@@ -1,9 +1,24 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart, Home, Shield, Sparkles } from "lucide-react";
+import { AuthDialog } from "./AuthDialog";
 
 const LandingPage = () => {
+  const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' | null }>({
+    isOpen: false,
+    role: null
+  });
+
+  const openAuthDialog = (role: 'client' | 'owner') => {
+    setAuthDialog({ isOpen: true, role });
+  };
+
+  const closeAuthDialog = () => {
+    setAuthDialog({ isOpen: false, role: null });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-primary flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background decoration */}
@@ -31,6 +46,7 @@ const LandingPage = () => {
           <Card className="bg-gradient-card border-border/50 shadow-card hover:shadow-glow transition-all duration-300 hover:scale-105 cursor-pointer">
             <div className="p-6">
               <Button 
+                onClick={() => openAuthDialog('client')}
                 className="w-full bg-gradient-button hover:bg-gradient-button/90 text-white font-semibold text-lg py-6 rounded-xl shadow-lg hover:shadow-glow transition-all duration-300 animate-pulse-glow"
                 size="lg"
               >
@@ -43,6 +59,7 @@ const LandingPage = () => {
           <Card className="bg-gradient-card border-border/50 shadow-card hover:shadow-glow transition-all duration-300 hover:scale-105 cursor-pointer">
             <div className="p-6">
               <Button 
+                onClick={() => openAuthDialog('owner')}
                 variant="secondary"
                 className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold text-lg py-6 rounded-xl shadow-lg hover:shadow-glow transition-all duration-300"
                 size="lg"
@@ -78,9 +95,18 @@ const LandingPage = () => {
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground">
-          <p>Already have an account? <span className="gradient-text font-semibold cursor-pointer hover:underline">Sign In</span></p>
+          <p>Join thousands of happy users finding their perfect match</p>
         </div>
       </div>
+
+      {/* Auth Dialog */}
+      {authDialog.role && (
+        <AuthDialog
+          isOpen={authDialog.isOpen}
+          onClose={closeAuthDialog}
+          role={authDialog.role}
+        />
+      )}
     </div>
   );
 };

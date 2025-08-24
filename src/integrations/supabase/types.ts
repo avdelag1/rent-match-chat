@@ -5451,6 +5451,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      set_user_role: {
+        Args: { p_role: Database["public"]["Enums"]["user_role"] }
+        Returns: undefined
+      }
       spheroid_in: {
         Args: { "": unknown }
         Returns: unknown
@@ -6593,6 +6597,7 @@ export type Database = {
       document_status: "pending" | "approved" | "rejected"
       document_type: "property_deed" | "broker_license" | "id_card" | "other"
       listing_status: "active" | "pending" | "inactive" | "suspended"
+      user_role: "client" | "owner" | "admin"
     }
     CompositeTypes: {
       geometry_dump: {
@@ -6731,6 +6736,7 @@ export const Constants = {
       document_status: ["pending", "approved", "rejected"],
       document_type: ["property_deed", "broker_license", "id_card", "other"],
       listing_status: ["active", "pending", "inactive", "suspended"],
+      user_role: ["client", "owner", "admin"],
     },
   },
 } as const
