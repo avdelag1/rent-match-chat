@@ -37,7 +37,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         }
         await signUp(formData.email, formData.password, role, formData.name);
       } else {
-        await signIn(formData.email, formData.password);
+        await signIn(formData.email, formData.password, role);
       }
       
       // Reset form and close dialog on success

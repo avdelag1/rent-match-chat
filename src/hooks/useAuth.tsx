@@ -9,7 +9,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string, role: 'client' | 'owner', name?: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string, role: 'client' | 'owner') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -28,6 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Redirect after successful sign in
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(() => {
+            redirectUserBasedOnRole(session.user);
+          }, 100);
+        }
       }
     );
 
@@ -36,10 +43,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // If user is already signed in, redirect them
+      if (session?.user) {
+        redirectUserBasedOnRole(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const redirectUserBasedOnRole = async (user: User) => {
+    try {
+      // Get user profile to determine role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      const role = profile?.role;
+      console.log('User role:', role);
+
+      if (role === 'client') {
+        window.location.href = '/client/dashboard';
+      } else if (role === 'owner') {
+        window.location.href = '/owner/dashboard';
+      }
+    } catch (error) {
+      console.error('Error getting user profile:', error);
+    }
+  };
 
   const signUp = async (email: string, password: string, role: 'client' | 'owner', name?: string) => {
     const redirectUrl = `${window.location.origin}/`;
@@ -72,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, role: 'client' | 'owner') => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -85,6 +119,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive"
       });
     } else {
+      // Set the role after successful sign in
+      try {
+        await supabase.rpc('set_user_role', { p_role: role });
+      } catch (roleError) {
+        console.error('Error setting user role:', roleError);
+      }
+
       toast({
         title: "Welcome back!",
         description: "Successfully signed in.",
@@ -107,6 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Signed out",
         description: "You have been signed out successfully.",
       });
+      // Redirect to home page after sign out
+      window.location.href = '/';
     }
   };
 
