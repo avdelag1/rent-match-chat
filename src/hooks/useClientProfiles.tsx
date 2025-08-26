@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ClientProfile {
-  id: string;
+  id: number;
   user_id: string;
   name: string;
   age: number;
