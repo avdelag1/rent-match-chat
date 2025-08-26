@@ -15,12 +15,12 @@ export function useSwipe() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
+      // Use the likes table instead of swipes since that's what exists in the database
       const { error } = await supabase
-        .from('swipes')
+        .from('likes')
         .insert({
           user_id: user.user.id,
           target_id: targetId,
-          target_type: targetType,
           direction
         });
 
@@ -37,23 +37,22 @@ export function useSwipe() {
 
         if (listing) {
           // Check if owner also liked this client
-          const { data: ownerSwipe } = await supabase
-            .from('swipes')
+          const { data: ownerLike } = await supabase
+            .from('likes')
             .select('*')
             .eq('user_id', listing.owner_id)
             .eq('target_id', user.user.id)
-            .eq('target_type', 'profile')
             .eq('direction', 'right')
             .single();
 
-          if (ownerSwipe) {
+          if (ownerLike) {
             // Create a match!
             await supabase.from('matches').insert({
               client_id: user.user.id,
               owner_id: listing.owner_id,
               listing_id: targetId,
               client_liked_at: new Date().toISOString(),
-              owner_liked_at: ownerSwipe.created_at,
+              owner_liked_at: ownerLike.created_at,
               is_mutual: true,
               status: 'accepted'
             });
@@ -67,7 +66,7 @@ export function useSwipe() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['swipes'] });
+      queryClient.invalidateQueries({ queryKey: ['likes'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
     },
   });

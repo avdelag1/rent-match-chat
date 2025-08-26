@@ -90,13 +90,13 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
         owner_id: user.user.id,
         amenities: selectedAmenities,
         images: images,
-        status: 'active',
+        status: 'active' as const, // Use proper enum value
         is_active: true
       };
 
       const { data: result, error } = await supabase
         .from('listings')
-        .insert([propertyData])
+        .insert(propertyData)
         .select()
         .single();
 

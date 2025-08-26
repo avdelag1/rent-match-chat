@@ -102,7 +102,7 @@ export function SubscriptionPackages({ isOpen, onClose, reason }: SubscriptionPa
                         <CardTitle className="text-lg">{pkg.name}</CardTitle>
                         <div className="flex items-baseline gap-1">
                           <span className="text-2xl font-bold">${pkg.price}</span>
-                          <span className="text-sm text-muted-foreground">/{pkg.billing_period}</span>
+                          <span className="text-sm text-muted-foreground">/{pkg.billing_period || 'month'}</span>
                         </div>
                       </div>
                     </div>
@@ -110,7 +110,7 @@ export function SubscriptionPackages({ isOpen, onClose, reason }: SubscriptionPa
 
                   <CardContent>
                     <div className="space-y-3 mb-6">
-                      {pkg.features.map((feature, index) => (
+                      {(pkg.features as string[] || []).map((feature, index) => (
                         <div key={index} className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
                           <span className="text-sm capitalize">

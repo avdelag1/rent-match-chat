@@ -25,14 +25,18 @@ export function useListings(excludeSwipedIds: string[] = []) {
   return useQuery({
     queryKey: ['listings', excludeSwipedIds],
     queryFn: async () => {
-      const { data: listings, error } = await supabase
+      let query = supabase
         .from('listings')
         .select('*')
         .eq('status', 'active')
         .eq('is_active', true)
-        .not('id', 'in', `(${excludeSwipedIds.join(',') || 'null'})`)
         .limit(20);
 
+      if (excludeSwipedIds.length > 0) {
+        query = query.not('id', 'in', `(${excludeSwipedIds.join(',')})`);
+      }
+
+      const { data: listings, error } = await query;
       if (error) throw error;
       return listings as Listing[];
     },
@@ -43,14 +47,16 @@ export function useSwipedListings() {
   return useQuery({
     queryKey: ['swipes'],
     queryFn: async () => {
-      const { data: swipes, error } = await supabase
-        .from('swipes')
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return [];
+
+      const { data: likes, error } = await supabase
+        .from('likes')
         .select('target_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .eq('target_type', 'listing');
+        .eq('user_id', user.user.id);
 
       if (error) throw error;
-      return swipes.map(s => s.target_id);
+      return likes.map(l => l.target_id);
     },
   });
 }
