@@ -6,6 +6,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import { Button } from '@/components/ui/button';
 import { Heart, X, RotateCcw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/use-toast';
 
 interface ClientSwipeContainerProps {
   onProfileTap: (profileId: string) => void;
@@ -14,7 +15,7 @@ interface ClientSwipeContainerProps {
 export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: swipedIds = [] } = useSwipedClientProfiles();
-  const { data: profiles = [], isLoading } = useClientProfiles(swipedIds);
+  const { data: profiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
   const swipeMutation = useSwipe();
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
@@ -34,10 +35,39 @@ export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps
     handleSwipe(direction);
   };
 
-  if (isLoading) {
+  const handleRefresh = async () => {
+    setCurrentIndex(0);
+    await refetch();
+    toast({
+      title: 'Refreshed',
+      description: 'We reloaded the latest client profiles.',
+    });
+  };
+
+  if (isLoading || isRefetching) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto">
         <Skeleton className="absolute inset-0 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-xl font-bold mb-2 text-white">Something went wrong</h3>
+          <p className="text-white/80 mb-4">We couldn’t load profiles. Please try again.</p>
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Try again
+          </Button>
+        </div>
       </div>
     );
   }
@@ -48,11 +78,12 @@ export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps
         <div className="text-center">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2 text-white">No more client profiles!</h3>
-          <p className="text-white/80 mb-4">Check back later for new client profiles</p>
+          <p className="text-white/80 mb-4">Check back later or refresh to see if new profiles are available.</p>
           <Button 
-            onClick={() => window.location.reload()}
+            onClick={handleRefresh}
             variant="outline"
             className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
+            disabled={isRefetching}
           >
             <RotateCcw className="w-4 h-4" />
             Refresh
