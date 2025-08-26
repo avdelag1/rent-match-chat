@@ -18,20 +18,17 @@ export function SubscriptionPackages({ isOpen, onClose, reason }: SubscriptionPa
   const { user } = useAuth();
   const { data: packages = [], isLoading } = useSubscriptionPackages();
 
-  // Get user role from their profile
-  const userRole = 'client'; // This should come from user profile
-
   const getPackageIcon = (packageName: string) => {
     if (packageName.includes('VIP')) return <Crown className="w-5 h-5" />;
     if (packageName.includes('Unlimited')) return <Zap className="w-5 h-5" />;
-    if (packageName.includes('Premium++')) return <Star className="w-5 h-5" />;
+    if (packageName.includes('Premium')) return <Star className="w-5 h-5" />;
     return <Check className="w-5 h-5" />;
   };
 
   const getPackageColor = (packageName: string) => {
     if (packageName.includes('VIP')) return 'from-purple-500 to-pink-500';
     if (packageName.includes('Unlimited')) return 'from-blue-500 to-cyan-500';
-    if (packageName.includes('Premium++')) return 'from-green-500 to-emerald-500';
+    if (packageName.includes('Premium')) return 'from-green-500 to-emerald-500';
     return 'from-gray-500 to-slate-500';
   };
 
@@ -79,7 +76,7 @@ export function SubscriptionPackages({ isOpen, onClose, reason }: SubscriptionPa
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {packages
-              .filter(pkg => pkg.role === userRole || pkg.role === 'universal')
+              .filter(pkg => pkg.is_active)
               .map((pkg) => (
                 <Card
                   key={pkg.id}
@@ -102,7 +99,7 @@ export function SubscriptionPackages({ isOpen, onClose, reason }: SubscriptionPa
                         <CardTitle className="text-lg">{pkg.name}</CardTitle>
                         <div className="flex items-baseline gap-1">
                           <span className="text-2xl font-bold">${pkg.price}</span>
-                          <span className="text-sm text-muted-foreground">/{pkg.billing_period || 'month'}</span>
+                          <span className="text-sm text-muted-foreground">/month</span>
                         </div>
                       </div>
                     </div>
@@ -110,6 +107,24 @@ export function SubscriptionPackages({ isOpen, onClose, reason }: SubscriptionPa
 
                   <CardContent>
                     <div className="space-y-3 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">
+                          Up to {pkg.max_property_listings} property listings
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">
+                          {pkg.max_daily_matches} daily matches
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">
+                          {pkg.max_property_views} property views
+                        </span>
+                      </div>
                       {(pkg.features as string[] || []).map((feature, index) => (
                         <div key={index} className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -122,7 +137,7 @@ export function SubscriptionPackages({ isOpen, onClose, reason }: SubscriptionPa
 
                     <Button
                       className={`w-full bg-gradient-to-r ${getPackageColor(pkg.name)} hover:opacity-90`}
-                      onClick={() => handleSubscribe(pkg.paypal_plan_id || pkg.id)}
+                      onClick={() => handleSubscribe(pkg.id.toString())}
                     >
                       Subscribe Now
                     </Button>
