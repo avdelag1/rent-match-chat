@@ -2,6 +2,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+// Lightweight type to avoid deep Supabase type inference
+type UserSubscriptionResult = {
+  id?: string;
+  user_id?: string;
+  status?: string;
+  subscription_packages?: {
+    features?: unknown;
+  } | null;
+} | null;
+
 export function useSubscriptionPackages(userTier?: string) {
   return useQuery({
     queryKey: ['subscription-packages', userTier],
@@ -20,9 +30,9 @@ export function useSubscriptionPackages(userTier?: string) {
 }
 
 export function useUserSubscription() {
-  return useQuery({
+  return useQuery<UserSubscriptionResult>({
     queryKey: ['user-subscription'],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserSubscriptionResult> => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return null;
 
@@ -35,7 +45,7 @@ export function useUserSubscription() {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      return data as UserSubscriptionResult;
     },
   });
 }
@@ -44,7 +54,10 @@ export function useHasPremiumFeature(feature: string) {
   const { data: subscription } = useUserSubscription();
   
   if (!subscription) return false;
+
+  const featuresRaw = subscription.subscription_packages?.features;
+  const features: string[] = Array.isArray(featuresRaw) ? (featuresRaw as string[]) : [];
   
-  const features = subscription.subscription_packages?.features as string[] || [];
   return features.includes(feature) || features.includes('all_features');
 }
+
