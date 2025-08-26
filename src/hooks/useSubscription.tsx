@@ -26,15 +26,13 @@ export function useUserSubscription() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return null;
 
+      // Simplify the query to avoid complex type inference
       const { data, error } = await supabase
         .from('user_subscriptions')
-        .select(`
-          *,
-          subscription_packages (*)
-        `)
+        .select('*, subscription_packages(*)')
         .eq('user_id', user.user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
       return data;
