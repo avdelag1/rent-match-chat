@@ -1,117 +1,209 @@
 
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Heart, X, MessageCircle, User, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { LogOut, Settings, Heart, MessageCircle, User, CreditCard } from 'lucide-react';
+import { SwipeContainer } from '@/components/SwipeContainer';
+import { PropertyDetails } from '@/components/PropertyDetails';
+import { SubscriptionPackages } from '@/components/SubscriptionPackages';
+import { useUserSubscription, useHasPremiumFeature } from '@/hooks/useSubscription';
 
 const ClientDashboard = () => {
   const { user, signOut } = useAuth();
-  const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0);
+  const { data: subscription } = useUserSubscription();
+  const hasMessaging = useHasPremiumFeature('messaging');
   
-  // Mock property data - in real app this would come from Supabase
-  const properties = [
-    {
-      id: 1,
-      title: "Beautiful Beach House",
-      location: "Tulum, Mexico",
-      price: "$2,500/month",
-      image: "/placeholder.svg",
-      description: "Stunning oceanfront property with modern amenities"
-    },
-    {
-      id: 2,
-      title: "Cozy Downtown Apartment", 
-      location: "Playa del Carmen, Mexico",
-      price: "$1,800/month",
-      image: "/placeholder.svg",
-      description: "Perfect location in the heart of the city"
-    }
-  ];
+  const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+  const [showPropertyDetails, setShowPropertyDetails] = useState(false);
+  const [showSubscriptionPackages, setShowSubscriptionPackages] = useState(false);
+  const [subscriptionReason, setSubscriptionReason] = useState<string>('');
 
-  const handleSwipe = (direction: 'left' | 'right') => {
-    console.log(`Swiped ${direction} on property ${properties[currentPropertyIndex]?.title}`);
-    
-    if (currentPropertyIndex < properties.length - 1) {
-      setCurrentPropertyIndex(currentPropertyIndex + 1);
+  const handleListingTap = (listingId: string) => {
+    setSelectedListingId(listingId);
+    setShowPropertyDetails(true);
+  };
+
+  const handleMessageClick = () => {
+    if (!hasMessaging) {
+      setSubscriptionReason('Unlock messaging to connect with property owners!');
+      setShowSubscriptionPackages(true);
     } else {
-      setCurrentPropertyIndex(0); // Reset to first property
+      // Navigate to messages
+      console.log('Navigate to messages');
     }
   };
 
-  const currentProperty = properties[currentPropertyIndex];
+  const handleSubscriptionClick = () => {
+    setSubscriptionReason('Choose the perfect plan for your rental search!');
+    setShowSubscriptionPackages(true);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-primary p-4">
+    <div className="min-h-screen bg-gradient-primary">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-2">
-          <User className="h-6 w-6 text-white" />
-          <span className="text-white font-medium">{user?.email}</span>
+      <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-white">Tinderent</h1>
+              <Badge variant="secondary" className="bg-white/20 text-white">
+                Client
+              </Badge>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {subscription ? (
+                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                  {subscription.subscription_packages?.name}
+                </Badge>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSubscriptionClick}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Upgrade
+                </Button>
+              )}
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={signOut}
+                className="text-white hover:bg-white/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
         </div>
-        <Button
-          onClick={signOut}
-          variant="ghost"
-          size="sm"
-          className="text-white hover:bg-white/10"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
-        </Button>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold text-white text-center mb-8">
-          Find Your Perfect Home
-        </h1>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Swipe Area */}
+          <div className="lg:col-span-2">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white text-center">
+                  Discover Your Perfect Home
+                </CardTitle>
+                <p className="text-white/80 text-center text-sm">
+                  Swipe right to like, left to pass, or tap for details
+                </p>
+              </CardHeader>
+              <CardContent className="flex justify-center pb-8">
+                <SwipeContainer onListingTap={handleListingTap} />
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Property Card */}
-        {currentProperty && (
-          <Card className="bg-card border-border shadow-glow mb-6 overflow-hidden">
-            <div className="aspect-video bg-muted flex items-center justify-center">
-              <span className="text-muted-foreground">Property Image</span>
-            </div>
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-2">{currentProperty.title}</h2>
-              <p className="text-muted-foreground mb-2">{currentProperty.location}</p>
-              <p className="text-2xl font-bold text-primary mb-4">{currentProperty.price}</p>
-              <p className="text-sm text-muted-foreground">{currentProperty.description}</p>
-            </div>
-          </Card>
-        )}
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Profile Summary */}
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Profile
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-white">
+                  <p className="font-medium">{user?.email}</p>
+                  <p className="text-sm text-white/80 mt-1">Client Account</p>
+                  {subscription ? (
+                    <Badge className="mt-2 bg-gradient-to-r from-green-500 to-emerald-500">
+                      Premium Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="mt-2 border-white/30 text-white">
+                      Free Account
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Swipe Actions */}
-        <div className="flex justify-center space-x-8 mb-8">
-          <Button
-            onClick={() => handleSwipe('left')}
-            size="lg"
-            variant="secondary"
-            className="rounded-full w-16 h-16 p-0"
-          >
-            <X className="h-8 w-8" />
-          </Button>
-          
-          <Button
-            onClick={() => handleSwipe('right')}
-            size="lg" 
-            className="rounded-full w-16 h-16 p-0 bg-gradient-button hover:bg-gradient-button/90"
-          >
-            <Heart className="h-8 w-8" />
-          </Button>
-        </div>
+            {/* Quick Actions */}
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={handleMessageClick}
+                  disabled={!hasMessaging}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Messages {!hasMessaging && '(Premium)'}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  Liked Properties
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Preferences
+                </Button>
+              </CardContent>
+            </Card>
 
-        {/* Bottom Navigation */}
-        <div className="flex justify-center">
-          <Button
-            variant="outline"
-            className="flex items-center space-x-2"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span>Messages</span>
-          </Button>
+            {/* Subscription Info */}
+            {!subscription && (
+              <Card className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border-purple-300/30">
+                <CardHeader>
+                  <CardTitle className="text-white">Unlock Premium</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-white/90 text-sm mb-4">
+                    Get unlimited messaging, advanced filters, and priority support!
+                  </p>
+                  <Button
+                    onClick={handleSubscriptionClick}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90"
+                  >
+                    View Plans
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Property Details Modal */}
+      <PropertyDetails
+        listingId={selectedListingId}
+        isOpen={showPropertyDetails}
+        onClose={() => {
+          setShowPropertyDetails(false);
+          setSelectedListingId(null);
+        }}
+        onMessageClick={handleMessageClick}
+      />
+
+      {/* Subscription Packages Modal */}
+      <SubscriptionPackages
+        isOpen={showSubscriptionPackages}
+        onClose={() => setShowSubscriptionPackages(false)}
+        reason={subscriptionReason}
+      />
     </div>
   );
 };
