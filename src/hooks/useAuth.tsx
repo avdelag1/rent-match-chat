@@ -3,6 +3,7 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AuthContextType {
   user: User | null;
@@ -19,6 +20,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -44,13 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // If user is already signed in, redirect them
-      if (session?.user) {
-        redirectUserBasedOnRole(session.user);
-      }
+      // IMPORTANT: Do not redirect here to avoid loops.
+      // ProtectedRoute will handle guarding routes based on role.
     });
 
     return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const redirectUserBasedOnRole = async (user: User) => {
@@ -65,10 +67,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const role = profile?.role;
       console.log('User role:', role);
 
-      if (role === 'client') {
-        window.location.href = '/client/dashboard';
-      } else if (role === 'owner') {
-        window.location.href = '/owner/dashboard';
+      const targetPath =
+        role === 'client'
+          ? '/client/dashboard'
+          : role === 'owner'
+          ? '/owner/dashboard'
+          : '/';
+
+      // Same-path guard to prevent loops
+      if (location.pathname !== targetPath) {
+        navigate(targetPath, { replace: true });
       }
     } catch (error) {
       console.error('Error getting user profile:', error);
@@ -130,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Welcome back!",
         description: "Successfully signed in.",
       });
+      // Redirect is handled by onAuthStateChange -> redirectUserBasedOnRole
     }
 
     return { error };
@@ -148,8 +157,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Signed out",
         description: "You have been signed out successfully.",
       });
-      // Redirect to home page after sign out
-      window.location.href = '/';
+      // Navigate to home page after sign out without full reload
+      navigate('/', { replace: true });
     }
   };
 
@@ -172,3 +181,4 @@ export function useAuth() {
   }
   return context;
 }
+

@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,6 +13,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['user-profile', user?.id],
@@ -32,20 +35,22 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/';
+      if (location.pathname !== '/') {
+        navigate('/', { replace: true });
+      }
       return;
     }
 
     if (!profileLoading && profile && requiredRole && profile.role !== requiredRole) {
-      // Redirect to correct dashboard based on user's role
-      if (profile.role === 'client') {
-        window.location.href = '/client/dashboard';
-      } else if (profile.role === 'owner') {
-        window.location.href = '/owner/dashboard';
+      // Redirect to correct dashboard based on user's role (same-path guard)
+      const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      if (location.pathname !== targetPath) {
+        navigate(targetPath, { replace: true });
       }
       return;
     }
-  }, [loading, user, profileLoading, profile, requiredRole]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, user, profileLoading, profile, requiredRole, navigate, location.pathname]);
 
   if (loading || profileLoading) {
     return (
@@ -64,3 +69,4 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   return <>{children}</>;
 }
+

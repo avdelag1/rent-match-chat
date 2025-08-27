@@ -6,6 +6,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import { Button } from '@/components/ui/button';
 import { Heart, X, RotateCcw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/use-toast';
 
 interface SwipeContainerProps {
   onListingTap: (listingId: string) => void;
@@ -14,7 +15,7 @@ interface SwipeContainerProps {
 export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: swipedIds = [] } = useSwipedListings();
-  const { data: listings = [], isLoading } = useListings(swipedIds);
+  const { data: listings = [], isLoading, refetch, isRefetching, error } = useListings(swipedIds);
   const swipeMutation = useSwipe();
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
@@ -34,10 +35,39 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
     handleSwipe(direction);
   };
 
-  if (isLoading) {
+  const handleRefresh = async () => {
+    setCurrentIndex(0);
+    await refetch();
+    toast({
+      title: 'Refreshed',
+      description: 'We reloaded the latest properties.',
+    });
+  };
+
+  if (isLoading || isRefetching) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto">
         <Skeleton className="absolute inset-0 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-xl font-bold mb-2">Something went wrong</h3>
+          <p className="text-muted-foreground mb-4">We couldn’t load properties. Please try again.</p>
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Try again
+          </Button>
+        </div>
       </div>
     );
   }
@@ -50,9 +80,10 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
           <h3 className="text-xl font-bold mb-2">No more properties!</h3>
           <p className="text-muted-foreground mb-4">Check back later for new listings</p>
           <Button 
-            onClick={() => window.location.reload()}
+            onClick={handleRefresh}
             variant="outline"
             className="gap-2"
+            disabled={isRefetching}
           >
             <RotateCcw className="w-4 h-4" />
             Refresh
@@ -111,3 +142,4 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
     </div>
   );
 }
+
