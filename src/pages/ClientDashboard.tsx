@@ -8,6 +8,7 @@ import { LogOut, Settings, Heart, MessageCircle, User, CreditCard } from 'lucide
 import { SwipeContainer } from '@/components/SwipeContainer';
 import { PropertyDetails } from '@/components/PropertyDetails';
 import { SubscriptionPackages } from '@/components/SubscriptionPackages';
+import { LikedPropertiesDialog } from '@/components/LikedPropertiesDialog';
 import { useUserSubscription, useHasPremiumFeature } from '@/hooks/useSubscription';
 import { ClientPreferencesDialog } from '@/components/ClientPreferencesDialog';
 import { ClientProfileDialog } from '@/components/ClientProfileDialog';
@@ -20,6 +21,7 @@ const ClientDashboard = () => {
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [showPropertyDetails, setShowPropertyDetails] = useState(false);
   const [showSubscriptionPackages, setShowSubscriptionPackages] = useState(false);
+  const [showLikedProperties, setShowLikedProperties] = useState(false);
   const [subscriptionReason, setSubscriptionReason] = useState<string>('');
 
   const [showPreferences, setShowPreferences] = useState(false);
@@ -43,6 +45,15 @@ const ClientDashboard = () => {
   const handleSubscriptionClick = () => {
     setSubscriptionReason('Choose the perfect plan for your rental search!');
     setShowSubscriptionPackages(true);
+  };
+
+  const handleLikedPropertiesClick = () => {
+    setShowLikedProperties(true);
+  };
+
+  const handleLikedPropertySelect = (listingId: string) => {
+    setSelectedListingId(listingId);
+    setShowPropertyDetails(true);
   };
 
   return (
@@ -154,6 +165,7 @@ const ClientDashboard = () => {
                 <Button
                   variant="outline"
                   className="w-full justify-start bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={handleLikedPropertiesClick}
                 >
                   <Heart className="w-4 h-4 mr-2" />
                   Liked Properties
@@ -218,6 +230,13 @@ const ClientDashboard = () => {
         isOpen={showSubscriptionPackages}
         onClose={() => setShowSubscriptionPackages(false)}
         reason={subscriptionReason}
+      />
+
+      {/* Liked Properties Modal */}
+      <LikedPropertiesDialog
+        isOpen={showLikedProperties}
+        onClose={() => setShowLikedProperties(false)}
+        onPropertySelect={handleLikedPropertySelect}
       />
 
       {/* Client Preferences Dialog */}
