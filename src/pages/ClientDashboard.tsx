@@ -9,6 +9,8 @@ import { SwipeContainer } from '@/components/SwipeContainer';
 import { PropertyDetails } from '@/components/PropertyDetails';
 import { SubscriptionPackages } from '@/components/SubscriptionPackages';
 import { useUserSubscription, useHasPremiumFeature } from '@/hooks/useSubscription';
+import { ClientPreferencesDialog } from '@/components/ClientPreferencesDialog';
+import { ClientProfileDialog } from '@/components/ClientProfileDialog';
 
 const ClientDashboard = () => {
   const { user, signOut } = useAuth();
@@ -19,6 +21,9 @@ const ClientDashboard = () => {
   const [showPropertyDetails, setShowPropertyDetails] = useState(false);
   const [showSubscriptionPackages, setShowSubscriptionPackages] = useState(false);
   const [subscriptionReason, setSubscriptionReason] = useState<string>('');
+
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const handleListingTap = (listingId: string) => {
     setSelectedListingId(listingId);
@@ -157,9 +162,19 @@ const ClientDashboard = () => {
                 <Button
                   variant="outline"
                   className="w-full justify-start bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={() => setShowPreferences(true)}
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   Preferences
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={() => setShowProfile(true)}
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Edit Profile
                 </Button>
               </CardContent>
             </Card>
@@ -204,6 +219,12 @@ const ClientDashboard = () => {
         onClose={() => setShowSubscriptionPackages(false)}
         reason={subscriptionReason}
       />
+
+      {/* Client Preferences Dialog */}
+      <ClientPreferencesDialog open={showPreferences} onOpenChange={setShowPreferences} />
+
+      {/* Client Profile Dialog */}
+      <ClientProfileDialog open={showProfile} onOpenChange={setShowProfile} />
     </div>
   );
 };
