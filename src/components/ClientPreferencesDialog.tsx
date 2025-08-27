@@ -48,7 +48,7 @@ export function ClientPreferencesDialog({ open, onOpenChange }: Props) {
       max_bedrooms: maxBeds === '' ? null : Number(maxBeds),
       pet_friendly_required: petFriendly,
       furnished_required: furnished,
-      rental_duration,
+      rental_duration: rentalDuration,
       location_zones: zones
         ? zones.split(',').map((s) => s.trim()).filter(Boolean)
         : [],

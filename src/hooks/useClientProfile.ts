@@ -20,13 +20,13 @@ async function fetchOwnProfile() {
   if (!uid) return null;
 
   const { data, error } = await supabase
-    .from('client_profiles' as any)
+    .from('client_profiles')
     .select('*')
     .eq('user_id', uid)
     .maybeSingle();
 
-  if (error && (error as any).code !== 'PGRST116') throw error;
-  return (data as ClientProfileLite) ?? null;
+  if (error && error.code !== 'PGRST116') throw error;
+  return data as ClientProfileLite | null;
 }
 
 export function useClientProfile() {
@@ -46,14 +46,14 @@ export function useSaveClientProfile() {
       if (!uid) throw new Error('Not authenticated');
 
       const { data: existing } = await supabase
-        .from('client_profiles' as any)
+        .from('client_profiles')
         .select('id')
         .eq('user_id', uid)
         .maybeSingle();
 
       if (existing?.id) {
         const { data, error } = await supabase
-          .from('client_profiles' as any)
+          .from('client_profiles')
           .update({ ...updates })
           .eq('id', existing.id)
           .select()
@@ -62,7 +62,7 @@ export function useSaveClientProfile() {
         return data as ClientProfileLite;
       } else {
         const { data, error } = await supabase
-          .from('client_profiles' as any)
+          .from('client_profiles')
           .insert([{ ...updates, user_id: uid }])
           .select()
           .single();

@@ -22,13 +22,13 @@ async function fetchPreferences() {
   if (!uid) return null;
 
   const { data, error } = await supabase
-    .from('client_filter_preferences' as any)
+    .from('client_filter_preferences')
     .select('*')
     .eq('user_id', uid)
     .maybeSingle();
 
-  if (error && (error as any).code !== 'PGRST116') throw error;
-  return (data as ClientFilterPreferences) ?? null;
+  if (error && error.code !== 'PGRST116') throw error;
+  return data as ClientFilterPreferences | null;
 }
 
 export function useClientFilterPreferences() {
@@ -49,14 +49,14 @@ export function useSaveClientFilterPreferences() {
 
       // Get existing row
       const { data: existing } = await supabase
-        .from('client_filter_preferences' as any)
+        .from('client_filter_preferences')
         .select('id')
         .eq('user_id', uid)
         .maybeSingle();
 
       if (existing?.id) {
         const { data, error } = await supabase
-          .from('client_filter_preferences' as any)
+          .from('client_filter_preferences')
           .update({ ...updates })
           .eq('id', existing.id)
           .select()
@@ -65,7 +65,7 @@ export function useSaveClientFilterPreferences() {
         return data as ClientFilterPreferences;
       } else {
         const { data, error } = await supabase
-          .from('client_filter_preferences' as any)
+          .from('client_filter_preferences')
           .insert([{ ...updates, user_id: uid }])
           .select()
           .single();
