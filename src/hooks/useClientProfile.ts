@@ -14,6 +14,9 @@ export type ClientProfileLite = {
   profile_images?: string[] | null;
 };
 
+// Type for database operations (excluding id)
+type ClientProfileUpdate = Omit<ClientProfileLite, 'id' | 'user_id'>;
+
 async function fetchOwnProfile() {
   const { data: auth } = await supabase.auth.getUser();
   const uid = auth.user?.id;
@@ -40,7 +43,7 @@ export function useSaveClientProfile() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (updates: Omit<ClientProfileLite, 'user_id'>) => {
+    mutationFn: async (updates: ClientProfileUpdate) => {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id;
       if (!uid) throw new Error('Not authenticated');
@@ -54,7 +57,7 @@ export function useSaveClientProfile() {
       if (existing?.id) {
         const { data, error } = await supabase
           .from('client_profiles')
-          .update({ ...updates })
+          .update(updates)
           .eq('id', existing.id)
           .select()
           .single();

@@ -9,14 +9,17 @@ export type ClientFilterPreferences = {
   max_price?: number | null;
   min_bedrooms?: number | null;
   max_bedrooms?: number | null;
-  pet_friendly_required?: boolean | null;
-  furnished_required?: boolean | null;
+  pet_friendly_required?: boolean;
+  furnished_required?: boolean;
   rental_duration?: string | null;
   location_zones?: string[] | null;
   amenities_required?: string[] | null;
 };
 
-async function fetchPreferences() {
+// Type for database operations (excluding id)
+type ClientFilterPreferencesUpdate = Omit<ClientFilterPreferences, 'id' | 'user_id'>;
+
+async function fetchOwnFilterPreferences() {
   const { data: auth } = await supabase.auth.getUser();
   const uid = auth.user?.id;
   if (!uid) return null;
@@ -33,8 +36,8 @@ async function fetchPreferences() {
 
 export function useClientFilterPreferences() {
   return useQuery({
-    queryKey: ['client-filter-preferences'],
-    queryFn: fetchPreferences,
+    queryKey: ['client-filter-preferences-own'],
+    queryFn: fetchOwnFilterPreferences,
   });
 }
 
@@ -42,7 +45,7 @@ export function useSaveClientFilterPreferences() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (updates: Omit<ClientFilterPreferences, 'user_id'>) => {
+    mutationFn: async (updates: ClientFilterPreferencesUpdate) => {
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id;
       if (!uid) throw new Error('Not authenticated');
@@ -57,7 +60,7 @@ export function useSaveClientFilterPreferences() {
       if (existing?.id) {
         const { data, error } = await supabase
           .from('client_filter_preferences')
-          .update({ ...updates })
+          .update(updates)
           .eq('id', existing.id)
           .select()
           .single();
@@ -74,7 +77,7 @@ export function useSaveClientFilterPreferences() {
       }
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['client-filter-preferences'] });
+      qc.invalidateQueries({ queryKey: ['client-filter-preferences-own'] });
     },
   });
 }
