@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -64,106 +65,108 @@ export function ClientPreferencesDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Search Preferences</DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-2">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="minPrice">Min Price</Label>
-              <Input
-                id="minPrice"
-                type="number"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : '')}
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <Label htmlFor="maxPrice">Max Price</Label>
-              <Input
-                id="maxPrice"
-                type="number"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : '')}
-                placeholder="3000"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="minBeds">Min Bedrooms</Label>
-              <Input
-                id="minBeds"
-                type="number"
-                value={minBeds}
-                onChange={(e) => setMinBeds(e.target.value ? Number(e.target.value) : '')}
-                placeholder="1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="maxBeds">Max Bedrooms</Label>
-              <Input
-                id="maxBeds"
-                type="number"
-                value={maxBeds}
-                onChange={(e) => setMaxBeds(e.target.value ? Number(e.target.value) : '')}
-                placeholder="3"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 items-center">
-            <div className="flex items-center justify-between border rounded-lg px-3 py-2">
+        <ScrollArea className="flex-1 px-1">
+          <div className="grid gap-4 py-2 pr-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="mb-0">Pet friendly</Label>
-                <p className="text-sm text-muted-foreground">Only pet-friendly</p>
+                <Label htmlFor="minPrice">Min Price</Label>
+                <Input
+                  id="minPrice"
+                  type="number"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : '')}
+                  placeholder="0"
+                />
               </div>
-              <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
-            </div>
-
-            <div className="flex items-center justify-between border rounded-lg px-3 py-2">
               <div>
-                <Label className="mb-0">Furnished</Label>
-                <p className="text-sm text-muted-foreground">Furniture required</p>
+                <Label htmlFor="maxPrice">Max Price</Label>
+                <Input
+                  id="maxPrice"
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : '')}
+                  placeholder="3000"
+                />
               </div>
-              <Switch checked={furnished} onCheckedChange={setFurnished} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="minBeds">Min Bedrooms</Label>
+                <Input
+                  id="minBeds"
+                  type="number"
+                  value={minBeds}
+                  onChange={(e) => setMinBeds(e.target.value ? Number(e.target.value) : '')}
+                  placeholder="1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="maxBeds">Max Bedrooms</Label>
+                <Input
+                  id="maxBeds"
+                  type="number"
+                  value={maxBeds}
+                  onChange={(e) => setMaxBeds(e.target.value ? Number(e.target.value) : '')}
+                  placeholder="3"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 items-center">
+              <div className="flex items-center justify-between border rounded-lg px-3 py-2">
+                <div>
+                  <Label className="mb-0">Pet friendly</Label>
+                  <p className="text-sm text-muted-foreground">Only pet-friendly</p>
+                </div>
+                <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
+              </div>
+
+              <div className="flex items-center justify-between border rounded-lg px-3 py-2">
+                <div>
+                  <Label className="mb-0">Furnished</Label>
+                  <p className="text-sm text-muted-foreground">Furniture required</p>
+                </div>
+                <Switch checked={furnished} onCheckedChange={setFurnished} />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="duration">Rental Duration</Label>
+              <Input
+                id="duration"
+                value={rentalDuration ?? ''}
+                onChange={(e) => setRentalDuration(e.target.value)}
+                placeholder="monthly | yearly | weekly"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="zones">Preferred Zones</Label>
+              <Input
+                id="zones"
+                value={zones}
+                onChange={(e) => setZones(e.target.value)}
+                placeholder="e.g. Downtown, Beach, Aldea Zama"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="amenities">Required Amenities</Label>
+              <Input
+                id="amenities"
+                value={amenities}
+                onChange={(e) => setAmenities(e.target.value)}
+                placeholder="e.g. Gym, Pool, Rooftop"
+              />
             </div>
           </div>
-
-          <div>
-            <Label htmlFor="duration">Rental Duration</Label>
-            <Input
-              id="duration"
-              value={rentalDuration ?? ''}
-              onChange={(e) => setRentalDuration(e.target.value)}
-              placeholder="monthly | yearly | weekly"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="zones">Preferred Zones</Label>
-            <Input
-              id="zones"
-              value={zones}
-              onChange={(e) => setZones(e.target.value)}
-              placeholder="e.g. Downtown, Beach, Aldea Zama"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="amenities">Required Amenities</Label>
-            <Input
-              id="amenities"
-              value={amenities}
-              onChange={(e) => setAmenities(e.target.value)}
-              placeholder="e.g. Gym, Pool, Rooftop"
-            />
-          </div>
-        </div>
+        </ScrollArea>
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>

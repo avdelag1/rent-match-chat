@@ -8,6 +8,10 @@ import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog"
 import { ClientProfileDialog } from "@/components/ClientProfileDialog"
 import { PropertyDetails } from "@/components/PropertyDetails"
+import { PropertyInsightsDialog } from "@/components/PropertyInsightsDialog"
+import { ClientInsightsDialog } from "@/components/ClientInsightsDialog"
+import { useListings } from "@/hooks/useListings"
+import { useClientProfiles } from "@/hooks/useClientProfiles"
 import { toast } from '@/hooks/use-toast'
 
 interface DashboardLayoutProps {
@@ -23,7 +27,17 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showProfile, setShowProfile] = useState(false)
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null)
   const [showPropertyDetails, setShowPropertyDetails] = useState(false)
+  const [showPropertyInsights, setShowPropertyInsights] = useState(false)
+  const [showClientInsights, setShowClientInsights] = useState(false)
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [subscriptionReason, setSubscriptionReason] = useState<string>('')
+
+  // Get listings and profiles data for insights
+  const { data: listings = [] } = useListings();
+  const { data: profiles = [] } = useClientProfiles();
+
+  const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
+  const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
 
   const handleMenuItemClick = (item: string) => {
     switch (item) {
@@ -72,6 +86,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     setShowSubscriptionPackages(true)
   }
 
+  const handlePropertyInsights = (listingId: string) => {
+    setSelectedListingId(listingId)
+    setShowPropertyInsights(true)
+  }
+
+  const handleClientInsights = (profileId: string) => {
+    setSelectedProfileId(profileId)
+    setShowClientInsights(true)
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-primary">
@@ -88,7 +112,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
           {/* Main content */}
           <main className="flex-1 overflow-auto">
-            {children}
+            {React.cloneElement(children as React.ReactElement, {
+              onPropertyInsights: handlePropertyInsights,
+              onClientInsights: handleClientInsights,
+            })}
           </main>
         </SidebarInset>
       </div>
@@ -135,7 +162,27 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             }}
             onMessageClick={handleMessageClick}
           />
+
+          <PropertyInsightsDialog
+            open={showPropertyInsights}
+            onOpenChange={(open) => {
+              setShowPropertyInsights(open)
+              if (!open) setSelectedListingId(null)
+            }}
+            listing={selectedListing || null}
+          />
         </>
+      )}
+
+      {userRole === 'owner' && (
+        <ClientInsightsDialog
+          open={showClientInsights}
+          onOpenChange={(open) => {
+            setShowClientInsights(open)
+            if (!open) setSelectedProfileId(null)
+          }}
+          profile={selectedProfile || null}
+        />
       )}
     </SidebarProvider>
   )
