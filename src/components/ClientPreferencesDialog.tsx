@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useClientFilterPreferences, useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 type Props = {
   open: boolean;
@@ -65,12 +65,12 @@ export function ClientPreferencesDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Search Preferences</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-1">
+        <ScrollArea className="flex-1 px-1 max-h-[70vh]">
           <div className="grid gap-4 py-2 pr-4">
             <div className="grid grid-cols-2 gap-4">
               <div>

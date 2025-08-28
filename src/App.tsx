@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ClientDashboard from "./pages/ClientDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import MessagingDashboard from "./pages/MessagingDashboard";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,15 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+
+            <Route 
+              path="/messages" 
+              element={
+                <ProtectedRoute>
+                  <MessagingDashboard />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
@@ -51,4 +61,3 @@ const App = () => (
 );
 
 export default App;
-

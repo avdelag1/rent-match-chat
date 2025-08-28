@@ -1,13 +1,13 @@
-
 import { useState, useCallback } from 'react';
 import { SwipeCard } from './SwipeCard';
 import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSwipe } from '@/hooks/useSwipe';
-import { useHasPremiumFeature } from '@/hooks/useSubscription';
+import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Heart, X, RotateCcw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface SwipeContainerProps {
   onListingTap: (listingId: string) => void;
@@ -20,7 +20,8 @@ export function SwipeContainer({ onListingTap, onInsights, onMessageClick }: Swi
   const { data: swipedIds = [] } = useSwipedListings();
   const { data: listings = [], isLoading, refetch, isRefetching, error } = useListings(swipedIds);
   const swipeMutation = useSwipe();
-  const hasPremium = useHasPremiumFeature('messaging');
+  const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
+  const navigate = useNavigate();
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
@@ -60,12 +61,17 @@ export function SwipeContainer({ onListingTap, onInsights, onMessageClick }: Swi
   };
 
   const handleMessage = () => {
-    if (!hasPremium && onMessageClick) {
+    if (needsUpgrade && onMessageClick) {
+      // Show upgrade dialog for non-premium users
       onMessageClick();
+    } else if (hasPremiumMessaging) {
+      // Navigate to messaging dashboard for premium users
+      navigate('/messages');
     } else {
       toast({
-        title: 'Message Sent',
-        description: 'Your message has been sent to the property owner.',
+        title: 'Upgrade Required',
+        description: 'You need to upgrade to premium to access messaging features.',
+        variant: 'destructive'
       });
     }
   };
@@ -134,7 +140,7 @@ export function SwipeContainer({ onListingTap, onInsights, onMessageClick }: Swi
             onInsights={() => {}}
             onMessage={() => {}}
             isTop={false}
-            hasPremium={hasPremium}
+            hasPremium={hasPremiumMessaging}
           />
         )}
         {currentListing && (
@@ -145,7 +151,7 @@ export function SwipeContainer({ onListingTap, onInsights, onMessageClick }: Swi
             onInsights={() => handleInsights(currentListing.id)}
             onMessage={handleMessage}
             isTop={true}
-            hasPremium={hasPremium}
+            hasPremium={hasPremiumMessaging}
           />
         )}
       </div>

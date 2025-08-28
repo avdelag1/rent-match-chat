@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useClientProfile, useSaveClientProfile } from '@/hooks/useClientProfile';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 type Props = {
   open: boolean;
@@ -56,12 +56,12 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-1">
+        <ScrollArea className="flex-1 px-1 max-h-[70vh]">
           <div className="grid gap-4 py-2 pr-4">
             <div>
               <Label htmlFor="name">Name</Label>
