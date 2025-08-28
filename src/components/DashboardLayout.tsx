@@ -1,5 +1,5 @@
 
-import { ReactNode, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
 import { PropertyForm } from "@/components/PropertyForm"
