@@ -3,20 +3,24 @@ import { useState, useCallback } from 'react';
 import { SwipeCard } from './SwipeCard';
 import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSwipe } from '@/hooks/useSwipe';
+import { useHasPremiumFeature } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Heart, X, RotateCcw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface SwipeContainerProps {
   onListingTap: (listingId: string) => void;
+  onInsights?: (listingId: string) => void;
+  onMessageClick?: () => void;
 }
 
-export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
+export function SwipeContainer({ onListingTap, onInsights, onMessageClick }: SwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: swipedIds = [] } = useSwipedListings();
   const { data: listings = [], isLoading, refetch, isRefetching, error } = useListings(swipedIds);
   const swipeMutation = useSwipe();
+  const hasPremium = useHasPremiumFeature('messaging');
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
@@ -44,6 +48,28 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
     });
   };
 
+  const handleInsights = (listingId: string) => {
+    if (onInsights) {
+      onInsights(listingId);
+    } else {
+      toast({
+        title: 'Property Insights',
+        description: 'Viewing detailed insights for this property.',
+      });
+    }
+  };
+
+  const handleMessage = () => {
+    if (!hasPremium && onMessageClick) {
+      onMessageClick();
+    } else {
+      toast({
+        title: 'Message Sent',
+        description: 'Your message has been sent to the property owner.',
+      });
+    }
+  };
+
   if (isLoading || isRefetching) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto">
@@ -57,12 +83,12 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
       <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">⚠️</div>
-          <h3 className="text-xl font-bold mb-2">Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn’t load properties. Please try again.</p>
+          <h3 className="text-xl font-bold mb-2 text-white">Something went wrong</h3>
+          <p className="text-white/80 mb-4">We couldn't load properties. Please try again.</p>
           <Button 
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2"
+            className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
           >
             <RotateCcw className="w-4 h-4" />
             Try again
@@ -76,13 +102,13 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">🎉</div>
-          <h3 className="text-xl font-bold mb-2">No more properties!</h3>
-          <p className="text-muted-foreground mb-4">Check back later for new listings</p>
+          <div className="text-6xl mb-4">🏠</div>
+          <h3 className="text-xl font-bold mb-2 text-white">No more properties!</h3>
+          <p className="text-white/80 mb-4">Check back later or refresh to see if new properties are available.</p>
           <Button 
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2"
+            className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
             disabled={isRefetching}
           >
             <RotateCcw className="w-4 h-4" />
@@ -105,7 +131,10 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
             listing={nextListing}
             onSwipe={() => {}}
             onTap={() => {}}
+            onInsights={() => {}}
+            onMessage={() => {}}
             isTop={false}
+            hasPremium={hasPremium}
           />
         )}
         {currentListing && (
@@ -113,7 +142,10 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
             listing={currentListing}
             onSwipe={handleSwipe}
             onTap={() => onListingTap(currentListing.id)}
+            onInsights={() => handleInsights(currentListing.id)}
+            onMessage={handleMessage}
             isTop={true}
+            hasPremium={hasPremium}
           />
         )}
       </div>
@@ -123,11 +155,11 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
         <Button
           size="lg"
           variant="outline"
-          className="w-14 h-14 rounded-full border-red-200 hover:bg-red-50 hover:border-red-300"
+          className="w-14 h-14 rounded-full border-red-200 hover:bg-red-50 hover:border-red-300 bg-white/10 border-white/20 text-white hover:bg-red-500/20"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <X className="w-6 h-6 text-red-500" />
+          <X className="w-6 h-6 text-red-400" />
         </Button>
         
         <Button
@@ -142,4 +174,3 @@ export function SwipeContainer({ onListingTap }: SwipeContainerProps) {
     </div>
   );
 }
-

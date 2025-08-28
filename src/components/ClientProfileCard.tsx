@@ -1,18 +1,21 @@
-
 import { useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, X, MapPin, User, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Heart, X, MapPin, User, Calendar, Eye, MessageCircle } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 
 interface ClientProfileCardProps {
   profile: ClientProfile;
   onSwipe: (direction: 'left' | 'right') => void;
   onTap: () => void;
+  onInsights: () => void;
+  onMessage: () => void;
   isTop: boolean;
+  hasPremium: boolean;
 }
 
-export function ClientProfileCard({ profile, onSwipe, onTap, isTop }: ClientProfileCardProps) {
+export function ClientProfileCard({ profile, onSwipe, onTap, onInsights, onMessage, isTop, hasPremium }: ClientProfileCardProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -94,6 +97,47 @@ export function ClientProfileCard({ profile, onSwipe, onTap, isTop }: ClientProf
       
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      
+      {/* Action Buttons */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onInsights();
+          }}
+        >
+          <Eye className="w-4 h-4" />
+        </Button>
+        
+        {hasPremium ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMessage();
+            }}
+          >
+            <MessageCircle className="w-4 h-4" />
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-amber-500/20 border-amber-500/40 text-amber-200 hover:bg-amber-500/30 backdrop-blur-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMessage();
+            }}
+          >
+            <MessageCircle className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
       
       {/* Swipe Indicators */}
       {isDragging && (

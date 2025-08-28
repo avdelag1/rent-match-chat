@@ -8,6 +8,7 @@ import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog"
 import { ClientProfileDialog } from "@/components/ClientProfileDialog"
 import { PropertyDetails } from "@/components/PropertyDetails"
+import { toast } from '@/hooks/use-toast'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -30,7 +31,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         setShowPropertyForm(true)
         break
       case 'upgrade':
-        setSubscriptionReason('Choose the perfect plan for your rental search!')
+        setSubscriptionReason('Choose the perfect plan for your needs!')
         setShowSubscriptionPackages(true)
         break
       case 'liked-properties':
@@ -43,12 +44,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         setShowProfile(true)
         break
       case 'messages':
-        // TODO: Handle messages navigation
-        console.log('Navigate to messages')
+        toast({
+          title: 'Messages',
+          description: 'Message feature coming soon! Upgrade to premium for early access.',
+        })
         break
       case 'settings':
-        // TODO: Handle settings navigation
-        console.log('Navigate to settings')
+        toast({
+          title: 'Settings',
+          description: 'Settings page coming soon! This will include your statistics and preferences.',
+        })
         break
       case 'dashboard':
       default:
@@ -63,7 +68,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }
 
   const handleMessageClick = () => {
-    setSubscriptionReason('Unlock messaging to connect with property owners!')
+    setSubscriptionReason('Unlock messaging to connect with property owners and tenants!')
     setShowSubscriptionPackages(true)
   }
 

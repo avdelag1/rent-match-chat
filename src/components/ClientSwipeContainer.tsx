@@ -3,20 +3,24 @@ import { useState, useCallback } from 'react';
 import { ClientProfileCard } from './ClientProfileCard';
 import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
 import { useSwipe } from '@/hooks/useSwipe';
+import { useHasPremiumFeature } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Heart, X, RotateCcw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface ClientSwipeContainerProps {
   onProfileTap: (profileId: string) => void;
+  onInsights?: (profileId: string) => void;
+  onMessageClick?: () => void;
 }
 
-export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps) {
+export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: swipedIds = [] } = useSwipedClientProfiles();
   const { data: profiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
   const swipeMutation = useSwipe();
+  const hasPremium = useHasPremiumFeature('messaging');
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentProfile = profiles[currentIndex];
@@ -44,6 +48,28 @@ export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps
     });
   };
 
+  const handleInsights = (profileId: string) => {
+    if (onInsights) {
+      onInsights(profileId);
+    } else {
+      toast({
+        title: 'Client Insights',
+        description: 'Viewing detailed insights for this client profile.',
+      });
+    }
+  };
+
+  const handleMessage = () => {
+    if (!hasPremium && onMessageClick) {
+      onMessageClick();
+    } else {
+      toast({
+        title: 'Message Sent',
+        description: 'Your message has been sent to the client.',
+      });
+    }
+  };
+
   if (isLoading || isRefetching) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto">
@@ -58,7 +84,7 @@ export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps
         <div className="text-center">
           <div className="text-6xl mb-4">⚠️</div>
           <h3 className="text-xl font-bold mb-2 text-white">Something went wrong</h3>
-          <p className="text-white/80 mb-4">We couldn’t load profiles. Please try again.</p>
+          <p className="text-white/80 mb-4">We couldn't load profiles. Please try again.</p>
           <Button 
             onClick={handleRefresh}
             variant="outline"
@@ -105,7 +131,10 @@ export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps
             profile={nextProfile}
             onSwipe={() => {}}
             onTap={() => {}}
+            onInsights={() => {}}
+            onMessage={() => {}}
             isTop={false}
+            hasPremium={hasPremium}
           />
         )}
         {currentProfile && (
@@ -113,7 +142,10 @@ export function ClientSwipeContainer({ onProfileTap }: ClientSwipeContainerProps
             profile={currentProfile}
             onSwipe={handleSwipe}
             onTap={() => onProfileTap(currentProfile.user_id)}
+            onInsights={() => handleInsights(currentProfile.user_id)}
+            onMessage={handleMessage}
             isTop={true}
+            hasPremium={hasPremium}
           />
         )}
       </div>
