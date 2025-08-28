@@ -20,6 +20,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+interface MenuItem {
+  title: string
+  icon: React.ComponentType<{ className?: string }>
+  key: string
+  premium?: boolean
+}
+
 interface AppSidebarProps {
   userRole: 'client' | 'owner'
   onMenuItemClick: (item: string) => void
@@ -31,7 +38,7 @@ export function AppSidebar({ userRole, onMenuItemClick }: AppSidebarProps) {
   const { state } = useSidebar()
   const isCollapsed = state === "collapsed"
 
-  const clientMenuItems = [
+  const clientMenuItems: MenuItem[] = [
     { 
       title: "Dashboard", 
       icon: Home, 
@@ -60,7 +67,7 @@ export function AppSidebar({ userRole, onMenuItemClick }: AppSidebarProps) {
     }
   ]
 
-  const ownerMenuItems = [
+  const ownerMenuItems: MenuItem[] = [
     { 
       title: "Dashboard", 
       icon: Home, 
@@ -95,7 +102,7 @@ export function AppSidebar({ userRole, onMenuItemClick }: AppSidebarProps) {
   }
 
   return (
-    <Sidebar className={isCollapsed ? "w-14" : "w-60"} collapsible>
+    <Sidebar className={isCollapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
