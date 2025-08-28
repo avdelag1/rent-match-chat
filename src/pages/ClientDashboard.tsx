@@ -5,9 +5,10 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
+  onMessageClick?: () => void;
 }
 
-const ClientDashboard = ({ onPropertyInsights }: ClientDashboardProps) => {
+const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
   const handleListingTap = (listingId: string) => {
     console.log('Listing tapped:', listingId);
   };
@@ -16,10 +17,6 @@ const ClientDashboard = ({ onPropertyInsights }: ClientDashboardProps) => {
     if (onPropertyInsights) {
       onPropertyInsights(listingId);
     }
-  };
-
-  const handleMessageClick = () => {
-    console.log('Message requires premium subscription');
   };
 
   return (
@@ -40,7 +37,7 @@ const ClientDashboard = ({ onPropertyInsights }: ClientDashboardProps) => {
               <SwipeContainer 
                 onListingTap={handleListingTap} 
                 onInsights={handleInsights}
-                onMessageClick={handleMessageClick}
+                onMessageClick={onMessageClick}
               />
             </CardContent>
           </Card>

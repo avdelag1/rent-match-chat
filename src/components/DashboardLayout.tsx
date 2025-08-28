@@ -82,7 +82,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }
 
   const handleMessageClick = () => {
-    setSubscriptionReason('Unlock messaging to connect with property owners and tenants!')
+    const roleText = userRole === 'owner' ? 'tenants' : 'owners'
+    setSubscriptionReason(`Unlock messaging to connect with ${roleText}!`)
     setShowSubscriptionPackages(true)
   }
 
@@ -115,6 +116,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             {React.cloneElement(children as React.ReactElement, {
               onPropertyInsights: handlePropertyInsights,
               onClientInsights: handleClientInsights,
+              onMessageClick: handleMessageClick,
             })}
           </main>
         </SidebarInset>
@@ -133,6 +135,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         isOpen={showSubscriptionPackages}
         onClose={() => setShowSubscriptionPackages(false)}
         reason={subscriptionReason}
+        userRole={userRole}
       />
 
       {userRole === 'client' && (
