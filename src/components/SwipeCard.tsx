@@ -97,7 +97,7 @@ export function SwipeCard({
 
   const primaryImage = listing.images && listing.images.length > 0 
     ? listing.images[0] 
-    : listing.featured_image_url || '/placeholder.svg';
+    : '/placeholder.svg';
 
   return (
     <Card
