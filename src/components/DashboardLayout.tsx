@@ -108,15 +108,19 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     setShowClientInsights(true)
   }
 
+  // Safe fallbacks in case sidebar components are not exported in this build
+  const InsetComponent: any = (SidebarInset as any) || ((props: any) => <div {...props} />)
+  const TriggerComponent: any = (SidebarTrigger as any) || ((props: any) => <button {...props} />)
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-primary">
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
-        <SidebarInset className="flex-1">
+        <InsetComponent className="flex-1">
           {/* Header with trigger */}
           <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/20 bg-white/5 backdrop-blur-sm px-4">
-            <SidebarTrigger className="text-white hover:bg-white/10" />
+            <TriggerComponent className="text-white hover:bg-white/10" />
             <div className="flex items-center gap-2 ml-auto">
               <span className="text-white text-sm">
                 Welcome back! ({userRole === 'owner' ? 'Property Owner' : 'Tenant'})
@@ -126,13 +130,21 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
           {/* Main content */}
           <main className="flex-1 overflow-auto">
-            {React.cloneElement(children as React.ReactElement, {
-              onPropertyInsights: handlePropertyInsights,
-              onClientInsights: handleClientInsights,
-              onMessageClick: handleMessageClick,
-            })}
+            {
+              // Safely inject handler props into each valid child (supports multiple children)
+              React.Children.map(children, (child) => {
+                if (React.isValidElement(child)) {
+                  return React.cloneElement(child as React.ReactElement, {
+                    onPropertyInsights: handlePropertyInsights,
+                    onClientInsights: handleClientInsights,
+                    onMessageClick: handleMessageClick,
+                  } as any);
+                }
+                return child;
+              })
+            }
           </main>
-        </SidebarInset>
+        </InsetComponent>
       </div>
 
       {/* Modals */}
