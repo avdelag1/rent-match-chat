@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,6 +14,7 @@ export interface Listing {
   baths: number;
   square_footage: number;
   furnished: boolean;
+  pet_friendly: boolean;
   owner_id: string;
   description: string;
   amenities: string[];
