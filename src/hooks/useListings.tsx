@@ -34,7 +34,9 @@ export function useListings(excludeSwipedIds: string[] = []) {
         .limit(20);
 
       if (excludeSwipedIds.length > 0) {
-        query = query.not('id', 'in', `(${excludeSwipedIds.join(',')})`);
+        // Properly quote UUIDs to avoid PostgREST errors
+        const quoted = excludeSwipedIds.map(id => `'${id}'`).join(',');
+        query = query.not('id', 'in', `(${quoted})`);
       }
 
       const { data: listings, error } = await query;
