@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, User, Calendar, Heart, Star } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
+import { ImageCarousel } from './ImageCarousel';
 
 interface ClientInsightsDialogProps {
   open: boolean;
@@ -23,18 +24,9 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
         <ScrollArea className="flex-1 px-1">
           <div className="space-y-6 pr-4">
-            {/* Profile Images */}
+            {/* Profile Images Carousel */}
             {profile.profile_images && profile.profile_images.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {profile.profile_images.slice(0, 4).map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    alt={`Profile ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
-                ))}
-              </div>
+              <ImageCarousel images={profile.profile_images} alt="Client Profile" />
             )}
 
             {/* Basic Info */}

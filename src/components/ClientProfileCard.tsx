@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -93,7 +92,7 @@ export function ClientProfileCard({
   };
 
   const rotation = dragOffset.x * 0.1;
-  const opacity = isTop ? Math.max(0.3, 1 - Math.abs(dragOffset.x) / 300) : 0.8;
+  const opacity = isTop ? Math.max(0.8, 1 - Math.abs(dragOffset.x) / 400) : 1;
 
   const primaryImage = profile.profile_images && profile.profile_images.length > 0 
     ? profile.profile_images[0] 
@@ -102,7 +101,7 @@ export function ClientProfileCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white/10 backdrop-blur-sm border-white/20 ${
+      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{
@@ -136,7 +135,7 @@ export function ClientProfileCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-white/20 backdrop-blur-sm border-white/30 hover:bg-white/30 text-white"
+                className="bg-white/90 backdrop-blur-sm border-white/30 hover:bg-white"
                 onClick={handleInsightsClick}
               >
                 <Eye className="w-4 h-4" />
@@ -144,10 +143,10 @@ export function ClientProfileCard({
               <Button
                 size="sm"
                 variant="outline"
-                className={`backdrop-blur-sm border-white/30 text-white ${
+                className={`backdrop-blur-sm border-white/30 ${
                   hasPremium 
-                    ? 'bg-green-500/20 hover:bg-green-500/30' 
-                    : 'bg-orange-500/20 hover:bg-orange-500/30'
+                    ? 'bg-green-500/90 hover:bg-green-600 text-white' 
+                    : 'bg-orange-500/90 hover:bg-orange-600 text-white'
                 }`}
                 onClick={handleMessageClick}
               >
@@ -179,21 +178,21 @@ export function ClientProfileCard({
         </div>
 
         {/* Profile Content */}
-        <div className="p-4 h-2/5 flex flex-col justify-between">
+        <div className="p-4 h-2/5 flex flex-col justify-between bg-white">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-xl font-bold text-gray-900">
                 {profile.name || 'Client'}
               </h3>
               {profile.age && (
-                <div className="flex items-center gap-1 text-white/80">
+                <div className="flex items-center gap-1 text-gray-600">
                   <Calendar className="w-4 h-4" />
                   <span className="text-sm">{profile.age}</span>
                 </div>
               )}
             </div>
             
-            <div className="flex items-center gap-2 text-white/80 mb-3">
+            <div className="flex items-center gap-2 text-gray-600 mb-3">
               <User className="w-4 h-4" />
               <span className="text-sm capitalize">
                 {profile.gender || 'Not specified'}
@@ -201,7 +200,7 @@ export function ClientProfileCard({
             </div>
 
             {profile.bio && (
-              <p className="text-sm text-white/70 line-clamp-2 mb-3">
+              <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                 {profile.bio}
               </p>
             )}
@@ -215,7 +214,7 @@ export function ClientProfileCard({
               </Badge>
             ))}
             {profile.interests && profile.interests.length > 3 && (
-              <Badge variant="outline" className="text-xs border-white/30 text-white">
+              <Badge variant="outline" className="text-xs">
                 +{profile.interests.length - 3} more
               </Badge>
             )}

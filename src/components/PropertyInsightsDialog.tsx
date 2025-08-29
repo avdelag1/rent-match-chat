@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Bed, Bath, Square, Calendar, DollarSign } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
+import { ImageCarousel } from './ImageCarousel';
 
 interface PropertyInsightsDialogProps {
   open: boolean;
@@ -23,18 +24,9 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
         <ScrollArea className="flex-1 px-1">
           <div className="space-y-6 pr-4">
-            {/* Property Images */}
+            {/* Property Images Carousel */}
             {listing.images && listing.images.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {listing.images.slice(0, 4).map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    alt={`Property ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
-                ))}
-              </div>
+              <ImageCarousel images={listing.images} alt="Property" />
             )}
 
             {/* Basic Info */}
@@ -78,6 +70,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{listing.property_type}</Badge>
                 {listing.furnished && <Badge variant="secondary">Furnished</Badge>}
+                {listing.pet_friendly && <Badge variant="secondary">Pet Friendly</Badge>}
                 <Badge variant="outline">{listing.status}</Badge>
               </div>
             </div>

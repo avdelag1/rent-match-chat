@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -92,7 +93,7 @@ export function SwipeCard({
   };
 
   const rotation = dragOffset.x * 0.1;
-  const opacity = isTop ? Math.max(0.3, 1 - Math.abs(dragOffset.x) / 300) : 0.8;
+  const opacity = isTop ? Math.max(0.8, 1 - Math.abs(dragOffset.x) / 400) : 1;
 
   const primaryImage = listing.images && listing.images.length > 0 
     ? listing.images[0] 
@@ -101,7 +102,7 @@ export function SwipeCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white/10 backdrop-blur-sm border-white/20 ${
+      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{
@@ -135,7 +136,7 @@ export function SwipeCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-white/20 backdrop-blur-sm border-white/30 hover:bg-white/30 text-white"
+                className="bg-white/90 backdrop-blur-sm border-white/30 hover:bg-white"
                 onClick={handleInsightsClick}
               >
                 <Eye className="w-4 h-4" />
@@ -143,10 +144,10 @@ export function SwipeCard({
               <Button
                 size="sm"
                 variant="outline"
-                className={`backdrop-blur-sm border-white/30 text-white ${
+                className={`backdrop-blur-sm border-white/30 ${
                   hasPremium 
-                    ? 'bg-green-500/20 hover:bg-green-500/30' 
-                    : 'bg-orange-500/20 hover:bg-orange-500/30'
+                    ? 'bg-green-500/90 hover:bg-green-600 text-white' 
+                    : 'bg-orange-500/90 hover:bg-orange-600 text-white'
                 }`}
                 onClick={handleMessageClick}
               >
@@ -178,13 +179,13 @@ export function SwipeCard({
         </div>
 
         {/* Content */}
-        <div className="p-4 h-2/5 flex flex-col justify-between">
+        <div className="p-4 h-2/5 flex flex-col justify-between bg-white">
           <div>
-            <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
+            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
               {listing.title || 'Beautiful Property'}
             </h3>
             
-            <div className="flex items-center gap-2 text-white/80 mb-3">
+            <div className="flex items-center gap-2 text-gray-600 mb-3">
               <MapPin className="w-4 h-4" />
               <span className="text-sm">
                 {listing.neighborhood}, {listing.city}
@@ -194,20 +195,20 @@ export function SwipeCard({
             <div className="grid grid-cols-3 gap-4 mb-3">
               {listing.price && (
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-2xl font-bold text-green-600">
                     ${listing.price.toLocaleString()}
                   </div>
-                  <div className="text-xs text-white/60">per month</div>
+                  <div className="text-xs text-gray-500">per month</div>
                 </div>
               )}
               {listing.beds && (
-                <div className="flex items-center gap-1 text-white/80">
+                <div className="flex items-center gap-1 text-gray-600">
                   <Bed className="w-4 h-4" />
                   <span className="text-sm">{listing.beds}</span>
                 </div>
               )}
               {listing.baths && (
-                <div className="flex items-center gap-1 text-white/80">
+                <div className="flex items-center gap-1 text-gray-600">
                   <Bath className="w-4 h-4" />
                   <span className="text-sm">{listing.baths}</span>
                 </div>
@@ -221,12 +222,12 @@ export function SwipeCard({
               {listing.property_type}
             </Badge>
             {listing.furnished && (
-              <Badge variant="outline" className="text-xs border-white/30 text-white">
+              <Badge variant="outline" className="text-xs">
                 Furnished
               </Badge>
             )}
             {listing.pet_friendly && (
-              <Badge variant="outline" className="text-xs border-white/30 text-white">
+              <Badge variant="outline" className="text-xs">
                 Pet Friendly
               </Badge>
             )}
