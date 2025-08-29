@@ -1,10 +1,11 @@
+
 import { useState, useCallback } from 'react';
 import { ClientProfileCard } from './ClientProfileCard';
 import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
-import { Heart, X, RotateCcw } from 'lucide-react';
+import { Heart, X, RotateCcw, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -23,9 +24,14 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
 
+  console.log('ClientSwipeContainer - Profiles loaded:', profiles.length, profiles);
+  console.log('ClientSwipeContainer - Swiped IDs:', swipedIds.length);
+
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
+
+    console.log('Swiping profile:', currentProfile.user_id, 'direction:', direction);
 
     swipeMutation.mutate({
       targetId: currentProfile.user_id,
@@ -79,18 +85,23 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
   if (isLoading || isRefetching) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto">
-        <Skeleton className="absolute inset-0 rounded-xl" />
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+          <Skeleton className="w-full h-32 mb-4" />
+          <Skeleton className="w-3/4 h-6 mb-2 mx-auto" />
+          <Skeleton className="w-1/2 h-4 mx-auto" />
+        </div>
       </div>
     );
   }
 
   if (error) {
+    console.error('ClientSwipeContainer error:', error);
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">⚠️</div>
           <h3 className="text-xl font-bold mb-2 text-white">Something went wrong</h3>
-          <p className="text-white/80 mb-4">We couldn't load profiles. Please try again.</p>
+          <p className="text-white/80 mb-4">We couldn't load client profiles. Please try again.</p>
           <Button 
             onClick={handleRefresh}
             variant="outline"
@@ -104,13 +115,41 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
     );
   }
 
+  if (profiles.length === 0) {
+    return (
+      <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
+          <div className="text-6xl mb-4">
+            <Users className="w-16 h-16 mx-auto text-white/60" />
+          </div>
+          <h3 className="text-xl font-bold mb-2 text-white">No Client Profiles</h3>
+          <p className="text-white/80 mb-4">No client profiles are available right now. This could mean:</p>
+          <ul className="text-sm text-white/70 mb-4 text-left">
+            <li>• No clients have created profiles yet</li>
+            <li>• All profiles have been swiped already</li>
+            <li>• Profiles are being loaded</li>
+          </ul>
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
+            disabled={isRefetching}
+          >
+            <RotateCcw className="w-4 h-4" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (currentIndex >= profiles.length) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2 text-white">No more client profiles!</h3>
-          <p className="text-white/80 mb-4">Check back later or refresh to see if new profiles are available.</p>
+          <p className="text-white/80 mb-4">You've seen all available client profiles. Check back later or refresh to see if new profiles are available.</p>
           <Button 
             onClick={handleRefresh}
             variant="outline"
@@ -176,6 +215,11 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
         >
           <Heart className="w-6 h-6 text-white" />
         </Button>
+      </div>
+
+      {/* Debug Info */}
+      <div className="mt-4 text-center text-xs text-white/60">
+        Profile {currentIndex + 1} of {profiles.length}
       </div>
     </div>
   );

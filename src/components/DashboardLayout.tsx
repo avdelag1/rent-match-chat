@@ -32,14 +32,24 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [subscriptionReason, setSubscriptionReason] = useState<string>('')
 
-  // Get listings and profiles data for insights
-  const { data: listings = [] } = useListings();
-  const { data: profiles = [] } = useClientProfiles();
+  // Get listings and profiles data for insights with error handling
+  const { data: listings = [], error: listingsError } = useListings();
+  const { data: profiles = [], error: profilesError } = useClientProfiles();
+
+  // Log errors for debugging
+  if (listingsError) {
+    console.error('DashboardLayout - Listings error:', listingsError);
+  }
+  if (profilesError) {
+    console.error('DashboardLayout - Profiles error:', profilesError);
+  }
 
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
 
   const handleMenuItemClick = (item: string) => {
+    console.log('Dashboard menu item clicked:', item);
+    
     switch (item) {
       case 'add-property':
         setShowPropertyForm(true)
@@ -93,6 +103,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }
 
   const handleClientInsights = (profileId: string) => {
+    console.log('Opening client insights for:', profileId);
     setSelectedProfileId(profileId)
     setShowClientInsights(true)
   }
@@ -107,7 +118,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/20 bg-white/5 backdrop-blur-sm px-4">
             <SidebarTrigger className="text-white hover:bg-white/10" />
             <div className="flex items-center gap-2 ml-auto">
-              <span className="text-white text-sm">Welcome back!</span>
+              <span className="text-white text-sm">
+                Welcome back! ({userRole === 'owner' ? 'Property Owner' : 'Tenant'})
+              </span>
             </div>
           </header>
 

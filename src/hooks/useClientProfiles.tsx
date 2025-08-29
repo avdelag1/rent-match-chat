@@ -19,6 +19,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
   return useQuery({
     queryKey: ['client-profiles', excludeSwipedIds],
     queryFn: async () => {
+      // First get all profiles, then filter client ones
       let query = supabase
         .from('client_profiles')
         .select('*')
@@ -29,8 +30,18 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
       }
 
       const { data: profiles, error } = await query;
-      if (error) throw error;
-      return profiles as ClientProfile[];
+      if (error) {
+        console.error('Error fetching client profiles:', error);
+        // Return empty array instead of throwing to prevent blocking the UI
+        return [];
+      }
+      
+      // Filter out profiles that don't have essential data
+      const validProfiles = (profiles || []).filter(profile => 
+        profile.name && profile.user_id
+      );
+      
+      return validProfiles as ClientProfile[];
     },
   });
 }
@@ -47,7 +58,10 @@ export function useSwipedClientProfiles() {
         .select('target_id')
         .eq('user_id', user.user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching owner swipes:', error);
+        return [];
+      }
       return likes.map(l => l.target_id);
     },
   });
