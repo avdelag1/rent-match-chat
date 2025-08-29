@@ -1,7 +1,10 @@
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
+import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { useClientProfiles } from '@/hooks/useClientProfiles';
 
 interface OwnerDashboardProps {
   onClientInsights?: (profileId: string) => void;
@@ -9,15 +12,25 @@ interface OwnerDashboardProps {
 }
 
 const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProps) => {
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const { data: profiles = [] } = useClientProfiles();
+
   const handleProfileTap = (profileId: string) => {
     console.log('Profile tapped:', profileId);
+    setSelectedProfileId(profileId);
+    setInsightsOpen(true);
   };
 
   const handleInsights = (profileId: string) => {
+    setSelectedProfileId(profileId);
+    setInsightsOpen(true);
     if (onClientInsights) {
       onClientInsights(profileId);
     }
   };
+
+  const selectedProfile = profiles.find(p => p.user_id === selectedProfileId);
 
   return (
     <DashboardLayout userRole="owner">
@@ -43,6 +56,12 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           </Card>
         </div>
       </div>
+
+      <ClientInsightsDialog
+        open={insightsOpen}
+        onOpenChange={setInsightsOpen}
+        profile={selectedProfile || null}
+      />
     </DashboardLayout>
   );
 };

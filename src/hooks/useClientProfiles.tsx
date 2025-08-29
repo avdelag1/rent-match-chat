@@ -19,29 +19,47 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
   return useQuery({
     queryKey: ['client-profiles', excludeSwipedIds],
     queryFn: async () => {
-      // First get all profiles, then filter client ones
-      let query = supabase
-        .from('client_profiles')
-        .select('*')
-        .limit(20);
+      try {
+        // Get current user to check their role
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) {
+          console.log('No authenticated user');
+          return [];
+        }
 
-      if (excludeSwipedIds.length > 0) {
-        query = query.not('user_id', 'in', `(${excludeSwipedIds.join(',')})`);
-      }
+        // Try to fetch profiles - the RLS policies will handle access control
+        let query = supabase
+          .from('client_profiles')
+          .select('*')
+          .limit(20);
 
-      const { data: profiles, error } = await query;
-      if (error) {
-        console.error('Error fetching client profiles:', error);
-        // Return empty array instead of throwing to prevent blocking the UI
+        if (excludeSwipedIds.length > 0) {
+          query = query.not('user_id', 'in', `(${excludeSwipedIds.join(',')})`);
+        }
+
+        const { data: profiles, error } = await query;
+        
+        if (error) {
+          console.error('Error fetching client profiles:', error);
+          // If it's a permission error, return empty array instead of throwing
+          if (error.code === '42501' || error.message?.includes('permission')) {
+            console.log('Permission denied - user may not be an owner');
+            return [];
+          }
+          throw error;
+        }
+        
+        // Filter out profiles that don't have essential data
+        const validProfiles = (profiles || []).filter(profile => 
+          profile.name && profile.user_id
+        );
+        
+        console.log('Fetched client profiles:', validProfiles.length);
+        return validProfiles as ClientProfile[];
+      } catch (error) {
+        console.error('Failed to fetch client profiles:', error);
         return [];
       }
-      
-      // Filter out profiles that don't have essential data
-      const validProfiles = (profiles || []).filter(profile => 
-        profile.name && profile.user_id
-      );
-      
-      return validProfiles as ClientProfile[];
     },
   });
 }

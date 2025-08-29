@@ -1,7 +1,10 @@
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SwipeContainer } from '@/components/SwipeContainer';
+import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { useListings } from '@/hooks/useListings';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
@@ -9,15 +12,25 @@ interface ClientDashboardProps {
 }
 
 const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
+  const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const { data: listings = [] } = useListings();
+
   const handleListingTap = (listingId: string) => {
     console.log('Listing tapped:', listingId);
+    setSelectedListingId(listingId);
+    setInsightsOpen(true);
   };
 
   const handleInsights = (listingId: string) => {
+    setSelectedListingId(listingId);
+    setInsightsOpen(true);
     if (onPropertyInsights) {
       onPropertyInsights(listingId);
     }
   };
+
+  const selectedListing = listings.find(l => l.id === selectedListingId);
 
   return (
     <DashboardLayout userRole="client">
@@ -43,6 +56,12 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
           </Card>
         </div>
       </div>
+
+      <PropertyInsightsDialog
+        open={insightsOpen}
+        onOpenChange={setInsightsOpen}
+        listing={selectedListing || null}
+      />
     </DashboardLayout>
   );
 };
