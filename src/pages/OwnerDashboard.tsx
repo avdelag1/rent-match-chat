@@ -48,7 +48,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
             </CardHeader>
             <CardContent className="flex justify-center pb-8">
               <ClientSwipeContainer 
-                onProfileTap={handleProfileTap}
+                onClientTap={handleProfileTap}
                 onInsights={handleInsights}
                 onMessageClick={onMessageClick}
               />
