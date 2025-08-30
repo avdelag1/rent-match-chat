@@ -1,46 +1,55 @@
 
 import { useState, useCallback } from 'react';
 import { ClientProfileCard } from './ClientProfileCard';
+import { AdvancedFilters } from './AdvancedFilters';
+import { SuperLikeButton } from './SuperLikeButton';
 import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
 import { useSwipe } from '@/hooks/useSwipe';
-import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
-import { Heart, X, RotateCcw, Users } from 'lucide-react';
+import { Heart, X, RotateCcw, Users, Filter } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 interface ClientSwipeContainerProps {
-  onProfileTap: (profileId: string) => void;
-  onInsights?: (profileId: string) => void;
-  onMessageClick?: () => void;
+  onClientTap: (clientId: string) => void;
+  onInsights?: (clientId: string) => void;
 }
 
-export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
+export function ClientSwipeContainer({ onClientTap, onInsights }: ClientSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState({});
+  
   const { data: swipedIds = [] } = useSwipedClientProfiles();
-  const { data: profiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
+  const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
   const swipeMutation = useSwipe();
-  const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
-  const navigate = useNavigate();
 
-  console.log('ClientSwipeContainer - Profiles loaded:', profiles.length, profiles);
+  console.log('ClientSwipeContainer - Profiles loaded:', clientProfiles.length, clientProfiles);
   console.log('ClientSwipeContainer - Swiped IDs:', swipedIds.length);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
-    const currentProfile = profiles[currentIndex];
-    if (!currentProfile) return;
+    const currentClient = clientProfiles[currentIndex];
+    if (!currentClient) return;
 
-    console.log('Swiping profile:', currentProfile.user_id, 'direction:', direction);
+    console.log('Swiping client:', currentClient.user_id, 'direction:', direction);
 
     swipeMutation.mutate({
-      targetId: currentProfile.user_id,
+      targetId: currentClient.user_id,
       direction,
       targetType: 'profile'
     });
 
     setCurrentIndex(prev => prev + 1);
-  }, [currentIndex, profiles, swipeMutation]);
+  }, [currentIndex, clientProfiles, swipeMutation]);
+
+  const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
+    swipeMutation.mutate({
+      targetId,
+      direction: 'right',
+      targetType: targetType as 'listing' | 'profile'
+    });
+    setCurrentIndex(prev => prev + 1);
+  }, [swipeMutation]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
     handleSwipe(direction);
@@ -55,31 +64,24 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
     });
   };
 
-  const handleInsights = (profileId: string) => {
+  const handleInsights = (clientId: string) => {
     if (onInsights) {
-      onInsights(profileId);
+      onInsights(clientId);
     } else {
       toast({
         title: 'Client Insights',
-        description: 'Viewing detailed insights for this client profile.',
+        description: 'Viewing detailed insights for this client.',
       });
     }
   };
 
-  const handleMessage = () => {
-    if (needsUpgrade && onMessageClick) {
-      // Show upgrade dialog for non-premium users
-      onMessageClick();
-    } else if (hasPremiumMessaging) {
-      // Navigate to messaging dashboard for premium users
-      navigate('/messages');
-    } else {
-      toast({
-        title: 'Upgrade Required',
-        description: 'You need to upgrade to premium to access messaging features.',
-        variant: 'destructive'
-      });
-    }
+  const handleApplyFilters = (filters: any) => {
+    setAppliedFilters(filters);
+    setCurrentIndex(0);
+    toast({
+      title: 'Filters Applied',
+      description: 'Clients updated based on your preferences.',
+    });
   };
 
   if (isLoading || isRefetching) {
@@ -115,88 +117,126 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
     );
   }
 
-  if (profiles.length === 0) {
+  if (clientProfiles.length === 0) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">
             <Users className="w-16 h-16 mx-auto text-white/60" />
           </div>
-          <h3 className="text-xl font-bold mb-2 text-white">No Client Profiles</h3>
-          <p className="text-white/80 mb-4">No client profiles are available right now. This could mean:</p>
-          <ul className="text-sm text-white/70 mb-4 text-left">
-            <li>• No clients have created profiles yet</li>
-            <li>• All profiles have been swiped already</li>
-            <li>• Profiles are being loaded</li>
-          </ul>
-          <Button 
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
-            disabled={isRefetching}
-          >
-            <RotateCcw className="w-4 h-4" />
-            Refresh
-          </Button>
+          <h3 className="text-xl font-bold mb-2 text-white">No Clients Available</h3>
+          <p className="text-white/80 mb-4">No clients match your current filters.</p>
+          <div className="space-y-2">
+            <Button 
+              onClick={() => setShowFilters(true)}
+              variant="outline"
+              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
+            >
+              <Filter className="w-4 h-4" />
+              Adjust Filters
+            </Button>
+            <Button 
+              onClick={handleRefresh}
+              variant="outline"
+              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
+              disabled={isRefetching}
+            >
+              <RotateCcw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (currentIndex >= profiles.length) {
+  if (currentIndex >= clientProfiles.length) {
     return (
       <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2 text-white">No more client profiles!</h3>
-          <p className="text-white/80 mb-4">You've seen all available client profiles. Check back later or refresh to see if new profiles are available.</p>
-          <Button 
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
-            disabled={isRefetching}
-          >
-            <RotateCcw className="w-4 h-4" />
-            Refresh
-          </Button>
+          <h3 className="text-xl font-bold mb-2 text-white">No more clients!</h3>
+          <p className="text-white/80 mb-4">You've seen all available clients matching your filters.</p>
+          <div className="space-y-2">
+            <Button 
+              onClick={() => setShowFilters(true)}
+              variant="outline"
+              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
+            >
+              <Filter className="w-4 h-4" />
+              Adjust Filters
+            </Button>
+            <Button 
+              onClick={handleRefresh}
+              variant="outline"
+              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
+              disabled={isRefetching}
+            >
+              <RotateCcw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  const currentProfile = profiles[currentIndex];
-  const nextProfile = profiles[currentIndex + 1];
+  const currentClient = clientProfiles[currentIndex];
+  const nextClient = clientProfiles[currentIndex + 1];
 
   return (
     <div className="w-full max-w-sm mx-auto">
+      {/* Filter Button */}
+      <div className="flex justify-between items-center mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowFilters(true)}
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+        >
+          <Filter className="w-4 h-4 mr-2" />
+          Filters
+        </Button>
+        
+        {Object.keys(appliedFilters).length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setAppliedFilters({});
+              setCurrentIndex(0);
+            }}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+          >
+            Clear Filters
+          </Button>
+        )}
+      </div>
+
       {/* Cards Container */}
       <div className="relative w-full h-[600px] mb-6">
-        {nextProfile && (
+        {nextClient && (
           <ClientProfileCard
-            profile={nextProfile}
+            profile={nextClient}
             onSwipe={() => {}}
             onTap={() => {}}
             onInsights={() => {}}
-            onMessage={() => {}}
             isTop={false}
-            hasPremium={hasPremiumMessaging}
           />
         )}
-        {currentProfile && (
+        {currentClient && (
           <ClientProfileCard
-            profile={currentProfile}
+            profile={currentClient}
             onSwipe={handleSwipe}
-            onTap={() => onProfileTap(currentProfile.user_id)}
-            onInsights={() => handleInsights(currentProfile.user_id)}
-            onMessage={handleMessage}
+            onTap={() => onClientTap(currentClient.user_id)}
+            onInsights={() => handleInsights(currentClient.user_id)}
             isTop={true}
-            hasPremium={hasPremiumMessaging}
           />
         )}
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center gap-6">
+      <div className="flex justify-center gap-4 mb-4">
         <Button
           size="lg"
           variant="outline"
@@ -206,6 +246,16 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
         >
           <X className="w-6 h-6 text-red-400" />
         </Button>
+        
+        {/* Super Like Button */}
+        {currentClient && (
+          <SuperLikeButton
+            targetId={currentClient.user_id}
+            targetType="profile"
+            onSuperLike={handleSuperLike}
+            disabled={swipeMutation.isPending}
+          />
+        )}
         
         <Button
           size="lg"
@@ -218,9 +268,18 @@ export function ClientSwipeContainer({ onProfileTap, onInsights, onMessageClick 
       </div>
 
       {/* Debug Info */}
-      <div className="mt-4 text-center text-xs text-white/60">
-        Profile {currentIndex + 1} of {profiles.length}
+      <div className="text-center text-xs text-white/60">
+        Client {currentIndex + 1} of {clientProfiles.length}
       </div>
+
+      {/* Advanced Filters Dialog */}
+      <AdvancedFilters
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        userRole="owner"
+        onApplyFilters={handleApplyFilters}
+        currentFilters={appliedFilters}
+      />
     </div>
   );
 }
