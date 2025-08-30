@@ -1,8 +1,9 @@
+
 import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Calendar, MapPin, Heart, MessageCircle, Eye } from 'lucide-react';
+import { User, Calendar, Heart, MessageCircle, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 
 interface ClientProfileCardProps {
@@ -27,7 +28,12 @@ export function ClientProfileCard({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const profileImages = profile.profile_images && profile.profile_images.length > 0 
+    ? profile.profile_images 
+    : ['/placeholder.svg'];
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isTop) return;
@@ -91,12 +97,18 @@ export function ClientProfileCard({
     onMessage();
   };
 
+  const goToPreviousImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => prev === 0 ? profileImages.length - 1 : prev - 1);
+  };
+
+  const goToNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => prev === profileImages.length - 1 ? 0 : prev + 1);
+  };
+
   const rotation = dragOffset.x * 0.1;
   const opacity = isTop ? Math.max(0.8, 1 - Math.abs(dragOffset.x) / 400) : 1;
-
-  const primaryImage = profile.profile_images && profile.profile_images.length > 0 
-    ? profile.profile_images[0] 
-    : '/placeholder.svg';
 
   return (
     <Card
@@ -120,14 +132,43 @@ export function ClientProfileCard({
       onClick={onTap}
     >
       <CardContent className="p-0 h-full relative">
-        {/* Profile Image */}
+        {/* Profile Image Carousel */}
         <div className="relative h-3/5 overflow-hidden">
           <img
-            src={primaryImage}
-            alt={profile.name || 'Client Profile'}
+            src={profileImages[currentImageIndex]}
+            alt={`${profile.name || 'Client'} photo ${currentImageIndex + 1}`}
             className="w-full h-full object-cover"
             draggable={false}
           />
+
+          {/* Image Navigation */}
+          {profileImages.length > 1 && isTop && (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm border-white/30 hover:bg-white w-8 h-8 p-0"
+                onClick={goToPreviousImage}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm border-white/30 hover:bg-white w-8 h-8 p-0"
+                onClick={goToNextImage}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </>
+          )}
+
+          {/* Image Counter */}
+          {profileImages.length > 1 && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+              {currentImageIndex + 1} / {profileImages.length}
+            </div>
+          )}
           
           {/* Action Buttons Overlay */}
           {isTop && (
