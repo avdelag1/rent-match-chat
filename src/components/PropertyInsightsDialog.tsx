@@ -17,13 +17,13 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle>Property Insights</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-1">
-          <div className="space-y-6 pr-4">
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-6 py-4">
             {/* Property Images Carousel */}
             {listing.images && listing.images.length > 0 && (
               <ImageCarousel images={listing.images} alt="Property" />

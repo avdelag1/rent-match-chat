@@ -17,13 +17,13 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle>Client Profile Insights</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-1">
-          <div className="space-y-6 pr-4">
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-6 py-4">
             {/* Profile Images Carousel */}
             {profile.profile_images && profile.profile_images.length > 0 && (
               <ImageCarousel images={profile.profile_images} alt="Client Profile" />

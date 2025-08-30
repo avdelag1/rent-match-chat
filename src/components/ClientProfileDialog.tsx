@@ -64,13 +64,13 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-1 max-h-[70vh]">
-          <div className="grid gap-6 py-2 pr-4">
+        <ScrollArea className="flex-1 px-6">
+          <div className="grid gap-6 py-4">
             {/* Profile Photos Section */}
             <div>
               <PhotoUploadManager
@@ -118,7 +118,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
 
               <div>
                 <Label htmlFor="bio">Bio</Label>
-                <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell us about yourself..." />
+                <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell us about yourself..." className="min-h-[100px]" />
               </div>
 
               <div>
@@ -134,7 +134,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
           </div>
         </ScrollArea>
 
-        <DialogFooter>
+        <DialogFooter className="px-6 py-4 border-t">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
