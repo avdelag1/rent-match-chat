@@ -1,10 +1,10 @@
-
 import { useState, useCallback } from 'react';
 import { ClientProfileCard } from './ClientProfileCard';
 import { AdvancedFilters } from './AdvancedFilters';
 import { SuperLikeButton } from './SuperLikeButton';
 import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
 import { useSwipe } from '@/hooks/useSwipe';
+import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Heart, X, RotateCcw, Users, Filter } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,9 +13,10 @@ import { toast } from '@/hooks/use-toast';
 interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
   onInsights?: (clientId: string) => void;
+  onMessageClick?: () => void;
 }
 
-export function ClientSwipeContainer({ onClientTap, onInsights }: ClientSwipeContainerProps) {
+export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
@@ -23,6 +24,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights }: ClientSwipeCon
   const { data: swipedIds = [] } = useSwipedClientProfiles();
   const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
   const swipeMutation = useSwipe();
+  const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
 
   console.log('ClientSwipeContainer - Profiles loaded:', clientProfiles.length, clientProfiles);
   console.log('ClientSwipeContainer - Swiped IDs:', swipedIds.length);
@@ -71,6 +73,17 @@ export function ClientSwipeContainer({ onClientTap, onInsights }: ClientSwipeCon
       toast({
         title: 'Client Insights',
         description: 'Viewing detailed insights for this client.',
+      });
+    }
+  };
+
+  const handleMessage = () => {
+    if (needsUpgrade && onMessageClick) {
+      onMessageClick();
+    } else {
+      toast({
+        title: 'Messaging',
+        description: 'Message feature coming soon.',
       });
     }
   };
@@ -221,7 +234,9 @@ export function ClientSwipeContainer({ onClientTap, onInsights }: ClientSwipeCon
             onSwipe={() => {}}
             onTap={() => {}}
             onInsights={() => {}}
+            onMessage={() => {}}
             isTop={false}
+            hasPremium={hasPremiumMessaging}
           />
         )}
         {currentClient && (
@@ -230,7 +245,9 @@ export function ClientSwipeContainer({ onClientTap, onInsights }: ClientSwipeCon
             onSwipe={handleSwipe}
             onTap={() => onClientTap(currentClient.user_id)}
             onInsights={() => handleInsights(currentClient.user_id)}
+            onMessage={handleMessage}
             isTop={true}
+            hasPremium={hasPremiumMessaging}
           />
         )}
       </div>
