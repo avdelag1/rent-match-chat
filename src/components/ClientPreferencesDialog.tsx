@@ -1,182 +1,325 @@
 
-import { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { useClientFilterPreferences, useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
-import { toast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { useClientFilterPreferences } from '@/hooks/useClientFilterPreferences'
+import { toast } from '@/hooks/use-toast'
 
-type Props = {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-};
+interface ClientPreferencesDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
 
-export function ClientPreferencesDialog({ open, onOpenChange }: Props) {
-  const { data, isLoading } = useClientFilterPreferences();
-  const saveMutation = useSaveClientFilterPreferences();
-
-  const [minPrice, setMinPrice] = useState<number | ''>('');
-  const [maxPrice, setMaxPrice] = useState<number | ''>('');
-  const [minBeds, setMinBeds] = useState<number | ''>('');
-  const [maxBeds, setMaxBeds] = useState<number | ''>('');
-  const [petFriendly, setPetFriendly] = useState(false);
-  const [furnished, setFurnished] = useState(false);
-  const [rentalDuration, setRentalDuration] = useState<string>('monthly');
-  const [zones, setZones] = useState<string>('');
-  const [amenities, setAmenities] = useState<string>('');
+export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreferencesDialogProps) {
+  const { data: preferences, updatePreferences, isLoading } = useClientFilterPreferences()
+  
+  const [formData, setFormData] = useState({
+    min_price: 0,
+    max_price: 100000,
+    min_bedrooms: 1,
+    max_bedrooms: 10,
+    min_bathrooms: 1,
+    max_bathrooms: 5,
+    property_types: [] as string[],
+    location_zones: [] as string[],
+    furnished_required: false,
+    pet_friendly_required: false,
+    requires_gym: false,
+    requires_balcony: false,
+    requires_elevator: false,
+    requires_jacuzzi: false,
+    requires_coworking_space: false,
+    requires_solar_panels: false,
+    rental_duration: 'monthly' as string,
+  })
 
   useEffect(() => {
-    if (!data) return;
-    setMinPrice(data.min_price ?? '');
-    setMaxPrice(data.max_price ?? '');
-    setMinBeds(data.min_bedrooms ?? '');
-    setMaxBeds(data.max_bedrooms ?? '');
-    setPetFriendly(Boolean(data.pet_friendly_required));
-    setFurnished(Boolean(data.furnished_required));
-    setRentalDuration(data.rental_duration ?? 'monthly');
-    setZones((data.location_zones ?? []).join(', '));
-    setAmenities((data.amenities_required ?? []).join(', '));
-  }, [data]);
+    if (preferences) {
+      setFormData({
+        min_price: preferences.min_price || 0,
+        max_price: preferences.max_price || 100000,
+        min_bedrooms: preferences.min_bedrooms || 1,
+        max_bedrooms: preferences.max_bedrooms || 10,
+        min_bathrooms: preferences.min_bathrooms || 1,
+        max_bathrooms: preferences.max_bathrooms || 5,
+        property_types: preferences.property_types || [],
+        location_zones: preferences.location_zones || [],
+        furnished_required: preferences.furnished_required || false,
+        pet_friendly_required: preferences.pet_friendly_required || false,
+        requires_gym: preferences.requires_gym || false,
+        requires_balcony: preferences.requires_balcony || false,
+        requires_elevator: preferences.requires_elevator || false,
+        requires_jacuzzi: preferences.requires_jacuzzi || false,
+        requires_coworking_space: preferences.requires_coworking_space || false,
+        requires_solar_panels: preferences.requires_solar_panels || false,
+        rental_duration: preferences.rental_duration || 'monthly',
+      })
+    }
+  }, [preferences])
 
   const handleSave = async () => {
-    const payload = {
-      min_price: minPrice === '' ? null : Number(minPrice),
-      max_price: maxPrice === '' ? null : Number(maxPrice),
-      min_bedrooms: minBeds === '' ? null : Number(minBeds),
-      max_bedrooms: maxBeds === '' ? null : Number(maxBeds),
-      pet_friendly_required: petFriendly,
-      furnished_required: furnished,
-      rental_duration: rentalDuration,
-      location_zones: zones
-        ? zones.split(',').map((s) => s.trim()).filter(Boolean)
-        : [],
-      amenities_required: amenities
-        ? amenities.split(',').map((s) => s.trim()).filter(Boolean)
-        : [],
-    };
+    try {
+      await updatePreferences(formData)
+      toast({
+        title: 'Preferences Updated',
+        description: 'Your filter preferences have been saved successfully.',
+      })
+      onOpenChange(false)
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update preferences. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
 
-    await saveMutation.mutateAsync(payload);
-    toast({ title: 'Preferences saved', description: 'Your search preferences were updated.' });
-    onOpenChange(false);
-  };
+  const propertyTypeOptions = [
+    'Apartment', 'House', 'Villa', 'Studio', 'Loft', 'Penthouse', 'Condo'
+  ]
+
+  const locationOptions = [
+    'Tulum Centro', 'Zona Hotelera', 'Aldea Zama', 'La Veleta', 'Región 15'
+  ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Search Preferences</DialogTitle>
+      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b">
+          <DialogTitle>Filter Preferences</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-1 max-h-[70vh]">
-          <div className="grid gap-4 py-2 pr-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="minPrice">Min Price</Label>
-                <Input
-                  id="minPrice"
-                  type="number"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : '')}
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label htmlFor="maxPrice">Max Price</Label>
-                <Input
-                  id="maxPrice"
-                  type="number"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : '')}
-                  placeholder="3000"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="minBeds">Min Bedrooms</Label>
-                <Input
-                  id="minBeds"
-                  type="number"
-                  value={minBeds}
-                  onChange={(e) => setMinBeds(e.target.value ? Number(e.target.value) : '')}
-                  placeholder="1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="maxBeds">Max Bedrooms</Label>
-                <Input
-                  id="maxBeds"
-                  type="number"
-                  value={maxBeds}
-                  onChange={(e) => setMaxBeds(e.target.value ? Number(e.target.value) : '')}
-                  placeholder="3"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 items-center">
-              <div className="flex items-center justify-between border rounded-lg px-3 py-2">
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-6 py-4">
+            {/* Price Range */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Price Range</h3>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="mb-0">Pet friendly</Label>
-                  <p className="text-sm text-muted-foreground">Only pet-friendly</p>
+                  <Label htmlFor="min_price">Min Price ($)</Label>
+                  <Input
+                    id="min_price"
+                    type="number"
+                    value={formData.min_price}
+                    onChange={(e) => setFormData({ ...formData, min_price: parseInt(e.target.value) || 0 })}
+                  />
                 </div>
-                <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
-              </div>
-
-              <div className="flex items-center justify-between border rounded-lg px-3 py-2">
                 <div>
-                  <Label className="mb-0">Furnished</Label>
-                  <p className="text-sm text-muted-foreground">Furniture required</p>
+                  <Label htmlFor="max_price">Max Price ($)</Label>
+                  <Input
+                    id="max_price"
+                    type="number"
+                    value={formData.max_price}
+                    onChange={(e) => setFormData({ ...formData, max_price: parseInt(e.target.value) || 100000 })}
+                  />
                 </div>
-                <Switch checked={furnished} onCheckedChange={setFurnished} />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="duration">Rental Duration</Label>
-              <Input
-                id="duration"
-                value={rentalDuration ?? ''}
-                onChange={(e) => setRentalDuration(e.target.value)}
-                placeholder="monthly | yearly | weekly"
-              />
+            {/* Bedrooms & Bathrooms */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Rooms</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="min_bedrooms">Min Bedrooms</Label>
+                  <Input
+                    id="min_bedrooms"
+                    type="number"
+                    value={formData.min_bedrooms}
+                    onChange={(e) => setFormData({ ...formData, min_bedrooms: parseInt(e.target.value) || 1 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="max_bedrooms">Max Bedrooms</Label>
+                  <Input
+                    id="max_bedrooms"
+                    type="number"
+                    value={formData.max_bedrooms}
+                    onChange={(e) => setFormData({ ...formData, max_bedrooms: parseInt(e.target.value) || 10 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="min_bathrooms">Min Bathrooms</Label>
+                  <Input
+                    id="min_bathrooms"
+                    type="number"
+                    value={formData.min_bathrooms}
+                    onChange={(e) => setFormData({ ...formData, min_bathrooms: parseInt(e.target.value) || 1 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="max_bathrooms">Max Bathrooms</Label>
+                  <Input
+                    id="max_bathrooms"
+                    type="number"
+                    value={formData.max_bathrooms}
+                    onChange={(e) => setFormData({ ...formData, max_bathrooms: parseInt(e.target.value) || 5 })}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="zones">Preferred Zones</Label>
-              <Input
-                id="zones"
-                value={zones}
-                onChange={(e) => setZones(e.target.value)}
-                placeholder="e.g. Downtown, Beach, Aldea Zama"
-              />
+            {/* Property Types */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Property Types</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {propertyTypeOptions.map((type) => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`property-${type}`}
+                      checked={formData.property_types.includes(type)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            property_types: [...formData.property_types, type]
+                          })
+                        } else {
+                          setFormData({
+                            ...formData,
+                            property_types: formData.property_types.filter(t => t !== type)
+                          })
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`property-${type}`}>{type}</Label>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="amenities">Required Amenities</Label>
-              <Input
-                id="amenities"
-                value={amenities}
-                onChange={(e) => setAmenities(e.target.value)}
-                placeholder="e.g. Gym, Pool, Rooftop"
-              />
+            {/* Location Zones */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Preferred Locations</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {locationOptions.map((location) => (
+                  <div key={location} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`location-${location}`}
+                      checked={formData.location_zones.includes(location)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            location_zones: [...formData.location_zones, location]
+                          })
+                        } else {
+                          setFormData({
+                            ...formData,
+                            location_zones: formData.location_zones.filter(l => l !== location)
+                          })
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`location-${location}`}>{location}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Amenities */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Required Amenities</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="furnished"
+                    checked={formData.furnished_required}
+                    onCheckedChange={(checked) => setFormData({ ...formData, furnished_required: !!checked })}
+                  />
+                  <Label htmlFor="furnished">Furnished</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="pet_friendly"
+                    checked={formData.pet_friendly_required}
+                    onCheckedChange={(checked) => setFormData({ ...formData, pet_friendly_required: !!checked })}
+                  />
+                  <Label htmlFor="pet_friendly">Pet Friendly</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="gym"
+                    checked={formData.requires_gym}
+                    onCheckedChange={(checked) => setFormData({ ...formData, requires_gym: !!checked })}
+                  />
+                  <Label htmlFor="gym">Gym</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="balcony"
+                    checked={formData.requires_balcony}
+                    onCheckedChange={(checked) => setFormData({ ...formData, requires_balcony: !!checked })}
+                  />
+                  <Label htmlFor="balcony">Balcony</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="elevator"
+                    checked={formData.requires_elevator}
+                    onCheckedChange={(checked) => setFormData({ ...formData, requires_elevator: !!checked })}
+                  />
+                  <Label htmlFor="elevator">Elevator</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="jacuzzi"
+                    checked={formData.requires_jacuzzi}
+                    onCheckedChange={(checked) => setFormData({ ...formData, requires_jacuzzi: !!checked })}
+                  />
+                  <Label htmlFor="jacuzzi">Jacuzzi</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="coworking"
+                    checked={formData.requires_coworking_space}
+                    onCheckedChange={(checked) => setFormData({ ...formData, requires_coworking_space: !!checked })}
+                  />
+                  <Label htmlFor="coworking">Coworking Space</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="solar"
+                    checked={formData.requires_solar_panels}
+                    onCheckedChange={(checked) => setFormData({ ...formData, requires_solar_panels: !!checked })}
+                  />
+                  <Label htmlFor="solar">Solar Panels</Label>
+                </div>
+              </div>
+            </div>
+
+            {/* Rental Duration */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Rental Duration</h3>
+              <Select value={formData.rental_duration} onValueChange={(value) => setFormData({ ...formData, rental_duration: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select rental duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </ScrollArea>
 
-        <DialogFooter>
+        <DialogFooter className="px-6 py-4 border-t">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={saveMutation.isPending || isLoading}>
-            {saveMutation.isPending ? 'Saving...' : 'Save'}
+          <Button onClick={handleSave} disabled={isLoading}>
+            {isLoading ? 'Saving...' : 'Save Preferences'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
