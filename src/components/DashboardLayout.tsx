@@ -13,6 +13,9 @@ import { ClientInsightsDialog } from "@/components/ClientInsightsDialog"
 import { useListings } from "@/hooks/useListings"
 import { useClientProfiles } from "@/hooks/useClientProfiles"
 import { toast } from '@/hooks/use-toast'
+import { useNavigate } from 'react-router-dom'
+import { OwnerSettingsDialog } from '@/components/OwnerSettingsDialog'
+import { OwnerProfileDialog } from '@/components/OwnerProfileDialog'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -32,11 +35,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [subscriptionReason, setSubscriptionReason] = useState<string>('')
 
+  // NEW: owner dialogs
+  const [showOwnerSettings, setShowOwnerSettings] = useState(false)
+  const [showOwnerProfile, setShowOwnerProfile] = useState(false)
+
+  const navigate = useNavigate()
+
   // Get listings and profiles data for insights with error handling
   const { data: listings = [], error: listingsError } = useListings();
   const { data: profiles = [], error: profilesError } = useClientProfiles();
 
-  // Log errors for debugging
   if (listingsError) {
     console.error('DashboardLayout - Listings error:', listingsError);
   }
@@ -65,23 +73,28 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         setShowPreferences(true)
         break
       case 'profile':
-        setShowProfile(true)
+        if (userRole === 'owner') {
+          setShowOwnerProfile(true)
+        } else {
+          setShowProfile(true)
+        }
         break
       case 'messages':
-        toast({
-          title: 'Messages',
-          description: 'Message feature coming soon! Upgrade to premium for early access.',
-        })
+        // For both roles, navigate to the messages page so "something opens"
+        navigate('/messages')
         break
       case 'settings':
-        toast({
-          title: 'Settings',
-          description: 'Settings page coming soon! This will include your statistics and preferences.',
-        })
+        if (userRole === 'owner') {
+          setShowOwnerSettings(true)
+        } else {
+          toast({
+            title: 'Settings',
+            description: 'Settings page coming soon! This will include your statistics and preferences.',
+          })
+        }
         break
       case 'dashboard':
       default:
-        // Already on dashboard
         break
     }
   }
@@ -108,7 +121,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     setShowClientInsights(true)
   }
 
-  // Safe fallbacks in case sidebar components are not exported in this build
   const InsetComponent: any = (SidebarInset as any) || ((props: any) => <div {...props} />)
   const TriggerComponent: any = (SidebarTrigger as any) || ((props: any) => <button {...props} />)
 
@@ -118,7 +130,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1">
-          {/* Header with trigger */}
           <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/20 bg-white/5 backdrop-blur-sm px-4">
             <TriggerComponent className="text-white hover:bg-white/10" />
             <div className="flex items-center gap-2 ml-auto">
@@ -128,10 +139,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             </div>
           </header>
 
-          {/* Main content */}
           <main className="flex-1 overflow-auto">
             {
-              // Safely inject handler props into each valid child (supports multiple children)
               React.Children.map(children, (child) => {
                 if (React.isValidElement(child)) {
                   return React.cloneElement(child as React.ReactElement, {
@@ -203,14 +212,26 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       )}
 
       {userRole === 'owner' && (
-        <ClientInsightsDialog
-          open={showClientInsights}
-          onOpenChange={(open) => {
-            setShowClientInsights(open)
-            if (!open) setSelectedProfileId(null)
-          }}
-          profile={selectedProfile || null}
-        />
+        <>
+          <ClientInsightsDialog
+            open={showClientInsights}
+            onOpenChange={(open) => {
+              setShowClientInsights(open)
+              if (!open) setSelectedProfileId(null)
+            }}
+            profile={selectedProfile || null}
+          />
+
+          <OwnerSettingsDialog
+            open={showOwnerSettings}
+            onOpenChange={setShowOwnerSettings}
+          />
+
+          <OwnerProfileDialog
+            open={showOwnerProfile}
+            onOpenChange={setShowOwnerProfile}
+          />
+        </>
       )}
     </SidebarProvider>
   )

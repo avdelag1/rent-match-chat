@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,11 +17,9 @@ export interface ClientProfile {
 
 function mapRpcRowToClientProfile(row: any): ClientProfile {
   return {
-    // The original type expects a numeric id from client_profiles (bigint).
-    // For RPC rows (which return user uuid), we set a placeholder number.
     id: 0,
-    user_id: row.id, // uuid of the user from RPC
-    name: row.full_name ?? row.name ?? '',
+    user_id: row.id || row.user_id || '',
+    name: row.full_name ?? row.name ?? row.profile_name ?? '',
     age: row.age ?? 0,
     bio: row.bio ?? '',
     gender: row.gender ?? '',
@@ -43,32 +42,50 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           return [];
         }
 
-        // Attempt to fetch owner-visible clients via security-definer RPC.
-        // This bypasses RLS appropriately and returns client users the owner can view.
-        const { data: rpcData, error: rpcError } = await supabase.rpc('get_clients_for_owner', {
-          owner_user_id: uid,
-        });
+        // Try the security-definer RPC with several likely param names.
+        let rpcData: any[] | null = null;
+        let lastRpcError: string | null = null;
 
-        if (rpcError) {
-          console.warn('get_clients_for_owner RPC failed, falling back:', rpcError.message);
+        const attempts = [
+          { owner_user_id: uid },
+          { owner_id: uid },
+          { uid },
+        ];
+
+        for (const params of attempts) {
+          const { data, error } = await supabase.rpc('get_clients_for_owner', params as any);
+          if (error) {
+            lastRpcError = error.message;
+            console.warn('get_clients_for_owner RPC attempt failed with params', params, error.message);
+            continue;
+          }
+          if (Array.isArray(data)) {
+            rpcData = data;
+            break;
+          }
         }
 
-        if (Array.isArray(rpcData) && rpcData.length > 0) {
+        if (rpcData && rpcData.length > 0) {
           const mapped = rpcData
             .map(mapRpcRowToClientProfile)
-            .filter(p => !excludeSwipedIds.includes(p.user_id));
+            .filter(p => p.user_id && !excludeSwipedIds.includes(p.user_id));
           console.log('Fetched client profiles via RPC:', mapped.length);
           return mapped as ClientProfile[];
         }
 
-        // Fallback: try reading from client_profiles (RLS may restrict to own only)
+        if (lastRpcError) {
+          console.warn('All RPC attempts failed, falling back to client_profiles. Last error:', lastRpcError);
+        } else {
+          console.log('RPC returned no data, falling back to client_profiles.');
+        }
+
+        // Fallback: read from client_profiles (RLS may restrict to own only)
         let query = supabase
           .from('client_profiles')
           .select('*')
           .limit(20);
 
         if (excludeSwipedIds.length > 0) {
-          // Filter client_profiles by user_id not in swiped list
           const quoted = excludeSwipedIds.map(id => `'${id}'`).join(',');
           query = query.not('user_id', 'in', `(${quoted})`);
         }
@@ -77,11 +94,10 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
 
         if (error) {
           console.error('Error fetching client profiles (fallback):', error);
-          // Graceful empty fallback to keep UI functional
           return [];
         }
 
-        const validProfiles = (profiles || []).filter((profile) => profile.name && profile.user_id);
+        const validProfiles = (profiles || []).filter((profile: any) => profile.name && profile.user_id);
         console.log('Fetched client profiles via fallback:', validProfiles.length);
         return validProfiles as ClientProfile[];
       } catch (error) {
