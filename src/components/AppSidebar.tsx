@@ -3,9 +3,6 @@ import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart, P
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
-import { useState } from "react"
-import { OwnerSettingsDialog } from "./OwnerSettingsDialog"
-import { OwnerProfileDialog } from "./OwnerProfileDialog"
 
 // Menu items for different user types
 const clientMenuItems = [
@@ -60,15 +57,13 @@ const ownerMenuItems = [
   },
   {
     title: "Profile",
-    url: "#profile",
+    url: "/owner/profile",
     icon: User,
-    action: "profile"
   },
   {
     title: "Settings",
-    url: "#settings",
+    url: "/owner/settings",
     icon: Settings,
-    action: "settings"
   },
 ]
 
@@ -80,8 +75,6 @@ export interface AppSidebarProps {
 const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuItemClick }) => {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [profileOpen, setProfileOpen] = useState(false)
   
   // Resolve role safely (prevents TS literal narrowing issues)
   const userRole: 'client' | 'owner' = (propUserRole ?? 'owner')
@@ -89,13 +82,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const menuItems = userRole === 'client' ? clientMenuItems : ownerMenuItems
 
   const handleMenuClick = (item: any) => {
-    if (item.action === 'settings') {
-      setSettingsOpen(true)
-      if (onMenuItemClick) onMenuItemClick('settings')
-    } else if (item.action === 'profile') {
-      setProfileOpen(true)
-      if (onMenuItemClick) onMenuItemClick('profile')
-    } else if (item.action === 'add-property') {
+    if (item.action === 'add-property') {
       // Use URL hash so DashboardLayout can auto-open the form
       if (location.hash !== '#add-property') {
         location.hash = '#add-property'
@@ -112,46 +99,31 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   }
 
   return (
-    <>
-      <Sidebar>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton onClick={() => handleMenuClick(item)}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={handleSignOut}>
-                    <LogOut />
-                    <span>Sign Out</span>
+    <Sidebar>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton onClick={() => handleMenuClick(item)}>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-
-      {userRole === 'owner' && (
-        <>
-          <OwnerSettingsDialog 
-            open={settingsOpen} 
-            onOpenChange={setSettingsOpen} 
-          />
-          <OwnerProfileDialog 
-            open={profileOpen} 
-            onOpenChange={setProfileOpen} 
-          />
-        </>
-      )}
-    </>
+              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleSignOut}>
+                  <LogOut />
+                  <span>Sign Out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   )
 }
 

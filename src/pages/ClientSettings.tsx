@@ -1,0 +1,116 @@
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { useClientFilterPreferences } from "@/hooks/useClientFilterPreferences";
+
+const ClientSettings = () => {
+  const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
+  const [notifications, setNotifications] = useState(true);
+  const [darkMode, setDarkMode] = useState(true);
+  const { data: preferences } = useClientFilterPreferences();
+
+  return (
+    <DashboardLayout userRole="client">
+      <div className="p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-white mb-4">Settings</h1>
+            <p className="text-white/80">Manage your preferences and account settings.</p>
+          </div>
+
+          <div className="grid gap-6">
+            {/* General Settings */}
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white">General Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-white font-medium">Email notifications</label>
+                    <p className="text-white/60 text-sm">Receive updates about new matches and messages</p>
+                  </div>
+                  <Switch checked={notifications} onCheckedChange={setNotifications} />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-white font-medium">Dark mode</label>
+                    <p className="text-white/60 text-sm">Toggle between light and dark theme</p>
+                  </div>
+                  <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Search Preferences */}
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white">Search Preferences</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {preferences ? (
+                  <div className="grid gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-white/90 text-sm font-medium">Price Range</label>
+                        <p className="text-white mt-1">
+                          ${preferences.min_price || 0} - ${preferences.max_price || 'No limit'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-white/90 text-sm font-medium">Bedrooms</label>
+                        <p className="text-white mt-1">
+                          {preferences.min_bedrooms || 0} - {preferences.max_bedrooms || 'Any'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-white/90 text-sm font-medium">Location Zones</label>
+                      <p className="text-white mt-1">
+                        {preferences.location_zones?.join(', ') || 'Any location'}
+                      </p>
+                    </div>
+
+                    {preferences.amenities_required && preferences.amenities_required.length > 0 && (
+                      <div>
+                        <label className="text-white/90 text-sm font-medium">Required Amenities</label>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {preferences.amenities_required.map((amenity, index) => (
+                            <span key={index} className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">
+                              {amenity}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-white/60">No search preferences set</p>
+                )}
+                
+                <Button 
+                  onClick={() => setShowPreferencesDialog(true)}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Update Preferences
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      <ClientPreferencesDialog 
+        open={showPreferencesDialog} 
+        onOpenChange={setShowPreferencesDialog} 
+      />
+    </DashboardLayout>
+  );
+};
+
+export default ClientSettings;
