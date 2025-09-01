@@ -5013,6 +5013,30 @@ export type Database = {
           name: string
         }[]
       }
+      get_all_clients_for_owner: {
+        Args: { owner_user_id?: string }
+        Returns: {
+          age: number
+          bio: string
+          full_name: string
+          id: string
+          images: string[]
+          interests: string[]
+          location: string
+          monthly_income: string
+          monthly_income_range: string
+          name: string
+          nationality: string
+          occupation: string
+          preferences: string[]
+          preferred_activities: string[]
+          profession: string
+          profile_images: string[]
+          profile_name: string
+          user_id: string
+          verified: boolean
+        }[]
+      }
       get_clients_for_owner: {
         Args: { owner_user_id: string }
         Returns: {

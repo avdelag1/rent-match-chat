@@ -38,12 +38,13 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-4">Discover Potential Tenants</h1>
+            <p className="text-white/80">Swipe through client profiles to find your ideal tenants</p>
           </div>
 
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
               <CardTitle className="text-white text-center">
-                Potential Tenants
+                Potential Tenants ({profiles.length} available)
               </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center pb-8">

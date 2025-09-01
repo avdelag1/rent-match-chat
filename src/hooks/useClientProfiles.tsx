@@ -42,7 +42,22 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           return [];
         }
 
-        // Try the security-definer RPC with several likely param names.
+        // First, try the new comprehensive RPC function
+        const { data: newRpcData, error: newRpcError } = await supabase.rpc('get_all_clients_for_owner', { owner_user_id: uid });
+        
+        if (!newRpcError && Array.isArray(newRpcData) && newRpcData.length > 0) {
+          const mapped = newRpcData
+            .map(mapRpcRowToClientProfile)
+            .filter(p => p.user_id && !excludeSwipedIds.includes(p.user_id));
+          console.log('Fetched client profiles via new RPC:', mapped.length);
+          return mapped as ClientProfile[];
+        }
+
+        if (newRpcError) {
+          console.warn('New RPC failed, trying original:', newRpcError.message);
+        }
+
+        // Try the original security-definer RPC with several likely param names.
         let rpcData: any[] | null = null;
         let lastRpcError: string | null = null;
 
@@ -69,7 +84,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           const mapped = rpcData
             .map(mapRpcRowToClientProfile)
             .filter(p => p.user_id && !excludeSwipedIds.includes(p.user_id));
-          console.log('Fetched client profiles via RPC:', mapped.length);
+          console.log('Fetched client profiles via original RPC:', mapped.length);
           return mapped as ClientProfile[];
         }
 
@@ -79,15 +94,14 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           console.log('RPC returned no data, falling back to client_profiles.');
         }
 
-        // Fallback: read from client_profiles (RLS may restrict to own only)
+        // Final fallback: read from client_profiles table directly
         let query = supabase
           .from('client_profiles')
           .select('*')
-          .limit(20);
+          .limit(50);
 
         if (excludeSwipedIds.length > 0) {
-          const quoted = excludeSwipedIds.map(id => `'${id}'`).join(',');
-          query = query.not('user_id', 'in', `(${quoted})`);
+          query = query.not('user_id', 'in', `(${excludeSwipedIds.map(id => `'${id}'`).join(',')})`);
         }
 
         const { data: profiles, error } = await query;
@@ -99,7 +113,18 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
 
         const validProfiles = (profiles || []).filter((profile: any) => profile.name && profile.user_id);
         console.log('Fetched client profiles via fallback:', validProfiles.length);
-        return validProfiles as ClientProfile[];
+        return validProfiles.map(profile => ({
+          id: profile.id || 0,
+          user_id: profile.user_id || '',
+          name: profile.name || '',
+          age: profile.age || 0,
+          bio: profile.bio || '',
+          gender: profile.gender || '',
+          interests: profile.interests || [],
+          preferred_activities: profile.preferred_activities || [],
+          profile_images: profile.profile_images || [],
+          location: profile.location || null,
+        })) as ClientProfile[];
       } catch (error) {
         console.error('Failed to fetch client profiles:', error);
         return [];

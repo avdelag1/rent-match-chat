@@ -42,6 +42,19 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     });
 
     setCurrentIndex(prev => prev + 1);
+
+    // Show success message for owners
+    if (direction === 'right') {
+      toast({
+        title: 'Client Liked! 💚',
+        description: `You liked ${currentClient.name}'s profile.`,
+      });
+    } else {
+      toast({
+        title: 'Client Passed',
+        description: `You passed on ${currentClient.name}'s profile.`,
+      });
+    }
   }, [currentIndex, clientProfiles, swipeMutation]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
@@ -51,6 +64,11 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       targetType: targetType as 'listing' | 'profile'
     });
     setCurrentIndex(prev => prev + 1);
+    
+    toast({
+      title: 'Super Like Sent! ⭐',
+      description: 'Your super like has been sent to this client.',
+    });
   }, [swipeMutation]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
@@ -104,6 +122,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           <Skeleton className="w-full h-32 mb-4" />
           <Skeleton className="w-3/4 h-6 mb-2 mx-auto" />
           <Skeleton className="w-1/2 h-4 mx-auto" />
+          <p className="text-white/70 mt-4">Loading client profiles...</p>
         </div>
       </div>
     );
@@ -138,7 +157,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
             <Users className="w-16 h-16 mx-auto text-white/60" />
           </div>
           <h3 className="text-xl font-bold mb-2 text-white">No Clients Available</h3>
-          <p className="text-white/80 mb-4">No clients match your current filters.</p>
+          <p className="text-white/80 mb-4">No client profiles found. Try refreshing or adjusting filters.</p>
           <div className="space-y-2">
             <Button 
               onClick={() => setShowFilters(true)}
