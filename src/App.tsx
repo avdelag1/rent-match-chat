@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import ClientDashboard from "./pages/ClientDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import MessagingDashboard from "./pages/MessagingDashboard";
+import OwnerProperties from "./pages/OwnerProperties";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,15 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="owner">
                   <OwnerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/owner/properties" 
+              element={
+                <ProtectedRoute requiredRole="owner">
+                  <OwnerProperties />
                 </ProtectedRoute>
               } 
             />

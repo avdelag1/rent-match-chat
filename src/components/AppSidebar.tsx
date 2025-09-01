@@ -1,5 +1,5 @@
 
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart, PlusCircle } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
@@ -48,6 +48,12 @@ const ownerMenuItems = [
     icon: Building2,
   },
   {
+    title: "Add Property",
+    url: "#add-property",
+    icon: PlusCircle,
+    action: "add-property",
+  },
+  {
     title: "Messages",
     url: "/messages",
     icon: MessageSquare,
@@ -66,20 +72,20 @@ const ownerMenuItems = [
   },
 ]
 
-interface AppSidebarProps {
+export interface AppSidebarProps {
   userRole?: 'client' | 'owner';
   onMenuItemClick?: (item: string) => void;
 }
 
-export function AppSidebar({ userRole: propUserRole, onMenuItemClick }: AppSidebarProps) {
+const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuItemClick }) => {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   
-  // Use prop userRole or fallback to 'owner' (remove the comparison that caused the error)
-  const userRole = propUserRole || 'owner'
-  
+  // Resolve role safely (prevents TS literal narrowing issues)
+  const userRole: 'client' | 'owner' = (propUserRole ?? 'owner')
+
   const menuItems = userRole === 'client' ? clientMenuItems : ownerMenuItems
 
   const handleMenuClick = (item: any) => {
@@ -89,6 +95,12 @@ export function AppSidebar({ userRole: propUserRole, onMenuItemClick }: AppSideb
     } else if (item.action === 'profile') {
       setProfileOpen(true)
       if (onMenuItemClick) onMenuItemClick('profile')
+    } else if (item.action === 'add-property') {
+      // Use URL hash so DashboardLayout can auto-open the form
+      if (location.hash !== '#add-property') {
+        location.hash = '#add-property'
+      }
+      if (onMenuItemClick) onMenuItemClick('add-property')
     } else {
       navigate(item.url)
       if (onMenuItemClick) onMenuItemClick('dashboard')
@@ -142,3 +154,6 @@ export function AppSidebar({ userRole: propUserRole, onMenuItemClick }: AppSideb
     </>
   )
 }
+
+export default AppSidebar
+export { AppSidebar }

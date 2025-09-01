@@ -1,7 +1,6 @@
-
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useState, useEffect } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/AppSidebar"
+import AppSidebar from "@/components/AppSidebar"
 import { PropertyForm } from "@/components/PropertyForm"
 import { SubscriptionPackages } from "@/components/SubscriptionPackages"
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
@@ -13,7 +12,7 @@ import { ClientInsightsDialog } from "@/components/ClientInsightsDialog"
 import { useListings } from "@/hooks/useListings"
 import { useClientProfiles } from "@/hooks/useClientProfiles"
 import { toast } from '@/hooks/use-toast'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { OwnerSettingsDialog } from '@/components/OwnerSettingsDialog'
 import { OwnerProfileDialog } from '@/components/OwnerProfileDialog'
 
@@ -40,6 +39,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showOwnerProfile, setShowOwnerProfile] = useState(false)
 
   const navigate = useNavigate()
+  const location = useLocation()
 
   // Get listings and profiles data for insights with error handling
   const { data: listings = [], error: listingsError } = useListings();
@@ -51,6 +51,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   if (profilesError) {
     console.error('DashboardLayout - Profiles error:', profilesError);
   }
+
+  // Auto-open property form when the URL hash is "#add-property"
+  useEffect(() => {
+    if (location.hash === '#add-property') {
+      setShowPropertyForm(true)
+    }
+  }, [location.hash])
 
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
@@ -80,7 +87,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         }
         break
       case 'messages':
-        // For both roles, navigate to the messages page so "something opens"
         navigate('/messages')
         break
       case 'settings':
