@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { ClientProfileCard } from './ClientProfileCard';
 import { AdvancedFilters } from './AdvancedFilters';
@@ -6,7 +7,7 @@ import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientPro
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
-import { Heart, X, RotateCcw, Users, Filter } from 'lucide-react';
+import { Heart, X, RotateCcw, Users, Filter, Zap } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 
@@ -46,12 +47,12 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     // Show success message for owners
     if (direction === 'right') {
       toast({
-        title: 'Client Liked! 💚',
+        title: '💚 Liked!',
         description: `You liked ${currentClient.name}'s profile.`,
       });
     } else {
       toast({
-        title: 'Client Passed',
+        title: 'Passed',
         description: `You passed on ${currentClient.name}'s profile.`,
       });
     }
@@ -66,7 +67,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     setCurrentIndex(prev => prev + 1);
     
     toast({
-      title: 'Super Like Sent! ⭐',
+      title: '⭐ Super Like Sent!',
       description: 'Your super like has been sent to this client.',
     });
   }, [swipeMutation]);
@@ -117,12 +118,12 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[600px] max-w-sm mx-auto">
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
-          <Skeleton className="w-full h-32 mb-4" />
-          <Skeleton className="w-3/4 h-6 mb-2 mx-auto" />
-          <Skeleton className="w-1/2 h-4 mx-auto" />
-          <p className="text-white/70 mt-4">Loading client profiles...</p>
+      <div className="relative w-full h-[700px] max-w-sm mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-xl p-6 text-center flex items-center justify-center">
+          <div className="space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+            <p className="text-white/70">Loading amazing tenants...</p>
+          </div>
         </div>
       </div>
     );
@@ -131,7 +132,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   if (error) {
     console.error('ClientSwipeContainer error:', error);
     return (
-      <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">⚠️</div>
           <h3 className="text-xl font-bold mb-2 text-white">Something went wrong</h3>
@@ -151,7 +152,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">
             <Users className="w-16 h-16 mx-auto text-white/60" />
@@ -184,11 +185,11 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[600px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2 text-white">No more clients!</h3>
-          <p className="text-white/80 mb-4">You've seen all available clients matching your filters.</p>
+          <h3 className="text-xl font-bold mb-2 text-white">All caught up!</h3>
+          <p className="text-white/80 mb-4">You've seen all available tenants. Check back later for more!</p>
           <div className="space-y-2">
             <Button 
               onClick={() => setShowFilters(true)}
@@ -217,9 +218,16 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const nextClient = clientProfiles[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-sm mx-auto">
-      {/* Filter Button */}
-      <div className="flex justify-between items-center mb-4">
+    <div className="w-full max-w-sm mx-auto space-y-6">
+      {/* Header with Filter Button */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-white/80 text-sm">
+            {clientProfiles.length - currentIndex} potential tenants
+          </span>
+        </div>
+        
         <Button
           variant="outline"
           size="sm"
@@ -229,24 +237,11 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           <Filter className="w-4 h-4 mr-2" />
           Filters
         </Button>
-        
-        {Object.keys(appliedFilters).length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setAppliedFilters({});
-              setCurrentIndex(0);
-            }}
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-          >
-            Clear Filters
-          </Button>
-        )}
       </div>
 
       {/* Cards Container */}
-      <div className="relative w-full h-[600px] mb-6">
+      <div className="relative w-full h-[600px]">
+        {/* Next card (behind) */}
         {nextClient && (
           <ClientProfileCard
             profile={nextClient}
@@ -258,6 +253,8 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
             hasPremium={hasPremiumMessaging}
           />
         )}
+        
+        {/* Current card (on top) */}
         {currentClient && (
           <ClientProfileCard
             profile={currentClient}
@@ -272,40 +269,53 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center gap-4 mb-4">
+      <div className="flex justify-center items-center gap-4">
         <Button
           size="lg"
           variant="outline"
-          className="w-14 h-14 rounded-full border-red-200 hover:bg-red-50 hover:border-red-300 bg-white/10 border-white/20 text-white hover:bg-red-500/20"
+          className="w-16 h-16 rounded-full border-2 border-red-400/50 hover:bg-red-500/10 hover:border-red-400 bg-white/10 backdrop-blur-sm transition-all duration-200"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <X className="w-6 h-6 text-red-400" />
+          <X className="w-7 h-7 text-red-400" />
         </Button>
         
         {/* Super Like Button */}
         {currentClient && (
-          <SuperLikeButton
-            targetId={currentClient.user_id}
-            targetType="profile"
-            onSuperLike={handleSuperLike}
+          <Button
+            size="lg"
+            variant="outline"
+            className="w-14 h-14 rounded-full border-2 border-blue-400/50 hover:bg-blue-500/10 hover:border-blue-400 bg-white/10 backdrop-blur-sm transition-all duration-200"
+            onClick={() => handleSuperLike(currentClient.user_id, 'profile')}
             disabled={swipeMutation.isPending}
-          />
+          >
+            <Zap className="w-6 h-6 text-blue-400" />
+          </Button>
         )}
         
         <Button
           size="lg"
-          className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-600"
+          className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 border-2 border-green-400/50 transition-all duration-200 shadow-lg"
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <Heart className="w-6 h-6 text-white" />
+          <Heart className="w-7 h-7 text-white" />
         </Button>
       </div>
 
-      {/* Debug Info */}
-      <div className="text-center text-xs text-white/60">
-        Client {currentIndex + 1} of {clientProfiles.length}
+      {/* Progress indicator */}
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+          <span className="text-white/60 text-sm">
+            {currentIndex + 1} of {clientProfiles.length}
+          </span>
+          <div className="w-16 h-1 bg-white/20 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-green-400 to-blue-400 transition-all duration-300"
+              style={{ width: `${((currentIndex + 1) / clientProfiles.length) * 100}%` }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Advanced Filters Dialog */}
