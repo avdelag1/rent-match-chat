@@ -66,24 +66,32 @@ const ownerMenuItems = [
   },
 ]
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  userRole?: 'client' | 'owner';
+  onMenuItemClick?: (item: string) => void;
+}
+
+export function AppSidebar({ userRole: propUserRole, onMenuItemClick }: AppSidebarProps) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   
-  // Get user role from profile (you may need to fetch this)
-  const userRole = 'owner' // This should come from your user profile/context
+  // Use prop userRole or fallback to 'owner' (remove the comparison that caused the error)
+  const userRole = propUserRole || 'owner'
   
   const menuItems = userRole === 'client' ? clientMenuItems : ownerMenuItems
 
   const handleMenuClick = (item: any) => {
     if (item.action === 'settings') {
       setSettingsOpen(true)
+      if (onMenuItemClick) onMenuItemClick('settings')
     } else if (item.action === 'profile') {
       setProfileOpen(true)
+      if (onMenuItemClick) onMenuItemClick('profile')
     } else {
       navigate(item.url)
+      if (onMenuItemClick) onMenuItemClick('dashboard')
     }
   }
 
