@@ -1,3 +1,4 @@
+
 import React, { ReactNode, useState, useEffect } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import AppSidebar from "@/components/AppSidebar"
@@ -15,6 +16,8 @@ import { toast } from '@/hooks/use-toast'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { OwnerSettingsDialog } from '@/components/OwnerSettingsDialog'
 import { OwnerProfileDialog } from '@/components/OwnerProfileDialog'
+import OwnerClientSwipeDialog from '@/components/OwnerClientSwipeDialog'
+import { Button } from '@/components/ui/button'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -38,6 +41,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showOwnerSettings, setShowOwnerSettings] = useState(false)
   const [showOwnerProfile, setShowOwnerProfile] = useState(false)
 
+  // NEW: quick access tenant swipe dialog for owners
+  const [showOwnerSwipe, setShowOwnerSwipe] = useState(false)
+
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -58,6 +64,14 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       setShowPropertyForm(true)
     }
   }, [location.hash])
+
+  // Auto-open tenant swipe on /owner/properties so owners see cards immediately
+  useEffect(() => {
+    if (userRole === 'owner' && location.pathname === '/owner/properties') {
+      setShowOwnerSwipe(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userRole, location.pathname])
 
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
@@ -139,6 +153,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/20 bg-white/5 backdrop-blur-sm px-4">
             <TriggerComponent className="text-white hover:bg-white/10" />
             <div className="flex items-center gap-2 ml-auto">
+              {userRole === 'owner' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={() => setShowOwnerSwipe(true)}
+                >
+                  Find Tenants
+                </Button>
+              )}
               <span className="text-white text-sm">
                 Welcome back! ({userRole === 'owner' ? 'Property Owner' : 'Tenant'})
               </span>
@@ -236,6 +260,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           <OwnerProfileDialog
             open={showOwnerProfile}
             onOpenChange={setShowOwnerProfile}
+          />
+
+          <OwnerClientSwipeDialog
+            open={showOwnerSwipe}
+            onOpenChange={setShowOwnerSwipe}
           />
         </>
       )}
