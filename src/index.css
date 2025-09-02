@@ -39,8 +39,40 @@
     --gradient-primary: linear-gradient(135deg, hsl(222, 84%, 5%) 0%, hsl(220, 70%, 15%) 50%, hsl(218, 60%, 25%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(222, 47%, 11%) 0%, hsl(220, 45%, 14%) 100%);
     --gradient-button: linear-gradient(135deg, hsl(15, 100%, 60%) 0%, hsl(0, 84%, 55%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(280, 100%, 70%) 0%, hsl(320, 100%, 60%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45, 100%, 60%) 0%, hsl(35, 100%, 50%) 100%);
+    --gradient-silver: linear-gradient(135deg, hsl(210, 20%, 60%) 0%, hsl(200, 15%, 50%) 100%);
     --shadow-glow: 0 0 20px hsla(15, 100%, 60%, 0.3);
+    --shadow-premium: 0 0 30px hsla(280, 100%, 70%, 0.4);
     --shadow-card: 0 8px 32px hsla(222, 84%, 5%, 0.4);
+  }
+
+  .dark {
+    /* Dark theme (default) */
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+  }
+
+  .amber {
+    /* Warm amber theme */
+    --background: 25 40% 8%;
+    --foreground: 35 40% 95%;
+    --card: 20 30% 12%;
+    --card-foreground: 35 40% 95%;
+    --primary: 35 90% 55%;
+    --secondary: 25 80% 45%;
+    --accent: 30 25% 18%;
+    --muted: 25 15% 25%;
+    --muted-foreground: 30 20% 60%;
+    --border: 25 25% 20%;
+    --input: 25 25% 20%;
+    --ring: 35 90% 55%;
+    --gradient-primary: linear-gradient(135deg, hsl(25, 40%, 8%) 0%, hsl(30, 35%, 15%) 50%, hsl(35, 30%, 22%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(20, 30%, 12%) 0%, hsl(25, 25%, 15%) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(35, 90%, 55%) 0%, hsl(25, 80%, 45%) 100%);
+    --shadow-glow: 0 0 20px hsla(35, 90%, 55%, 0.3);
   }
 }
 
@@ -56,7 +88,7 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
   
-  /* Custom animations */
+  /* Advanced animations for legendary UX */
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
@@ -77,6 +109,37 @@
       transform: translateY(0);
     }
   }
+
+  @keyframes swipe-reveal {
+    from {
+      opacity: 0;
+      transform: scale(0.9) rotateY(-15deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotateY(0deg);
+    }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes bounce-in {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes heart-beat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.3); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.3); }
+    70% { transform: scale(1); }
+  }
   
   .animate-float {
     animation: float 3s ease-in-out infinite;
@@ -89,11 +152,57 @@
   .animate-slide-up {
     animation: slide-up 0.6s ease-out;
   }
+
+  .animate-swipe-reveal {
+    animation: swipe-reveal 0.4s ease-out;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.5s ease-out;
+  }
+
+  .animate-heart-beat {
+    animation: heart-beat 1.3s ease-in-out infinite;
+  }
   
   .gradient-text {
     background: linear-gradient(135deg, hsl(15, 100%, 60%), hsl(0, 84%, 55%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .premium-glow {
+    box-shadow: var(--shadow-premium);
+  }
+
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .interactive-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .interactive-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .swipe-card {
+    transform-style: preserve-3d;
+    transition: transform 0.2s ease-out;
+  }
+
+  .swipe-card:hover {
+    transform: rotateY(2deg) scale(1.02);
   }
 }
