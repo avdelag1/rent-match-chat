@@ -466,6 +466,92 @@ export type Database = {
         }
         Relationships: []
       }
+      client_preferences_detailed: {
+        Row: {
+          background_check_completed: boolean | null
+          budget_max: number | null
+          budget_min: number | null
+          communication_style: string | null
+          created_at: string | null
+          credit_score_range: string | null
+          employment_status: string | null
+          id: string
+          income_documents_provided: boolean | null
+          income_verification: boolean | null
+          languages_spoken: string[] | null
+          lease_duration_preference: string | null
+          lifestyle_compatibility: string[] | null
+          move_in_flexibility: string | null
+          occupation_category: string | null
+          party_frequency: string | null
+          pet_ownership: boolean | null
+          pet_types: string[] | null
+          previous_landlord_references: boolean | null
+          smoking_preference: string | null
+          social_media_verified: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          background_check_completed?: boolean | null
+          budget_max?: number | null
+          budget_min?: number | null
+          communication_style?: string | null
+          created_at?: string | null
+          credit_score_range?: string | null
+          employment_status?: string | null
+          id?: string
+          income_documents_provided?: boolean | null
+          income_verification?: boolean | null
+          languages_spoken?: string[] | null
+          lease_duration_preference?: string | null
+          lifestyle_compatibility?: string[] | null
+          move_in_flexibility?: string | null
+          occupation_category?: string | null
+          party_frequency?: string | null
+          pet_ownership?: boolean | null
+          pet_types?: string[] | null
+          previous_landlord_references?: boolean | null
+          smoking_preference?: string | null
+          social_media_verified?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          background_check_completed?: boolean | null
+          budget_max?: number | null
+          budget_min?: number | null
+          communication_style?: string | null
+          created_at?: string | null
+          credit_score_range?: string | null
+          employment_status?: string | null
+          id?: string
+          income_documents_provided?: boolean | null
+          income_verification?: boolean | null
+          languages_spoken?: string[] | null
+          lease_duration_preference?: string | null
+          lifestyle_compatibility?: string[] | null
+          move_in_flexibility?: string | null
+          occupation_category?: string | null
+          party_frequency?: string | null
+          pet_ownership?: boolean | null
+          pet_types?: string[] | null
+          previous_landlord_references?: boolean | null
+          smoking_preference?: string | null
+          social_media_verified?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_preferences_detailed_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_profiles: {
         Row: {
           age: number | null
@@ -1437,6 +1523,82 @@ export type Database = {
           },
         ]
       }
+      owner_client_matches: {
+        Row: {
+          client_id: string | null
+          client_notes: string | null
+          communication_log: Json | null
+          compatibility_factors: Json | null
+          created_at: string | null
+          id: string
+          last_contact_date: string | null
+          listing_id: string | null
+          match_score: number | null
+          next_follow_up_date: string | null
+          owner_id: string | null
+          owner_notes: string | null
+          priority_level: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          client_notes?: string | null
+          communication_log?: Json | null
+          compatibility_factors?: Json | null
+          created_at?: string | null
+          id?: string
+          last_contact_date?: string | null
+          listing_id?: string | null
+          match_score?: number | null
+          next_follow_up_date?: string | null
+          owner_id?: string | null
+          owner_notes?: string | null
+          priority_level?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          client_notes?: string | null
+          communication_log?: Json | null
+          compatibility_factors?: Json | null
+          created_at?: string | null
+          id?: string
+          last_contact_date?: string | null
+          listing_id?: string | null
+          match_score?: number | null
+          next_follow_up_date?: string | null
+          owner_id?: string | null
+          owner_notes?: string | null
+          priority_level?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_client_matches_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_client_matches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_client_matches_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_client_preferences: {
         Row: {
           allows_extra_guests: boolean | null
@@ -1528,6 +1690,7 @@ export type Database = {
           client_id: string
           created_at: string
           id: string
+          is_super_like: boolean | null
           listing_id: string | null
           owner_id: string
         }
@@ -1535,6 +1698,7 @@ export type Database = {
           client_id: string
           created_at?: string
           id?: string
+          is_super_like?: boolean | null
           listing_id?: string | null
           owner_id: string
         }
@@ -1542,6 +1706,7 @@ export type Database = {
           client_id?: string
           created_at?: string
           id?: string
+          is_super_like?: boolean | null
           listing_id?: string | null
           owner_id?: string
         }
@@ -3279,6 +3444,62 @@ export type Database = {
         }
         Relationships: []
       }
+      swipe_analytics: {
+        Row: {
+          average_time_per_profile: number | null
+          conversations_started: number | null
+          created_at: string | null
+          date: string | null
+          filter_usage_count: number | null
+          id: string
+          likes_given: number | null
+          matches_created: number | null
+          passes_given: number | null
+          super_likes_given: number | null
+          total_swipes: number | null
+          user_id: string | null
+          user_role: string
+        }
+        Insert: {
+          average_time_per_profile?: number | null
+          conversations_started?: number | null
+          created_at?: string | null
+          date?: string | null
+          filter_usage_count?: number | null
+          id?: string
+          likes_given?: number | null
+          matches_created?: number | null
+          passes_given?: number | null
+          super_likes_given?: number | null
+          total_swipes?: number | null
+          user_id?: string | null
+          user_role: string
+        }
+        Update: {
+          average_time_per_profile?: number | null
+          conversations_started?: number | null
+          created_at?: string | null
+          date?: string | null
+          filter_usage_count?: number | null
+          id?: string
+          likes_given?: number | null
+          matches_created?: number | null
+          passes_given?: number | null
+          super_likes_given?: number | null
+          total_swipes?: number | null
+          user_id?: string | null
+          user_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swipe_analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       swipes: {
         Row: {
           action: string
@@ -4681,6 +4902,10 @@ export type Database = {
       }
       calculate_advanced_match_score: {
         Args: { property: Json; tenant_profile: Json }
+        Returns: number
+      }
+      calculate_compatibility_score: {
+        Args: { client_id: string; owner_id: string }
         Returns: number
       }
       calculate_match_score: {
@@ -6566,6 +6791,10 @@ export type Database = {
       }
       update_password_complexity: {
         Args: { password: string }
+        Returns: undefined
+      }
+      update_swipe_analytics: {
+        Args: { p_swipe_type: string; p_user_id: string; p_user_role: string }
         Returns: undefined
       }
       update_user_search_preferences: {
