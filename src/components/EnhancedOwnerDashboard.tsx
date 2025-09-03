@@ -279,11 +279,11 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
         </div>
       </motion.div>
 
-      {selectedClientId && (
+      {selectedClient && (
         <ClientInsightsDialog
           open={insightsOpen}
           onOpenChange={setInsightsOpen}
-          clientId={selectedClientId}
+          profile={selectedClient}
         />
       )}
     </DashboardLayout>
