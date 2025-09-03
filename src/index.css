@@ -7,72 +7,88 @@
 
 @layer base {
   :root {
-    /* Brand Colors - HSL format only */
-    --background: 222 84% 5%;
-    --foreground: 210 40% 98%;
+    /* Legendary Tinder-Style Brand Colors - HSL format only */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
     
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
     
-    --primary: 15 100% 60%; /* Vibrant orange */
+    --primary: 15 100% 60%; /* Vibrant Tinder orange */
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 0 84% 55%; /* Vibrant red */
+    --secondary: 340 75% 55%; /* Vibrant pink-red */
     --secondary-foreground: 0 0% 100%;
     
-    --accent: 220 30% 18%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 25 95% 65%; /* Warm orange accent */
+    --accent-foreground: 0 0% 100%;
     
-    --muted: 220 15% 25%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
     
-    --border: 220 30% 18%;
-    --input: 220 30% 18%;
+    --border: 0 0% 15%;
+    --input: 0 0% 12%;
     --ring: 15 100% 60%;
     
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
     
-    --radius: 1rem;
+    --radius: 1.5rem;
     
-    /* Custom Tinderent tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(222, 84%, 5%) 0%, hsl(220, 70%, 15%) 50%, hsl(218, 60%, 25%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(222, 47%, 11%) 0%, hsl(220, 45%, 14%) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(15, 100%, 60%) 0%, hsl(0, 84%, 55%) 100%);
+    /* Legendary Tinder-Style Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(340, 75%, 55%) 0%, hsl(15, 100%, 60%) 50%, hsl(25, 95%, 65%) 100%);
+    --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(15, 100%, 60%) 0%, hsl(25, 95%, 65%) 100%);
     --gradient-premium: linear-gradient(135deg, hsl(280, 100%, 70%) 0%, hsl(320, 100%, 60%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(45, 100%, 60%) 0%, hsl(35, 100%, 50%) 100%);
     --gradient-silver: linear-gradient(135deg, hsl(210, 20%, 60%) 0%, hsl(200, 15%, 50%) 100%);
-    --shadow-glow: 0 0 20px hsla(15, 100%, 60%, 0.3);
+    --gradient-surface: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    
+    /* Enhanced Shadow Effects */
+    --shadow-glow: 0 0 40px hsla(15, 100%, 60%, 0.4), 0 0 80px hsla(340, 75%, 55%, 0.2);
     --shadow-premium: 0 0 30px hsla(280, 100%, 70%, 0.4);
-    --shadow-card: 0 8px 32px hsla(222, 84%, 5%, 0.4);
+    --shadow-card: 0 20px 60px -10px rgba(0, 0, 0, 0.15);
+    --shadow-button: 0 10px 30px -5px hsla(15, 100%, 60%, 0.3);
   }
 
   .dark {
-    /* Dark theme (default) */
-    --background: 222 84% 5%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    /* Dark theme - Black background with neon accents */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+    --primary: 15 100% 60%;
+    --secondary: 340 75% 55%;
+    --accent: 25 95% 65%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --border: 0 0% 15%;
+    --input: 0 0% 12%;
+    --ring: 15 100% 60%;
+    --gradient-primary: linear-gradient(135deg, hsl(0, 0%, 3%) 0%, hsl(0, 0%, 8%) 50%, hsl(0, 0%, 12%) 100%);
+    --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(15, 100%, 60%) 0%, hsl(25, 95%, 65%) 100%);
+    --shadow-glow: 0 0 40px hsla(15, 100%, 60%, 0.5), 0 0 80px hsla(340, 75%, 55%, 0.3);
   }
 
   .amber {
-    /* Warm amber theme */
+    /* Warm amber theme - Cozy golden vibes */
     --background: 25 40% 8%;
     --foreground: 35 40% 95%;
-    --card: 20 30% 12%;
-    --card-foreground: 35 40% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 40% 10%;
     --primary: 35 90% 55%;
     --secondary: 25 80% 45%;
-    --accent: 30 25% 18%;
+    --accent: 45 95% 65%;
     --muted: 25 15% 25%;
     --muted-foreground: 30 20% 60%;
     --border: 25 25% 20%;
     --input: 25 25% 20%;
     --ring: 35 90% 55%;
-    --gradient-primary: linear-gradient(135deg, hsl(25, 40%, 8%) 0%, hsl(30, 35%, 15%) 50%, hsl(35, 30%, 22%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(20, 30%, 12%) 0%, hsl(25, 25%, 15%) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(35, 90%, 55%) 0%, hsl(25, 80%, 45%) 100%);
-    --shadow-glow: 0 0 20px hsla(35, 90%, 55%, 0.3);
+    --gradient-primary: linear-gradient(135deg, hsl(25, 40%, 8%) 0%, hsl(30, 45%, 12%) 50%, hsl(35, 50%, 16%) 100%);
+    --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(35, 90%, 55%) 0%, hsl(45, 95%, 65%) 100%);
+    --shadow-glow: 0 0 30px hsla(35, 90%, 55%, 0.4), 0 0 60px hsla(45, 95%, 65%, 0.2);
   }
 }
 
