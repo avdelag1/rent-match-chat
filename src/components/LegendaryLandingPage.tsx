@@ -21,10 +21,6 @@ const LegendaryLandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col relative overflow-hidden">
-      {/* Theme Toggle - Top Right */}
-      <div className="absolute top-4 right-4 z-20">
-        <ThemeToggle />
-      </div>
 
       {/* Main Content - Centered */}
       <motion.div 
