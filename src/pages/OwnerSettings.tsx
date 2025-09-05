@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Shield, Zap, Users, Building2 } from "lucide-react";
+import { PremiumSubscriptionManager } from "@/components/PremiumSubscriptionManager";
 
 const OwnerSettings = () => {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
@@ -159,6 +160,10 @@ const OwnerSettings = () => {
                 </div>
               </CardContent>
             </Card>
+            {/* Subscription Management */}
+            <div id="subscription">
+              <PremiumSubscriptionManager userRole="owner" />
+            </div>
           </div>
         </div>
       </div>

@@ -101,15 +101,22 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   };
 
   const handleMessage = () => {
-    if (needsUpgrade && onMessageClick) {
-      onMessageClick();
-    } else if (hasPremiumMessaging) {
+    if (needsUpgrade) {
+      // Route users to Settings > Subscription instead of showing inline upgrade UI
+      navigate('/client/settings#subscription');
+      toast({
+        title: 'Subscription Required',
+        description: 'Manage or upgrade your plan in Settings > Subscription.',
+      });
+      return;
+    }
+
+    if (hasPremiumMessaging) {
       navigate('/messages');
     } else {
       toast({
-        title: '💎 Premium Feature',
-        description: 'Upgrade to start conversations with property owners!',
-        variant: 'destructive'
+        title: 'Subscription Required',
+        description: 'Manage or upgrade your plan in Settings > Subscription.',
       });
     }
   };
@@ -352,32 +359,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <Heart className="w-7 h-7 text-white" />
         </Button>
       </motion.div>
-
-      {/* Premium Messaging Banner */}
-      {!hasPremiumMessaging && (
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 border-yellow-400/20 p-4 text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Crown className="w-5 h-5 text-yellow-500" />
-              <span className="font-semibold text-yellow-600">Upgrade to Premium</span>
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">
-              Start conversations with property owners and get priority matches!
-            </p>
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black hover:from-yellow-500 hover:to-yellow-700"
-              onClick={onMessageClick}
-            >
-              Upgrade Now
-            </Button>
-          </Card>
-        </motion.div>
-      )}
 
       {/* Ultimate Filters Dialog */}
       <UltimateFilters

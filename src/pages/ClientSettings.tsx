@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useClientFilterPreferences } from "@/hooks/useClientFilterPreferences";
+import { PremiumSubscriptionManager } from "@/components/PremiumSubscriptionManager";
 
 const ClientSettings = () => {
   const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
@@ -101,6 +102,10 @@ const ClientSettings = () => {
                 </Button>
               </CardContent>
             </Card>
+            {/* Subscription Management */}
+            <div id="subscription">
+              <PremiumSubscriptionManager userRole="client" />
+            </div>
           </div>
         </div>
       </div>

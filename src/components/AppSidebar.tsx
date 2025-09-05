@@ -1,5 +1,5 @@
 
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart, PlusCircle } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart, PlusCircle, Crown } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
@@ -30,6 +30,11 @@ const clientMenuItems = [
     title: "Settings",
     url: "/client/settings",
     icon: Settings,
+  },
+  {
+    title: "Subscription",
+    url: "/client/settings#subscription",
+    icon: Crown,
   },
 ]
 
@@ -64,6 +69,11 @@ const ownerMenuItems = [
     title: "Settings",
     url: "/owner/settings",
     icon: Settings,
+  },
+  {
+    title: "Subscription",
+    url: "/owner/settings#subscription",
+    icon: Crown,
   },
 ]
 
