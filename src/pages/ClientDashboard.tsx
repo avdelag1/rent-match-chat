@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SwipeContainer } from '@/components/SwipeContainer';
+import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
@@ -47,7 +47,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
               </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center pb-8">
-              <SwipeContainer 
+              <TinderentSwipeContainer 
                 onListingTap={handleListingTap} 
                 onInsights={handleInsights}
                 onMessageClick={onMessageClick}

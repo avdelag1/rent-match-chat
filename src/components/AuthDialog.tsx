@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2, Mail, Lock, User, Facebook, Chrome } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -15,7 +17,7 @@ interface AuthDialogProps {
 }
 
 export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false); // Start with login first
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -50,6 +52,28 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     }
   };
 
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            role: role
+          }
+        }
+      });
+      
+      if (error) throw error;
+      onClose();
+    } catch (error: any) {
+      console.error(`${provider} auth error:`, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const roleTitle = role === 'client' ? 'Client' : 'Owner';
   const roleDescription = role === 'client' 
     ? 'Looking for the perfect rental property?' 
@@ -57,111 +81,171 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-card border-border">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold gradient-text">
-            {isSignUp ? 'Join' : 'Welcome Back'} as {roleTitle}
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            {roleDescription}
-          </DialogDescription>
+      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white shadow-2xl">
+        <DialogHeader className="text-center">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-2">
+              {isSignUp ? 'Join Tinderent' : 'Welcome Back'}
+            </DialogTitle>
+            <DialogDescription className="text-slate-300 text-base">
+              {isSignUp 
+                ? `Create your ${roleTitle.toLowerCase()} account` 
+                : `Sign in to your ${roleTitle.toLowerCase()} account`
+              }
+            </DialogDescription>
+          </motion.div>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium">Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Your full name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="pl-10"
-                  required={isSignUp}
-                />
-              </div>
+
+        <div className="space-y-6">
+          {/* Social Login Buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="outline"
+              onClick={() => handleSocialLogin('google')}
+              disabled={loading}
+              className="bg-white/5 border-white/20 text-white hover:bg-white/10 py-6"
+            >
+              <Chrome className="mr-2 h-5 w-5" />
+              Google
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleSocialLogin('facebook')}
+              disabled={loading}
+              className="bg-white/5 border-white/20 text-white hover:bg-white/10 py-6"
+            >
+              <Facebook className="mr-2 h-5 w-5" />
+              Facebook
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full bg-white/20" />
             </div>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="pl-10"
-                required
-              />
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-slate-900 px-2 text-slate-400">Or continue with email</span>
             </div>
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-          
-          {isSignUp && (
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="pl-10"
-                  required={isSignUp}
-                />
+          {/* Email Form */}
+          <AnimatePresence mode="wait">
+            <motion.form
+              key={isSignUp ? 'signup' : 'login'}
+              initial={{ opacity: 0, x: isSignUp ? 20 : -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isSignUp ? -20 : 20 }}
+              transition={{ duration: 0.3 }}
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              {isSignUp && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="name" className="text-sm font-medium text-white/90">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Your full name"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                      required={isSignUp}
+                    />
+                  </div>
+                </motion.div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-white/90">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                    required
+                  />
+                </div>
               </div>
-            </div>
-          )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-white/90">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                    required
+                  />
+                </div>
+              </div>
+              
+              {isSignUp && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-white/90">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                      required={isSignUp}
+                    />
+                  </div>
+                </motion.div>
+              )}
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-6 shadow-lg transform hover:scale-105 transition-all duration-200"
+                disabled={loading}
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSignUp ? `Create ${roleTitle} Account` : `Sign In`}
+              </Button>
+            </motion.form>
+          </AnimatePresence>
           
-          <Button 
-            type="submit" 
-            className="w-full bg-gradient-button hover:bg-gradient-button/90 text-white font-semibold py-6"
-            disabled={loading}
-          >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSignUp ? `Join as ${roleTitle}` : `Sign In as ${roleTitle}`}
-          </Button>
-        </form>
-        
-        <Separator />
-        
-        <div className="text-center">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setIsSignUp(!isSignUp);
-              setFormData({ email: '', password: '', confirmPassword: '', name: '' });
-            }}
-            className="text-sm text-muted-foreground hover:gradient-text"
-          >
-            {isSignUp 
-              ? `Already have an account? Sign in as ${roleTitle}`
-              : `Don't have an account? Join as ${roleTitle}`
-            }
-          </Button>
+          <div className="text-center">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setFormData({ email: '', password: '', confirmPassword: '', name: '' });
+              }}
+              className="text-sm text-slate-300 hover:text-white transition-colors"
+            >
+              {isSignUp 
+                ? 'Already have an account? Sign in'
+                : "Don't have an account? Sign up"
+              }
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
