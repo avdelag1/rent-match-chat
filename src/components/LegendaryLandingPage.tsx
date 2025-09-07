@@ -20,7 +20,7 @@ const LegendaryLandingPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/10 to-accent/15 flex flex-col relative overflow-hidden animate-dynamic-gradient">
 
       {/* Main Content - Centered */}
       <motion.div 
@@ -38,11 +38,11 @@ const LegendaryLandingPage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="space-y-6"
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-wider">
-              TINDERENT <span className="text-5xl">🔥</span>
+            <h1 className="text-4xl md:text-5xl font-bold gradient-text tracking-wider animate-glow-pulse">
+              TINDERENT <span className="text-5xl animate-float">🔥</span>
             </h1>
             
-            <p className="text-lg text-slate-300 leading-relaxed px-4">
+            <p className="text-lg text-foreground/80 leading-relaxed px-4">
               Find your perfect rental property or tenant with ease.
             </p>
           </motion.div>
@@ -55,18 +55,16 @@ const LegendaryLandingPage = () => {
             className="space-y-4 w-full"
           >
             <Button 
-              variant="tinder"
               size="lg"
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl transform hover:scale-105 transition-all duration-200"
+              className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-xl transform hover:scale-105 transition-all duration-300 animate-dynamic-gradient"
               onClick={() => openAuthDialog('client')}
             >
               I'm a Client
             </Button>
             
             <Button 
-              variant="premium"
               size="lg"
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-xl transform hover:scale-105 transition-all duration-200"
+              className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-secondary to-destructive hover:from-secondary/90 hover:to-destructive/90 text-white shadow-xl transform hover:scale-105 transition-all duration-300 animate-dynamic-gradient"
               onClick={() => openAuthDialog('owner')}
             >
               I'm an Owner

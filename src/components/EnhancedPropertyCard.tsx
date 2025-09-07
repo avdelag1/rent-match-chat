@@ -123,7 +123,7 @@ export function EnhancedPropertyCard({
       whileHover={{ scale: isTop ? 1.02 : 0.95 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <Card className="relative w-full h-[600px] overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 shadow-glow">
+      <Card className="relative w-full h-[600px] overflow-hidden dynamic-card animate-glow-pulse">
         {/* Image Carousel */}
         <div className="relative h-3/5 overflow-hidden">
           {listing.images && listing.images.length > 0 ? (

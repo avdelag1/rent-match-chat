@@ -333,11 +333,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         <Button
           size="lg"
           variant="outline"
-          className="w-16 h-16 rounded-full border-red-200 hover:bg-red-50 hover:border-red-300 bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20 hover:scale-110 transition-all duration-200"
+          className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/30 border-2 border-red-400/40 text-red-500 hover:from-red-500/30 hover:to-red-600/40 hover:border-red-400/60 hover:scale-110 transition-all duration-300 animate-glow-pulse hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <X className="w-7 h-7" />
+          <X className="w-8 h-8" />
         </Button>
         
         {/* Super Like Button */}
@@ -352,11 +352,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         
         <Button
           size="lg"
-          className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:scale-110 transition-all duration-200 shadow-glow"
+          className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 hover:scale-110 transition-all duration-300 animate-glow-pulse shadow-[0_0_40px_rgba(34,197,94,0.5)] hover:shadow-[0_0_60px_rgba(34,197,94,0.7)] animate-dynamic-gradient"
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <Heart className="w-7 h-7 text-white" />
+          <Heart className="w-8 h-8 text-white animate-heart-beat" />
         </Button>
       </motion.div>
 
