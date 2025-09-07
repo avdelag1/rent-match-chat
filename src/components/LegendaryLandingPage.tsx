@@ -20,58 +20,54 @@ const LegendaryLandingPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/10 to-accent/15 flex flex-col relative overflow-hidden animate-dynamic-gradient">
+    <div className="min-h-screen bg-black flex flex-col relative">
 
       {/* Main Content - Centered */}
-      <motion.div 
-        className="flex-1 flex flex-col items-center justify-center p-6 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="w-full max-w-md mx-auto space-y-12">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div className="w-full max-w-lg mx-auto space-y-16">
           
           {/* Brand Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="space-y-6"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold gradient-text tracking-wider animate-glow-pulse">
-              TINDERENT <span className="text-5xl animate-float">🔥</span>
-            </h1>
+          <div className="space-y-8">
+            <div className="border-b border-white/10 pb-8">
+              <h1 className="text-5xl md:text-6xl font-bold text-white tracking-wider mb-2">
+                TINDERENT
+              </h1>
+              <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto"></div>
+            </div>
             
-            <p className="text-lg text-foreground/80 leading-relaxed px-4">
+            <p className="text-xl text-white/70 leading-relaxed max-w-md mx-auto">
               Find your perfect rental property or tenant with ease.
             </p>
-          </motion.div>
+          </div>
 
-          {/* Action Buttons */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="space-y-4 w-full"
-          >
-            <Button 
-              size="lg"
-              className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-xl transform hover:scale-105 transition-all duration-300 animate-dynamic-gradient"
-              onClick={() => openAuthDialog('client')}
-            >
-              I'm a Client
-            </Button>
+          {/* Action Sections */}
+          <div className="space-y-8">
+            {/* Client Section */}
+            <div className="border border-white/10 rounded-lg p-6 hover:border-primary/30 transition-colors">
+              <h3 className="text-lg font-semibold text-white mb-3">Looking for a place?</h3>
+              <Button 
+                size="lg"
+                className="w-full h-14 text-lg font-medium bg-primary hover:bg-primary/90 text-white"
+                onClick={() => openAuthDialog('client')}
+              >
+                I'm a Client
+              </Button>
+            </div>
             
-            <Button 
-              size="lg"
-              className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-secondary to-destructive hover:from-secondary/90 hover:to-destructive/90 text-white shadow-xl transform hover:scale-105 transition-all duration-300 animate-dynamic-gradient"
-              onClick={() => openAuthDialog('owner')}
-            >
-              I'm an Owner
-            </Button>
-          </motion.div>
+            {/* Owner Section */}
+            <div className="border border-white/10 rounded-lg p-6 hover:border-secondary/30 transition-colors">
+              <h3 className="text-lg font-semibold text-white mb-3">Have properties to rent?</h3>
+              <Button 
+                size="lg"
+                className="w-full h-14 text-lg font-medium bg-secondary hover:bg-secondary/90 text-white"
+                onClick={() => openAuthDialog('owner')}
+              >
+                I'm an Owner
+              </Button>
+            </div>
+          </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Auth Dialog */}
       {authDialog.role && (
