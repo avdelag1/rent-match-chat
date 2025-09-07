@@ -187,28 +187,6 @@
     70% { transform: scale(1); }
   }
 
-  @keyframes glow-pulse {
-    0%, 100% { 
-      box-shadow: 0 0 20px hsla(12, 100%, 58%, 0.3);
-    }
-    50% { 
-      box-shadow: 0 0 40px hsla(12, 100%, 58%, 0.6), 0 0 60px hsla(345, 85%, 55%, 0.4);
-    }
-  }
-
-  @keyframes dynamic-gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  @keyframes match-celebration {
-    0% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.2) rotate(-5deg); }
-    50% { transform: scale(1.1) rotate(5deg); }
-    75% { transform: scale(1.15) rotate(-3deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
   
   .animate-float {
     animation: float 3s ease-in-out infinite;
@@ -240,18 +218,6 @@
     animation: heart-beat 1.3s ease-in-out infinite;
   }
 
-  .animate-glow-pulse {
-    animation: glow-pulse 2s ease-in-out infinite;
-  }
-
-  .animate-dynamic-gradient {
-    background-size: 200% 200%;
-    animation: dynamic-gradient 3s ease infinite;
-  }
-
-  .animate-match-celebration {
-    animation: match-celebration 0.8s ease-out;
-  }
   
   .gradient-text {
     background: linear-gradient(135deg, hsl(15, 100%, 60%), hsl(0, 84%, 55%));

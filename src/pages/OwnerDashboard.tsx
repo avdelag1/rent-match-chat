@@ -34,27 +34,29 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-4">Discover Potential Tenants</h1>
-            <p className="text-white/80">Swipe through client profiles to find your ideal tenants</p>
+      <div className="min-h-screen bg-black p-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <div className="border-b border-white/10 pb-8">
+              <h1 className="text-4xl font-bold text-white mb-2">Discover Potential Tenants</h1>
+              <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-4"></div>
+              <p className="text-white/70">Swipe through client profiles to find your ideal tenants</p>
+            </div>
           </div>
 
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white text-center">
-                Potential Tenants ({profiles.length} available)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-center pb-8">
+          {/* Tenants Section */}
+          <div className="border border-white/10 rounded-lg p-8">
+            <h2 className="text-xl font-semibold text-white text-center mb-2">Potential Tenants</h2>
+            <p className="text-white/60 text-center mb-8">{profiles.length} available</p>
+            <div className="flex justify-center">
               <ClientSwipeContainer 
                 onClientTap={handleProfileTap}
                 onInsights={handleInsights}
                 onMessageClick={onMessageClick}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 

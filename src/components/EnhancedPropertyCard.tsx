@@ -123,7 +123,7 @@ export function EnhancedPropertyCard({
       whileHover={{ scale: isTop ? 1.02 : 0.95 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <Card className="relative w-full h-[600px] overflow-hidden dynamic-card animate-glow-pulse">
+      <Card className="relative w-full h-[600px] overflow-hidden bg-card border-border">
         {/* Image Carousel */}
         <div className="relative h-3/5 overflow-hidden">
           {listing.images && listing.images.length > 0 ? (
@@ -195,19 +195,17 @@ export function EnhancedPropertyCard({
               <Eye className="w-4 h-4" />
             </Button>
             
-            {hasPremium && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-black/50 hover:bg-black/70 text-white rounded-full"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMessage?.();
-                }}
-              >
-                <MessageCircle className="w-4 h-4" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-black/50 hover:bg-black/70 text-white rounded-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMessage?.();
+              }}
+            >
+              <MessageCircle className="w-4 h-4" />
+            </Button>
           </div>
 
           {/* Premium Badge */}
