@@ -34,21 +34,27 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="min-h-screen bg-black p-8">
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 p-6">
         <div className="max-w-4xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-12">
-            <div className="border-b border-white/10 pb-8">
-              <h1 className="text-4xl font-bold text-white mb-2">Discover Potential Tenants</h1>
-              <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-4"></div>
-              <p className="text-white/70">Swipe through client profiles to find your ideal tenants</p>
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-white mb-4 tracking-wide">Discover Potential Tenants</h1>
+              <div className="flex items-center justify-center mb-4">
+                <span className="text-3xl mr-2">👥</span>
+                <div className="w-24 h-1 bg-gradient-to-r from-red-500 to-pink-500 rounded-full"></div>
+                <span className="text-3xl ml-2">🎯</span>
+              </div>
+              <p className="text-slate-300 text-lg">Find the perfect tenants for your properties</p>
             </div>
           </div>
 
           {/* Tenants Section */}
-          <div className="border border-white/10 rounded-lg p-8">
-            <h2 className="text-xl font-semibold text-white text-center mb-2">Potential Tenants</h2>
-            <p className="text-white/60 text-center mb-8">{profiles.length} available</p>
+          <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/30 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-white mb-2">Potential Tenants</h2>
+              <p className="text-slate-400">{profiles.length} available profiles • Swipe to connect</p>
+            </div>
             <div className="flex justify-center">
               <ClientSwipeContainer 
                 onClientTap={handleProfileTap}

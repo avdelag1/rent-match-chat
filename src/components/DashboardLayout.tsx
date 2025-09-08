@@ -146,30 +146,31 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-primary">
+      <div className="min-h-screen flex w-full bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900">
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/20 bg-white/5 backdrop-blur-sm px-4">
-            <TriggerComponent className="text-white hover:bg-white/10" />
-            <div className="flex items-center gap-2 ml-auto">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/10 bg-slate-800/30 backdrop-blur-sm px-4">
+            <TriggerComponent className="text-white hover:bg-white/10 rounded-lg p-2" />
+            <div className="flex items-center gap-4 ml-auto">
               {userRole === 'owner' && (
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all duration-300"
                   onClick={() => setShowOwnerSwipe(true)}
                 >
-                  Find Tenants
+                  🎯 Find Tenants
                 </Button>
               )}
-              <span className="text-white text-sm">
-                Welcome back! ({userRole === 'owner' ? 'Property Owner' : 'Tenant'})
-              </span>
+              <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+                <span className="text-white text-sm font-medium">
+                  Welcome back! 👋 {userRole === 'owner' ? '🏢 Owner' : '🏠 Tenant'}
+                </span>
+              </div>
             </div>
           </header>
 
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900">
             {
               React.Children.map(children, (child) => {
                 if (React.isValidElement(child)) {
