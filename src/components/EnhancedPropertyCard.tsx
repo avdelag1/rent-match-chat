@@ -181,20 +181,8 @@ export function EnhancedPropertyCard({
             </div>
           )}
 
-          {/* Action Buttons Overlay */}
-          <div className="absolute top-4 right-4 space-y-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-black/50 hover:bg-black/70 text-white rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                onTap?.();
-              }}
-            >
-              <Eye className="w-4 h-4" />
-            </Button>
-            
+          {/* Action Button Overlay */}
+          <div className="absolute top-4 right-4">
             <Button
               variant="ghost"
               size="icon"
@@ -207,13 +195,6 @@ export function EnhancedPropertyCard({
               <MessageCircle className="w-4 h-4" />
             </Button>
           </div>
-
-          {/* Premium Badge */}
-          {listing.price && listing.price > 5000 && (
-            <Badge className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black">
-              ⭐ Premium
-            </Badge>
-          )}
         </div>
 
         {/* Content */}
