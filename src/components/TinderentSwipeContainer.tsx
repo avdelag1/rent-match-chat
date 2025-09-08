@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { EnhancedPropertyCard } from './EnhancedPropertyCard';
 import { UltimateFilters } from './UltimateFilters';
-import { SuperLikeButton } from './SuperLikeButton';
+
 import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
@@ -339,16 +339,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         >
           <X className="w-8 h-8" />
         </Button>
-        
-        {/* Super Like Button */}
-        {currentListing && (
-          <SuperLikeButton
-            targetId={currentListing.id}
-            targetType="listing"
-            onSuperLike={handleSuperLike}
-            disabled={swipeMutation.isPending}
-          />
-        )}
         
         <Button
           size="lg"
