@@ -53,10 +53,14 @@ export function useSwipedListings() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return [];
 
+      // Only exclude listings swiped within the last 5 days
+      const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+      
       const { data: likes, error } = await supabase
         .from('likes')
         .select('target_id')
-        .eq('user_id', user.user.id);
+        .eq('user_id', user.user.id)
+        .gte('created_at', fiveDaysAgo);
 
       if (error) throw error;
       return likes.map(l => l.target_id);
