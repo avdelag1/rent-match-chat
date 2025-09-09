@@ -109,24 +109,35 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   }
 
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar className="bg-gradient-primary border-r border-white/10">
+      <SidebarContent className="bg-transparent">
+        <div className="p-6 border-b border-white/10">
+          <h2 className="text-xl font-bold gradient-text">TINDERENT</h2>
+          <p className="text-white/60 text-sm">{userRole === 'client' ? 'Find Your Home' : 'Find Tenants'}</p>
+        </div>
+        
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/80 font-semibold px-6 py-3">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2 px-3">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton onClick={() => handleMenuClick(item)}>
-                    <item.icon />
-                    <span>{item.title}</span>
+                  <SidebarMenuButton 
+                    onClick={() => handleMenuClick(item)}
+                    className="w-full text-left p-3 rounded-lg text-white/90 hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center gap-3 group"
+                  >
+                    <item.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <span className="font-medium">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut}>
-                  <LogOut />
-                  <span>Sign Out</span>
+              <SidebarMenuItem className="mt-6 pt-6 border-t border-white/10">
+                <SidebarMenuButton 
+                  onClick={handleSignOut}
+                  className="w-full text-left p-3 rounded-lg text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-all duration-200 flex items-center gap-3"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="font-medium">Sign Out</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

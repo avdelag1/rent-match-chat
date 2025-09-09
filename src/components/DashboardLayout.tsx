@@ -150,22 +150,31 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/20 bg-white/5 backdrop-blur-sm px-4">
-            <TriggerComponent className="text-white hover:bg-white/10" />
-            <div className="flex items-center gap-2 ml-auto">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/10 bg-black/20 backdrop-blur-sm px-4">
+            <TriggerComponent className="text-white hover:bg-white/10 p-2 rounded-lg" />
+            <div className="flex items-center gap-4 ml-auto">
               {userRole === 'owner' && (
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="bg-gradient-button hover:shadow-glow text-white font-medium px-4 py-2 rounded-full"
                   onClick={() => setShowOwnerSwipe(true)}
                 >
-                  Find Tenants
+                  🔍 Find Tenants
                 </Button>
               )}
-              <span className="text-white text-sm">
-                Welcome back! ({userRole === 'owner' ? 'Property Owner' : 'Tenant'})
-              </span>
+              {userRole === 'client' && (
+                <Button
+                  size="sm"
+                  className="bg-gradient-button hover:shadow-glow text-white font-medium px-4 py-2 rounded-full"
+                  onClick={() => setShowLikedProperties(true)}
+                >
+                  💝 Liked Properties
+                </Button>
+              )}
+              <div className="text-right">
+                <p className="text-white text-sm font-medium">Welcome back!</p>
+                <p className="text-white/60 text-xs">{userRole === 'owner' ? 'Property Owner' : 'Home Seeker'}</p>
+              </div>
             </div>
           </header>
 
