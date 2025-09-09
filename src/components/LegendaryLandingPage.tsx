@@ -22,12 +22,12 @@ const LegendaryLandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-primary flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
-      {/* Animated background particles */}
+      {/* Subtle background particles */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-4 h-4 bg-white/20 rounded-full animate-float"></div>
-        <div className="absolute top-40 right-20 w-3 h-3 bg-accent/30 rounded-full animate-float" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-40 left-20 w-2 h-2 bg-primary/40 rounded-full animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-20 right-10 w-5 h-5 bg-secondary/20 rounded-full animate-float" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-white/10 rounded-full animate-subtle-float"></div>
+        <div className="absolute top-40 right-20 w-1 h-1 bg-accent/20 rounded-full animate-subtle-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-40 left-20 w-1 h-1 bg-primary/15 rounded-full animate-subtle-float" style={{animationDelay: '4s'}}></div>
+        <div className="absolute bottom-20 right-10 w-2 h-2 bg-secondary/10 rounded-full animate-subtle-float" style={{animationDelay: '1s'}}></div>
       </div>
       
       <motion.div 
@@ -44,12 +44,12 @@ const LegendaryLandingPage = () => {
           className="text-center mb-16"
         >
           <div className="flex items-center justify-center mb-6">
-            <h1 className="text-5xl md:text-6xl font-bold gradient-text tracking-wider animate-pulse-glow">
+            <h1 className="text-5xl md:text-6xl font-bold gradient-text tracking-wider">
               TINDERENT
             </h1>
             <motion.span 
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              animate={{ rotate: [0, 3, -3, 0] }}
+              transition={{ duration: 6, repeat: Infinity, repeatDelay: 8 }}
               className="text-4xl ml-3"
             >
               🔥
@@ -73,12 +73,13 @@ const LegendaryLandingPage = () => {
           className="space-y-6 mb-8"
         >
           <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="subtle-hover-glow"
           >
             <Button 
               onClick={() => openAuthDialog('client')}
-              className="w-full bg-gradient-button hover:shadow-glow text-white font-bold text-lg py-8 rounded-full shadow-2xl transition-all duration-300 animate-shimmer"
+              className="w-full bg-gradient-button text-white font-bold text-lg py-8 rounded-full shadow-lg transition-all duration-500 hover:shadow-xl"
               size="lg"
             >
               🏠 I'm Looking for a Home
@@ -86,12 +87,13 @@ const LegendaryLandingPage = () => {
           </motion.div>
 
           <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="subtle-hover-glow"
           >
             <Button 
               onClick={() => openAuthDialog('owner')}
-              className="w-full bg-gradient-to-r from-secondary to-accent hover:shadow-glow text-white font-bold text-lg py-8 rounded-full shadow-2xl transition-all duration-300"
+              className="w-full bg-gradient-to-r from-secondary to-accent text-white font-bold text-lg py-8 rounded-full shadow-lg transition-all duration-500 hover:shadow-xl"
               size="lg"
             >
               🏢 I'm a Property Owner

@@ -5,6 +5,8 @@ import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
+import QuickActions from '@/components/QuickActions';
+import NotificationManager from '@/components/NotificationManager';
 
 interface OwnerDashboardProps {
   onClientInsights?: (profileId: string) => void;
@@ -34,8 +36,11 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   return (
     <DashboardLayout userRole="owner">
+      <NotificationManager />
       <div className="min-h-screen bg-transparent p-4 lg:p-8">
         <div className="max-w-6xl mx-auto">
+          <QuickActions role="owner" />
+          
           {/* Welcome Section */}
           <div className="text-center mb-8 lg:mb-12">
             <div className="glass-morphism rounded-2xl p-6 lg:p-8 mb-6">

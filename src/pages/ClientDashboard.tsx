@@ -5,6 +5,9 @@ import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
+import ProfileCompletionBanner from '@/components/ProfileCompletionBanner';
+import QuickActions from '@/components/QuickActions';
+import NotificationManager from '@/components/NotificationManager';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
@@ -34,8 +37,12 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
 
   return (
     <DashboardLayout userRole="client">
+      <NotificationManager />
       <div className="min-h-screen bg-transparent p-4 lg:p-8">
         <div className="max-w-6xl mx-auto">
+          <ProfileCompletionBanner />
+          <QuickActions role="client" />
+          
           {/* Welcome Section */}
           <div className="text-center mb-8 lg:mb-12">
             <div className="glass-morphism rounded-2xl p-6 lg:p-8 mb-6">
