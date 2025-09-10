@@ -160,6 +160,42 @@ const OwnerSettings = () => {
                 </div>
               </CardContent>
             </Card>
+            {/* Advanced Features */}
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Advanced Tools
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={() => window.location.href = '/owner/saved-searches'}
+                >
+                  Manage Saved Searches
+                </Button>
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={() => window.location.href = '/owner/match-history'}
+                >
+                  View Match History
+                </Button>
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={() => window.location.href = '/owner/activity-feed'}
+                >
+                  Activity Feed
+                </Button>
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={() => window.location.href = '/owner/security'}
+                >
+                  Account Security
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Subscription Management */}
             <div id="subscription">
               <PremiumSubscriptionManager userRole="owner" />
