@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useClientFilterPreferences } from "@/hooks/useClientFilterPreferences";
 import { PremiumSubscriptionManager } from "@/components/PremiumSubscriptionManager";
+import { ThemeSelector } from "@/components/ThemeSelector";
 
 const ClientSettings = () => {
   const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
@@ -18,68 +19,63 @@ const ClientSettings = () => {
       <div className="p-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-4">Settings</h1>
-            <p className="text-white/80">Manage your preferences and account settings.</p>
+            <h1 className="text-3xl font-bold text-foreground mb-4">Settings</h1>
+            <p className="text-muted-foreground">Manage your preferences and account settings.</p>
           </div>
 
           <div className="grid gap-6">
+            {/* Theme Settings */}
+            <ThemeSelector />
+
             {/* General Settings */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white">General Settings</CardTitle>
+                <CardTitle className="text-foreground">General Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-white font-medium">Email notifications</label>
-                    <p className="text-white/60 text-sm">Receive updates about new matches and messages</p>
+                    <label className="text-foreground font-medium">Email notifications</label>
+                    <p className="text-muted-foreground text-sm">Receive updates about new matches and messages</p>
                   </div>
                   <Switch checked={notifications} onCheckedChange={setNotifications} />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-white font-medium">Dark mode</label>
-                    <p className="text-white/60 text-sm">Toggle between light and dark theme</p>
-                  </div>
-                  <Switch checked={darkMode} onCheckedChange={setDarkMode} />
                 </div>
               </CardContent>
             </Card>
 
             {/* Search Preferences */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white">Search Preferences</CardTitle>
+                <CardTitle className="text-foreground">Search Preferences</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {preferences ? (
                   <div className="grid gap-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-white/90 text-sm font-medium">Price Range</label>
-                        <p className="text-white mt-1">
+                        <label className="text-foreground text-sm font-medium">Price Range</label>
+                        <p className="text-foreground mt-1">
                           ${preferences.min_price || 0} - ${preferences.max_price || 'No limit'}
                         </p>
                       </div>
                       <div>
-                        <label className="text-white/90 text-sm font-medium">Bedrooms</label>
-                        <p className="text-white mt-1">
+                        <label className="text-foreground text-sm font-medium">Bedrooms</label>
+                        <p className="text-foreground mt-1">
                           {preferences.min_bedrooms || 0} - {preferences.max_bedrooms || 'Any'}
                         </p>
                       </div>
                     </div>
                     
                     <div>
-                      <label className="text-white/90 text-sm font-medium">Location Zones</label>
-                      <p className="text-white mt-1">
+                      <label className="text-foreground text-sm font-medium">Location Zones</label>
+                      <p className="text-foreground mt-1">
                         {preferences.location_zones?.join(', ') || 'Any location'}
                       </p>
                     </div>
 
                     {preferences.amenities_required && preferences.amenities_required.length > 0 && (
                       <div>
-                        <label className="text-white/90 text-sm font-medium">Required Amenities</label>
+                        <label className="text-foreground text-sm font-medium">Required Amenities</label>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {preferences.amenities_required.map((amenity, index) => (
                             <span key={index} className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">
@@ -91,7 +87,7 @@ const ClientSettings = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-white/60">No search preferences set</p>
+                  <p className="text-muted-foreground">No search preferences set</p>
                 )}
                 
                 <Button 
@@ -103,9 +99,9 @@ const ClientSettings = () => {
               </CardContent>
             </Card>
             {/* Advanced Features */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white">Advanced Features</CardTitle>
+                <CardTitle className="text-foreground">Advanced Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 

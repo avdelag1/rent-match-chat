@@ -104,7 +104,7 @@
     /* Warm amber theme - Cozy golden vibes */
     --background: 25 40% 8%;
     --foreground: 35 40% 95%;
-    --card: 0 0% 100%;
+    --card: 0 0% 98%;
     --card-foreground: 25 40% 10%;
     --primary: 35 90% 55%;
     --secondary: 25 80% 45%;
@@ -115,9 +115,69 @@
     --input: 25 25% 20%;
     --ring: 35 90% 55%;
     --gradient-primary: linear-gradient(135deg, hsl(25, 40%, 8%) 0%, hsl(30, 45%, 12%) 50%, hsl(35, 50%, 16%) 100%);
-    --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
     --gradient-button: linear-gradient(135deg, hsl(35, 90%, 55%) 0%, hsl(45, 95%, 65%) 100%);
     --shadow-glow: 0 0 30px hsla(35, 90%, 55%, 0.4), 0 0 60px hsla(45, 95%, 65%, 0.2);
+  }
+
+  .blue {
+    /* Cool blue theme - Professional and calm */
+    --background: 220 40% 8%;
+    --foreground: 220 40% 95%;
+    --card: 0 0% 98%;
+    --card-foreground: 220 40% 10%;
+    --primary: 220 90% 55%;
+    --secondary: 200 80% 45%;
+    --accent: 240 95% 65%;
+    --muted: 220 15% 25%;
+    --muted-foreground: 220 20% 60%;
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 220 90% 55%;
+    --gradient-primary: linear-gradient(135deg, hsl(220, 40%, 8%) 0%, hsl(220, 45%, 12%) 50%, hsl(220, 50%, 16%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(220, 90%, 55%) 0%, hsl(240, 95%, 65%) 100%);
+    --shadow-glow: 0 0 30px hsla(220, 90%, 55%, 0.4), 0 0 60px hsla(240, 95%, 65%, 0.2);
+  }
+
+  .green {
+    /* Fresh green theme - Natural and energetic */
+    --background: 150 40% 8%;
+    --foreground: 150 40% 95%;
+    --card: 0 0% 98%;
+    --card-foreground: 150 40% 10%;
+    --primary: 150 90% 55%;
+    --secondary: 130 80% 45%;
+    --accent: 170 95% 65%;
+    --muted: 150 15% 25%;
+    --muted-foreground: 150 20% 60%;
+    --border: 150 25% 20%;
+    --input: 150 25% 20%;
+    --ring: 150 90% 55%;
+    --gradient-primary: linear-gradient(135deg, hsl(150, 40%, 8%) 0%, hsl(150, 45%, 12%) 50%, hsl(150, 50%, 16%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(150, 90%, 55%) 0%, hsl(170, 95%, 65%) 100%);
+    --shadow-glow: 0 0 30px hsla(150, 90%, 55%, 0.4), 0 0 60px hsla(170, 95%, 65%, 0.2);
+  }
+
+  .purple {
+    /* Vibrant purple theme - Creative and luxurious */
+    --background: 280 40% 8%;
+    --foreground: 280 40% 95%;
+    --card: 0 0% 98%;
+    --card-foreground: 280 40% 10%;
+    --primary: 280 90% 55%;
+    --secondary: 260 80% 45%;
+    --accent: 300 95% 65%;
+    --muted: 280 15% 25%;
+    --muted-foreground: 280 20% 60%;
+    --border: 280 25% 20%;
+    --input: 280 25% 20%;
+    --ring: 280 90% 55%;
+    --gradient-primary: linear-gradient(135deg, hsl(280, 40%, 8%) 0%, hsl(280, 45%, 12%) 50%, hsl(280, 50%, 16%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
+    --gradient-button: linear-gradient(135deg, hsl(280, 90%, 55%) 0%, hsl(300, 95%, 65%) 100%);
+    --shadow-glow: 0 0 30px hsla(280, 90%, 55%, 0.4), 0 0 60px hsla(300, 95%, 65%, 0.2);
   }
 }
 
