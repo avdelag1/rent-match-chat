@@ -1,217 +1,72 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { OwnerSettingsDialog } from "@/components/OwnerSettingsDialog";
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { ThemeSelector } from "@/components/ThemeSelector";
-import { Badge } from "@/components/ui/badge";
-import { Bell, Shield, Zap, Users, Building2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PremiumSubscriptionManager } from "@/components/PremiumSubscriptionManager";
+import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
+import { AccountSecurity } from "@/components/AccountSecurity";
+import { ThemeSelector } from "@/components/ThemeSelector";
+import { PropertyManagement } from "@/components/PropertyManagement";
+import { TenantScreening } from "@/components/TenantScreening";
+import { LeaseManagement } from "@/components/LeaseManagement";
+import { RentalAnalytics } from "@/components/RentalAnalytics";
 
 const OwnerSettings = () => {
-  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [tenantInquiries, setTenantInquiries] = useState(true);
-  const [propertyAlerts, setPropertyAlerts] = useState(true);
-  const [autoApproval, setAutoApproval] = useState(false);
-
   return (
     <DashboardLayout userRole="owner">
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">Owner Settings</h1>
-            <p className="text-muted-foreground">Configure your account preferences and business settings.</p>
+            <p className="text-muted-foreground">Manage your account, properties, and business operations</p>
           </div>
 
-          <div className="grid gap-6">
-            {/* Theme Settings */}
-            <ThemeSelector />
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid grid-cols-8 w-full">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="subscription">Subscription</TabsTrigger>
+              <TabsTrigger value="security">Security</TabsTrigger>
+              <TabsTrigger value="theme">Theme</TabsTrigger>
+              <TabsTrigger value="properties">Properties</TabsTrigger>
+              <TabsTrigger value="screening">Screening</TabsTrigger>
+              <TabsTrigger value="leases">Leases</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
 
-            {/* Notification Settings */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground flex items-center gap-2">
-                  <Bell className="w-5 h-5" />
-                  Notification Preferences
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-foreground font-medium">Email notifications</label>
-                    <p className="text-muted-foreground text-sm">Receive updates via email</p>
-                  </div>
-                  <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-foreground font-medium">Push notifications</label>
-                    <p className="text-muted-foreground text-sm">Get instant alerts on your device</p>
-                  </div>
-                  <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
-                </div>
+            <TabsContent value="profile">
+              <div className="p-6 text-center">
+                <p className="text-muted-foreground">Profile settings will appear here</p>
+              </div>
+            </TabsContent>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-foreground font-medium">Tenant inquiries</label>
-                    <p className="text-muted-foreground text-sm">Notifications for new tenant applications</p>
-                  </div>
-                  <Switch checked={tenantInquiries} onCheckedChange={setTenantInquiries} />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-foreground font-medium">Property alerts</label>
-                    <p className="text-muted-foreground text-sm">Updates about your property performance</p>
-                  </div>
-                  <Switch checked={propertyAlerts} onCheckedChange={setPropertyAlerts} />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Business Settings */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground flex items-center gap-2">
-                  <Building2 className="w-5 h-5" />
-                  Business Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-foreground font-medium">Auto-approval for qualified tenants</label>
-                    <p className="text-muted-foreground text-sm">Automatically approve tenants who meet your criteria</p>
-                    <Badge variant="secondary" className="mt-1">Premium Feature</Badge>
-                  </div>
-                  <Switch checked={autoApproval} onCheckedChange={setAutoApproval} disabled />
-                </div>
-
-                <div className="pt-4 space-y-2">
-                  <label className="text-foreground font-medium">Tenant Requirements</label>
-                  <p className="text-muted-foreground text-sm">Set minimum requirements for potential tenants</p>
-                  <Button 
-                    variant="outline" 
-                    className="border-border hover:bg-muted"
-                    disabled
-                  >
-                    Configure Requirements <Badge variant="secondary" className="ml-2">Premium</Badge>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Privacy & Security */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
-                  Privacy & Security
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4">
-                  <div>
-                    <label className="text-foreground font-medium">Profile Visibility</label>
-                    <p className="text-muted-foreground text-sm">Control who can see your business profile</p>
-                    <div className="mt-2">
-                      <Badge variant="outline" className="border-green-500 text-green-400">Public - Verified Owner</Badge>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-foreground font-medium">Contact Information</label>
-                    <p className="text-muted-foreground text-sm">Manage how tenants can contact you</p>
-                    <Button 
-                      variant="outline" 
-                      className="border-border hover:bg-muted mt-2"
-                    >
-                      Manage Contact Preferences
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Account Actions */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  Advanced Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button 
-                  onClick={() => setShowSettingsDialog(true)}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  Open Advanced Settings
-                </Button>
-                
-                <div className="pt-4 border-t border-border">
-                  <p className="text-muted-foreground text-sm mb-2">Need help with your account?</p>
-                  <Button 
-                    variant="outline" 
-                    className="border-border hover:bg-muted"
-                  >
-                    Contact Support
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            {/* Advanced Features */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Advanced Tools
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/owner/saved-searches'}
-                >
-                  Manage Saved Searches
-                </Button>
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/owner/match-history'}
-                >
-                  View Match History
-                </Button>
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/owner/activity-feed'}
-                >
-                  Activity Feed
-                </Button>
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/owner/security'}
-                >
-                  Account Security
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Subscription Management */}
-            <div id="subscription">
+            <TabsContent value="subscription">
               <PremiumSubscriptionManager userRole="owner" />
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="security">
+              <AccountSecurity userRole="owner" />
+            </TabsContent>
+
+            <TabsContent value="theme">
+              <ThemeSelector />
+            </TabsContent>
+
+            <TabsContent value="properties">
+              <PropertyManagement />
+            </TabsContent>
+
+            <TabsContent value="screening">
+              <TenantScreening />
+            </TabsContent>
+
+            <TabsContent value="leases">
+              <LeaseManagement />
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <RentalAnalytics />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
-
-      <OwnerSettingsDialog 
-        open={showSettingsDialog} 
-        onOpenChange={setShowSettingsDialog} 
-      />
     </DashboardLayout>
   );
 };

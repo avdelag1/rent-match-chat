@@ -96,7 +96,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
             </div>
             <div className="flex gap-2">
               <ThemeToggle />
-              <Button variant="outline" size="icon" className="glass-morphism">
+              <Button variant="outline" size="icon">
                 <Settings className="w-4 h-4" />
               </Button>
             </div>
@@ -104,28 +104,28 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
 
           {/* Stats Row */}
           <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="glass-morphism border-border/50">
+            <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-2xl font-bold text-primary">{clientProfiles.length}</div>
                 <div className="text-xs text-muted-foreground">Available Tenants</div>
               </CardContent>
             </Card>
             
-            <Card className="glass-morphism border-border/50">
+            <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-2xl font-bold text-green-400">8</div>
                 <div className="text-xs text-muted-foreground">Tenants Liked</div>
               </CardContent>
             </Card>
             
-            <Card className="glass-morphism border-border/50">
+            <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-2xl font-bold text-blue-400">5</div>
                 <div className="text-xs text-muted-foreground">Active Matches</div>
               </CardContent>
             </Card>
             
-            <Card className="glass-morphism border-border/50">
+            <Card>
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center gap-1">
                   {hasPremium ? (
@@ -150,7 +150,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
             
             {/* Swipe Section */}
             <motion.div variants={itemVariants} className="lg:col-span-2">
-              <Card className="glass-morphism border-border/50 overflow-hidden">
+              <Card className="overflow-hidden">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-foreground">
                     <Users className="w-5 h-5 text-primary" />
@@ -186,7 +186,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
               <PremiumSubscriptionManager userRole="owner" />
 
               {/* Quick Actions */}
-              <Card className="glass-morphism border-border/50">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Quick Actions</CardTitle>
                 </CardHeader>
@@ -240,7 +240,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
 
               {/* Premium Features Teaser */}
               {!hasPremium && (
-                <Card className="glass-morphism border-primary/30 bg-gradient-to-br from-primary/10 to-secondary/10">
+                <Card className="border-primary/30 bg-gradient-to-br from-primary/10 to-secondary/10">
                   <CardContent className="p-4 text-center space-y-3">
                     <Crown className="w-8 h-8 mx-auto text-primary animate-pulse-glow" />
                     <div>
