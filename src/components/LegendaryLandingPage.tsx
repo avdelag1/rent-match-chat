@@ -20,49 +20,55 @@ const LegendaryLandingPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-slate-800/40 to-blue-950/60"></div>
-      
-      <div className="relative z-10 w-full max-w-sm mx-auto">
-        {/* Logo and title */}
-        <div className="text-center mb-16">
-          <div className="flex items-center justify-center mb-6">
-            <h1 className="text-5xl md:text-6xl font-bold text-white tracking-wider">
-              TINDERENT
-            </h1>
-            <span className="text-4xl ml-3">🔥</span>
+    <div className="min-h-screen relative overflow-hidden bg-theme-primary">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 opacity-10 rounded-full blur-3xl animate-pulse" 
+             style={{ backgroundColor: 'var(--accent-primary)' }}></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 opacity-10 rounded-full blur-3xl animate-pulse animation-delay-1000"
+             style={{ backgroundColor: 'var(--accent-primary)' }}></div>
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
+        <div className="animate-fade-in max-w-4xl mx-auto">
+          <h1 className="text-6xl md:text-8xl font-bold mb-8 text-theme-text-primary">
+            TINDERENT 🔥
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-theme-text-secondary mb-12 max-w-2xl mx-auto leading-relaxed">
+            Swipe your way to the perfect rental match. Modern property discovery meets intuitive design.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <Button 
+              size="lg" 
+              className="w-64 h-16 text-lg font-semibold text-white shadow-theme-lg hover:shadow-theme-lg transition-all duration-300 transform hover:scale-105 border-none"
+              style={{ 
+                background: 'var(--accent-gradient)'
+              }}
+              onClick={() => openAuthDialog('client')}
+            >
+              I'm Looking for a Place
+            </Button>
+            
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="w-64 h-16 text-lg font-semibold border-2 bg-transparent text-theme-text-primary hover:text-white shadow-theme-lg hover:shadow-theme-lg transition-all duration-300 transform hover:scale-105"
+              style={{ 
+                borderColor: 'var(--accent-primary)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--accent-gradient)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+              onClick={() => openAuthDialog('owner')}
+            >
+              I'm a Property Owner
+            </Button>
           </div>
-          <p className="text-lg text-slate-300 px-4 leading-relaxed">
-            Find your perfect rental property or tenant with ease.
-          </p>
-        </div>
-
-        {/* Role selection buttons */}
-        <div className="space-y-6 mb-8">
-          <Button 
-            onClick={() => openAuthDialog('client')}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-lg py-8 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-orange-500/25"
-            size="lg"
-          >
-            I'm a Client
-          </Button>
-
-          <Button 
-            onClick={() => openAuthDialog('owner')}
-            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold text-lg py-8 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-red-500/25"
-            size="lg"
-          >
-            I'm an Owner
-          </Button>
-        </div>
-
-        {/* Subtle hint text */}
-        <div className="text-center">
-          <p className="text-slate-400 text-sm">
-            Swipe your way to the perfect match
-          </p>
         </div>
       </div>
 

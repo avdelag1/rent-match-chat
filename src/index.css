@@ -7,36 +7,41 @@
 
 @layer base {
   :root {
-    /* Ultra-Dynamic Tinder-Style Brand Colors - Enhanced HSL format */
-    --background: 0 0% 2%;
-    --foreground: 0 0% 98%;
-    
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
-    
-    --primary: 12 100% 58%; /* Electric Tinder orange */
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 345 85% 55%; /* Intense red-pink */
-    --secondary-foreground: 0 0% 100%;
-    
-    --accent: 20 100% 62%; /* Blazing orange accent */
-    --accent-foreground: 0 0% 100%;
-    
-    --success: 150 75% 50%; /* Vibrant green for matches */
-    --success-foreground: 0 0% 100%;
-    
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 70%;
-    
-    --border: 0 0% 18%;
-    --input: 0 0% 8%;
-    --ring: 12 100% 58%;
-    
-    --destructive: 0 90% 58%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --radius: 1.5rem;
+    /* Modern Theme System */
+    --bg-primary: #0F0F0F;
+    --bg-secondary: #1A1A1A;
+    --bg-tertiary: #2A2A2A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --text-tertiary: #666666;
+    --border-primary: #333333;
+    --border-secondary: #444444;
+    --accent-primary: #FF4458;
+    --accent-secondary: #FF6B7A;
+    --accent-gradient: linear-gradient(135deg, #FF4458 0%, #FF6B7A 100%);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+    /* Shadcn compatibility colors */
+    --background: 220 25% 5%;
+    --foreground: 220 10% 90%;
+    --card: 220 25% 8%;
+    --card-foreground: 220 10% 90%;
+    --primary: 359 100% 62%;
+    --primary-foreground: 220 10% 5%;
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 220 10% 90%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 220 10% 60%;
+    --accent: 359 100% 62%;
+    --accent-foreground: 220 10% 5%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 220 10% 90%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 359 100% 62%;
+    --radius: 0.5rem;
     
     /* Ultra-Dynamic Gradients with More Color */
     --gradient-primary: linear-gradient(135deg, 
@@ -81,103 +86,73 @@
   }
 
   .dark {
-    /* Dark theme - Black background with neon accents */
-    --background: 0 0% 3%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
-    --primary: 15 100% 60%;
-    --secondary: 340 75% 55%;
-    --accent: 25 95% 65%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-    --border: 0 0% 15%;
-    --input: 0 0% 12%;
-    --ring: 15 100% 60%;
-    --gradient-primary: linear-gradient(135deg, hsl(0, 0%, 3%) 0%, hsl(0, 0%, 8%) 50%, hsl(0, 0%, 12%) 100%);
-    --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(15, 100%, 60%) 0%, hsl(25, 95%, 65%) 100%);
-    --shadow-glow: 0 0 40px hsla(15, 100%, 60%, 0.5), 0 0 80px hsla(340, 75%, 55%, 0.3);
+    --bg-primary: #0F0F0F;
+    --bg-secondary: #1A1A1A;
+    --bg-tertiary: #2A2A2A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --text-tertiary: #666666;
+    --border-primary: #333333;
+    --border-secondary: #444444;
+    --accent-primary: #FF4458;
+    --accent-secondary: #FF6B7A;
+    --accent-gradient: linear-gradient(135deg, #FF4458 0%, #FF6B7A 100%);
   }
 
   .amber {
-    /* Warm amber theme - Cozy golden vibes */
-    --background: 25 40% 8%;
-    --foreground: 35 40% 95%;
-    --card: 0 0% 98%;
-    --card-foreground: 25 40% 10%;
-    --primary: 35 90% 55%;
-    --secondary: 25 80% 45%;
-    --accent: 45 95% 65%;
-    --muted: 25 15% 25%;
-    --muted-foreground: 30 20% 60%;
-    --border: 25 25% 20%;
-    --input: 25 25% 20%;
-    --ring: 35 90% 55%;
-    --gradient-primary: linear-gradient(135deg, hsl(25, 40%, 8%) 0%, hsl(30, 45%, 12%) 50%, hsl(35, 50%, 16%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(35, 90%, 55%) 0%, hsl(45, 95%, 65%) 100%);
-    --shadow-glow: 0 0 30px hsla(35, 90%, 55%, 0.4), 0 0 60px hsla(45, 95%, 65%, 0.2);
+    --bg-primary: #1A1200;
+    --bg-secondary: #2A1F00;
+    --bg-tertiary: #3A2F00;
+    --text-primary: #FFF8E1;
+    --text-secondary: #E6D7B7;
+    --text-tertiary: #B8A082;
+    --border-primary: #4A3F00;
+    --border-secondary: #5A4F00;
+    --accent-primary: #FFC107;
+    --accent-secondary: #FFD54F;
+    --accent-gradient: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
   }
 
   .blue {
-    /* Cool blue theme - Professional and calm */
-    --background: 220 40% 8%;
-    --foreground: 220 40% 95%;
-    --card: 0 0% 98%;
-    --card-foreground: 220 40% 10%;
-    --primary: 220 90% 55%;
-    --secondary: 200 80% 45%;
-    --accent: 240 95% 65%;
-    --muted: 220 15% 25%;
-    --muted-foreground: 220 20% 60%;
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
-    --ring: 220 90% 55%;
-    --gradient-primary: linear-gradient(135deg, hsl(220, 40%, 8%) 0%, hsl(220, 45%, 12%) 50%, hsl(220, 50%, 16%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(220, 90%, 55%) 0%, hsl(240, 95%, 65%) 100%);
-    --shadow-glow: 0 0 30px hsla(220, 90%, 55%, 0.4), 0 0 60px hsla(240, 95%, 65%, 0.2);
+    --bg-primary: #001122;
+    --bg-secondary: #002244;
+    --bg-tertiary: #003366;
+    --text-primary: #E3F2FD;
+    --text-secondary: #BBDEFB;
+    --text-tertiary: #90CAF9;
+    --border-primary: #004488;
+    --border-secondary: #0055AA;
+    --accent-primary: #2196F3;
+    --accent-secondary: #64B5F6;
+    --accent-gradient: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);
   }
 
   .green {
-    /* Fresh green theme - Natural and energetic */
-    --background: 150 40% 8%;
-    --foreground: 150 40% 95%;
-    --card: 0 0% 98%;
-    --card-foreground: 150 40% 10%;
-    --primary: 150 90% 55%;
-    --secondary: 130 80% 45%;
-    --accent: 170 95% 65%;
-    --muted: 150 15% 25%;
-    --muted-foreground: 150 20% 60%;
-    --border: 150 25% 20%;
-    --input: 150 25% 20%;
-    --ring: 150 90% 55%;
-    --gradient-primary: linear-gradient(135deg, hsl(150, 40%, 8%) 0%, hsl(150, 45%, 12%) 50%, hsl(150, 50%, 16%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(150, 90%, 55%) 0%, hsl(170, 95%, 65%) 100%);
-    --shadow-glow: 0 0 30px hsla(150, 90%, 55%, 0.4), 0 0 60px hsla(170, 95%, 65%, 0.2);
+    --bg-primary: #0D1B0D;
+    --bg-secondary: #1A2E1A;
+    --bg-tertiary: #274127;
+    --text-primary: #E8F5E8;
+    --text-secondary: #C8E6C9;
+    --text-tertiary: #A5D6A7;
+    --border-primary: #345434;
+    --border-secondary: #416741;
+    --accent-primary: #4CAF50;
+    --accent-secondary: #81C784;
+    --accent-gradient: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
   }
 
   .purple {
-    /* Vibrant purple theme - Creative and luxurious */
-    --background: 280 40% 8%;
-    --foreground: 280 40% 95%;
-    --card: 0 0% 98%;
-    --card-foreground: 280 40% 10%;
-    --primary: 280 90% 55%;
-    --secondary: 260 80% 45%;
-    --accent: 300 95% 65%;
-    --muted: 280 15% 25%;
-    --muted-foreground: 280 20% 60%;
-    --border: 280 25% 20%;
-    --input: 280 25% 20%;
-    --ring: 280 90% 55%;
-    --gradient-primary: linear-gradient(135deg, hsl(280, 40%, 8%) 0%, hsl(280, 45%, 12%) 50%, hsl(280, 50%, 16%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 98%) 0%, hsl(0, 0%, 95%) 100%);
-    --gradient-button: linear-gradient(135deg, hsl(280, 90%, 55%) 0%, hsl(300, 95%, 65%) 100%);
-    --shadow-glow: 0 0 30px hsla(280, 90%, 55%, 0.4), 0 0 60px hsla(300, 95%, 65%, 0.2);
+    --bg-primary: #1A0D1A;
+    --bg-secondary: #2E1A2E;
+    --bg-tertiary: #412741;
+    --text-primary: #F3E5F5;
+    --text-secondary: #E1BEE7;
+    --text-tertiary: #CE93D8;
+    --border-primary: #543454;
+    --border-secondary: #674167;
+    --accent-primary: #9C27B0;
+    --accent-secondary: #BA68C8;
+    --accent-gradient: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);
   }
 }
 
@@ -187,11 +162,10 @@
   }
   
   body {
-    @apply bg-background text-foreground;
-    background: var(--gradient-hero);
+    @apply bg-theme-primary text-theme-text-primary;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     min-height: 100vh;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-attachment: fixed;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   
   /* Advanced animations for legendary UX */

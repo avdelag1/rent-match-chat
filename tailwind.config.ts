@@ -20,6 +20,19 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Modern theme system with CSS variables
+				'theme-primary': 'var(--bg-primary)',
+				'theme-secondary': 'var(--bg-secondary)',
+				'theme-tertiary': 'var(--bg-tertiary)',
+				'theme-text-primary': 'var(--text-primary)',
+				'theme-text-secondary': 'var(--text-secondary)',
+				'theme-text-tertiary': 'var(--text-tertiary)',
+				'theme-border-primary': 'var(--border-primary)',
+				'theme-border-secondary': 'var(--border-secondary)',
+				'theme-accent-primary': 'var(--accent-primary)',
+				'theme-accent-secondary': 'var(--accent-secondary)',
+				
+				// Keep existing shadcn colors for compatibility
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -56,11 +69,15 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			backgroundImage: {
+				'theme-accent-gradient': 'var(--accent-gradient)',
 				'gradient-primary': 'var(--gradient-primary)',
 				'gradient-card': 'var(--gradient-card)',
 				'gradient-button': 'var(--gradient-button)',
 			},
 			boxShadow: {
+				'theme-sm': 'var(--shadow-sm)',
+				'theme-md': 'var(--shadow-md)',
+				'theme-lg': 'var(--shadow-lg)',
 				'glow': 'var(--shadow-glow)',
 				'card': 'var(--shadow-card)',
 			},
