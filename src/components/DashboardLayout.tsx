@@ -146,7 +146,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-primary">
+      <div className="min-h-screen flex w-full" style={{ background: 'var(--app-gradient)' }}>
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1">

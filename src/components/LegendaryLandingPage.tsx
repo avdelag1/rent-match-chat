@@ -18,7 +18,7 @@ export default function LegendaryLandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-theme-accent-gradient flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--app-gradient)' }}>
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-transparent via-black/10 to-black/20" />
       
@@ -79,7 +79,8 @@ export default function LegendaryLandingPage() {
               transition: { type: "spring", bounce: 0.8, duration: 0.2 }
             }}
             onClick={() => openAuthDialog('client')}
-            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 shadow-theme-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
+            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
+            style={{ boxShadow: 'var(--shadow-md)' }}
           >
             <Users className="w-6 h-6" />
             I'm a Client
@@ -104,7 +105,8 @@ export default function LegendaryLandingPage() {
               transition: { type: "spring", bounce: 0.8, duration: 0.2 }
             }}
             onClick={() => openAuthDialog('owner')}
-            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 shadow-theme-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
+            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
+            style={{ boxShadow: 'var(--shadow-md)' }}
           >
             <Heart className="w-6 h-6" />
             I'm an Owner
