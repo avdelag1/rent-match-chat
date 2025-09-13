@@ -20,17 +20,17 @@ export default {
 		},
 		extend: {
 			colors: {
-				// Modern theme system with CSS variables
-				'theme-primary': 'var(--bg-primary)',
-				'theme-secondary': 'var(--bg-secondary)',
-				'theme-tertiary': 'var(--bg-tertiary)',
-				'theme-text-primary': 'var(--text-primary)',
-				'theme-text-secondary': 'var(--text-secondary)',
-				'theme-text-tertiary': 'var(--text-tertiary)',
-				'theme-border-primary': 'var(--border-primary)',
-				'theme-border-secondary': 'var(--border-secondary)',
-				'theme-accent-primary': 'var(--accent-primary)',
-				'theme-accent-secondary': 'var(--accent-secondary)',
+				// Modern theme system with CSS variables - using HSL format
+				'theme-primary': 'hsl(var(--bg-primary))',
+				'theme-secondary': 'hsl(var(--bg-secondary))',
+				'theme-tertiary': 'hsl(var(--bg-tertiary))',
+				'theme-text-primary': 'hsl(var(--text-primary))',
+				'theme-text-secondary': 'hsl(var(--text-secondary))',
+				'theme-text-tertiary': 'hsl(var(--text-tertiary))',
+				'theme-border-primary': 'hsl(var(--border-primary))',
+				'theme-border-secondary': 'hsl(var(--border-secondary))',
+				'theme-accent-primary': 'hsl(var(--accent-primary))',
+				'theme-accent-secondary': 'hsl(var(--accent-secondary))',
 				
 				// Keep existing shadcn colors for compatibility
 				border: 'hsl(var(--border))',

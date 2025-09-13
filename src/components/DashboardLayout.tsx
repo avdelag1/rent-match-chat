@@ -151,17 +151,17 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-white/20 bg-white/10 backdrop-blur-md px-6">
-            <TriggerComponent className="text-white hover:bg-white/10 p-2 rounded-lg" />
+          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-white/20 bg-white/15 backdrop-blur-md px-6">
+            <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200" />
             
             {/* Brand Header */}
             <div className="flex items-center gap-3 flex-1">
-              <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-                <Flame className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center border border-white/30">
+                <Flame className="w-4 h-4 text-white drop-shadow-sm" />
               </div>
               <div>
-                <h1 className="text-white font-bold text-lg">TINDERENT</h1>
-                <p className="text-white/70 text-xs">
+                <h1 className="text-white font-bold text-lg drop-shadow-sm">TINDERENT</h1>
+                <p className="text-white/80 text-xs font-medium">
                   {userRole === 'owner' ? 'Owner Dashboard' : 'Client Dashboard'}
                 </p>
               </div>
@@ -173,14 +173,14 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl px-4"
+                  className="bg-white/15 border-white/30 text-white hover:bg-white/25 rounded-xl px-4 font-medium backdrop-blur-sm"
                   onClick={() => setShowOwnerSwipe(true)}
                 >
                   Find Tenants
                 </Button>
               )}
-              <div className="bg-white/10 rounded-xl px-4 py-2 backdrop-blur-sm">
-                <span className="text-white text-sm font-medium">
+              <div className="bg-white/15 rounded-xl px-4 py-2 backdrop-blur-sm border border-white/20">
+                <span className="text-white text-sm font-medium drop-shadow-sm">
                   Welcome back! 
                 </span>
               </div>
