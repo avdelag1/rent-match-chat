@@ -63,16 +63,14 @@ export default function LegendaryLandingPage() {
         {/* Buttons Container */}
         <div className="space-y-6 mt-12">
           
-          {/* I'm a Client Button - Smooth slide in with orange gradient */}
+          {/* I'm a Client Button - Smooth slide from left */}
           <motion.button
-            initial={{ x: -100, opacity: 0, scale: 0.8 }}
-            animate={{ x: 0, opacity: 1, scale: 1 }}
+            initial={{ x: -400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
             transition={{ 
-              type: "spring", 
-              duration: 0.8, 
+              duration: 0.7, 
               delay: 0.4,
-              bounce: 0.3,
-              ease: [0.175, 0.885, 0.32, 1.275]
+              ease: [0.25, 0.25, 0.25, 1]
             }}
             whileHover={{ 
               scale: 1.05,
@@ -97,16 +95,14 @@ export default function LegendaryLandingPage() {
             <span className="relative z-10">I'm a Client</span>
           </motion.button>
 
-          {/* I'm an Owner Button - Smooth slide in with red gradient */}
+          {/* I'm an Owner Button - Smooth slide from right */}
           <motion.button
-            initial={{ x: 100, opacity: 0, scale: 0.8 }}
-            animate={{ x: 0, opacity: 1, scale: 1 }}
+            initial={{ x: 400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
             transition={{ 
-              type: "spring", 
-              duration: 0.8, 
+              duration: 0.7, 
               delay: 0.6,
-              bounce: 0.3,
-              ease: [0.175, 0.885, 0.32, 1.275]
+              ease: [0.25, 0.25, 0.25, 1]
             }}
             whileHover={{ 
               scale: 1.05,
