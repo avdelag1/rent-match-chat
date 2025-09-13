@@ -8,7 +8,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Heart, X, RotateCcw, Home, SlidersHorizontal, Sparkles, Crown } from 'lucide-react';
+import { Heart, X, RotateCcw, Home, SlidersHorizontal, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -333,20 +333,20 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         <Button
           size="lg"
           variant="outline"
-          className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/30 border-2 border-red-400/40 text-red-500 hover:from-red-500/30 hover:to-red-600/40 hover:border-red-400/60 hover:scale-110 transition-all duration-300 animate-glow-pulse hover:shadow-[0_0_30px_rgba(239,68,68,0.4)]"
+          className="w-20 h-20 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <X className="w-8 h-8" />
+          <ThumbsDown className="w-8 h-8" />
         </Button>
         
         <Button
           size="lg"
-          className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 hover:scale-110 transition-all duration-300 animate-glow-pulse shadow-[0_0_40px_rgba(34,197,94,0.5)] hover:shadow-[0_0_60px_rgba(34,197,94,0.7)] animate-dynamic-gradient"
+          className="w-20 h-20 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200"
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <Heart className="w-8 h-8 text-white animate-heart-beat" />
+          <ThumbsUp className="w-8 h-8 text-white" />
         </Button>
       </motion.div>
 

@@ -62,21 +62,21 @@ export default function LegendaryLandingPage() {
           
           {/* I'm a Client Button - Slide from Left */}
           <motion.button
-            initial={{ x: -200, opacity: 0 }}
+            initial={{ x: -300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ 
               type: "spring", 
-              duration: 0.8, 
-              delay: 0.6,
-              bounce: 0.7
+              duration: 0.6, 
+              delay: 0.4,
+              bounce: 0.5
             }}
             whileHover={{ 
               scale: 1.05, 
-              boxShadow: "0 20px 40px rgba(0,0,0,0.3)" 
+              boxShadow: "0 25px 50px rgba(0,0,0,0.3)" 
             }}
             whileTap={{ 
-              scale: 0.95,
-              transition: { type: "spring", bounce: 0.8, duration: 0.2 }
+              scale: 0.98,
+              transition: { type: "spring", bounce: 0.7, duration: 0.15 }
             }}
             onClick={() => openAuthDialog('client')}
             className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
@@ -88,21 +88,21 @@ export default function LegendaryLandingPage() {
 
           {/* I'm an Owner Button - Slide from Right */}
           <motion.button
-            initial={{ x: 200, opacity: 0 }}
+            initial={{ x: 300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ 
               type: "spring", 
-              duration: 0.8, 
-              delay: 0.8,
-              bounce: 0.7
+              duration: 0.6, 
+              delay: 0.6,
+              bounce: 0.5
             }}
             whileHover={{ 
               scale: 1.05, 
-              boxShadow: "0 20px 40px rgba(0,0,0,0.3)" 
+              boxShadow: "0 25px 50px rgba(0,0,0,0.3)" 
             }}
             whileTap={{ 
-              scale: 0.95,
-              transition: { type: "spring", bounce: 0.8, duration: 0.2 }
+              scale: 0.98,
+              transition: { type: "spring", bounce: 0.7, duration: 0.15 }
             }}
             onClick={() => openAuthDialog('owner')}
             className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"

@@ -1,6 +1,7 @@
 
 import React, { ReactNode, useState, useEffect } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { Flame } from 'lucide-react'
 import AppSidebar from "@/components/AppSidebar"
 import { PropertyForm } from "@/components/PropertyForm"
 import { SubscriptionPackages } from "@/components/SubscriptionPackages"
@@ -150,22 +151,39 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-white/20 bg-white/5 backdrop-blur-sm px-4">
-            <TriggerComponent className="text-white hover:bg-white/10" />
-            <div className="flex items-center gap-2 ml-auto">
+          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-white/20 bg-white/10 backdrop-blur-md px-6">
+            <TriggerComponent className="text-white hover:bg-white/10 p-2 rounded-lg" />
+            
+            {/* Brand Header */}
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+                <Flame className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-white font-bold text-lg">TINDERENT</h1>
+                <p className="text-white/70 text-xs">
+                  {userRole === 'owner' ? 'Owner Dashboard' : 'Client Dashboard'}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
               {userRole === 'owner' && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl px-4"
                   onClick={() => setShowOwnerSwipe(true)}
                 >
                   Find Tenants
                 </Button>
               )}
-              <span className="text-white text-sm">
-                Welcome back! ({userRole === 'owner' ? 'Property Owner' : 'Tenant'})
-              </span>
+              <div className="bg-white/10 rounded-xl px-4 py-2 backdrop-blur-sm">
+                <span className="text-white text-sm font-medium">
+                  Welcome back! 
+                </span>
+              </div>
             </div>
           </header>
 
