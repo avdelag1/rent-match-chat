@@ -15,6 +15,8 @@ export function useSwipe() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
+      console.log('Swiping:', { targetId, direction, targetType, userId: user.user.id });
+
       // Use the likes table for both listings and profiles
       const { error } = await supabase
         .from('likes')
@@ -24,8 +26,13 @@ export function useSwipe() {
           direction
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting like:', error);
+        throw error;
+      }
 
+      console.log('Like inserted successfully');
+      
       // Check if this creates a match (both users liked each other)
       if (direction === 'right') {
         if (targetType === 'listing') {
@@ -94,9 +101,19 @@ export function useSwipe() {
       }
     },
     onSuccess: () => {
+      console.log('Swipe successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['likes'] });
+      queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-swipes'] });
       queryClient.invalidateQueries({ queryKey: ['client-profiles'] });
     },
+    onError: (error) => {
+      console.error('Swipe failed:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to record your preference. Please try again.',
+        variant: 'destructive'
+      });
+    }
   });
 }

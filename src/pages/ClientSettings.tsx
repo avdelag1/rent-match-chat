@@ -17,11 +17,10 @@ const ClientSettings = () => {
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid grid-cols-5 w-full">
+            <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="subscription">Subscription</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="theme">Theme</TabsTrigger>
               <TabsTrigger value="search">Search</TabsTrigger>
             </TabsList>
 
@@ -37,10 +36,6 @@ const ClientSettings = () => {
 
             <TabsContent value="security">
               <AccountSecurity userRole="client" />
-            </TabsContent>
-
-            <TabsContent value="theme">
-              <ThemeSelector />
             </TabsContent>
 
             <TabsContent value="search">

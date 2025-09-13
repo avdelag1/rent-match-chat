@@ -54,16 +54,16 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       return;
     }
 
-    // Here you would call the password change API
+    // Simulate password change
     toast({
       title: 'Password Updated',
-      description: 'Your password has been changed successfully.'
+      description: 'Your password has been successfully changed.'
     });
     
+    setShowPasswordDialog(false);
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    setShowPasswordDialog(false);
   };
 
   const handleTwoFactorToggle = (enabled: boolean) => {
@@ -88,47 +88,47 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   };
 
   const securityScore = () => {
-    let score = 0;
+    let score = 50; // Base score
     if (twoFactorEnabled) score += 25;
-    if (loginAlerts) score += 20;
-    if (sessionTimeout) score += 25;
-    if (deviceTracking) score += 30;
+    if (loginAlerts) score += 10;
+    if (sessionTimeout) score += 10;
+    if (deviceTracking) score += 5;
     return score;
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-400';
-    if (score >= 60) return 'text-yellow-400';
-    return 'text-red-400';
+    if (score >= 80) return 'text-green-500';
+    if (score >= 60) return 'text-yellow-500';
+    return 'text-red-500';
   };
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">Account Security</h2>
-        <p className="text-white/70">Protect your account with advanced security features</p>
+        <h2 className="text-2xl font-bold text-foreground mb-2">Account Security</h2>
+        <p className="text-muted-foreground">Protect your account with advanced security features</p>
       </div>
 
       {/* Security Score */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Shield className="w-5 h-5" />
             Security Score
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-white/70">Current Score</span>
+            <span className="text-muted-foreground">Current Score</span>
             <span className={`text-2xl font-bold ${getScoreColor(securityScore())}`}>
               {securityScore()}/100
             </span>
           </div>
-          <div className="w-full bg-white/20 rounded-full h-2">
+          <div className="w-full bg-muted rounded-full h-2">
             <div 
               className={`h-2 rounded-full ${
-                securityScore() >= 80 ? 'bg-green-400' : 
-                securityScore() >= 60 ? 'bg-yellow-400' : 'bg-red-400'
+                securityScore() >= 80 ? 'bg-green-500' : 
+                securityScore() >= 60 ? 'bg-yellow-500' : 'bg-red-500'
               }`}
               style={{ width: `${securityScore()}%` }}
             />
@@ -137,185 +137,176 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       </Card>
 
       {/* Password Security */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Lock className="w-5 h-5" />
             Password Security
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center">
             <div>
-              <p className="text-white font-medium">Password</p>
-              <p className="text-white/60 text-sm">Last changed 30 days ago</p>
+              <h4 className="text-foreground font-medium">Password</h4>
+              <p className="text-muted-foreground text-sm">Last changed 30 days ago</p>
             </div>
-            <Button onClick={() => setShowPasswordDialog(true)}>
+            <Button onClick={() => setShowPasswordDialog(true)} variant="outline">
               Change Password
             </Button>
           </div>
-          
-          <div className="flex items-center justify-between">
+        </CardContent>
+      </Card>
+
+      {/* Two-Factor Authentication */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-foreground flex items-center gap-2">
+            <Smartphone className="w-5 h-5" />
+            Two-Factor Authentication
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-between items-center">
             <div>
-              <p className="text-white font-medium">Two-Factor Authentication</p>
-              <p className="text-white/60 text-sm">Add an extra layer of security</p>
+              <h4 className="text-foreground font-medium">Add an extra layer of security</h4>
+              <p className="text-muted-foreground text-sm">
+                {twoFactorEnabled ? 'Two-factor authentication is enabled' : 'Not enabled'}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {twoFactorEnabled && (
-                <Badge className="bg-green-500 text-white">Enabled</Badge>
-              )}
-              <Switch 
-                checked={twoFactorEnabled} 
-                onCheckedChange={handleTwoFactorToggle}
-              />
-            </div>
+            <Switch
+              checked={twoFactorEnabled}
+              onCheckedChange={handleTwoFactorToggle}
+            />
           </div>
         </CardContent>
       </Card>
 
       {/* Login Security */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Smartphone className="w-5 h-5" />
+          <CardTitle className="text-foreground flex items-center gap-2">
+            <Shield className="w-5 h-5" />
             Login Security
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center">
             <div>
-              <p className="text-white font-medium">Login Alerts</p>
-              <p className="text-white/60 text-sm">Get notified of new login attempts</p>
+              <h4 className="text-foreground font-medium">Login Alerts</h4>
+              <p className="text-muted-foreground text-sm">Get notified of new sign-ins</p>
             </div>
-            <Switch checked={loginAlerts} onCheckedChange={setLoginAlerts} />
+            <Switch
+              checked={loginAlerts}
+              onCheckedChange={setLoginAlerts}
+            />
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center">
             <div>
-              <p className="text-white font-medium">Auto Session Timeout</p>
-              <p className="text-white/60 text-sm">Automatically log out after inactivity</p>
+              <h4 className="text-foreground font-medium">Session Timeout</h4>
+              <p className="text-muted-foreground text-sm">Auto logout after inactivity</p>
             </div>
-            <Switch checked={sessionTimeout} onCheckedChange={setSessionTimeout} />
+            <Switch
+              checked={sessionTimeout}
+              onCheckedChange={setSessionTimeout}
+            />
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center">
             <div>
-              <p className="text-white font-medium">Device Tracking</p>
-              <p className="text-white/60 text-sm">Monitor devices accessing your account</p>
+              <h4 className="text-foreground font-medium">Device Tracking</h4>
+              <p className="text-muted-foreground text-sm">Monitor unknown devices</p>
             </div>
-            <Switch checked={deviceTracking} onCheckedChange={setDeviceTracking} />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Activity */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white">Recent Security Activity</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
-            <CheckCircle className="w-5 h-5 text-green-400" />
-            <div className="flex-1">
-              <p className="text-white text-sm">Successful login from Chrome</p>
-              <p className="text-white/60 text-xs">Today at 2:30 PM • Mexico City, MX</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
-            <AlertTriangle className="w-5 h-5 text-yellow-400" />
-            <div className="flex-1">
-              <p className="text-white text-sm">New device detected</p>
-              <p className="text-white/60 text-xs">Yesterday at 8:15 AM • Unknown location</p>
-            </div>
+            <Switch
+              checked={deviceTracking}
+              onCheckedChange={setDeviceTracking}
+            />
           </div>
         </CardContent>
       </Card>
 
       {/* Password Change Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="bg-black/90 backdrop-blur border-white/20">
+        <DialogContent className="bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-white">Change Password</DialogTitle>
+            <DialogTitle className="text-foreground">Change Password</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <label className="text-white/90 text-sm font-medium">Current Password</label>
-              <div className="relative">
-                <Input
-                  type={showPasswords ? 'text' : 'password'}
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
-                  onClick={() => setShowPasswords(!showPasswords)}
-                >
-                  {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </Button>
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-white/90 text-sm font-medium">New Password</label>
+            <div className="relative">
               <Input
-                type={showPasswords ? 'text' : 'password'}
+                type={showPasswords ? "text" : "password"}
+                placeholder="Current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="bg-background border-border text-foreground"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowPasswords(!showPasswords)}
+              >
+                {showPasswords ? (
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
+            </div>
+            <div className="relative">
+              <Input
+                type={showPasswords ? "text" : "password"}
+                placeholder="New password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
-            
-            <div>
-              <label className="text-white/90 text-sm font-medium">Confirm New Password</label>
+            <div className="relative">
               <Input
-                type={showPasswords ? 'text' : 'password'}
+                type={showPasswords ? "text" : "password"}
+                placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowPasswordDialog(false)}>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handlePasswordChange}>
-              Update Password
-            </Button>
+            <Button onClick={handlePasswordChange}>Update Password</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Two-Factor Setup Dialog */}
       <Dialog open={showTwoFactorDialog} onOpenChange={setShowTwoFactorDialog}>
-        <DialogContent className="bg-black/90 backdrop-blur border-white/20">
+        <DialogContent className="bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-white">Enable Two-Factor Authentication</DialogTitle>
+            <DialogTitle className="text-foreground">Enable Two-Factor Authentication</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 text-center">
-            <Smartphone className="w-16 h-16 mx-auto text-primary" />
-            <p className="text-white">
-              Scan the QR code with your authenticator app or enter the setup code manually.
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Two-factor authentication adds an extra layer of security to your account by requiring
+              a code from your phone in addition to your password.
             </p>
-            <div className="bg-white p-4 rounded-lg">
-              <div className="w-32 h-32 bg-gray-200 mx-auto mb-4 rounded flex items-center justify-center">
-                QR Code
-              </div>
-              <p className="text-sm text-gray-600">Setup Code: ABCD-EFGH-IJKL-MNOP</p>
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <h4 className="text-foreground font-medium mb-2">Setup Steps:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+                <li>Download an authenticator app (Google Authenticator, Authy, etc.)</li>
+                <li>Scan the QR code with your authenticator app</li>
+                <li>Enter the 6-digit code to verify</li>
+              </ol>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowTwoFactorDialog(false)}>
+            <Button variant="outline" onClick={() => setShowTwoFactorDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={enableTwoFactor}>
-              Enable 2FA
-            </Button>
+            <Button onClick={enableTwoFactor}>Enable 2FA</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
