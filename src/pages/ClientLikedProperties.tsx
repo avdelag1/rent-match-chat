@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
-import { Heart, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const ClientLikedProperties = () => {
   const [showLikedDialog, setShowLikedDialog] = useState(false);
   const [showPropertyDetails, setShowPropertyDetails] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
-  const { data: likedProperties = [], isLoading } = useLikedProperties();
+  const { data: likedProperties = [], isLoading, refetch: refreshLikedProperties } = useLikedProperties();
   const { data: subscription } = useUserSubscription();
 
   // Mock messages remaining - this would come from your subscription/usage system  
@@ -52,14 +52,24 @@ const ClientLikedProperties = () => {
               Your Liked Properties
             </h1>
             <p className="text-muted-foreground">Properties you've shown interest in.</p>
-            {messagesRemaining > 0 && (
-              <div className="mt-4">
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <Button
+                onClick={() => refreshLikedProperties()}
+                variant="outline"
+                size="sm"
+                disabled={isLoading}
+                className="bg-card/50 border-border text-foreground hover:bg-card"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              {messagesRemaining > 0 && (
                 <Badge variant="secondary" className="text-sm">
                   <MessageCircle className="w-4 h-4 mr-1" />
                   {messagesRemaining} messages remaining
                 </Badge>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {isLoading ? (

@@ -155,7 +155,7 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
     <div className="space-y-3">
       {activities.length > 0 && (
         <>
-          <h3 className="text-sm font-medium text-white/60 uppercase tracking-wide">
+          <h3 className="text-sm font-medium text-foreground/60 uppercase tracking-wide">
             {title}
           </h3>
           {activities.map((activity) => (
@@ -164,7 +164,7 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
                 <div className="flex items-start space-x-3">
                   <Avatar className="w-10 h-10">
                     <AvatarImage src={activity.user.image} />
-                    <AvatarFallback className="bg-primary text-white text-sm">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                       {activity.user.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -172,12 +172,12 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {getActivityIcon(activity.type)}
-                      <p className="text-white text-sm">
+                      <p className="text-foreground text-sm">
                         {getActivityText(activity)}
                       </p>
                     </div>
                     
-                    <div className="flex items-center gap-3 text-xs text-white/60">
+                    <div className="flex items-center gap-3 text-xs text-foreground/60">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {formatTimeAgo(activity.timestamp)}
@@ -196,18 +196,18 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
                       )}
                     </div>
                     
-                    <p className="text-white/50 text-xs mt-1">
+                    <p className="text-foreground/50 text-xs mt-1">
                       {activity.target.name}
                     </p>
                   </div>
                   
                   <div className="flex gap-2">
                     {activity.type === 'message' && (
-                      <Button size="sm" variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10">
+                      <Button size="sm" variant="ghost" className="text-foreground/70 hover:text-foreground hover:bg-foreground/10">
                         Reply
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10">
+                    <Button size="sm" variant="ghost" className="text-foreground/70 hover:text-foreground hover:bg-foreground/10">
                       View
                     </Button>
                   </div>
@@ -224,15 +224,15 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Activity Feed</h2>
-          <p className="text-white/70">Stay updated with your latest interactions</p>
+          <h2 className="text-2xl font-bold text-foreground">Activity Feed</h2>
+          <p className="text-foreground/70">Stay updated with your latest interactions</p>
         </div>
         
         <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10"
+            className="text-foreground/70 hover:text-foreground hover:bg-foreground/10"
           >
             <Filter className="w-4 h-4 mr-2" />
             Filter
@@ -245,40 +245,40 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 text-center">
             <Heart className="w-6 h-6 mx-auto text-red-400 mb-2" />
-            <div className="text-lg font-bold text-white">
+            <div className="text-lg font-bold text-foreground">
               {activities.filter(a => ['like', 'super_like'].includes(a.type)).length}
             </div>
-            <div className="text-white/60 text-xs">Likes Today</div>
+            <div className="text-foreground/60 text-xs">Likes Today</div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 text-center">
             <MessageCircle className="w-6 h-6 mx-auto text-blue-400 mb-2" />
-            <div className="text-lg font-bold text-white">
+            <div className="text-lg font-bold text-foreground">
               {activities.filter(a => a.type === 'message').length}
             </div>
-            <div className="text-white/60 text-xs">Messages</div>
+            <div className="text-foreground/60 text-xs">Messages</div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 text-center">
             <Eye className="w-6 h-6 mx-auto text-gray-400 mb-2" />
-            <div className="text-lg font-bold text-white">
+            <div className="text-lg font-bold text-foreground">
               {activities.filter(a => a.type === 'view').length}
             </div>
-            <div className="text-white/60 text-xs">Views</div>
+            <div className="text-foreground/60 text-xs">Views</div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 text-center">
             <TrendingUp className="w-6 h-6 mx-auto text-green-400 mb-2" />
-            <div className="text-lg font-bold text-white">
+            <div className="text-lg font-bold text-foreground">
               {activities.filter(a => a.type === 'match').length}
             </div>
-            <div className="text-white/60 text-xs">Matches</div>
+            <div className="text-foreground/60 text-xs">Matches</div>
           </CardContent>
         </Card>
       </div>
@@ -286,16 +286,16 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
       {/* Activity Filter Tabs */}
       <Tabs value={filter} onValueChange={(value) => setFilter(value as any)} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
-          <TabsTrigger value="all" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="all" className="text-foreground data-[state=active]:bg-foreground/20">
             All
           </TabsTrigger>
-          <TabsTrigger value="likes" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="likes" className="text-foreground data-[state=active]:bg-foreground/20">
             Likes
           </TabsTrigger>
-          <TabsTrigger value="messages" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="messages" className="text-foreground data-[state=active]:bg-foreground/20">
             Messages
           </TabsTrigger>
-          <TabsTrigger value="matches" className="text-white data-[state=active]:bg-white/20">
+          <TabsTrigger value="matches" className="text-foreground data-[state=active]:bg-foreground/20">
             Matches
           </TabsTrigger>
         </TabsList>
@@ -308,9 +308,9 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
           {filteredActivities.length === 0 && (
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-8 text-center">
-                <Bell className="w-12 h-12 mx-auto text-white/50 mb-4" />
-                <p className="text-white/70">No activities yet</p>
-                <p className="text-white/50 text-sm">Start swiping to see your activity feed</p>
+                <Bell className="w-12 h-12 mx-auto text-foreground/50 mb-4" />
+                <p className="text-foreground/70">No activities yet</p>
+                <p className="text-foreground/50 text-sm">Start swiping to see your activity feed</p>
               </CardContent>
             </Card>
           )}
