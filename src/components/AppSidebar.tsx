@@ -1,8 +1,8 @@
-
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart, PlusCircle, Crown } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart, PlusCircle, Crown, Flame } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
+import { motion } from "framer-motion"
 
 // Menu items for different user types
 const clientMenuItems = [
@@ -85,11 +85,17 @@ export interface AppSidebarProps {
 const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuItemClick }) => {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   
   // Resolve role safely (prevents TS literal narrowing issues)
   const userRole: 'client' | 'owner' = (propUserRole ?? 'owner')
 
   const menuItems = userRole === 'client' ? clientMenuItems : ownerMenuItems
+
+  const isActive = (url: string) => {
+    if (url === "#add-property") return false
+    return location.pathname === url || location.pathname.startsWith(url)
+  }
 
   const handleMenuClick = (item: any) => {
     if (item.action === 'add-property') {
@@ -109,30 +115,99 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   }
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton onClick={() => handleMenuClick(item)}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut}>
-                  <LogOut />
-                  <span>Sign Out</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+    <Sidebar className="border-none">
+      <div className="h-full" style={{ background: 'var(--app-gradient)' }}>
+        {/* Sidebar Header */}
+        <div className="p-6 border-b border-white/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+              <Flame className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-white font-bold text-lg">TINDERENT</h2>
+              <p className="text-white/70 text-xs">
+                {userRole === 'client' ? 'Client Portal' : 'Owner Portal'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <SidebarContent className="p-4">
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-white/90 font-medium mb-4 px-3">
+              Navigation
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-2">
+                {menuItems.map((item, index) => (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <SidebarMenuItem>
+                      <SidebarMenuButton 
+                        onClick={() => handleMenuClick(item)}
+                        className={`
+                          w-full rounded-xl p-3 transition-all duration-200 group
+                          ${isActive(item.url) 
+                            ? 'bg-white/95 text-gray-900 shadow-lg backdrop-blur-sm' 
+                            : 'bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30'
+                          }
+                        `}
+                        style={isActive(item.url) ? { boxShadow: 'var(--shadow-md)' } : {}}
+                      >
+                        <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-gray-700' : 'text-white/90'}`} />
+                        <span className={`font-medium ${isActive(item.url) ? 'text-gray-900' : 'text-white'}`}>
+                          {item.title}
+                        </span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </motion.div>
+                ))}
+                
+                {/* Sign Out Button */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: menuItems.length * 0.1 }}
+                >
+                  <SidebarMenuItem className="mt-6">
+                    <SidebarMenuButton 
+                      onClick={handleSignOut}
+                      className="w-full rounded-xl p-3 bg-red-500/20 hover:bg-red-500/30 text-white border border-red-400/30 hover:border-red-400/50 transition-all duration-200"
+                    >
+                      <LogOut className="w-5 h-5 text-red-300" />
+                      <span className="font-medium text-red-100">Sign Out</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </motion.div>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* User Info Card */}
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-8 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-medium text-sm">Welcome back!</p>
+                  <p className="text-white/70 text-xs">{user.email}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </SidebarContent>
+      </div>
     </Sidebar>
   )
 }
