@@ -278,7 +278,7 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                       <Badge
                         key={item}
                         variant={filters.lifestyleCategories.includes(item) ? "default" : "outline"}
-                        className="cursor-pointer transition-all duration-200 hover:scale-105"
+                        className="cursor-pointer transition-all duration-200 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
                         onClick={() => handleToggleArrayItem(filters.lifestyleCategories, item, 'lifestyleCategories')}
                       >
                         {item}
@@ -306,7 +306,7 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     <Badge
                       key={style}
                       variant={filters.aesthetic.includes(style) ? "default" : "outline"}
-                      className="cursor-pointer transition-all duration-200 hover:scale-105"
+                      className="cursor-pointer transition-all duration-200 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
                       onClick={() => handleToggleArrayItem(filters.aesthetic, style, 'aesthetic')}
                     >
                       {style}
@@ -331,7 +331,7 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     <Badge
                       key={feature}
                       variant={filters.unusualFeatures.includes(feature) ? "default" : "outline"}
-                      className="cursor-pointer transition-all duration-200 hover:scale-105"
+                      className="cursor-pointer transition-all duration-200 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
                       onClick={() => handleToggleArrayItem(filters.unusualFeatures, feature, 'unusualFeatures')}
                     >
                       {feature}

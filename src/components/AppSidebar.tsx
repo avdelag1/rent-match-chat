@@ -104,6 +104,18 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
         location.hash = '#add-property'
       }
       if (onMenuItemClick) onMenuItemClick('add-property')
+    } else if (item.url.includes('#subscription')) {
+      // Handle subscription navigation properly
+      const basePath = item.url.split('#')[0];
+      navigate(basePath);
+      // Use timeout to ensure navigation is complete before scrolling
+      setTimeout(() => {
+        const subscriptionTab = document.querySelector('[value="subscription"]');
+        if (subscriptionTab) {
+          (subscriptionTab as HTMLElement).click();
+        }
+      }, 100);
+      if (onMenuItemClick) onMenuItemClick('subscription')
     } else {
       navigate(item.url)
       if (onMenuItemClick) onMenuItemClick('dashboard')

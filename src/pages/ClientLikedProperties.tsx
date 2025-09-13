@@ -78,10 +78,10 @@ const ClientLikedProperties = () => {
                   Start swiping on properties to build your favorites list. Properties you like will appear here.
                 </p>
                 <Button 
-                  onClick={() => setShowLikedDialog(true)}
+                  onClick={() => window.location.href = '/client/dashboard'}
                   className="bg-primary hover:bg-primary/90"
                 >
-                  Browse Properties
+                  Start Swiping Properties
                 </Button>
               </CardContent>
             </Card>
