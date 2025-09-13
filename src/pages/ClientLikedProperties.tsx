@@ -186,23 +186,12 @@ const ClientLikedProperties = () => {
             </div>
           ) : (
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="flex flex-col items-center justify-center py-16">
-                <Heart className="w-20 h-20 text-white/30 mb-6" />
-                <h3 className="text-2xl font-semibold text-white mb-4">No Liked Properties Yet</h3>
-                <p className="text-white/70 text-center mb-8 max-w-md leading-relaxed">
-                  Start exploring properties and swipe right on the ones you love. They'll appear here where you can view details and contact owners directly.
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Heart className="w-16 h-16 text-white/30 mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">No Liked Properties</h3>
+                <p className="text-white/70 text-center">
+                  Properties you like will appear here.
                 </p>
-                <div className="space-y-3 w-full max-w-sm">
-                  <Button 
-                    onClick={() => window.location.href = '/client/dashboard'}
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 py-3"
-                  >
-                    Start Swiping Properties
-                  </Button>
-                  <p className="text-white/50 text-center text-sm">
-                    💡 Swipe right to like properties and build your collection
-                  </p>
-                </div>
               </CardContent>
             </Card>
           )}
