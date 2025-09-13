@@ -16,6 +16,7 @@ export type ClientFilterPreferences = {
   rental_duration?: string | null;
   location_zones?: string[] | null;
   property_types?: string[] | null;
+  preferred_listing_types?: string[] | null;
   amenities_required?: string[] | null;
   requires_gym?: boolean;
   requires_balcony?: boolean;

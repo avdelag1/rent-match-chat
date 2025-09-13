@@ -355,6 +355,7 @@ export type Database = {
           pet_friendly_required: boolean | null
           preferred_lease_end_date: string | null
           preferred_lease_start_date: string | null
+          preferred_listing_types: string[] | null
           preferred_pool_types: string[] | null
           preferred_tulum_locations: string[] | null
           preferred_unit_types: string[] | null
@@ -403,6 +404,7 @@ export type Database = {
           pet_friendly_required?: boolean | null
           preferred_lease_end_date?: string | null
           preferred_lease_start_date?: string | null
+          preferred_listing_types?: string[] | null
           preferred_pool_types?: string[] | null
           preferred_tulum_locations?: string[] | null
           preferred_unit_types?: string[] | null
@@ -451,6 +453,7 @@ export type Database = {
           pet_friendly_required?: boolean | null
           preferred_lease_end_date?: string | null
           preferred_lease_start_date?: string | null
+          preferred_listing_types?: string[] | null
           preferred_pool_types?: string[] | null
           preferred_tulum_locations?: string[] | null
           preferred_unit_types?: string[] | null

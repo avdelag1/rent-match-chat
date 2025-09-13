@@ -25,6 +25,7 @@ interface PropertyFormData {
   title: string;
   description: string;
   property_type: string;
+  listing_type: string;
   price: number;
   address: string;
   city: string;
@@ -87,6 +88,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
       const propertyData = {
         ...data,
+        listing_type: data.listing_type || 'rent',
         owner_id: user.user.id,
         amenities: selectedAmenities,
         images: images,
@@ -198,6 +200,19 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
                           {type}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="listing_type">Listing For</Label>
+                  <Select onValueChange={(value) => setValue('listing_type', value)} defaultValue="rent">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select listing type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rent">For Rent</SelectItem>
+                      <SelectItem value="buy">For Sale</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

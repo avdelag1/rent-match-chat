@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
+import { ListingTypeFilter } from '@/components/ListingTypeFilter';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 
@@ -43,6 +44,9 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
               <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto"></div>
             </div>
           </div>
+
+          {/* Listing Type Filter */}
+          <ListingTypeFilter />
 
           {/* Properties Section */}
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8" style={{ boxShadow: 'var(--shadow-card)' }}>

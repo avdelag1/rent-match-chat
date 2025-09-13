@@ -27,6 +27,7 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
     max_bathrooms: 5,
     property_types: [] as string[],
     location_zones: [] as string[],
+    preferred_listing_types: ['rent'] as string[],
     furnished_required: false,
     pet_friendly_required: false,
     requires_gym: false,
@@ -49,6 +50,7 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
         max_bathrooms: preferences.max_bathrooms || 5,
         property_types: preferences.property_types || [],
         location_zones: preferences.location_zones || [],
+        preferred_listing_types: preferences.preferred_listing_types || ['rent'],
         furnished_required: preferences.furnished_required || false,
         pet_friendly_required: preferences.pet_friendly_required || false,
         requires_gym: preferences.requires_gym || false,
@@ -188,6 +190,56 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
                       }}
                     />
                     <Label htmlFor={`property-${type}`}>{type}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Listing Types */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Looking For</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {['rent', 'buy', 'both'].map((type) => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`listing-${type}`}
+                      checked={
+                        type === 'both' 
+                          ? formData.preferred_listing_types.includes('rent') && formData.preferred_listing_types.includes('buy')
+                          : formData.preferred_listing_types.includes(type)
+                      }
+                      onCheckedChange={(checked) => {
+                        if (type === 'both') {
+                          if (checked) {
+                            setFormData({
+                              ...formData,
+                              preferred_listing_types: ['rent', 'buy']
+                            })
+                          } else {
+                            setFormData({
+                              ...formData,
+                              preferred_listing_types: ['rent']
+                            })
+                          }
+                        } else {
+                          if (checked) {
+                            setFormData({
+                              ...formData,
+                              preferred_listing_types: [type]
+                            })
+                          } else {
+                            // Don't allow unchecking if it's the only option
+                            if (formData.preferred_listing_types.length > 1) {
+                              setFormData({
+                                ...formData,
+                                preferred_listing_types: formData.preferred_listing_types.filter(t => t !== type)
+                              })
+                            }
+                          }
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`listing-${type}`} className="capitalize">{type === 'both' ? 'Rent & Buy' : type}</Label>
                   </div>
                 ))}
               </div>
