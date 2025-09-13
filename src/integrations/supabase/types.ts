@@ -741,6 +741,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
@@ -780,6 +787,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversations_listing_id"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -911,6 +925,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -1342,6 +1363,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_matches_listing_id"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_matches_owner_id"
             columns: ["owner_id"]
             isOneToOne: false
@@ -1374,6 +1402,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -1426,6 +1461,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -1710,6 +1752,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "owner_client_matches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "owner_client_matches_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
@@ -1809,6 +1858,13 @@ export type Database = {
             referencedRelation: "listings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "owner_client_preferences_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       owner_likes: {
@@ -1856,6 +1912,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_likes_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -2755,6 +2818,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "property_comments_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "property_comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -2795,6 +2865,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -2840,6 +2917,13 @@ export type Database = {
             referencedRelation: "listings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_features_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_images: {
@@ -2867,6 +2951,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_images_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3016,6 +3107,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "property_ratings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "property_ratings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -3102,6 +3200,13 @@ export type Database = {
             referencedRelation: "listings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_reports_reported_listing_id_fkey"
+            columns: ["reported_listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_swipes: {
@@ -3170,6 +3275,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_tours_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -3335,6 +3447,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
           {
@@ -5012,6 +5131,66 @@ export type Database = {
           f_table_schema?: unknown | null
           srid?: number | null
           type?: string | null
+        }
+        Relationships: []
+      }
+      listings_public: {
+        Row: {
+          amenities: string[] | null
+          availability_status: string | null
+          baths: number | null
+          beds: number | null
+          city: string | null
+          contact_method: string | null
+          created_at: string | null
+          description: string | null
+          furnished: boolean | null
+          id: string | null
+          images: string[] | null
+          neighborhood: string | null
+          pet_friendly: boolean | null
+          price: number | null
+          property_type: string | null
+          square_footage: number | null
+          title: string | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          availability_status?: never
+          baths?: number | null
+          beds?: number | null
+          city?: string | null
+          contact_method?: never
+          created_at?: string | null
+          description?: string | null
+          furnished?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          neighborhood?: string | null
+          pet_friendly?: boolean | null
+          price?: number | null
+          property_type?: string | null
+          square_footage?: number | null
+          title?: string | null
+        }
+        Update: {
+          amenities?: string[] | null
+          availability_status?: never
+          baths?: number | null
+          beds?: number | null
+          city?: string | null
+          contact_method?: never
+          created_at?: string | null
+          description?: string | null
+          furnished?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          neighborhood?: string | null
+          pet_friendly?: boolean | null
+          price?: number | null
+          property_type?: string | null
+          square_footage?: number | null
+          title?: string | null
         }
         Relationships: []
       }
