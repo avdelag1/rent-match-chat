@@ -20,7 +20,10 @@ export default function LegendaryLandingPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--app-gradient)' }}>
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-black/10 to-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-black/15 to-black/30" />
+      
+      {/* Additional contrast layer for buttons */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10" />
       
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-8 max-w-md w-full">
@@ -58,58 +61,74 @@ export default function LegendaryLandingPage() {
         </motion.div>
 
         {/* Buttons Container */}
-        <div className="space-y-4 mt-12">
+        <div className="space-y-6 mt-12">
           
-          {/* I'm a Client Button - Slide from Left */}
+          {/* I'm a Client Button - Smooth slide in with orange gradient */}
           <motion.button
-            initial={{ x: -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+            initial={{ x: -100, opacity: 0, scale: 0.8 }}
+            animate={{ x: 0, opacity: 1, scale: 1 }}
             transition={{ 
               type: "spring", 
-              duration: 0.6, 
+              duration: 0.8, 
               delay: 0.4,
-              bounce: 0.5
+              bounce: 0.3,
+              ease: [0.175, 0.885, 0.32, 1.275]
             }}
             whileHover={{ 
-              scale: 1.05, 
-              boxShadow: "0 25px 50px rgba(0,0,0,0.3)" 
+              scale: 1.05,
+              y: -3,
+              boxShadow: "0 20px 40px rgba(255, 138, 0, 0.4), 0 8px 25px rgba(0,0,0,0.15)",
+              transition: { type: "spring", bounce: 0.4, duration: 0.3 }
             }}
             whileTap={{ 
               scale: 0.98,
+              y: 0,
               transition: { type: "spring", bounce: 0.7, duration: 0.15 }
             }}
             onClick={() => openAuthDialog('client')}
-            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
-            style={{ boxShadow: 'var(--shadow-md)' }}
+            className="w-full py-5 px-8 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold text-lg rounded-full shadow-xl border-0 hover:from-orange-500 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden"
+            style={{ 
+              boxShadow: '0 10px 30px rgba(255, 138, 0, 0.3), 0 4px 15px rgba(0,0,0,0.1)',
+              background: 'linear-gradient(135deg, #FF8A00 0%, #FF6B00 100%)'
+            }}
           >
-            <Users className="w-6 h-6" />
-            I'm a Client
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+            <Users className="w-6 h-6 relative z-10" />
+            <span className="relative z-10">I'm a Client</span>
           </motion.button>
 
-          {/* I'm an Owner Button - Slide from Right */}
+          {/* I'm an Owner Button - Smooth slide in with red gradient */}
           <motion.button
-            initial={{ x: 300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+            initial={{ x: 100, opacity: 0, scale: 0.8 }}
+            animate={{ x: 0, opacity: 1, scale: 1 }}
             transition={{ 
               type: "spring", 
-              duration: 0.6, 
+              duration: 0.8, 
               delay: 0.6,
-              bounce: 0.5
+              bounce: 0.3,
+              ease: [0.175, 0.885, 0.32, 1.275]
             }}
             whileHover={{ 
-              scale: 1.05, 
-              boxShadow: "0 25px 50px rgba(0,0,0,0.3)" 
+              scale: 1.05,
+              y: -3,
+              boxShadow: "0 20px 40px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(0,0,0,0.15)",
+              transition: { type: "spring", bounce: 0.4, duration: 0.3 }
             }}
             whileTap={{ 
               scale: 0.98,
+              y: 0,
               transition: { type: "spring", bounce: 0.7, duration: 0.15 }
             }}
             onClick={() => openAuthDialog('owner')}
-            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
-            style={{ boxShadow: 'var(--shadow-md)' }}
+            className="w-full py-5 px-8 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-lg rounded-full shadow-xl border-0 hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden"
+            style={{ 
+              boxShadow: '0 10px 30px rgba(239, 68, 68, 0.3), 0 4px 15px rgba(0,0,0,0.1)',
+              background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
+            }}
           >
-            <Heart className="w-6 h-6" />
-            I'm an Owner
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+            <Heart className="w-6 h-6 relative z-10" />
+            <span className="relative z-10">I'm an Owner</span>
           </motion.button>
         </div>
 
