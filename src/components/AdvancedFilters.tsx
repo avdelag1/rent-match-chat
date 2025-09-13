@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { useAutoSaveListingTypes } from '@/hooks/useAutoSaveListingTypes';
 
 interface AdvancedFiltersProps {
   isOpen: boolean;
@@ -24,9 +25,11 @@ const lifestyleTags = ['student', 'professional', 'family', 'digital-nomad', 'co
 const locationRadii = [1, 5, 10, 20, 50];
 
 export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, currentFilters = {} }: AdvancedFiltersProps) {
+  const { saveListingTypes } = useAutoSaveListingTypes();
   const [filters, setFilters] = useState({
     priceRange: currentFilters.priceRange || [0, 100000],
     propertyTypes: currentFilters.propertyTypes || [],
+    listingTypes: currentFilters.listingTypes || ['rent'],
     bedrooms: currentFilters.bedrooms || [1, 10],
     bathrooms: currentFilters.bathrooms || [1, 5],
     amenities: currentFilters.amenities || [],
@@ -57,6 +60,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
     setFilters({
       priceRange: [0, 100000],
       propertyTypes: [],
+      listingTypes: ['rent'],
       bedrooms: [1, 10],
       bathrooms: [1, 5],
       amenities: [],
@@ -119,6 +123,45 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                   {filters.propertyTypes.includes(type) && (
                     <X className="w-3 h-3 ml-1" />
                   )}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Looking For */}
+          <div>
+            <Label className="text-base font-semibold">Looking For</Label>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {['rent', 'buy', 'both'].map((type) => (
+                <Badge
+                  key={type}
+                  variant={
+                    type === 'both' 
+                      ? (filters.listingTypes.includes('rent') && filters.listingTypes.includes('buy') ? 'default' : 'outline')
+                      : (filters.listingTypes.includes(type) ? 'default' : 'outline')
+                  }
+                  className="cursor-pointer text-center justify-center p-2"
+                  onClick={async () => {
+                    let newTypes;
+                    if (type === 'both') {
+                      newTypes = filters.listingTypes.includes('rent') && filters.listingTypes.includes('buy') 
+                        ? ['rent'] 
+                        : ['rent', 'buy'];
+                    } else {
+                      newTypes = filters.listingTypes.includes(type) && filters.listingTypes.length > 1
+                        ? filters.listingTypes.filter(t => t !== type)
+                        : [type];
+                    }
+                    
+                    setFilters(prev => ({ ...prev, listingTypes: newTypes }));
+                    
+                    // Auto-save to user preferences
+                    if (userRole === 'client') {
+                      await saveListingTypes(newTypes);
+                    }
+                  }}
+                >
+                  {type === 'both' ? 'Rent & Buy' : type.charAt(0).toUpperCase() + type.slice(1)}
                 </Badge>
               ))}
             </div>

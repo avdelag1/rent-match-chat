@@ -88,6 +88,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         setSubscriptionReason('Choose the perfect plan for your needs!')
         setShowSubscriptionPackages(true)
         break
+      case 'premium-packages':
+        setSubscriptionReason('Choose the perfect plan for your needs!')
+        setShowSubscriptionPackages(true)
+        break
       case 'liked-properties':
         setShowLikedProperties(true)
         break

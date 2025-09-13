@@ -32,9 +32,10 @@ const clientMenuItems = [
     icon: Settings,
   },
   {
-    title: "Subscription",
-    url: "/client/settings#subscription",
+    title: "Premium Packages",
+    url: "#premium-packages",
     icon: Crown,
+    action: 'premium-packages'
   },
 ]
 
@@ -71,9 +72,10 @@ const ownerMenuItems = [
     icon: Settings,
   },
   {
-    title: "Subscription",
-    url: "/owner/settings#subscription",
+    title: "Premium Packages",
+    url: "#premium-packages",
     icon: Crown,
+    action: 'premium-packages'
   },
 ]
 
@@ -104,18 +106,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
         location.hash = '#add-property'
       }
       if (onMenuItemClick) onMenuItemClick('add-property')
-    } else if (item.url.includes('#subscription')) {
-      // Handle subscription navigation properly
-      const basePath = item.url.split('#')[0];
-      navigate(basePath);
-      // Use timeout to ensure navigation is complete before scrolling
-      setTimeout(() => {
-        const subscriptionTab = document.querySelector('[value="subscription"]');
-        if (subscriptionTab) {
-          (subscriptionTab as HTMLElement).click();
-        }
-      }, 100);
-      if (onMenuItemClick) onMenuItemClick('subscription')
+    } else if (item.action === 'premium-packages') {
+      // Open premium packages dialog directly
+      if (onMenuItemClick) onMenuItemClick('premium-packages')
     } else {
       navigate(item.url)
       if (onMenuItemClick) onMenuItemClick('dashboard')
