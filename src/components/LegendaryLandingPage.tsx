@@ -68,9 +68,9 @@ export default function LegendaryLandingPage() {
             initial={{ x: -400, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ 
-              duration: 0.7, 
+              duration: 0.25, 
               delay: 0.4,
-              ease: [0.25, 0.25, 0.25, 1]
+              ease: [0.68, -0.55, 0.265, 1.55]
             }}
             whileHover={{ 
               scale: 1.05,
@@ -100,9 +100,9 @@ export default function LegendaryLandingPage() {
             initial={{ x: 400, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ 
-              duration: 0.7, 
-              delay: 0.6,
-              ease: [0.25, 0.25, 0.25, 1]
+              duration: 0.25, 
+              delay: 0.55,
+              ease: [0.68, -0.55, 0.265, 1.55]
             }}
             whileHover={{ 
               scale: 1.05,
