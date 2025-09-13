@@ -1,22 +1,22 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'system' | 'dark' | 'amber' | 'blue' | 'green' | 'purple';
+type Theme = 'system' | 'light' | 'dark' | 'amber' | 'blue' | 'green' | 'purple';
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: 'dark' | 'amber' | 'blue' | 'green' | 'purple';
+  resolvedTheme: 'light' | 'dark' | 'amber' | 'blue' | 'green' | 'purple';
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'amber' | 'blue' | 'green' | 'purple'>('dark');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark' | 'amber' | 'blue' | 'green' | 'purple'>('light');
 
   useEffect(() => {
     const stored = localStorage.getItem('tinderent-theme') as Theme;
-    if (stored && ['system', 'dark', 'amber', 'blue', 'green', 'purple'].includes(stored)) {
+    if (stored && ['system', 'light', 'dark', 'amber', 'blue', 'green', 'purple'].includes(stored)) {
       setTheme(stored);
     }
   }, []);
@@ -25,10 +25,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('tinderent-theme', theme);
     
     const root = window.document.documentElement;
-    root.classList.remove('dark', 'amber', 'blue', 'green', 'purple');
+    root.classList.remove('light', 'dark', 'amber', 'blue', 'green', 'purple');
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dark'; // Default to dark for Tinderent
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       root.classList.add(systemTheme);
       setResolvedTheme(systemTheme);
     } else {
