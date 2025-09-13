@@ -5,7 +5,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Filter, Sun, Palette } from 'lucide-react';
+import { Sun, Moon, Flame } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 export function ThemeToggle() {
@@ -13,10 +13,9 @@ export function ThemeToggle() {
 
   const getIcon = () => {
     switch (theme) {
-      case 'system': return <Filter className="w-4 h-4" />;
-      case 'dark': return <Filter className="w-4 h-4" />;
-      case 'amber': return <Filter className="w-4 h-4" />;
-      default: return <Filter className="w-4 h-4" />;
+      case 'dark': return <Moon className="w-4 h-4" />;
+      case 'amber': return <Flame className="w-4 h-4" />;
+      default: return <Sun className="w-4 h-4" />;
     }
   };
 
@@ -24,33 +23,33 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="tinder" 
+          variant="outline" 
           size="icon"
-          className="bg-gradient-to-r from-primary to-accent text-white hover:shadow-glow transition-all duration-300"
+          className="bg-theme-accent-gradient text-white border-none shadow-theme-md hover:shadow-theme-lg transition-all duration-300"
         >
           {getIcon()}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card/95 backdrop-blur-sm border-border shadow-glow">
+      <DropdownMenuContent className="bg-theme-primary border-theme-border-primary shadow-theme-lg">
         <DropdownMenuItem 
-          onClick={() => setTheme('system')}
-          className="flex items-center gap-2 cursor-pointer text-foreground hover:bg-primary/20 hover:text-primary transition-colors"
+          onClick={() => setTheme('default')}
+          className="flex items-center gap-2 cursor-pointer text-theme-text-primary hover:bg-theme-secondary transition-colors"
         >
-          <Filter className="w-4 h-4" />
-          Auto
+          <Sun className="w-4 h-4" />
+          Default
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('dark')}
-          className="flex items-center gap-2 cursor-pointer text-foreground hover:bg-primary/20 hover:text-primary transition-colors"
+          className="flex items-center gap-2 cursor-pointer text-theme-text-primary hover:bg-theme-secondary transition-colors"
         >
-          <Filter className="w-4 h-4" />
-          Dark Red
+          <Moon className="w-4 h-4" />
+          Dark
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('amber')}
-          className="flex items-center gap-2 cursor-pointer text-foreground hover:bg-primary/20 hover:text-primary transition-colors"
+          className="flex items-center gap-2 cursor-pointer text-theme-text-primary hover:bg-theme-secondary transition-colors"
         >
-          <Sun className="w-4 h-4" />
+          <Flame className="w-4 h-4" />
           Amber
         </DropdownMenuItem>
       </DropdownMenuContent>

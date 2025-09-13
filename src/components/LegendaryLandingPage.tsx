@@ -1,14 +1,12 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { AuthDialog } from "./AuthDialog";
-import { motion } from "framer-motion";
-import { Flame, User, Home } from "lucide-react";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Flame, Users, Heart } from 'lucide-react';
+import { AuthDialog } from './AuthDialog';
 
-const LegendaryLandingPage = () => {
-  const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' | null }>({
+export default function LegendaryLandingPage() {
+  const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' }>({
     isOpen: false,
-    role: null
+    role: 'client'
   });
 
   const openAuthDialog = (role: 'client' | 'owner') => {
@@ -16,123 +14,120 @@ const LegendaryLandingPage = () => {
   };
 
   const closeAuthDialog = () => {
-    setAuthDialog({ isOpen: false, role: null });
+    setAuthDialog({ isOpen: false, role: 'client' });
   };
 
-
   return (
-    <div className="min-h-screen relative overflow-hidden" 
-         style={{ 
-           background: 'linear-gradient(135deg, #ec4899 0%, #f97316 50%, #ea580c 100%)'
-         }}>
+    <div className="min-h-screen bg-theme-accent-gradient flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-black/10 to-black/20" />
       
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
-        <div className="max-w-4xl mx-auto">
-          
-          {/* Flame Icon with Zoom Animation */}
-          <motion.div 
-            className="flex justify-center mb-12"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ 
-              duration: 0.8, 
-              ease: "backOut",
-              delay: 0.2 
-            }}
-          >
-            <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl">
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                <Flame className="w-10 h-10 text-white" />
-              </div>
-            </div>
-          </motion.div>
-          
-          {/* Title with Fade In */}
-          <motion.h1 
-            className="text-6xl md:text-8xl font-bold mb-8 text-white tracking-wider"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-          >
-            TINDERENT
-          </motion.h1>
-          
-          {/* Subtitle with Fade In */}
-          <motion.p 
-            className="text-xl md:text-2xl text-white/90 mb-16 max-w-2xl mx-auto leading-relaxed font-light"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
-          >
-            Find your perfect rental property or tenant with ease.
-          </motion.p>
-
-          {/* Buttons with Slide Animations */}
-          <div className="flex flex-col gap-6 items-center max-w-md mx-auto">
-            
-            {/* Client Button - Slides from Left */}
-            <motion.div
-              className="w-full"
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ 
-                delay: 1.0, 
-                duration: 0.8, 
-                ease: "easeOut",
-                type: "spring",
-                stiffness: 100
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                size="lg" 
-                className="w-full h-16 text-xl font-semibold text-white border-none rounded-full shadow-2xl bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 transition-all duration-300"
-                onClick={() => openAuthDialog('client')}
-              >
-                <User className="mr-3 h-6 w-6" />
-                I'm a Client
-              </Button>
-            </motion.div>
-            
-            {/* Owner Button - Slides from Right */}
-            <motion.div
-              className="w-full"
-              initial={{ x: 300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ 
-                delay: 1.2, 
-                duration: 0.8, 
-                ease: "easeOut",
-                type: "spring",
-                stiffness: 100
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                size="lg" 
-                className="w-full h-16 text-xl font-semibold text-white border-none rounded-full shadow-2xl bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 transition-all duration-300"
-                onClick={() => openAuthDialog('owner')}
-              >
-                <Home className="mr-3 h-6 w-6" />
-                I'm an Owner
-              </Button>
-            </motion.div>
+      {/* Main Content */}
+      <div className="relative z-10 text-center space-y-8 max-w-md w-full">
+        
+        {/* Flame Icon - Zoom In Animation */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ 
+            type: "spring", 
+            duration: 0.8, 
+            delay: 0.2,
+            bounce: 0.6 
+          }}
+          className="flex justify-center mb-6"
+        >
+          <div className="p-6 rounded-full bg-white/20 backdrop-blur-md shadow-theme-lg">
+            <Flame className="w-16 h-16 text-white animate-pulse" />
           </div>
+        </motion.div>
+
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="space-y-2"
+        >
+          <h1 className="text-5xl font-bold text-white tracking-wider drop-shadow-lg">
+            TINDERENT
+          </h1>
+          <p className="text-white/90 text-lg font-medium">
+            Swipe Your Way to the Perfect Home
+          </p>
+        </motion.div>
+
+        {/* Buttons Container */}
+        <div className="space-y-4 mt-12">
+          
+          {/* I'm a Client Button - Slide from Left */}
+          <motion.button
+            initial={{ x: -200, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ 
+              type: "spring", 
+              duration: 0.8, 
+              delay: 0.6,
+              bounce: 0.7
+            }}
+            whileHover={{ 
+              scale: 1.05, 
+              boxShadow: "0 20px 40px rgba(0,0,0,0.3)" 
+            }}
+            whileTap={{ 
+              scale: 0.95,
+              transition: { type: "spring", bounce: 0.8, duration: 0.2 }
+            }}
+            onClick={() => openAuthDialog('client')}
+            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 shadow-theme-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
+          >
+            <Users className="w-6 h-6" />
+            I'm a Client
+          </motion.button>
+
+          {/* I'm an Owner Button - Slide from Right */}
+          <motion.button
+            initial={{ x: 200, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ 
+              type: "spring", 
+              duration: 0.8, 
+              delay: 0.8,
+              bounce: 0.7
+            }}
+            whileHover={{ 
+              scale: 1.05, 
+              boxShadow: "0 20px 40px rgba(0,0,0,0.3)" 
+            }}
+            whileTap={{ 
+              scale: 0.95,
+              transition: { type: "spring", bounce: 0.8, duration: 0.2 }
+            }}
+            onClick={() => openAuthDialog('owner')}
+            className="w-full py-4 px-6 bg-white/20 backdrop-blur-md text-white font-semibold text-lg rounded-2xl border border-white/30 shadow-theme-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center gap-3"
+          >
+            <Heart className="w-6 h-6" />
+            I'm an Owner
+          </motion.button>
         </div>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.2 }}
+          className="text-white/80 text-sm mt-8"
+        >
+          Find your perfect match in real estate
+        </motion.p>
       </div>
 
       {/* Auth Dialog */}
-      {authDialog.role && (
-        <AuthDialog
-          isOpen={authDialog.isOpen}
-          onClose={closeAuthDialog}
-          role={authDialog.role}
-        />
-      )}
+      <AuthDialog 
+        isOpen={authDialog.isOpen}
+        onClose={closeAuthDialog}
+        role={authDialog.role}
+      />
     </div>
   );
-};
-
-export default LegendaryLandingPage;
+}

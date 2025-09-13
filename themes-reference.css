@@ -1,0 +1,180 @@
+/* Base CSS Variables for Theme System */
+:root {
+  /* Normal Mode (Default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --accent-primary: #f97316;
+  --accent-secondary: #ea580c;
+  --accent-gradient: linear-gradient(135deg, #f97316, #dc2626);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --overlay: rgba(0, 0, 0, 0.5);
+}
+
+/* Dark Mode */
+.theme-dark {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --border-primary: #374151;
+  --border-secondary: #4b5563;
+  --accent-primary: #f97316;
+  --accent-secondary: #ea580c;
+  --accent-gradient: linear-gradient(135deg, #f97316, #dc2626);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --overlay: rgba(0, 0, 0, 0.7);
+}
+
+/* Amber Mode */
+.theme-amber {
+  --bg-primary: #fefbf3;
+  --bg-secondary: #fef3e2;
+  --bg-tertiary: #fed7aa;
+  --text-primary: #451a03;
+  --text-secondary: #92400e;
+  --text-tertiary: #d97706;
+  --border-primary: #fed7aa;
+  --border-secondary: #fdba74;
+  --accent-primary: #d97706;
+  --accent-secondary: #b45309;
+  --accent-gradient: linear-gradient(135deg, #d97706, #b45309);
+  --shadow-sm: 0 1px 2px 0 rgb(217 119 6 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(217 119 6 / 0.15), 0 2px 4px -2px rgb(217 119 6 / 0.15);
+  --shadow-lg: 0 10px 15px -3px rgb(217 119 6 / 0.2), 0 4px 6px -4px rgb(217 119 6 / 0.2);
+  --overlay: rgba(217, 119, 6, 0.3);
+}
+
+/* Apply theme variables to components */
+.theme-bg-primary {
+  background-color: var(--bg-primary);
+}
+
+.theme-bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.theme-bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+.theme-text-primary {
+  color: var(--text-primary);
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary);
+}
+
+.theme-text-tertiary {
+  color: var(--text-tertiary);
+}
+
+.theme-border-primary {
+  border-color: var(--border-primary);
+}
+
+.theme-border-secondary {
+  border-color: var(--border-secondary);
+}
+
+.theme-accent-primary {
+  color: var(--accent-primary);
+}
+
+.theme-accent-bg {
+  background: var(--accent-gradient);
+}
+
+.theme-shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.theme-shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Override Tailwind classes with theme variables */
+.theme-dark .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+.theme-dark .bg-gray-50 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.theme-dark .bg-gray-100 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.theme-dark .text-gray-800 {
+  color: var(--text-primary) !important;
+}
+
+.theme-dark .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.theme-dark .text-gray-500 {
+  color: var(--text-tertiary) !important;
+}
+
+.theme-dark .border-gray-200 {
+  border-color: var(--border-primary) !important;
+}
+
+.theme-dark .border-gray-300 {
+  border-color: var(--border-secondary) !important;
+}
+
+.theme-amber .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+.theme-amber .bg-gray-50 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.theme-amber .bg-gray-100 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.theme-amber .text-gray-800 {
+  color: var(--text-primary) !important;
+}
+
+.theme-amber .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.theme-amber .text-gray-500 {
+  color: var(--text-tertiary) !important;
+}
+
+.theme-amber .border-gray-200 {
+  border-color: var(--border-primary) !important;
+}
+
+.theme-amber .border-gray-300 {
+  border-color: var(--border-secondary) !important;
+}

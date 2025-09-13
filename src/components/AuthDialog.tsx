@@ -81,7 +81,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white shadow-2xl">
+      <DialogContent className="sm:max-w-lg bg-theme-primary/95 backdrop-blur-xl border border-theme-border-primary/50 text-theme-text-primary shadow-theme-lg">
         <DialogHeader className="text-center">
           <motion.div
             initial={{ opacity: 0, y: -20 }}

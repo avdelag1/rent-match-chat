@@ -1,60 +1,39 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
-import { Palette, Smartphone, Moon, Sun, Waves, Leaf, Sparkles } from "lucide-react";
+import { Palette, Moon, Sun, Flame } from "lucide-react";
 
 export function ThemeSelector() {
   const { theme, setTheme } = useTheme();
 
   const themes = [
     { 
-      id: 'system', 
-      name: 'Auto', 
-      icon: Smartphone, 
-      description: 'Follow system preference',
-      preview: 'bg-gradient-to-r from-muted to-muted-foreground'
+      id: 'default', 
+      name: 'Default', 
+      icon: Sun, 
+      description: 'Clean and bright',
+      preview: 'bg-gradient-to-r from-white to-gray-100'
     },
     { 
       id: 'dark', 
-      name: 'Dark Red', 
+      name: 'Dark', 
       icon: Moon, 
-      description: 'Classic dark theme',
-      preview: 'bg-gradient-to-r from-red-600 to-red-500'
+      description: 'Easy on the eyes',
+      preview: 'bg-gradient-to-r from-gray-800 to-gray-900'
     },
     { 
       id: 'amber', 
       name: 'Amber', 
-      icon: Sun, 
-      description: 'Warm golden theme',
-      preview: 'bg-gradient-to-r from-amber-600 to-amber-500'
-    },
-    { 
-      id: 'blue', 
-      name: 'Ocean Blue', 
-      icon: Waves, 
-      description: 'Cool professional theme',
-      preview: 'bg-gradient-to-r from-blue-600 to-blue-500'
-    },
-    { 
-      id: 'green', 
-      name: 'Forest Green', 
-      icon: Leaf, 
-      description: 'Natural fresh theme',
-      preview: 'bg-gradient-to-r from-green-600 to-green-500'
-    },
-    { 
-      id: 'purple', 
-      name: 'Royal Purple', 
-      icon: Sparkles, 
-      description: 'Luxurious creative theme',
-      preview: 'bg-gradient-to-r from-purple-600 to-purple-500'
+      icon: Flame, 
+      description: 'Warm and inviting',
+      preview: 'bg-gradient-to-r from-amber-400 to-orange-500'
     }
   ];
 
   return (
-    <Card className="bg-card border-border">
+    <Card className="bg-theme-primary border-theme-border-primary">
       <CardHeader>
-        <CardTitle className="text-foreground flex items-center gap-2">
+        <CardTitle className="text-theme-text-primary flex items-center gap-2">
           <Palette className="w-5 h-5" />
           App Theme
         </CardTitle>
@@ -70,14 +49,14 @@ export function ThemeSelector() {
                 key={themeOption.id}
                 onClick={() => setTheme(themeOption.id as any)}
                 variant={isSelected ? "default" : "outline"}
-                className={`w-full h-auto p-4 justify-start ${
+                className={`w-full h-auto p-4 justify-start bg-theme-secondary border-theme-border-primary text-theme-text-primary hover:bg-theme-tertiary ${
                   isSelected 
-                    ? 'border-primary bg-primary text-primary-foreground' 
-                    : 'border-border hover:bg-muted'
+                    ? 'bg-theme-accent-gradient text-white border-theme-accent-primary' 
+                    : ''
                 }`}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <div className={`w-8 h-8 rounded-full ${themeOption.preview}`} />
+                  <div className={`w-8 h-8 rounded-full ${themeOption.preview} shadow-theme-sm`} />
                   <div className="flex items-center gap-2 flex-1">
                     <Icon className="w-4 h-4" />
                     <div className="text-left">
