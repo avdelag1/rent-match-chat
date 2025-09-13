@@ -2,8 +2,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PremiumSubscriptionManager } from "@/components/PremiumSubscriptionManager";
 import { AccountSecurity } from "@/components/AccountSecurity";
-import { ThemeSelector } from "@/components/ThemeSelector";
 import { PropertySearch } from "@/components/PropertySearch";
+import { ClientProfileSettings } from "@/components/ClientProfileSettings";
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
 
 const ClientSettings = () => {
@@ -25,9 +25,7 @@ const ClientSettings = () => {
             </TabsList>
 
             <TabsContent value="profile">
-              <div className="p-6 text-center">
-                <p className="text-muted-foreground">Profile settings will appear here</p>
-              </div>
+              <ClientProfileSettings />
             </TabsContent>
 
             <TabsContent value="subscription">

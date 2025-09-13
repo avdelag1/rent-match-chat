@@ -34,7 +34,17 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
-    if (!currentListing) return;
+    if (!currentListing) {
+      console.log('No current listing found for swipe');
+      return;
+    }
+
+    console.log('Starting swipe:', { 
+      listingId: currentListing.id, 
+      direction, 
+      currentIndex,
+      listingTitle: currentListing.title 
+    });
 
     setSwipeDirection(direction);
     
