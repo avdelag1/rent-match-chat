@@ -116,16 +116,16 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
 
   return (
     <Sidebar className="border-none">
-      <div className="h-full" style={{ background: 'var(--app-gradient)' }}>
+      <div className="h-full bg-white shadow-xl border-r border-gray-200">
         {/* Sidebar Header */}
-        <div className="p-6 border-b border-white/30">
+        <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center border border-white/40">
-              <Flame className="w-5 h-5 text-white drop-shadow-sm" />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-md" style={{ background: 'var(--button-gradient)' }}>
+              <Flame className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-bold text-lg drop-shadow-sm">TINDERENT</h2>
-              <p className="text-white/80 text-xs font-medium">
+              <h2 className="text-gray-900 font-bold text-lg">TINDERENT</h2>
+              <p className="text-gray-600 text-xs font-medium">
                 {userRole === 'client' ? 'Client Portal' : 'Owner Portal'}
               </p>
             </div>
@@ -134,7 +134,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
 
         <SidebarContent className="p-4">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-white/90 font-medium mb-4 px-3 drop-shadow-sm">
+            <SidebarGroupLabel className="text-gray-700 font-medium mb-4 px-3">
               Navigation
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -150,16 +150,16 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                       <SidebarMenuButton 
                         onClick={() => handleMenuClick(item)}
                         className={`
-                          w-full rounded-xl p-3 transition-all duration-200 group border
+                          w-full rounded-lg p-3 transition-all duration-200 group border
                           ${isActive(item.url) 
-                            ? 'bg-white/95 text-gray-900 shadow-lg backdrop-blur-sm border-white/50' 
-                            : 'bg-white/15 hover:bg-white/25 text-white border-white/30 hover:border-white/40'
+                            ? 'text-white shadow-md border-orange-300' 
+                            : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 hover:border-gray-300'
                           }
                         `}
-                        style={isActive(item.url) ? { boxShadow: 'var(--shadow-md)' } : {}}
+                        style={isActive(item.url) ? { background: 'var(--button-gradient)' } : {}}
                       >
-                        <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-gray-700' : 'text-white drop-shadow-sm'}`} />
-                        <span className={`font-medium ${isActive(item.url) ? 'text-gray-900' : 'text-white drop-shadow-sm'}`}>
+                        <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-white' : 'text-gray-600'}`} />
+                        <span className={`font-medium ${isActive(item.url) ? 'text-white' : 'text-gray-700'}`}>
                           {item.title}
                         </span>
                       </SidebarMenuButton>
@@ -176,10 +176,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                   <SidebarMenuItem className="mt-6">
                     <SidebarMenuButton 
                       onClick={handleSignOut}
-                      className="w-full rounded-xl p-3 bg-red-500/25 hover:bg-red-500/35 text-white border border-red-400/40 hover:border-red-400/60 transition-all duration-200"
+                      className="w-full rounded-lg p-3 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 transition-all duration-200"
                     >
-                      <LogOut className="w-5 h-5 text-red-200 drop-shadow-sm" />
-                      <span className="font-medium text-red-100 drop-shadow-sm">Sign Out</span>
+                      <LogOut className="w-5 h-5 text-red-600" />
+                      <span className="font-medium text-red-700">Sign Out</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </motion.div>
@@ -193,15 +193,15 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mt-8 p-4 bg-white/15 backdrop-blur-md rounded-xl border border-white/30"
+              className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/25 flex items-center justify-center border border-white/30">
-                  <User className="w-5 h-5 text-white drop-shadow-sm" />
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
+                  <User className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
-                  <p className="text-white font-medium text-sm drop-shadow-sm">Welcome back!</p>
-                  <p className="text-white/80 text-xs">{user.email}</p>
+                  <p className="text-gray-900 font-medium text-sm">Welcome back!</p>
+                  <p className="text-gray-600 text-xs">{user.email}</p>
                 </div>
               </div>
             </motion.div>

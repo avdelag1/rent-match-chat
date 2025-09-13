@@ -7,10 +7,10 @@
 
 @layer base {
   :root {
-    /* TINDERENT DESIGN SYSTEM - Pink Gradient Theme */
-    --app-gradient: linear-gradient(135deg, hsl(335, 100%, 70%) 0%, hsl(15, 100%, 65%) 25%, hsl(25, 100%, 67%) 50%, hsl(40, 100%, 62%) 75%, hsl(45, 100%, 52%) 100%);
-    --card-gradient: linear-gradient(145deg, hsla(0, 0%, 100%, 0.98) 0%, hsla(0, 0%, 100%, 0.95) 100%);
-    --button-gradient: linear-gradient(135deg, hsl(15, 100%, 58%) 0%, hsl(25, 100%, 62%) 50%, hsl(40, 100%, 62%) 100%);
+    /* TINDERENT DESIGN SYSTEM - Orange/Red Professional Theme */
+    --app-gradient: linear-gradient(135deg, hsl(14, 100%, 57%) 0%, hsl(9, 100%, 64%) 50%, hsl(4, 90%, 58%) 100%);
+    --card-gradient: linear-gradient(145deg, hsla(0, 0%, 100%, 0.95) 0%, hsla(0, 0%, 100%, 0.90) 100%);
+    --button-gradient: linear-gradient(135deg, hsl(14, 100%, 57%) 0%, hsl(9, 100%, 64%) 100%);
     
     /* Background Colors - HSL Format */
     --bg-primary: 0 0% 100%;
@@ -29,9 +29,9 @@
     --border-secondary: 217 32% 83%;
     --border-white: 0 0% 100% / 0.2;
     
-    /* Accent Colors - HSL Format */
-    --accent-primary: 15 100% 58%;
-    --accent-secondary: 25 100% 62%;
+    /* Accent Colors - Orange/Red Theme */
+    --accent-primary: 14 100% 57%;
+    --accent-secondary: 9 100% 64%;
     
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -45,19 +45,19 @@
     --foreground: 222 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222 84% 4.9%;
-    --primary: 15 100% 58%;
+    --primary: 14 100% 57%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 98%;
     --secondary-foreground: 222 84% 4.9%;
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 15 100% 58%;
+    --accent: 14 100% 57%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 15 100% 58%;
+    --ring: 14 100% 57%;
     --radius: 0.75rem;
     --secondary-foreground: 220 13% 18%;
     --muted: 210 40% 96%;

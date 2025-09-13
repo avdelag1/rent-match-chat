@@ -151,17 +151,17 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-white/30 bg-white/10 backdrop-blur-lg px-6">
-            <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200 bg-white/15 border border-white/40 shadow-lg" />
+          <header className="flex h-16 shrink-0 items-center gap-4 bg-white/95 backdrop-blur-lg px-6 shadow-lg border-b border-gray-200">
+            <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-all duration-200" />
             
             {/* Brand Header */}
             <div className="flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 shadow-md">
-                <Flame className="w-5 h-5 text-white drop-shadow-lg" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm" style={{ background: 'var(--button-gradient)' }}>
+                <Flame className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-white font-bold text-xl drop-shadow-lg">TINDERENT</h1>
-                <p className="text-white/90 text-sm font-medium drop-shadow-md">
+                <h1 className="text-gray-900 font-bold text-xl">TINDERENT</h1>
+                <p className="text-gray-600 text-sm font-medium">
                   {userRole === 'owner' ? 'Owner Dashboard' : 'Client Dashboard'}
                 </p>
               </div>
@@ -172,15 +172,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               {userRole === 'owner' && (
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="bg-white/15 border border-white/40 text-white hover:bg-white/25 rounded-xl px-4 font-medium backdrop-blur-sm shadow-md"
+                  className="text-white font-medium rounded-lg px-4 shadow-md"
+                  style={{ background: 'var(--button-gradient)' }}
                   onClick={() => setShowOwnerSwipe(true)}
                 >
                   Find Tenants
                 </Button>
               )}
-              <div className="bg-white/15 rounded-xl px-4 py-2 backdrop-blur-sm border border-white/30 shadow-md">
-                <span className="text-white text-sm font-medium drop-shadow-md">
+              <div className="bg-gray-100 rounded-lg px-4 py-2 shadow-sm">
+                <span className="text-gray-700 text-sm font-medium">
                   Welcome back! 
                 </span>
               </div>
