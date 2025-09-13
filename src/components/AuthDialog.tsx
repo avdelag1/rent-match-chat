@@ -81,17 +81,25 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white shadow-2xl">
+      <DialogContent className="sm:max-w-lg border-none shadow-2xl overflow-hidden"
+                     style={{ 
+                       background: 'linear-gradient(135deg, #ec4899 0%, #f97316 50%, #ea580c 100%)'
+                     }}>
         <DialogHeader className="text-center">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ 
+              duration: 0.6,
+              type: "spring",
+              damping: 10,
+              stiffness: 100
+            }}
           >
-            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-2">
+            <DialogTitle className="text-3xl font-bold text-white mb-2">
               {isSignUp ? 'Join Tinderent' : 'Welcome Back'}
             </DialogTitle>
-            <DialogDescription className="text-slate-300 text-base">
+            <DialogDescription className="text-white/80 text-base">
               {isSignUp 
                 ? `Create your ${roleTitle.toLowerCase()} account` 
                 : `Sign in to your ${roleTitle.toLowerCase()} account`
@@ -102,43 +110,63 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
         <div className="space-y-6">
           {/* Social Login Buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              onClick={() => handleSocialLogin('google')}
-              disabled={loading}
-              className="bg-white/5 border-white/20 text-white hover:bg-white/10 py-6"
+          <motion.div 
+            className="grid grid-cols-2 gap-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Chrome className="mr-2 h-5 w-5" />
-              Google
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleSocialLogin('facebook')}
-              disabled={loading}
-              className="bg-white/5 border-white/20 text-white hover:bg-white/10 py-6"
+              <Button
+                variant="outline"
+                onClick={() => handleSocialLogin('google')}
+                disabled={loading}
+                className="bg-white/20 border-white/30 text-white hover:bg-white/30 py-6 backdrop-blur-sm"
+              >
+                <Chrome className="mr-2 h-5 w-5" />
+                Google
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Facebook className="mr-2 h-5 w-5" />
-              Facebook
-            </Button>
-          </div>
+              <Button
+                variant="outline"
+                onClick={() => handleSocialLogin('facebook')}
+                disabled={loading}
+                className="bg-white/20 border-white/30 text-white hover:bg-white/30 py-6 backdrop-blur-sm"
+              >
+                <Facebook className="mr-2 h-5 w-5" />
+                Facebook
+              </Button>
+            </motion.div>
+          </motion.div>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full bg-white/20" />
+              <Separator className="w-full bg-white/30" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-slate-900 px-2 text-slate-400">Or continue with email</span>
+              <span className="bg-gradient-to-r from-pink-500 to-orange-500 px-2 text-white/90">Or continue with email</span>
             </div>
           </div>
           {/* Email Form */}
           <AnimatePresence mode="wait">
             <motion.form
               key={isSignUp ? 'signup' : 'login'}
-              initial={{ opacity: 0, x: isSignUp ? 20 : -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: isSignUp ? -20 : 20 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, x: isSignUp ? 20 : -20, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: isSignUp ? -20 : 20, scale: 0.95 }}
+              transition={{ 
+                duration: 0.4,
+                type: "spring",
+                damping: 20,
+                stiffness: 300
+              }}
               onSubmit={handleSubmit}
               className="space-y-4"
             >
@@ -158,7 +186,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                       placeholder="Your full name"
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                      className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50 backdrop-blur-sm"
                       required={isSignUp}
                     />
                   </div>
@@ -175,7 +203,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     placeholder="your@email.com"
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50 backdrop-blur-sm"
                     required
                   />
                 </div>
@@ -191,7 +219,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50 backdrop-blur-sm"
                     required
                   />
                 </div>
@@ -213,21 +241,26 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                      className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50 backdrop-blur-sm"
                       required={isSignUp}
                     />
                   </div>
                 </motion.div>
               )}
               
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-6 shadow-lg transform hover:scale-105 transition-all duration-200"
-                disabled={loading}
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSignUp ? `Create ${roleTitle} Account` : `Sign In`}
-              </Button>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-white/20 hover:bg-white/30 text-white font-semibold py-6 shadow-lg backdrop-blur-sm border border-white/30 transition-all duration-200"
+                  disabled={loading}
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSignUp ? `Create ${roleTitle} Account` : `Sign In`}
+                </Button>
+              </motion.div>
             </motion.form>
           </AnimatePresence>
           
@@ -238,7 +271,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 setIsSignUp(!isSignUp);
                 setFormData({ email: '', password: '', confirmPassword: '', name: '' });
               }}
-              className="text-sm text-slate-300 hover:text-white transition-colors"
+              className="text-sm text-white/80 hover:text-white transition-colors"
             >
               {isSignUp 
                 ? 'Already have an account? Sign in'

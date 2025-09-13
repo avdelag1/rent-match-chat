@@ -67,27 +67,32 @@ const LegendaryLandingPage = () => {
             Find your perfect rental property or tenant with ease.
           </motion.p>
 
-          {/* Buttons with Slide Animations */}
+          {/* Buttons with Enhanced Bouncing Slide Animations */}
           <div className="flex flex-col gap-6 items-center max-w-md mx-auto">
             
-            {/* Client Button - Slides from Left */}
+            {/* Client Button - Slides from Left with Bounce */}
             <motion.div
               className="w-full"
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
+              initial={{ x: -400, opacity: 0, scale: 0.3 }}
+              animate={{ x: 0, opacity: 1, scale: 1 }}
               transition={{ 
                 delay: 1.0, 
-                duration: 0.8, 
-                ease: "easeOut",
+                duration: 1.2,
                 type: "spring",
-                stiffness: 100
+                damping: 8,
+                stiffness: 100,
+                bounce: 0.6
               }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ 
+                scale: 1.08,
+                y: -5,
+                transition: { type: "spring", stiffness: 400, damping: 10 }
+              }}
+              whileTap={{ scale: 0.92 }}
             >
               <Button 
                 size="lg" 
-                className="w-full h-16 text-xl font-semibold text-white border-none rounded-full shadow-2xl bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 transition-all duration-300"
+                className="w-full h-16 text-xl font-semibold text-white border-none rounded-full shadow-2xl bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 transition-all duration-300 hover:shadow-3xl"
                 onClick={() => openAuthDialog('client')}
               >
                 <User className="mr-3 h-6 w-6" />
@@ -95,24 +100,29 @@ const LegendaryLandingPage = () => {
               </Button>
             </motion.div>
             
-            {/* Owner Button - Slides from Right */}
+            {/* Owner Button - Slides from Right with Bounce */}
             <motion.div
               className="w-full"
-              initial={{ x: 300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
+              initial={{ x: 400, opacity: 0, scale: 0.3 }}
+              animate={{ x: 0, opacity: 1, scale: 1 }}
               transition={{ 
-                delay: 1.2, 
-                duration: 0.8, 
-                ease: "easeOut",
+                delay: 1.3, 
+                duration: 1.2,
                 type: "spring",
-                stiffness: 100
+                damping: 8,
+                stiffness: 100,
+                bounce: 0.6
               }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ 
+                scale: 1.08,
+                y: -5,
+                transition: { type: "spring", stiffness: 400, damping: 10 }
+              }}
+              whileTap={{ scale: 0.92 }}
             >
               <Button 
                 size="lg" 
-                className="w-full h-16 text-xl font-semibold text-white border-none rounded-full shadow-2xl bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 transition-all duration-300"
+                className="w-full h-16 text-xl font-semibold text-white border-none rounded-full shadow-2xl bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 transition-all duration-300 hover:shadow-3xl"
                 onClick={() => openAuthDialog('owner')}
               >
                 <Home className="mr-3 h-6 w-6" />
