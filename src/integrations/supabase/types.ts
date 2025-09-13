@@ -2241,6 +2241,7 @@ export type Database = {
           country_of_residence: string | null
           created_at: string | null
           credit_score_range: string | null
+          data_sensitivity_level: string | null
           drinking: string | null
           drinking_policy: string | null
           education: string | null
@@ -2271,6 +2272,7 @@ export type Database = {
           is_active: boolean
           is_public: boolean | null
           languages_spoken: string[] | null
+          last_security_audit: string | null
           lease_duration: string | null
           license_number: string | null
           lifestyle_description: string | null
@@ -2367,6 +2369,7 @@ export type Database = {
           country_of_residence?: string | null
           created_at?: string | null
           credit_score_range?: string | null
+          data_sensitivity_level?: string | null
           drinking?: string | null
           drinking_policy?: string | null
           education?: string | null
@@ -2397,6 +2400,7 @@ export type Database = {
           is_active?: boolean
           is_public?: boolean | null
           languages_spoken?: string[] | null
+          last_security_audit?: string | null
           lease_duration?: string | null
           license_number?: string | null
           lifestyle_description?: string | null
@@ -2493,6 +2497,7 @@ export type Database = {
           country_of_residence?: string | null
           created_at?: string | null
           credit_score_range?: string | null
+          data_sensitivity_level?: string | null
           drinking?: string | null
           drinking_policy?: string | null
           education?: string | null
@@ -2523,6 +2528,7 @@ export type Database = {
           is_active?: boolean
           is_public?: boolean | null
           languages_spoken?: string[] | null
+          last_security_audit?: string | null
           lease_duration?: string | null
           license_number?: string | null
           lifestyle_description?: string | null
