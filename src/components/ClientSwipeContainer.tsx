@@ -7,9 +7,11 @@ import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientPro
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
-import { Flame, X, RotateCcw, Users, Filter, Zap, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Flame, X, RotateCcw, Users, Filter, Zap, ThumbsDown, ThumbsUp, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
@@ -21,6 +23,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
   const { data: swipedIds = [] } = useSwipedClientProfiles();
   const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
@@ -36,26 +39,27 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
     console.log('Swiping client:', currentClient.user_id, 'direction:', direction);
 
-    swipeMutation.mutate({
-      targetId: currentClient.user_id,
-      direction,
-      targetType: 'profile'
-    });
-
-    setCurrentIndex(prev => prev + 1);
-
-    // Show success message for owners
-    if (direction === 'right') {
-      toast({
-        title: '💚 Liked!',
-        description: `You liked ${currentClient.name}'s profile.`,
+    setSwipeDirection(direction);
+    
+    // Show visual feedback
+    setTimeout(() => {
+      swipeMutation.mutate({
+        targetId: currentClient.user_id,
+        direction,
+        targetType: 'profile'
       });
-    } else {
-      toast({
-        title: 'Passed',
-        description: `You passed on ${currentClient.name}'s profile.`,
-      });
-    }
+
+      // Show success message for owners
+      if (direction === 'right') {
+        toast({
+          title: '💚 Liked!',
+          description: `You liked ${currentClient.name}'s profile.`,
+        });
+      }
+
+      setCurrentIndex(prev => prev + 1);
+      setSwipeDirection(null);
+    }, 300);
   }, [currentIndex, clientProfiles, swipeMutation]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
@@ -110,20 +114,33 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const handleApplyFilters = (filters: any) => {
     setAppliedFilters(filters);
     setCurrentIndex(0);
+    
+    const activeFiltersCount = Object.values(filters).flat().filter(Boolean).length;
     toast({
-      title: 'Filters Applied',
-      description: 'Clients updated based on your preferences.',
+      title: '✨ Filters Applied',
+      description: `Found tenants matching your ${activeFiltersCount} preferences.`,
     });
   };
 
+  const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
+
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[500px] max-w-sm mx-auto overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-xl p-6 text-center flex items-center justify-center">
-          <div className="space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-            <p className="text-white/70">Loading amazing tenants...</p>
+      <div className="relative w-full h-[700px] max-w-sm mx-auto">
+        <div className="w-full h-[600px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-xl">
+          <div className="p-6 space-y-4">
+            <Skeleton className="w-full h-64 rounded-lg" />
+            <Skeleton className="w-3/4 h-6" />
+            <Skeleton className="w-1/2 h-4" />
+            <div className="flex space-x-2">
+              <Skeleton className="w-16 h-6 rounded-full" />
+              <Skeleton className="w-20 h-6 rounded-full" />
+            </div>
           </div>
+        </div>
+        <div className="text-center mt-4 text-muted-foreground">
+          <Sparkles className="w-5 h-5 mx-auto mb-2 animate-spin" />
+          Finding perfect tenants...
         </div>
       </div>
     );
@@ -132,18 +149,18 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   if (error) {
     console.error('ClientSwipeContainer error:', error);
     return (
-      <div className="relative w-full h-[500px] max-w-sm mx-auto flex items-center justify-center overflow-hidden">
-        <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h3 className="text-xl font-bold mb-2 text-white">Something went wrong</h3>
-          <p className="text-white/80 mb-4">We couldn't load client profiles. Please try again.</p>
+      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
+          <div className="text-6xl mb-4">😞</div>
+          <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
+          <p className="text-muted-foreground mb-4">We couldn't load tenant profiles right now.</p>
           <Button 
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
+            className="gap-2"
           >
             <RotateCcw className="w-4 h-4" />
-            Try again
+            Try Again
           </Button>
         </div>
       </div>
@@ -152,27 +169,26 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[500px] max-w-sm mx-auto flex items-center justify-center overflow-hidden">
-        <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
-          <div className="text-6xl mb-4">
-            <Users className="w-16 h-16 mx-auto text-white/60" />
-          </div>
-          <h3 className="text-xl font-bold mb-2 text-white">No Clients Available</h3>
-          <p className="text-white/80 mb-4">No client profiles found. Try refreshing or adjusting filters.</p>
+      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20 rounded-xl p-8">
+          <div className="text-6xl mb-4">👥</div>
+          <h3 className="text-xl font-bold mb-2">No Tenants Found</h3>
+          <p className="text-muted-foreground mb-4">
+            Try adjusting your filters to see more profiles.
+          </p>
           <div className="space-y-2">
             <Button 
               onClick={() => setShowFilters(true)}
               variant="outline"
-              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
+              className="gap-2 w-full"
             >
-              <Filter className="w-4 h-4" />
+              <SlidersHorizontal className="w-4 h-4" />
               Adjust Filters
             </Button>
             <Button 
               onClick={handleRefresh}
               variant="outline"
-              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
-              disabled={isRefetching}
+              className="gap-2 w-full"
             >
               <RotateCcw className="w-4 h-4" />
               Refresh
@@ -185,28 +201,29 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[500px] max-w-sm mx-auto flex items-center justify-center overflow-hidden">
-        <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
+      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2 text-white">All caught up!</h3>
-          <p className="text-white/80 mb-4">You've seen all available tenants. Check back later for more!</p>
+          <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
+          <p className="text-muted-foreground mb-4">
+            No more tenant profiles match your current filters.
+          </p>
           <div className="space-y-2">
             <Button 
               onClick={() => setShowFilters(true)}
               variant="outline"
-              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
+              className="gap-2 w-full"
             >
-              <Filter className="w-4 h-4" />
-              Adjust Filters
+              <SlidersHorizontal className="w-4 h-4" />
+              Expand Search
             </Button>
             <Button 
               onClick={handleRefresh}
               variant="outline"
-              className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
-              disabled={isRefetching}
+              className="gap-2 w-full"
             >
               <RotateCcw className="w-4 h-4" />
-              Refresh
+              Check for New Profiles
             </Button>
           </div>
         </div>
@@ -218,92 +235,111 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const nextClient = clientProfiles[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-sm mx-auto space-y-2 px-2">
-      {/* Header with Filter Button - Compact */}
-      <div className="flex justify-between items-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowFilters(true)}
-          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-        >
-          <Filter className="w-4 h-4 mr-1" />
-          Filters
-        </Button>
-        
-        <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-white/80 text-xs">
-            {clientProfiles.length - currentIndex} tenants
-          </span>
+    <div className="w-full max-w-sm mx-auto space-y-2">
+      {/* Header with Progress and Filters - Compact */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(true)}
+            className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:bg-primary/20 gap-2"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Tenant Filters
+          </Button>
+          
+          {Object.keys(appliedFilters).length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setAppliedFilters({});
+                setCurrentIndex(0);
+              }}
+              className="bg-gradient-to-r from-destructive/10 to-destructive/5 border-destructive/20 hover:bg-destructive/20"
+            >
+              Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
+            </Button>
+          )}
+        </div>
+
+        {/* Progress Bar */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Tenant {currentIndex + 1} of {clientProfiles.length}</span>
+            <span>{Math.round(progress)}% complete</span>
+          </div>
+          <Progress value={progress} className="h-2" />
         </div>
       </div>
 
       {/* Cards Container - Positioned Higher */}
-      <div className="relative w-full h-[520px] overflow-hidden">
-        {/* Next card (behind) */}
-        {nextClient && (
-          <ClientProfileCard
-            profile={nextClient}
-            onSwipe={() => {}}
-            onTap={() => {}}
-            onInsights={() => {}}
-            onMessage={() => {}}
-            isTop={false}
-            hasPremium={hasPremiumMessaging}
-          />
-        )}
-        
-        {/* Current card (on top) */}
-        {currentClient && (
-          <ClientProfileCard
-            profile={currentClient}
-            onSwipe={handleSwipe}
-            onTap={() => onClientTap(currentClient.user_id)}
-            onInsights={() => handleInsights(currentClient.user_id)}
-            onMessage={handleMessage}
-            isTop={true}
-            hasPremium={hasPremiumMessaging}
-          />
-        )}
+      <div className="relative w-full h-[620px]">
+        <AnimatePresence>
+          {nextClient && (
+            <ClientProfileCard
+              profile={nextClient}
+              onSwipe={() => {}}
+              onTap={() => {}}
+              onInsights={() => {}}
+              onMessage={() => {}}
+              isTop={false}
+              hasPremium={hasPremiumMessaging}
+            />
+          )}
+          {currentClient && (
+            <motion.div
+              key={currentClient.user_id}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ 
+                x: swipeDirection === 'right' ? 300 : swipeDirection === 'left' ? -300 : 0,
+                opacity: 0,
+                transition: { duration: 0.3 }
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <ClientProfileCard
+                profile={currentClient}
+                onSwipe={handleSwipe}
+                onTap={() => onClientTap(currentClient.user_id)}
+                onInsights={() => handleInsights(currentClient.user_id)}
+                onMessage={handleMessage}
+                isTop={true}
+                hasPremium={hasPremiumMessaging}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Action Buttons - Mobile Optimized */}
-      <div className="flex justify-center gap-6 items-center px-4">
+      {/* Action Buttons */}
+      <motion.div 
+        className="flex justify-center gap-6 items-center"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
         <Button
           size="lg"
           variant="outline"
-          className="w-14 h-14 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200 flex-shrink-0"
+          className="w-20 h-20 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <ThumbsDown className="w-5 h-5" />
+          <ThumbsDown className="w-8 h-8" />
         </Button>
         
         <Button
           size="lg"
-          className="w-14 h-14 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200 flex-shrink-0"
+          className="w-20 h-20 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200"
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <ThumbsUp className="w-5 h-5 text-white" />
+          <ThumbsUp className="w-8 h-8 text-white" />
         </Button>
-      </div>
-
-      {/* Progress indicator - Compact */}
-      <div className="text-center">
-        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
-          <span className="text-white/60 text-xs">
-            {currentIndex + 1} of {clientProfiles.length}
-          </span>
-          <div className="w-12 h-1 bg-white/20 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-green-400 to-blue-400 transition-all duration-300"
-              style={{ width: `${((currentIndex + 1) / clientProfiles.length) * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
+      </motion.div>
 
       {/* Advanced Filters Dialog */}
       <AdvancedFilters

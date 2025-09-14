@@ -49,7 +49,7 @@ export default function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="space-y-4"
         >
-          <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg">
+          <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center">
             TINDERENT
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
