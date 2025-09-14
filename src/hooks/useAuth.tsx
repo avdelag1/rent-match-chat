@@ -59,19 +59,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // First try to get role from user metadata (most reliable for fresh logins)
       let role = user.user_metadata?.role;
+      let onboardingCompleted = false;
       
       // If no role in metadata, try to get from profiles table
       if (!role) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, onboarding_completed')
           .eq('id', user.id)
           .single();
         
         role = profile?.role;
+        onboardingCompleted = profile?.onboarding_completed || false;
+      } else {
+        // If role from metadata, check onboarding status
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single();
+        
+        onboardingCompleted = profile?.onboarding_completed || false;
       }
       
-      console.log('User role:', role, 'from metadata:', user.user_metadata?.role);
+      console.log('User role:', role, 'onboarding completed:', onboardingCompleted);
+
+      // If user hasn't completed onboarding, redirect to onboarding
+      if (!onboardingCompleted && (role === 'client' || role === 'owner')) {
+        if (location.pathname !== '/onboarding') {
+          console.log('Redirecting to onboarding');
+          navigate('/onboarding', { replace: true });
+        }
+        return;
+      }
 
       const targetPath =
         role === 'client'

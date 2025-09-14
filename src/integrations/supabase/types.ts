@@ -5769,6 +5769,10 @@ export type Database = {
           user_role: string
         }[]
       }
+      complete_user_onboarding: {
+        Args: { onboarding_data?: Json; user_id: string }
+        Returns: undefined
+      }
       deactivate_expired_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
