@@ -37,20 +37,20 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId);
 
-  // Emergency fallback content for debugging
+  // Mobile-optimized content
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="owner">
-      <div className="min-h-screen p-2 md:p-4">
-        <div className="max-w-lg mx-auto">
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <div className="w-full max-w-sm mx-auto px-4 py-6">
           {/* Compact Header */}
-          <div className="text-center mb-3">
-            <h1 className="text-xl md:text-2xl font-bold text-white mb-1">Find Your Tenants</h1>
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-bold text-white mb-1">Find Your Tenants</h1>
             <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-accent mx-auto mb-1"></div>
             <p className="text-white/70 text-sm">Swipe to connect with clients</p>
           </div>
 
           {/* Compact Tenants Section */}
-          <div className="rounded-lg p-2 min-h-[70vh]">
+          <div className="w-full">
             <h2 className="text-lg font-semibold text-white text-center mb-1">Available Tenants</h2>
             <p className="text-white/60 text-center mb-4 text-sm">{profiles.length} profiles</p>
             
@@ -97,7 +97,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 </Button>
               </div>
             ) : (
-              <div className="flex justify-center">
+              <div className="w-full">
                 <ClientSwipeContainer 
                   onClientTap={handleProfileTap}
                   onInsights={handleInsights}

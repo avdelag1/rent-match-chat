@@ -218,7 +218,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const nextClient = clientProfiles[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-sm mx-auto space-y-6">
+    <div className="w-full max-w-sm mx-auto space-y-4 px-2">
       {/* Header with Filter Button */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -240,7 +240,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       </div>
 
       {/* Cards Container */}
-      <div className="relative w-full h-[600px]">
+      <div className="relative w-full h-[500px] overflow-hidden">
         {/* Next card (behind) */}
         {nextClient && (
           <ClientProfileCard
@@ -268,25 +268,25 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         )}
       </div>
 
-      {/* Action Buttons - Compact */}
-      <div className="flex justify-center gap-4 items-center">
+      {/* Action Buttons - Mobile Optimized */}
+      <div className="flex justify-center gap-6 items-center px-4">
         <Button
           size="lg"
           variant="outline"
-          className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200"
+          className="w-14 h-14 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200 flex-shrink-0"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <ThumbsDown className="w-6 h-6 md:w-8 md:h-8" />
+          <ThumbsDown className="w-5 h-5" />
         </Button>
         
         <Button
           size="lg"
-          className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200"
+          className="w-14 h-14 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200 flex-shrink-0"
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-white" />
+          <ThumbsUp className="w-5 h-5 text-white" />
         </Button>
       </div>
 
