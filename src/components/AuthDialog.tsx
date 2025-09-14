@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Eye, EyeOff, Flame, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -74,6 +74,12 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md w-full mx-auto border-0 p-0 overflow-hidden max-h-[95vh] bg-transparent">
+        <DialogTitle className="sr-only">
+          {isLogin ? 'Sign In' : 'Sign Up'} as {role}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Tinderent
+        </DialogDescription>
         <div className="max-h-[95vh] overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
