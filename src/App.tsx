@@ -18,7 +18,7 @@ import ClientSavedSearches from "./pages/ClientSavedSearches";
 import ClientMatchHistory from "./pages/ClientMatchHistory";
 import ClientActivityFeed from "./pages/ClientActivityFeed";
 import ClientSecurity from "./pages/ClientSecurity";
-import OwnerDashboard from "./pages/OwnerDashboard";
+import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
 import OwnerProfile from "./pages/OwnerProfile";
 import OwnerSettings from "./pages/OwnerSettings";
 import OwnerSavedSearches from "./pages/OwnerSavedSearches";
@@ -126,7 +126,7 @@ const App = () => (
               path="/owner/dashboard" 
               element={
                 <ProtectedRoute requiredRole="owner">
-                  <OwnerDashboard />
+                  <EnhancedOwnerDashboard />
                 </ProtectedRoute>
               } 
             />
