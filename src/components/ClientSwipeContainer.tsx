@@ -316,29 +316,39 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
       {/* Action Buttons */}
       <motion.div 
-        className="flex justify-center gap-6 items-center"
+        className="flex justify-center gap-8 items-center"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <Button
-          size="lg"
-          variant="outline"
-          className="w-20 h-20 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200"
-          onClick={() => handleButtonSwipe('left')}
-          disabled={swipeMutation.isPending}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <ThumbsDown className="w-8 h-8" />
-        </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-red-400/50 text-white hover:from-red-600 hover:to-orange-600 hover:border-red-500 transition-all duration-300 shadow-lg hover:shadow-red-500/25"
+            onClick={() => handleButtonSwipe('left')}
+            disabled={swipeMutation.isPending}
+          >
+            <X className="w-7 h-7" />
+          </Button>
+        </motion.div>
         
-        <Button
-          size="lg"
-          className="w-20 h-20 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200"
-          onClick={() => handleButtonSwipe('right')}
-          disabled={swipeMutation.isPending}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <ThumbsUp className="w-8 h-8 text-white" />
-        </Button>
+          <Button
+            size="lg"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-300 shadow-lg hover:shadow-green-500/25 border-2 border-green-400/50 hover:border-green-500"
+            onClick={() => handleButtonSwipe('right')}
+            disabled={swipeMutation.isPending}
+          >
+            <Flame className="w-7 h-7 text-white" />
+          </Button>
+        </motion.div>
       </motion.div>
 
       {/* Advanced Filters Dialog */}
