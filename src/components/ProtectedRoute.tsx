@@ -25,7 +25,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
         .from('profiles')
         .select('role, onboarding_completed')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
