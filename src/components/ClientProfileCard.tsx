@@ -129,7 +129,7 @@ export function ClientProfileCard({
   return (
     <Card
       ref={cardRef}
-      className="absolute w-full h-full bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-xl overflow-hidden cursor-grab active:cursor-grabbing"
+      className="absolute w-full h-full max-w-sm bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-xl overflow-hidden cursor-grab active:cursor-grabbing"
       style={cardStyle}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}

@@ -158,47 +158,47 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full" style={{ background: 'var(--app-gradient)' }}>
+      <div className="min-h-screen flex w-full overflow-x-hidden" style={{ background: 'var(--app-gradient)' }}>
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
-        <InsetComponent className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-4 bg-white/95 backdrop-blur-lg px-6 shadow-lg border-b border-gray-200">
-            <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-all duration-200" />
+        <InsetComponent className="flex-1 overflow-x-hidden">
+          <header className="flex h-16 shrink-0 items-center gap-2 bg-white/95 backdrop-blur-lg px-3 shadow-lg border-b border-gray-200 overflow-x-hidden">
+            <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
             
-            {/* Brand Header */}
-            <div className="flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm" style={{ background: 'var(--button-gradient)' }}>
-                <Flame className="w-5 h-5 text-white" />
+            {/* Brand Header - Responsive */}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm flex-shrink-0" style={{ background: 'var(--button-gradient)' }}>
+                <Flame className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <h1 className="text-gray-900 font-bold text-xl">TINDERENT</h1>
-                <p className="text-gray-600 text-sm font-medium">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-gray-900 font-bold text-lg leading-tight truncate">TINDERENT</h1>
+                <p className="text-gray-600 text-xs font-medium truncate">
                   {userRole === 'owner' ? 'Owner Dashboard' : 'Client Dashboard'}
                 </p>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
+            {/* Action Buttons - Mobile Optimized */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               {userRole === 'owner' && (
                 <Button
                   size="sm"
-                  className="text-white font-medium rounded-lg px-4 shadow-md"
+                  className="text-white font-medium rounded-lg px-3 py-1 shadow-md text-xs whitespace-nowrap"
                   style={{ background: 'var(--button-gradient)' }}
                   onClick={() => setShowOwnerSwipe(true)}
                 >
                   Find Tenants
                 </Button>
               )}
-              <div className="bg-gray-100 rounded-lg px-4 py-2 shadow-sm">
-                <span className="text-gray-700 text-sm font-medium">
-                  Welcome back! 
+              <div className="hidden sm:block bg-gray-100 rounded-lg px-3 py-1 shadow-sm">
+                <span className="text-gray-700 text-xs font-medium whitespace-nowrap">
+                  Welcome!
                 </span>
               </div>
             </div>
           </header>
 
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto overflow-x-hidden">
             {
               React.Children.map(children, (child) => {
                 if (React.isValidElement(child)) {

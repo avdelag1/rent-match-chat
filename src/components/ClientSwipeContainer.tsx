@@ -118,7 +118,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto">
+      <div className="relative w-full h-[500px] max-w-sm mx-auto overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-xl p-6 text-center flex items-center justify-center">
           <div className="space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
@@ -132,7 +132,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   if (error) {
     console.error('ClientSwipeContainer error:', error);
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[500px] max-w-sm mx-auto flex items-center justify-center overflow-hidden">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">⚠️</div>
           <h3 className="text-xl font-bold mb-2 text-white">Something went wrong</h3>
@@ -152,7 +152,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[500px] max-w-sm mx-auto flex items-center justify-center overflow-hidden">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">
             <Users className="w-16 h-16 mx-auto text-white/60" />
@@ -185,7 +185,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[500px] max-w-sm mx-auto flex items-center justify-center overflow-hidden">
         <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2 text-white">All caught up!</h3>
