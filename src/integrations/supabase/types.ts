@@ -5735,10 +5735,6 @@ export type Database = {
           old_package_name: string
         }[]
       }
-      check_password_strength: {
-        Args: { password: string }
-        Returns: boolean
-      }
       check_property_availability: {
         Args: {
           p_end_date: string
@@ -7592,10 +7588,6 @@ export type Database = {
       }
       update_conversation_last_message: {
         Args: { p_conversation_id: number; p_last_message: string }
-        Returns: undefined
-      }
-      update_password_complexity: {
-        Args: { password: string }
         Returns: undefined
       }
       update_swipe_analytics: {
