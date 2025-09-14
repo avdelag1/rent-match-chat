@@ -231,10 +231,12 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
         return finalList;
       } catch (error) {
         console.error('Failed to fetch client profiles:', error);
-        // On any unexpected error, ensure UI still works
+        // On any unexpected error, ensure UI still works with mock data
         return MOCK_CLIENT_PROFILES.filter(p => !excludeSwipedIds.includes(p.user_id));
       }
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 }
 
@@ -242,23 +244,30 @@ export function useSwipedClientProfiles() {
   return useQuery({
     queryKey: ['owner-swipes'],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return [];
+      try {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return [];
 
-      // Only exclude client profiles swiped within the last 5 days
-      const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+        // Only exclude client profiles swiped within the last 5 days
+        const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
 
-      const { data: likes, error } = await supabase
-        .from('likes')
-        .select('target_id')
-        .eq('user_id', user.user.id)
-        .gte('created_at', fiveDaysAgo);
+        const { data: likes, error } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.user.id)
+          .gte('created_at', fiveDaysAgo);
 
-      if (error) {
-        console.error('Error fetching owner swipes:', error);
+        if (error) {
+          console.error('Error fetching owner swipes:', error);
+          return [];
+        }
+        return likes?.map(l => l.target_id) || [];
+      } catch (error) {
+        console.error('Failed to fetch swiped client profiles:', error);
         return [];
       }
-      return likes.map(l => l.target_id);
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 }
