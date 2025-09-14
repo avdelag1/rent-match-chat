@@ -73,7 +73,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm w-full mx-auto border-0 p-0 overflow-hidden max-h-[85vh] bg-transparent">
+      <DialogContent className="max-w-sm w-full mx-auto border-0 p-0 overflow-hidden max-h-[95vh] bg-transparent">
+        <div className="max-h-[95vh] overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -107,7 +108,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           </div>
 
           {/* Main Content */}
-          <div className="bg-white rounded-b-2xl p-4 space-y-4">
+          <div className="bg-white rounded-b-2xl p-4 space-y-4 pb-6">
             {/* OAuth Buttons */}
             <div className="space-y-2">
               <Button
@@ -278,6 +279,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             </div>
           </div>
         </motion.div>
+        </div>
       </DialogContent>
     </Dialog>
   );
