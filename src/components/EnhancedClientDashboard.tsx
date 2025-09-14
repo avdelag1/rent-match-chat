@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { SwipeContainer } from '@/components/SwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 import { useUserSubscription } from '@/hooks/useSubscription';
@@ -94,7 +93,6 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: Enhance
               </p>
             </div>
             <div className="flex gap-2">
-              <ThemeToggle />
               <Button variant="outline" size="icon">
                 <Settings className="w-4 h-4" />
               </Button>

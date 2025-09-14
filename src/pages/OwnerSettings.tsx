@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PremiumSubscriptionManager } from "@/components/PremiumSubscriptionManager";
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
 import { AccountSecurity } from "@/components/AccountSecurity";
-import { ThemeSelector } from "@/components/ThemeSelector";
 import { PropertyManagement } from "@/components/PropertyManagement";
 import { TenantScreening } from "@/components/TenantScreening";
 import { LeaseManagement } from "@/components/LeaseManagement";
@@ -20,11 +19,10 @@ const OwnerSettings = () => {
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid grid-cols-8 w-full">
+            <TabsList className="grid grid-cols-7 w-full">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="subscription">Subscription</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="theme">Theme</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="screening">Screening</TabsTrigger>
               <TabsTrigger value="leases">Leases</TabsTrigger>
@@ -43,10 +41,6 @@ const OwnerSettings = () => {
 
             <TabsContent value="security">
               <AccountSecurity userRole="owner" />
-            </TabsContent>
-
-            <TabsContent value="theme">
-              <ThemeSelector />
             </TabsContent>
 
             <TabsContent value="properties">

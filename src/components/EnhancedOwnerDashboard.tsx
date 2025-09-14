@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
 import { useUserSubscription } from '@/hooks/useSubscription';
@@ -95,7 +94,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
               </p>
             </div>
             <div className="flex gap-2">
-              <ThemeToggle />
               <Button variant="outline" size="icon">
                 <Settings className="w-4 h-4" />
               </Button>

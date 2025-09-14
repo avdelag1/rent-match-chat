@@ -57,7 +57,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as LegalDocument[];
+      return ((data || []) as unknown) as LegalDocument[];
     },
     enabled: open
   });

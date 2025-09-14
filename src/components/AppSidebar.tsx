@@ -173,7 +173,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                         style={isActive(item.url) ? { background: 'var(--button-gradient)' } : {}}
                       >
                         <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-white' : 'text-gray-600'}`} />
-                        <span className={`font-medium ${isActive(item.url) ? 'text-white' : 'text-gray-700'}`}>
+                        <span className={`font-medium ml-3 ${isActive(item.url) ? 'text-white' : 'text-gray-700'}`}>
                           {item.title}
                         </span>
                       </SidebarMenuButton>
@@ -193,7 +193,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                       className="w-full rounded-lg p-3 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 transition-all duration-200"
                     >
                       <LogOut className="w-5 h-5 text-red-600" />
-                      <span className="font-medium text-red-700">Sign Out</span>
+                      <span className="font-medium text-red-700 ml-3">Sign Out</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </motion.div>
