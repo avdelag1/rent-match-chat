@@ -94,8 +94,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     setCurrentIndex(0);
     await refetch();
     toast({
-      title: '🔄 Fresh Properties!',
-      description: 'We loaded the latest listings just for you.',
+      title: 'Properties Updated',
+      description: 'Latest listings loaded.',
     });
   };
 

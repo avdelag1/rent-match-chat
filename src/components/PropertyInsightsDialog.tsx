@@ -95,14 +95,16 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
               </div>
             )}
 
-            {/* Market Insights */}
+            {/* Property Analytics */}
             <div>
-              <h4 className="font-semibold mb-2">Market Insights</h4>
+              <h4 className="font-semibold mb-2">Property Analytics</h4>
               <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                <p className="text-sm">📊 Average rent in {listing.neighborhood}: ${(listing.price * 0.9).toLocaleString()} - ${(listing.price * 1.1).toLocaleString()}</p>
-                <p className="text-sm">🏘️ Similar properties available: 12-15 in this area</p>
-                <p className="text-sm">⭐ Property score: 8.5/10 based on location and amenities</p>
-                <p className="text-sm">📈 Rental demand: High in this neighborhood</p>
+                <p className="text-sm">📊 Current rent: ${listing.price?.toLocaleString()}/month</p>
+                <p className="text-sm">📏 Space: {listing.square_footage ? `${listing.square_footage} sqft` : 'Size not specified'}</p>
+                <p className="text-sm">🏠 Type: {listing.property_type} in {listing.neighborhood}</p>
+                <p className="text-sm">✨ Features: {(listing.amenities?.length || 0)} amenities listed</p>
+                {listing.furnished && <p className="text-sm">🪑 Furnished property available</p>}
+                {listing.pet_friendly && <p className="text-sm">🐕 Pet-friendly accommodation</p>}
               </div>
             </div>
           </div>

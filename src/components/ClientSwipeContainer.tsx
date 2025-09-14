@@ -84,8 +84,8 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     setCurrentIndex(0);
     await refetch();
     toast({
-      title: 'Refreshed',
-      description: 'We reloaded the latest client profiles.',
+      title: 'Profiles Updated',
+      description: 'Latest client profiles loaded.',
     });
   };
 

@@ -4,11 +4,13 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Mail, Calendar, MapPin } from "lucide-react";
+import { useOwnerStats } from "@/hooks/useOwnerStats";
+import { User, Mail, Calendar, MapPin, TrendingUp } from "lucide-react";
 
 const OwnerProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { user } = useAuth();
+  const { data: stats, isLoading: statsLoading } = useOwnerStats();
 
   return (
     <DashboardLayout userRole="owner">
@@ -69,23 +71,30 @@ const OwnerProfile = () => {
             {/* Business Stats */}
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardHeader>
-                <CardTitle className="text-white">Business Overview</CardTitle>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Business Overview
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary mb-2">0</div>
-                    <p className="text-white/60">Active Properties</p>
+                {statsLoading ? (
+                  <div className="text-center text-white/60">Loading statistics...</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary mb-2">{stats?.activeProperties || 0}</div>
+                      <p className="text-white/60">Active Properties</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary mb-2">{stats?.totalInquiries || 0}</div>
+                      <p className="text-white/60">Total Inquiries</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary mb-2">{stats?.activeMatches || 0}</div>
+                      <p className="text-white/60">Active Conversations</p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary mb-2">0</div>
-                    <p className="text-white/60">Total Inquiries</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary mb-2">0</div>
-                    <p className="text-white/60">Active Tenants</p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 

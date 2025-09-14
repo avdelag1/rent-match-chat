@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
+import { ClientStatsCard } from '@/components/ClientStatsCard';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -40,18 +41,19 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   // Emergency fallback content for debugging
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="client">
-      <div className="min-h-screen p-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Emergency Visible Header */}
-          <div className="text-center mb-8">
-            <div className="border-b border-white/10 pb-6">
-              <h1 className="text-4xl font-bold text-white mb-2">Discover Your Perfect Home</h1>
-              <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto"></div>
-            </div>
+      <div className="min-h-screen p-4">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-white mb-2">Discover Properties</h1>
+            <p className="text-white/70">Find your perfect home</p>
           </div>
 
-          {/* Emergency Properties Section with guaranteed content */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 min-h-[600px]" style={{ boxShadow: 'var(--shadow-card)' }}>
+          {/* Stats Card - Above Properties */}
+          <ClientStatsCard />
+
+          {/* Properties Section */}
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
             <h2 className="text-xl font-semibold text-gray-900 text-center mb-6">Available Properties</h2>
             
             {isLoading ? (
@@ -60,10 +62,6 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
                   <Skeleton className="w-full h-64 rounded-lg" />
                   <Skeleton className="w-3/4 h-6" />
                   <Skeleton className="w-1/2 h-4" />
-                  <div className="flex space-x-2">
-                    <Skeleton className="w-16 h-6 rounded-full" />
-                    <Skeleton className="w-20 h-6 rounded-full" />
-                  </div>
                 </div>
               </div>
             ) : error ? (

@@ -146,10 +146,27 @@ export function ClientProfileCard({
       {/* Main Image */}
       <div className="relative h-3/5 overflow-hidden">
         <img
-          src={profile.profile_images[0] || '/placeholder.svg'}
+          src={profile.profile_images?.[0] || '/api/placeholder/400/600'}
           alt={profile.name}
           className="w-full h-full object-cover"
           draggable={false}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const parent = target.parentElement;
+            if (parent) {
+              parent.innerHTML = `
+                <div class="w-full h-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
+                  <div class="text-center text-gray-600">
+                    <div class="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
+                      <span class="text-2xl font-bold">${profile.name?.[0] || '?'}</span>
+                    </div>
+                    <p class="text-sm">No Photo</p>
+                  </div>
+                </div>
+              `;
+            }
+          }}
         />
         
         {/* Gradient Overlay */}

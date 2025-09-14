@@ -63,7 +63,7 @@ export function EnhancedSwipeCard({
   const rotate = useTransform(x, [-300, 300], [-30, 30]);
   const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 1, 1, 1, 0]);
 
-  const images = listing.images || ['/placeholder.svg'];
+  const images = listing.images && listing.images.length > 0 ? listing.images : [];
   const hasMultipleImages = images.length > 1;
 
   const handleDragEnd = (event: any, info: PanInfo) => {
@@ -125,9 +125,21 @@ export function EnhancedSwipeCard({
               initial={{ scale: 1.1, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3 }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder.svg';
-              }}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `
+                      <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <div class="text-center text-gray-500">
+                          <div class="text-4xl mb-2">🏠</div>
+                          <p class="text-sm">Photo unavailable</p>
+                        </div>
+                      </div>
+                    `;
+                  }
+                }}
             />
             
             {/* Image Navigation */}
