@@ -144,28 +144,18 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
             </Card>
           </motion.div>
 
-          {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="w-full">
             
             {/* Swipe Section */}
-            <motion.div variants={itemVariants} className="lg:col-span-2">
+            <motion.div variants={itemVariants} className="w-full">
               <Card className="overflow-hidden">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-foreground">
-                    <Users className="w-5 h-5 text-primary" />
-                    Tenant Discovery
-                  </CardTitle>
                   <div className="flex gap-2">
                     <Badge variant="outline" className="border-primary/50 text-primary">
                       <Zap className="w-3 h-3 mr-1" />
                       Smart Matching
                     </Badge>
-                    {hasPremium && (
-                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none">
-                        <Crown className="w-3 h-3 mr-1" />
-                        Premium Active
-                      </Badge>
-                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="flex justify-center pb-8">
@@ -199,102 +189,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
               </Card>
             </motion.div>
 
-            {/* Sidebar */}
-            <motion.div variants={itemVariants} className="space-y-6">
-              
-              {/* Premium Subscription */}
-              <PremiumSubscriptionManager userRole="owner" />
-
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full justify-start gap-2" 
-                    variant="outline"
-                    onClick={() => {/* Navigate to properties */}}
-                  >
-                    <Home className="w-4 h-4 text-blue-400" />
-                    My Properties
-                  </Button>
-                  
-                  <Button 
-                    className="w-full justify-start gap-2" 
-                    variant="outline"
-                    onClick={() => {/* Add new property */}}
-                  >
-                    <Plus className="w-4 h-4 text-green-400" />
-                    Add Property
-                  </Button>
-                  
-                  <Button 
-                    className="w-full justify-start gap-2" 
-                    variant="outline"
-                    onClick={() => {/* Navigate to messages */}}
-                  >
-                    <MessageCircle className="w-4 h-4 text-purple-400" />
-                    Messages
-                  </Button>
-                  
-                  <Button 
-                    className="w-full justify-start gap-2" 
-                    variant="outline"
-                    onClick={() => {/* Open filters */}}
-                  >
-                    <Filter className="w-4 h-4 text-orange-400" />
-                    Tenant Filters
-                  </Button>
-                  
-                  <Button 
-                    className="w-full justify-start gap-2" 
-                    variant="outline"
-                    onClick={() => {/* View insights */}}
-                  >
-                    <TrendingUp className="w-4 h-4 text-red-400" />
-                    Analytics
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Premium Features Teaser */}
-              {!hasPremium && (
-                <Card className="border-primary/30 bg-gradient-to-br from-primary/10 to-secondary/10">
-                  <CardContent className="p-4 text-center space-y-3">
-                    <Crown className="w-8 h-8 mx-auto text-primary animate-pulse-glow" />
-                    <div>
-                      <h3 className="font-semibold text-foreground">Unlock Premium</h3>
-                      <p className="text-xs text-muted-foreground">
-                        Get priority access to quality tenants
-                      </p>
-                    </div>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <Star className="w-3 h-3 text-yellow-400" />
-                        Unlimited Properties
-                      </div>
-                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <Eye className="w-3 h-3 text-blue-400" />
-                        Priority Visibility
-                      </div>
-                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <TrendingUp className="w-3 h-3 text-green-400" />
-                        Advanced Analytics
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      className="w-full bg-gradient-to-r from-primary to-secondary text-white"
-                      onClick={() => {/* Open subscription manager */}}
-                    >
-                      <Crown className="w-3 h-3 mr-1" />
-                      Upgrade Now
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </motion.div>
           </div>
         </div>
       </motion.div>
