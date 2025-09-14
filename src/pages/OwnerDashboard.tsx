@@ -79,19 +79,33 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 </Button>
               </div>
             ) : profiles.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-3 py-8">
-                <Users className="w-12 h-12 text-white/60" />
-                <h3 className="text-lg font-semibold text-white">No tenants available</h3>
-                <p className="text-white/70 text-center text-sm">Check back later for new profiles!</p>
-                <Button 
-                  onClick={() => refetch()}
-                  className="gap-2"
-                  variant="outline"
-                  size="sm"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Refresh
-                </Button>
+              <div className="flex flex-col items-center justify-center space-y-4 py-12">
+                <Users className="w-16 h-16 text-white/40" />
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-semibold text-white">No Tenants Available Yet</h3>
+                  <p className="text-white/70 text-sm max-w-xs">
+                    Tenant profiles will appear here once users complete their onboarding.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 w-full max-w-xs">
+                  <Button 
+                    onClick={() => refetch()}
+                    className="gap-2 w-full"
+                    variant="outline"
+                    size="sm"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Check for New Tenants
+                  </Button>
+                  <Button 
+                    className="gap-2 w-full bg-white/10 hover:bg-white/20 text-white border-white/20"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = '/owner/properties'}
+                  >
+                    Add Your Properties
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="w-full">

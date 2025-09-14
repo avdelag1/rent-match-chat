@@ -19,7 +19,8 @@ import {
   Settings,
   Crown,
   Eye,
-  Plus
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -168,11 +169,32 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                   </div>
                 </CardHeader>
                 <CardContent className="flex justify-center pb-8">
-                  <ClientSwipeContainer 
-                    onClientTap={handleClientTap} 
-                    onInsights={handleInsights}
-                    onMessageClick={onMessageClick}
-                  />
+                  {clientProfiles.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center space-y-4 py-12 text-center">
+                      <Users className="w-16 h-16 text-muted-foreground/40" />
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-semibold">No Tenants Available</h3>
+                        <p className="text-muted-foreground text-sm max-w-sm">
+                          Tenant profiles will appear here once users complete their onboarding. Check back soon!
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Refresh
+                        </Button>
+                        <Button size="sm">
+                          Add Properties
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <ClientSwipeContainer 
+                      onClientTap={handleClientTap} 
+                      onInsights={handleInsights}
+                      onMessageClick={onMessageClick}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

@@ -2399,6 +2399,7 @@ export type Database = {
           budget: number | null
           budget_max: number | null
           budget_min: number | null
+          business_type: string | null
           buy_budget_max: number | null
           buy_budget_min: number | null
           buyer_intent: string | null
@@ -2408,6 +2409,7 @@ export type Database = {
           client_budget_max: number | null
           client_budget_min: number | null
           client_description: string | null
+          contact_phone: string | null
           cooking_skills: string | null
           country_of_residence: string | null
           created_at: string | null
@@ -2489,12 +2491,16 @@ export type Database = {
           privacy_settings: Json | null
           profession: string | null
           property_description: string | null
+          property_location: string | null
+          property_photos: string[] | null
           property_preferences: Json | null
+          property_specialties: string[] | null
           property_type_want: string | null
           reason_for_moving: string | null
           references_text: string | null
           relationship_status: string | null
           rental_duration_preference: string | null
+          rental_philosophy: string | null
           required_amenities: string[] | null
           role: string | null
           sexual_orientation: string | null
@@ -2512,6 +2518,7 @@ export type Database = {
           work_location: string | null
           work_schedule: string | null
           years_experience: number | null
+          years_of_experience: number | null
         }
         Insert: {
           about_me?: string | null
@@ -2528,6 +2535,7 @@ export type Database = {
           budget?: number | null
           budget_max?: number | null
           budget_min?: number | null
+          business_type?: string | null
           buy_budget_max?: number | null
           buy_budget_min?: number | null
           buyer_intent?: string | null
@@ -2537,6 +2545,7 @@ export type Database = {
           client_budget_max?: number | null
           client_budget_min?: number | null
           client_description?: string | null
+          contact_phone?: string | null
           cooking_skills?: string | null
           country_of_residence?: string | null
           created_at?: string | null
@@ -2618,12 +2627,16 @@ export type Database = {
           privacy_settings?: Json | null
           profession?: string | null
           property_description?: string | null
+          property_location?: string | null
+          property_photos?: string[] | null
           property_preferences?: Json | null
+          property_specialties?: string[] | null
           property_type_want?: string | null
           reason_for_moving?: string | null
           references_text?: string | null
           relationship_status?: string | null
           rental_duration_preference?: string | null
+          rental_philosophy?: string | null
           required_amenities?: string[] | null
           role?: string | null
           sexual_orientation?: string | null
@@ -2641,6 +2654,7 @@ export type Database = {
           work_location?: string | null
           work_schedule?: string | null
           years_experience?: number | null
+          years_of_experience?: number | null
         }
         Update: {
           about_me?: string | null
@@ -2657,6 +2671,7 @@ export type Database = {
           budget?: number | null
           budget_max?: number | null
           budget_min?: number | null
+          business_type?: string | null
           buy_budget_max?: number | null
           buy_budget_min?: number | null
           buyer_intent?: string | null
@@ -2666,6 +2681,7 @@ export type Database = {
           client_budget_max?: number | null
           client_budget_min?: number | null
           client_description?: string | null
+          contact_phone?: string | null
           cooking_skills?: string | null
           country_of_residence?: string | null
           created_at?: string | null
@@ -2747,12 +2763,16 @@ export type Database = {
           privacy_settings?: Json | null
           profession?: string | null
           property_description?: string | null
+          property_location?: string | null
+          property_photos?: string[] | null
           property_preferences?: Json | null
+          property_specialties?: string[] | null
           property_type_want?: string | null
           reason_for_moving?: string | null
           references_text?: string | null
           relationship_status?: string | null
           rental_duration_preference?: string | null
+          rental_philosophy?: string | null
           required_amenities?: string[] | null
           role?: string | null
           sexual_orientation?: string | null
@@ -2770,6 +2790,7 @@ export type Database = {
           work_location?: string | null
           work_schedule?: string | null
           years_experience?: number | null
+          years_of_experience?: number | null
         }
         Relationships: []
       }

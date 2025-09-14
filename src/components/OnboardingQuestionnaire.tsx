@@ -26,6 +26,15 @@ interface FormData {
   budget_max?: number;
   has_pets?: boolean;
   smoking?: boolean;
+  // Owner-specific fields
+  business_type?: string;
+  property_description?: string;
+  property_location?: string;
+  contact_phone?: string;
+  years_of_experience?: number;
+  property_specialties?: string[];
+  rental_philosophy?: string;
+  property_photos?: string[];
 }
 
 const interestOptions = [
@@ -42,6 +51,15 @@ const propertyTypeOptions = [
   'Apartment', 'House', 'Studio', 'Condo', 'Townhouse', 'Villa', 'Room'
 ];
 
+const businessTypeOptions = [
+  'Rent Only', 'Sale Only', 'Both Rent & Sale'
+];
+
+const propertySpecialtyOptions = [
+  'Luxury Properties', 'Budget-Friendly', 'Student Housing', 'Family Homes', 
+  'Pet-Friendly', 'Short-term Rentals', 'Long-term Rentals', 'Commercial'
+];
+
 export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnaireProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({});
@@ -49,7 +67,7 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const totalSteps = userRole === 'client' ? 4 : 3;
+  const totalSteps = userRole === 'client' ? 4 : 6;
 
   const handleSkip = async () => {
     try {
@@ -127,6 +145,39 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
   const renderStep = () => {
     switch (currentStep) {
       case 1:
+        if (userRole === 'owner') {
+          return (
+            <div className="space-y-6">
+              <div>
+                <Label htmlFor="business_type" className="text-lg font-medium">What type of business do you operate?</Label>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {businessTypeOptions.map((type) => (
+                    <Badge
+                      key={type}
+                      variant={formData.business_type === type ? "default" : "outline"}
+                      className="cursor-pointer px-4 py-2 text-sm"
+                      onClick={() => setFormData(prev => ({ ...prev, business_type: type }))}
+                    >
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="contact_phone" className="text-lg font-medium">Contact Phone</Label>
+                <Input
+                  id="contact_phone"
+                  type="tel"
+                  value={formData.contact_phone || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
+                  className="mt-2 h-12 text-lg"
+                  placeholder="Your business phone number"
+                />
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="space-y-6">
             <div>
@@ -157,6 +208,36 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
         );
       
       case 2:
+        if (userRole === 'owner') {
+          return (
+            <div className="space-y-6">
+              <div>
+                <Label htmlFor="property_location" className="text-lg font-medium">Where are your properties located?</Label>
+                <Input
+                  id="property_location"
+                  value={formData.property_location || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, property_location: e.target.value }))}
+                  className="mt-2 h-12 text-lg"
+                  placeholder="e.g., Tulum, Mexico City, etc."
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="years_of_experience" className="text-lg font-medium">Years of experience in real estate</Label>
+                <Input
+                  id="years_of_experience"
+                  type="number"
+                  min="0"
+                  max="50"
+                  value={formData.years_of_experience || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, years_of_experience: parseInt(e.target.value) || undefined }))}
+                  className="mt-2 h-12 text-lg"
+                  placeholder="Number of years"
+                />
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="space-y-6">
             <div>
@@ -188,6 +269,37 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
         );
       
       case 3:
+        if (userRole === 'owner') {
+          return (
+            <div className="space-y-6">
+              <div>
+                <Label className="text-lg font-medium">Property specialties</Label>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {propertySpecialtyOptions.map((specialty) => (
+                    <Badge
+                      key={specialty}
+                      variant={formData.property_specialties?.includes(specialty) ? "default" : "outline"}
+                      className="cursor-pointer px-4 py-2 text-sm"
+                      onClick={() => handleArrayToggle('property_specialties', specialty)}
+                    >
+                      {specialty}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <Label className="text-lg font-medium">Describe your properties</Label>
+                <Textarea
+                  value={formData.property_description || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, property_description: e.target.value }))}
+                  className="mt-2 min-h-[120px] text-base"
+                  placeholder="Tell clients about your properties, amenities, and what makes them special..."
+                />
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="space-y-6">
             <div>
@@ -254,7 +366,32 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
           </div>
         );
       
-      case 4: // Only for clients
+      case 4:
+        if (userRole === 'owner') {
+          return (
+            <div className="space-y-6">
+              <div>
+                <Label className="text-lg font-medium">Your rental philosophy</Label>
+                <Textarea
+                  value={formData.rental_philosophy || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, rental_philosophy: e.target.value }))}
+                  className="mt-2 min-h-[120px] text-base"
+                  placeholder="What's your approach to renting? What do you look for in tenants?"
+                />
+              </div>
+              
+              <div>
+                <Label className="text-lg font-medium">Tell us about yourself</Label>
+                <Textarea
+                  value={formData.bio || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                  className="mt-2 min-h-[100px] text-base"
+                  placeholder="Brief description about yourself as a property owner..."
+                />
+              </div>
+            </div>
+          );
+        } // Only for clients
         return (
           <div className="space-y-6">
             <div>
@@ -304,6 +441,63 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
             </div>
           </div>
         );
+      
+      case 5: // Owner photo upload
+        if (userRole === 'owner') {
+          return (
+            <div className="space-y-6">
+              <div>
+                <Label className="text-lg font-medium">Property Photos (Optional)</Label>
+                <p className="text-sm text-muted-foreground mb-3">Upload some photos of your properties to attract clients</p>
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                  <div className="text-muted-foreground">
+                    <p className="text-sm">Photo upload will be available in your dashboard</p>
+                    <p className="text-xs mt-1">You can add property photos after completing onboarding</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        return null;
+      
+      case 6: // Owner contact & final info  
+        if (userRole === 'owner') {
+          return (
+            <div className="space-y-6">
+              <div>
+                <Label htmlFor="age" className="text-lg font-medium">What's your age?</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  min="18"
+                  max="100"
+                  value={formData.age || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, age: parseInt(e.target.value) || undefined }))}
+                  className="mt-2 h-12 text-lg"
+                  placeholder="Enter your age"
+                />
+              </div>
+              
+              <div>
+                <Label className="text-lg font-medium">Your interests</Label>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {interestOptions.map((interest) => (
+                    <Badge
+                      key={interest}
+                      variant={formData.interests?.includes(interest) ? "default" : "outline"}
+                      className="cursor-pointer px-4 py-2 text-sm"
+                      onClick={() => handleArrayToggle('interests', interest)}
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        }
+        return null;
       
       default:
         return null;
