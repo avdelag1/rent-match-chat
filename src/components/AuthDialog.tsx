@@ -73,7 +73,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full mx-auto border-0 p-0 overflow-hidden max-h-[90vh] bg-transparent">
+      <DialogContent className="max-w-sm w-full mx-auto border-0 p-0 overflow-hidden max-h-[85vh] bg-transparent">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -82,7 +82,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           className="relative"
         >
           {/* Header with gradient background */}
-          <div className="relative bg-gradient-to-br from-orange-500 to-red-500 rounded-t-2xl px-6 py-8">
+          <div className="relative bg-gradient-to-br from-orange-500 to-red-500 rounded-t-2xl px-4 py-6">
             {/* Back Button */}
             <button 
               onClick={onClose}
@@ -93,11 +93,11 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             </button>
 
             {/* Header Content */}
-            <div className="text-center text-white pt-6">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Flame className="w-8 h-8 text-white" />
+            <div className="text-center text-white pt-4">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Flame className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold mb-2">
+              <h1 className="text-xl font-bold mb-1">
                 {isLogin ? 'Welcome Back!' : 'Join Tinderent'}
               </h1>
               <p className="text-white/90 text-sm capitalize">
@@ -107,13 +107,13 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           </div>
 
           {/* Main Content */}
-          <div className="bg-white rounded-b-2xl p-6 space-y-6">
+          <div className="bg-white rounded-b-2xl p-4 space-y-4">
             {/* OAuth Buttons */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Button
                 type="button"
                 onClick={() => handleOAuthSignIn('google')}
-                className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 shadow-sm"
+                className="w-full h-11 bg-white border-2 border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 shadow-sm"
               >
                 <FaGoogle className="w-5 h-5 text-red-500" />
                 Continue with Google
@@ -122,7 +122,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               <Button
                 type="button"
                 onClick={() => handleOAuthSignIn('facebook')}
-                className="w-full h-12 bg-[#1877F2] text-white font-medium rounded-xl hover:bg-[#166FE5] transition-all duration-200 flex items-center justify-center gap-3 shadow-sm"
+                className="w-full h-11 bg-[#1877F2] text-white font-medium rounded-xl hover:bg-[#166FE5] transition-all duration-200 flex items-center justify-center gap-3 shadow-sm"
               >
                 <FaFacebook className="w-5 h-5" />
                 Continue with Facebook
@@ -130,14 +130,14 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             </div>
 
             {/* Divider */}
-            <div className="relative flex items-center py-2">
+            <div className="relative flex items-center py-1">
               <div className="flex-grow border-t border-gray-200"></div>
-              <span className="flex-shrink mx-4 text-gray-400 text-sm font-medium">or</span>
+              <span className="flex-shrink mx-3 text-gray-400 text-sm font-medium">or</span>
               <div className="flex-grow border-t border-gray-200"></div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Name Field (Sign Up Only) */}
               {!isLogin && (
                 <div>
@@ -150,7 +150,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="mt-1 h-12 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
+                    className="mt-1 h-11 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -169,7 +169,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-12 h-12 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
+                    className="pl-12 h-11 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -188,7 +188,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="pl-12 pr-12 h-12 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
+                    className="pl-12 pr-12 h-11 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
                     placeholder="Enter your password"
                   />
                   <button
@@ -205,7 +205,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               <Button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl border-0 shadow-lg hover:shadow-xl transition-all duration-200 mt-6"
+                className="w-full h-11 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl border-0 shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -219,7 +219,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             </form>
 
             {/* Toggle Sign In/Up */}
-            <div className="text-center pt-4">
+            <div className="text-center pt-2">
               <span className="text-gray-600 text-sm">
                 {isLogin ? "Don't have an account? " : "Already have an account? "}
               </span>
@@ -238,11 +238,11 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             </div>
 
             {/* Benefits Section - Compact */}
-            <div className="bg-gray-50 rounded-xl p-4 mt-6">
-              <h3 className="font-semibold text-gray-900 text-sm mb-3">
+            <div className="bg-gray-50 rounded-xl p-3 mt-3">
+              <h3 className="font-semibold text-gray-900 text-sm mb-2">
                 {role === 'client' ? '🏠 Client Benefits:' : '🏢 Owner Benefits:'}
               </h3>
-              <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
+              <div className="grid grid-cols-1 gap-1 text-xs text-gray-600">
                 {role === 'client' ? (
                   <>
                     <div className="flex items-center gap-2">
