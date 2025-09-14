@@ -18,7 +18,7 @@ export default function LegendaryLandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-pink-400 via-red-400 to-red-500">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-red-400 via-red-500 to-orange-500">
       
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-12 max-w-md w-full">
