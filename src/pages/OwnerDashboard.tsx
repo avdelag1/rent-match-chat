@@ -8,6 +8,7 @@ import { useClientProfiles } from '@/hooks/useClientProfiles';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Users, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface OwnerDashboardProps {
   onClientInsights?: (profileId: string) => void;
@@ -18,6 +19,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const { data: profiles = [], isLoading, error, refetch } = useClientProfiles();
+  const navigate = useNavigate();
   
   console.log('OwnerDashboard - Profiles:', profiles.length, 'Loading:', isLoading, 'Error:', error);
 
@@ -101,7 +103,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                     className="gap-2 w-full bg-white/10 hover:bg-white/20 text-white border-white/20"
                     variant="outline"
                     size="sm"
-                    onClick={() => window.location.href = '/owner/properties'}
+                    onClick={() => navigate('/owner/properties')}
                   >
                     Add Your Properties
                   </Button>

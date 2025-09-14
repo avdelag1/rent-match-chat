@@ -83,12 +83,15 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
 
       toast({
         title: "Welcome to Tinderent!",
-        description: "You can complete your profile anytime from settings.",
+        description: `You can complete your ${userRole === 'owner' ? 'business' : 'tenant'} profile anytime from settings.`,
       });
+
+      // Small delay to show the toast before navigating
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Navigate to appropriate dashboard
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      navigate(targetPath);
+      navigate(targetPath, { replace: true });
     } catch (error) {
       console.error('Error skipping onboarding:', error);
       toast({
@@ -114,13 +117,16 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
       if (error) throw error;
 
       toast({
-        title: "Profile completed!",
-        description: "Welcome to Tinderent! Your profile has been saved.",
+        title: "Profile completed successfully!",
+        description: `Welcome to Tinderent! Your ${userRole === 'owner' ? 'business' : 'tenant'} profile has been saved.`,
       });
+
+      // Small delay to show the toast before navigating
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Navigate to appropriate dashboard
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      navigate(targetPath);
+      navigate(targetPath, { replace: true });
     } catch (error) {
       console.error('Error completing onboarding:', error);
       toast({
@@ -505,8 +511,8 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-start justify-center p-4 py-8 overflow-y-auto">
+      <Card className="w-full max-w-2xl my-auto">
         <CardHeader className="text-center relative">
           <Button
             variant="ghost"
@@ -520,10 +526,12 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
           </Button>
           
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Complete Your Profile
+            Complete Your {userRole === 'owner' ? 'Business' : 'Tenant'} Profile
           </CardTitle>
           <p className="text-gray-600 mt-2">
-            Step {currentStep} of {totalSteps} - Help us personalize your experience
+            Step {currentStep} of {totalSteps} - {userRole === 'owner' 
+              ? 'Help clients find your properties' 
+              : 'Help us personalize your experience'}
           </p>
           
           {/* Progress bar */}
@@ -535,10 +543,12 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-6">
-          {renderStep()}
+        <CardContent className="space-y-6 max-h-[60vh] overflow-y-auto">
+          <div className="min-h-[400px]">
+            {renderStep()}
+          </div>
           
-          <div className="flex justify-between pt-6">
+          <div className="flex justify-between pt-6 sticky bottom-0 bg-white border-t">
             <Button
               variant="outline"
               onClick={() => setCurrentStep(prev => prev - 1)}
@@ -555,7 +565,7 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
                 disabled={isLoading}
                 className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white flex items-center gap-2"
               >
-                {isLoading ? 'Saving...' : 'Complete Profile'}
+                {isLoading ? 'Saving Profile...' : `Complete ${userRole === 'owner' ? 'Business' : 'Profile'}`}
               </Button>
             ) : (
               <Button
