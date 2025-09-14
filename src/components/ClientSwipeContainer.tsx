@@ -268,35 +268,35 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-center gap-6 items-center">
+      {/* Action Buttons - Compact */}
+      <div className="flex justify-center gap-4 items-center">
         <Button
           size="lg"
           variant="outline"
-          className="w-20 h-20 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200"
+          className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <ThumbsDown className="w-8 h-8" />
+          <ThumbsDown className="w-6 h-6 md:w-8 md:h-8" />
         </Button>
         
         <Button
           size="lg"
-          className="w-20 h-20 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200"
+          className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200"
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <ThumbsUp className="w-8 h-8 text-white" />
+          <ThumbsUp className="w-6 h-6 md:w-8 md:h-8 text-white" />
         </Button>
       </div>
 
-      {/* Progress indicator */}
+      {/* Progress indicator - Compact */}
       <div className="text-center">
-        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-          <span className="text-white/60 text-sm">
+        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+          <span className="text-white/60 text-xs">
             {currentIndex + 1} of {clientProfiles.length}
           </span>
-          <div className="w-16 h-1 bg-white/20 rounded-full overflow-hidden">
+          <div className="w-12 h-1 bg-white/20 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-green-400 to-blue-400 transition-all duration-300"
               style={{ width: `${((currentIndex + 1) / clientProfiles.length) * 100}%` }}

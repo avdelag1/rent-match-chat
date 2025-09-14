@@ -40,57 +40,57 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   // Emergency fallback content for debugging
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="owner">
-      <div className="min-h-screen p-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Reduced Header */}
-          <div className="text-center mb-6">
-            <div className="border-b border-white/10 pb-4">
-              <h1 className="text-3xl font-bold text-white mb-2">Discover Potential Tenants</h1>
-              <div className="w-20 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-2"></div>
-              <p className="text-white/70">Swipe through client profiles to find your ideal tenants</p>
-            </div>
+      <div className="min-h-screen p-2 md:p-4">
+        <div className="max-w-lg mx-auto">
+          {/* Compact Header */}
+          <div className="text-center mb-3">
+            <h1 className="text-xl md:text-2xl font-bold text-white mb-1">Find Your Tenants</h1>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-accent mx-auto mb-1"></div>
+            <p className="text-white/70 text-sm">Swipe to connect with clients</p>
           </div>
 
-          {/* Tenants Section with reduced spacing */}
-          <div className="border border-white/10 rounded-lg p-4 min-h-[600px]">
-            <h2 className="text-xl font-semibold text-white text-center mb-2">Potential Tenants</h2>
-            <p className="text-white/60 text-center mb-8">{profiles.length} available</p>
+          {/* Compact Tenants Section */}
+          <div className="rounded-lg p-2 min-h-[70vh]">
+            <h2 className="text-lg font-semibold text-white text-center mb-1">Available Tenants</h2>
+            <p className="text-white/60 text-center mb-4 text-sm">{profiles.length} profiles</p>
             
             {isLoading ? (
               <div className="flex justify-center">
-                <div className="space-y-4 w-full max-w-sm">
-                  <Skeleton className="w-full h-64 rounded-lg bg-white/10" />
-                  <Skeleton className="w-3/4 h-6 bg-white/10" />
-                  <Skeleton className="w-1/2 h-4 bg-white/10" />
+                <div className="space-y-3 w-full max-w-xs">
+                  <Skeleton className="w-full h-48 rounded-lg bg-white/10" />
+                  <Skeleton className="w-3/4 h-4 bg-white/10" />
+                  <Skeleton className="w-1/2 h-3 bg-white/10" />
                   <div className="flex space-x-2">
-                    <Skeleton className="w-16 h-6 rounded-full bg-white/10" />
-                    <Skeleton className="w-20 h-6 rounded-full bg-white/10" />
+                    <Skeleton className="w-12 h-4 rounded-full bg-white/10" />
+                    <Skeleton className="w-16 h-4 rounded-full bg-white/10" />
                   </div>
                 </div>
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center space-y-4 py-12">
-                <Users className="w-16 h-16 text-white/60" />
-                <h3 className="text-xl font-semibold text-white">Unable to load tenants</h3>
-                <p className="text-white/70 text-center">There was an error loading client profiles. Please try again.</p>
+              <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                <Users className="w-12 h-12 text-white/60" />
+                <h3 className="text-lg font-semibold text-white">Unable to load tenants</h3>
+                <p className="text-white/70 text-center text-sm">Error loading profiles. Please try again.</p>
                 <Button 
                   onClick={() => refetch()}
                   className="gap-2"
                   variant="outline"
+                  size="sm"
                 >
                   <RefreshCw className="w-4 h-4" />
                   Try Again
                 </Button>
               </div>
             ) : profiles.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-4 py-12">
-                <Users className="w-16 h-16 text-white/60" />
-                <h3 className="text-xl font-semibold text-white">No tenants available</h3>
-                <p className="text-white/70 text-center">Check back later for new client profiles!</p>
+              <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                <Users className="w-12 h-12 text-white/60" />
+                <h3 className="text-lg font-semibold text-white">No tenants available</h3>
+                <p className="text-white/70 text-center text-sm">Check back later for new profiles!</p>
                 <Button 
                   onClick={() => refetch()}
                   className="gap-2"
                   variant="outline"
+                  size="sm"
                 >
                   <RefreshCw className="w-4 h-4" />
                   Refresh
