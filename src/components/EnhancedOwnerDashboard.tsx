@@ -88,55 +88,12 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
           <motion.div variants={itemVariants} className="mb-8">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Find Perfect Tenants
+                Browse Clients
               </h1>
               <p className="text-muted-foreground">
-                Swipe through verified tenant profiles for your properties
+                Explore verified client profiles and connect with potential matches
               </p>
             </div>
-          </motion.div>
-
-          {/* Stats Row */}
-          <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">{clientProfiles.length}</div>
-                <div className="text-xs text-muted-foreground">Available Tenants</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-green-400">8</div>
-                <div className="text-xs text-muted-foreground">Tenants Liked</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-blue-400">5</div>
-                <div className="text-xs text-muted-foreground">Active Matches</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  {hasPremium ? (
-                    <>
-                      <Crown className="w-4 h-4 text-yellow-400" />
-                      <span className="text-sm font-medium text-yellow-400">Premium</span>
-                    </>
-                  ) : (
-                    <>
-                      <Star className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Free</span>
-                    </>
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground">Plan Status</div>
-              </CardContent>
-            </Card>
           </motion.div>
 
           {/* Main Content */}
@@ -151,6 +108,10 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                       <Zap className="w-3 h-3 mr-1" />
                       Smart Matching
                     </Badge>
+                    <Badge variant="outline" className="border-secondary/50 text-secondary">
+                      <Filter className="w-3 h-3 mr-1" />
+                      Client Filters
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="flex justify-center pb-8">
@@ -158,9 +119,9 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                     <div className="flex flex-col items-center justify-center space-y-4 py-12 text-center">
                       <Users className="w-16 h-16 text-muted-foreground/40" />
                       <div className="space-y-2">
-                        <h3 className="text-xl font-semibold">No Tenants Available</h3>
+                        <h3 className="text-xl font-semibold">No Clients Available</h3>
                         <p className="text-muted-foreground text-sm max-w-sm">
-                          Tenant profiles will appear here once users complete their onboarding. Check back soon!
+                          Client profiles will appear here once users complete their onboarding. Check back soon!
                         </p>
                       </div>
                       <div className="flex gap-2">
