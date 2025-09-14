@@ -57,15 +57,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const redirectUserBasedOnRole = async (user: User) => {
     try {
-      // Get user profile to determine role
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      const role = profile?.role;
-      console.log('User role:', role);
+      // First try to get role from user metadata (most reliable for fresh logins)
+      let role = user.user_metadata?.role;
+      
+      // If no role in metadata, try to get from profiles table
+      if (!role) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        role = profile?.role;
+      }
+      
+      console.log('User role:', role, 'from metadata:', user.user_metadata?.role);
 
       const targetPath =
         role === 'client'
@@ -76,10 +82,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Same-path guard to prevent loops
       if (location.pathname !== targetPath) {
+        console.log('Redirecting to:', targetPath);
         navigate(targetPath, { replace: true });
       }
     } catch (error) {
       console.error('Error getting user profile:', error);
+      // If we can't determine role, stay on main page
     }
   };
 
@@ -127,11 +135,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive"
       });
     } else {
-      // Set the role after successful sign in
+      // Update user metadata with the selected role
       try {
-        await supabase.rpc('set_user_role', { p_role: role });
-      } catch (roleError) {
-        console.error('Error setting user role:', roleError);
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: { role: role }
+        });
+        
+        if (updateError) {
+          console.error('Error updating user metadata:', updateError);
+        }
+      } catch (metadataError) {
+        console.error('Error updating user metadata:', metadataError);
       }
 
       toast({
