@@ -2433,6 +2433,7 @@ export type Database = {
           pet_types: string[] | null
           phone: string | null
           preferences: string[] | null
+          preferred_activities: string[] | null
           preferred_bathrooms: number | null
           preferred_bedrooms: number | null
           preferred_buy_city: string | null
@@ -2561,6 +2562,7 @@ export type Database = {
           pet_types?: string[] | null
           phone?: string | null
           preferences?: string[] | null
+          preferred_activities?: string[] | null
           preferred_bathrooms?: number | null
           preferred_bedrooms?: number | null
           preferred_buy_city?: string | null
@@ -2689,6 +2691,7 @@ export type Database = {
           pet_types?: string[] | null
           phone?: string | null
           preferences?: string[] | null
+          preferred_activities?: string[] | null
           preferred_bathrooms?: number | null
           preferred_bedrooms?: number | null
           preferred_buy_city?: string | null
