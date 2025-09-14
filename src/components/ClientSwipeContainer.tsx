@@ -7,7 +7,7 @@ import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientPro
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
-import { Flame, X, RotateCcw, Users, Filter, Zap } from 'lucide-react';
+import { Flame, X, RotateCcw, Users, Filter, Zap, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 
@@ -269,37 +269,24 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center items-center gap-4">
+      <div className="flex justify-center gap-6 items-center">
         <Button
           size="lg"
           variant="outline"
-          className="w-16 h-16 rounded-full border-2 border-red-400/50 hover:bg-red-500/10 hover:border-red-400 bg-white/10 backdrop-blur-sm transition-all duration-200"
+          className="w-20 h-20 rounded-full bg-gray-500/80 border-2 border-gray-400/40 text-white hover:bg-gray-600 transition-colors duration-200"
           onClick={() => handleButtonSwipe('left')}
           disabled={swipeMutation.isPending}
         >
-          <X className="w-7 h-7 text-red-400" />
+          <ThumbsDown className="w-8 h-8" />
         </Button>
-        
-        {/* Super Like Button */}
-        {currentClient && (
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-14 h-14 rounded-full border-2 border-blue-400/50 hover:bg-blue-500/10 hover:border-blue-400 bg-white/10 backdrop-blur-sm transition-all duration-200"
-            onClick={() => handleSuperLike(currentClient.user_id, 'profile')}
-            disabled={swipeMutation.isPending}
-          >
-            <Zap className="w-6 h-6 text-blue-400" />
-          </Button>
-        )}
         
         <Button
           size="lg"
-          className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 border-2 border-green-400/50 transition-all duration-200 shadow-lg"
+          className="w-20 h-20 rounded-full bg-green-500/80 hover:bg-green-600 text-white transition-colors duration-200"
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <Flame className="w-7 h-7 text-white" />
+          <ThumbsUp className="w-8 h-8 text-white" />
         </Button>
       </div>
 
