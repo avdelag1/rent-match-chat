@@ -18,15 +18,10 @@ export default function LegendaryLandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--app-gradient)' }}>
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-black/15 to-black/30" />
-      
-      {/* Additional contrast layer for buttons */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10" />
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-pink-400 via-red-400 to-red-500">
       
       {/* Main Content */}
-      <div className="relative z-10 text-center space-y-8 max-w-md w-full">
+      <div className="relative z-10 text-center space-y-12 max-w-md w-full">
         
         {/* Flame Icon - Zoom In Animation */}
         <motion.div
@@ -38,10 +33,12 @@ export default function LegendaryLandingPage() {
             delay: 0.2,
             bounce: 0.6 
           }}
-          className="flex justify-center mb-6"
+          className="flex justify-center mb-8"
         >
-          <div className="p-6 rounded-full bg-white/20 backdrop-blur-md shadow-theme-lg">
-            <Flame className="w-16 h-16 text-white animate-pulse" />
+          <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+              <Flame className="w-8 h-8 text-white" />
+            </div>
           </div>
         </motion.div>
 
@@ -50,18 +47,18 @@ export default function LegendaryLandingPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="space-y-2"
+          className="space-y-4"
         >
-          <h1 className="text-5xl font-bold text-white tracking-wider drop-shadow-lg">
+          <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg">
             TINDERENT
           </h1>
-          <p className="text-white/90 text-lg font-medium">
-            Swipe Your Way to the Perfect Home
+          <p className="text-white/90 text-xl font-medium px-4">
+            Find your perfect rental property or tenant with ease.
           </p>
         </motion.div>
 
         {/* Buttons Container */}
-        <div className="space-y-6 mt-12">
+        <div className="space-y-6 mt-16">
           
           {/* I'm a Client Button - Smooth slide from left */}
           <motion.button
@@ -75,7 +72,6 @@ export default function LegendaryLandingPage() {
             whileHover={{ 
               scale: 1.05,
               y: -3,
-              boxShadow: "0 20px 40px rgba(255, 138, 0, 0.4), 0 8px 25px rgba(0,0,0,0.15)",
               transition: { type: "spring", bounce: 0.4, duration: 0.3 }
             }}
             whileTap={{ 
@@ -84,15 +80,10 @@ export default function LegendaryLandingPage() {
               transition: { type: "spring", bounce: 0.7, duration: 0.15 }
             }}
             onClick={() => openAuthDialog('client')}
-            className="w-full py-5 px-8 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold text-lg rounded-full shadow-xl border-0 hover:from-orange-500 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden"
-            style={{ 
-              boxShadow: '0 10px 30px rgba(255, 138, 0, 0.3), 0 4px 15px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, #FF8A00 0%, #FF6B00 100%)'
-            }}
+            className="w-full py-6 px-8 bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 text-white font-bold text-xl rounded-full shadow-2xl border-0 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden hover:shadow-3xl"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 hover:opacity-100 transition-opacity duration-300" />
-            <Users className="w-6 h-6 relative z-10" />
-            <span className="relative z-10">I'm a Client</span>
+            <Users className="w-6 h-6" />
+            <span>I'm a Client</span>
           </motion.button>
 
           {/* I'm an Owner Button - Smooth slide from right */}
@@ -107,7 +98,6 @@ export default function LegendaryLandingPage() {
             whileHover={{ 
               scale: 1.05,
               y: -3,
-              boxShadow: "0 20px 40px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(0,0,0,0.15)",
               transition: { type: "spring", bounce: 0.4, duration: 0.3 }
             }}
             whileTap={{ 
@@ -116,15 +106,10 @@ export default function LegendaryLandingPage() {
               transition: { type: "spring", bounce: 0.7, duration: 0.15 }
             }}
             onClick={() => openAuthDialog('owner')}
-            className="w-full py-5 px-8 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-lg rounded-full shadow-xl border-0 hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden"
-            style={{ 
-              boxShadow: '0 10px 30px rgba(239, 68, 68, 0.3), 0 4px 15px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
-            }}
+            className="w-full py-6 px-8 bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-white font-bold text-xl rounded-full shadow-2xl border-0 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden hover:shadow-3xl"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 hover:opacity-100 transition-opacity duration-300" />
-            <Heart className="w-6 h-6 relative z-10" />
-            <span className="relative z-10">I'm an Owner</span>
+            <Heart className="w-6 h-6" />
+            <span>I'm an Owner</span>
           </motion.button>
         </div>
 
@@ -133,9 +118,9 @@ export default function LegendaryLandingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 1.2 }}
-          className="text-white/80 text-sm mt-8"
+          className="text-white/90 text-lg mt-12"
         >
-          Find your perfect match in real estate
+          Choose your role to get started
         </motion.p>
       </div>
 
