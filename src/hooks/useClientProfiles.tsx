@@ -27,6 +27,8 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
       }
 
       try {
+        console.log('Fetching client profiles for owner:', user.id);
+        
         // Get real client profiles from database
         const { data: profiles, error } = await supabase
           .from('profiles')
@@ -42,8 +44,10 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           return [];
         }
 
+        console.log('Found client profiles:', profiles?.length || 0, profiles);
+
         if (!profiles || profiles.length === 0) {
-          console.log('No client profiles found');
+          console.log('No client profiles found - this is normal if no clients have completed onboarding');
           return [];
         }
 
@@ -60,8 +64,12 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           profile_images: profile.images || [],
           location: profile.location || null
         }));
-
-        return transformedProfiles.filter(p => !excludeSwipedIds.includes(p.user_id));
+        
+        console.log('Transformed profiles:', transformedProfiles);
+        const filteredProfiles = transformedProfiles.filter(p => !excludeSwipedIds.includes(p.user_id));
+        console.log('Final filtered profiles:', filteredProfiles);
+        
+        return filteredProfiles;
 
       } catch (error) {
         console.error('Error fetching client profiles:', error);
