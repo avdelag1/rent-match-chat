@@ -85,7 +85,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
         <div className="max-w-7xl mx-auto">
           
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex justify-between items-center mb-8">
+          <motion.div variants={itemVariants} className="mb-8">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
                 Find Perfect Tenants
@@ -93,11 +93,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
               <p className="text-muted-foreground">
                 Swipe through verified tenant profiles for your properties
               </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon">
-                <Settings className="w-4 h-4" />
-              </Button>
             </div>
           </motion.div>
 
