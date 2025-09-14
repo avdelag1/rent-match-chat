@@ -6156,6 +6156,10 @@ export type Database = {
         Args: { "": unknown }
         Returns: Json
       }
+      log_admin_data_access: {
+        Args: { accessed_admin_email: string; accessed_admin_id: string }
+        Returns: undefined
+      }
       log_profile_update: {
         Args: { update_data: Json; user_id: string }
         Returns: undefined
