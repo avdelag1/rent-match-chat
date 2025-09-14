@@ -4,6 +4,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useProfileSetup } from './useProfileSetup';
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { createProfileIfMissing } = useProfileSetup();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -59,33 +61,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // First try to get role from user metadata (most reliable for fresh logins)
       let role = user.user_metadata?.role;
-      let onboardingCompleted = false;
+      let profile = null;
       
-      // If no role in metadata, try to get from profiles table
-      if (!role) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role, onboarding_completed')
-          .eq('id', user.id)
-          .single();
-        
-        role = profile?.role;
-        onboardingCompleted = profile?.onboarding_completed || false;
-      } else {
-        // If role from metadata, check onboarding status
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('id', user.id)
-          .single();
-        
-        onboardingCompleted = profile?.onboarding_completed || false;
+      // Try to get or create profile
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, onboarding_completed')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileError);
+        return;
+      }
+
+      if (existingProfile) {
+        profile = existingProfile;
+        role = role || profile.role; // Use metadata role if available, fallback to profile role
+      } else if (role) {
+        // Create profile if missing and we have role from metadata
+        profile = await createProfileIfMissing(user, role);
+        if (!profile) {
+          console.error('Failed to create profile');
+          return;
+        }
       }
       
-      console.log('User role:', role, 'onboarding completed:', onboardingCompleted);
+      console.log('User role:', role, 'profile:', profile);
 
       // If user hasn't completed onboarding, redirect to onboarding
-      if (!onboardingCompleted && (role === 'client' || role === 'owner')) {
+      if (!profile?.onboarding_completed && (role === 'client' || role === 'owner')) {
         if (location.pathname !== '/onboarding') {
           console.log('Redirecting to onboarding');
           navigate('/onboarding', { replace: true });
@@ -112,70 +117,99 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, role: 'client' | 'owner', name?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          role: role,
-          name: name || ''
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            role: role,
+            name: name || '',
+            full_name: name || ''
+          }
         }
-      }
-    });
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Sign up error:', error);
+        throw error;
+      }
+
+      // If user is immediately available (some auth providers), create profile
+      if (data.user && !data.user.email_confirmed_at) {
+        toast({
+          title: "Welcome to Tinderent!",
+          description: "Please check your email to verify your account.",
+        });
+      } else if (data.user) {
+        // Auto-create profile for immediate sign-ups
+        await createProfileIfMissing(data.user, role);
+        toast({
+          title: "Welcome to Tinderent!",
+          description: "Your account has been created successfully.",
+        });
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Sign up error:', error);
       toast({
         title: "Sign Up Failed",
-        description: error.message,
+        description: error.message || "Failed to create account. Please try again.",
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Welcome to Tinderent!",
-        description: "Please check your email to verify your account.",
-      });
+      return { error };
     }
-
-    return { error };
   };
 
   const signIn = async (email: string, password: string, role: 'client' | 'owner') => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      toast({
-        title: "Sign In Failed",
-        description: error.message,
-        variant: "destructive"
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
-    } else {
-      // Update user metadata with the selected role
-      try {
-        const { error: updateError } = await supabase.auth.updateUser({
-          data: { role: role }
-        });
-        
-        if (updateError) {
-          console.error('Error updating user metadata:', updateError);
-        }
-      } catch (metadataError) {
-        console.error('Error updating user metadata:', metadataError);
+
+      if (error) {
+        console.error('Sign in error:', error);
+        throw error;
       }
 
-      toast({
-        title: "Welcome back!",
-        description: "Successfully signed in.",
-      });
-      // Redirect is handled by onAuthStateChange -> redirectUserBasedOnRole
-    }
+      if (data.user) {
+        // Update user metadata with the selected role
+        try {
+          await supabase.auth.updateUser({
+            data: { role: role }
+          });
+        } catch (metadataError) {
+          console.error('Error updating user metadata:', metadataError);
+        }
 
-    return { error };
+        // Ensure profile exists
+        await createProfileIfMissing(data.user, role);
+
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      const errorMessage = error.message === 'Invalid login credentials' 
+        ? 'Invalid email or password. Please check your credentials and try again.'
+        : error.message || 'Failed to sign in. Please try again.';
+      
+      toast({
+        title: "Sign In Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      return { error };
+    }
   };
 
   const signOut = async () => {
