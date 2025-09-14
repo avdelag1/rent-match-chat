@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MapPin, Bed, Bath, Square, X } from 'lucide-react';
+import { Flame, MapPin, Bed, Bath, Square, X } from 'lucide-react';
 import { useLikedProperties } from '@/hooks/useLikedProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -60,7 +60,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-            <Heart className="w-6 h-6 text-red-500" />
+            <Flame className="w-6 h-6 text-red-500" />
             Liked Properties
           </DialogTitle>
         </DialogHeader>
@@ -84,7 +84,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
           </div>
         ) : likedProperties.length === 0 ? (
           <div className="text-center py-12">
-            <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <Flame className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No liked properties yet</h3>
             <p className="text-muted-foreground">
               Start swiping to find properties you love!
@@ -123,7 +123,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
                     
                     <div className="absolute top-2 left-2">
                       <Badge className="bg-red-500 hover:bg-red-600">
-                        <Heart className="w-3 h-3 mr-1 fill-current" />
+                        <Flame className="w-3 h-3 mr-1 fill-current" />
                         Liked
                       </Badge>
                     </div>

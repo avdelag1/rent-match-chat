@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Users, Heart } from 'lucide-react';
+import { Flame, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 
 export default function LegendaryLandingPage() {
@@ -108,7 +108,7 @@ export default function LegendaryLandingPage() {
             onClick={() => openAuthDialog('owner')}
             className="w-full py-6 px-8 bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-white font-bold text-xl rounded-full shadow-2xl border-0 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden hover:shadow-3xl"
           >
-            <Heart className="w-6 h-6" />
+            <Flame className="w-6 h-6" />
             <span>I'm an Owner</span>
           </motion.button>
         </div>

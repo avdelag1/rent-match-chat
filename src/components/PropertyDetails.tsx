@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Bed, Bath, Square, Heart, MessageCircle, X } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Flame, MessageCircle, X } from 'lucide-react';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useHasPremiumFeature } from '@/hooks/useSubscription';
 import { Listing } from '@/hooks/useListings';
@@ -193,7 +193,7 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
                 onClick={() => handleSwipe('right')}
                 disabled={swipeMutation.isPending}
               >
-                <Heart className="w-4 h-4" />
+                <Flame className="w-4 h-4" />
                 Like
               </Button>
             </div>

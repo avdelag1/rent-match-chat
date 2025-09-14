@@ -1,4 +1,4 @@
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Heart, PlusCircle, Crown, Flame } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -14,7 +14,7 @@ const clientMenuItems = [
   {
     title: "Liked Properties",
     url: "/client/liked-properties",
-    icon: Heart,
+    icon: Flame,
   },
   {
     title: "Messages",

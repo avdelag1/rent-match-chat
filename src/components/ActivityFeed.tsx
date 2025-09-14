@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Heart, 
+  Flame, 
   MessageCircle, 
   Eye, 
   Star, 
@@ -86,12 +86,12 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'like': return <Heart className="w-4 h-4 text-red-400" />;
+      case 'like': return <Flame className="w-4 h-4 text-red-400" />;
       case 'super_like': return <Star className="w-4 h-4 text-yellow-400" />;
       case 'message': return <MessageCircle className="w-4 h-4 text-blue-400" />;
       case 'view': return <Eye className="w-4 h-4 text-gray-400" />;
       case 'match': return <TrendingUp className="w-4 h-4 text-green-400" />;
-      case 'favorite': return <Heart className="w-4 h-4 text-pink-400" />;
+      case 'favorite': return <Flame className="w-4 h-4 text-orange-400" />;
       default: return <Bell className="w-4 h-4 text-white" />;
     }
   };
@@ -244,7 +244,7 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 text-center">
-            <Heart className="w-6 h-6 mx-auto text-red-400 mb-2" />
+            <Flame className="w-6 h-6 mx-auto text-red-400 mb-2" />
             <div className="text-lg font-bold text-foreground">
               {activities.filter(a => ['like', 'super_like'].includes(a.type)).length}
             </div>

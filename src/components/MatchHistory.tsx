@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, MessageCircle, Calendar, TrendingUp, Users } from 'lucide-react';
+import { Flame, MessageCircle, Calendar, TrendingUp, Users } from 'lucide-react';
 
 interface Match {
   id: string;
@@ -118,7 +118,7 @@ export function MatchHistory({ userRole }: MatchHistoryProps) {
               </Button>
             )}
             <Button size="sm" variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10">
-              <Heart className="w-4 h-4" />
+              <Flame className="w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -137,7 +137,7 @@ export function MatchHistory({ userRole }: MatchHistoryProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 text-center">
-            <Heart className="w-8 h-8 mx-auto text-red-400 mb-2" />
+            <Flame className="w-8 h-8 mx-auto text-red-400 mb-2" />
             <div className="text-2xl font-bold text-white">{mutualMatches.length}</div>
             <div className="text-white/60 text-sm">Mutual Matches</div>
           </CardContent>

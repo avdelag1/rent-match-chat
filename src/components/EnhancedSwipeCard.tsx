@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Heart, 
+  Flame, 
   X, 
   Star, 
   MapPin, 
@@ -265,7 +265,7 @@ export function EnhancedSwipeCard({
               </div>
               <div className="text-xs">← Swipe →</div>
               <div className="flex items-center gap-1">
-                <Heart className="w-4 h-4 text-green-400" />
+                <Flame className="w-4 h-4 text-green-400" />
                 <span className="text-xs">Like</span>
               </div>
             </div>
@@ -276,7 +276,7 @@ export function EnhancedSwipeCard({
             className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [0, 150], [0, 1]) }}
           >
-            <div className="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-2xl border-4 border-green-400 animate-heart-beat">
+            <div className="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-2xl border-4 border-green-400 animate-pulse">
               LIKE
             </div>
           </motion.div>

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, Heart, Home, Zap, Car, PawPrint, Palette, Camera, Music, Coffee, RotateCcw } from 'lucide-react';
+import { X, Flame, Home, Zap, Car, PawPrint, Palette, Camera, Music, Coffee, RotateCcw } from 'lucide-react';
 
 interface UltimateFiltersProps {
   isOpen: boolean;
@@ -266,7 +266,7 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     {category === 'pets' && <PawPrint className="w-5 h-5" />}
                     {category === 'workspace' && <Zap className="w-5 h-5" />}
                     {category === 'creativity' && <Palette className="w-5 h-5" />}
-                    {category === 'wellness' && <Heart className="w-5 h-5" />}
+                    {category === 'wellness' && <Flame className="w-5 h-5" />}
                     {category === 'culinary' && <Coffee className="w-5 h-5" />}
                     {category === 'entertainment' && <Music className="w-5 h-5" />}
                     {category.replace(/([A-Z])/g, ' $1').trim()}

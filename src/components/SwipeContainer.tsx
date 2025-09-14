@@ -5,7 +5,7 @@ import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
-import { Heart, X, RotateCcw, Home, Filter, Settings } from 'lucide-react';
+import { Flame, X, RotateCcw, Home, Filter, Settings } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';

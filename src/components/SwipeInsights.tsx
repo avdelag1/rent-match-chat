@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { useSwipeAnalytics } from '@/hooks/useSwipeAnalytics';
 import { 
   TrendingUp, 
-  Heart, 
+  Flame, 
   X, 
   Zap, 
   Clock, 
@@ -64,7 +64,7 @@ export function SwipeInsights({ userRole, isOpen, onClose }: SwipeInsightsProps)
 
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-4 text-center">
-                <Heart className="w-8 h-8 mx-auto text-red-400 mb-2" />
+                <Flame className="w-8 h-8 mx-auto text-red-400 mb-2" />
                 <div className="text-2xl font-bold text-white">{metrics?.likesGiven || 0}</div>
                 <div className="text-white/60 text-sm">Likes Given</div>
               </CardContent>

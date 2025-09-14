@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Bed, Bath, Square, Heart, MessageCircle, Eye } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Flame, MessageCircle, Eye } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 
 interface SwipeCardProps {
@@ -162,7 +162,7 @@ export function SwipeCard({
               {dragOffset.x > 50 && (
                 <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
                   <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-lg flex items-center gap-2">
-                    <Heart className="w-6 h-6" />
+                    <Flame className="w-6 h-6" />
                     LIKE
                   </div>
                 </div>

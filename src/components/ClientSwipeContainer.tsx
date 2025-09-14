@@ -7,7 +7,7 @@ import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientPro
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
-import { Heart, X, RotateCcw, Users, Filter, Zap } from 'lucide-react';
+import { Flame, X, RotateCcw, Users, Filter, Zap } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 
@@ -299,7 +299,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           onClick={() => handleButtonSwipe('right')}
           disabled={swipeMutation.isPending}
         >
-          <Heart className="w-7 h-7 text-white" />
+          <Flame className="w-7 h-7 text-white" />
         </Button>
       </div>
 

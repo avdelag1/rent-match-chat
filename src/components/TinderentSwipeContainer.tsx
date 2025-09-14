@@ -8,7 +8,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Heart, X, RotateCcw, Home, SlidersHorizontal, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Flame, X, RotateCcw, Home, SlidersHorizontal, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';

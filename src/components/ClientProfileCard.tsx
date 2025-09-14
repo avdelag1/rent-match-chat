@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, X, MessageCircle, TrendingUp, MapPin } from 'lucide-react';
+import { Flame, X, MessageCircle, TrendingUp, MapPin } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 
 interface ClientProfileCardProps {
@@ -104,7 +104,7 @@ export function ClientProfileCard({
       return (
         <div className="absolute inset-0 bg-green-500/20 rounded-xl flex items-center justify-center">
           <div className="bg-green-500 rounded-full p-4">
-            <Heart className="w-8 h-8 text-white" />
+            <Flame className="w-8 h-8 text-white" />
           </div>
         </div>
       );

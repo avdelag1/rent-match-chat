@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { User, MapPin, Phone, Mail, Calendar, Heart, Home } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Calendar, Flame, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
@@ -249,7 +249,7 @@ export function ClientProfileSettings() {
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="text-foreground flex items-center gap-2">
-            <Heart className="w-5 h-5" />
+            <Flame className="w-5 h-5" />
             Lifestyle Preferences
           </CardTitle>
         </CardHeader>

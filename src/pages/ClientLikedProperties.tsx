@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
-import { Heart, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw } from "lucide-react";
+import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const ClientLikedProperties = () => {
@@ -48,7 +48,7 @@ const ClientLikedProperties = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-2">
-              <Heart className="w-8 h-8 text-red-500" />
+              <Flame className="w-8 h-8 text-red-500" />
               Your Liked Properties
             </h1>
             <p className="text-muted-foreground">Properties you've shown interest in.</p>
@@ -92,12 +92,12 @@ const ClientLikedProperties = () => {
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                        <Heart className="w-12 h-12 text-muted-foreground/50" />
+                        <Flame className="w-12 h-12 text-muted-foreground/50" />
                       </div>
                     )}
                     <div className="absolute top-2 left-2">
                       <Badge className="bg-red-500 hover:bg-red-600">
-                        <Heart className="w-3 h-3 mr-1 fill-current" />
+                        <Flame className="w-3 h-3 mr-1 fill-current" />
                         Liked
                       </Badge>
                     </div>
@@ -197,7 +197,7 @@ const ClientLikedProperties = () => {
           ) : (
             <Card className="bg-card/50 backdrop-blur-sm border-border">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Heart className="w-16 h-16 text-muted-foreground/30 mb-4" />
+                <Flame className="w-16 h-16 text-muted-foreground/30 mb-4" />
                 <h3 className="text-xl font-semibold text-foreground mb-2">No Liked Properties</h3>
                 <p className="text-muted-foreground text-center">
                   Properties you like will appear here.

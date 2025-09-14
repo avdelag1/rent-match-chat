@@ -10,7 +10,7 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { 
-  Heart, 
+  Flame, 
   Home, 
   Zap, 
   TrendingUp, 
@@ -195,7 +195,7 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: Enhance
                     variant="outline"
                     onClick={() => {/* Navigate to liked properties */}}
                   >
-                    <Heart className="w-4 h-4 text-red-400" />
+                    <Flame className="w-4 h-4 text-red-400" />
                     View Liked Properties
                   </Button>
                   

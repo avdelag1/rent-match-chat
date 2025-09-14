@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { 
-  Heart, X, Star, MapPin, Bed, Bath, Square, Wifi, Car, 
+  Flame, X, Star, MapPin, Bed, Bath, Square, Wifi, Car, 
   Camera, Eye, MessageCircle, ChevronLeft, ChevronRight,
   Home, TreePine, Utensils, Dumbbell, Music, Palette, PawPrint
 } from 'lucide-react';
@@ -83,7 +83,7 @@ export function EnhancedPropertyCard({
       return (
         <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
           <div className="bg-green-500 rounded-full p-4">
-            <Heart className="w-8 h-8 text-white fill-white" />
+            <Flame className="w-8 h-8 text-white fill-white" />
           </div>
         </div>
       );

@@ -2,7 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, User, Calendar, Heart, Star } from 'lucide-react';
+import { MapPin, User, Calendar, Flame, Star } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 import { ImageCarousel } from './ImageCarousel';
 
@@ -103,7 +103,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               <h4 className="font-semibold mb-2">Match Indicators</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-red-500" />
+                  <Flame className="w-4 h-4 text-red-500" />
                   <span className="text-sm">Lifestyle match: 92%</span>
                 </div>
                 <div className="flex items-center gap-2">
