@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Redirect after successful sign in
+        // Only redirect after successful sign in, not on initial session load
         if (event === 'SIGNED_IN' && session?.user) {
           setTimeout(() => {
             redirectUserBasedOnRole(session.user);
@@ -43,12 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email || 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // IMPORTANT: Do not redirect here to avoid loops.
-      // ProtectedRoute will handle guarding routes based on role.
+      // Don't redirect on initial load to avoid loops
     });
 
     return () => subscription.unsubscribe();
