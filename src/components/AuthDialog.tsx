@@ -6,6 +6,9 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Eye, EyeOff, Flame, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { FaGoogle, FaFacebook } from 'react-icons/fa';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -17,31 +20,54 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Mock authentication - replace with real auth logic
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: isLogin ? "Welcome back!" : "Account created!",
-        description: isLogin ? "You've successfully signed in." : "Your account has been created successfully.",
-      });
-      
+      if (isLogin) {
+        const { error } = await signIn(email, password, role);
+        if (error) throw error;
+      } else {
+        const { error } = await signUp(email, password, role, name);
+        if (error) throw error;
+      }
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            role: role
+          }
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || `Failed to sign in with ${provider}`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -75,12 +101,62 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Title */}
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-                <p className="text-gray-600">Sign in as {role}</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {isLogin ? 'Welcome Back' : 'Create Account'}
+                </h2>
+                <p className="text-gray-600">
+                  {isLogin ? 'Sign in' : 'Sign up'} as {role}
+                </p>
               </div>
 
               <div className="space-y-6">
+                {/* OAuth Buttons */}
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    onClick={() => handleOAuthSignIn('google')}
+                    className="w-full py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3"
+                  >
+                    <FaGoogle className="w-5 h-5 text-red-500" />
+                    Continue with Google
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    onClick={() => handleOAuthSignIn('facebook')}
+                    className="w-full py-3 bg-[#1877F2] text-white font-semibold rounded-xl hover:bg-[#166FE5] transition-all duration-200 flex items-center justify-center gap-3"
+                  >
+                    <FaFacebook className="w-5 h-5" />
+                    Continue with Facebook
+                  </Button>
+                </div>
+
+                {/* Divider */}
+                <div className="relative flex items-center">
+                  <div className="flex-grow border-t border-gray-200"></div>
+                  <span className="flex-shrink mx-4 text-gray-400 text-sm">or</span>
+                  <div className="flex-grow border-t border-gray-200"></div>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Name Field (Sign Up Only) */}
+                  {!isLogin && (
+                    <div>
+                      <Label htmlFor="name" className="text-gray-700 font-medium">Full Name *</Label>
+                      <div className="mt-2 relative">
+                        <Input
+                          id="name"
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                          className="py-3 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400"
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* Email Field */}
                   <div>
                     <Label htmlFor="email" className="text-gray-700 font-medium">Email Address *</Label>
@@ -122,7 +198,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     </div>
                   </div>
 
-                  {/* Sign In Button */}
+                  {/* Submit Button */}
                   <Button 
                     type="submit" 
                     disabled={isLoading}
@@ -135,33 +211,57 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         Please wait...
                       </div>
                     ) : (
-                      'Sign In'
+                      isLogin ? 'Sign In' : 'Create Account'
                     )}
                   </Button>
 
-                  {/* Sign Up Link */}
+                  {/* Toggle Sign In/Up */}
                   <div className="text-center">
-                    <span className="text-gray-600">Don't have an account? </span>
+                    <span className="text-gray-600">
+                      {isLogin ? "Don't have an account? " : "Already have an account? "}
+                    </span>
                     <button
                       type="button"
-                      onClick={() => setIsLogin(false)}
+                      onClick={() => {
+                        setIsLogin(!isLogin);
+                        setEmail('');
+                        setPassword('');
+                        setName('');
+                      }}
                       className="font-semibold"
                       style={{ color: 'var(--accent-primary)' }}
                     >
-                      Sign Up
+                      {isLogin ? 'Sign Up' : 'Sign In'}
                     </button>
                   </div>
 
-                  {/* Benefits Section (only for sign in) */}
-                  {isLogin && role === 'client' && (
+                  {/* Benefits Section */}
+                  {role === 'client' && (
                     <div className="mt-8">
-                      <h3 className="font-semibold text-gray-900 mb-4">Client Account Benefits:</h3>
+                      <h3 className="font-semibold text-gray-900 mb-4">
+                        {isLogin ? 'Client Account Benefits:' : 'What you get as a client:'}
+                      </h3>
                       <ul className="space-y-2 text-sm text-gray-600">
                         <li>• Browse and swipe through property listings</li>
                         <li>• Match with property owners</li>
                         <li>• Chat with matched owners</li>
                         <li>• Save favorite properties</li>
                         <li>• Get personalized recommendations</li>
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {role === 'owner' && (
+                    <div className="mt-8">
+                      <h3 className="font-semibold text-gray-900 mb-4">
+                        {isLogin ? 'Owner Account Benefits:' : 'What you get as an owner:'}
+                      </h3>
+                      <ul className="space-y-2 text-sm text-gray-600">
+                        <li>• List your properties for rent</li>
+                        <li>• View and match with potential tenants</li>
+                        <li>• Chat with interested clients</li>
+                        <li>• Manage your property portfolio</li>
+                        <li>• Access detailed analytics</li>
                       </ul>
                     </div>
                   )}
