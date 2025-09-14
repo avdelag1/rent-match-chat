@@ -43,16 +43,13 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
       <div className="min-h-screen w-full overflow-x-hidden">
         <div className="w-full max-w-sm mx-auto px-4 py-6">
           {/* Compact Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-xl font-bold text-white mb-1">Find Your Tenants</h1>
-            <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-accent mx-auto mb-1"></div>
-            <p className="text-white/70 text-sm">Swipe to connect with clients</p>
+          <div className="text-center mb-2">
+            <h1 className="text-xl font-bold text-white mb-1">Available Tenants</h1>
+            <p className="text-white/70 text-sm">{profiles.length} profiles</p>
           </div>
 
           {/* Compact Tenants Section */}
           <div className="w-full">
-            <h2 className="text-lg font-semibold text-white text-center mb-1">Available Tenants</h2>
-            <p className="text-white/60 text-center mb-4 text-sm">{profiles.length} profiles</p>
             
             {isLoading ? (
               <div className="flex justify-center">

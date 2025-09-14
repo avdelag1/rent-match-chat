@@ -180,16 +180,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
             {/* Action Buttons - Mobile Optimized */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              {userRole === 'owner' && (
-                <Button
-                  size="sm"
-                  className="text-white font-medium rounded-lg px-3 py-1 shadow-md text-xs whitespace-nowrap"
-                  style={{ background: 'var(--button-gradient)' }}
-                  onClick={() => setShowOwnerSwipe(true)}
-                >
-                  Find Tenants
-                </Button>
-              )}
               <div className="hidden sm:block bg-gray-100 rounded-lg px-3 py-1 shadow-sm">
                 <span className="text-gray-700 text-xs font-medium whitespace-nowrap">
                   Welcome!

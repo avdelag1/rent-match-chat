@@ -218,29 +218,29 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const nextClient = clientProfiles[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-sm mx-auto space-y-4 px-2">
-      {/* Header with Filter Button */}
+    <div className="w-full max-w-sm mx-auto space-y-2 px-2">
+      {/* Header with Filter Button - Compact */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-white/80 text-sm">
-            {clientProfiles.length - currentIndex} potential tenants
-          </span>
-        </div>
-        
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowFilters(true)}
           className="bg-white/10 border-white/20 text-white hover:bg-white/20"
         >
-          <Filter className="w-4 h-4 mr-2" />
+          <Filter className="w-4 h-4 mr-1" />
           Filters
         </Button>
+        
+        <div className="flex items-center gap-1">
+          <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-white/80 text-xs">
+            {clientProfiles.length - currentIndex} tenants
+          </span>
+        </div>
       </div>
 
-      {/* Cards Container */}
-      <div className="relative w-full h-[500px] overflow-hidden">
+      {/* Cards Container - Positioned Higher */}
+      <div className="relative w-full h-[520px] overflow-hidden">
         {/* Next card (behind) */}
         {nextClient && (
           <ClientProfileCard
