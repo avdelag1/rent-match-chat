@@ -1,4 +1,4 @@
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -67,6 +67,12 @@ const ownerMenuItems = [
     icon: User,
   },
   {
+    title: "Legal Documents",
+    url: "#legal-documents",
+    icon: FileText,
+    action: "legal-documents",
+  },
+  {
     title: "Settings",
     url: "/owner/settings",
     icon: Settings,
@@ -109,6 +115,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
     } else if (item.action === 'premium-packages') {
       // Open premium packages dialog directly
       if (onMenuItemClick) onMenuItemClick('premium-packages')
+    } else if (item.action === 'legal-documents') {
+      // Open legal documents dialog
+      if (onMenuItemClick) onMenuItemClick('legal-documents')
     } else {
       navigate(item.url)
       if (onMenuItemClick) onMenuItemClick('dashboard')

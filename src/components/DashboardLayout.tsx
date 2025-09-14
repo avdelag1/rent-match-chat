@@ -6,6 +6,7 @@ import AppSidebar from "@/components/AppSidebar"
 import { PropertyForm } from "@/components/PropertyForm"
 import { SubscriptionPackages } from "@/components/SubscriptionPackages"
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
+import { LegalDocumentsDialog } from "@/components/LegalDocumentsDialog"
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog"
 import { ClientProfileDialog } from "@/components/ClientProfileDialog"
 import { PropertyDetails } from "@/components/PropertyDetails"
@@ -44,6 +45,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   // NEW: quick access tenant swipe dialog for owners
   const [showOwnerSwipe, setShowOwnerSwipe] = useState(false)
+
+  // Legal documents dialog
+  const [showLegalDocuments, setShowLegalDocuments] = useState(false)
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -107,6 +111,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         break
       case 'messages':
         navigate('/messages')
+        break
+      case 'legal-documents':
+        setShowLegalDocuments(true)
         break
       case 'settings':
         if (userRole === 'owner') {
@@ -287,6 +294,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           <OwnerClientSwipeDialog
             open={showOwnerSwipe}
             onOpenChange={setShowOwnerSwipe}
+          />
+
+          <LegalDocumentsDialog
+            open={showLegalDocuments}
+            onOpenChange={setShowLegalDocuments}
           />
         </>
       )}

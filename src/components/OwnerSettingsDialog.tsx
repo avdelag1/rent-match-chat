@@ -10,7 +10,6 @@ interface OwnerSettingsDialogProps {
 
 export function OwnerSettingsDialog({ open, onOpenChange }: OwnerSettingsDialogProps) {
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -18,18 +17,17 @@ export function OwnerSettingsDialog({ open, onOpenChange }: OwnerSettingsDialogP
         <DialogHeader>
           <DialogTitle>Owner Settings</DialogTitle>
           <DialogDescription className="text-white/70">
-            Basic settings placeholder so the menu actually opens something. More options coming soon.
+            Manage your account preferences and notification settings.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span>Email notifications</span>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+            <div className="space-y-1">
+              <span className="font-medium">Email Notifications</span>
+              <p className="text-sm text-white/60">Receive updates about new tenant applications and messages</p>
+            </div>
             <Switch checked={notifications} onCheckedChange={setNotifications} />
-          </div>
-          <div className="flex items-center justify-between">
-            <span>Dark mode</span>
-            <Switch checked={darkMode} onCheckedChange={setDarkMode} />
           </div>
         </div>
       </DialogContent>
