@@ -41,13 +41,28 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return;
     }
 
-    if (!profileLoading && profile && requiredRole && profile.role !== requiredRole) {
-      // Redirect to correct dashboard based on user's role (same-path guard)
-      const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      if (location.pathname !== targetPath) {
-        navigate(targetPath, { replace: true });
+    if (!profileLoading && profile) {
+      // Check if user hasn't completed onboarding
+      if (!profile.onboarding_completed && location.pathname !== '/onboarding') {
+        navigate('/onboarding', { replace: true });
+        return;
       }
-      return;
+
+      // Check if user has completed onboarding but is still on onboarding page
+      if (profile.onboarding_completed && location.pathname === '/onboarding') {
+        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+        navigate(targetPath, { replace: true });
+        return;
+      }
+
+      // Check role-based access for protected routes
+      if (requiredRole && profile.role !== requiredRole) {
+        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+        if (location.pathname !== targetPath) {
+          navigate(targetPath, { replace: true });
+        }
+        return;
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user, profileLoading, profile, requiredRole, navigate, location.pathname]);
@@ -63,7 +78,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     );
   }
 
-  if (!user || (requiredRole && profile?.role !== requiredRole)) {
+  if (!user || (requiredRole && profile?.role !== requiredRole) || (profile && !profile.onboarding_completed && location.pathname !== '/onboarding')) {
     return null; // Will redirect via useEffect
   }
 

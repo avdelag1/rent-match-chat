@@ -108,24 +108,45 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
     try {
       setIsLoading(true);
       
+      console.log('Starting onboarding completion...', { userId: user?.id, formData });
+      
       // Save onboarding data using the database function
       const { error } = await supabase.rpc('complete_user_onboarding', {
         user_id: user?.id,
         onboarding_data: formData as any
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database function error:', error);
+        throw error;
+      }
+
+      console.log('Onboarding data saved successfully');
 
       toast({
         title: "Profile completed successfully!",
         description: `Welcome to Tinderent! Your ${userRole === 'owner' ? 'business' : 'tenant'} profile has been saved.`,
       });
 
+      // Verify the update worked by checking the profile
+      const { data: updatedProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('onboarding_completed, role')
+        .eq('id', user?.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching updated profile:', fetchError);
+      } else {
+        console.log('Updated profile:', updatedProfile);
+      }
+
       // Small delay to show the toast before navigating
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Navigate to appropriate dashboard
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      console.log('Navigating to:', targetPath);
       navigate(targetPath, { replace: true });
     } catch (error) {
       console.error('Error completing onboarding:', error);
