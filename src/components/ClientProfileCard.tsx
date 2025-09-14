@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Flame, X, MessageCircle, TrendingUp, MapPin } from 'lucide-react';
+import { Flame, X, MessageCircle, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 
 interface ClientProfileCardProps {
@@ -28,8 +28,39 @@ export function ClientProfileCard({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
+  const [imageIndex, setImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
   const startPos = useRef({ x: 0, y: 0 });
+
+  const images = profile.profile_images || [];
+  const hasMultipleImages = images.length > 1;
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (hasMultipleImages) {
+      setImageIndex((prev) => (prev + 1) % images.length);
+    }
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (hasMultipleImages) {
+      setImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    }
+  };
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const centerX = rect.width / 2;
+    const threshold = rect.width * 0.3; // 30% of width for center area
+
+    if (Math.abs(clickX - centerX) < threshold) {
+      // Middle click - open detailed view
+      onTap();
+    }
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isTop) return;
@@ -146,10 +177,11 @@ export function ClientProfileCard({
       {/* Main Image */}
       <div className="relative h-3/5 overflow-hidden">
         <img
-          src={profile.profile_images?.[0] || '/api/placeholder/400/600'}
+          src={images[imageIndex] || '/api/placeholder/400/600'}
           alt={profile.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover cursor-pointer"
           draggable={false}
+          onClick={handleImageClick}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
@@ -169,8 +201,38 @@ export function ClientProfileCard({
           }}
         />
         
+        {/* Photo Navigation Arrows */}
+        {hasMultipleImages && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all z-10"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all z-10"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+            
+            {/* Image Dots */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    idx === imageIndex ? 'bg-white' : 'bg-white/40'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
         
         {/* Age Badge */}
         <Badge className="absolute top-4 right-4 bg-black/50 text-white border-none">
@@ -188,70 +250,58 @@ export function ClientProfileCard({
         )}
         
         {/* Name at bottom of image */}
-        <div className="absolute bottom-4 left-4 right-4">
+        <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
           <h3 className="text-2xl font-bold text-white mb-1">{profile.name}</h3>
         </div>
       </div>
       
-      {/* Content Section */}
+      {/* Content Section - Scrollable */}
       <div className="p-4 h-2/5 flex flex-col">
-        {/* Bio */}
-        <p className="text-gray-700 text-sm mb-3 flex-1 overflow-y-auto">
-          {profile.bio}
-        </p>
-        
-        {/* Interests */}
-        {profile.interests && profile.interests.length > 0 && (
-          <div className="mb-3">
-            <div className="flex flex-wrap gap-1">
-              {profile.interests.slice(0, 3).map((interest, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200"
-                >
-                  {interest}
-                </Badge>
-              ))}
-              {profile.interests.length > 3 && (
-                <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
-                  +{profile.interests.length - 3}
-                </Badge>
-              )}
-            </div>
+        <div className="flex-1 overflow-y-auto space-y-3 mb-3">
+          {/* Bio */}
+          <div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {profile.bio}
+            </p>
           </div>
-        )}
+          
+          {/* Interests */}
+          {profile.interests && profile.interests.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-gray-500 mb-2">INTERESTS</h4>
+              <div className="flex flex-wrap gap-1">
+                {profile.interests.map((interest, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  >
+                    {interest}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Note: Additional fields like occupation/education can be added */}
+          {/* when they become available in the ClientProfile interface */}
+        </div>
         
         {/* Action Buttons */}
-        <div className="flex gap-2 mt-auto">
+        {hasPremium && (
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 gap-2"
+            className="w-full gap-2"
             onClick={(e) => {
               e.stopPropagation();
-              onInsights();
+              onMessage();
             }}
           >
-            <TrendingUp className="w-4 h-4" />
-            Insights
+            <MessageCircle className="w-4 h-4" />
+            Message
           </Button>
-          
-          {hasPremium && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 gap-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMessage();
-              }}
-            >
-              <MessageCircle className="w-4 h-4" />
-              Message
-            </Button>
-          )}
-        </div>
+        )}
       </div>
     </Card>
   );
