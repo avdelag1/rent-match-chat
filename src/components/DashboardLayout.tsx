@@ -162,16 +162,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1 flex flex-col min-h-screen">
-          <header className="flex h-8 sm:h-10 shrink-0 items-center gap-1 bg-white/95 backdrop-blur-lg px-1 sm:px-2 shadow-md border-b border-gray-200 sticky top-0 z-50">
+          <header className="flex h-6 sm:h-8 shrink-0 items-center gap-1 bg-white/95 backdrop-blur-lg px-1 sm:px-2 shadow-sm border-b border-gray-200 sticky top-0 z-50">
             <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-0.5 rounded-md transition-all duration-200 flex-shrink-0" />
             
             {/* Brand Header - Very Compact */}
             <div className="flex items-center gap-1 flex-1 min-w-0">
-              <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full flex items-center justify-center shadow-sm flex-shrink-0" style={{ background: 'var(--button-gradient)' }}>
-                <Flame className="w-2 h-2 sm:w-3 sm:h-3 text-white" />
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shadow-sm flex-shrink-0" style={{ background: 'var(--button-gradient)' }}>
+                <Flame className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-white" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-gray-900 font-bold text-xs leading-tight truncate">TINDERENT</h1>
+                <h1 className="text-gray-900 font-bold text-[10px] sm:text-xs leading-tight truncate">TINDERENT</h1>
               </div>
             </div>
           </header>

@@ -293,8 +293,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </div>
       </div>
 
-      {/* Cards Container - Positioned Higher */}
-      <div className="relative w-full h-[500px] sm:h-[620px]">
+      {/* Cards Container - Much Smaller */}
+      <div className="relative w-full h-[300px] sm:h-[400px]">
         <AnimatePresence>
           {nextListing && (
             <EnhancedPropertyCard

@@ -46,8 +46,8 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
 
 
           {/* Properties Section */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2 sm:p-4" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 text-center mb-2 sm:mb-4">Available Properties</h2>
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg p-1 sm:p-2" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <h2 className="text-sm sm:text-base font-semibold text-gray-900 text-center mb-1 sm:mb-2">Available Properties</h2>
             
             {isLoading ? (
               <div className="flex justify-center">
