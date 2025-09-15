@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { motion } from 'framer-motion';
 
 interface OnboardingQuestionnaireProps {
   userRole: 'client' | 'owner';
@@ -69,7 +70,15 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
   
   const totalSteps = userRole === 'client' ? 4 : 6;
 
-  const handleSkip = async () => {
+  const handleSkipStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      handleSkipAll();
+    }
+  };
+
+  const handleSkipAll = async () => {
     try {
       setIsLoading(true);
       
@@ -82,8 +91,8 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
       if (error) throw error;
 
       toast({
-        title: "Welcome to Tinderent!",
-        description: `You can complete your ${userRole === 'owner' ? 'business' : 'tenant'} profile anytime from settings.`,
+        title: "Welcome!",
+        description: `You can complete your profile anytime from settings.`,
       });
 
       // Small delay to show the toast before navigating
@@ -418,7 +427,7 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
               </div>
             </div>
           );
-        } // Only for clients
+        } 
         return (
           <div className="space-y-6">
             <div>
@@ -469,7 +478,7 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
           </div>
         );
       
-      case 5: // Owner photo upload
+      case 5:
         if (userRole === 'owner') {
           return (
             <div className="space-y-6">
@@ -488,7 +497,7 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
         }
         return null;
       
-      case 6: // Owner contact & final info  
+      case 6:
         if (userRole === 'owner') {
           return (
             <div className="space-y-6">
@@ -532,75 +541,105 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-start justify-center p-4 py-8 overflow-y-auto">
-      <Card className="w-full max-w-2xl my-auto">
-        <CardHeader className="text-center relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSkip}
-            disabled={isLoading}
-            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-          >
-            <SkipForward className="w-4 h-4 mr-1" />
-            Skip
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="w-full max-w-2xl bg-white/95 backdrop-blur-sm border-white/20 shadow-2xl">
+          <CardHeader className="text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
+              {userRole === 'owner' ? '🏠' : '👤'}
+            </div>
+            <CardTitle className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+              Complete Your {userRole === 'owner' ? 'Business' : 'Client'} Profile
+            </CardTitle>
+            <p className="text-muted-foreground text-lg">
+              Step {currentStep} of {totalSteps} • {Math.round((currentStep / totalSteps) * 100)}% Complete
+            </p>
+            <div className="w-full bg-gradient-to-r from-gray-200 to-gray-100 rounded-full h-3 mt-4 overflow-hidden">
+              <motion.div 
+                className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 h-3 rounded-full shadow-sm" 
+                initial={{ width: 0 }}
+                animate={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+              />
+            </div>
+          </CardHeader>
           
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            Complete Your {userRole === 'owner' ? 'Business' : 'Tenant'} Profile
-          </CardTitle>
-          <p className="text-gray-600 mt-2">
-            Step {currentStep} of {totalSteps} - {userRole === 'owner' 
-              ? 'Help clients find your properties' 
-              : 'Help us personalize your experience'}
-          </p>
-          
-          {/* Progress bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
-            <div 
-              className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            />
-          </div>
-        </CardHeader>
-        
-        <CardContent className="space-y-6 max-h-[60vh] overflow-y-auto">
-          <div className="min-h-[400px]">
-            {renderStep()}
-          </div>
-          
-          <div className="flex justify-between pt-6 sticky bottom-0 bg-white border-t">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentStep(prev => prev - 1)}
-              disabled={currentStep === 1 || isLoading}
-              className="flex items-center gap-2"
+          <CardContent className="space-y-6">
+            <motion.div
+              key={currentStep}
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <ArrowLeft className="w-4 h-4" />
-              Previous
-            </Button>
+              {renderStep()}
+            </motion.div>
             
-            {currentStep === totalSteps ? (
-              <Button
-                onClick={handleComplete}
-                disabled={isLoading}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white flex items-center gap-2"
-              >
-                {isLoading ? 'Saving Profile...' : `Complete ${userRole === 'owner' ? 'Business' : 'Profile'}`}
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setCurrentStep(prev => prev + 1)}
-                disabled={isLoading}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white flex items-center gap-2"
-              >
-                Next
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex justify-between gap-4 pt-6 border-t border-gray-100">
+              {currentStep > 1 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep(prev => prev - 1)}
+                  className="gap-2 border-gray-300 hover:bg-gray-50"
+                  disabled={isLoading}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+              )}
+              
+              <div className="flex gap-3 ml-auto">
+                <Button
+                  variant="ghost"
+                  onClick={handleSkipStep}
+                  disabled={isLoading}
+                  className="gap-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                >
+                  <SkipForward className="w-4 h-4" />
+                  {currentStep < totalSteps ? 'Skip Step' : 'Skip All'}
+                </Button>
+                
+                {currentStep < totalSteps ? (
+                  <Button
+                    onClick={() => setCurrentStep(prev => prev + 1)}
+                    disabled={isLoading}
+                    className="gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-orange-500/25"
+                  >
+                    Next
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleComplete}
+                    disabled={isLoading}
+                    className="gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-green-500/25"
+                  >
+                    {isLoading ? (
+                      <>
+                        <motion.div
+                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        />
+                        Completing...
+                      </>
+                    ) : (
+                      <>
+                        Complete Profile
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

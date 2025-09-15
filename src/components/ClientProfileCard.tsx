@@ -234,8 +234,20 @@ export function ClientProfileCard({
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
         
+        {/* Message Button - Top Right */}
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onMessage();
+          }}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 border-none p-0 z-20"
+        >
+          <MessageCircle className="w-5 h-5" />
+        </Button>
+
         {/* Age Badge */}
-        <Badge className="absolute top-4 right-4 bg-black/50 text-white border-none">
+        <Badge className="absolute top-4 right-16 bg-black/50 text-white border-none">
           {profile.age}
         </Badge>
         
@@ -287,21 +299,12 @@ export function ClientProfileCard({
           {/* when they become available in the ClientProfile interface */}
         </div>
         
-        {/* Action Buttons */}
-        {hasPremium && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full gap-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMessage();
-            }}
-          >
-            <MessageCircle className="w-4 h-4" />
-            Message
-          </Button>
-        )}
+        {/* Tap to view more indicator */}
+        <div className="text-center">
+          <p className="text-xs text-gray-500">
+            Tap center of photo for details • Swipe to navigate
+          </p>
+        </div>
       </div>
     </Card>
   );
