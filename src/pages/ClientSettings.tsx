@@ -17,27 +17,35 @@ const ClientSettings = () => {
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="search">Search</TabsTrigger>
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
+              <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
+              <TabsTrigger value="subscription" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Subscription</TabsTrigger>
+              <TabsTrigger value="security" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Security</TabsTrigger>
+              <TabsTrigger value="search" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Search</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="profile">
-              <ClientProfileSettings />
+            <TabsContent value="profile" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <ClientProfileSettings />
+              </div>
             </TabsContent>
 
-            <TabsContent value="subscription">
-              <PremiumSubscriptionManager userRole="client" />
+            <TabsContent value="subscription" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <PremiumSubscriptionManager userRole="client" />
+              </div>
             </TabsContent>
 
-            <TabsContent value="security">
-              <AccountSecurity userRole="client" />
+            <TabsContent value="security" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <AccountSecurity userRole="client" />
+              </div>
             </TabsContent>
 
-            <TabsContent value="search">
-              <PropertySearch />
+            <TabsContent value="search" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <PropertySearch />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

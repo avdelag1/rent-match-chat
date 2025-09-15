@@ -28,6 +28,7 @@ import OwnerActivityFeed from "./pages/OwnerActivityFeed";
 import OwnerSecurity from "./pages/OwnerSecurity";
 import MessagingDashboard from "./pages/MessagingDashboard";
 import OwnerProperties from "./pages/OwnerProperties";
+import OwnerLikedClients from "./pages/OwnerLikedClients";
 
 const queryClient = new QueryClient();
 
@@ -156,6 +157,15 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="owner">
                   <OwnerProperties />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/owner/liked-clients" 
+              element={
+                <ProtectedRoute requiredRole="owner">
+                  <OwnerLikedClients />
                 </ProtectedRoute>
               } 
             />

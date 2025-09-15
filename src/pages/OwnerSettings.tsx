@@ -19,44 +19,56 @@ const OwnerSettings = () => {
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid grid-cols-7 w-full">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="properties">Properties</TabsTrigger>
-              <TabsTrigger value="screening">Screening</TabsTrigger>
-              <TabsTrigger value="leases">Leases</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
+              <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
+              <TabsTrigger value="subscription" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Subscription</TabsTrigger>
+              <TabsTrigger value="security" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Security</TabsTrigger>
+              <TabsTrigger value="properties" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Properties</TabsTrigger>
+              <TabsTrigger value="screening" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Screening</TabsTrigger>
+              <TabsTrigger value="leases" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Leases</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Analytics</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile">
-              <div className="p-6 text-center">
-                <p className="text-muted-foreground">Profile settings will appear here</p>
+              <div className="p-6 text-center bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 mt-6">
+                <p className="text-gray-700">Profile settings will appear here</p>
               </div>
             </TabsContent>
 
-            <TabsContent value="subscription">
-              <PremiumSubscriptionManager userRole="owner" />
+            <TabsContent value="subscription" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <PremiumSubscriptionManager userRole="owner" />
+              </div>
             </TabsContent>
 
-            <TabsContent value="security">
-              <AccountSecurity userRole="owner" />
+            <TabsContent value="security" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <AccountSecurity userRole="owner" />
+              </div>
             </TabsContent>
 
-            <TabsContent value="properties">
-              <PropertyManagement />
+            <TabsContent value="properties" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <PropertyManagement />
+              </div>
             </TabsContent>
 
-            <TabsContent value="screening">
-              <TenantScreening />
+            <TabsContent value="screening" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <TenantScreening />
+              </div>
             </TabsContent>
 
-            <TabsContent value="leases">
-              <LeaseManagement />
+            <TabsContent value="leases" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <LeaseManagement />
+              </div>
             </TabsContent>
 
-            <TabsContent value="analytics">
-              <RentalAnalytics />
+            <TabsContent value="analytics" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <RentalAnalytics />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

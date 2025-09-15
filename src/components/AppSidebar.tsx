@@ -57,6 +57,11 @@ const ownerMenuItems = [
     action: "add-property",
   },
   {
+    title: "Liked Clients",
+    url: "/owner/liked-clients",
+    icon: Flame,
+  },
+  {
     title: "Messages",
     url: "/messages",
     icon: MessageSquare,
