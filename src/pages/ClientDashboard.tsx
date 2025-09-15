@@ -6,9 +6,10 @@ import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
+import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Home, RefreshCw } from 'lucide-react';
+import { Home, RefreshCw, Heart } from 'lucide-react';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
@@ -19,6 +20,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const { data: listings = [], isLoading, error, refetch } = useListings();
+  const { user } = useAuth();
   
   console.log('ClientDashboard - Listings:', listings.length, 'Loading:', isLoading, 'Error:', error);
 
@@ -38,38 +40,51 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
 
   const selectedListing = listings.find(l => l.id === selectedListingId);
 
-  // Emergency fallback content for debugging
-  const renderEmergencyFallback = () => (
+  // Main render function
+  const renderDashboard = () => (
     <DashboardLayout userRole="client">
-      <div className="h-full p-1 sm:p-2">
-        <div className="max-w-4xl mx-auto">
+      <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        {/* Welcome Section */}
+        <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Welcome back!</h2>
+              <p className="text-gray-600 mt-1">
+                {user?.user_metadata?.full_name || user?.email || 'Valued Client'}
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-1">
+                <Heart className="w-4 h-4 text-red-500" />
+                <span>Find your dream home</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <div className="flex-1 p-4 space-y-4">
+          {error && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
+              Error loading properties. 
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => refetch()}
+                className="ml-2 text-red-600 hover:text-red-700"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          )}
 
           {/* Properties Section */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-lg p-1 sm:p-2" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="text-sm sm:text-base font-semibold text-gray-900 text-center mb-1 sm:mb-2">Available Properties</h2>
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <h3 className="text-xl font-semibold text-gray-900 text-center mb-6">Available Properties</h3>
             
             {isLoading ? (
               <div className="flex justify-center">
-                <div className="space-y-4 w-full max-w-sm">
-                  <Skeleton className="w-full h-64 rounded-lg" />
-                  <Skeleton className="w-3/4 h-6" />
-                  <Skeleton className="w-1/2 h-4" />
-                </div>
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center space-y-4 py-12">
-                <Home className="w-16 h-16 text-gray-400" />
-                <h3 className="text-xl font-semibold text-gray-700">Unable to load properties</h3>
-                <p className="text-gray-500 text-center">There was an error loading properties. Please try again.</p>
-                <Button 
-                  onClick={() => refetch()}
-                  className="gap-2"
-                  variant="outline"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Try Again
-                </Button>
+                <Skeleton className="w-full max-w-md h-[500px] rounded-xl" />
               </div>
             ) : listings.length === 0 ? (
               <div className="flex flex-col items-center justify-center space-y-4 py-12">
@@ -86,13 +101,11 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
                 </Button>
               </div>
             ) : (
-              <div className="flex justify-center">
-                <TinderentSwipeContainer
-                  onListingTap={handleListingTap} 
-                  onInsights={handleInsights}
-                  onMessageClick={onMessageClick}
-                />
-              </div>
+              <TinderentSwipeContainer
+                onListingTap={handleListingTap} 
+                onInsights={handleInsights}
+                onMessageClick={onMessageClick}
+              />
             )}
           </div>
         </div>
@@ -106,7 +119,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
     </DashboardLayout>
   );
 
-  return renderEmergencyFallback();
+  return renderDashboard();
 };
 
 export default ClientDashboard;
