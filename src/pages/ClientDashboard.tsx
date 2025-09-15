@@ -41,13 +41,13 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   // Emergency fallback content for debugging
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="client">
-      <div className="h-full">
-        <div className="max-w-4xl mx-auto p-2 sm:p-4">
+      <div className="h-full p-1 sm:p-2">
+        <div className="max-w-4xl mx-auto">
 
 
           {/* Properties Section */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 sm:p-6 mt-2" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 text-center mb-3 sm:mb-6">Available Properties</h2>
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2 sm:p-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 text-center mb-2 sm:mb-4">Available Properties</h2>
             
             {isLoading ? (
               <div className="flex justify-center">
