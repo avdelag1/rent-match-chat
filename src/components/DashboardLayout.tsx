@@ -158,11 +158,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full overflow-x-hidden" style={{ background: 'var(--app-gradient)' }}>
+      <div className="min-h-screen flex w-full" style={{ background: 'var(--app-gradient)' }}>
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
-        <InsetComponent className="flex-1 overflow-x-hidden">
-          <header className="flex h-12 sm:h-14 shrink-0 items-center gap-2 bg-white/95 backdrop-blur-lg px-2 sm:px-4 shadow-lg border-b border-gray-200">
+        <InsetComponent className="flex-1 flex flex-col min-h-screen">
+          <header className="flex h-12 sm:h-14 shrink-0 items-center gap-2 bg-white/95 backdrop-blur-lg px-2 sm:px-4 shadow-lg border-b border-gray-200 sticky top-0 z-50">
             <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-1 sm:p-1.5 rounded-lg transition-all duration-200 flex-shrink-0" />
             
             {/* Brand Header - Mobile Optimized */}
@@ -179,7 +179,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             </div>
           </header>
 
-          <main className="flex-1 overflow-auto overflow-x-hidden">
+          <main className="flex-1 overflow-y-auto">
             {
               React.Children.map(children, (child) => {
                 if (React.isValidElement(child)) {
