@@ -19,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'brand': ['Orbitron', 'system-ui', 'sans-serif'],
+				'inter': ['Inter', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				// Modern theme system with CSS variables - using HSL format
 				'theme-primary': 'hsl(var(--bg-primary))',
