@@ -29,22 +29,22 @@ const LandingPage = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-pink-500 to-red-500 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md mx-auto px-6">
+      <div className="relative z-10 w-full max-w-lg mx-auto px-8 sm:px-12">
         {/* Logo and title */}
         <div className="text-center mb-16">
           <div className="flex flex-col items-center justify-center mb-8">
-            <div className="relative mb-4 w-full flex justify-center">
-              <h1 className="font-brand text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg">
+            <div className="relative mb-4 w-full flex justify-center px-4">
+              <h1 className="font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg text-center">
                 TINDERENT
               </h1>
               {/* Clean modern shadow */}
-              <div className="absolute inset-0 font-brand text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white/20 blur-sm transform translate-x-0.5 translate-y-0.5">
+              <div className="absolute inset-0 font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white/20 blur-sm transform translate-x-0.5 translate-y-0.5">
                 TINDERENT
               </div>
             </div>
             <span className="text-3xl animate-bounce filter drop-shadow-md">🔥</span>
           </div>
-          <p className="text-lg text-gray-200 px-4 leading-relaxed font-light">
+          <p className="text-lg text-gray-200 px-6 leading-relaxed font-light text-center">
             Find your perfect rental property or tenant with ease.
           </p>
         </div>
