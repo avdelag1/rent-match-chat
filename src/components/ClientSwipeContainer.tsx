@@ -342,7 +342,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         >
           <Button
             size="lg"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-300 shadow-lg hover:shadow-green-500/25 border-2 border-green-400/50 hover:border-green-500"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-2 border-orange-400/50 hover:border-orange-500"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >

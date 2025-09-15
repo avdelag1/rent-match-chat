@@ -99,48 +99,6 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: Enhance
             </div>
           </motion.div>
 
-          {/* Stats Row */}
-          <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">{listings.length}</div>
-                <div className="text-xs text-muted-foreground">Available Properties</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-green-400">12</div>
-                <div className="text-xs text-muted-foreground">Properties Liked</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-blue-400">3</div>
-                <div className="text-xs text-muted-foreground">Active Matches</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  {hasPremium ? (
-                    <>
-                      <Crown className="w-4 h-4 text-yellow-400" />
-                      <span className="text-sm font-medium text-yellow-400">Premium</span>
-                    </>
-                  ) : (
-                    <>
-                      <Star className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Free</span>
-                    </>
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground">Plan Status</div>
-              </CardContent>
-            </Card>
-          </motion.div>
 
           {/* Main Content Grid */}
           <div className="grid lg:grid-cols-3 gap-8">
