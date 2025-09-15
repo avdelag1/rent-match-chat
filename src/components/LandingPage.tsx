@@ -40,7 +40,7 @@ const LandingPage = () => {
         <div className="space-y-4 mb-8">
           <Button 
             onClick={() => openAuthDialog('client')}
-            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold text-lg py-6 rounded-full shadow-lg transition-all duration-300"
+            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold text-lg py-6 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 active:animate-elastic-bounce"
             size="lg"
           >
             I'm a Client
@@ -48,7 +48,7 @@ const LandingPage = () => {
 
           <Button 
             onClick={() => openAuthDialog('owner')}
-            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold text-lg py-6 rounded-full shadow-lg transition-all duration-300"
+            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold text-lg py-6 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 active:animate-elastic-bounce"
             size="lg"
           >
             I'm an Owner

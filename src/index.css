@@ -261,8 +261,20 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
+  @keyframes elastic-bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.15); }
+    40% { transform: scale(0.95); }
+    60% { transform: scale(1.05); }
+    80% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+  }
 
-  
+  @keyframes page-transition {
+    0% { opacity: 0; transform: translateX(-20px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
   .gradient-text {
     background: linear-gradient(135deg, hsl(15, 100%, 60%), hsl(0, 84%, 55%));
     -webkit-background-clip: text;
@@ -276,22 +288,45 @@
 
 
   .interactive-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .interactive-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .interactive-card:hover::before {
+    left: 100%;
   }
 
   .interactive-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
   }
 
   .swipe-card {
     transform-style: preserve-3d;
-    transition: transform 0.2s ease-out;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
   }
 
   .swipe-card:hover {
-    transform: rotateY(2deg) scale(1.02);
+    transform: rotateY(3deg) scale(1.05) translateZ(20px);
     box-shadow: var(--shadow-glow);
+    animation: elastic-bounce 0.6s ease-out;
+  }
+
+  .smooth-page {
+    animation: page-transition 0.5s ease-out;
   }
 
   .dynamic-card {
