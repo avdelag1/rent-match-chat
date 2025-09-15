@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
-import { ClientStatsCard } from '@/components/ClientStatsCard';
+
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,20 +41,13 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   // Emergency fallback content for debugging
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="client">
-      <div className="min-h-screen p-4">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">Discover Properties</h1>
-            <p className="text-white/70">Find your perfect home</p>
-          </div>
+      <div className="min-h-screen p-2 sm:p-4">
+        <div className="max-w-4xl mx-auto space-y-3 sm:space-y-6">
 
-          {/* Stats Card - Above Properties */}
-          <ClientStatsCard />
 
           {/* Properties Section */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="text-xl font-semibold text-gray-900 text-center mb-6">Available Properties</h2>
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-3 sm:p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 text-center mb-3 sm:mb-6">Available Properties</h2>
             
             {isLoading ? (
               <div className="flex justify-center">
