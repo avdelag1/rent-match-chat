@@ -20,7 +20,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'brand': ['Orbitron', 'system-ui', 'sans-serif'],
+				'brand': ['Poppins', 'system-ui', 'sans-serif'],
 				'inter': ['Inter', 'system-ui', 'sans-serif'],
 			},
 			colors: {

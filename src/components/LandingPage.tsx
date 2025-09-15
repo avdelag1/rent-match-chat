@@ -29,27 +29,22 @@ const LandingPage = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-pink-500 to-red-500 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-lg mx-auto">
+      <div className="relative z-10 w-full max-w-md mx-auto px-6">
         {/* Logo and title */}
         <div className="text-center mb-16">
           <div className="flex flex-col items-center justify-center mb-8">
-            <div className="relative mb-4">
-              <h1 className="font-brand text-5xl sm:text-6xl md:text-7xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 animate-bounce-gentle">
+            <div className="relative mb-4 w-full flex justify-center">
+              <h1 className="font-brand text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg">
                 TINDERENT
               </h1>
-              {/* Enhanced shadow layers */}
-              <div className="absolute inset-0 font-brand text-5xl sm:text-6xl md:text-7xl font-black tracking-wider text-red-500/30 blur-sm transform translate-x-1 translate-y-1">
+              {/* Clean modern shadow */}
+              <div className="absolute inset-0 font-brand text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white/20 blur-sm transform translate-x-0.5 translate-y-0.5">
                 TINDERENT
               </div>
-              <div className="absolute inset-0 font-brand text-5xl sm:text-6xl md:text-7xl font-black tracking-wider text-orange-500/20 blur-md transform translate-x-2 translate-y-2">
-                TINDERENT
-              </div>
-              {/* Glowing underline */}
-              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent animate-pulse"></div>
             </div>
-            <span className="text-4xl animate-bounce filter drop-shadow-lg">🔥</span>
+            <span className="text-3xl animate-bounce filter drop-shadow-md">🔥</span>
           </div>
-          <p className="text-xl text-gray-300 px-4 leading-relaxed font-light">
+          <p className="text-lg text-gray-200 px-4 leading-relaxed font-light">
             Find your perfect rental property or tenant with ease.
           </p>
         </div>
