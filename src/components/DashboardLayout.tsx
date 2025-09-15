@@ -162,17 +162,17 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1 overflow-x-hidden">
-          <header className="flex h-14 shrink-0 items-center gap-2 bg-white/95 backdrop-blur-lg px-2 sm:px-4 shadow-lg border-b border-gray-200">
-            <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-1.5 sm:p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
+          <header className="flex h-12 sm:h-14 shrink-0 items-center gap-2 bg-white/95 backdrop-blur-lg px-2 sm:px-4 shadow-lg border-b border-gray-200">
+            <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-1 sm:p-1.5 rounded-lg transition-all duration-200 flex-shrink-0" />
             
             {/* Brand Header - Mobile Optimized */}
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-sm flex-shrink-0" style={{ background: 'var(--button-gradient)' }}>
-                <Flame className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+            <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+              <div className="w-5 h-5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-sm flex-shrink-0" style={{ background: 'var(--button-gradient)' }}>
+                <Flame className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-white" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-gray-900 font-bold text-sm sm:text-lg leading-tight truncate">TINDERENT</h1>
-                <p className="text-gray-600 text-xs font-medium truncate hidden xs:block">
+                <h1 className="text-gray-900 font-bold text-xs sm:text-lg leading-tight truncate">TINDERENT</h1>
+                <p className="text-gray-600 text-xs font-medium truncate hidden sm:block">
                   {userRole === 'owner' ? 'Owner Dashboard' : 'Client Dashboard'}
                 </p>
               </div>

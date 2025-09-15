@@ -75,56 +75,46 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: Enhance
   return (
     <DashboardLayout userRole="client">
       <motion.div 
-        className="p-4 md:p-8"
+        className="p-2 sm:p-4 md:p-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <div className="max-w-7xl mx-auto">
-          
-          {/* Header */}
-          <motion.div variants={itemVariants} className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Discover Your Dream Home
+        <div className="max-w-7xl mx-auto">{/* removed empty div */}
+          {/* Header - Compact for mobile */}
+          <motion.div variants={itemVariants} className="mb-4 sm:mb-6">
+            <div className="text-center sm:text-left">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
+                Find Your Dream Home
               </h1>
-              <p className="text-muted-foreground">
-                Swipe through curated properties that match your preferences
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Swipe through properties that match your preferences
               </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon">
-                <Settings className="w-4 h-4" />
-              </Button>
             </div>
           </motion.div>
 
 
-          {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content - Mobile First */}
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
             
-            {/* Swipe Section */}
-            <motion.div variants={itemVariants} className="lg:col-span-2">
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-foreground">
-                    <Home className="w-5 h-5 text-primary" />
-                    Property Discovery
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="border-primary/50 text-primary">
+            {/* Swipe Section - Full width on mobile, larger on desktop */}
+            <motion.div variants={itemVariants} className="flex-1 lg:flex-[2]">
+              <Card className="overflow-hidden shadow-lg">
+                <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="border-primary/50 text-primary text-xs">
                       <Zap className="w-3 h-3 mr-1" />
                       Smart Matching
                     </Badge>
                     {hasPremium && (
-                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none text-xs">
                         <Crown className="w-3 h-3 mr-1" />
-                        Premium Active
+                        Premium
                       </Badge>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="flex justify-center pb-8">
+                <CardContent className="flex justify-center pb-4 sm:pb-8 px-2 sm:px-6">
                   <SwipeContainer 
                     onListingTap={handleListingTap} 
                     onInsights={handleInsights}
@@ -134,30 +124,32 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: Enhance
               </Card>
             </motion.div>
 
-            {/* Sidebar */}
-            <motion.div variants={itemVariants} className="space-y-6">
+            {/* Sidebar - Hidden on mobile, shown on desktop */}
+            <motion.div variants={itemVariants} className="hidden lg:block lg:flex-1 space-y-4">
               
               {/* Premium Subscription */}
               <PremiumSubscriptionManager userRole="client" />
 
               {/* Quick Actions */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Quick Actions</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2">
                   <Button 
-                    className="w-full justify-start gap-2" 
+                    className="w-full justify-start gap-2 text-sm" 
                     variant="outline"
+                    size="sm"
                     onClick={() => {/* Navigate to liked properties */}}
                   >
                     <Flame className="w-4 h-4 text-red-400" />
-                    View Liked Properties
+                    Liked Properties
                   </Button>
                   
                   <Button 
-                    className="w-full justify-start gap-2" 
+                    className="w-full justify-start gap-2 text-sm" 
                     variant="outline"
+                    size="sm"
                     onClick={() => {/* Navigate to messages */}}
                   >
                     <MessageCircle className="w-4 h-4 text-blue-400" />
@@ -165,21 +157,13 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: Enhance
                   </Button>
                   
                   <Button 
-                    className="w-full justify-start gap-2" 
+                    className="w-full justify-start gap-2 text-sm" 
                     variant="outline"
+                    size="sm"
                     onClick={() => {/* Open filters */}}
                   >
                     <Filter className="w-4 h-4 text-green-400" />
-                    Adjust Filters
-                  </Button>
-                  
-                  <Button 
-                    className="w-full justify-start gap-2" 
-                    variant="outline"
-                    onClick={() => {/* View insights */}}
-                  >
-                    <TrendingUp className="w-4 h-4 text-purple-400" />
-                    My Insights
+                    Filters
                   </Button>
                 </CardContent>
               </Card>
@@ -187,35 +171,31 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: Enhance
               {/* Premium Features Teaser */}
               {!hasPremium && (
                 <Card className="border-primary/30 bg-gradient-to-br from-primary/10 to-secondary/10">
-                  <CardContent className="p-4 text-center space-y-3">
-                    <Crown className="w-8 h-8 mx-auto text-primary animate-pulse-glow" />
+                  <CardContent className="p-3 text-center space-y-2">
+                    <Crown className="w-6 h-6 mx-auto text-primary" />
                     <div>
-                      <h3 className="font-semibold text-foreground">Unlock Premium</h3>
+                      <h3 className="font-semibold text-foreground text-sm">Unlock Premium</h3>
                       <p className="text-xs text-muted-foreground">
-                        Get 10x better results with premium features
+                        Get premium features
                       </p>
                     </div>
                     <div className="space-y-1 text-xs">
                       <div className="flex items-center justify-center gap-1 text-muted-foreground">
                         <Star className="w-3 h-3 text-yellow-400" />
-                        Unlimited Super Likes
+                        Super Likes
                       </div>
                       <div className="flex items-center justify-center gap-1 text-muted-foreground">
                         <Eye className="w-3 h-3 text-blue-400" />
                         See Who Liked You
                       </div>
-                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <TrendingUp className="w-3 h-3 text-green-400" />
-                        Priority Matching
-                      </div>
                     </div>
                     <Button 
                       size="sm" 
-                      className="w-full bg-gradient-to-r from-primary to-secondary text-white"
+                      className="w-full bg-gradient-to-r from-primary to-secondary text-white text-xs"
                       onClick={() => {/* Open subscription manager */}}
                     >
                       <Crown className="w-3 h-3 mr-1" />
-                      Upgrade Now
+                      Upgrade
                     </Button>
                   </CardContent>
                 </Card>
