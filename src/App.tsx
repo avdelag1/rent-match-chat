@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
@@ -38,10 +39,11 @@ const App = () => (
       <ThemeProvider>
         <BrowserRouter>
           <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-          <Routes>
+            <AppLayout>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <Routes>
             <Route path="/" element={<Index />} />
             
             <Route 
@@ -215,10 +217,11 @@ const App = () => (
               } 
             />
             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-            </TooltipProvider>
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+                </Routes>
+              </TooltipProvider>
+            </AppLayout>
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>

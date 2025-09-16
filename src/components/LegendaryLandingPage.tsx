@@ -122,6 +122,16 @@ export default function LegendaryLandingPage() {
         >
           Choose your role to get started
         </motion.p>
+
+        {/* Keyboard Shortcuts Hint */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.4 }}
+          className="text-white/60 text-xs mt-4"
+        >
+          💡 Tip: Use Alt+D for dashboard, Alt+P for profile
+        </motion.div>
       </div>
 
       {/* Auth Dialog */}

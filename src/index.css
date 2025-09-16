@@ -59,17 +59,6 @@
     --input: 214 32% 91%;
     --ring: 14 100% 57%;
     --radius: 0.75rem;
-    --secondary-foreground: 220 13% 18%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 12 100% 58%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 12 100% 58%;
-    --radius: 0.75rem;
     
     /* Ultra-Dynamic Gradients with More Color */
     --gradient-primary: linear-gradient(135deg, 
