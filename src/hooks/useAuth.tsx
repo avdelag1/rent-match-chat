@@ -156,9 +156,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: null };
     } catch (error: any) {
       console.error('Sign up error:', error);
+      let errorMessage = "Failed to create account. Please try again.";
+      
+      if (error.message?.includes('User already registered')) {
+        errorMessage = "An account with this email already exists. Please sign in instead.";
+      } else if (error.message?.includes('Password should be at least')) {
+        errorMessage = "Password should be at least 6 characters long.";
+      } else if (error.message?.includes('Invalid email')) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Sign Up Failed",
-        description: error.message || "Failed to create account. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
       return { error };
@@ -199,9 +211,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: null };
     } catch (error: any) {
       console.error('Sign in error:', error);
-      const errorMessage = error.message === 'Invalid login credentials' 
-        ? 'Invalid email or password. Please check your credentials and try again.'
-        : error.message || 'Failed to sign in. Please try again.';
+      let errorMessage = 'Failed to sign in. Please try again.';
+      
+      if (error.message === 'Invalid login credentials') {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMessage = 'Please check your email and click the confirmation link before signing in.';
+      } else if (error.message?.includes('Too many requests')) {
+        errorMessage = 'Too many login attempts. Please wait a moment and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
       
       toast({
         title: "Sign In Failed",

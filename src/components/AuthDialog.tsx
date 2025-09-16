@@ -50,6 +50,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   };
 
   const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -62,12 +63,17 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       });
       
       if (error) throw error;
+      
+      // Close dialog on successful OAuth initiation
+      onClose();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || `Failed to sign in with ${provider}`,
+        title: "OAuth Error",
+        description: error.message || `Failed to sign in with ${provider}. Please try again.`,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -120,7 +126,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               <Button
                 type="button"
                 onClick={() => handleOAuthSignIn('google')}
-                className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 shadow-sm"
+                disabled={isLoading}
+                className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 shadow-sm disabled:opacity-50"
               >
                 <FaGoogle className="w-5 h-5 text-red-500" />
                 Continue with Google
@@ -129,7 +136,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               <Button
                 type="button"
                 onClick={() => handleOAuthSignIn('facebook')}
-                className="w-full h-12 bg-[#1877F2] text-white font-medium rounded-xl hover:bg-[#166FE5] transition-all duration-200 flex items-center justify-center gap-3 shadow-sm"
+                disabled={isLoading}
+                className="w-full h-12 bg-[#1877F2] text-white font-medium rounded-xl hover:bg-[#166FE5] transition-all duration-200 flex items-center justify-center gap-3 shadow-sm disabled:opacity-50"
               >
                 <FaFacebook className="w-5 h-5" />
                 Continue with Facebook
