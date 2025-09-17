@@ -1075,6 +1075,7 @@ export type Database = {
           is_active: boolean | null
           is_featured: boolean | null
           jacuzzi: boolean | null
+          latitude: number | null
           lease_end_date: string | null
           lease_start_date: string | null
           lease_terms: string | null
@@ -1084,8 +1085,10 @@ export type Database = {
           listing_category: string | null
           listing_for: string | null
           listing_type: string | null
+          location_accuracy: number | null
           location_zone: string | null
           lockoff_unit: boolean | null
+          longitude: number | null
           max_occupants: number | null
           min_rental_term_months: number | null
           move_in_date: string | null
@@ -1155,6 +1158,7 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           jacuzzi?: boolean | null
+          latitude?: number | null
           lease_end_date?: string | null
           lease_start_date?: string | null
           lease_terms?: string | null
@@ -1164,8 +1168,10 @@ export type Database = {
           listing_category?: string | null
           listing_for?: string | null
           listing_type?: string | null
+          location_accuracy?: number | null
           location_zone?: string | null
           lockoff_unit?: boolean | null
+          longitude?: number | null
           max_occupants?: number | null
           min_rental_term_months?: number | null
           move_in_date?: string | null
@@ -1235,6 +1241,7 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           jacuzzi?: boolean | null
+          latitude?: number | null
           lease_end_date?: string | null
           lease_start_date?: string | null
           lease_terms?: string | null
@@ -1244,8 +1251,10 @@ export type Database = {
           listing_category?: string | null
           listing_for?: string | null
           listing_type?: string | null
+          location_accuracy?: number | null
           location_zone?: string | null
           lockoff_unit?: boolean | null
+          longitude?: number | null
           max_occupants?: number | null
           min_rental_term_months?: number | null
           move_in_date?: string | null
@@ -2446,12 +2455,16 @@ export type Database = {
           is_public: boolean | null
           languages_spoken: string[] | null
           last_security_audit: string | null
+          latitude: number | null
           lease_duration: string | null
           license_number: string | null
           lifestyle_description: string | null
           lifestyle_tags: string[] | null
           location: string | null
+          location_accuracy: number | null
           location_preference: string | null
+          location_updated_at: string | null
+          longitude: number | null
           looking_for: string | null
           max_bathrooms: number | null
           max_bedrooms: number | null
@@ -2582,12 +2595,16 @@ export type Database = {
           is_public?: boolean | null
           languages_spoken?: string[] | null
           last_security_audit?: string | null
+          latitude?: number | null
           lease_duration?: string | null
           license_number?: string | null
           lifestyle_description?: string | null
           lifestyle_tags?: string[] | null
           location?: string | null
+          location_accuracy?: number | null
           location_preference?: string | null
+          location_updated_at?: string | null
+          longitude?: number | null
           looking_for?: string | null
           max_bathrooms?: number | null
           max_bedrooms?: number | null
@@ -2718,12 +2735,16 @@ export type Database = {
           is_public?: boolean | null
           languages_spoken?: string[] | null
           last_security_audit?: string | null
+          latitude?: number | null
           lease_duration?: string | null
           license_number?: string | null
           lifestyle_description?: string | null
           lifestyle_tags?: string[] | null
           location?: string | null
+          location_accuracy?: number | null
           location_preference?: string | null
+          location_updated_at?: string | null
+          longitude?: number | null
           looking_for?: string | null
           max_bathrooms?: number | null
           max_bedrooms?: number | null
@@ -5726,6 +5747,10 @@ export type Database = {
         Args: { client_id: string; owner_id: string }
         Returns: number
       }
+      calculate_distance: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
+      }
       calculate_match_score: {
         Args:
           | { client_profile_id: string; listing_id: string }
@@ -5779,12 +5804,7 @@ export type Database = {
         Args:
           | { p_required_role: string; p_user_id: string }
           | { p_user_id: string }
-        Returns: {
-          can_book_property: boolean
-          can_create_property: boolean
-          can_view_all_properties: boolean
-          user_role: string
-        }[]
+        Returns: boolean
       }
       complete_user_onboarding: {
         Args: { onboarding_data?: Json; user_id: string }
@@ -6052,8 +6072,25 @@ export type Database = {
       get_active_listings_for_client: {
         Args: Record<PropertyKey, never> | { client_user_id: string }
         Returns: {
-          id: number
-          name: string
+          address: string
+          amenities: string[]
+          baths: number
+          beds: number
+          distance_to_beach: number
+          distance_to_cenotes: number
+          furnished: boolean
+          id: string
+          images: string[]
+          owner_avatar: string
+          owner_name: string
+          owner_response_time: string
+          price: number
+          property_description: string
+          property_type: string
+          rating: number
+          square_footage: number
+          title: string
+          tulum_zone: string
         }[]
       }
       get_all_clients_for_owner: {
@@ -6120,6 +6157,40 @@ export type Database = {
           property_type: string
           square_footage: number
           title: string
+        }[]
+      }
+      get_nearby_listings: {
+        Args: {
+          exclude_owner_id?: string
+          radius_km?: number
+          user_lat: number
+          user_lon: number
+        }
+        Returns: {
+          distance: number
+          id: string
+          latitude: number
+          longitude: number
+          owner_id: string
+          price: number
+          property_type: string
+          title: string
+        }[]
+      }
+      get_nearby_profiles: {
+        Args: {
+          exclude_user_id?: string
+          radius_km?: number
+          user_lat: number
+          user_lon: number
+        }
+        Returns: {
+          distance: number
+          full_name: string
+          id: string
+          latitude: number
+          longitude: number
+          role: string
         }[]
       }
       get_potential_clients_for_owner: {
@@ -6282,12 +6353,7 @@ export type Database = {
               p_verification_status: string
             }
           | { p_user_id: string; p_verification_status: string }
-        Returns: {
-          full_name: string
-          new_status: string
-          previous_status: string
-          user_id: string
-        }[]
+        Returns: boolean
       }
       path: {
         Args: { "": unknown }
@@ -6349,7 +6415,7 @@ export type Database = {
         Args:
           | { tbl_oid: unknown; use_typmod?: boolean }
           | { use_typmod?: boolean }
-        Returns: string
+        Returns: number
       }
       postgis_addbbox: {
         Args: { "": unknown }
