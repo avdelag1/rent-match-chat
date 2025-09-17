@@ -8,6 +8,7 @@ import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionMana
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 import { useUserSubscription } from '@/hooks/useSubscription';
+import { useLocationBasedMatching } from '@/hooks/useLocationBasedMatching';
 import { 
   Flame, 
   Home, 
@@ -25,9 +26,15 @@ import { motion } from 'framer-motion';
 interface EnhancedClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
+  locationFilter?: {
+    latitude: number;
+    longitude: number;
+    city?: string;
+    radius: number;
+  } | null;
 }
 
-const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick }: EnhancedClientDashboardProps) => {
+const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationFilter }: EnhancedClientDashboardProps) => {
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const { data: listings = [] } = useListings();

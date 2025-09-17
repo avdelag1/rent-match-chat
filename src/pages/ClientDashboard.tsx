@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
-
+import { LocationBasedMatching } from '@/components/LocationBasedMatching';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +19,12 @@ interface ClientDashboardProps {
 const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [locationData, setLocationData] = useState<{
+    latitude: number;
+    longitude: number;
+    city?: string;
+    radius: number;
+  } | null>(null);
   const { data: listings = [], isLoading, error, refetch } = useListings();
   const { user } = useAuth();
   
@@ -62,25 +68,41 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
           </div>
         </div>
 
-        <div className="flex-1 p-4 space-y-4">
-          {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
-              Error loading properties. 
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => refetch()}
-                className="ml-2 text-red-600 hover:text-red-700"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Retry
-              </Button>
+        <div className="flex-1 p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Location-based matching sidebar */}
+            <div className="lg:col-span-1">
+              <LocationBasedMatching
+                onLocationUpdate={setLocationData}
+                className="sticky top-6"
+              />
             </div>
-          )}
+            
+            {/* Main content */}
+            <div className="lg:col-span-3 space-y-4">
+              {error && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
+                  Error loading properties. 
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => refetch()}
+                    className="ml-2 text-red-600 hover:text-red-700"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retry
+                  </Button>
+                </div>
+              )}
 
-          {/* Properties Section */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <h3 className="text-xl font-semibold text-gray-900 text-center mb-6">Available Properties</h3>
+              {/* Properties Section */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
+                <h3 className="text-xl font-semibold text-gray-900 text-center mb-6">
+                  {locationData ? `Properties within ${locationData.radius}km` : 'Available Properties'}
+                  {locationData?.city && (
+                    <span className="block text-sm text-gray-500 mt-1">Near {locationData.city}</span>
+                  )}
+                </h3>
             
             {isLoading ? (
               <div className="flex justify-center">
@@ -101,12 +123,15 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
                 </Button>
               </div>
             ) : (
-              <TinderentSwipeContainer
-                onListingTap={handleListingTap} 
-                onInsights={handleInsights}
-                onMessageClick={onMessageClick}
-              />
-            )}
+                <TinderentSwipeContainer
+                  onListingTap={handleListingTap} 
+                  onInsights={handleInsights}
+                  onMessageClick={onMessageClick}
+                  locationFilter={locationData}
+                />
+              )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

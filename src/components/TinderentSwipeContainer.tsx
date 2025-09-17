@@ -18,9 +18,15 @@ interface TinderentSwipeContainerProps {
   onListingTap: (listingId: string) => void;
   onInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
+  locationFilter?: {
+    latitude: number;
+    longitude: number;
+    city?: string;
+    radius: number;
+  } | null;
 }
 
-export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick }: TinderentSwipeContainerProps) {
+export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
