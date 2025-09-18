@@ -5,9 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
+import { LocationBasedMatching } from '@/components/LocationBasedMatching';
+import { MatchCelebration } from '@/components/MatchCelebration';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
 import { useUserSubscription } from '@/hooks/useSubscription';
+import { useNotifications } from '@/hooks/useNotifications';
 import { 
   Users, 
   Home, 
@@ -20,7 +23,8 @@ import {
   Crown,
   Eye,
   Plus,
-  RefreshCw
+  RefreshCw,
+  MapPin
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -32,8 +36,18 @@ interface EnhancedOwnerDashboardProps {
 const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOwnerDashboardProps) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [showLocationMatching, setShowLocationMatching] = useState(false);
+  const [matchCelebration, setMatchCelebration] = useState<{
+    isOpen: boolean;
+    clientProfile?: any;
+    ownerProfile?: any;
+  }>({ isOpen: false });
+  
   const { data: clientProfiles = [] } = useClientProfiles();
   const { data: subscription } = useUserSubscription();
+  
+  // Initialize notifications
+  useNotifications();
 
   const handleClientTap = (clientId: string) => {
     console.log('Client tapped:', clientId);
@@ -47,6 +61,19 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
     if (onClientInsights) {
       onClientInsights(clientId);
     }
+  };
+
+  const handleMatchCelebration = (clientProfile: any, ownerProfile: any) => {
+    setMatchCelebration({
+      isOpen: true,
+      clientProfile,
+      ownerProfile
+    });
+  };
+
+  const handleStartConversation = () => {
+    // Navigate to messaging or implement conversation start
+    console.log('Starting conversation...');
   };
 
   const selectedClient = clientProfiles.find(c => c.user_id === selectedClientId);
@@ -103,7 +130,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
             <motion.div variants={itemVariants} className="w-full">
               <Card className="overflow-hidden">
                 <CardHeader className="pb-4">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Badge variant="outline" className="border-primary/50 text-primary">
                       <Zap className="w-3 h-3 mr-1" />
                       Smart Matching
@@ -112,6 +139,15 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                       <Filter className="w-3 h-3 mr-1" />
                       Client Filters
                     </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowLocationMatching(!showLocationMatching)}
+                      className="border-primary/50 text-primary hover:bg-primary/10"
+                    >
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {showLocationMatching ? 'Hide Location' : 'Show Nearby'}
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="flex justify-center pb-8">
@@ -134,6 +170,8 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                         </Button>
                       </div>
                     </div>
+                  ) : showLocationMatching ? (
+                    <LocationBasedMatching />
                   ) : (
                     <ClientSwipeContainer 
                       onClientTap={handleClientTap} 
@@ -156,6 +194,14 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
           profile={selectedClient}
         />
       )}
+
+      <MatchCelebration
+        isOpen={matchCelebration.isOpen}
+        onClose={() => setMatchCelebration({ isOpen: false })}
+        clientProfile={matchCelebration.clientProfile}
+        ownerProfile={matchCelebration.ownerProfile}
+        onStartConversation={handleStartConversation}
+      />
     </DashboardLayout>
   );
 };

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Users, Search } from "lucide-react";
+import { Heart, MessageSquare, Users, Search, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,12 +13,19 @@ import { toast } from "sonner";
 interface LikedClient {
   id: string;
   user_id: string;
+  full_name: string;
   name: string;
   age: number;
   bio: string;
   profile_images: string[];
+  images: string[];
   location: any;
   liked_at: string;
+  occupation?: string;
+  nationality?: string;
+  interests?: string[];
+  monthly_income?: string;
+  verified?: boolean;
 }
 
 export function LikedClients() {
@@ -32,7 +39,7 @@ export function LikedClients() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // First get the liked user IDs
+      // Get likes where the owner liked clients (profiles)
       const { data: likes, error: likesError } = await supabase
         .from('likes')
         .select('target_id, created_at')
@@ -42,26 +49,34 @@ export function LikedClients() {
       if (likesError) throw likesError;
       if (!likes || likes.length === 0) return [];
 
-      // Then get the profiles for those users
+      // Get the profiles for those users from the main profiles table
       const { data: profiles, error: profilesError } = await supabase
-        .from('client_profiles')
+        .from('profiles')
         .select('*')
-        .in('user_id', likes.map(like => like.target_id));
+        .in('id', likes.map(like => like.target_id))
+        .eq('role', 'client');
 
       if (profilesError) throw profilesError;
       if (!profiles) return [];
 
       return profiles.map(profile => {
-        const like = likes.find(l => l.target_id === profile.user_id);
+        const like = likes.find(l => l.target_id === profile.id);
         return {
-          id: profile.id.toString(),
-          user_id: profile.user_id,
-          name: profile.name || 'Unknown',
+          id: profile.id,
+          user_id: profile.id,
+          full_name: profile.full_name || 'Unknown',
+          name: profile.full_name || 'Unknown',
           age: profile.age || 0,
           bio: profile.bio || '',
-          profile_images: profile.profile_images || [],
+          profile_images: profile.images || [],
+          images: profile.images || [],
           location: profile.location,
-          liked_at: like?.created_at || ''
+          liked_at: like?.created_at || '',
+          occupation: profile.occupation,
+          nationality: profile.nationality,
+          interests: profile.interests,
+          monthly_income: profile.monthly_income,
+          verified: profile.verified
         };
       }) as LikedClient[];
     },
@@ -87,13 +102,51 @@ export function LikedClients() {
     }
   });
 
+  const messageClientMutation = useMutation({
+    mutationFn: async (clientId: string) => {
+      // Check if conversation already exists
+      const { data: existingConversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`and(client_id.eq.${clientId},owner_id.eq.${user?.id}),and(client_id.eq.${user?.id},owner_id.eq.${clientId})`)
+        .single();
+
+      if (existingConversation) {
+        return existingConversation.id;
+      }
+
+      // Create new conversation - Note: match_id is required, using a UUID placeholder
+      const { data: newConversation, error } = await supabase
+        .from('conversations')
+        .insert({
+          client_id: clientId,
+          owner_id: user?.id,
+          match_id: crypto.randomUUID(), // Generate a temporary match ID
+          status: 'active'
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      return newConversation.id;
+    },
+    onSuccess: (conversationId) => {
+      toast.success("Conversation started!");
+      // Navigate to messaging (could be implemented later)
+    },
+    onError: () => {
+      toast.error("Failed to start conversation");
+    }
+  });
+
   const filteredClients = likedClients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.bio.toLowerCase().includes(searchTerm.toLowerCase())
+    (client.bio && client.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (client.occupation && client.occupation.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleMessage = (clientId: string) => {
-    toast.success("Message feature coming soon!");
+    messageClientMutation.mutate(clientId);
   };
 
   const handleRemoveLike = (clientId: string) => {
@@ -112,22 +165,22 @@ export function LikedClients() {
             <Heart className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Liked Clients</h1>
-            <p className="text-gray-600">Manage your liked client profiles and start conversations</p>
+            <h1 className="text-3xl font-bold">Liked Clients</h1>
+            <p className="text-muted-foreground">Manage your liked client profiles and start conversations</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4 mb-6">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
             <Input
               placeholder="Search clients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white border-gray-200 focus:border-orange-300 focus:ring-orange-500/20"
+              className="pl-10"
             />
           </div>
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-5 h-5" />
             <span className="font-medium">{filteredClients.length} clients</span>
           </div>
@@ -138,9 +191,9 @@ export function LikedClients() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="p-6 animate-pulse">
-              <div className="w-full h-64 bg-gray-200 rounded-lg mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              <div className="w-full h-64 bg-muted rounded-lg mb-4"></div>
+              <div className="h-4 bg-muted rounded mb-2"></div>
+              <div className="h-3 bg-muted rounded w-2/3"></div>
             </Card>
           ))}
         </div>
@@ -150,11 +203,11 @@ export function LikedClients() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center py-16"
         >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
-            <Heart className="w-12 h-12 text-gray-400" />
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+            <Heart className="w-12 h-12 text-muted-foreground" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Liked Clients Yet</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold mb-2">No Liked Clients Yet</h2>
+          <p className="text-muted-foreground mb-6">
             Start browsing client profiles and like the ones you're interested in working with
           </p>
           <Button 
@@ -174,17 +227,17 @@ export function LikedClients() {
               transition={{ delay: index * 0.1 }}
               className="group"
             >
-              <Card className="p-6 h-full bg-white/80 backdrop-blur-sm border-gray-200 hover:border-orange-300 transition-all duration-300 hover:shadow-lg">
+              <Card className="p-6 h-full hover:shadow-lg transition-all duration-300">
                 <div className="relative mb-4">
-                  {client.profile_images.length > 0 ? (
+                  {client.images && client.images.length > 0 ? (
                     <img
-                      src={client.profile_images[0]}
+                      src={client.images[0]}
                       alt={client.name}
                       className="w-full h-64 object-cover rounded-lg"
                     />
                   ) : (
-                    <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <Users className="w-16 h-16 text-gray-400" />
+                    <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+                      <Users className="w-16 h-16 text-muted-foreground" />
                     </div>
                   )}
                   
@@ -193,6 +246,7 @@ export function LikedClients() {
                       size="sm"
                       onClick={() => handleMessage(client.user_id)}
                       className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
+                      disabled={messageClientMutation.isPending}
                     >
                       <MessageSquare className="w-4 h-4" />
                     </Button>
@@ -201,6 +255,7 @@ export function LikedClients() {
                       variant="destructive"
                       onClick={() => handleRemoveLike(client.user_id)}
                       className="shadow-lg"
+                      disabled={removeLikeMutation.isPending}
                     >
                       <Heart className="w-4 h-4 fill-current" />
                     </Button>
@@ -209,16 +264,39 @@ export function LikedClients() {
 
                 <div className="space-y-3">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{client.name}</h3>
-                    <p className="text-gray-600">Age: {client.age}</p>
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      {client.name}
+                      {client.verified && (
+                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                      )}
+                    </h3>
+                    <p className="text-muted-foreground">Age: {client.age}</p>
+                    {client.occupation && (
+                      <p className="text-sm text-muted-foreground">{client.occupation}</p>
+                    )}
                   </div>
                   
                   {client.bio && (
-                    <p className="text-gray-700 text-sm line-clamp-3">{client.bio}</p>
+                    <p className="text-sm line-clamp-3">{client.bio}</p>
+                  )}
+
+                  {client.interests && client.interests.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {client.interests.slice(0, 3).map((interest, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                    </div>
                   )}
                   
-                  <div className="pt-3 border-t border-gray-100">
-                    <p className="text-xs text-gray-500">
+                  <div className="pt-3 border-t">
+                    <p className="text-xs text-muted-foreground">
                       Liked on {new Date(client.liked_at).toLocaleDateString()}
                     </p>
                   </div>

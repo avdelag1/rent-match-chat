@@ -3,8 +3,9 @@ import { useState, useCallback } from 'react';
 import { ClientProfileCard } from './ClientProfileCard';
 import { AdvancedFilters } from './AdvancedFilters';
 import { SuperLikeButton } from './SuperLikeButton';
+import { MatchCelebration } from './MatchCelebration';
 import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
-import { useSwipe } from '@/hooks/useSwipe';
+import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -24,10 +25,23 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const [showFilters, setShowFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [matchCelebration, setMatchCelebration] = useState<{
+    isOpen: boolean;
+    clientProfile?: any;
+    ownerProfile?: any;
+  }>({ isOpen: false });
   
   const { data: swipedIds = [] } = useSwipedClientProfiles();
   const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
-  const swipeMutation = useSwipe();
+  const swipeMutation = useSwipeWithMatch({
+    onMatch: (clientProfile, ownerProfile) => {
+      setMatchCelebration({
+        isOpen: true,
+        clientProfile,
+        ownerProfile
+      });
+    }
+  });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
 
   console.log('ClientSwipeContainer - Profiles loaded:', clientProfiles.length, clientProfiles);
@@ -358,6 +372,14 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         userRole="owner"
         onApplyFilters={handleApplyFilters}
         currentFilters={appliedFilters}
+      />
+
+      <MatchCelebration
+        isOpen={matchCelebration.isOpen}
+        onClose={() => setMatchCelebration({ isOpen: false })}
+        clientProfile={matchCelebration.clientProfile}
+        ownerProfile={matchCelebration.ownerProfile}
+        onStartConversation={handleStartConversation}
       />
     </div>
   );

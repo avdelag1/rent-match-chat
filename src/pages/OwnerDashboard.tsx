@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { LocationBasedMatching } from '@/components/LocationBasedMatching';
+import { MatchCelebration } from '@/components/MatchCelebration';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Users, RefreshCw } from 'lucide-react';
+import { Users, RefreshCw, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface OwnerDashboardProps {
@@ -18,8 +21,18 @@ interface OwnerDashboardProps {
 const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProps) => {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [showLocationMatching, setShowLocationMatching] = useState(false);
+  const [matchCelebration, setMatchCelebration] = useState<{
+    isOpen: boolean;
+    clientProfile?: any;
+    ownerProfile?: any;
+  }>({ isOpen: false });
+  
   const { data: profiles = [], isLoading, error, refetch } = useClientProfiles();
   const navigate = useNavigate();
+  
+  // Initialize notifications
+  useNotifications();
   
   console.log('OwnerDashboard - Profiles:', profiles.length, 'Loading:', isLoading, 'Error:', error);
 
@@ -37,18 +50,43 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     }
   };
 
+  const handleMatchCelebration = (clientProfile: any, ownerProfile: any) => {
+    setMatchCelebration({
+      isOpen: true,
+      clientProfile,
+      ownerProfile
+    });
+  };
+
+  const handleStartConversation = () => {
+    navigate('/messaging');
+  };
+
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId);
 
   // Mobile-optimized content
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="owner">
       <div className="min-h-screen w-full overflow-x-hidden">
-        <div className="w-full max-w-sm mx-auto px-4 py-6">
-          {/* Compact Header */}
-          <div className="text-center mb-2">
-            <h1 className="text-xl font-bold text-white mb-1">Available Tenants</h1>
-            <p className="text-white/70 text-sm">{profiles.length} profiles</p>
-          </div>
+          <div className="w-full max-w-sm mx-auto px-4 py-6">
+            {/* Compact Header */}
+            <div className="text-center mb-2">
+              <h1 className="text-xl font-bold text-white mb-1">Available Tenants</h1>
+              <p className="text-white/70 text-sm">{profiles.length} profiles</p>
+              
+              {/* Location Toggle */}
+              <div className="flex justify-center mt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowLocationMatching(!showLocationMatching)}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {showLocationMatching ? 'Hide Location' : 'Show Nearby'}
+                </Button>
+              </div>
+            </div>
 
           {/* Compact Tenants Section */}
           <div className="w-full">
@@ -111,11 +149,15 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
               </div>
             ) : (
               <div className="w-full">
-                <ClientSwipeContainer 
-                  onClientTap={handleProfileTap}
-                  onInsights={handleInsights}
-                  onMessageClick={onMessageClick}
-                />
+                {showLocationMatching ? (
+                  <LocationBasedMatching />
+                ) : (
+                  <ClientSwipeContainer 
+                    onClientTap={handleProfileTap}
+                    onInsights={handleInsights}
+                    onMessageClick={onMessageClick}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -126,6 +168,14 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         open={insightsOpen}
         onOpenChange={setInsightsOpen}
         profile={selectedProfile || null}
+      />
+
+      <MatchCelebration
+        isOpen={matchCelebration.isOpen}
+        onClose={() => setMatchCelebration({ isOpen: false })}
+        clientProfile={matchCelebration.clientProfile}
+        ownerProfile={matchCelebration.ownerProfile}
+        onStartConversation={handleStartConversation}
       />
     </DashboardLayout>
   );
