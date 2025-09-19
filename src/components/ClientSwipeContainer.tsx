@@ -125,6 +125,17 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     }
   };
 
+  const handleStartConversation = () => {
+    if (needsUpgrade && onMessageClick) {
+      onMessageClick();
+    } else {
+      toast({
+        title: '💬 Starting Conversation',
+        description: 'Opening messaging with your new match!',
+      });
+    }
+  };
+
   const handleApplyFilters = (filters: any) => {
     setAppliedFilters(filters);
     setCurrentIndex(0);
