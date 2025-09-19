@@ -27,7 +27,7 @@ import OwnerSavedSearches from "./pages/OwnerSavedSearches";
 import OwnerMatchHistory from "./pages/OwnerMatchHistory";
 import OwnerActivityFeed from "./pages/OwnerActivityFeed";
 import OwnerSecurity from "./pages/OwnerSecurity";
-import MessagingDashboard from "./pages/MessagingDashboard";
+import { MessagingDashboard } from "./pages/MessagingDashboard";
 import OwnerProperties from "./pages/OwnerProperties";
 import OwnerLikedClients from "./pages/OwnerLikedClients";
 

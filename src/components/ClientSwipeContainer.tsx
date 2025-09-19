@@ -6,6 +6,7 @@ import { SuperLikeButton } from './SuperLikeButton';
 import { MatchCelebration } from './MatchCelebration';
 import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
+import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -21,6 +22,7 @@ interface ClientSwipeContainerProps {
 }
 
 export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
@@ -125,14 +127,12 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     }
   };
 
-  const handleStartConversation = () => {
+  const handleStartConversation = (clientId: string) => {
     if (needsUpgrade && onMessageClick) {
       onMessageClick();
     } else {
-      toast({
-        title: '💬 Starting Conversation',
-        description: 'Opening messaging with your new match!',
-      });
+      // Navigate to messaging with this specific client
+      navigate(`/messaging?startConversation=${clientId}`);
     }
   };
 
@@ -390,7 +390,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         onClose={() => setMatchCelebration({ isOpen: false })}
         clientProfile={matchCelebration.clientProfile}
         ownerProfile={matchCelebration.ownerProfile}
-        onStartConversation={handleStartConversation}
+        onStartConversation={() => handleStartConversation(currentClient?.id?.toString() || '')}
       />
     </div>
   );

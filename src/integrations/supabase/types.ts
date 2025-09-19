@@ -687,6 +687,33 @@ export type Database = {
           },
         ]
       }
+      conversation_starters: {
+        Row: {
+          conversations_started: number | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          conversations_started?: number | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          conversations_started?: number | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           client_id: string
@@ -5759,6 +5786,10 @@ export type Database = {
           | { property: Json; tenant_profile: Json }
         Returns: number
       }
+      can_start_conversation: {
+        Args: { p_other_user_id: string; p_user_id: string }
+        Returns: boolean
+      }
       can_user_perform_action: {
         Args:
           | Record<PropertyKey, never>
@@ -6255,6 +6286,10 @@ export type Database = {
           liker_id: string
         }[]
       }
+      get_weekly_conversation_count: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       gettransactionid: {
         Args: Record<PropertyKey, never>
         Returns: unknown
@@ -6266,6 +6301,10 @@ export type Database = {
       gidx_out: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      increment_conversation_count: {
+        Args: { p_user_id: string }
+        Returns: boolean
       }
       increment_usage_count: {
         Args:
