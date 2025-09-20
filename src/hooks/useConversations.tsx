@@ -34,22 +34,16 @@ export function useConversations() {
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // Get conversations without requiring messages to exist
       const { data, error } = await supabase
         .from('conversations')
-        .select(`
-          *,
-          conversation_messages!inner (
-            message_text,
-            created_at,
-            sender_id
-          )
-        `)
+        .select('*')
         .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-        .order('last_message_at', { ascending: false });
+        .order('last_message_at', { ascending: false, nullsFirst: false });
 
       if (error) throw error;
 
-      // Get other user profiles
+      // Get other user profiles and last messages
       const conversationsWithProfiles = await Promise.all(
         (data || []).map(async (conversation) => {
           const otherUserId = conversation.client_id === user.id 
@@ -60,7 +54,7 @@ export function useConversations() {
             .from('profiles')
             .select('id, full_name, avatar_url, role')
             .eq('id', otherUserId)
-            .single();
+            .maybeSingle();
 
           // Get last message
           const { data: lastMessage } = await supabase
@@ -69,7 +63,7 @@ export function useConversations() {
             .eq('conversation_id', conversation.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           return {
             ...conversation,

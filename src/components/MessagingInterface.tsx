@@ -10,6 +10,7 @@ import { useConversationMessages, useSendMessage } from '@/hooks/useConversation
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -27,6 +28,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
   const { user } = useAuth();
   const { data: messages = [], isLoading } = useConversationMessages(conversationId);
   const sendMessage = useSendMessage();
+  const queryClient = useQueryClient();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -37,8 +39,10 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
 
   // Set up real-time subscription
   useEffect(() => {
+    if (!conversationId) return;
+
     const channel = supabase
-      .channel('conversation-messages')
+      .channel(`conversation-${conversationId}`)
       .on(
         'postgres_changes',
         {
@@ -47,8 +51,12 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           table: 'conversation_messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        () => {
-          // Messages will be refetched automatically by React Query
+        (payload) => {
+          console.log('New message received:', payload);
+          // Invalidate and refetch messages
+          queryClient.invalidateQueries({ 
+            queryKey: ['conversation-messages', conversationId] 
+          });
         }
       )
       .subscribe();
