@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
+import { useStartConversation, useConversationStats } from "@/hooks/useConversations";
+import { useNavigate } from "react-router-dom";
 import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -16,30 +18,41 @@ const ClientLikedProperties = () => {
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const { data: likedProperties = [], isLoading, refetch: refreshLikedProperties } = useLikedProperties();
   const { data: subscription } = useUserSubscription();
+  const { data: conversationStats } = useConversationStats();
+  const startConversation = useStartConversation();
+  const navigate = useNavigate();
 
-  // Mock messages remaining - this would come from your subscription/usage system  
-  const messagesRemaining = subscription?.subscription_packages?.name === 'Premium' ? 999 : 3;
+  // Get conversations remaining from the stats
+  const conversationsRemaining = conversationStats?.conversationsLeft || 0;
 
   const handlePropertySelect = (listingId: string) => {
     setSelectedListingId(listingId);
     setShowPropertyDetails(true);
   };
 
-  const handleContactOwner = (propertyTitle: string) => {
-    if (messagesRemaining <= 0) {
+  const handleContactOwner = async (property: any) => {
+    if (conversationsRemaining <= 0) {
       toast({
-        title: "No messages remaining",
-        description: "Upgrade your subscription to contact property owners.",
+        title: "No conversation starters remaining",
+        description: "You've used all your weekly conversation starters. Upgrade for unlimited conversations.",
         variant: "destructive"
       });
       return;
     }
     
-    // This would typically navigate to messaging or open a contact modal
-    toast({
-      title: "Contact initiated",
-      description: `Starting conversation about ${propertyTitle}. ${messagesRemaining - 1} messages remaining.`,
-    });
+    try {
+      // Start a conversation with the property owner
+      await startConversation.mutateAsync({
+        otherUserId: property.owner_id,
+        listingId: property.id,
+        initialMessage: `Hi! I'm interested in your property: ${property.title}. Could you tell me more about it?`
+      });
+      
+      // Navigate to messages
+      navigate('/messages');
+    } catch (error) {
+      console.error('Failed to start conversation:', error);
+    }
   };
 
   return (
@@ -63,10 +76,10 @@ const ClientLikedProperties = () => {
                 <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
-              {messagesRemaining > 0 && (
+              {conversationsRemaining > 0 && (
                 <Badge variant="secondary" className="text-sm">
                   <MessageCircle className="w-4 h-4 mr-1" />
-                  {messagesRemaining} messages remaining
+                  {conversationsRemaining} conversation starters remaining
                 </Badge>
               )}
             </div>
@@ -173,14 +186,19 @@ const ClientLikedProperties = () => {
                     {/* Contact Button */}
                     <div className="pt-2">
                       <Button
-                        onClick={() => handleContactOwner(property.title)}
-                        disabled={messagesRemaining <= 0}
+                        onClick={() => handleContactOwner(property)}
+                        disabled={conversationsRemaining <= 0 || startConversation.isPending}
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
-                        {messagesRemaining <= 0 ? (
+                        {conversationsRemaining <= 0 ? (
                           <>
                             <Crown className="w-4 h-4 mr-2" />
                             Upgrade to Contact
+                          </>
+                        ) : startConversation.isPending ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Starting Conversation...
                           </>
                         ) : (
                           <>
@@ -221,7 +239,12 @@ const ClientLikedProperties = () => {
           setShowPropertyDetails(false);
           setSelectedListingId(null);
         }}
-        onMessageClick={() => handleContactOwner("this property")}
+        onMessageClick={() => {
+          const selectedProperty = likedProperties.find(p => p.id === selectedListingId);
+          if (selectedProperty) {
+            handleContactOwner(selectedProperty);
+          }
+        }}
       />
     </DashboardLayout>
   );
