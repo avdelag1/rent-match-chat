@@ -48,10 +48,20 @@ const ClientLikedProperties = () => {
         initialMessage: `Hi! I'm interested in your property: ${property.title}. Could you tell me more about it?`
       });
       
+      toast({
+        title: "Conversation started!",
+        description: "You can now chat with the property owner.",
+      });
+      
       // Navigate to messages
       navigate('/messages');
     } catch (error) {
-      console.error('Failed to start conversation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
+      toast({
+        title: "Unable to start conversation",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
   };
 

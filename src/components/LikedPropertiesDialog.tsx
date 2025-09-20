@@ -82,7 +82,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
               </Card>
             ))}
           </div>
-        ) : likedProperties.length === 0 ? (
+        ) : likedProperties && likedProperties.length === 0 ? (
           <div className="text-center py-12">
             <Flame className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No liked properties yet</h3>
@@ -92,7 +92,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
-            {likedProperties.map((property) => (
+            {likedProperties && likedProperties.map((property) => (
               <Card key={property.id} className="relative group cursor-pointer hover:shadow-lg transition-shadow">
                 <Button
                   variant="ghost"
