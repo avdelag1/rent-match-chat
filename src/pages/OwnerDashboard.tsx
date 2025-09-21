@@ -67,21 +67,22 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="owner">
       <div className="min-h-screen w-full overflow-x-hidden">
-        <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
+        <div className="w-full max-w-sm mx-auto px-3 py-4 space-y-4">
           {/* Header Section */}
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">Browse Clients</h1>
-            <p className="text-white/80 text-sm">
+            <h1 className="text-lg font-bold text-white mb-1">Browse Clients</h1>
+            <p className="text-white/80 text-xs">
               Explore verified client profiles and connect with potential matches
             </p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex gap-2 justify-center">
             <Button
               onClick={() => setShowLocationMatching(!showLocationMatching)}
               variant="outline"
-              className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 text-orange-300 hover:bg-orange-500/20 gap-2"
+              size="sm"
+              className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 text-orange-300 hover:bg-orange-500/20 gap-1 text-xs px-3"
             >
               <span className="text-orange-400">⚡</span>
               Smart Matching
@@ -89,9 +90,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
             <Button
               onClick={() => setShowLocationMatching(!showLocationMatching)}
               variant="outline"
-              className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-400/30 text-blue-300 hover:bg-blue-500/20 gap-2"
+              size="sm"
+              className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-400/30 text-blue-300 hover:bg-blue-500/20 gap-1 text-xs px-3"
             >
-              <MapPin className="w-4 h-4" />
+              <MapPin className="w-3 h-3" />
               Show Nearby
             </Button>
           </div>
@@ -100,45 +102,47 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           <div className="w-full">
             {isLoading ? (
               <div className="flex justify-center">
-                <div className="space-y-4 w-full max-w-sm">
+                <div className="space-y-3 w-full max-w-xs">
                   <div className="animate-pulse">
-                    <div className="w-full h-64 bg-white/10 rounded-lg mb-4"></div>
-                    <div className="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-white/10 rounded w-1/2 mb-3"></div>
+                    <div className="w-full h-48 bg-white/10 rounded-lg mb-3"></div>
+                    <div className="h-3 bg-white/10 rounded w-3/4 mb-2"></div>
+                    <div className="h-2 bg-white/10 rounded w-1/2 mb-2"></div>
                     <div className="flex space-x-2">
-                      <div className="h-6 bg-white/10 rounded-full w-16"></div>
-                      <div className="h-6 bg-white/10 rounded-full w-20"></div>
+                      <div className="h-5 bg-white/10 rounded-full w-12"></div>
+                      <div className="h-5 bg-white/10 rounded-full w-16"></div>
                     </div>
                   </div>
                 </div>
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
-                <div className="text-6xl mb-4">😞</div>
-                <h3 className="text-xl font-bold text-white">Unable to load tenants</h3>
-                <p className="text-white/70 text-sm max-w-sm">
+              <div className="flex flex-col items-center justify-center space-y-3 py-6 text-center">
+                <div className="text-4xl mb-2">😞</div>
+                <h3 className="text-lg font-bold text-white">Unable to load tenants</h3>
+                <p className="text-white/70 text-xs max-w-xs">
                   Error loading profiles. Please check your connection and try again.
                 </p>
                 <Button 
                   onClick={() => refetch()}
                   variant="outline"
+                  size="sm"
                   className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-3 h-3" />
                   Try Again
                 </Button>
               </div>
             ) : profiles.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-6 py-12 text-center">
-                <div className="text-6xl mb-4">👥</div>
-                <h3 className="text-xl font-bold text-white">No Tenants Found</h3>
-                <p className="text-white/70 text-sm max-w-sm">
+              <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
+                <div className="text-4xl mb-2">👥</div>
+                <h3 className="text-lg font-bold text-white">No Tenants Found</h3>
+                <p className="text-white/70 text-xs max-w-xs">
                   Try adjusting your filters to see more profiles.
                 </p>
-                <div className="flex flex-col gap-3 w-full max-w-sm">
+                <div className="flex flex-col gap-2 w-full max-w-xs">
                   <Button 
                     variant="outline"
-                    className="gap-2 w-full bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 text-white hover:bg-primary/20"
+                    size="sm"
+                    className="gap-1 w-full bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 text-white hover:bg-primary/20 text-xs"
                   >
                     <span className="text-primary">⚙️</span>
                     Adjust Filters
@@ -146,9 +150,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                   <Button 
                     onClick={() => refetch()}
                     variant="outline"
-                    className="gap-2 w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    size="sm"
+                    className="gap-1 w-full bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs"
                   >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="w-3 h-3" />
                     Refresh
                   </Button>
                 </div>
