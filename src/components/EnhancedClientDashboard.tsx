@@ -6,8 +6,10 @@ import { SwipeContainer } from '@/components/SwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { NotificationBar } from '@/components/NotificationBar';
 import { useListings } from '@/hooks/useListings';
 import { useUserSubscription } from '@/hooks/useSubscription';
+import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { useLocationBasedMatching } from '@/hooks/useLocationBasedMatching';
 import { 
   Flame, 
@@ -39,6 +41,7 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationF
   const [insightsOpen, setInsightsOpen] = useState(false);
   const { data: listings = [] } = useListings();
   const { data: subscription } = useUserSubscription();
+  const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
 
   const handleListingTap = (listingId: string) => {
     console.log('Listing tapped:', listingId);
@@ -81,6 +84,12 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationF
 
   return (
     <DashboardLayout userRole="client">
+      <NotificationBar
+        notifications={notifications}
+        onDismiss={dismissNotification}
+        onMarkAllRead={markAllAsRead}
+        onNotificationClick={handleNotificationClick}
+      />
       <motion.div 
         className="p-2 sm:p-4 md:p-6"
         variants={containerVariants}

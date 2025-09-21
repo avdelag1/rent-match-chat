@@ -8,9 +8,11 @@ import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionMana
 import { LocationBasedMatching } from '@/components/LocationBasedMatching';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { NotificationBar } from '@/components/NotificationBar';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { 
   Users, 
   Home, 
@@ -45,6 +47,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   
   const { data: clientProfiles = [] } = useClientProfiles();
   const { data: subscription } = useUserSubscription();
+  const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
   
   // Initialize notifications
   useNotifications();
@@ -103,6 +106,12 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
 
   return (
     <DashboardLayout userRole="owner">
+      <NotificationBar
+        notifications={notifications}
+        onDismiss={dismissNotification}
+        onMarkAllRead={markAllAsRead}
+        onNotificationClick={handleNotificationClick}
+      />
       <div className="w-full min-h-screen bg-background">
         <motion.div 
           className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 max-w-7xl"
