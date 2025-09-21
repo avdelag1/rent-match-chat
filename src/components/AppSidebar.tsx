@@ -1,4 +1,4 @@
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -36,6 +36,12 @@ const clientMenuItems = [
     url: "#premium-packages",
     icon: Crown,
     action: 'premium-packages'
+  },
+  {
+    title: "Support",
+    url: "#support",
+    icon: HelpCircle,
+    action: 'support'
   },
 ]
 
@@ -88,6 +94,12 @@ const ownerMenuItems = [
     icon: Crown,
     action: 'premium-packages'
   },
+  {
+    title: "Support",
+    url: "#support",
+    icon: HelpCircle,
+    action: 'support'
+  },
 ]
 
 export interface AppSidebarProps {
@@ -123,6 +135,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
     } else if (item.action === 'legal-documents') {
       // Open legal documents dialog
       if (onMenuItemClick) onMenuItemClick('legal-documents')
+    } else if (item.action === 'support') {
+      // Open support dialog
+      if (onMenuItemClick) onMenuItemClick('support')
     } else {
       navigate(item.url)
       if (onMenuItemClick) onMenuItemClick('dashboard')

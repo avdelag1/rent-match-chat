@@ -261,15 +261,15 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-48 mx-auto space-y-1">
-      {/* Header with Progress and Filters - Ultra Compact */}
-      <div className="space-y-1">
-        <div className="flex justify-between items-center">
+    <div className="w-full max-w-sm mx-auto space-y-6">
+      {/* Header with Progress and Filters */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center gap-4">
           <Button
             variant="outline"
-            size="sm"
+            size="default"
             onClick={() => setShowFilters(true)}
-            className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:bg-primary/20 gap-2"
+            className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:bg-primary/20 gap-2 flex-1"
           >
             <SlidersHorizontal className="w-4 h-4" />
             Ultimate Filters
@@ -278,7 +278,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           {Object.keys(appliedFilters).length > 0 && (
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={() => {
                 setAppliedFilters({});
                 setCurrentIndex(0);
@@ -291,17 +291,17 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </div>
 
         {/* Progress Bar */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Property {currentIndex + 1} of {listings.length}</span>
             <span>{Math.round(progress)}% complete</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-3" />
         </div>
       </div>
 
-      {/* Cards Container - Compact Size */}
-      <div className="relative w-full h-80">
+      {/* Cards Container - Proper Size */}
+      <div className="relative w-full h-96">
         <AnimatePresence>
           {nextListing && (
             <EnhancedPropertyCard

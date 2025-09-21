@@ -19,6 +19,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { OwnerSettingsDialog } from '@/components/OwnerSettingsDialog'
 import { OwnerProfileDialog } from '@/components/OwnerProfileDialog'
 import OwnerClientSwipeDialog from '@/components/OwnerClientSwipeDialog'
+import { SupportDialog } from '@/components/SupportDialog'
 import { Button } from '@/components/ui/button'
 
 interface DashboardLayoutProps {
@@ -48,6 +49,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   // Legal documents dialog
   const [showLegalDocuments, setShowLegalDocuments] = useState(false)
+
+  // Support dialog
+  const [showSupport, setShowSupport] = useState(false)
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -114,6 +118,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         break
       case 'legal-documents':
         setShowLegalDocuments(true)
+        break
+      case 'support':
+        setShowSupport(true)
         break
       case 'settings':
         if (userRole === 'owner') {
@@ -282,6 +289,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           />
         </>
       )}
+
+      <SupportDialog
+        isOpen={showSupport}
+        onClose={() => setShowSupport(false)}
+        userRole={userRole}
+      />
     </SidebarProvider>
   )
 }
