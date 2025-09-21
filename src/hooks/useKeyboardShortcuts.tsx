@@ -68,7 +68,7 @@ export function useKeyboardShortcuts() {
         action: () => {
           // Show keyboard shortcuts help
           console.log('Keyboard shortcuts:', shortcuts.map(s => 
-            `${s.altKey ? 'Alt+' : ''}${s.ctrlKey ? 'Ctrl+' : ''}${s.key.toUpperCase()}: ${s.description}`
+            `${s.altKey ? 'Alt+' : ''}${s.ctrlKey ? 'Ctrl+' : ''}${s.key?.toUpperCase() || ''}: ${s.description}`
           ));
         },
         description: 'Show keyboard shortcuts'

@@ -64,86 +64,92 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId);
 
-  // Mobile-optimized content
   const renderEmergencyFallback = () => (
     <DashboardLayout userRole="owner">
       <div className="min-h-screen w-full overflow-x-hidden">
-          <div className="w-full max-w-sm mx-auto px-4 py-6">
-            {/* Compact Header */}
-            <div className="text-center mb-2">
-              <h1 className="text-xl font-bold text-white mb-1">Available Tenants</h1>
-              <p className="text-white/70 text-sm">{profiles.length} profiles</p>
-              
-              {/* Location Toggle */}
-              <div className="flex justify-center mt-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setShowLocationMatching(!showLocationMatching)}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {showLocationMatching ? 'Hide Location' : 'Show Nearby'}
-                </Button>
-              </div>
-            </div>
+        <div className="w-full max-w-lg mx-auto px-4 py-6 space-y-6">
+          {/* Header Section */}
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-white mb-2">Browse Clients</h1>
+            <p className="text-white/80 text-sm">
+              Explore verified client profiles and connect with potential matches
+            </p>
+          </div>
 
-          {/* Compact Tenants Section */}
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              onClick={() => setShowLocationMatching(!showLocationMatching)}
+              variant="outline"
+              className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 text-orange-300 hover:bg-orange-500/20 gap-2"
+            >
+              <span className="text-orange-400">⚡</span>
+              Smart Matching
+            </Button>
+            <Button
+              onClick={() => setShowLocationMatching(!showLocationMatching)}
+              variant="outline"
+              className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-400/30 text-blue-300 hover:bg-blue-500/20 gap-2"
+            >
+              <MapPin className="w-4 h-4" />
+              Show Nearby
+            </Button>
+          </div>
+
+          {/* Main Content Area */}
           <div className="w-full">
-            
             {isLoading ? (
               <div className="flex justify-center">
-                <div className="space-y-3 w-full max-w-xs">
-                  <Skeleton className="w-full h-48 rounded-lg bg-white/10" />
-                  <Skeleton className="w-3/4 h-4 bg-white/10" />
-                  <Skeleton className="w-1/2 h-3 bg-white/10" />
-                  <div className="flex space-x-2">
-                    <Skeleton className="w-12 h-4 rounded-full bg-white/10" />
-                    <Skeleton className="w-16 h-4 rounded-full bg-white/10" />
+                <div className="space-y-4 w-full max-w-sm">
+                  <div className="animate-pulse">
+                    <div className="w-full h-64 bg-white/10 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-white/10 rounded w-1/2 mb-3"></div>
+                    <div className="flex space-x-2">
+                      <div className="h-6 bg-white/10 rounded-full w-16"></div>
+                      <div className="h-6 bg-white/10 rounded-full w-20"></div>
+                    </div>
                   </div>
                 </div>
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center space-y-3 py-8">
-                <Users className="w-12 h-12 text-white/60" />
-                <h3 className="text-lg font-semibold text-white">Unable to load tenants</h3>
-                <p className="text-white/70 text-center text-sm">Error loading profiles. Please try again.</p>
+              <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
+                <div className="text-6xl mb-4">😞</div>
+                <h3 className="text-xl font-bold text-white">Unable to load tenants</h3>
+                <p className="text-white/70 text-sm max-w-sm">
+                  Error loading profiles. Please check your connection and try again.
+                </p>
                 <Button 
                   onClick={() => refetch()}
-                  className="gap-2"
                   variant="outline"
-                  size="sm"
+                  className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
                   <RefreshCw className="w-4 h-4" />
                   Try Again
                 </Button>
               </div>
             ) : profiles.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-4 py-12">
-                <Users className="w-16 h-16 text-white/40" />
-                <div className="text-center space-y-2">
-                  <h3 className="text-xl font-semibold text-white">No Tenants Available Yet</h3>
-                  <p className="text-white/70 text-sm max-w-xs">
-                    Tenant profiles will appear here once users complete their onboarding.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 w-full max-w-xs">
+              <div className="flex flex-col items-center justify-center space-y-6 py-12 text-center">
+                <div className="text-6xl mb-4">👥</div>
+                <h3 className="text-xl font-bold text-white">No Tenants Found</h3>
+                <p className="text-white/70 text-sm max-w-sm">
+                  Try adjusting your filters to see more profiles.
+                </p>
+                <div className="flex flex-col gap-3 w-full max-w-sm">
                   <Button 
-                    onClick={() => refetch()}
-                    className="gap-2 w-full"
                     variant="outline"
-                    size="sm"
+                    className="gap-2 w-full bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 text-white hover:bg-primary/20"
                   >
-                    <RefreshCw className="w-4 h-4" />
-                    Check for New Tenants
+                    <span className="text-primary">⚙️</span>
+                    Adjust Filters
                   </Button>
                   <Button 
-                    className="gap-2 w-full bg-white/10 hover:bg-white/20 text-white border-white/20"
+                    onClick={() => refetch()}
                     variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/owner/properties')}
+                    className="gap-2 w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
                   >
-                    Add Your Properties
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh
                   </Button>
                 </div>
               </div>
