@@ -721,7 +721,7 @@ export type Database = {
           id: string
           last_message_at: string | null
           listing_id: string | null
-          match_id: string
+          match_id: string | null
           owner_id: string
           status: string | null
           updated_at: string
@@ -732,7 +732,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           listing_id?: string | null
-          match_id: string
+          match_id?: string | null
           owner_id: string
           status?: string | null
           updated_at?: string
@@ -743,7 +743,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           listing_id?: string | null
-          match_id?: string
+          match_id?: string | null
           owner_id?: string
           status?: string | null
           updated_at?: string

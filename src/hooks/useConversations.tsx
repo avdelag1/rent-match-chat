@@ -128,7 +128,6 @@ export function useStartConversation() {
 
       let conversationId = existingConversation?.id;
 
-      // Create conversation if it doesn't exist
       if (!conversationId) {
         // Determine roles
         const { data: myProfile } = await supabase
@@ -146,34 +145,14 @@ export function useStartConversation() {
         const clientId = myProfile?.role === 'client' ? user.id : otherUserId;
         const ownerId = myProfile?.role === 'owner' ? user.id : otherUserId;
 
-        // First create a match to ensure we have a valid match_id
-        const { data: newMatch, error: matchError } = await supabase
-          .from('matches')
-          .insert({
-            client_id: clientId,
-            owner_id: ownerId,
-            listing_id: listingId,
-            is_mutual: true,
-            status: 'accepted',
-            client_liked_at: new Date().toISOString(),
-            owner_liked_at: new Date().toISOString()
-          })
-          .select()
-          .single();
-
-        if (matchError) {
-          console.error('Match creation error:', matchError);
-          throw new Error('Failed to create match: ' + matchError.message);
-        }
-
-        // Now create the conversation with the valid match_id
+        // Create conversation without requiring a match first (match_id is now nullable)
         const { data: newConversation, error: conversationError } = await supabase
           .from('conversations')
           .insert({
             client_id: clientId,
             owner_id: ownerId,
             listing_id: listingId,
-            match_id: newMatch.id,
+            match_id: null, // We'll create the match after if needed
             status: 'active'
           })
           .select()
@@ -181,6 +160,23 @@ export function useStartConversation() {
 
         if (conversationError) throw conversationError;
         conversationId = newConversation.id;
+
+        // Optionally create a match record for tracking purposes (but don't block conversation if it fails)
+        try {
+          await supabase
+            .from('matches')
+            .insert({
+              client_id: clientId,
+              owner_id: ownerId,
+              listing_id: listingId,
+              is_mutual: true,
+              status: 'accepted',
+              client_liked_at: new Date().toISOString(),
+              owner_liked_at: new Date().toISOString()
+            });
+        } catch (matchError) {
+          console.log('Match creation failed, but conversation was created successfully:', matchError);
+        }
       }
 
       // Send initial message
