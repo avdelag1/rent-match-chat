@@ -272,7 +272,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:bg-primary/20 gap-2 flex-1"
           >
             <SlidersHorizontal className="w-4 h-4" />
-            Filters
           </Button>
           
           {Object.keys(appliedFilters).length > 0 && (
@@ -301,7 +300,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
       {/* Cards Container - Proper Size */}
-      <div className="relative w-full h-96">
+      <div className="relative w-full h-[500px]">
         <AnimatePresence>
           {nextListing && (
             <EnhancedPropertyCard

@@ -27,10 +27,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const { data: listings = [], isLoading, error, refetch } = useListings();
   const { user } = useAuth();
   
-  console.log('ClientDashboard - Listings:', listings.length, 'Loading:', isLoading, 'Error:', error);
-
   const handleListingTap = (listingId: string) => {
-    console.log('Listing tapped:', listingId);
     setSelectedListingId(listingId);
     setInsightsOpen(true);
   };

@@ -33,10 +33,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   // Initialize notifications
   useNotifications();
   
-  console.log('OwnerDashboard - Profiles:', profiles.length, 'Loading:', isLoading, 'Error:', error);
-
   const handleProfileTap = (profileId: string) => {
-    console.log('Profile tapped:', profileId);
     setSelectedProfileId(profileId);
     setInsightsOpen(true);
   };

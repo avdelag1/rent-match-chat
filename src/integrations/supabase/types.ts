@@ -2530,6 +2530,7 @@ export type Database = {
           previous_rental_history: string | null
           privacy_settings: Json | null
           profession: string | null
+          profile_photo_url: string | null
           property_description: string | null
           property_location: string | null
           property_photos: string[] | null
@@ -2670,6 +2671,7 @@ export type Database = {
           previous_rental_history?: string | null
           privacy_settings?: Json | null
           profession?: string | null
+          profile_photo_url?: string | null
           property_description?: string | null
           property_location?: string | null
           property_photos?: string[] | null
@@ -2810,6 +2812,7 @@ export type Database = {
           previous_rental_history?: string | null
           privacy_settings?: Json | null
           profession?: string | null
+          profile_photo_url?: string | null
           property_description?: string | null
           property_location?: string | null
           property_photos?: string[] | null

@@ -3,6 +3,8 @@ import React, { ReactNode, useState, useEffect } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Flame } from 'lucide-react'
 import AppSidebar from "@/components/AppSidebar"
+import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
+import { useAuth } from "@/hooks/useAuth"
 import { PropertyForm } from "@/components/PropertyForm"
 import { SubscriptionPackages } from "@/components/SubscriptionPackages"
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
@@ -55,6 +57,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   const navigate = useNavigate()
   const location = useLocation()
+  const { user } = useAuth()
+  
+  // Profile photo state
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
 
   // Get listings and profiles data for insights with error handling
   const { data: listings = [], error: listingsError } = useListings();
@@ -86,7 +92,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
 
   const handleMenuItemClick = (item: string) => {
-    console.log('Dashboard menu item clicked:', item);
     
     switch (item) {
       case 'add-property':
@@ -155,7 +160,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }
 
   const handleClientInsights = (profileId: string) => {
-    console.log('Opening client insights for:', profileId);
     setSelectedProfileId(profileId)
     setShowClientInsights(true)
   }
@@ -172,8 +176,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           <header className="flex h-12 shrink-0 items-center gap-2 bg-gradient-to-r from-primary to-secondary px-3 shadow-lg border-b sticky top-0 z-50">
             <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
             
-            {/* Brand Header - Mobile First */}
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            {/* Brand Header with Profile Photo */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {/* Profile Photo - only in header when sidebar is closed */}
+              <ProfilePhotoUpload
+                currentPhotoUrl={user?.user_metadata?.profile_photo_url || profilePhotoUrl}
+                size="sm"
+                onPhotoUpdate={setProfilePhotoUrl}
+                className="flex-shrink-0"
+              />
+              
               <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-md flex-shrink-0 bg-white/20">
                 <Flame className="w-4 h-4 text-white" />
               </div>

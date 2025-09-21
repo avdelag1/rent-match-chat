@@ -3,6 +3,8 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGrou
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
+import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
+import { useState } from "react"
 
 // Menu items for different user types
 const clientMenuItems = [
@@ -111,6 +113,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
   
   // Resolve role safely (prevents TS literal narrowing issues)
   const userRole: 'client' | 'owner' = (propUserRole ?? 'owner')
@@ -151,12 +154,16 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   return (
     <Sidebar className="border-none">
       <div className="h-full bg-white shadow-xl border-r border-gray-200">
-        {/* Sidebar Header */}
+        {/* Sidebar Header with Large Profile Photo */}
         <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-md" style={{ background: 'var(--button-gradient)' }}>
-              <Flame className="w-5 h-5 text-white" />
-            </div>
+          <div className="flex flex-col items-center gap-4 text-center">
+            {/* Large clickable profile photo */}
+            <ProfilePhotoUpload
+              currentPhotoUrl={user?.user_metadata?.profile_photo_url || profilePhotoUrl}
+              size="lg"
+              onPhotoUpdate={setProfilePhotoUrl}
+            />
+            
             <div>
               <h2 className="text-gray-900 font-bold text-lg">TINDERENT</h2>
               <p className="text-gray-600 text-xs font-medium">
