@@ -161,7 +161,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                     <div className="flex flex-col items-center justify-center space-y-4 py-8 sm:py-12 text-center max-w-md mx-auto">
                       <Users className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground/40" />
                       <div className="space-y-2">
-                        <h3 className="text-lg sm:text-xl font-semibold">No Tenants Found</h3>
+                        <h3 className="text-lg sm:text-xl font-semibold">No Clients Found</h3>
                         <p className="text-muted-foreground text-xs sm:text-sm max-w-sm">
                           Try adjusting your filters to see potential matches in your area.
                         </p>

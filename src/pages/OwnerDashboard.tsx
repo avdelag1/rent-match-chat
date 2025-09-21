@@ -127,7 +127,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
               ) : profiles.length === 0 ? (
                 <div className="flex flex-col items-center justify-center space-y-1 py-3 text-center">
                   <div className="text-lg mb-0.5">👥</div>
-                  <h3 className="text-xs font-bold text-white">No Tenants Found</h3>
+                  <h3 className="text-xs font-bold text-white">No Clients Found</h3>
                   <p className="text-white/70 text-xs max-w-48 leading-tight">Try adjusting filters.</p>
                   <div className="flex flex-col gap-0.5 w-full max-w-48">
                     <Button 

@@ -12,7 +12,7 @@ export function OwnerClientSwipeDialog({ open, onOpenChange }: OwnerClientSwipeD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl w-full">
         <DialogHeader>
-          <DialogTitle>Discover Potential Tenants</DialogTitle>
+          <DialogTitle>Discover Potential Clients</DialogTitle>
         </DialogHeader>
         <div className="py-2">
           <ClientSwipeContainer

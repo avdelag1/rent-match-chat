@@ -272,7 +272,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:bg-primary/20 gap-2 flex-1"
           >
             <SlidersHorizontal className="w-4 h-4" />
-            Ultimate Filters
+            Filters
           </Button>
           
           {Object.keys(appliedFilters).length > 0 && (

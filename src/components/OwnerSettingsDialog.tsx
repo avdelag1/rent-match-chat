@@ -25,7 +25,7 @@ export function OwnerSettingsDialog({ open, onOpenChange }: OwnerSettingsDialogP
           <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
             <div className="space-y-1">
               <span className="font-medium">Email Notifications</span>
-              <p className="text-sm text-white/60">Receive updates about new tenant applications and messages</p>
+              <p className="text-sm text-white/60">Receive updates about new client applications and messages</p>
             </div>
             <Switch checked={notifications} onCheckedChange={setNotifications} />
           </div>
