@@ -261,9 +261,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-sm mx-auto space-y-2">
-      {/* Header with Progress and Filters - Compact */}
-      <div className="space-y-2">
+    <div className="w-full max-w-48 mx-auto space-y-1">
+      {/* Header with Progress and Filters - Ultra Compact */}
+      <div className="space-y-1">
         <div className="flex justify-between items-center">
           <Button
             variant="outline"
@@ -300,8 +300,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </div>
       </div>
 
-      {/* Cards Container - Proper Size */}
-      <div className="relative w-full h-[500px] sm:h-[600px]">
+      {/* Cards Container - Compact Size */}
+      <div className="relative w-full h-80">
         <AnimatePresence>
           {nextListing && (
             <EnhancedPropertyCard

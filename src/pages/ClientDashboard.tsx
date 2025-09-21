@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
@@ -46,91 +45,81 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
 
   const selectedListing = listings.find(l => l.id === selectedListingId);
 
-  // Main render function
-  const renderDashboard = () => (
+  return (
     <DashboardLayout userRole="client">
-      <div className="flex flex-col h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        {/* Welcome Section */}
-        <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Welcome back!</h2>
-              <p className="text-gray-600 mt-1">
-                {user?.user_metadata?.full_name || user?.email || 'Valued Client'}
+      <div className="w-full h-full flex flex-col">
+        <div className="flex-1 overflow-y-auto">
+          <div className="w-full max-w-48 mx-auto px-1 pt-1 pb-2">
+            {/* Header Section */}
+            <div className="text-center mb-1">
+              <h2 className="text-xs font-bold text-white">Find Properties</h2>
+              <p className="text-white/80 text-xs leading-tight">
+                {user?.user_metadata?.full_name || 'Welcome back!'}
               </p>
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <div className="flex items-center gap-1">
-                <Heart className="w-4 h-4 text-red-500" />
-                <span>Find your dream home</span>
+
+            {/* Stats Quick View */}
+            <div className="flex gap-1 justify-center mb-1">
+              <div className="bg-white/10 rounded px-2 py-0.5 text-center">
+                <p className="text-xs text-white/90">{listings.length}</p>
+                <p className="text-xs text-white/70">Properties</p>
+              </div>
+              <div className="bg-white/10 rounded px-2 py-0.5 text-center">
+                <p className="text-xs text-white/90">0</p>
+                <p className="text-xs text-white/70">Matches</p>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="flex-1 p-4">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Location-based matching sidebar */}
-            <div className="lg:col-span-1">
-              <LocationBasedMatching
-                onLocationUpdate={setLocationData}
-                className="sticky top-6"
-              />
-            </div>
-            
-            {/* Main content */}
-            <div className="lg:col-span-3 space-y-4">
-              {error && (
-                <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
-                  Error loading properties. 
+            {/* Main Content Area */}
+            <div className="w-full">
+              {isLoading ? (
+                <div className="flex justify-center">
+                  <div className="space-y-1 w-full max-w-48">
+                    <div className="animate-pulse">
+                      <div className="w-full h-24 bg-white/10 rounded mb-1"></div>
+                      <div className="h-2 bg-white/10 rounded w-3/4 mb-0.5"></div>
+                      <div className="h-1 bg-white/10 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="flex flex-col items-center justify-center space-y-1 py-2 text-center">
+                  <div className="text-lg mb-0.5">😞</div>
+                  <h3 className="text-xs font-bold text-white">Error loading</h3>
+                  <p className="text-white/70 text-xs max-w-48 leading-tight">Please try again.</p>
                   <Button 
-                    variant="ghost" 
-                    size="sm" 
                     onClick={() => refetch()}
-                    className="ml-2 text-red-600 hover:text-red-700"
+                    variant="outline"
+                    size="sm"
+                    className="gap-0.5 bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs py-0.5 h-5"
                   >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Retry
+                    🔄 Try Again
                   </Button>
                 </div>
+              ) : listings.length === 0 ? (
+                <div className="flex flex-col items-center justify-center space-y-1 py-3 text-center">
+                  <div className="text-lg mb-0.5">🏠</div>
+                  <h3 className="text-xs font-bold text-white">No Properties Found</h3>
+                  <p className="text-white/70 text-xs max-w-48 leading-tight">Try adjusting filters.</p>
+                  <Button 
+                    onClick={() => refetch()}
+                    variant="outline"
+                    size="sm"
+                    className="gap-0.5 bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs py-0.5 h-5"
+                  >
+                    🔄 Refresh
+                  </Button>
+                </div>
+              ) : (
+                <div className="w-full max-w-48 mx-auto">
+                  <TinderentSwipeContainer
+                    onListingTap={handleListingTap}
+                    onInsights={handleInsights}
+                    onMessageClick={onMessageClick}
+                    locationFilter={locationData}
+                  />
+                </div>
               )}
-
-              {/* Properties Section */}
-              <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-                <h3 className="text-xl font-semibold text-gray-900 text-center mb-6">
-                  {locationData ? `Properties within ${locationData.radius}km` : 'Available Properties'}
-                  {locationData?.city && (
-                    <span className="block text-sm text-gray-500 mt-1">Near {locationData.city}</span>
-                  )}
-                </h3>
-            
-            {isLoading ? (
-              <div className="flex justify-center">
-                <Skeleton className="w-full max-w-md h-[500px] rounded-xl" />
-              </div>
-            ) : listings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-4 py-12">
-                <Home className="w-16 h-16 text-gray-400" />
-                <h3 className="text-xl font-semibold text-gray-700">No properties available</h3>
-                <p className="text-gray-500 text-center">Check back later for new listings!</p>
-                <Button 
-                  onClick={() => refetch()}
-                  className="gap-2"
-                  variant="outline"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Refresh
-                </Button>
-              </div>
-            ) : (
-                <TinderentSwipeContainer
-                  onListingTap={handleListingTap} 
-                  onInsights={handleInsights}
-                  onMessageClick={onMessageClick}
-                  locationFilter={locationData}
-                />
-              )}
-              </div>
             </div>
           </div>
         </div>
@@ -143,8 +132,6 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
       />
     </DashboardLayout>
   );
-
-  return renderDashboard();
 };
 
 export default ClientDashboard;

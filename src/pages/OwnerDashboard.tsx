@@ -66,21 +66,21 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   return (
     <DashboardLayout userRole="owner">
       <div className="w-full h-full flex flex-col">
-        <div className="flex-1 overflow-y-auto px-1 py-1">
-          <div className="w-full max-w-48 mx-auto space-y-1">
+        <div className="flex-1 overflow-y-auto">
+          <div className="w-full max-w-48 mx-auto px-1 pt-1 pb-2">
             {/* Header Section */}
-            <div className="text-center">
-              <h1 className="text-xs font-bold text-white mb-0.5">Browse Clients</h1>
+            <div className="text-center mb-1">
+              <h1 className="text-xs font-bold text-white">Browse Clients</h1>
               <p className="text-white/80 text-xs leading-tight">Explore client profiles</p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-0.5 justify-center">
+            <div className="flex gap-0.5 justify-center mb-1">
               <Button
                 onClick={() => setShowLocationMatching(!showLocationMatching)}
                 variant="outline"
                 size="sm"
-                className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 text-orange-300 hover:bg-orange-500/20 gap-0.5 text-xs px-1 py-0.5 h-5"
+                className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 text-orange-300 hover:bg-orange-500/20 text-xs px-1 py-0.5 h-5"
               >
                 ⚡
               </Button>
@@ -88,7 +88,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 onClick={() => setShowLocationMatching(!showLocationMatching)}
                 variant="outline"
                 size="sm"
-                className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-400/30 text-blue-300 hover:bg-blue-500/20 gap-0.5 text-xs px-1 py-0.5 h-5"
+                className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-400/30 text-blue-300 hover:bg-blue-500/20 text-xs px-1 py-0.5 h-5"
               >
                 📍
               </Button>
