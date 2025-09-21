@@ -1,11 +1,38 @@
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Global responsive foundation */
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 /* Tinderent Design System - Theme Variables */
 
 @layer base {
+  /* Mobile-first responsive design variables */
   :root {
     /* TINDERENT DESIGN SYSTEM - Orange/Red Professional Theme */
     --app-gradient: linear-gradient(135deg, hsl(14, 100%, 57%) 0%, hsl(9, 100%, 64%) 50%, hsl(4, 90%, 58%) 100%);

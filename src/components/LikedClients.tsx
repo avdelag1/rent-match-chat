@@ -135,69 +135,74 @@ export function LikedClients() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white">
-            <Heart className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">Liked Clients</h1>
-            <p className="text-muted-foreground">Manage your liked client profiles and start conversations</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <Input
-              placeholder="Search clients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Users className="w-5 h-5" />
-            <span className="font-medium">{filteredClients.length} clients</span>
-          </div>
-        </div>
-      </motion.div>
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="p-6 animate-pulse">
-              <div className="w-full h-64 bg-muted rounded-lg mb-4"></div>
-              <div className="h-4 bg-muted rounded mb-2"></div>
-              <div className="h-3 bg-muted rounded w-2/3"></div>
-            </Card>
-          ))}
-        </div>
-      ) : filteredClients.length === 0 ? (
+    <div className="w-full min-h-screen bg-background">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center py-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 sm:mb-8"
         >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
-            <Heart className="w-12 h-12 text-muted-foreground" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white flex-shrink-0">
+                <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Liked Clients</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Manage your liked client profiles and start conversations</p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold mb-2">No Liked Clients Yet</h2>
-          <p className="text-muted-foreground mb-6">
-            Start browsing client profiles and like the ones you're interested in working with
-          </p>
-          <Button 
-            onClick={() => window.location.href = '/owner/dashboard'}
-            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-          >
-            Browse Clients
-          </Button>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
+              <Input
+                placeholder="Search clients..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 sm:pl-10 h-10 sm:h-11"
+              />
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="font-medium">{filteredClients.length} clients</span>
+            </div>
+          </div>
         </motion.div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {[...Array(8)].map((_, i) => (
+              <Card key={i} className="p-4 sm:p-6 animate-pulse">
+                <div className="w-full aspect-[3/4] bg-muted rounded-lg mb-4"></div>
+                <div className="h-4 bg-muted rounded mb-2"></div>
+                <div className="h-3 bg-muted rounded w-2/3"></div>
+              </Card>
+            ))}
+          </div>
+        ) : filteredClients.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-12 sm:py-16 max-w-md mx-auto"
+          >
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-muted flex items-center justify-center">
+              <Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">No Liked Clients Yet</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-4">
+              {searchTerm ? 'No clients match your search.' : 'Start browsing client profiles and like the ones you\'re interested in working with'}
+            </p>
+            {!searchTerm && (
+              <Button 
+                onClick={() => window.location.href = '/owner/dashboard'}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-sm sm:text-base"
+              >
+                Browse Clients
+              </Button>
+            )}
+          </motion.div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClients.map((client, index) => (
@@ -283,10 +288,11 @@ export function LikedClients() {
                   </div>
                 </div>
               </Card>
-            </motion.div>
-          ))}
-        </div>
-      )}
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

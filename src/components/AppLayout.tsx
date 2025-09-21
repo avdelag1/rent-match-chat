@@ -34,12 +34,14 @@ export function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <>
+    <div className="min-h-screen w-full">
       <SkipToMainContent />
-      <main id="main-content" tabIndex={-1} className="outline-none">
-        {children}
+      <main id="main-content" tabIndex={-1} className="outline-none w-full min-h-screen">
+        <div className="w-full min-h-screen overflow-x-hidden">
+          {children}
+        </div>
       </main>
       <PWAInstallPrompt />
-    </>
+    </div>
   );
 }

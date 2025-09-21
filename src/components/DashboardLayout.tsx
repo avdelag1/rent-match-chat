@@ -158,37 +158,39 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full" style={{ background: 'var(--app-gradient)' }}>
+      <div className="min-h-screen flex w-full bg-background overflow-hidden">
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
-        <InsetComponent className="flex-1 flex flex-col min-h-screen">
-          <header className="flex h-16 sm:h-20 shrink-0 items-center gap-4 bg-white/95 backdrop-blur-lg px-4 sm:px-6 shadow-lg border-b border-gray-200 sticky top-0 z-50">
-            <TriggerComponent className="text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
+        <InsetComponent className="flex-1 flex flex-col min-h-screen min-w-0">
+          <header className="flex h-14 sm:h-16 md:h-20 shrink-0 items-center gap-2 sm:gap-4 bg-background/95 backdrop-blur-lg px-3 sm:px-4 md:px-6 shadow-sm border-b sticky top-0 z-50">
+            <TriggerComponent className="text-foreground hover:bg-muted p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
             
-            {/* Brand Header - Prominent */}
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: 'var(--button-gradient)' }}>
-                <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            {/* Brand Header - Responsive */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-md flex-shrink-0 bg-primary">
+                <Flame className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-primary-foreground" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-gray-900 font-bold text-xl sm:text-2xl leading-tight truncate">TINDERENT</h1>
+                <h1 className="text-foreground font-bold text-sm sm:text-lg md:text-xl lg:text-2xl leading-tight truncate">TINDERENT</h1>
               </div>
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto">
-            {
-              React.Children.map(children, (child) => {
-                if (React.isValidElement(child)) {
-                  return React.cloneElement(child as React.ReactElement, {
-                    onPropertyInsights: handlePropertyInsights,
-                    onClientInsights: handleClientInsights,
-                    onMessageClick: handleMessageClick,
-                  } as any);
-                }
-                return child;
-              })
-            }
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+            <div className="w-full min-h-full">
+              {
+                React.Children.map(children, (child) => {
+                  if (React.isValidElement(child)) {
+                    return React.cloneElement(child as React.ReactElement, {
+                      onPropertyInsights: handlePropertyInsights,
+                      onClientInsights: handleClientInsights,
+                      onMessageClick: handleMessageClick,
+                    } as any);
+                  }
+                  return child;
+                })
+              }
+            </div>
           </main>
         </InsetComponent>
       </div>

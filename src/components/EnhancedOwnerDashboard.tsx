@@ -103,21 +103,21 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
 
   return (
     <DashboardLayout userRole="owner">
-      <motion.div 
-        className="p-4 md:p-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full min-h-screen bg-background">
+        <motion.div 
+          className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 max-w-7xl"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           
           {/* Header */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+          <motion.div variants={itemVariants} className="mb-6 sm:mb-8">
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
                 Browse Clients
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Explore verified client profiles and connect with potential matches
               </p>
             </div>
@@ -129,63 +129,63 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
             {/* Swipe Section */}
             <motion.div variants={itemVariants} className="w-full">
               <Card className="overflow-hidden">
-                <CardHeader className="pb-4">
-                  <div className="flex gap-2 flex-wrap">
-                    <Badge variant="outline" className="border-primary/50 text-primary">
+                <CardHeader className="pb-4 px-3 sm:px-6">
+                  <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+                    <Badge variant="outline" className="border-primary/50 text-primary text-xs">
                       <Zap className="w-3 h-3 mr-1" />
                       Smart Matching
-                    </Badge>
-                    <Badge variant="outline" className="border-secondary/50 text-secondary">
-                      <Filter className="w-3 h-3 mr-1" />
-                      Client Filters
                     </Badge>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setShowLocationMatching(!showLocationMatching)}
-                      className="border-primary/50 text-primary hover:bg-primary/10"
+                      className="border-primary/50 text-primary hover:bg-primary/10 text-xs"
                     >
                       <MapPin className="w-3 h-3 mr-1" />
                       {showLocationMatching ? 'Hide Location' : 'Show Nearby'}
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="flex justify-center pb-8">
+                <CardContent className="flex justify-center pb-6 sm:pb-8 px-3 sm:px-6">
                   {clientProfiles.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center space-y-4 py-12 text-center">
-                      <Users className="w-16 h-16 text-muted-foreground/40" />
+                    <div className="flex flex-col items-center justify-center space-y-4 py-8 sm:py-12 text-center max-w-md mx-auto">
+                      <Users className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground/40" />
                       <div className="space-y-2">
-                        <h3 className="text-xl font-semibold">No Clients Available</h3>
-                        <p className="text-muted-foreground text-sm max-w-sm">
-                          Client profiles will appear here once users complete their onboarding. Check back soon!
+                        <h3 className="text-lg sm:text-xl font-semibold">No Tenants Found</h3>
+                        <p className="text-muted-foreground text-xs sm:text-sm max-w-sm">
+                          Try adjusting your filters to see potential matches in your area.
                         </p>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                      <div className="flex gap-2 flex-wrap justify-center">
+                        <Button variant="outline" size="sm" className="text-xs">
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Refresh
                         </Button>
-                        <Button size="sm">
+                        <Button size="sm" className="text-xs">
                           Add Properties
                         </Button>
                       </div>
                     </div>
                   ) : showLocationMatching ? (
-                    <LocationBasedMatching />
+                    <div className="w-full max-w-4xl">
+                      <LocationBasedMatching />
+                    </div>
                   ) : (
-                    <ClientSwipeContainer 
-                      onClientTap={handleClientTap} 
-                      onInsights={handleInsights}
-                      onMessageClick={onMessageClick}
-                    />
+                    <div className="w-full max-w-4xl">
+                      <ClientSwipeContainer 
+                        onClientTap={handleClientTap} 
+                        onInsights={handleInsights}
+                        onMessageClick={onMessageClick}
+                      />
+                    </div>
                   )}
                 </CardContent>
               </Card>
             </motion.div>
 
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
       {selectedClient && (
         <ClientInsightsDialog
