@@ -10,9 +10,17 @@ import { toast } from '@/hooks/use-toast';
 interface SavedSearch {
   id: string;
   name: string;
-  filters: any;
+  filters: {
+    priceMin?: number;
+    priceMax?: number;
+    propertyType?: string;
+    location?: string;
+    bedrooms?: number;
+    bathrooms?: number;
+  };
+  alertsEnabled: boolean;
   createdAt: Date;
-  resultCount?: number;
+  lastNotified?: Date;
 }
 
 interface SavedSearchesProps {
@@ -24,16 +32,16 @@ export function SavedSearches({ userRole }: SavedSearchesProps) {
     {
       id: '1',
       name: 'Beach Apartments',
-      filters: { priceRange: [1000, 3000], propertyTypes: ['apartment'], locationZones: ['Zona Hotelera'] },
+      filters: { priceMin: 1000, priceMax: 3000, propertyType: 'apartment', location: 'Zona Hotelera' },
+      alertsEnabled: true,
       createdAt: new Date(),
-      resultCount: 12
     },
     {
       id: '2', 
       name: 'Family Homes',
-      filters: { bedrooms: [3, 5], amenities: ['parking', 'security'] },
+      filters: { bedrooms: 3, location: 'Downtown' },
+      alertsEnabled: false,
       createdAt: new Date(),
-      resultCount: 8
     }
   ]);
   
@@ -48,6 +56,7 @@ export function SavedSearches({ userRole }: SavedSearchesProps) {
       id: Date.now().toString(),
       name: searchName,
       filters,
+      alertsEnabled: true,
       createdAt: new Date()
     };
     
@@ -109,7 +118,7 @@ export function SavedSearches({ userRole }: SavedSearchesProps) {
                     <h4 className="font-medium text-white mb-1">{search.name}</h4>
                     <p className="text-white/60 text-sm">
                       Saved {search.createdAt.toLocaleDateString()}
-                      {search.resultCount && ` • ${search.resultCount} results`}
+                      {search.alertsEnabled ? ' • Alerts enabled' : ' • Alerts paused'}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -141,21 +150,26 @@ export function SavedSearches({ userRole }: SavedSearchesProps) {
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
-                  {search.filters.propertyTypes?.map((type: string) => (
-                    <Badge key={type} variant="secondary" className="text-xs">
-                      {type}
-                    </Badge>
-                  ))}
-                  {search.filters.priceRange && (
+                  {search.filters.propertyType && (
                     <Badge variant="secondary" className="text-xs">
-                      ${search.filters.priceRange[0]} - ${search.filters.priceRange[1]}
+                      {search.filters.propertyType}
                     </Badge>
                   )}
-                  {search.filters.locationZones?.map((zone: string) => (
-                    <Badge key={zone} variant="secondary" className="text-xs">
-                      {zone}
+                  {(search.filters.priceMin || search.filters.priceMax) && (
+                    <Badge variant="secondary" className="text-xs">
+                      ${search.filters.priceMin || 0} - ${search.filters.priceMax || '∞'}
                     </Badge>
-                  ))}
+                  )}
+                  {search.filters.location && (
+                    <Badge variant="secondary" className="text-xs">
+                      {search.filters.location}
+                    </Badge>
+                  )}
+                  {search.filters.bedrooms && (
+                    <Badge variant="secondary" className="text-xs">
+                      {search.filters.bedrooms} bed
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>

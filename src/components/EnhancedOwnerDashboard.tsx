@@ -207,9 +207,12 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
         onClose={() => setMatchCelebration({ isOpen: false })}
-        clientProfile={matchCelebration.clientProfile}
-        ownerProfile={matchCelebration.ownerProfile}
-        onStartConversation={handleStartConversation}
+        matchedUser={{
+          name: matchCelebration.clientProfile?.name || 'User',
+          avatar: matchCelebration.clientProfile?.images?.[0],
+          role: 'client'
+        }}
+        onMessage={handleStartConversation}
       />
     </DashboardLayout>
   );

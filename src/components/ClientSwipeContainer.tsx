@@ -388,9 +388,12 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
         onClose={() => setMatchCelebration({ isOpen: false })}
-        clientProfile={matchCelebration.clientProfile}
-        ownerProfile={matchCelebration.ownerProfile}
-        onStartConversation={() => handleStartConversation(currentClient?.id?.toString() || '')}
+        matchedUser={{
+          name: matchCelebration.clientProfile?.name || 'User',
+          avatar: matchCelebration.clientProfile?.images?.[0],
+          role: 'client'
+        }}
+        onMessage={() => handleStartConversation(currentClient?.id?.toString() || '')}
       />
     </div>
   );

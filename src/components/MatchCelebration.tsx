@@ -7,25 +7,15 @@ import { Card } from '@/components/ui/card';
 interface MatchCelebrationProps {
   isOpen: boolean;
   onClose: () => void;
-  clientProfile?: {
+  onMessage: () => void;
+  matchedUser: {
     name: string;
-    images?: string[];
-    age?: number;
+    avatar?: string;
+    role: 'client' | 'owner';
   };
-  ownerProfile?: {
-    name: string;
-    images?: string[];
-  };
-  onStartConversation?: () => void;
 }
 
-export function MatchCelebration({ 
-  isOpen, 
-  onClose, 
-  clientProfile, 
-  ownerProfile,
-  onStartConversation 
-}: MatchCelebrationProps) {
+export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: MatchCelebrationProps) {
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
@@ -38,7 +28,7 @@ export function MatchCelebration({
   }, [isOpen]);
 
   const handleStartConversation = () => {
-    onStartConversation?.();
+    onMessage();
     onClose();
   };
 
@@ -150,7 +140,7 @@ export function MatchCelebration({
                     className="mb-6"
                   >
                     <div className="flex items-center justify-center gap-4 mb-4">
-                      {/* Client Profile */}
+                      {/* Matched User Profile */}
                       <motion.div
                         initial={{ x: -100, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
@@ -158,20 +148,20 @@ export function MatchCelebration({
                         className="text-center"
                       >
                         <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-red-400 shadow-lg">
-                          {clientProfile?.images?.[0] ? (
+                          {matchedUser?.avatar ? (
                             <img 
-                              src={clientProfile.images[0]} 
-                              alt={clientProfile.name}
+                              src={matchedUser.avatar} 
+                              alt={matchedUser.name}
                               className="w-full h-full object-cover"
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
-                              {clientProfile?.name?.charAt(0) || 'C'}
+                              {matchedUser?.name?.charAt(0) || 'U'}
                             </div>
                           )}
                         </div>
                         <p className="text-sm font-semibold mt-2 text-gray-700">
-                          {clientProfile?.name || 'Client'}
+                          {matchedUser?.name || 'User'}
                         </p>
                       </motion.div>
 
@@ -190,7 +180,7 @@ export function MatchCelebration({
                         <Heart className="w-8 h-8 text-red-500 fill-current" />
                       </motion.div>
 
-                      {/* Owner Profile */}
+                      {/* Current User Profile */}
                       <motion.div
                         initial={{ x: 100, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
@@ -198,20 +188,12 @@ export function MatchCelebration({
                         className="text-center"
                       >
                         <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-red-400 shadow-lg">
-                          {ownerProfile?.images?.[0] ? (
-                            <img 
-                              src={ownerProfile.images[0]} 
-                              alt={ownerProfile.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
-                              {ownerProfile?.name?.charAt(0) || 'O'}
-                            </div>
-                          )}
+                          <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
+                            You
+                          </div>
                         </div>
                         <p className="text-sm font-semibold mt-2 text-gray-700">
-                          {ownerProfile?.name || 'Owner'}
+                          You
                         </p>
                       </motion.div>
                     </div>
