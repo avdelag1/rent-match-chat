@@ -19,6 +19,11 @@ const clientMenuItems = [
     icon: Flame,
   },
   {
+    title: "Contracts",
+    url: "/client/contracts",
+    icon: FileText,
+  },
+  {
     title: "Messages",
     url: "/messages",
     icon: MessageSquare,
@@ -63,6 +68,11 @@ const ownerMenuItems = [
     url: "#add-property",
     icon: PlusCircle,
     action: "add-property",
+  },
+  {
+    title: "Contracts",
+    url: "/owner/contracts",
+    icon: FileText,
   },
   {
     title: "Liked Clients",

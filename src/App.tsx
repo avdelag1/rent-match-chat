@@ -30,6 +30,8 @@ import OwnerSecurity from "./pages/OwnerSecurity";
 import { MessagingDashboard } from "./pages/MessagingDashboard";
 import OwnerProperties from "./pages/OwnerProperties";
 import OwnerLikedClients from "./pages/OwnerLikedClients";
+import ClientContracts from "./pages/ClientContracts";
+import OwnerContracts from "./pages/OwnerContracts";
 
 const queryClient = new QueryClient();
 
@@ -219,6 +221,24 @@ const App = () => (
                       element={
                         <ProtectedRoute>
                           <MessagingDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
+                      path="/client/contracts" 
+                      element={
+                        <ProtectedRoute requiredRole="client">
+                          <ClientContracts />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
+                      path="/owner/contracts" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <OwnerContracts />
                         </ProtectedRoute>
                       } 
                     />

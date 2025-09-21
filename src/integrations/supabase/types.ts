@@ -635,6 +635,47 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_signatures: {
+        Row: {
+          contract_id: string
+          id: string
+          ip_address: unknown | null
+          signature_data: string
+          signature_type: Database["public"]["Enums"]["signature_type"]
+          signed_at: string | null
+          signer_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          contract_id: string
+          id?: string
+          ip_address?: unknown | null
+          signature_data: string
+          signature_type: Database["public"]["Enums"]["signature_type"]
+          signed_at?: string | null
+          signer_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          contract_id?: string
+          id?: string
+          ip_address?: unknown | null
+          signature_data?: string
+          signature_type?: Database["public"]["Enums"]["signature_type"]
+          signed_at?: string | null
+          signer_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_signatures_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "digital_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_messages: {
         Row: {
           conversation_id: string
@@ -916,6 +957,157 @@ export type Database = {
           source_system?: string | null
         }
         Relationships: []
+      }
+      deal_status_tracking: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          contract_id: string
+          created_at: string | null
+          id: string
+          listing_id: string | null
+          owner_id: string
+          signed_by_client_at: string | null
+          signed_by_owner_at: string | null
+          status: Database["public"]["Enums"]["deal_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          contract_id: string
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          owner_id: string
+          signed_by_client_at?: string | null
+          signed_by_owner_at?: string | null
+          status?: Database["public"]["Enums"]["deal_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          contract_id?: string
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          owner_id?: string
+          signed_by_client_at?: string | null
+          signed_by_owner_at?: string | null
+          status?: Database["public"]["Enums"]["deal_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_status_tracking_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "digital_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digital_contracts: {
+        Row: {
+          client_id: string | null
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string | null
+          created_by: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          listing_id: string | null
+          mime_type: string
+          owner_id: string
+          status: Database["public"]["Enums"]["deal_status"] | null
+          terms_and_conditions: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at?: string | null
+          created_by: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id?: string
+          listing_id?: string | null
+          mime_type?: string
+          owner_id: string
+          status?: Database["public"]["Enums"]["deal_status"] | null
+          terms_and_conditions?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string | null
+          created_by?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          listing_id?: string | null
+          mime_type?: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["deal_status"] | null
+          terms_and_conditions?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      dispute_reports: {
+        Row: {
+          admin_notes: string | null
+          contract_id: string
+          created_at: string | null
+          description: string
+          id: string
+          issue_type: string
+          reported_against: string
+          reported_by: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          contract_id: string
+          created_at?: string | null
+          description: string
+          id?: string
+          issue_type: string
+          reported_against: string
+          reported_by: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          contract_id?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          issue_type?: string
+          reported_against?: string
+          reported_by?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_reports_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "digital_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       edge_compute_nodes: {
         Row: {
@@ -7773,9 +7965,18 @@ export type Database = {
       }
     }
     Enums: {
+      contract_type: "lease" | "rental" | "purchase" | "rental_agreement"
+      deal_status:
+        | "pending"
+        | "signed_by_owner"
+        | "signed_by_client"
+        | "completed"
+        | "cancelled"
+        | "disputed"
       document_status: "pending" | "approved" | "rejected"
       document_type: "property_deed" | "broker_license" | "id_card" | "other"
       listing_status: "active" | "pending" | "inactive" | "suspended"
+      signature_type: "drawn" | "typed" | "uploaded"
       user_role: "client" | "owner" | "admin"
     }
     CompositeTypes: {
@@ -7912,9 +8113,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      contract_type: ["lease", "rental", "purchase", "rental_agreement"],
+      deal_status: [
+        "pending",
+        "signed_by_owner",
+        "signed_by_client",
+        "completed",
+        "cancelled",
+        "disputed",
+      ],
       document_status: ["pending", "approved", "rejected"],
       document_type: ["property_deed", "broker_license", "id_card", "other"],
       listing_status: ["active", "pending", "inactive", "suspended"],
+      signature_type: ["drawn", "typed", "uploaded"],
       user_role: ["client", "owner", "admin"],
     },
   },
