@@ -65,111 +65,113 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full min-h-screen overflow-hidden">
-        <div className="w-full max-w-xs mx-auto px-2 py-3 space-y-3">
-          {/* Header Section */}
-          <div className="text-center">
-            <h1 className="text-base font-bold text-white mb-1">Browse Clients</h1>
-            <p className="text-white/80 text-xs leading-tight">
-              Explore verified client profiles and connect with potential matches
-            </p>
-          </div>
+      <div className="w-full h-full flex flex-col">
+        <div className="flex-1 overflow-y-auto px-2 py-2">
+          <div className="w-full max-w-xs mx-auto space-y-2">
+            {/* Header Section */}
+            <div className="text-center">
+              <h1 className="text-sm font-bold text-white mb-1">Browse Clients</h1>
+              <p className="text-white/80 text-xs leading-tight">
+                Explore verified client profiles and connect with potential matches
+              </p>
+            </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-1 justify-center">
-            <Button
-              onClick={() => setShowLocationMatching(!showLocationMatching)}
-              variant="outline"
-              size="sm"
-              className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 text-orange-300 hover:bg-orange-500/20 gap-1 text-xs px-2 py-1 h-7"
-            >
-              <span className="text-orange-400">⚡</span>
-              Smart
-            </Button>
-            <Button
-              onClick={() => setShowLocationMatching(!showLocationMatching)}
-              variant="outline"
-              size="sm"
-              className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-400/30 text-blue-300 hover:bg-blue-500/20 gap-1 text-xs px-2 py-1 h-7"
-            >
-              <MapPin className="w-3 h-3" />
-              Nearby
-            </Button>
-          </div>
+            {/* Action Buttons */}
+            <div className="flex gap-1 justify-center">
+              <Button
+                onClick={() => setShowLocationMatching(!showLocationMatching)}
+                variant="outline"
+                size="sm"
+                className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-400/30 text-orange-300 hover:bg-orange-500/20 gap-1 text-xs px-2 py-1 h-6"
+              >
+                <span className="text-orange-400">⚡</span>
+                Smart
+              </Button>
+              <Button
+                onClick={() => setShowLocationMatching(!showLocationMatching)}
+                variant="outline"
+                size="sm"
+                className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-400/30 text-blue-300 hover:bg-blue-500/20 gap-1 text-xs px-2 py-1 h-6"
+              >
+                <MapPin className="w-3 h-3" />
+                Nearby
+              </Button>
+            </div>
 
-          {/* Main Content Area */}
-          <div className="w-full">
-            {isLoading ? (
-              <div className="flex justify-center">
-                <div className="space-y-2 w-full max-w-xs">
-                  <div className="animate-pulse">
-                    <div className="w-full h-40 bg-white/10 rounded-lg mb-2"></div>
-                    <div className="h-3 bg-white/10 rounded w-3/4 mb-1"></div>
-                    <div className="h-2 bg-white/10 rounded w-1/2 mb-2"></div>
-                    <div className="flex space-x-1">
-                      <div className="h-4 bg-white/10 rounded-full w-10"></div>
-                      <div className="h-4 bg-white/10 rounded-full w-12"></div>
+            {/* Main Content Area */}
+            <div className="w-full">
+              {isLoading ? (
+                <div className="flex justify-center">
+                  <div className="space-y-2 w-full max-w-xs">
+                    <div className="animate-pulse">
+                      <div className="w-full h-32 bg-white/10 rounded-lg mb-2"></div>
+                      <div className="h-2 bg-white/10 rounded w-3/4 mb-1"></div>
+                      <div className="h-2 bg-white/10 rounded w-1/2 mb-1"></div>
+                      <div className="flex space-x-1">
+                        <div className="h-3 bg-white/10 rounded-full w-8"></div>
+                        <div className="h-3 bg-white/10 rounded-full w-10"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center space-y-2 py-4 text-center">
-                <div className="text-3xl mb-1">😞</div>
-                <h3 className="text-sm font-bold text-white">Unable to load tenants</h3>
-                <p className="text-white/70 text-xs max-w-xs leading-tight">
-                  Error loading profiles. Please check your connection and try again.
-                </p>
-                <Button 
-                  onClick={() => refetch()}
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs py-1 h-7"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  Try Again
-                </Button>
-              </div>
-            ) : profiles.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-3 py-6 text-center">
-                <div className="text-3xl mb-1">👥</div>
-                <h3 className="text-sm font-bold text-white">No Tenants Found</h3>
-                <p className="text-white/70 text-xs max-w-xs leading-tight">
-                  Try adjusting your filters to see more profiles.
-                </p>
-                <div className="flex flex-col gap-2 w-full max-w-xs">
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    className="gap-1 w-full bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 text-white hover:bg-primary/20 text-xs py-1 h-7"
-                  >
-                    <span className="text-primary">⚙️</span>
-                    Adjust Filters
-                  </Button>
+              ) : error ? (
+                <div className="flex flex-col items-center justify-center space-y-2 py-3 text-center">
+                  <div className="text-2xl mb-1">😞</div>
+                  <h3 className="text-xs font-bold text-white">Unable to load tenants</h3>
+                  <p className="text-white/70 text-xs max-w-xs leading-tight">
+                    Error loading profiles. Please try again.
+                  </p>
                   <Button 
                     onClick={() => refetch()}
                     variant="outline"
                     size="sm"
-                    className="gap-1 w-full bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs py-1 h-7"
+                    className="gap-1 bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs py-1 h-6"
                   >
                     <RefreshCw className="w-3 h-3" />
-                    Refresh
+                    Try Again
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div className="w-full">
-                {showLocationMatching ? (
-                  <LocationBasedMatching />
-                ) : (
-                  <ClientSwipeContainer 
-                    onClientTap={handleProfileTap}
-                    onInsights={handleInsights}
-                    onMessageClick={onMessageClick}
-                  />
-                )}
-              </div>
-            )}
+              ) : profiles.length === 0 ? (
+                <div className="flex flex-col items-center justify-center space-y-2 py-4 text-center">
+                  <div className="text-2xl mb-1">👥</div>
+                  <h3 className="text-xs font-bold text-white">No Tenants Found</h3>
+                  <p className="text-white/70 text-xs max-w-xs leading-tight">
+                    Try adjusting your filters to see more profiles.
+                  </p>
+                  <div className="flex flex-col gap-1 w-full max-w-xs">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 w-full bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 text-white hover:bg-primary/20 text-xs py-1 h-6"
+                    >
+                      <span className="text-primary">⚙️</span>
+                      Adjust Filters
+                    </Button>
+                    <Button 
+                      onClick={() => refetch()}
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 w-full bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs py-1 h-6"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Refresh
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full">
+                  {showLocationMatching ? (
+                    <LocationBasedMatching />
+                  ) : (
+                    <ClientSwipeContainer 
+                      onClientTap={handleProfileTap}
+                      onInsights={handleInsights}
+                      onMessageClick={onMessageClick}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
