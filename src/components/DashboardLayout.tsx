@@ -158,26 +158,26 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background overflow-hidden">
+      <div className="min-h-screen flex w-full bg-gray-900 relative">
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
-        <InsetComponent className="flex-1 flex flex-col min-h-screen min-w-0">
-          <header className="flex h-14 sm:h-16 md:h-20 shrink-0 items-center gap-2 sm:gap-4 bg-background/95 backdrop-blur-lg px-3 sm:px-4 md:px-6 shadow-sm border-b sticky top-0 z-50">
-            <TriggerComponent className="text-foreground hover:bg-muted p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
+        <InsetComponent className="flex-1 flex flex-col min-h-screen w-full">
+          <header className="flex h-12 shrink-0 items-center gap-2 bg-gradient-to-r from-primary to-secondary px-3 shadow-lg border-b sticky top-0 z-50">
+            <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
             
-            {/* Brand Header - Responsive */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-md flex-shrink-0 bg-primary">
-                <Flame className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-primary-foreground" />
+            {/* Brand Header - Mobile First */}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-md flex-shrink-0 bg-white/20">
+                <Flame className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-foreground font-bold text-sm sm:text-lg md:text-xl lg:text-2xl leading-tight truncate">TINDERENT</h1>
+                <h1 className="text-white font-bold text-sm leading-tight truncate">TINDERENT</h1>
               </div>
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
-            <div className="w-full min-h-full">
+          <main className="flex-1 overflow-y-auto bg-gray-900">
+            <div className="w-full min-h-full relative">
               {
                 React.Children.map(children, (child) => {
                   if (React.isValidElement(child)) {
