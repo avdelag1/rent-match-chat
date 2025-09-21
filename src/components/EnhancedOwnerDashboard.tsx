@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
+import { SupportButton } from '@/components/SupportButton';
 import { LocationBasedMatching } from '@/components/LocationBasedMatching';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { DashboardLayout } from '@/components/DashboardLayout';

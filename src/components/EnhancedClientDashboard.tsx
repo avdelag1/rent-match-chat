@@ -7,6 +7,7 @@ import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { NotificationBar } from '@/components/NotificationBar';
+import { SupportButton } from '@/components/SupportButton';
 import { useListings } from '@/hooks/useListings';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
