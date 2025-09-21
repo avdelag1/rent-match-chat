@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
 import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
+import { ThemeSelector } from "@/components/ThemeSelector"
 import { useState } from "react"
 
 // Menu items for different user types
@@ -246,7 +247,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
               transition={{ delay: 0.5 }}
               className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 flex-shrink-0"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
                   <User className="w-5 h-5 text-gray-600" />
                 </div>
@@ -254,6 +255,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                   <p className="text-gray-900 font-medium text-sm">Welcome back!</p>
                   <p className="text-gray-600 text-xs">{user.email}</p>
                 </div>
+              </div>
+              
+              {/* Quick Theme Switcher */}
+              <div className="border-t border-gray-200 pt-3">
+                <p className="text-xs text-gray-500 mb-2">Quick Theme</p>
+                <ThemeSelector compact showTitle={false} />
               </div>
             </motion.div>
           )}

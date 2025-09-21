@@ -7,6 +7,7 @@ import { PropertyManagement } from "@/components/PropertyManagement";
 import { TenantScreening } from "@/components/TenantScreening";
 import { LeaseManagement } from "@/components/LeaseManagement";
 import { RentalAnalytics } from "@/components/RentalAnalytics";
+import { ThemeSelector } from "@/components/ThemeSelector";
 
 const OwnerSettings = () => {
   return (
@@ -19,7 +20,7 @@ const OwnerSettings = () => {
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
+            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
               <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
               <TabsTrigger value="subscription" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Subscription</TabsTrigger>
               <TabsTrigger value="security" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Security</TabsTrigger>
@@ -27,6 +28,7 @@ const OwnerSettings = () => {
               <TabsTrigger value="screening" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Screening</TabsTrigger>
               <TabsTrigger value="leases" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Leases</TabsTrigger>
               <TabsTrigger value="analytics" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Analytics</TabsTrigger>
+              <TabsTrigger value="theme" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Theme</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile">
@@ -68,6 +70,12 @@ const OwnerSettings = () => {
             <TabsContent value="analytics" className="mt-6">
               <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
                 <RentalAnalytics />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="theme" className="mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                <ThemeSelector />
               </div>
             </TabsContent>
           </Tabs>

@@ -213,6 +213,23 @@ body {
     --shadow-lg: 0 10px 15px -3px rgb(139 92 246 / 0.2), 0 4px 6px -4px rgb(139 92 246 / 0.2);
     --overlay: rgba(139, 92, 246, 0.3);
   }
+
+  .red {
+    --bg-primary: 354 100% 97%;
+    --bg-secondary: 354 100% 94%;
+    --bg-tertiary: 354 100% 88%;
+    --text-primary: 356 75% 28%;
+    --text-secondary: 356 69% 40%;
+    --text-tertiary: 354 64% 52%;
+    --border-primary: 354 100% 88%;
+    --border-secondary: 354 100% 82%;
+    --accent-primary: 354 64% 52%;
+    --accent-secondary: 356 69% 40%;
+    --shadow-sm: 0 1px 2px 0 rgb(220 38 38 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(220 38 38 / 0.15), 0 2px 4px -2px rgb(220 38 38 / 0.15);
+    --shadow-lg: 0 10px 15px -3px rgb(220 38 38 / 0.2), 0 4px 6px -4px rgb(220 38 38 / 0.2);
+    --overlay: rgba(220, 38, 38, 0.3);
+  }
 }
 
 @layer base {
