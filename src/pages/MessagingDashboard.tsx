@@ -55,7 +55,7 @@ export function MessagingDashboard() {
 
   if (selectedConversation && selectedConversation.other_user) {
     return (
-      <div className="container mx-auto p-6 max-w-7xl h-screen flex flex-col">
+      <div className="container mx-auto p-4 max-w-6xl h-[calc(100vh-2rem)] flex flex-col">
         <MessagingInterface
           conversationId={selectedConversation.id}
           otherUser={selectedConversation.other_user}
@@ -66,7 +66,7 @@ export function MessagingDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-4 max-w-6xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">

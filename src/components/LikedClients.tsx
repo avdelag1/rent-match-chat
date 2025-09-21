@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useStartConversation } from "@/hooks/useConversations";
 
 interface LikedClient {
   id: string;
@@ -30,9 +32,11 @@ interface LikedClient {
 
 export function LikedClients() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const startConversation = useStartConversation();
 
   const { data: likedClients = [], isLoading } = useQuery({
     queryKey: ['liked-clients', user?.id],
@@ -102,42 +106,22 @@ export function LikedClients() {
     }
   });
 
-  const messageClientMutation = useMutation({
-    mutationFn: async (clientId: string) => {
-      // Check if conversation already exists
-      const { data: existingConversation } = await supabase
-        .from('conversations')
-        .select('id')
-        .or(`and(client_id.eq.${clientId},owner_id.eq.${user?.id}),and(client_id.eq.${user?.id},owner_id.eq.${clientId})`)
-        .single();
-
-      if (existingConversation) {
-        return existingConversation.id;
+  const handleMessage = async (client: LikedClient) => {
+    try {
+      const result = await startConversation.mutateAsync({
+        otherUserId: client.user_id,
+        initialMessage: `Hi ${client.name}! I'm interested in discussing potential rental opportunities with you.`
+      });
+      
+      if (result?.conversationId) {
+        toast.success("Conversation started!");
+        navigate('/messages');
       }
-
-      // Create new conversation - Note: match_id is required, using a UUID placeholder
-      const { data: newConversation, error } = await supabase
-        .from('conversations')
-        .insert({
-          client_id: clientId,
-          owner_id: user?.id,
-          match_id: crypto.randomUUID(), // Generate a temporary match ID
-          status: 'active'
-        })
-        .select('id')
-        .single();
-
-      if (error) throw error;
-      return newConversation.id;
-    },
-    onSuccess: (conversationId) => {
-      toast.success("Conversation started!");
-      // Navigate to messaging (could be implemented later)
-    },
-    onError: () => {
+    } catch (error) {
+      console.error('Error starting conversation:', error);
       toast.error("Failed to start conversation");
     }
-  });
+  };
 
   const filteredClients = likedClients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,9 +129,6 @@ export function LikedClients() {
     (client.occupation && client.occupation.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleMessage = (clientId: string) => {
-    messageClientMutation.mutate(clientId);
-  };
 
   const handleRemoveLike = (clientId: string) => {
     removeLikeMutation.mutate(clientId);
@@ -244,9 +225,9 @@ export function LikedClients() {
                   <div className="absolute top-3 right-3 flex gap-2">
                     <Button
                       size="sm"
-                      onClick={() => handleMessage(client.user_id)}
+                      onClick={() => handleMessage(client)}
                       className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
-                      disabled={messageClientMutation.isPending}
+                      disabled={startConversation.isPending}
                     >
                       <MessageSquare className="w-4 h-4" />
                     </Button>
