@@ -52,7 +52,6 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           filter: `conversation_id=eq.${conversationId}`
         },
         (payload) => {
-          console.log('New message received:', payload);
           // Invalidate and refetch messages
           queryClient.invalidateQueries({ 
             queryKey: ['conversation-messages', conversationId] 
@@ -64,7 +63,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId]);
+  }, [conversationId, queryClient]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();

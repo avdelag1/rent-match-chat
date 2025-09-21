@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useConversations, useConversationStats } from '@/hooks/useConversations';
 import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 export function MessagingDashboard() {
   const navigate = useNavigate();
@@ -28,13 +29,28 @@ export function MessagingDashboard() {
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
   const handleBackToDashboard = () => {
-    // Navigate back to the appropriate dashboard based on user role
-    const userRole = user?.user_metadata?.role || 'client';
-    if (userRole === 'owner') {
-      navigate('/owner/dashboard');
-    } else {
-      navigate('/client/dashboard');
-    }
+    // Get user role from profile data via auth hook
+    const getUserRole = async () => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user?.id)
+          .maybeSingle();
+        
+        const role = profile?.role || user?.user_metadata?.role || 'client';
+        if (role === 'owner') {
+          navigate('/owner/dashboard');
+        } else {
+          navigate('/client/dashboard');
+        }
+      } catch (error) {
+        console.error('Error getting user role:', error);
+        navigate('/client/dashboard'); // Default fallback
+      }
+    };
+    
+    getUserRole();
   };
 
   if (selectedConversation && selectedConversation.other_user) {
