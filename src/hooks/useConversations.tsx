@@ -146,7 +146,7 @@ export function useStartConversation() {
         const clientId = myProfile?.role === 'client' ? user.id : otherUserId;
         const ownerId = myProfile?.role === 'owner' ? user.id : otherUserId;
 
-        // Create a simple match first (without the problematic trigger)
+        // First create a match to ensure we have a valid match_id
         const { data: newMatch, error: matchError } = await supabase
           .from('matches')
           .insert({
@@ -154,23 +154,26 @@ export function useStartConversation() {
             owner_id: ownerId,
             listing_id: listingId,
             is_mutual: true,
-            status: 'accepted'
+            status: 'accepted',
+            client_liked_at: new Date().toISOString(),
+            owner_liked_at: new Date().toISOString()
           })
           .select()
           .single();
 
         if (matchError) {
           console.error('Match creation error:', matchError);
-          // Continue without match if it fails
+          throw new Error('Failed to create match: ' + matchError.message);
         }
 
+        // Now create the conversation with the valid match_id
         const { data: newConversation, error: conversationError } = await supabase
           .from('conversations')
           .insert({
             client_id: clientId,
             owner_id: ownerId,
             listing_id: listingId,
-            match_id: newMatch?.id || crypto.randomUUID(),
+            match_id: newMatch.id,
             status: 'active'
           })
           .select()

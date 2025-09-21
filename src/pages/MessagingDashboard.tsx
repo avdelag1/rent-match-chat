@@ -55,7 +55,7 @@ export function MessagingDashboard() {
 
   if (selectedConversation && selectedConversation.other_user) {
     return (
-      <div className="container mx-auto p-4 max-w-6xl h-[calc(100vh-2rem)] flex flex-col">
+      <div className="w-full max-w-4xl mx-auto p-2 sm:p-4 h-[calc(100vh-1rem)] sm:h-[calc(100vh-2rem)] flex flex-col">
         <MessagingInterface
           conversationId={selectedConversation.id}
           otherUser={selectedConversation.other_user}
@@ -66,23 +66,24 @@ export function MessagingDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
+    <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Button variant="ghost" size="sm" onClick={handleBackToDashboard}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Messages</h1>
-            <p className="text-muted-foreground">Stay connected with your matches</p>
+            <h1 className="text-xl sm:text-3xl font-bold">Messages</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Stay connected with your matches</p>
           </div>
         </div>
         {stats && (
-          <Card className="px-4 py-2">
+          <Card className="px-3 py-2 sm:px-4">
             <div className="text-center">
-              <p className="text-sm font-medium">Conversations This Week</p>
+              <p className="text-xs sm:text-sm font-medium">Conversations This Week</p>
               <p className="text-xs text-muted-foreground">
                 {stats.conversationsUsed}/{stats.isPremium ? '∞' : 5} used
               </p>
@@ -111,7 +112,7 @@ export function MessagingDashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <ScrollArea className="h-[500px]">
+            <ScrollArea className="h-[60vh] sm:h-[500px]">
               {isLoading ? (
                 <div className="p-8 text-center">
                   <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
