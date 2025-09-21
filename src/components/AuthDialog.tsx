@@ -23,7 +23,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithOAuth } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,26 +52,15 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            role: role
-          }
-        }
-      });
+      const { error } = await signInWithOAuth(provider, role);
       
       if (error) throw error;
       
       // Close dialog on successful OAuth initiation
       onClose();
     } catch (error: any) {
-      toast({
-        title: "OAuth Error",
-        description: error.message || `Failed to sign in with ${provider}. Please try again.`,
-        variant: "destructive",
-      });
+      console.error(`OAuth error for ${provider}:`, error);
+      // Error handling is done in signInWithOAuth
     } finally {
       setIsLoading(false);
     }

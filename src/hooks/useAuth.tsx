@@ -12,6 +12,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, role: 'client' | 'owner', name?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string, role: 'client' | 'owner') => Promise<{ error: any }>;
+  signInWithOAuth: (provider: 'google' | 'facebook', role: 'client' | 'owner') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -34,10 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Only redirect after successful sign in, not on initial session load
+        // Handle OAuth users and role assignment
         if (event === 'SIGNED_IN' && session?.user) {
           setTimeout(() => {
-            redirectUserBasedOnRole(session.user);
+            handleOAuthUserSetup(session.user);
           }, 100);
         }
       }
@@ -56,6 +57,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleOAuthUserSetup = async (user: User) => {
+    // For OAuth users, check URL params for role first
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
+    
+    if (roleFromUrl) {
+      // Update user metadata with role from URL
+      try {
+        await supabase.auth.updateUser({
+          data: { role: roleFromUrl }
+        });
+      } catch (metadataError) {
+        console.error('Error updating OAuth user metadata:', metadataError);
+      }
+    }
+    
+    // Clear role from URL params to clean up the URL
+    if (roleFromUrl) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('role');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+    
+    await redirectUserBasedOnRole(user);
+  };
 
   const redirectUserBasedOnRole = async (user: User) => {
     try {
@@ -232,6 +259,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithOAuth = async (provider: 'google' | 'facebook', role: 'client' | 'owner') => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            role: role
+          }
+        }
+      });
+
+      if (error) {
+        console.error(`${provider} OAuth error:`, error);
+        throw error;
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error(`${provider} OAuth error:`, error);
+      let errorMessage = `Failed to sign in with ${provider}. Please try again.`;
+      
+      if (error.message?.includes('Email link is invalid')) {
+        errorMessage = 'OAuth link expired. Please try signing in again.';
+      } else if (error.message?.includes('access_denied')) {
+        errorMessage = `Access denied. Please grant permission to continue with ${provider}.`;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "OAuth Sign In Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -256,6 +322,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signUp,
     signIn,
+    signInWithOAuth,
     signOut
   };
 
