@@ -119,18 +119,6 @@ export function useStartConversation() {
     }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      // Check if user can start conversation
-      const { data: canStart, error: canStartError } = await supabase
-        .rpc('can_start_conversation', {
-          p_user_id: user.id,
-          p_other_user_id: otherUserId
-        });
-
-      if (canStartError) throw canStartError;
-      if (!canStart) {
-        throw new Error('You have reached your weekly conversation limit');
-      }
-
       // Check if conversation already exists
       const { data: existingConversation } = await supabase
         .from('conversations')
@@ -158,13 +146,31 @@ export function useStartConversation() {
         const clientId = myProfile?.role === 'client' ? user.id : otherUserId;
         const ownerId = myProfile?.role === 'owner' ? user.id : otherUserId;
 
+        // Create a simple match first (without the problematic trigger)
+        const { data: newMatch, error: matchError } = await supabase
+          .from('matches')
+          .insert({
+            client_id: clientId,
+            owner_id: ownerId,
+            listing_id: listingId,
+            is_mutual: true,
+            status: 'accepted'
+          })
+          .select()
+          .single();
+
+        if (matchError) {
+          console.error('Match creation error:', matchError);
+          // Continue without match if it fails
+        }
+
         const { data: newConversation, error: conversationError } = await supabase
           .from('conversations')
           .insert({
             client_id: clientId,
             owner_id: ownerId,
             listing_id: listingId,
-            match_id: crypto.randomUUID(), // Create a match ID for compatibility
+            match_id: newMatch?.id || crypto.randomUUID(),
             status: 'active'
           })
           .select()
@@ -172,11 +178,6 @@ export function useStartConversation() {
 
         if (conversationError) throw conversationError;
         conversationId = newConversation.id;
-
-        // Increment conversation starter count
-        await supabase.rpc('increment_conversation_count', {
-          p_user_id: user.id
-        });
       }
 
       // Send initial message
@@ -275,35 +276,13 @@ export function useConversationStats() {
   return useQuery({
     queryKey: ['conversation-stats', user?.id],
     queryFn: async () => {
-      if (!user?.id) return { conversationsUsed: 0, conversationsLeft: 5 };
+      if (!user?.id) return { conversationsUsed: 0, conversationsLeft: 999, isPremium: true };
 
-      const { data, error } = await supabase
-        .rpc('get_weekly_conversation_count', {
-          p_user_id: user.id
-        });
-
-      if (error) throw error;
-
-      const conversationsUsed = data || 0;
-      
-      // Check if user has premium
-      const { data: subscription } = await supabase
-        .from('user_subscriptions')
-        .select(`
-          *,
-          subscription_packages (tier)
-        `)
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      const isPremium = subscription?.subscription_packages?.tier !== 'free';
-      const conversationsLeft = isPremium ? 999 : Math.max(0, 5 - conversationsUsed);
-
+      // Allow unlimited conversations for all users
       return {
-        conversationsUsed,
-        conversationsLeft,
-        isPremium
+        conversationsUsed: 0,
+        conversationsLeft: 999,
+        isPremium: true
       };
     },
     enabled: !!user?.id
