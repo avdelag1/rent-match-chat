@@ -163,10 +163,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
 
   return (
     <Sidebar className="border-none">
-      <div className="h-full bg-white shadow-xl border-r border-gray-200">
+      <div className="h-full bg-white shadow-xl border-r border-gray-200 flex flex-col">
         {/* Sidebar Header with Large Profile Photo */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col items-center gap-4 text-center">
+        <div className="p-4 border-b border-gray-200 flex-shrink-0">
+          <div className="flex flex-col items-center gap-3 text-center">
             {/* Large clickable profile photo */}
             <ProfilePhotoUpload
               currentPhotoUrl={user?.user_metadata?.profile_photo_url || profilePhotoUrl}
@@ -183,13 +183,13 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
           </div>
         </div>
 
-        <SidebarContent className="p-4">
+        <SidebarContent className="p-3 flex-1 overflow-y-auto">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-gray-700 font-medium mb-4 px-3">
+            <SidebarGroupLabel className="text-gray-700 font-medium mb-3 px-2">
               Navigation
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-2">
+              <SidebarMenu className="space-y-1">
                 {menuItems.map((item, index) => (
                   <motion.div
                     key={item.title}
@@ -201,7 +201,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                       <SidebarMenuButton 
                         onClick={() => handleMenuClick(item)}
                         className={`
-                          w-full rounded-lg p-3 transition-all duration-200 group border
+                          w-full rounded-lg p-2.5 transition-all duration-200 group border
                           ${isActive(item.url) 
                             ? 'text-white shadow-md border-orange-300' 
                             : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 hover:border-gray-300'
@@ -218,17 +218,17 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                   </motion.div>
                 ))}
                 
-                {/* Sign Out Button */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: menuItems.length * 0.1 }}
-                >
-                  <SidebarMenuItem className="mt-6">
-                    <SidebarMenuButton 
-                      onClick={handleSignOut}
-                      className="w-full rounded-lg p-3 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 transition-all duration-200"
-                    >
+                 {/* Sign Out Button */}
+                 <motion.div
+                   initial={{ opacity: 0, x: -20 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   transition={{ delay: menuItems.length * 0.1 }}
+                 >
+                   <SidebarMenuItem className="mt-4">
+                     <SidebarMenuButton 
+                       onClick={handleSignOut}
+                       className="w-full rounded-lg p-2.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 transition-all duration-200"
+                     >
                       <LogOut className="w-5 h-5 text-red-600" />
                       <span className="font-medium text-red-700 ml-3">Sign Out</span>
                     </SidebarMenuButton>
@@ -244,7 +244,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200"
+              className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 flex-shrink-0"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
