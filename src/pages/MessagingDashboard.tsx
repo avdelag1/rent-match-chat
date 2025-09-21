@@ -55,12 +55,14 @@ export function MessagingDashboard() {
 
   if (selectedConversation && selectedConversation.other_user) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-2 sm:p-4 h-[calc(100vh-1rem)] sm:h-[calc(100vh-2rem)] flex flex-col">
-        <MessagingInterface
-          conversationId={selectedConversation.id}
-          otherUser={selectedConversation.other_user}
-          onBack={() => setSelectedConversationId(null)}
-        />
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col min-h-0">
+          <MessagingInterface
+            conversationId={selectedConversation.id}
+            otherUser={selectedConversation.other_user}
+            onBack={() => setSelectedConversationId(null)}
+          />
+        </div>
       </div>
     );
   }

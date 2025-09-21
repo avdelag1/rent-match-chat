@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -37,7 +38,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Set up real-time subscription
+  // Set up real-time subscription with notifications
   useEffect(() => {
     if (!conversationId) return;
 
@@ -52,6 +53,26 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           filter: `conversation_id=eq.${conversationId}`
         },
         (payload) => {
+          console.log('New message received:', payload);
+          
+          // Show notification for messages from other users
+          const newMessage = payload.new;
+          if (newMessage.sender_id !== user?.id) {
+            toast({
+              title: "New Message",
+              description: `${otherUser.full_name}: ${newMessage.message_text.slice(0, 50)}${newMessage.message_text.length > 50 ? '...' : ''}`,
+              duration: 4000,
+            });
+            
+            // Browser notification if supported
+            if (Notification.permission === 'granted') {
+              new Notification(`Message from ${otherUser.full_name}`, {
+                body: newMessage.message_text.slice(0, 100),
+                icon: otherUser.avatar_url || '/placeholder.svg'
+              });
+            }
+          }
+          
           // Invalidate and refetch messages
           queryClient.invalidateQueries({ 
             queryKey: ['conversation-messages', conversationId] 
@@ -63,7 +84,14 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, queryClient]);
+  }, [conversationId, queryClient, user?.id, otherUser]);
+
+  // Request notification permission on component mount
+  useEffect(() => {
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,10 +100,26 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     const messageText = newMessage.trim();
     setNewMessage('');
 
-    sendMessage.mutate({
-      conversationId,
-      message: messageText
-    });
+    try {
+      await sendMessage.mutateAsync({
+        conversationId,
+        message: messageText
+      });
+      
+      toast({
+        title: "Message Sent",
+        description: "Your message has been delivered!",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      toast({
+        title: "Failed to Send",
+        description: "Please try again",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
   };
 
   if (isLoading) {
@@ -90,9 +134,9 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
   }
 
   return (
-    <Card className="flex-1 flex flex-col h-full">
+    <Card className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border-b shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border-b shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <Button variant="ghost" size="sm" onClick={onBack} className="shrink-0">
           <ArrowLeft className="w-4 h-4" />
         </Button>
@@ -111,8 +155,8 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-2 sm:p-4" ref={scrollAreaRef}>
-        <div className="space-y-3 sm:space-y-4">
+      <ScrollArea className="flex-1 overflow-hidden" ref={scrollAreaRef}>
+        <div className="p-2 sm:p-4 space-y-3 sm:space-y-4 min-h-full">
           {messages.length === 0 ? (
             <div className="text-center py-6 sm:py-8">
               <MessageCircle className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
@@ -126,19 +170,19 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
               return (
                 <div
                   key={message.id}
-                  className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-200`}
                 >
                   <div
-                    className={`max-w-[85%] sm:max-w-[80%] p-2 sm:p-3 rounded-lg ${
+                    className={`max-w-[85%] sm:max-w-[75%] p-3 rounded-2xl shadow-sm ${
                       isMyMessage
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                        ? 'bg-primary text-primary-foreground rounded-br-md'
+                        : 'bg-muted rounded-bl-md'
                     }`}
                   >
-                    <p className="text-sm break-words">{message.message_text}</p>
-                    <p className={`text-xs mt-1 ${
+                    <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{message.message_text}</p>
+                    <p className={`text-xs mt-1.5 ${
                       isMyMessage 
-                        ? 'text-primary-foreground/70' 
+                        ? 'text-primary-foreground/60' 
                         : 'text-muted-foreground'
                     }`}>
                       {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
@@ -153,24 +197,34 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
       </ScrollArea>
 
       {/* Message Input */}
-      <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t shrink-0">
-        <div className="flex gap-2">
+      <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex gap-2 items-end">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type your message..."
-            className="flex-1 text-sm sm:text-base"
+            className="flex-1 text-sm sm:text-base min-h-[44px] resize-none border-2 focus:border-primary/50"
             disabled={sendMessage.isPending}
+            maxLength={1000}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(e);
+              }
+            }}
           />
           <Button 
             type="submit" 
             disabled={!newMessage.trim() || sendMessage.isPending}
             size="sm"
-            className="shrink-0"
+            className="shrink-0 h-[44px] w-[44px] rounded-full"
           >
             <Send className="w-4 h-4" />
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground mt-1 px-1">
+          Press Enter to send, Shift+Enter for new line
+        </p>
       </form>
     </Card>
   );
