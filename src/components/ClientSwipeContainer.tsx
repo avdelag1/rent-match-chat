@@ -5,6 +5,7 @@ import { AdvancedFilters } from './AdvancedFilters';
 import { SuperLikeButton } from './SuperLikeButton';
 import { MatchCelebration } from './MatchCelebration';
 import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
+import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
@@ -34,7 +35,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   }>({ isOpen: false });
   
   const { data: swipedIds = [] } = useSwipedClientProfiles();
-  const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useClientProfiles(swipedIds);
+  const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
       setMatchCelebration({

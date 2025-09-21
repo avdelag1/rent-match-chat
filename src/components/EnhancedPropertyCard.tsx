@@ -9,9 +9,11 @@ import {
   Home, TreePine, Utensils, Dumbbell, Music, Palette, PawPrint
 } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
+import { MatchedListing } from '@/hooks/useSmartMatching';
+import { MatchPercentageBadge } from './MatchPercentageBadge';
 
 interface EnhancedPropertyCardProps {
-  listing: Listing;
+  listing: Listing | MatchedListing;
   onSwipe: (direction: 'left' | 'right') => void;
   onTap?: () => void;
   onSuperLike?: () => void;
@@ -212,6 +214,16 @@ export function EnhancedPropertyCard({
                 <div className="text-sm text-muted-foreground">per month</div>
               </div>
             </div>
+
+            {/* Match Percentage Badge */}
+            {'matchPercentage' in listing && (
+              <div className="flex justify-center">
+                <MatchPercentageBadge 
+                  percentage={listing.matchPercentage} 
+                  reasons={listing.matchReasons}
+                />
+              </div>
+            )}
 
             {/* Location */}
             <div className="flex items-center text-muted-foreground">

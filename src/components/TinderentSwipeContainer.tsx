@@ -3,6 +3,7 @@ import { EnhancedPropertyCard } from './EnhancedPropertyCard';
 import { UltimateFilters } from './UltimateFilters';
 
 import { useListings, useSwipedListings } from '@/hooks/useListings';
+import { useSmartListingMatching } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
   const { data: swipedIds = [] } = useSwipedListings();
-  const { data: listings = [], isLoading, refetch, isRefetching, error } = useListings(swipedIds);
+  const { data: listings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();

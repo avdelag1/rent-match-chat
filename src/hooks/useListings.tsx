@@ -20,6 +20,9 @@ export interface Listing {
   description: string;
   amenities: string[];
   status: string;
+  listing_type: string;
+  tulum_location: string;
+  lifestyle_compatible: string[];
 }
 
 export function useListings(excludeSwipedIds: string[] = []) {
