@@ -136,7 +136,7 @@ export default function LegendaryLandingPage() {
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-12 max-w-md w-full">
         
-        {/* Pure Flame Icon - No Background */}
+        {/* Custom Real Flame SVG */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -156,19 +156,19 @@ export default function LegendaryLandingPage() {
             animate={flameClicked ? {
               scale: [1, 1.3, 1.1, 1.2, 1],
               filter: [
-                "brightness(1) saturate(1) drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))",
-                "brightness(1.5) saturate(1.3) drop-shadow(0 0 20px rgba(251, 146, 60, 0.8))",
-                "brightness(1.2) saturate(1.1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))",
-                "brightness(1) saturate(1) drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))"
+                "brightness(1) saturate(1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))",
+                "brightness(1.5) saturate(1.3) drop-shadow(0 0 25px rgba(251, 146, 60, 0.9))",
+                "brightness(1.2) saturate(1.1) drop-shadow(0 0 20px rgba(251, 146, 60, 0.7))",
+                "brightness(1) saturate(1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))"
               ]
             } : {
               y: [0, -3, 0, -2, 0],
               rotate: [0, 1, -1, 0.5, 0],
               scale: [1, 1.02, 1, 1.01, 1],
               filter: [
-                "drop-shadow(0 0 8px rgba(251, 146, 60, 0.4))",
-                "drop-shadow(0 0 12px rgba(251, 146, 60, 0.6))",
-                "drop-shadow(0 0 8px rgba(251, 146, 60, 0.4))"
+                "drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))",
+                "drop-shadow(0 0 15px rgba(251, 146, 60, 0.7))",
+                "drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))"
               ]
             }}
             transition={flameClicked ? {
@@ -180,7 +180,12 @@ export default function LegendaryLandingPage() {
               ease: "easeInOut"
             }}
           >
-            <motion.div
+            <motion.svg
+              width="80"
+              height="100"
+              viewBox="0 0 80 100"
+              xmlns="http://www.w3.org/2000/svg"
+              className="overflow-visible"
               animate={flameClicked ? {
                 rotate: [0, 8, -5, 3, -2, 0],
                 scaleY: [1, 1.3, 0.9, 1.1, 1],
@@ -199,35 +204,57 @@ export default function LegendaryLandingPage() {
                 ease: "easeInOut"
               }}
             >
-              <Flame 
-                className="w-20 h-20 text-transparent"
+              <defs>
+                <radialGradient id="flameGradient" cx="50%" cy="80%" r="60%">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="30%" stopColor="#f97316" />
+                  <stop offset="60%" stopColor="#ea580c" />
+                  <stop offset="100%" stopColor="#dc2626" />
+                </radialGradient>
+                <radialGradient id="innerFlame" cx="50%" cy="70%" r="40%">
+                  <stop offset="0%" stopColor="#fef3c7" />
+                  <stop offset="50%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#f59e0b" />
+                </radialGradient>
+              </defs>
+              
+              {/* Main flame shape */}
+              <path
+                d="M40 95 C20 85, 15 70, 20 55 C25 45, 30 40, 35 30 C38 20, 42 15, 45 10 C48 5, 52 8, 55 15 C58 25, 60 35, 65 45 C70 55, 68 65, 60 75 C55 85, 50 90, 40 95 Z"
                 fill="url(#flameGradient)"
-                strokeWidth={0}
+                stroke="none"
               />
-            </motion.div>
+              
+              {/* Inner flame highlight */}
+              <path
+                d="M40 85 C28 78, 25 68, 28 58 C30 52, 33 48, 36 42 C38 35, 40 32, 42 28 C44 25, 46 27, 48 32 C50 38, 52 44, 54 50 C56 56, 55 62, 52 68 C49 74, 45 80, 40 85 Z"
+                fill="url(#innerFlame)"
+                stroke="none"
+                opacity="0.8"
+              />
+              
+              {/* Flame tip */}
+              <ellipse
+                cx="45"
+                cy="12"
+                rx="3"
+                ry="8"
+                fill="#fef3c7"
+                opacity="0.9"
+              />
+            </motion.svg>
           </motion.div>
-
-          {/* SVG Gradient Definition */}
-          <svg width="0" height="0" className="absolute">
-            <defs>
-              <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stopColor="#f97316" />
-                <stop offset="50%" stopColor="#ea580c" />
-                <stop offset="100%" stopColor="#dc2626" />
-              </linearGradient>
-            </defs>
-          </svg>
 
           {/* Flame Particles */}
           <AnimatePresence>
             {particles.map((particle) => (
               <motion.div
                 key={particle.id}
-                className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
+                className="absolute w-2 h-2 rounded-full pointer-events-none"
                 style={{
                   left: '50%',
-                  top: '50%',
-                  background: `linear-gradient(45deg, #f97316, #dc2626)`
+                  top: '40%',
+                  background: `radial-gradient(circle, #fbbf24, #f97316)`
                 }}
                 initial={{ scale: 0, x: 0, y: 0 }}
                 animate={{
