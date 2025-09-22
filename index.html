@@ -32,10 +32,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Tinderent">
     
-    <!-- Performance, Security and Cache Control -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <!-- Performance and Security -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
@@ -46,74 +43,18 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Enhanced Service Worker Registration with Cache Busting -->
+    <!-- Service Worker Registration -->
     <script>
-      // Force cache clear and reload function
-      function forceCacheRefresh() {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(registrations => {
-            registrations.forEach(registration => {
-              registration.unregister();
-            });
-          }).then(() => {
-            // Clear all caches
-            caches.keys().then(cacheNames => {
-              return Promise.all(
-                cacheNames.map(cacheName => caches.delete(cacheName))
-              );
-            }).then(() => {
-              // Force reload
-              window.location.reload(true);
-            });
-          });
-        } else {
-          // Fallback for browsers without service worker
-          window.location.reload(true);
-        }
-      }
-
-      // Register service worker with immediate update checking
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?' + Date.now()) // Cache bust the SW itself
+          navigator.serviceWorker.register('/sw.js')
             .then((registration) => {
               console.log('SW registered: ', registration);
-              
-              // Check for updates every 30 seconds
-              setInterval(() => {
-                registration.update();
-              }, 30000);
-              
-              // Listen for updates
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // New version available, force refresh
-                    console.log('New version available, refreshing...');
-                    forceCacheRefresh();
-                  }
-                });
-              });
             })
             .catch((registrationError) => {
               console.log('SW registration failed: ', registrationError);
             });
-
-          // Listen for service worker messages
-          navigator.serviceWorker.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'CACHE_UPDATED') {
-              console.log(event.data.message);
-              // Auto-refresh after 2 seconds
-              setTimeout(() => {
-                forceCacheRefresh();
-              }, 2000);
-            }
-          });
         });
-
-        // Add global cache refresh function for manual use
-        window.forceCacheRefresh = forceCacheRefresh;
       }
     </script>
   </body>

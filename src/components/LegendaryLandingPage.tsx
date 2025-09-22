@@ -2,7 +2,6 @@ import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Users, Sparkles } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
-import { CacheRefreshButton } from './CacheRefreshButton';
 
 export default function LegendaryLandingPage() {
   const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' }>({
@@ -291,9 +290,6 @@ export default function LegendaryLandingPage() {
         </motion.p>
 
       </div>
-
-      {/* Cache Refresh Button */}
-      <CacheRefreshButton />
 
       {/* Auth Dialog */}
       <AuthDialog 
