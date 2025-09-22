@@ -257,26 +257,80 @@ export default function LegendaryLandingPage() {
           </p>
         </motion.div>
 
-        {/* Buttons Container */}
+        {/* Buttons Container with Elastic Entrance Effects */}
         <div className="space-y-6 mt-16">
           
-          {/* I'm a Client Button - Clean & Fast */}
-          <button
+          {/* I'm a Client Button - Slides in from LEFT with elastic bounce */}
+          <motion.button
             onClick={() => openAuthDialog('client')}
-            className="w-full py-4 px-6 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold text-lg rounded-2xl transform transition-transform duration-100 active:scale-98 flex items-center justify-center gap-3"
+            className="w-full py-4 px-6 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold text-lg rounded-2xl transform transition-transform duration-100 active:scale-98 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+            initial={{ 
+              opacity: 0, 
+              x: -300,
+              scale: 0.8,
+              rotate: -10
+            }}
+            animate={{ 
+              opacity: 1, 
+              x: 0,
+              scale: 1,
+              rotate: 0
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 150,
+              damping: 12,
+              delay: 0.8,
+              duration: 0.8
+            }}
+            whileHover={{ 
+              scale: 1.05,
+              transition: { duration: 0.2 }
+            }}
+            whileTap={{ 
+              scale: 0.95,
+              transition: { duration: 0.1 }
+            }}
           >
             <Users className="w-5 h-5" />
             <span>I'm a Client</span>
-          </button>
+          </motion.button>
 
-          {/* I'm an Owner Button - Clean & Fast */}
-          <button
+          {/* I'm an Owner Button - Slides in from RIGHT with elastic bounce */}
+          <motion.button
             onClick={() => openAuthDialog('owner')}
-            className="w-full py-4 px-6 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-lg rounded-2xl transform transition-transform duration-100 active:scale-98 flex items-center justify-center gap-3"
+            className="w-full py-4 px-6 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-lg rounded-2xl transform transition-transform duration-100 active:scale-98 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+            initial={{ 
+              opacity: 0, 
+              x: 300,
+              scale: 0.8,
+              rotate: 10
+            }}
+            animate={{ 
+              opacity: 1, 
+              x: 0,
+              scale: 1,
+              rotate: 0
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 150,
+              damping: 12,
+              delay: 1.0,
+              duration: 0.8
+            }}
+            whileHover={{ 
+              scale: 1.05,
+              transition: { duration: 0.2 }
+            }}
+            whileTap={{ 
+              scale: 0.95,
+              transition: { duration: 0.1 }
+            }}
           >
             <Flame className="w-5 h-5" />
             <span>I'm an Owner</span>
-          </button>
+          </motion.button>
         </div>
 
         {/* Subtitle */}
