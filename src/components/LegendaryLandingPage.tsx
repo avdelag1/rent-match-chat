@@ -136,7 +136,7 @@ export default function LegendaryLandingPage() {
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-12 max-w-md w-full">
         
-        {/* Minimal Flame Icon - Realistic Animation */}
+        {/* Pure Flame Icon - No Background */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -156,15 +156,20 @@ export default function LegendaryLandingPage() {
             animate={flameClicked ? {
               scale: [1, 1.3, 1.1, 1.2, 1],
               filter: [
-                "brightness(1) saturate(1)",
-                "brightness(1.5) saturate(1.3)",
-                "brightness(1.2) saturate(1.1)",
-                "brightness(1) saturate(1)"
+                "brightness(1) saturate(1) drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))",
+                "brightness(1.5) saturate(1.3) drop-shadow(0 0 20px rgba(251, 146, 60, 0.8))",
+                "brightness(1.2) saturate(1.1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))",
+                "brightness(1) saturate(1) drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))"
               ]
             } : {
               y: [0, -3, 0, -2, 0],
               rotate: [0, 1, -1, 0.5, 0],
-              scale: [1, 1.02, 1, 1.01, 1]
+              scale: [1, 1.02, 1, 1.01, 1],
+              filter: [
+                "drop-shadow(0 0 8px rgba(251, 146, 60, 0.4))",
+                "drop-shadow(0 0 12px rgba(251, 146, 60, 0.6))",
+                "drop-shadow(0 0 8px rgba(251, 146, 60, 0.4))"
+              ]
             }}
             transition={flameClicked ? {
               duration: 2,
@@ -193,10 +198,9 @@ export default function LegendaryLandingPage() {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="drop-shadow-lg"
             >
               <Flame 
-                className="w-16 h-16 text-transparent"
+                className="w-20 h-20 text-transparent"
                 fill="url(#flameGradient)"
                 strokeWidth={0}
               />
