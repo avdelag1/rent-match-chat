@@ -84,68 +84,131 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           className="relative"
         >
           {/* Header with enhanced gradient background */}
-          <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-t-3xl px-6 py-10 shadow-2xl">
+          <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-t-3xl px-6 py-10 shadow-2xl overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 via-purple-400/20 to-red-400/20 animate-pulse"></div>
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full animate-bounce [animation-delay:0.5s]"></div>
+            <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-white/15 rounded-full animate-bounce [animation-delay:1s]"></div>
+            
             {/* Back Button */}
             <button 
               onClick={onClose}
-              className="absolute top-5 left-5 flex items-center gap-2 text-white/90 hover:text-white transition-all duration-200 text-sm bg-white/10 px-3 py-2 rounded-xl backdrop-blur-sm hover:bg-white/20"
+              className="absolute top-5 left-5 flex items-center gap-2 text-white/90 hover:text-white transition-all duration-200 text-sm bg-white/10 px-3 py-2 rounded-xl backdrop-blur-sm hover:bg-white/20 transform hover:scale-105"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
 
-            {/* Close Button */}
-            <button 
-              onClick={onClose}
-              className="absolute top-5 right-5 text-white/90 hover:text-white transition-all duration-200 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
-            >
-              ×
-            </button>
-
             {/* Header Content */}
-            <div className="text-center text-white pt-4">
-              <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm">
+            <div className="text-center text-white pt-4 relative z-10">
+              <motion.div 
+                className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm"
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 10, -10, 0]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
                 <Flame className="w-10 h-10 text-white drop-shadow-lg" />
-              </div>
-              <h1 className="text-3xl font-bold mb-3 drop-shadow-sm">
+              </motion.div>
+              <motion.h1 
+                className="text-3xl font-bold mb-3 drop-shadow-sm"
+                animate={{ 
+                  y: [0, -5, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
                 {isLogin ? 'Welcome Back!' : 'Join Tinderent'}
-              </h1>
-              <p className="text-white/90 text-base capitalize font-medium">
+              </motion.h1>
+              <motion.p 
+                className="text-white/90 text-base capitalize font-medium"
+                animate={{ 
+                  opacity: [0.7, 1, 0.7],
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
                 {isLogin ? 'Sign in' : 'Sign up'} as {role}
-              </p>
+              </motion.p>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="bg-white rounded-b-3xl p-8 space-y-8">
+          <div className="bg-white rounded-b-3xl p-8 space-y-8 relative overflow-hidden">
+            {/* Floating decorative elements */}
+            <div className="absolute top-4 right-4 w-3 h-3 bg-orange-300 rounded-full animate-ping [animation-delay:0.5s]"></div>
+            <div className="absolute bottom-8 left-8 w-2 h-2 bg-red-300 rounded-full animate-ping [animation-delay:1.5s]"></div>
+            
             {/* OAuth Buttons */}
-            <div className="space-y-4">
-              <Button
-                type="button"
-                onClick={() => handleOAuthSignIn('google')}
-                disabled={isLoading}
-                className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-md transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
+            <div className="space-y-4 relative z-10">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <FaGoogle className="w-6 h-6 text-red-500" />
-                Continue with Google
-              </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleOAuthSignIn('google')}
+                  disabled={isLoading}
+                  className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  <FaGoogle className="w-6 h-6 text-red-500 relative z-10" />
+                  <span className="relative z-10">Continue with Google</span>
+                </Button>
+              </motion.div>
               
-              <Button
-                type="button"
-                onClick={() => handleOAuthSignIn('facebook')}
-                disabled={isLoading}
-                className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-md transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <FaFacebook className="w-6 h-6" />
-                Continue with Facebook
-              </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleOAuthSignIn('facebook')}
+                  disabled={isLoading}
+                  className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  <FaFacebook className="w-6 h-6 relative z-10" />
+                  <span className="relative z-10">Continue with Facebook</span>
+                </Button>
+              </motion.div>
             </div>
 
-            {/* Divider */}
+            {/* Animated Divider */}
             <div className="relative flex items-center py-4">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2">or</span>
-              <div className="flex-grow border-t border-gray-300"></div>
+              <motion.div 
+                className="flex-grow border-t border-gray-300"
+                animate={{ scaleX: [0.8, 1, 0.8] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              ></motion.div>
+              <motion.span 
+                className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2"
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  color: ["#6b7280", "#f97316", "#6b7280"]
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                or
+              </motion.span>
+              <motion.div 
+                className="flex-grow border-t border-gray-300"
+                animate={{ scaleX: [0.8, 1, 0.8] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+              ></motion.div>
             </div>
 
             {/* Form */}
@@ -213,21 +276,45 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8 transform hover:scale-[1.02] active:scale-[0.98]"
+              {/* Animated Submit Button */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                {isLoading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Please wait...
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8 relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  <div className="relative z-10 flex items-center gap-3">
+                    {isLoading ? (
+                      <>
+                        <motion.div 
+                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        />
+                        Please wait...
+                      </>
+                    ) : (
+                      <motion.span
+                        animate={{ 
+                          scale: [1, 1.05, 1],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        {isLogin ? 'Sign In' : 'Create Account'}
+                      </motion.span>
+                    )}
                   </div>
-                ) : (
-                  isLogin ? 'Sign In' : 'Create Account'
-                )}
-              </Button>
+                </Button>
+              </motion.div>
             </form>
 
             {/* Toggle Sign In/Up */}
