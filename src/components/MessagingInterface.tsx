@@ -8,10 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send, MessageCircle } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
+import { useMessagingQuota } from '@/hooks/useMessagingQuota';
+import { MessageQuotaDialog } from '@/components/MessageQuotaDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -26,12 +29,36 @@ interface MessagingInterfaceProps {
 
 export function MessagingInterface({ conversationId, otherUser, onBack }: MessagingInterfaceProps) {
   const [newMessage, setNewMessage] = useState('');
+  const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: messages = [], isLoading } = useConversationMessages(conversationId);
   const sendMessage = useSendMessage();
   const queryClient = useQueryClient();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Get user's current role from profile
+  const [userRole, setUserRole] = useState<'client' | 'owner'>('client');
+  const { canSendMessage, remainingMessages, decrementMessageCount, isUnlimited } = useMessagingQuota();
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+        
+      if (profile?.role) {
+        setUserRole(profile.role as 'client' | 'owner');
+      }
+    };
+    
+    fetchUserRole();
+  }, [user]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -97,6 +124,12 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     e.preventDefault();
     if (!newMessage.trim()) return;
 
+    // Check if user can send message
+    if (!canSendMessage) {
+      setShowQuotaDialog(true);
+      return;
+    }
+
     const messageText = newMessage.trim();
     setNewMessage('');
 
@@ -105,6 +138,9 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
         conversationId,
         message: messageText
       });
+      
+      // Decrement quota after successful send
+      decrementMessageCount();
       
       toast({
         title: "Message Sent",
@@ -120,6 +156,12 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
         duration: 3000,
       });
     }
+  };
+
+  const handleUpgrade = () => {
+    setShowQuotaDialog(false);
+    // Navigate to subscription packages based on user role
+    navigate('/subscription-packages');
   };
 
   if (isLoading) {
@@ -222,10 +264,24 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
             <Send className="w-4 h-4" />
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-1 px-1">
-          Press Enter to send, Shift+Enter for new line
-        </p>
+        <div className="flex justify-between items-center mt-1 px-1">
+          <p className="text-xs text-muted-foreground">
+            Press Enter to send, Shift+Enter for new line
+          </p>
+          {!isUnlimited && (
+            <p className="text-xs text-muted-foreground">
+              {remainingMessages} messages left this month
+            </p>
+          )}
+        </div>
       </form>
+      
+      <MessageQuotaDialog
+        isOpen={showQuotaDialog}
+        onClose={() => setShowQuotaDialog(false)}
+        onUpgrade={handleUpgrade}
+        userRole={userRole}
+      />
     </Card>
   );
 }

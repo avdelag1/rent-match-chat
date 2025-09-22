@@ -32,6 +32,7 @@ import OwnerProperties from "./pages/OwnerProperties";
 import OwnerLikedClients from "./pages/OwnerLikedClients";
 import ClientContracts from "./pages/ClientContracts";
 import OwnerContracts from "./pages/OwnerContracts";
+import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
 
 const queryClient = new QueryClient();
 
@@ -244,6 +245,15 @@ const App = () => (
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerContracts />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
+                      path="/subscription-packages" 
+                      element={
+                        <ProtectedRoute>
+                          <SubscriptionPackagesPage />
                         </ProtectedRoute>
                       } 
                     />

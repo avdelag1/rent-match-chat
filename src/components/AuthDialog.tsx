@@ -32,12 +32,21 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     try {
       if (isLogin) {
         const { error } = await signIn(email, password, role);
-        if (error) throw error;
+        if (!error) {
+          // Only close on successful sign in
+          onClose();
+        } else {
+          throw error;
+        }
       } else {
         const { error } = await signUp(email, password, role, name);
-        if (error) throw error;
+        if (!error) {
+          // Only close on successful sign up
+          onClose();
+        } else {
+          throw error;
+        }
       }
-      onClose();
     } catch (error: any) {
       toast({
         title: "Error",
