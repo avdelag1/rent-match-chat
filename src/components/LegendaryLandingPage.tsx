@@ -80,9 +80,9 @@ export default function LegendaryLandingPage() {
       }}
       transition={{ duration: 0.3 }}
     >
-      {/* Enhanced Floating Embers */}
+      {/* Optimized Floating Embers - reduced from 15 to 8 for better performance */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 15 }).map((_, i) => (
+        {Array.from({ length: 8 }).map((_, i) => (
           <motion.div
             key={i}
             className="absolute rounded-full"
@@ -116,7 +116,7 @@ export default function LegendaryLandingPage() {
               rotate: [0, 180, 360, 540, 720]
             }}
             transition={{
-              duration: 25 + Math.random() * 15, // Much slower: 25-40 seconds
+              duration: 20 + Math.random() * 10, // Optimized: 20-30 seconds
               repeat: Infinity,
               ease: "linear",
               delay: Math.random() * 10 // Staggered start

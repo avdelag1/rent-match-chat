@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { AppLoadingScreen } from './AppLoadingScreen';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
+import { UpdateNotification } from './UpdateNotification';
 import { SkipToMainContent, useFocusManagement } from './AccessibilityHelpers';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useOfflineDetection } from '@/hooks/useOfflineDetection';
 import { useAuth } from '@/hooks/useAuth';
+import { useErrorReporting } from '@/hooks/useErrorReporting';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,6 +20,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   useKeyboardShortcuts();
   useFocusManagement();
   useOfflineDetection();
+  useErrorReporting();
 
   useEffect(() => {
     // Simulate initial app loading
@@ -42,6 +45,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       </main>
       <PWAInstallPrompt />
+      <UpdateNotification />
     </div>
   );
 }
