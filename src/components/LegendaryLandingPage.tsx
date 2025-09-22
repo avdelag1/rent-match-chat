@@ -136,7 +136,7 @@ export default function LegendaryLandingPage() {
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-12 max-w-md w-full">
         
-        {/* Flame Icon - Interactive Animation */}
+        {/* Minimal Flame Icon - Realistic Animation */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -146,74 +146,95 @@ export default function LegendaryLandingPage() {
             delay: 0.2,
             bounce: 0.6 
           }}
-          className="flex justify-center mb-8 relative"
+          className="flex justify-center mb-8 relative cursor-pointer"
+          onClick={handleFlameClick}
         >
           <motion.div 
-            className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-2xl cursor-pointer relative"
-            whileHover={{ 
-              scale: 1.1,
-              boxShadow: "0 0 40px rgba(251, 146, 60, 0.6)"
-            }}
+            className="relative"
+            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleFlameClick}
             animate={flameClicked ? {
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.2, 1]
-            } : {}}
+              scale: [1, 1.3, 1.1, 1.2, 1],
+              filter: [
+                "brightness(1) saturate(1)",
+                "brightness(1.5) saturate(1.3)",
+                "brightness(1.2) saturate(1.1)",
+                "brightness(1) saturate(1)"
+              ]
+            } : {
+              y: [0, -3, 0, -2, 0],
+              rotate: [0, 1, -1, 0.5, 0],
+              scale: [1, 1.02, 1, 1.01, 1]
+            }}
+            transition={flameClicked ? {
+              duration: 2,
+              ease: "easeOut"
+            } : {
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
           >
-            <motion.div 
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center relative overflow-hidden"
+            <motion.div
               animate={flameClicked ? {
-                background: [
-                  "linear-gradient(135deg, rgb(251 146 60), rgb(239 68 68))",
-                  "linear-gradient(135deg, rgb(59 130 246), rgb(147 51 234))",
-                  "linear-gradient(135deg, rgb(251 146 60), rgb(239 68 68))"
-                ]
+                rotate: [0, 8, -5, 3, -2, 0],
+                scaleY: [1, 1.3, 0.9, 1.1, 1],
+                scaleX: [1, 0.9, 1.1, 0.95, 1]
               } : {
-                rotate: [0, 2, -2, 0]
+                rotate: [0, 2, -1, 1, 0],
+                scaleY: [1, 1.05, 0.98, 1.02, 1],
+                scaleX: [1, 0.98, 1.02, 0.99, 1]
               }}
-              transition={{
-                rotate: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-                background: { duration: 1.5 }
+              transition={flameClicked ? {
+                duration: 1.5,
+                ease: [0.4, 0, 0.2, 1]
+              } : {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
               }}
+              className="drop-shadow-lg"
             >
-              <motion.div
-                animate={flameClicked ? {
-                  scale: [1, 1.5, 1],
-                  rotate: [0, 180, 360]
-                } : {
-                  y: [0, -2, 0]
-                }}
-                transition={{
-                  y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
-                  scale: { duration: 0.8 },
-                  rotate: { duration: 0.8 }
-                }}
-              >
-                <Flame className="w-8 h-8 text-white" />
-              </motion.div>
+              <Flame 
+                className="w-16 h-16 text-transparent"
+                fill="url(#flameGradient)"
+                strokeWidth={0}
+              />
             </motion.div>
           </motion.div>
+
+          {/* SVG Gradient Definition */}
+          <svg width="0" height="0" className="absolute">
+            <defs>
+              <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stopColor="#f97316" />
+                <stop offset="50%" stopColor="#ea580c" />
+                <stop offset="100%" stopColor="#dc2626" />
+              </linearGradient>
+            </defs>
+          </svg>
 
           {/* Flame Particles */}
           <AnimatePresence>
             {particles.map((particle) => (
               <motion.div
                 key={particle.id}
-                className="absolute w-2 h-2 bg-orange-400 rounded-full pointer-events-none"
+                className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
                 style={{
                   left: '50%',
                   top: '50%',
+                  background: `linear-gradient(45deg, #f97316, #dc2626)`
                 }}
                 initial={{ scale: 0, x: 0, y: 0 }}
                 animate={{
-                  scale: [0, 1, 0],
+                  scale: [0, 1.5, 0],
                   x: particle.x,
                   y: particle.y,
-                  opacity: [1, 0.8, 0]
+                  opacity: [1, 0.8, 0],
+                  rotate: [0, 180, 360]
                 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
+                transition={{ duration: 2, ease: "easeOut" }}
               />
             ))}
           </AnimatePresence>
