@@ -83,42 +83,50 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           transition={{ duration: 0.2 }}
           className="relative"
         >
-          {/* Header with gradient background */}
-          <div className="relative bg-gradient-to-br from-orange-500 to-red-500 rounded-t-3xl px-6 py-8">
+          {/* Header with enhanced gradient background */}
+          <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-t-3xl px-6 py-10 shadow-2xl">
             {/* Back Button */}
             <button 
               onClick={onClose}
-              className="absolute top-4 left-4 flex items-center gap-2 text-white/90 hover:text-white transition-colors text-sm"
+              className="absolute top-5 left-5 flex items-center gap-2 text-white/90 hover:text-white transition-all duration-200 text-sm bg-white/10 px-3 py-2 rounded-xl backdrop-blur-sm hover:bg-white/20"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
 
+            {/* Close Button */}
+            <button 
+              onClick={onClose}
+              className="absolute top-5 right-5 text-white/90 hover:text-white transition-all duration-200 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+            >
+              ×
+            </button>
+
             {/* Header Content */}
-            <div className="text-center text-white pt-6">
-              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Flame className="w-8 h-8 text-white" />
+            <div className="text-center text-white pt-4">
+              <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm">
+                <Flame className="w-10 h-10 text-white drop-shadow-lg" />
               </div>
-              <h1 className="text-2xl font-bold mb-2">
+              <h1 className="text-3xl font-bold mb-3 drop-shadow-sm">
                 {isLogin ? 'Welcome Back!' : 'Join Tinderent'}
               </h1>
-              <p className="text-white/90 text-sm capitalize">
+              <p className="text-white/90 text-base capitalize font-medium">
                 {isLogin ? 'Sign in' : 'Sign up'} as {role}
               </p>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="bg-white rounded-b-3xl p-6 space-y-6">
+          <div className="bg-white rounded-b-3xl p-8 space-y-8">
             {/* OAuth Buttons */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Button
                 type="button"
                 onClick={() => handleOAuthSignIn('google')}
                 disabled={isLoading}
-                className="w-full h-12 bg-white border-2 border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 shadow-sm disabled:opacity-50"
+                className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-md transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
               >
-                <FaGoogle className="w-5 h-5 text-red-500" />
+                <FaGoogle className="w-6 h-6 text-red-500" />
                 Continue with Google
               </Button>
               
@@ -126,26 +134,26 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 type="button"
                 onClick={() => handleOAuthSignIn('facebook')}
                 disabled={isLoading}
-                className="w-full h-12 bg-[#1877F2] text-white font-medium rounded-xl hover:bg-[#166FE5] transition-all duration-200 flex items-center justify-center gap-3 shadow-sm disabled:opacity-50"
+                className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-md transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98]"
               >
-                <FaFacebook className="w-5 h-5" />
+                <FaFacebook className="w-6 h-6" />
                 Continue with Facebook
               </Button>
             </div>
 
             {/* Divider */}
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-gray-200"></div>
-              <span className="flex-shrink mx-4 text-gray-400 text-sm font-medium">or</span>
-              <div className="flex-grow border-t border-gray-200"></div>
+            <div className="relative flex items-center py-4">
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2">or</span>
+              <div className="flex-grow border-t border-gray-300"></div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Field (Sign Up Only) */}
               {!isLogin && (
                 <div>
-                  <Label htmlFor="name" className="text-gray-700 font-medium text-sm">
+                  <Label htmlFor="name" className="text-gray-700 font-semibold text-base">
                     Full Name
                   </Label>
                   <Input
@@ -154,7 +162,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="mt-1 h-12 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
+                    className="mt-2 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -162,18 +170,18 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Email Field */}
               <div>
-                <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
+                <Label htmlFor="email" className="text-gray-700 font-semibold text-base">
                   Email Address
                 </Label>
-                <div className="mt-1 relative">
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="mt-2 relative">
+                  <Mail className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-12 h-12 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
+                    className="pl-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -181,24 +189,24 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Password Field */}
               <div>
-                <Label htmlFor="password" className="text-gray-700 font-medium text-sm">
+                <Label htmlFor="password" className="text-gray-700 font-semibold text-base">
                   Password
                 </Label>
-                <div className="mt-1 relative">
-                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="mt-2 relative">
+                  <Lock className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="pl-12 pr-12 h-12 bg-gray-50 border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white transition-colors"
+                    className="pl-14 pr-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -209,11 +217,11 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               <Button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl border-0 shadow-lg hover:shadow-xl transition-all duration-200 mt-6"
+                className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8 transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Please wait...
                   </div>
                 ) : (
@@ -223,8 +231,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             </form>
 
             {/* Toggle Sign In/Up */}
-            <div className="text-center pt-4">
-              <span className="text-gray-600 text-sm">
+            <div className="text-center pt-6">
+              <span className="text-gray-600 text-base">
                 {isLogin ? "Don't have an account? " : "Already have an account? "}
               </span>
               <button
@@ -235,46 +243,54 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                   setPassword('');
                   setName('');
                 }}
-                className="font-semibold text-orange-600 hover:text-orange-700 transition-colors text-sm"
+                className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-base underline"
               >
                 {isLogin ? 'Sign Up' : 'Sign In'}
               </button>
             </div>
 
-            {/* Benefits Section - Compact */}
-            <div className="bg-gray-50 rounded-2xl p-4 mt-6">
-              <h3 className="font-semibold text-gray-900 text-sm mb-3">
-                {role === 'client' ? '🏠 Client Benefits:' : '🏢 Owner Benefits:'}
-              </h3>
-              <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
+            {/* Benefits Section - Enhanced */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl p-6 mt-8 border border-gray-200">
+              <h3 className="font-bold text-gray-900 text-lg mb-4 flex items-center gap-2">
                 {role === 'client' ? (
                   <>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                      Browse properties & smart matching
+                    🏠 <span>Client Benefits</span>
+                  </>
+                ) : (
+                  <>
+                    🏢 <span>Owner Benefits</span>
+                  </>
+                )}
+              </h3>
+              <div className="grid grid-cols-1 gap-3 text-sm text-gray-700">
+                {role === 'client' ? (
+                  <>
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
+                      <span className="font-medium">Browse properties & smart matching</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                      Chat with owners & save favorites
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
+                      <span className="font-medium">Chat with owners & save favorites</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                      Personalized recommendations
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
+                      <span className="font-medium">Personalized recommendations</span>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                      List properties & manage portfolio
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
+                      <span className="font-medium">List properties & manage portfolio</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                      Connect with quality tenants
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
+                      <span className="font-medium">Connect with quality tenants</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-orange-500 rounded-full"></div>
-                      Advanced analytics & insights
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
+                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
+                      <span className="font-medium">Advanced analytics & insights</span>
                     </div>
                   </>
                 )}
