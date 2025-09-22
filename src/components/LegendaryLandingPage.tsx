@@ -244,98 +244,23 @@ export default function LegendaryLandingPage() {
         {/* Buttons Container */}
         <div className="space-y-6 mt-16">
           
-          {/* I'm a Client Button - Enhanced with trail effect */}
-          <motion.button
-            initial={{ x: -400, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ 
-              duration: 0.25, 
-              delay: 0.4,
-              ease: [0.68, -0.55, 0.265, 1.55]
-            }}
-            whileHover={{ 
-              scale: 1.02,
-              y: -2,
-              boxShadow: "0 10px 25px rgba(251, 146, 60, 0.2)",
-              transition: { type: "spring", bounce: 0.3, duration: 0.4 }
-            }}
-            whileTap={{ 
-              scale: 0.99,
-              y: 0,
-              transition: { type: "spring", bounce: 0.5, duration: 0.2 }
-            }}
+          {/* I'm a Client Button - Clean & Fast */}
+          <button
             onClick={() => openAuthDialog('client')}
-            className="w-full py-6 px-8 bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 text-white font-bold text-xl rounded-full shadow-2xl border-0 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden group"
+            className="w-full py-4 px-6 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold text-lg rounded-2xl transform transition-transform duration-100 active:scale-98 flex items-center justify-center gap-3"
           >
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-orange-200 via-orange-300 to-orange-400 opacity-0 group-hover:opacity-10"
-              animate={{ 
-                x: [-100, 400],
-                opacity: [0, 0.15, 0]
-              }}
-              transition={{ 
-                duration: 8, 
-                repeat: Infinity,
-                repeatDelay: 4,
-                ease: "easeInOut"
-              }}
-            />
-            <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-            >
-              <Users className="w-6 h-6" />
-            </motion.div>
+            <Users className="w-5 h-5" />
             <span>I'm a Client</span>
-          </motion.button>
+          </button>
 
-          {/* I'm an Owner Button - Enhanced with flame trail */}
-          <motion.button
-            initial={{ x: 400, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ 
-              duration: 0.25, 
-              delay: 0.55,
-              ease: [0.68, -0.55, 0.265, 1.55]
-            }}
-            whileHover={{ 
-              scale: 1.02,
-              y: -2,
-              boxShadow: "0 10px 25px rgba(239, 68, 68, 0.2)",
-              transition: { type: "spring", bounce: 0.3, duration: 0.4 }
-            }}
-            whileTap={{ 
-              scale: 0.99,
-              y: 0,
-              transition: { type: "spring", bounce: 0.5, duration: 0.2 }
-            }}
+          {/* I'm an Owner Button - Clean & Fast */}
+          <button
             onClick={() => openAuthDialog('owner')}
-            className="w-full py-6 px-8 bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-white font-bold text-xl rounded-full shadow-2xl border-0 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden group"
+            className="w-full py-4 px-6 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-lg rounded-2xl transform transition-transform duration-100 active:scale-98 flex items-center justify-center gap-3"
           >
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-red-300 via-red-400 to-red-500 opacity-0 group-hover:opacity-10"
-              animate={{ 
-                x: [400, -100],
-                opacity: [0, 0.15, 0]
-              }}
-              transition={{ 
-                duration: 8, 
-                repeat: Infinity,
-                repeatDelay: 4,
-                ease: "easeInOut"
-              }}
-            />
-            <motion.div
-              whileHover={{ 
-                rotate: [0, 10, -10, 0],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-            >
-              <Flame className="w-6 h-6" />
-            </motion.div>
+            <Flame className="w-5 h-5" />
             <span>I'm an Owner</span>
-          </motion.button>
+          </button>
         </div>
 
         {/* Subtitle */}

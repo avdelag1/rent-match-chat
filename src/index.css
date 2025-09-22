@@ -262,63 +262,39 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   }
   
-  /* Advanced animations for legendary UX */
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
-  
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: var(--shadow-glow); }
-    50% { box-shadow: 0 0 30px hsla(15, 100%, 60%, 0.5); }
-  }
-  
-  @keyframes slide-up {
+  /* Optimized animations for 60fps performance */
+  @keyframes fast-fade-in {
     from {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-
-  @keyframes swipe-reveal {
+  
+  @keyframes quick-scale {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  
+  @keyframes smooth-slide {
     from {
       opacity: 0;
-      transform: scale(0.9) rotateY(-15deg);
+      transform: translateX(-15px);
     }
     to {
       opacity: 1;
-      transform: scale(1) rotateY(0deg);
+      transform: translateX(0);
     }
   }
 
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  @keyframes bounce-in {
-    0% { transform: scale(0.3); opacity: 0; }
-    50% { transform: scale(1.05); }
-    70% { transform: scale(0.9); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  @keyframes elastic-bounce {
+  @keyframes minimal-bounce {
     0% { transform: scale(1); }
-    30% { transform: scale(1.15); }
-    40% { transform: scale(0.95); }
-    60% { transform: scale(1.05); }
-    80% { transform: scale(0.98); }
+    50% { transform: scale(0.98); }
     100% { transform: scale(1); }
-  }
-
-  @keyframes page-transition {
-    0% { opacity: 0; transform: translateX(-20px); }
-    100% { opacity: 1; transform: translateX(0); }
   }
 
   .gradient-text {
@@ -333,46 +309,31 @@ body {
   }
 
 
-  .interactive-card {
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
-    overflow: hidden;
+  /* Optimized card interactions */
+  .fast-card {
+    transition: transform 0.15s ease-out;
+    will-change: transform;
   }
 
-  .interactive-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s;
+  .fast-card:hover {
+    transform: translateY(-2px);
   }
 
-  .interactive-card:hover::before {
-    left: 100%;
-  }
-
-  .interactive-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  .fast-card:active {
+    transform: translateY(0) scale(0.98);
   }
 
   .swipe-card {
-    transform-style: preserve-3d;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
+    transition: transform 0.2s ease-out;
+    will-change: transform;
   }
 
-  .swipe-card:hover {
-    transform: rotateY(3deg) scale(1.05) translateZ(20px);
-    box-shadow: var(--shadow-glow);
-    animation: elastic-bounce 0.6s ease-out;
+  .swipe-card:active {
+    transform: scale(0.98);
   }
 
   .smooth-page {
-    animation: page-transition 0.5s ease-out;
+    animation: fast-fade-in 0.3s ease-out;
   }
 
   .dynamic-card {
