@@ -53,7 +53,7 @@ export default function LegendaryLandingPage() {
             TINDERENT
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
-            Find your perfect rental property or tenant with ease.
+            Swipe your way to the perfect deal - rent, buy, or find clients
           </p>
         </motion.div>
 
