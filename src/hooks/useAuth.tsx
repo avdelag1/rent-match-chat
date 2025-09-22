@@ -1,10 +1,10 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProfileSetup } from './useProfileSetup';
+import { useAccountLinking } from './useAccountLinking';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { createProfileIfMissing } = useProfileSetup();
+  const { handleOAuthUserSetup: linkOAuthAccount, checkExistingAccount } = useAccountLinking();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -64,30 +65,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
     
     if (roleFromUrl) {
-      // Update user metadata with role from URL
-      try {
-        await supabase.auth.updateUser({
-          data: { role: roleFromUrl }
-        });
-      } catch (metadataError) {
-        console.error('Error updating OAuth user metadata:', metadataError);
+      // Use enhanced account linking for OAuth users
+      const linkingResult = await linkOAuthAccount(user, roleFromUrl);
+      
+      if (linkingResult.success) {
+        // Clear role from URL params
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('role');
+        window.history.replaceState({}, '', newUrl.toString());
+        
+        // Use the role from the linking result (might be different from requested if account existed)
+        const finalRole = linkingResult.existingProfile?.role || roleFromUrl;
+        await redirectUserBasedOnRole(user, finalRole);
+      } else {
+        console.error('OAuth account linking failed');
+        // Fallback to basic setup
+        await redirectUserBasedOnRole(user);
       }
+    } else {
+      await redirectUserBasedOnRole(user);
     }
-    
-    // Clear role from URL params to clean up the URL
-    if (roleFromUrl) {
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('role');
-      window.history.replaceState({}, '', newUrl.toString());
-    }
-    
-    await redirectUserBasedOnRole(user);
   };
 
-  const redirectUserBasedOnRole = async (user: User) => {
+  const redirectUserBasedOnRole = async (user: User, forceRole?: 'client' | 'owner') => {
     try {
-      // First try to get role from user metadata (most reliable for fresh logins)
-      let role = user.user_metadata?.role;
+      // First try to get role from forced role (for account linking), then user metadata
+      let role = forceRole || user.user_metadata?.role;
       let profile = null;
       
       // Try to get or create profile
@@ -145,6 +148,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, role: 'client' | 'owner', name?: string) => {
     try {
+      // Check if account already exists with this email
+      const { profile: existingProfile } = await checkExistingAccount(email);
+      
+      if (existingProfile) {
+        toast({
+          title: "Account Already Exists",
+          description: `An account with this email already exists as a ${existingProfile.role}. Please sign in instead.`,
+          variant: "destructive"
+        });
+        return { error: new Error('User already registered') };
+      }
+
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -217,22 +232,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Update user metadata with the selected role
-        try {
-          await supabase.auth.updateUser({
-            data: { role: role }
+        // Check existing profile to see if role matches
+        const { profile: existingProfile } = await checkExistingAccount(data.user.email || '');
+        
+        if (existingProfile && existingProfile.role !== role) {
+          // Role mismatch - use existing profile's role
+          toast({
+            title: "Welcome back!",
+            description: `Signed in as ${existingProfile.role}. Your existing role has been preserved.`,
           });
-        } catch (metadataError) {
-          console.error('Error updating user metadata:', metadataError);
+          
+          // Update metadata to match existing profile
+          await supabase.auth.updateUser({
+            data: { role: existingProfile.role }
+          });
+        } else {
+          // Update user metadata with the selected role
+          try {
+            await supabase.auth.updateUser({
+              data: { role: role }
+            });
+          } catch (metadataError) {
+            console.error('Error updating user metadata:', metadataError);
+          }
+
+          toast({
+            title: "Welcome back!",
+            description: "Successfully signed in.",
+          });
         }
 
         // Ensure profile exists
-        await createProfileIfMissing(data.user, role);
-
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in.",
-        });
+        await createProfileIfMissing(data.user, existingProfile?.role || role);
       }
 
       return { error: null };
@@ -336,4 +367,3 @@ export function useAuth() {
   }
   return context;
 }
-
