@@ -80,14 +80,27 @@ export default function LegendaryLandingPage() {
       }}
       transition={{ duration: 0.3 }}
     >
-      {/* Floating Embers */}
+      {/* Enhanced Floating Embers */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 12 }).map((_, i) => (
+        {Array.from({ length: 15 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-orange-300 rounded-full opacity-60"
+            className="absolute rounded-full"
+            style={{
+              width: `${2 + Math.random() * 4}px`,
+              height: `${2 + Math.random() * 4}px`,
+              background: `radial-gradient(circle, ${
+                i % 3 === 0 ? '#fbbf24' : 
+                i % 3 === 1 ? '#f97316' : '#dc2626'
+              }, transparent)`,
+              boxShadow: `0 0 ${4 + Math.random() * 8}px ${
+                i % 3 === 0 ? '#fbbf24' : 
+                i % 3 === 1 ? '#f97316' : '#dc2626'
+              }60`,
+            }}
             animate={{
               x: [
+                Math.random() * window.innerWidth,
                 Math.random() * window.innerWidth,
                 Math.random() * window.innerWidth,
                 Math.random() * window.innerWidth
@@ -95,15 +108,18 @@ export default function LegendaryLandingPage() {
               y: [
                 Math.random() * window.innerHeight,
                 Math.random() * window.innerHeight,
+                Math.random() * window.innerHeight,
                 Math.random() * window.innerHeight
               ],
-              scale: [0.5, 1, 0.5],
-              opacity: [0.3, 0.8, 0.3]
+              scale: [0.3, 1, 0.6, 1.2, 0.4],
+              opacity: [0.2, 0.8, 0.4, 0.9, 0.3],
+              rotate: [0, 180, 360, 540, 720]
             }}
             transition={{
-              duration: 8 + Math.random() * 4,
+              duration: 25 + Math.random() * 15, // Much slower: 25-40 seconds
               repeat: Infinity,
-              ease: "linear"
+              ease: "linear",
+              delay: Math.random() * 10 // Staggered start
             }}
           />
         ))}
