@@ -247,34 +247,35 @@ export default function LegendaryLandingPage() {
               ease: [0.68, -0.55, 0.265, 1.55]
             }}
             whileHover={{ 
-              scale: 1.05,
-              y: -3,
-              boxShadow: "0 20px 40px rgba(251, 146, 60, 0.4)",
-              transition: { type: "spring", bounce: 0.4, duration: 0.3 }
+              scale: 1.02,
+              y: -2,
+              boxShadow: "0 10px 25px rgba(251, 146, 60, 0.2)",
+              transition: { type: "spring", bounce: 0.3, duration: 0.4 }
             }}
             whileTap={{ 
-              scale: 0.98,
+              scale: 0.99,
               y: 0,
-              transition: { type: "spring", bounce: 0.7, duration: 0.15 }
+              transition: { type: "spring", bounce: 0.5, duration: 0.2 }
             }}
             onClick={() => openAuthDialog('client')}
             className="w-full py-6 px-8 bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 text-white font-bold text-xl rounded-full shadow-2xl border-0 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden group"
           >
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-orange-200 via-orange-300 to-orange-400 opacity-0 group-hover:opacity-20"
+              className="absolute inset-0 bg-gradient-to-r from-orange-200 via-orange-300 to-orange-400 opacity-0 group-hover:opacity-10"
               animate={{ 
                 x: [-100, 400],
-                opacity: [0, 0.3, 0]
+                opacity: [0, 0.15, 0]
               }}
               transition={{ 
-                duration: 1.5, 
+                duration: 8, 
                 repeat: Infinity,
-                repeatDelay: 2
+                repeatDelay: 4,
+                ease: "easeInOut"
               }}
             />
             <motion.div
               whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
             >
               <Users className="w-6 h-6" />
             </motion.div>
@@ -291,37 +292,38 @@ export default function LegendaryLandingPage() {
               ease: [0.68, -0.55, 0.265, 1.55]
             }}
             whileHover={{ 
-              scale: 1.05,
-              y: -3,
-              boxShadow: "0 20px 40px rgba(239, 68, 68, 0.4)",
-              transition: { type: "spring", bounce: 0.4, duration: 0.3 }
+              scale: 1.02,
+              y: -2,
+              boxShadow: "0 10px 25px rgba(239, 68, 68, 0.2)",
+              transition: { type: "spring", bounce: 0.3, duration: 0.4 }
             }}
             whileTap={{ 
-              scale: 0.98,
+              scale: 0.99,
               y: 0,
-              transition: { type: "spring", bounce: 0.7, duration: 0.15 }
+              transition: { type: "spring", bounce: 0.5, duration: 0.2 }
             }}
             onClick={() => openAuthDialog('owner')}
             className="w-full py-6 px-8 bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-white font-bold text-xl rounded-full shadow-2xl border-0 transition-all duration-300 flex items-center justify-center gap-3 relative overflow-hidden group"
           >
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-red-300 via-red-400 to-red-500 opacity-0 group-hover:opacity-20"
+              className="absolute inset-0 bg-gradient-to-r from-red-300 via-red-400 to-red-500 opacity-0 group-hover:opacity-10"
               animate={{ 
                 x: [400, -100],
-                opacity: [0, 0.3, 0]
+                opacity: [0, 0.15, 0]
               }}
               transition={{ 
-                duration: 1.5, 
+                duration: 8, 
                 repeat: Infinity,
-                repeatDelay: 2
+                repeatDelay: 4,
+                ease: "easeInOut"
               }}
             />
             <motion.div
               whileHover={{ 
-                rotate: [0, 15, -15, 0],
-                scale: [1, 1.2, 1]
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.1, 1]
               }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
             >
               <Flame className="w-6 h-6" />
             </motion.div>
