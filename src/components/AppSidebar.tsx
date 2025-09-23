@@ -62,33 +62,32 @@ export default function AppSidebar({ userRole = 'client' }: AppSidebarProps) {
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive 
-      ? "bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-600 font-medium border-r-2 border-orange-500" 
-      : "hover:bg-muted/50 text-muted-foreground hover:text-foreground";
+      ? "bg-white/20 text-white font-bold border-r-4 border-white" 
+      : "hover:bg-white/10 text-white/90 hover:text-white";
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-16" : "w-64"} border-r border-gray-200 transition-all duration-300`}
-      style={{ backgroundColor: '#ffffff' }}
+      className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-orange-400 to-red-500 border-r border-white/20 transition-all duration-300`}
       collapsible="icon"
     >
       {/* Sidebar Header */}
-      <div className="p-4 border-b flex items-center justify-between">
+      <div className="p-4 border-b border-white/20 flex items-center justify-between">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">T</span>
             </div>
-            <span className="font-bold text-lg bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+            <span className="font-bold text-lg text-white">
               Tinderents
             </span>
           </div>
         )}
-        <SidebarTrigger className="hover:bg-muted rounded-md p-1" />
+        <SidebarTrigger className="hover:bg-white/10 text-white rounded-md p-1" />
       </div>
 
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
+          <SidebarGroupLabel className={collapsed ? "sr-only" : "text-white/70 font-semibold"}>
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -117,7 +116,7 @@ export default function AppSidebar({ userRole = 'client' }: AppSidebarProps) {
         {/* Secondary Actions */}
         {!collapsed && (
           <SidebarGroup className="mt-8">
-            <SidebarGroupLabel>Account</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-white/70 font-semibold">Account</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">
                 <SidebarMenuItem>
