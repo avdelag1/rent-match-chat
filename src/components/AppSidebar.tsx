@@ -67,7 +67,11 @@ export default function AppSidebar({ userRole = 'client' }: AppSidebarProps) {
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-16" : "w-64"} bg-gradient-to-b from-orange-400 to-red-500 border-r border-white/20 transition-all duration-300`}
+      className={`${collapsed ? "w-16" : "w-64"} border-r border-white/20 transition-all duration-300`}
+      style={{ 
+        background: 'linear-gradient(to bottom, #fb923c, #ef4444)',
+        backgroundColor: '#fb923c !important'
+      }}
       collapsible="icon"
     >
       {/* Sidebar Header */}
@@ -85,7 +89,10 @@ export default function AppSidebar({ userRole = 'client' }: AppSidebarProps) {
         <SidebarTrigger className="hover:bg-white/10 text-white rounded-md p-1" />
       </div>
 
-      <SidebarContent className="px-2 py-4">
+      <SidebarContent 
+        className="px-2 py-4" 
+        style={{ background: 'transparent' }}
+      >
         <SidebarGroup>
           <SidebarGroupLabel className={collapsed ? "sr-only" : "text-white/70 font-semibold"}>
             Navigation
