@@ -72,6 +72,19 @@ export function PropertyManagement() {
 
   const handleDeleteProperty = async (listing: any) => {
     try {
+      // Optimistically update the UI by removing the property immediately
+      queryClient.setQueryData(['listings'], (oldData: any[]) => {
+        if (!oldData) return oldData;
+        return oldData.filter(item => item.id !== listing.id);
+      });
+
+      // Show immediate feedback
+      toast({
+        title: 'Deleting Property...',
+        description: `Removing ${listing.title} from your listings.`,
+      });
+
+      // Delete from database
       const { error } = await supabase
         .from('listings')
         .delete()
@@ -79,15 +92,21 @@ export function PropertyManagement() {
 
       if (error) throw error;
 
+      // Show success message
       toast({
         title: 'Property Deleted',
         description: `${listing.title} has been deleted successfully.`,
       });
 
-      // Refresh the listings
+      // Invalidate and refetch to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['listings'] });
+      
     } catch (error: any) {
       console.error('Error deleting property:', error);
+      
+      // Revert the optimistic update if deletion failed
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+      
       toast({
         title: 'Error',
         description: 'Failed to delete property. Please try again.',
