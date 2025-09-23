@@ -10,6 +10,9 @@ import { useConversationMessages, useSendMessage } from '@/hooks/useConversation
 import { useAuth } from '@/hooks/useAuth';
 import { useMessagingQuota } from '@/hooks/useMessagingQuota';
 import { MessageQuotaDialog } from '@/components/MessageQuotaDialog';
+import { TypingIndicator } from '@/components/TypingIndicator';
+import { OnlineStatus, ConnectionStatus } from '@/components/OnlineStatus';
+import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
@@ -41,6 +44,16 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
   // Get user's current role from profile
   const [userRole, setUserRole] = useState<'client' | 'owner'>('client');
   const { canSendMessage, remainingMessages, decrementMessageCount, isUnlimited } = useMessagingQuota();
+  
+  // Real-time chat features
+  const { 
+    startTyping, 
+    stopTyping, 
+    isTyping, 
+    typingUsers, 
+    onlineUsers, 
+    isConnected 
+  } = useRealtimeChat(conversationId);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -178,26 +191,23 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
 
     const messageText = newMessage.trim();
     setNewMessage('');
+    
+    // Stop typing indicator
+    stopTyping();
 
     try {
       console.log('💬 Sending message:', messageText);
       
-      // Send the actual message first
-      const result = await sendMessage.mutateAsync({
+      // Send the actual message
+      await sendMessage.mutateAsync({
         conversationId,
         message: messageText
       });
       
-      console.log('✅ Message sent successfully:', result);
+      console.log('✅ Message sent successfully');
       
       // Decrement quota after successful send
       decrementMessageCount();
-      
-      // Force refresh the conversation messages to ensure it shows immediately
-      queryClient.invalidateQueries({ 
-        queryKey: ['conversation-messages', conversationId] 
-      });
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
       
     } catch (error) {
       console.error('❌ Failed to send message:', error);
@@ -208,6 +218,18 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
         variant: "destructive",
         duration: 3000,
       });
+    }
+  };
+
+  // Handle typing detection
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    
+    // Start typing indicator when user types
+    if (e.target.value.length > 0) {
+      startTyping();
+    } else {
+      stopTyping();
     }
   };
 
@@ -235,18 +257,22 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
         <Button variant="ghost" size="sm" onClick={onBack} className="shrink-0">
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <Avatar className="w-8 h-8 sm:w-10 sm:h-10 shrink-0">
-          <AvatarImage src={otherUser.avatar_url} />
-          <AvatarFallback>
-            {otherUser.full_name?.charAt(0) || '?'}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 shrink-0">
+            <AvatarImage src={otherUser.avatar_url} />
+            <AvatarFallback>
+              {otherUser.full_name?.charAt(0) || '?'}
+            </AvatarFallback>
+          </Avatar>
+          <OnlineStatus isOnline={true} />
+        </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-sm sm:text-base truncate">{otherUser.full_name}</h3>
           <Badge variant="secondary" className="text-xs">
             {otherUser.role === 'client' ? 'Client' : 'Property Owner'}
           </Badge>
         </div>
+        <ConnectionStatus isConnected={isConnected} />
       </div>
 
       {/* Messages */}
@@ -287,6 +313,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
               );
             })
           )}
+          <TypingIndicator typingUsers={typingUsers} />
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
@@ -296,7 +323,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
         <div className="flex gap-2 items-end">
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Type your message..."
             className="flex-1 text-sm sm:text-base min-h-[44px] resize-none border-2 focus:border-primary/50"
             disabled={sendMessage.isPending}
@@ -307,6 +334,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
                 handleSendMessage(e);
               }
             }}
+            onBlur={stopTyping}
           />
           <Button 
             type="submit" 
