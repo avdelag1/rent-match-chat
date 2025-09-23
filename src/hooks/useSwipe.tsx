@@ -17,21 +17,42 @@ export function useSwipe() {
 
       console.log('Swiping:', { targetId, direction, targetType, userId: user.user.id });
 
-      // Use the likes table for both listings and profiles
-      const { error } = await supabase
+      // Check if user has already swiped on this target to prevent duplicates
+      const { data: existingLike } = await supabase
         .from('likes')
-        .insert({
-          user_id: user.user.id,
-          target_id: targetId,
-          direction
-        });
+        .select('*')
+        .eq('user_id', user.user.id)
+        .eq('target_id', targetId)
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error inserting like:', error);
-        throw error;
+      if (existingLike) {
+        // Update existing like instead of creating new one
+        const { error } = await supabase
+          .from('likes')
+          .update({ direction })
+          .eq('id', existingLike.id);
+
+        if (error) {
+          console.error('Error updating like:', error);
+          throw error;
+        }
+      } else {
+        // Create new like
+        const { error } = await supabase
+          .from('likes')
+          .insert({
+            user_id: user.user.id,
+            target_id: targetId,
+            direction
+          });
+
+        if (error) {
+          console.error('Error inserting like:', error);
+          throw error;
+        }
       }
 
-      console.log('Like inserted successfully');
+      console.log('Like saved successfully');
       
       // Check if this creates a match (both users liked each other)
       if (direction === 'right') {
@@ -41,7 +62,7 @@ export function useSwipe() {
             .from('listings')
             .select('owner_id')
             .eq('id', targetId)
-            .single();
+            .maybeSingle();
 
           if (listing) {
             // Check if owner also liked this client
@@ -51,11 +72,11 @@ export function useSwipe() {
               .eq('user_id', listing.owner_id)
               .eq('target_id', user.user.id)
               .eq('direction', 'right')
-              .single();
+              .maybeSingle();
 
             if (ownerLike) {
               // Create a match!
-              await supabase.from('matches').insert({
+              const { error: matchError } = await supabase.from('matches').upsert({
                 client_id: user.user.id,
                 owner_id: listing.owner_id,
                 listing_id: targetId,
@@ -65,10 +86,12 @@ export function useSwipe() {
                 status: 'accepted'
               });
 
-              toast({
-                title: "It's a Match! 🎉",
-                description: "You and the client both liked each other!",
-              });
+              if (!matchError) {
+                toast({
+                  title: "It's a Match! 🎉",
+                  description: "You and the owner both liked each other!",
+                });
+              }
             }
           }
         } else if (targetType === 'profile') {
@@ -79,11 +102,11 @@ export function useSwipe() {
             .eq('user_id', targetId)
             .eq('target_id', user.user.id)
             .eq('direction', 'right')
-            .single();
+            .maybeSingle();
 
           if (clientLike) {
             // Create a match!
-            await supabase.from('matches').insert({
+            const { error: matchError } = await supabase.from('matches').upsert({
               client_id: targetId,
               owner_id: user.user.id,
               client_liked_at: clientLike.created_at,
@@ -92,13 +115,17 @@ export function useSwipe() {
               status: 'accepted'
             });
 
-            toast({
-              title: "It's a Match! 🎉",
-              description: "You and the client both liked each other!",
-            });
+            if (!matchError) {
+              toast({
+                title: "It's a Match! 🎉",
+                description: "You and the client both liked each other!",
+              });
+            }
           }
         }
       }
+
+      return { success: true };
     },
     onSuccess: () => {
       console.log('Swipe successful, invalidating queries');

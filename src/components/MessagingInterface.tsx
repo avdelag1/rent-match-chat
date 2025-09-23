@@ -100,9 +100,18 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
             }
           }
           
-          // Invalidate and refetch messages
+          // Immediately update messages in real-time
+          queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
+            if (!oldData) return [newMessage];
+            return [...oldData, newMessage];
+          });
+          
+          // Also invalidate to ensure fresh data
           queryClient.invalidateQueries({ 
             queryKey: ['conversation-messages', conversationId] 
+          });
+          queryClient.invalidateQueries({ 
+            queryKey: ['conversations'] 
           });
         }
       )

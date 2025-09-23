@@ -21,69 +21,16 @@ const PLAN_LIMITS: Record<string, PlanLimits> = {
 
 export function useMessagingQuota() {
   const { user } = useAuth();
-  const { data: subscription } = useUserSubscription();
-  const [remainingMessages, setRemainingMessages] = useState<number>(0);
-  const [messagesSentThisMonth, setMessagesSentThisMonth] = useState<number>(0);
   
-  const currentPlan = subscription?.subscription_packages?.name || 'free';
-  const planLimits = PLAN_LIMITS[currentPlan] || PLAN_LIMITS['free'];
-  
-  useEffect(() => {
-    if (!user) return;
-    
-    fetchMessageCount();
-  }, [user, currentPlan]);
-
-  const fetchMessageCount = async () => {
-    if (!user) return;
-    
-    try {
-      // Get messages sent this month
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-      
-      const { data, error } = await supabase
-        .from('conversation_messages')
-        .select('id')
-        .eq('sender_id', user.id)
-        .gte('created_at', startOfMonth.toISOString());
-      
-      if (error) throw error;
-      
-      const sentCount = data?.length || 0;
-      setMessagesSentThisMonth(sentCount);
-      
-      if (planLimits.unlimited_messages) {
-        setRemainingMessages(999999); // Unlimited
-      } else {
-        setRemainingMessages(Math.max(0, planLimits.messages_per_month - sentCount));
-      }
-    } catch (error) {
-      console.error('Error fetching message count:', error);
-      setRemainingMessages(0);
-    }
-  };
-
-  const canSendMessage = () => {
-    return planLimits.unlimited_messages || remainingMessages > 0;
-  };
-
-  const decrementMessageCount = () => {
-    if (!planLimits.unlimited_messages && remainingMessages > 0) {
-      setRemainingMessages(prev => prev - 1);
-      setMessagesSentThisMonth(prev => prev + 1);
-    }
-  };
-
+  // For testing: Always allow unlimited messaging
   return {
-    remainingMessages,
-    messagesSentThisMonth,
-    totalAllowed: planLimits.messages_per_month,
-    canSendMessage: canSendMessage(),
-    isUnlimited: planLimits.unlimited_messages,
-    currentPlan,
-    decrementMessageCount,
-    refreshQuota: fetchMessageCount
+    remainingMessages: 999999,
+    messagesSentThisMonth: 0,
+    totalAllowed: 999999,
+    canSendMessage: true,
+    isUnlimited: true,
+    currentPlan: 'unlimited_testing',
+    decrementMessageCount: () => {}, // No-op for unlimited
+    refreshQuota: () => {} // No-op for unlimited
   };
 }
