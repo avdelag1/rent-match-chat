@@ -80,13 +80,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     }
   }, [location.hash])
 
-  // Auto-open tenant swipe on /owner/properties so owners see cards immediately
-  useEffect(() => {
-    if (userRole === 'owner' && location.pathname === '/owner/properties') {
-      setShowOwnerSwipe(true)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userRole, location.pathname])
+  // Remove auto-opening tenant swipe on /owner/properties - this was causing the wrong interface to show
+  // useEffect(() => {
+  //   if (userRole === 'owner' && location.pathname === '/owner/properties') {
+  //     setShowOwnerSwipe(true)
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [userRole, location.pathname])
 
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;

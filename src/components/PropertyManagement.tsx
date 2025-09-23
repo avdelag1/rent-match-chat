@@ -6,16 +6,47 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useListings } from '@/hooks/useListings';
+import { useAuth } from '@/hooks/useAuth';
 import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
 
 export function PropertyManagement() {
-  const { data: listings = [] } = useListings();
+  const { user } = useAuth();
+  const { data: allListings = [], isLoading, error } = useListings();
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter listings to show only those owned by current user
+  const listings = allListings.filter(listing => listing.owner_id === user?.id);
 
   const filteredListings = listings.filter(listing =>
     listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     listing.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  console.log('PropertyManagement - Current user:', user?.id);
+  console.log('PropertyManagement - All listings:', allListings.length);
+  console.log('PropertyManagement - Owner listings:', listings.length);
+  console.log('PropertyManagement - Filtered listings:', filteredListings.length);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-white">Loading Properties...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-white">Error Loading Properties</h1>
+          <p className="text-white/80">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -24,7 +55,15 @@ export function PropertyManagement() {
           <h1 className="text-3xl font-bold text-foreground">Property Management</h1>
           <p className="text-muted-foreground">Manage all your rental properties</p>
         </div>
-        <Button className="gap-2">
+        <Button 
+          className="gap-2"
+          onClick={() => {
+            // Set hash so DashboardLayout opens the PropertyForm
+            if (location.hash !== '#add-property') {
+              location.hash = '#add-property';
+            }
+          }}
+        >
           <Plus className="w-4 h-4" />
           Add Property
         </Button>
@@ -103,7 +142,14 @@ export function PropertyManagement() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'No properties match your search criteria.' : 'You haven\'t added any properties yet.'}
               </p>
-              <Button>
+              <Button 
+                onClick={() => {
+                  // Set hash so DashboardLayout opens the PropertyForm
+                  if (location.hash !== '#add-property') {
+                    location.hash = '#add-property';
+                  }
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Your First Property
               </Button>

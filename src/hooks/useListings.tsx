@@ -70,7 +70,13 @@ export function useListings(excludeSwipedIds: string[] = []) {
           throw error;
         }
         
-        console.log(`Loaded ${listings?.length || 0} listings`);
+        console.log(`Loaded ${listings?.length || 0} listings for owner properties:`, listings);
+        console.log('Query filters applied:', { 
+          status: 'active', 
+          is_active: true, 
+          excludeSwipedIds: excludeSwipedIds.length,
+          preferredListingTypes 
+        });
         return (listings as Listing[]) || [];
       } catch (error) {
         console.error('Error in useListings:', error);
