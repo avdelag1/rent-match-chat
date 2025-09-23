@@ -2,7 +2,7 @@
 import React, { ReactNode, useState, useEffect } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Flame } from 'lucide-react'
-import AppSidebar from "@/components/AppSidebar"
+import { AppSidebar } from "@/components/AppSidebar"
 import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
 import { useAuth } from "@/hooks/useAuth"
 import { PropertyForm } from "@/components/PropertyForm"
@@ -170,7 +170,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-900 relative">
-        <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
+        <AppSidebar userRole={userRole} />
         
         <InsetComponent className="flex-1 flex flex-col min-h-screen w-full">
           <header className="flex h-12 shrink-0 items-center gap-2 bg-gradient-to-r from-primary to-secondary px-3 shadow-lg border-b sticky top-0 z-50">

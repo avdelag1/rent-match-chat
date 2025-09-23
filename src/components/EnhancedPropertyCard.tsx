@@ -67,13 +67,15 @@ export function EnhancedPropertyCard({
     }
   };
 
-  const nextImage = () => {
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentImageIndex((prev) => 
       prev === listing.images.length - 1 ? 0 : prev + 1
     );
   };
 
-  const prevImage = () => {
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentImageIndex((prev) => 
       prev === 0 ? listing.images.length - 1 : prev - 1
     );
@@ -142,39 +144,27 @@ export function EnhancedPropertyCard({
                 className="w-full h-full object-cover"
               />
               
-              {/* Image Navigation */}
+              {/* Left/Right Tap Areas for Image Navigation */}
               {listing.images.length > 1 && (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      prevImage();
-                    }}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
+                  {/* Left tap area */}
+                  <div 
+                    className="absolute left-0 top-0 w-1/3 h-full z-10 cursor-pointer"
+                    onClick={prevImage}
+                  />
                   
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      nextImage();
-                    }}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                  {/* Right tap area */}
+                  <div 
+                    className="absolute right-0 top-0 w-1/3 h-full z-10 cursor-pointer"
+                    onClick={nextImage}
+                  />
 
                   {/* Image Indicators */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
                     {listing.images.map((_, index) => (
                       <div
                         key={index}
-                        className={`w-2 h-2 rounded-full ${
+                        className={`w-1.5 h-1.5 rounded-full ${
                           index === currentImageIndex ? 'bg-white' : 'bg-white/50'
                         }`}
                       />
@@ -188,21 +178,6 @@ export function EnhancedPropertyCard({
               <Home className="w-16 h-16 text-muted-foreground" />
             </div>
           )}
-
-          {/* Action Button Overlay */}
-          <div className="absolute top-4 right-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-black/50 hover:bg-black/70 text-white rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMessage?.();
-              }}
-            >
-              <MessageCircle className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
 
         {/* Content - Compact bottom section */}

@@ -344,11 +344,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <Button
             size="lg"
             variant="outline"
-            className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-lg"
+            className="w-16 h-16 rounded-full bg-white border-0 shadow-xl hover:bg-gray-50 transition-all duration-300"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            👎
+            <div className="text-3xl text-gray-600">👎</div>
           </Button>
         </motion.div>
         
@@ -358,11 +358,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         >
           <Button
             size="lg"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-none"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/25 border-none"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            🔥
+            <div className="text-4xl">🔥</div>
           </Button>
         </motion.div>
       </motion.div>
