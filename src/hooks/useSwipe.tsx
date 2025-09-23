@@ -17,6 +17,19 @@ export function useSwipe() {
 
       console.log('Swiping:', { targetId, direction, targetType, userId: user.user.id });
 
+      // Check if already swiped to prevent duplicate errors
+      const { data: existingSwipe } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('user_id', user.user.id)
+        .eq('target_id', targetId)
+        .single();
+
+      if (existingSwipe) {
+        console.log('Already swiped on this target, skipping...');
+        return { alreadySwiped: true };
+      }
+
       // Use the likes table for both listings and profiles
       const { error } = await supabase
         .from('likes')

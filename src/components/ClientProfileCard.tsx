@@ -1,5 +1,6 @@
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,12 +26,14 @@ export function ClientProfileCard({
   isTop,
   hasPremium
 }: ClientProfileCardProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [rotation, setRotation] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const startPos = useRef({ x: 0, y: 0 });
+  
+  const dragX = useMotionValue(0);
+  const opacity = useTransform(dragX, [-150, 0, 150], [0.7, 1, 0.7]);
+  const rotate = useTransform(dragX, [-150, 150], [-15, 15]);
+  const scale = useTransform(dragX, [-150, 0, 150], [0.95, 1, 0.95]);
+  const likeOpacity = useTransform(dragX, [0, 150], [0, 1]);
+  const dislikeOpacity = useTransform(dragX, [-150, 0], [1, 0]);
 
   const images = profile.profile_images || [];
   const hasMultipleImages = images.length > 1;
@@ -49,6 +52,15 @@ export function ClientProfileCard({
     }
   };
 
+  const handleDragEnd = (event: any, info: any) => {
+    const threshold = 75;
+    
+    if (Math.abs(info.offset.x) > threshold) {
+      const direction = info.offset.x > 0 ? 'right' : 'left';
+      onSwipe(direction);
+    }
+  };
+
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -62,115 +74,58 @@ export function ClientProfileCard({
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!isTop) return;
-    setIsDragging(true);
-    startPos.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !isTop) return;
-    
-    const deltaX = e.clientX - startPos.current.x;
-    const deltaY = e.clientY - startPos.current.y;
-    
-    setDragOffset({ x: deltaX, y: deltaY });
-    setRotation(deltaX * 0.1);
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging || !isTop) return;
-    
-    setIsDragging(false);
-    
-    const threshold = 100;
-    if (Math.abs(dragOffset.x) > threshold) {
-      const direction = dragOffset.x > 0 ? 'right' : 'left';
-      onSwipe(direction);
-    }
-    
-    // Reset position
-    setDragOffset({ x: 0, y: 0 });
-    setRotation(0);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isTop) return;
-    setIsDragging(true);
-    const touch = e.touches[0];
-    startPos.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !isTop) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - startPos.current.x;
-    const deltaY = touch.clientY - startPos.current.y;
-    
-    setDragOffset({ x: deltaX, y: deltaY });
-    setRotation(deltaX * 0.1);
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging || !isTop) return;
-    
-    setIsDragging(false);
-    
-    const threshold = 100;
-    if (Math.abs(dragOffset.x) > threshold) {
-      const direction = dragOffset.x > 0 ? 'right' : 'left';
-      onSwipe(direction);
-    }
-    
-    // Reset position
-    setDragOffset({ x: 0, y: 0 });
-    setRotation(0);
-  };
-
   const getSwipeIndicator = () => {
-    if (Math.abs(dragOffset.x) < 50) return null;
-    
-    if (dragOffset.x > 0) {
-      return (
-        <div className="absolute inset-0 bg-green-500/20 rounded-xl flex items-center justify-center">
-          <div className="bg-green-500 rounded-full p-4">
-            <Flame className="w-8 h-8 text-white" />
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="absolute inset-0 bg-red-500/20 rounded-xl flex items-center justify-center">
-          <div className="bg-red-500 rounded-full p-4">
-            <X className="w-8 h-8 text-white" />
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const cardStyle = {
-    transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)`,
-    opacity: isTop ? 1 - Math.abs(dragOffset.x) / 300 : 0.8,
-    zIndex: isTop ? 10 : 1,
-    transition: isDragging ? 'none' : 'all 0.3s ease-out',
+    return (
+      <>
+        <motion.div 
+          className="absolute top-16 left-8 bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg transform -rotate-12 z-20 shadow-lg"
+          style={{ opacity: likeOpacity }}
+          initial={{ scale: 0.8 }}
+          animate={{ scale: dragX.get() > 50 ? 1 : 0.8 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        >
+          LIKE
+        </motion.div>
+        <motion.div 
+          className="absolute top-16 right-8 bg-red-500 text-white px-6 py-3 rounded-full font-bold text-lg transform rotate-12 z-20 shadow-lg"
+          style={{ opacity: dislikeOpacity }}
+          initial={{ scale: 0.8 }}
+          animate={{ scale: dragX.get() < -50 ? 1 : 0.8 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        >
+          NOPE
+        </motion.div>
+      </>
+    );
   };
 
   return (
-    <Card
-      ref={cardRef}
-      className="absolute w-full h-full max-w-sm bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-xl overflow-hidden cursor-grab active:cursor-grabbing"
-      style={cardStyle}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onClick={onTap}
-    >
+    <div className="relative w-full h-[600px] max-w-sm mx-auto">
+      <motion.div
+        drag={isTop ? "x" : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.1}
+        onDragEnd={handleDragEnd}
+        style={{
+          x: dragX,
+          opacity,
+          rotate,
+          scale,
+        }}
+        className={`
+          absolute inset-0 bg-white rounded-2xl shadow-2xl cursor-pointer overflow-hidden
+          ${isTop ? 'z-10' : 'z-0'}
+        `}
+        onClick={onTap}
+        whileHover={isTop ? { scale: 1.02 } : {}}
+        whileTap={isTop ? { scale: 0.98 } : {}}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        exit={{
+          x: dragX.get() > 0 ? 300 : -300,
+          opacity: 0,
+          transition: { duration: 0.3, ease: "easeOut" }
+        }}
+      >
       {/* Swipe Indicator */}
       {getSwipeIndicator()}
       
@@ -306,6 +261,7 @@ export function ClientProfileCard({
           </p>
         </div>
       </div>
-    </Card>
+      </motion.div>
+    </div>
   );
 }

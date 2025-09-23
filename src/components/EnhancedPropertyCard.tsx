@@ -53,15 +53,17 @@ export function EnhancedPropertyCard({
   const cardRef = useRef<HTMLDivElement>(null);
   
   const x = useMotionValue(0);
-  const opacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
-  const rotate = useTransform(x, [-200, 200], [-30, 30]);
-  const scale = useTransform(x, [-200, 0, 200], [0.9, 1, 0.9]);
+  const opacity = useTransform(x, [-150, 0, 150], [0.7, 1, 0.7]);
+  const rotate = useTransform(x, [-150, 150], [-15, 15]);
+  const scale = useTransform(x, [-150, 0, 150], [0.95, 1, 0.95]);
+  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
+  const dislikeOpacity = useTransform(x, [-150, 0], [1, 0]);
 
   const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 100;
+    const threshold = 75;
     const velocity = Math.abs(info.velocity.x);
     
-    if (Math.abs(info.offset.x) > threshold || velocity > 1000) {
+    if (Math.abs(info.offset.x) > threshold || velocity > 800) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
@@ -82,31 +84,28 @@ export function EnhancedPropertyCard({
   };
 
   const getSwipeIndicator = () => {
-    const xValue = x.get();
-    if (xValue > 50) {
-      return (
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-red-500/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-          <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-full p-6 shadow-lg">
-            <div className="text-white text-2xl font-bold">🔥</div>
-          </div>
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
-            LIKE
-          </div>
-        </div>
-      );
-    } else if (xValue < -50) {
-      return (
-        <div className="absolute inset-0 bg-gray-600/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-          <div className="bg-white rounded-full p-6 shadow-lg">
-            <div className="text-gray-600 text-2xl font-bold">👎</div>
-          </div>
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
-            NOPE
-          </div>
-        </div>
-      );
-    }
-    return null;
+    return (
+      <>
+        <motion.div 
+          className="absolute top-16 left-8 bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg transform -rotate-12 z-20 shadow-lg"
+          style={{ opacity: likeOpacity }}
+          initial={{ scale: 0.8 }}
+          animate={{ scale: x.get() > 50 ? 1 : 0.8 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        >
+          LIKE
+        </motion.div>
+        <motion.div 
+          className="absolute top-16 right-8 bg-red-500 text-white px-6 py-3 rounded-full font-bold text-lg transform rotate-12 z-20 shadow-lg"
+          style={{ opacity: dislikeOpacity }}
+          initial={{ scale: 0.8 }}
+          animate={{ scale: x.get() < -50 ? 1 : 0.8 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        >
+          NOPE
+        </motion.div>
+      </>
+    );
   };
 
   const cardStyle = {
@@ -127,11 +126,17 @@ export function EnhancedPropertyCard({
       style={cardStyle}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.1}
       onDragEnd={handleDragEnd}
       onClick={() => onTap?.()}
       className="cursor-pointer"
       whileHover={{ scale: isTop ? 1.02 : 0.95 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      exit={{
+        x: x.get() > 0 ? 300 : -300,
+        opacity: 0,
+        transition: { duration: 0.3, ease: "easeOut" }
+      }}
     >
       <Card className="relative w-full h-full max-h-[calc(100vh-200px)] overflow-hidden bg-card border-none shadow-2xl rounded-2xl">
         {/* Image Carousel - Takes most of the card */}
