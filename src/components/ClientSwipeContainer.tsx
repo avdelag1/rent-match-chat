@@ -20,12 +20,13 @@ interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
   onInsights?: (clientId: string) => void;
   onMessageClick?: () => void;
+  showFilters?: boolean;
+  onFiltersClose?: () => void;
 }
 
-export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
+export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, showFilters = false, onFiltersClose }: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -204,7 +205,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           </p>
           <div className="space-y-2">
             <Button 
-              onClick={() => setShowFilters(true)}
+              onClick={() => {}}
               variant="outline"
               className="gap-2 w-full"
             >
@@ -236,7 +237,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           </p>
           <div className="space-y-2">
             <Button 
-              onClick={() => setShowFilters(true)}
+              onClick={() => {}}
               variant="outline"
               className="gap-2 w-full"
             >
@@ -303,32 +304,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         </AnimatePresence>
       </div>
 
-      {/* Top Controls Overlay - Right positioned to avoid menu */}
-      <div className="absolute top-4 left-20 right-4 flex justify-start items-center z-20 gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowFilters(true)}
-          className="bg-black/50 hover:bg-black/70 text-white border border-white/30 rounded-full px-4 backdrop-blur-sm"
-        >
-          <SlidersHorizontal className="w-4 h-4 mr-2" />
-          Filters
-        </Button>
-        
-        {Object.keys(appliedFilters).length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setAppliedFilters({});
-              setCurrentIndex(0);
-            }}
-            className="bg-black/50 hover:bg-black/70 text-white border border-white/30 rounded-full backdrop-blur-sm"
-          >
-            Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
-          </Button>
-        )}
-      </div>
 
       {/* Action Buttons - Enhanced Design */}
       <motion.div 
@@ -370,7 +345,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       {/* Advanced Filters Dialog */}
       <AdvancedFilters
         isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
+        onClose={() => onFiltersClose?.()}
         userRole="owner"
         onApplyFilters={handleApplyFilters}
         currentFilters={appliedFilters}

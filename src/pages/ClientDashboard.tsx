@@ -16,6 +16,7 @@ interface ClientDashboardProps {
 const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [locationData, setLocationData] = useState<{
     latitude: number;
     longitude: number;
@@ -38,12 +39,18 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
     }
   };
 
+  const handleMenuAction = (action: string) => {
+    if (action === 'filters') {
+      setShowFilters(true);
+    }
+  };
+
   const selectedListing = listings.find(l => l.id === selectedListingId);
 
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full flex bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
-        <AppSidebar userRole="client" />
+        <AppSidebar userRole="client" onMenuItemClick={handleMenuAction} />
         
         <main className="flex-1 relative overflow-hidden">
           {/* Minimal Header */}
@@ -103,6 +110,8 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
                 onListingTap={handleListingTap}
                 onInsights={handleInsights}
                 onMessageClick={onMessageClick}
+                showFilters={showFilters}
+                onFiltersClose={() => setShowFilters(false)}
                 locationFilter={locationData}
               />
             )}

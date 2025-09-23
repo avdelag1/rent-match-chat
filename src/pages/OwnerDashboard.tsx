@@ -19,6 +19,7 @@ interface OwnerDashboardProps {
 const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProps) => {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [showLocationMatching, setShowLocationMatching] = useState(false);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
@@ -57,12 +58,18 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     navigate('/messaging');
   };
 
+  const handleMenuAction = (action: string) => {
+    if (action === 'filters') {
+      setShowFilters(true);
+    }
+  };
+
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId);
 
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full flex bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
-        <AppSidebar userRole="owner" />
+        <AppSidebar userRole="owner" onMenuItemClick={handleMenuAction} />
         
         <main className="flex-1 relative overflow-hidden">
           {/* Minimal Header */}
@@ -122,6 +129,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 onClientTap={handleProfileTap}
                 onInsights={handleInsights}
                 onMessageClick={onMessageClick}
+                showFilters={showFilters}
+                onFiltersClose={() => setShowFilters(false)}
               />
             )}
           </div>
