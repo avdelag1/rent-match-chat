@@ -68,7 +68,7 @@ export function useKeyboardShortcuts() {
         action: () => {
           // Show keyboard shortcuts help
           console.log('Keyboard shortcuts:', shortcuts.map(s => 
-            `${s.altKey ? 'Alt+' : ''}${s.ctrlKey ? 'Ctrl+' : ''}${s.key?.toUpperCase() || ''}: ${s.description}`
+            `${s.altKey ? 'Alt+' : ''}${s.ctrlKey ? 'Ctrl+' : ''}${s.key ? s.key.toUpperCase() : ''}: ${s.description}`
           ));
         },
         description: 'Show keyboard shortcuts'
@@ -77,7 +77,7 @@ export function useKeyboardShortcuts() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const shortcut = shortcuts.find(s => 
-        s.key.toLowerCase() === event.key.toLowerCase() &&
+        s.key && event.key && s.key.toLowerCase() === event.key.toLowerCase() &&
         !!s.ctrlKey === event.ctrlKey &&
         !!s.altKey === event.altKey &&
         !!s.shiftKey === event.shiftKey
