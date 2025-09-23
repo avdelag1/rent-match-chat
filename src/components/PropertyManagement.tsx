@@ -5,31 +5,115 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
 
 export function PropertyManagement() {
   const { user } = useAuth();
   const { data: allListings = [], isLoading, error } = useListings();
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
+  const [editingProperty, setEditingProperty] = useState<any>(null);
+  const [showPropertyForm, setShowPropertyForm] = useState(false);
+  const [viewingProperty, setViewingProperty] = useState<any>(null);
+  const [showPropertyDetails, setShowPropertyDetails] = useState(false);
+  const queryClient = useQueryClient();
 
   // Filter listings to show only those owned by current user
   const listings = allListings.filter(listing => listing.owner_id === user?.id);
 
-  const filteredListings = listings.filter(listing =>
-    listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredListings = listings.filter(listing => {
+    const matchesSearch = listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      listing.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      listing.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      listing.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      listing.neighborhood?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (activeTab === 'all') return matchesSearch;
+    if (activeTab === 'active') return matchesSearch && listing.status === 'active';
+    if (activeTab === 'rented') return matchesSearch && listing.status === 'rented';
+    if (activeTab === 'maintenance') return matchesSearch && listing.status === 'maintenance';
+    
+    return matchesSearch;
+  });
 
   console.log('PropertyManagement - Current user:', user?.id);
   console.log('PropertyManagement - All listings:', allListings.length);
   console.log('PropertyManagement - Owner listings:', listings.length);
   console.log('PropertyManagement - Filtered listings:', filteredListings.length);
 
+  const handleAddProperty = () => {
+    // Set hash so DashboardLayout opens the PropertyForm
+    if (location.hash !== '#add-property') {
+      location.hash = '#add-property';
+    }
+  };
+
+  const handleEditProperty = (listing: any) => {
+    console.log('Edit property:', listing.id);
+    setEditingProperty(listing);
+    setShowPropertyForm(true);
+    // Set hash so DashboardLayout opens the PropertyForm with editing data
+    if (location.hash !== '#add-property') {
+      location.hash = '#add-property';
+    }
+  };
+
+  const handleViewProperty = (listing: any) => {
+    console.log('View property:', listing.id);
+    setViewingProperty(listing);
+    setShowPropertyDetails(true);
+  };
+
+  const handleDeleteProperty = async (listing: any) => {
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .delete()
+        .eq('id', listing.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Property Deleted',
+        description: `${listing.title} has been deleted successfully.`,
+      });
+
+      // Refresh the listings
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+    } catch (error: any) {
+      console.error('Error deleting property:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete property. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusColors = {
+      active: 'bg-green-100 text-green-800',
+      rented: 'bg-blue-100 text-blue-800',
+      maintenance: 'bg-yellow-100 text-yellow-800',
+      pending: 'bg-gray-100 text-gray-800',
+    };
+    
+    return (
+      <Badge className={statusColors[status as keyof typeof statusColors] || statusColors.pending}>
+        {status?.charAt(0).toUpperCase() + status?.slice(1) || 'Pending'}
+      </Badge>
+    );
+  };
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="min-h-screen overflow-y-auto bg-gray-900 p-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Loading Properties...</h1>
         </div>
@@ -39,7 +123,7 @@ export function PropertyManagement() {
 
   if (error) {
     return (
-      <div className="space-y-6">
+      <div className="min-h-screen overflow-y-auto bg-gray-900 p-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Error Loading Properties</h1>
           <p className="text-white/80">{error.message}</p>
@@ -49,138 +133,169 @@ export function PropertyManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Property Management</h1>
-          <p className="text-muted-foreground">Manage all your rental properties</p>
+    <div className="min-h-screen overflow-y-auto bg-gray-900">
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Property Management</h1>
+            <p className="text-white/80">Manage all your rental properties</p>
+          </div>
+          <Button 
+            className="gap-2 bg-orange-500 hover:bg-orange-600"
+            onClick={handleAddProperty}
+          >
+            <Plus className="w-4 h-4" />
+            Add Property
+          </Button>
         </div>
-        <Button 
-          className="gap-2"
-          onClick={() => {
-            // Set hash so DashboardLayout opens the PropertyForm
-            if (location.hash !== '#add-property') {
-              location.hash = '#add-property';
-            }
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Add Property
-        </Button>
-      </div>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">All Properties</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="rented">Rented</TabsTrigger>
-          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-        </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm">
+            <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
+              All Properties ({listings.length})
+            </TabsTrigger>
+            <TabsTrigger value="active" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
+              Active ({listings.filter(l => l.status === 'active').length})
+            </TabsTrigger>
+            <TabsTrigger value="rented" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
+              Rented ({listings.filter(l => l.status === 'rented').length})
+            </TabsTrigger>
+            <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
+              Maintenance ({listings.filter(l => l.status === 'maintenance').length})
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="all" className="space-y-6">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Label htmlFor="search">Search Properties</Label>
-              <Input
-                id="search"
-                placeholder="Search by title or location..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="space-y-6">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="search" className="text-white">Search Properties</Label>
+                <Input
+                  id="search"
+                  placeholder="Search by title or location..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredListings.map((listing) => (
-              <Card key={listing.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">{listing.title}</CardTitle>
-                    <Badge variant="outline" className="text-xs">
-                      Active
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <MapPin className="w-4 h-4" />
-                            {listing.description}
+            <TabsContent value={activeTab} className="space-y-4">
+              {filteredListings.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredListings.map((listing) => (
+                    <Card key={listing.id} className="hover:shadow-lg transition-shadow bg-white/95 backdrop-blur-sm">
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-lg text-gray-900 truncate">{listing.title}</CardTitle>
+                          {getStatusBadge(listing.status)}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <MapPin className="w-4 h-4" />
+                          <span className="truncate">{listing.address || listing.description}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-sm">
+                          <DollarSign className="w-4 h-4 text-green-500" />
+                          <span className="font-semibold text-gray-900">
+                            ${listing.price?.toLocaleString() || 'N/A'}/month
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Calendar className="w-4 h-4" />
+                          <span>Available Now</span>
+                        </div>
+
+                        {listing.beds && listing.baths && (
+                          <div className="text-sm text-gray-600">
+                            {listing.beds} bed{listing.beds !== 1 ? 's' : ''} • {listing.baths} bath{listing.baths !== 1 ? 's' : ''}
+                            {listing.square_footage && ` • ${listing.square_footage} sq ft`}
                           </div>
-                  
-                  <div className="flex items-center gap-2 text-sm">
-                    <DollarSign className="w-4 h-4 text-green-500" />
-                    <span className="font-semibold">${listing.price}/month</span>
-                  </div>
+                        )}
 
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    Available Now
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
+                        <div className="flex gap-2 pt-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleViewProperty(listing)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleEditProperty(listing)}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{listing.title}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteProperty(listing)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-8 text-center bg-white/10 backdrop-blur-sm border-white/20">
+                  <Home className="w-12 h-12 mx-auto text-white/60 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2 text-white">
+                    {searchTerm ? 'No Properties Found' : 'No Properties Yet'}
+                  </h3>
+                  <p className="text-white/80 mb-4">
+                    {searchTerm 
+                      ? 'No properties match your search criteria.' 
+                      : activeTab === 'all' 
+                        ? "You haven't added any properties yet."
+                        : `No properties in the ${activeTab} category.`
+                    }
+                  </p>
+                  {activeTab === 'all' && !searchTerm && (
+                    <Button 
+                      onClick={handleAddProperty}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Your First Property
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  )}
+                </Card>
+              )}
+            </TabsContent>
           </div>
-
-          {filteredListings.length === 0 && (
-            <Card className="p-8 text-center">
-              <Home className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Properties Found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? 'No properties match your search criteria.' : 'You haven\'t added any properties yet.'}
-              </p>
-              <Button 
-                onClick={() => {
-                  // Set hash so DashboardLayout opens the PropertyForm
-                  if (location.hash !== '#add-property') {
-                    location.hash = '#add-property';
-                  }
-                }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Your First Property
-              </Button>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="active">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Active properties will appear here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="rented">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Rented properties will appear here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="maintenance">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Properties under maintenance will appear here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }
