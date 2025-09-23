@@ -261,47 +261,9 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const nextClient = clientProfiles[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-sm mx-auto space-y-2">
-      {/* Header with Progress and Filters - Compact */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(true)}
-            className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:bg-primary/20 gap-2"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Tenant Filters
-          </Button>
-          
-          {Object.keys(appliedFilters).length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setAppliedFilters({});
-                setCurrentIndex(0);
-              }}
-              className="bg-gradient-to-r from-destructive/10 to-destructive/5 border-destructive/20 hover:bg-destructive/20"
-            >
-              Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
-            </Button>
-          )}
-        </div>
-
-        {/* Progress Bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Tenant {currentIndex + 1} of {clientProfiles.length}</span>
-            <span>{Math.round(progress)}% complete</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
-      </div>
-
-      {/* Cards Container - Positioned Higher */}
-      <div className="relative w-full h-[620px]">
+    <div className="w-full h-full flex flex-col">
+      {/* Full Screen Cards Container */}
+      <div className="flex-1 relative">
         <AnimatePresence>
           {nextClient && (
             <ClientProfileCard
@@ -325,6 +287,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
                 transition: { duration: 0.3 }
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute inset-0"
             >
               <ClientProfileCard
                 profile={currentClient}
@@ -340,39 +303,66 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons */}
+      {/* Top Controls Overlay */}
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowFilters(true)}
+          className="bg-black/50 hover:bg-black/70 text-white border border-white/30 rounded-full px-4 backdrop-blur-sm"
+        >
+          <SlidersHorizontal className="w-4 h-4 mr-2" />
+          Filters
+        </Button>
+        
+        {Object.keys(appliedFilters).length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setAppliedFilters({});
+              setCurrentIndex(0);
+            }}
+            className="bg-black/50 hover:bg-black/70 text-white border border-white/30 rounded-full backdrop-blur-sm"
+          >
+            Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
+          </Button>
+        )}
+      </div>
+
+      {/* Action Buttons - Enhanced Design */}
       <motion.div 
-        className="flex justify-center gap-8 items-center"
-        initial={{ y: 20, opacity: 0 }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-8 items-center z-20"
+        initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
             variant="outline"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-red-400/50 text-white hover:from-red-600 hover:to-orange-600 hover:border-red-500 transition-all duration-300 shadow-lg hover:shadow-red-500/25"
+            className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            <X className="w-7 h-7" />
+            <X className="w-6 h-6" />
           </Button>
         </motion.div>
         
         <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-2 border-orange-400/50 hover:border-orange-500"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 border-2 border-orange-400/50 hover:border-orange-300"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            <Flame className="w-7 h-7 text-white" />
+            <Flame className="w-8 h-8" />
           </Button>
         </motion.div>
       </motion.div>

@@ -60,9 +60,9 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden p-0">
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="p-6 space-y-4">
             <Skeleton className="h-64 w-full rounded-lg" />
             <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
@@ -74,128 +74,146 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
           </div>
         ) : listing ? (
           <>
-            <DialogHeader>
-              <DialogTitle className="sr-only">Property Details</DialogTitle>
+            <DialogHeader className="sr-only">
+              <DialogTitle>Property Details</DialogTitle>
             </DialogHeader>
             
-            {/* Image Gallery */}
-            <div className="relative">
+            {/* Full Screen Image Gallery */}
+            <div className="relative h-[60vh] overflow-hidden">
               <img
                 src={listing.images?.[0] || '/placeholder.svg'}
                 alt={listing.title}
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-full object-cover"
               />
               {listing.images && listing.images.length > 1 && (
-                <div className="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-2 rounded-full text-sm backdrop-blur-sm">
                   1 / {listing.images.length}
                 </div>
               )}
+              
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
 
-            {/* Property Info */}
-            <div className="space-y-4">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Property Info */}
               <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold">{listing.title}</h2>
-                  <div className="flex items-center gap-2 text-muted-foreground mt-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>{listing.address}</span>
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold mb-2">{listing.title}</h2>
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                    <MapPin className="w-5 h-5" />
+                    <span className="text-lg">{listing.address}</span>
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-muted-foreground">
                     {listing.neighborhood}, {listing.city}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold">${listing.price?.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground">per month</div>
+                  <div className="text-3xl font-bold text-primary">${listing.price?.toLocaleString()}</div>
+                  <div className="text-muted-foreground">per month</div>
                 </div>
               </div>
 
               {/* Property Details */}
-              <div className="flex items-center gap-6">
+              <div className="grid grid-cols-3 gap-6">
                 {listing.beds && (
-                  <div className="flex items-center gap-2">
-                    <Bed className="w-5 h-5 text-muted-foreground" />
-                    <span>{listing.beds} bed{listing.beds !== 1 ? 's' : ''}</span>
+                  <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+                    <Bed className="w-6 h-6 text-primary" />
+                    <div>
+                      <div className="font-semibold">{listing.beds}</div>
+                      <div className="text-sm text-muted-foreground">Bedroom{listing.beds !== 1 ? 's' : ''}</div>
+                    </div>
                   </div>
                 )}
                 {listing.baths && (
-                  <div className="flex items-center gap-2">
-                    <Bath className="w-5 h-5 text-muted-foreground" />
-                    <span>{listing.baths} bath{listing.baths !== 1 ? 's' : ''}</span>
+                  <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+                    <Bath className="w-6 h-6 text-primary" />
+                    <div>
+                      <div className="font-semibold">{listing.baths}</div>
+                      <div className="text-sm text-muted-foreground">Bathroom{listing.baths !== 1 ? 's' : ''}</div>
+                    </div>
                   </div>
                 )}
                 {listing.square_footage && (
-                  <div className="flex items-center gap-2">
-                    <Square className="w-5 h-5 text-muted-foreground" />
-                    <span>{listing.square_footage} sqft</span>
+                  <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+                    <Square className="w-6 h-6 text-primary" />
+                    <div>
+                      <div className="font-semibold">{listing.square_footage}</div>
+                      <div className="text-sm text-muted-foreground">Square ft</div>
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">{listing.property_type}</Badge>
-                {listing.furnished && <Badge variant="secondary">Furnished</Badge>}
-                {listing.amenities?.slice(0, 3).map((amenity) => (
-                  <Badge key={amenity} variant="outline">{amenity}</Badge>
+                <Badge variant="secondary" className="text-sm px-3 py-1">{listing.property_type}</Badge>
+                {listing.furnished && <Badge variant="secondary" className="text-sm px-3 py-1">Furnished</Badge>}
+                {listing.amenities?.map((amenity) => (
+                  <Badge key={amenity} variant="outline" className="text-sm px-3 py-1">{amenity}</Badge>
                 ))}
               </div>
 
               {/* Description */}
               {listing.description && (
-                <div>
-                  <h3 className="font-semibold mb-2">Description</h3>
-                  <p className="text-muted-foreground">{listing.description}</p>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold">Description</h3>
+                  <p className="text-muted-foreground leading-relaxed text-lg">{listing.description}</p>
                 </div>
               )}
 
               {/* Owner Info */}
               {listing.profiles && (
-                <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-2">Listed by</h3>
-                  <div className="flex items-center gap-3">
+                <div className="border-t pt-6">
+                  <h3 className="text-xl font-semibold mb-4">Listed by</h3>
+                  <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg">
                     <img
                       src={listing.profiles.avatar_url || '/placeholder.svg'}
                       alt={listing.profiles.full_name}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-16 h-16 rounded-full object-cover"
                     />
-                    <span className="font-medium">{listing.profiles.full_name}</span>
+                    <div>
+                      <div className="font-semibold text-lg">{listing.profiles.full_name}</div>
+                      <div className="text-muted-foreground">Property Owner</div>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t">
-              <Button
-                variant="outline"
-                className="flex-1 gap-2"
-                onClick={() => handleSwipe('left')}
-                disabled={swipeMutation.isPending}
-              >
-                <X className="w-4 h-4" />
-                Pass
-              </Button>
-              
-              <Button
-                variant="outline"
-                className="flex-1 gap-2"
-                onClick={hasMessaging ? onMessageClick : () => {}}
-                disabled={!hasMessaging}
-              >
-                <MessageCircle className="w-4 h-4" />
-                {hasMessaging ? 'Message' : 'Premium Only'}
-              </Button>
-              
-              <Button
-                className="flex-1 gap-2 bg-green-500 hover:bg-green-600"
-                onClick={() => handleSwipe('right')}
-                disabled={swipeMutation.isPending}
-              >
-                <Flame className="w-4 h-4" />
-                Like
-              </Button>
+            {/* Action Buttons - Fixed at bottom */}
+            <div className="p-6 border-t bg-background/95 backdrop-blur-sm">
+              <div className="flex gap-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 h-12"
+                  onClick={() => handleSwipe('left')}
+                  disabled={swipeMutation.isPending}
+                >
+                  <X className="w-5 h-5" />
+                  Pass
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 h-12"
+                  onClick={hasMessaging ? onMessageClick : () => {}}
+                  disabled={!hasMessaging}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {hasMessaging ? 'Message' : 'Premium Only'}
+                </Button>
+                
+                <Button
+                  className="flex-1 gap-2 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                  onClick={() => handleSwipe('right')}
+                  disabled={swipeMutation.isPending}
+                >
+                  <Flame className="w-5 h-5" />
+                  Like
+                </Button>
+              </div>
             </div>
           </>
         ) : null}

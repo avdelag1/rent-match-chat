@@ -261,34 +261,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="w-full h-full flex flex-col max-w-lg mx-auto">
-      {/* Minimal Top Controls */}
-      <div className="flex justify-between items-center p-4 z-10">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowFilters(true)}
-          className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-full px-4"
-        >
-          <SlidersHorizontal className="w-4 h-4 mr-2" />
-          Filters
-        </Button>
-        
-        {Object.keys(appliedFilters).length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setAppliedFilters({});
-              setCurrentIndex(0);
-            }}
-            className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-full"
-          >
-            Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
-          </Button>
-        )}
-      </div>
-
+    <div className="w-full h-full flex flex-col">
       {/* Full Screen Cards Container */}
       <div className="flex-1 relative">
         <AnimatePresence>
@@ -330,56 +303,69 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </AnimatePresence>
       </div>
 
-      {/* Bottom Action Buttons - Fixed Position */}
+      {/* Top Controls Overlay */}
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowFilters(true)}
+          className="bg-black/50 hover:bg-black/70 text-white border border-white/30 rounded-full px-4 backdrop-blur-sm"
+        >
+          <SlidersHorizontal className="w-4 h-4 mr-2" />
+          Filters
+        </Button>
+        
+        {Object.keys(appliedFilters).length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setAppliedFilters({});
+              setCurrentIndex(0);
+            }}
+            className="bg-black/50 hover:bg-black/70 text-white border border-white/30 rounded-full backdrop-blur-sm"
+          >
+            Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
+          </Button>
+        )}
+      </div>
+
+      {/* Bottom Action Buttons - Enhanced Design */}
       <motion.div 
-        className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
-        initial={{ y: 20, opacity: 0 }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-8 items-center z-20"
+        initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
             variant="outline"
-            className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-lg"
+            className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            👎
+            <X className="w-6 h-6" />
           </Button>
         </motion.div>
         
         <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-none"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 border-2 border-orange-400/50 hover:border-orange-300"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            🔥
+            <Flame className="w-8 h-8" />
           </Button>
         </motion.div>
       </motion.div>
-
-      {/* Progress indicator - minimal */}
-      <div className="absolute top-20 left-4 right-4 z-10">
-        <div className="flex space-x-1">
-          {listings.slice(0, 5).map((_, index) => (
-            <div
-              key={index}
-              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                index <= currentIndex ? 'bg-white' : 'bg-white/30'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
 
       {/* Ultimate Filters Dialog */}
       <UltimateFilters

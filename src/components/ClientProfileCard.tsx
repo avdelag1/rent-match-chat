@@ -56,8 +56,11 @@ export function ClientProfileCard({
     const centerX = rect.width / 2;
     const threshold = rect.width * 0.3; // 30% of width for center area
 
-    if (Math.abs(clickX - centerX) < threshold) {
-      // Middle click - open detailed view
+    if (clickX < threshold) {
+      prevImage(e);
+    } else if (clickX > rect.width - threshold) {
+      nextImage(e);
+    } else {
       onTap();
     }
   };
@@ -160,7 +163,7 @@ export function ClientProfileCard({
   return (
     <Card
       ref={cardRef}
-      className="absolute w-full h-full max-w-sm bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-xl overflow-hidden cursor-grab active:cursor-grabbing"
+      className="absolute w-full h-[calc(100vh-120px)] bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing"
       style={cardStyle}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -169,13 +172,12 @@ export function ClientProfileCard({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      onClick={onTap}
     >
       {/* Swipe Indicator */}
       {getSwipeIndicator()}
       
-      {/* Main Image */}
-      <div className="relative h-3/5 overflow-hidden">
+      {/* Main Image - Full Screen */}
+      <div className="relative h-[85%] overflow-hidden">
         <img
           src={images[imageIndex] || '/api/placeholder/400/600'}
           alt={profile.name}
@@ -190,10 +192,10 @@ export function ClientProfileCard({
               parent.innerHTML = `
                 <div class="w-full h-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
                   <div class="text-center text-gray-600">
-                    <div class="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
-                      <span class="text-2xl font-bold">${profile.name?.[0] || '?'}</span>
+                    <div class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
+                      <span class="text-3xl font-bold">${profile.name?.[0] || '?'}</span>
                     </div>
-                    <p class="text-sm">No Photo</p>
+                    <p class="text-lg">No Photo</p>
                   </div>
                 </div>
               `;
@@ -201,34 +203,34 @@ export function ClientProfileCard({
           }}
         />
         
-        {/* Photo Navigation Arrows */}
+        {/* Left/Right Click Areas for Navigation */}
+        <div className="absolute inset-0 flex">
+          <div 
+            className="w-1/3 h-full cursor-pointer opacity-0 hover:opacity-10 hover:bg-black transition-opacity"
+            onClick={(e) => prevImage(e)}
+          />
+          <div 
+            className="w-1/3 h-full cursor-pointer"
+            onClick={handleImageClick}
+          />
+          <div 
+            className="w-1/3 h-full cursor-pointer opacity-0 hover:opacity-10 hover:bg-black transition-opacity"
+            onClick={(e) => nextImage(e)}
+          />
+        </div>
+        
+        {/* Image Dots */}
         {hasMultipleImages && (
-          <>
-            <button
-              onClick={prevImage}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all z-10"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all z-10"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-            
-            {/* Image Dots */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
-              {images.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    idx === imageIndex ? 'bg-white' : 'bg-white/40'
-                  }`}
-                />
-              ))}
-            </div>
-          </>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  idx === imageIndex ? 'bg-white' : 'bg-white/40'
+                }`}
+              />
+            ))}
+          </div>
         )}
         
         {/* Gradient Overlay */}
@@ -241,69 +243,57 @@ export function ClientProfileCard({
             e.stopPropagation();
             onMessage();
           }}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 border-none p-0 z-20"
+          className="absolute top-4 right-4 w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 border-none p-0 z-20"
         >
           <MessageCircle className="w-5 h-5" />
         </Button>
 
         {/* Age Badge */}
-        <Badge className="absolute top-4 right-16 bg-black/50 text-white border-none">
+        <Badge className="absolute top-4 right-20 bg-black/50 text-white border-none px-3 py-1">
           {profile.age}
         </Badge>
         
         {/* Location */}
         {profile.location && (
           <div className="absolute top-4 left-4 flex items-center gap-1 bg-black/50 rounded-full px-3 py-1">
-            <MapPin className="w-3 h-3 text-white" />
-            <span className="text-white text-xs">
+            <MapPin className="w-4 h-4 text-white" />
+            <span className="text-white text-sm">
               {profile.location.city}
             </span>
           </div>
         )}
-        
-        {/* Name at bottom of image */}
-        <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
-          <h3 className="text-2xl font-bold text-white mb-1">{profile.name}</h3>
-        </div>
       </div>
       
-      {/* Content Section - Scrollable */}
-      <div className="p-4 h-2/5 flex flex-col">
-        <div className="flex-1 overflow-y-auto space-y-3 mb-3">
-          {/* Bio */}
+      {/* Bottom Content - Compact */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent">
+        <div className="space-y-2">
+          {/* Name and Bio */}
           <div>
-            <p className="text-gray-700 text-sm leading-relaxed">
+            <h3 className="text-2xl font-bold text-foreground mb-1">{profile.name}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
               {profile.bio}
             </p>
           </div>
           
           {/* Interests */}
           {profile.interests && profile.interests.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold text-gray-500 mb-2">INTERESTS</h4>
-              <div className="flex flex-wrap gap-1">
-                {profile.interests.map((interest, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200"
-                  >
-                    {interest}
-                  </Badge>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-1">
+              {profile.interests.slice(0, 4).map((interest, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="text-xs bg-primary/10 text-primary hover:bg-primary/20"
+                >
+                  {interest}
+                </Badge>
+              ))}
+              {profile.interests.length > 4 && (
+                <Badge variant="outline" className="text-xs">
+                  +{profile.interests.length - 4} more
+                </Badge>
+              )}
             </div>
           )}
-
-          {/* Note: Additional fields like occupation/education can be added */}
-          {/* when they become available in the ClientProfile interface */}
-        </div>
-        
-        {/* Tap to view more indicator */}
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Tap center of photo for details • Swipe to navigate
-          </p>
         </div>
       </div>
     </Card>
