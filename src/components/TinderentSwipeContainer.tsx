@@ -330,9 +330,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </AnimatePresence>
       </div>
 
-      {/* Bottom Action Buttons - Centered */}
+      {/* Bottom Action Buttons - Fixed Position */}
       <motion.div 
-        className="flex gap-8 items-center justify-center py-6 z-20"
+        className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -344,11 +344,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <Button
             size="lg"
             variant="outline"
-            className="w-16 h-16 rounded-full bg-white border-0 shadow-xl hover:bg-gray-50 transition-all duration-300"
+            className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-lg"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            <div className="text-3xl text-gray-600">👎</div>
+            👎
           </Button>
         </motion.div>
         
@@ -358,15 +358,28 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         >
           <Button
             size="lg"
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/25 border-none"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-none"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            <div className="text-4xl">🔥</div>
+            🔥
           </Button>
         </motion.div>
       </motion.div>
 
+      {/* Progress indicator - minimal */}
+      <div className="absolute top-20 left-4 right-4 z-10">
+        <div className="flex space-x-1">
+          {listings.slice(0, 5).map((_, index) => (
+            <div
+              key={index}
+              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                index <= currentIndex ? 'bg-white' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* Ultimate Filters Dialog */}
       <UltimateFilters

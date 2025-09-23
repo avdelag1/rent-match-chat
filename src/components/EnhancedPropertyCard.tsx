@@ -53,59 +53,58 @@ export function EnhancedPropertyCard({
   const cardRef = useRef<HTMLDivElement>(null);
   
   const x = useMotionValue(0);
-  const opacity = useTransform(x, [-150, 0, 150], [0.7, 1, 0.7]);
-  const rotate = useTransform(x, [-150, 150], [-15, 15]);
-  const scale = useTransform(x, [-150, 0, 150], [0.95, 1, 0.95]);
-  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
-  const dislikeOpacity = useTransform(x, [-150, 0], [1, 0]);
+  const opacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
+  const rotate = useTransform(x, [-200, 200], [-30, 30]);
+  const scale = useTransform(x, [-200, 0, 200], [0.9, 1, 0.9]);
 
   const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 75;
+    const threshold = 100;
     const velocity = Math.abs(info.velocity.x);
     
-    if (Math.abs(info.offset.x) > threshold || velocity > 800) {
+    if (Math.abs(info.offset.x) > threshold || velocity > 1000) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
   };
 
-  const nextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const nextImage = () => {
     setCurrentImageIndex((prev) => 
       prev === listing.images.length - 1 ? 0 : prev + 1
     );
   };
 
-  const prevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const prevImage = () => {
     setCurrentImageIndex((prev) => 
       prev === 0 ? listing.images.length - 1 : prev - 1
     );
   };
 
   const getSwipeIndicator = () => {
-    return (
-      <>
-        <motion.div 
-          className="absolute top-16 left-8 bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg transform -rotate-12 z-20 shadow-lg"
-          style={{ opacity: likeOpacity }}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: x.get() > 50 ? 1 : 0.8 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        >
-          LIKE
-        </motion.div>
-        <motion.div 
-          className="absolute top-16 right-8 bg-red-500 text-white px-6 py-3 rounded-full font-bold text-lg transform rotate-12 z-20 shadow-lg"
-          style={{ opacity: dislikeOpacity }}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: x.get() < -50 ? 1 : 0.8 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        >
-          NOPE
-        </motion.div>
-      </>
-    );
+    const xValue = x.get();
+    if (xValue > 50) {
+      return (
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-red-500/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+          <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-full p-6 shadow-lg">
+            <div className="text-white text-2xl font-bold">🔥</div>
+          </div>
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
+            LIKE
+          </div>
+        </div>
+      );
+    } else if (xValue < -50) {
+      return (
+        <div className="absolute inset-0 bg-gray-600/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+          <div className="bg-white rounded-full p-6 shadow-lg">
+            <div className="text-gray-600 text-2xl font-bold">👎</div>
+          </div>
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
+            NOPE
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   const cardStyle = {
@@ -126,17 +125,11 @@ export function EnhancedPropertyCard({
       style={cardStyle}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.1}
       onDragEnd={handleDragEnd}
       onClick={() => onTap?.()}
       className="cursor-pointer"
       whileHover={{ scale: isTop ? 1.02 : 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      exit={{
-        x: x.get() > 0 ? 300 : -300,
-        opacity: 0,
-        transition: { duration: 0.3, ease: "easeOut" }
-      }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <Card className="relative w-full h-full max-h-[calc(100vh-200px)] overflow-hidden bg-card border-none shadow-2xl rounded-2xl">
         {/* Image Carousel - Takes most of the card */}
@@ -149,27 +142,39 @@ export function EnhancedPropertyCard({
                 className="w-full h-full object-cover"
               />
               
-              {/* Left/Right Tap Areas for Image Navigation */}
+              {/* Image Navigation */}
               {listing.images.length > 1 && (
                 <>
-                  {/* Left tap area */}
-                  <div 
-                    className="absolute left-0 top-0 w-1/3 h-full z-10 cursor-pointer"
-                    onClick={prevImage}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      prevImage();
+                    }}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
                   
-                  {/* Right tap area */}
-                  <div 
-                    className="absolute right-0 top-0 w-1/3 h-full z-10 cursor-pointer"
-                    onClick={nextImage}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      nextImage();
+                    }}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
 
                   {/* Image Indicators */}
-                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
                     {listing.images.map((_, index) => (
                       <div
                         key={index}
-                        className={`w-1.5 h-1.5 rounded-full ${
+                        className={`w-2 h-2 rounded-full ${
                           index === currentImageIndex ? 'bg-white' : 'bg-white/50'
                         }`}
                       />
@@ -183,6 +188,21 @@ export function EnhancedPropertyCard({
               <Home className="w-16 h-16 text-muted-foreground" />
             </div>
           )}
+
+          {/* Action Button Overlay */}
+          <div className="absolute top-4 right-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-black/50 hover:bg-black/70 text-white rounded-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMessage?.();
+              }}
+            >
+              <MessageCircle className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Content - Compact bottom section */}

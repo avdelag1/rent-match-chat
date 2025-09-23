@@ -170,7 +170,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-900 relative">
-        <AppSidebar userRole={userRole} />
+        <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1 flex flex-col min-h-screen w-full">
           <header className="flex h-12 shrink-0 items-center gap-2 bg-gradient-to-r from-primary to-secondary px-3 shadow-lg border-b sticky top-0 z-50">

@@ -5,7 +5,7 @@ import { useListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import AppSidebar from '@/components/AppSidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import { Menu, Flame, RotateCcw } from 'lucide-react';
 
 interface ClientDashboardProps {
