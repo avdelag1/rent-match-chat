@@ -135,13 +135,13 @@ export function PropertyManagement() {
   return (
     <div className="min-h-screen overflow-y-auto bg-gray-900">
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Property Management</h1>
-            <p className="text-white/80">Manage all your rental properties</p>
+        <div className="flex justify-between items-center mb-6">
+          <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+            <h1 className="text-3xl font-bold text-white drop-shadow-lg">Property Management</h1>
+            <p className="text-white/90 drop-shadow-sm">Manage all your rental properties</p>
           </div>
           <Button 
-            className="gap-2 bg-orange-500 hover:bg-orange-600"
+            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg"
             onClick={handleAddProperty}
           >
             <Plus className="w-4 h-4" />
@@ -166,9 +166,9 @@ export function PropertyManagement() {
           </TabsList>
 
           <div className="space-y-6">
-            <div className="flex gap-4">
+            <div className="flex gap-4 mb-4">
               <div className="flex-1">
-                <Label htmlFor="search" className="text-white">Search Properties</Label>
+                <Label htmlFor="search" className="text-white font-medium drop-shadow-sm">Search Properties</Label>
                 <Input
                   id="search"
                   placeholder="Search by title or location..."
@@ -215,65 +215,69 @@ export function PropertyManagement() {
                           </div>
                         )}
 
-                        <div className="flex gap-2 pt-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => handleViewProperty(listing)}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            onClick={() => handleEditProperty(listing)}
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete "{listing.title}"? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  onClick={() => handleDeleteProperty(listing)}
-                                  className="bg-red-600 hover:bg-red-700"
+                        {/* Horizontally Scrollable Action Buttons */}
+                        <div className="pt-3 border-t border-gray-200">
+                          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-shrink-0 min-w-[100px] bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 font-medium"
+                              onClick={() => handleViewProperty(listing)}
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              View
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-shrink-0 min-w-[100px] bg-green-50 hover:bg-green-100 text-green-700 border-green-200 font-medium"
+                              onClick={() => handleEditProperty(listing)}
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="flex-shrink-0 min-w-[100px] bg-red-50 hover:bg-red-100 text-red-700 border-red-200 font-medium"
                                 >
+                                  <Trash2 className="w-4 h-4 mr-2" />
                                   Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete "{listing.title}"? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDeleteProperty(listing)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <Card className="p-8 text-center bg-white/10 backdrop-blur-sm border-white/20">
-                  <Home className="w-12 h-12 mx-auto text-white/60 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2 text-white">
+                <Card className="p-8 text-center bg-white/20 backdrop-blur-sm border-white/30">
+                  <Home className="w-12 h-12 mx-auto text-white/80 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2 text-white drop-shadow-sm">
                     {searchTerm ? 'No Properties Found' : 'No Properties Yet'}
                   </h3>
-                  <p className="text-white/80 mb-4">
+                  <p className="text-white/90 mb-4 drop-shadow-sm">
                     {searchTerm 
                       ? 'No properties match your search criteria.' 
                       : activeTab === 'all' 
@@ -284,7 +288,7 @@ export function PropertyManagement() {
                   {activeTab === 'all' && !searchTerm && (
                     <Button 
                       onClick={handleAddProperty}
-                      className="bg-orange-500 hover:bg-orange-600"
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Your First Property
