@@ -253,13 +253,22 @@ export function useSendMessage() {
 
       return data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
+      console.log('✅ Message sent successfully via hook:', data);
+      
+      // Immediately invalidate and refetch to ensure UI updates
       queryClient.invalidateQueries({ 
         queryKey: ['conversation-messages', variables.conversationId] 
       });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      
+      // Also trigger a manual refetch to be extra sure
+      queryClient.refetchQueries({ 
+        queryKey: ['conversation-messages', variables.conversationId] 
+      });
     },
     onError: (error: Error) => {
+      console.error('❌ Failed to send message via hook:', error);
       toast({
         title: 'Failed to Send Message',
         description: error.message,

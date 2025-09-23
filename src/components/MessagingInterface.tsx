@@ -69,8 +69,16 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
   useEffect(() => {
     if (!conversationId) return;
 
+    console.log('Setting up real-time subscription for conversation:', conversationId);
+
     const channel = supabase
-      .channel(`conversation-${conversationId}`)
+      .channel(`messages-${conversationId}`, {
+        config: {
+          presence: {
+            key: user?.id,
+          },
+        },
+      })
       .on(
         'postgres_changes',
         {
@@ -80,7 +88,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           filter: `conversation_id=eq.${conversationId}`
         },
         async (payload) => {
-          console.log('New message received in real-time:', payload);
+          console.log('📨 Real-time message received:', payload);
           
           const newMessage = payload.new;
           
@@ -95,6 +103,8 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
             ...newMessage,
             sender: senderProfile || { id: newMessage.sender_id, full_name: 'Unknown', avatar_url: null }
           };
+          
+          console.log('📋 Complete message with sender:', completeMessage);
           
           // Show notification for messages from other users
           if (newMessage.sender_id !== user?.id) {
@@ -118,12 +128,19 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           
           // Immediately update messages in real-time with complete data
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
-            if (!oldData) return [completeMessage];
+            if (!oldData) {
+              console.log('📦 No existing data, returning new message');
+              return [completeMessage];
+            }
             
             // Check if message already exists to prevent duplicates
             const exists = oldData.some((msg: any) => msg.id === newMessage.id);
-            if (exists) return oldData;
+            if (exists) {
+              console.log('🔄 Message already exists, skipping duplicate');
+              return oldData;
+            }
             
+            console.log('➕ Adding new message to existing data');
             return [...oldData, completeMessage];
           });
           
@@ -132,9 +149,12 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Subscription status:', status);
+      });
 
     return () => {
+      console.log('🔌 Unsubscribing from real-time messages');
       supabase.removeChannel(channel);
     };
   }, [conversationId, queryClient, user?.id, otherUser]);
@@ -160,53 +180,27 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     setNewMessage('');
 
     try {
-      // Optimistically add message to UI immediately
-      const tempMessage = {
-        id: `temp-${Date.now()}`,
-        conversation_id: conversationId,
-        sender_id: user?.id,
-        message_text: messageText,
-        created_at: new Date().toISOString(),
-        is_read: false,
-        message_type: 'text',
-        sender: {
-          id: user?.id,
-          full_name: user?.user_metadata?.full_name || 'You',
-          avatar_url: user?.user_metadata?.avatar_url
-        }
-      };
-
-      // Add temp message to UI immediately
-      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
-        if (!oldData) return [tempMessage];
-        return [...oldData, tempMessage];
-      });
-
-      // Send the actual message
+      console.log('💬 Sending message:', messageText);
+      
+      // Send the actual message first
       const result = await sendMessage.mutateAsync({
         conversationId,
         message: messageText
       });
       
-      // Replace temp message with real one
-      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
-        if (!oldData) return [];
-        return oldData.map((msg: any) => 
-          msg.id === tempMessage.id ? { ...result, sender: tempMessage.sender } : msg
-        );
-      });
+      console.log('✅ Message sent successfully:', result);
       
       // Decrement quota after successful send
       decrementMessageCount();
       
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      
-      // Remove temp message on error
-      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
-        if (!oldData) return [];
-        return oldData.filter((msg: any) => !msg.id.startsWith('temp-'));
+      // Force refresh the conversation messages to ensure it shows immediately
+      queryClient.invalidateQueries({ 
+        queryKey: ['conversation-messages', conversationId] 
       });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      
+    } catch (error) {
+      console.error('❌ Failed to send message:', error);
       
       toast({
         title: "Failed to Send",
