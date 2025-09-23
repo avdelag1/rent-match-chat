@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
-import { AppSidebar } from '@/components/AppSidebar';
+import AppSidebar from '@/components/AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
 import { useNotifications } from '@/hooks/useNotifications';

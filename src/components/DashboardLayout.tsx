@@ -2,7 +2,7 @@
 import React, { ReactNode, useState, useEffect } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Flame } from 'lucide-react'
-import { AppSidebar } from "@/components/AppSidebar"
+import AppSidebar from "@/components/AppSidebar"
 import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
 import { useAuth } from "@/hooks/useAuth"
 import { PropertyForm } from "@/components/PropertyForm"

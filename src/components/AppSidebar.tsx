@@ -51,7 +51,7 @@ interface AppSidebarProps {
   userRole?: 'client' | 'owner';
 }
 
-export function AppSidebar({ userRole = 'client' }: AppSidebarProps) {
+export default function AppSidebar({ userRole = 'client' }: AppSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
