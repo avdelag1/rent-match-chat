@@ -303,8 +303,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </AnimatePresence>
       </div>
 
-      {/* Top Controls Overlay */}
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
+      {/* Top Controls Overlay - Right positioned to avoid menu */}
+      <div className="absolute top-4 left-20 right-4 flex justify-start items-center z-20 gap-2">
         <Button
           variant="ghost"
           size="sm"
