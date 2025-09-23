@@ -321,22 +321,13 @@ export function PropertyManagement() {
                     {searchTerm ? 'No Properties Found' : 'No Properties Yet'}
                   </h3>
                   <p className="text-white/90 mb-4 drop-shadow-sm">
-                    {searchTerm 
-                      ? 'No properties match your search criteria.' 
-                      : activeTab === 'all' 
-                        ? "You haven't added any properties yet."
-                        : `No properties in the ${activeTab} category.`
-                    }
-                  </p>
-                  {activeTab === 'all' && !searchTerm && (
-                    <Button 
-                      onClick={handleAddProperty}
-                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Your First Property
-                    </Button>
-                  )}
+                {searchTerm 
+                  ? 'No properties match your search criteria.' 
+                  : activeTab === 'all' 
+                    ? "You haven't added any properties yet."
+                    : `No properties in the ${activeTab} category.`
+                }
+              </p>
                 </Card>
               )}
             </TabsContent>

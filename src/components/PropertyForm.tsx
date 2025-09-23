@@ -110,7 +110,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
         title: "Property Listed!",
         description: "Your property has been successfully listed.",
       });
-      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
     },
     onError: (error) => {
@@ -138,11 +138,54 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     );
   };
 
-  const handleImageAdd = () => {
-    // In a real app, this would open a file picker and upload to Supabase Storage
-    // For now, we'll just add a placeholder
-    const placeholderUrl = `https://picsum.photos/800/600?random=${Date.now()}`;
-    setImages(prev => [...prev, placeholderUrl]);
+  const handleImageAdd = async () => {
+    if (images.length >= 30) {
+      toast({
+        title: "Maximum Photos Reached",
+        description: "You can only upload up to 30 photos per property.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    
+    input.onchange = async (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || []);
+      
+      if (files.length + images.length > 30) {
+        toast({
+          title: "Too Many Photos",
+          description: `You can only have 30 photos total. You can add ${30 - images.length} more.`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          toast({
+            title: "File Too Large",
+            description: `${file.name} is too large. Maximum size is 10MB.`,
+            variant: "destructive"
+          });
+          continue;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setImages(prev => [...prev, event.target!.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
+    input.click();
   };
 
   const handleImageRemove = (index: number) => {
@@ -399,7 +442,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
                   </div>
                 ))}
                 
-                {images.length < 8 && (
+                {images.length < 30 && (
                   <Button
                     type="button"
                     variant="outline"
@@ -414,7 +457,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
                 )}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Add up to 8 photos. First photo will be the main image.
+                Add up to 30 photos ({images.length}/30). First photo will be the main image.
               </p>
             </CardContent>
           </Card>
