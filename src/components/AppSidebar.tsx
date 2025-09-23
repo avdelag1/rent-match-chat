@@ -67,7 +67,8 @@ export default function AppSidebar({ userRole = 'client' }: AppSidebarProps) {
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-16" : "w-64"} bg-white border-r border-gray-200 transition-all duration-300`}
+      className={`${collapsed ? "w-16" : "w-64"} border-r border-gray-200 transition-all duration-300`}
+      style={{ backgroundColor: '#ffffff' }}
       collapsible="icon"
     >
       {/* Sidebar Header */}
