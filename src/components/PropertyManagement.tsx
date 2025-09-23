@@ -113,7 +113,7 @@ export function PropertyManagement() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen overflow-y-auto bg-gray-900 p-6">
+      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Loading Properties...</h1>
         </div>
@@ -123,7 +123,7 @@ export function PropertyManagement() {
 
   if (error) {
     return (
-      <div className="min-h-screen overflow-y-auto bg-gray-900 p-6">
+      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white">Error Loading Properties</h1>
           <p className="text-white/80">{error.message}</p>
@@ -133,35 +133,55 @@ export function PropertyManagement() {
   }
 
   return (
-    <div className="min-h-screen overflow-y-auto bg-gray-900">
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-            <h1 className="text-3xl font-bold text-white drop-shadow-lg">Property Management</h1>
-            <p className="text-white/90 drop-shadow-sm">Manage all your rental properties</p>
+    <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20 w-full sm:w-auto">
+            <h1 className="text-xl sm:text-3xl font-bold text-white drop-shadow-lg">Property Management</h1>
+            <p className="text-sm sm:text-base text-white/90 drop-shadow-sm">Manage all your rental properties</p>
           </div>
           <Button 
-            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg"
+            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg w-full sm:w-auto"
             onClick={handleAddProperty}
           >
             <Plus className="w-4 h-4" />
-            Add Property
+            <span className="text-sm sm:text-base">Add Property</span>
           </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm">
-            <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
-              All Properties ({listings.length})
+          <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm h-auto">
+            <TabsTrigger 
+              value="all" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">All Properties</span>
+              <span className="sm:hidden">All</span>
+              <span className="ml-1">({listings.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="active" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
-              Active ({listings.filter(l => l.status === 'active').length})
+            <TabsTrigger 
+              value="active" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">Active</span>
+              <span className="sm:hidden">Act</span>
+              <span className="ml-1">({listings.filter(l => l.status === 'active').length})</span>
             </TabsTrigger>
-            <TabsTrigger value="rented" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
-              Rented ({listings.filter(l => l.status === 'rented').length})
+            <TabsTrigger 
+              value="rented" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">Rented</span>
+              <span className="sm:hidden">Rent</span>
+              <span className="ml-1">({listings.filter(l => l.status === 'rented').length})</span>
             </TabsTrigger>
-            <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
-              Maintenance ({listings.filter(l => l.status === 'maintenance').length})
+            <TabsTrigger 
+              value="maintenance" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">Maintenance</span>
+              <span className="sm:hidden">Main</span>
+              <span className="ml-1">({listings.filter(l => l.status === 'maintenance').length})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -179,32 +199,36 @@ export function PropertyManagement() {
               </div>
             </div>
 
-            <TabsContent value={activeTab} className="space-y-4">
+            <TabsContent value={activeTab} className="space-y-4 w-full">
               {filteredListings.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full">
                   {filteredListings.map((listing) => (
-                    <Card key={listing.id} className="hover:shadow-lg transition-shadow bg-white/95 backdrop-blur-sm">
+                    <Card key={listing.id} className="hover:shadow-lg transition-shadow bg-white/95 backdrop-blur-sm w-full">
                       <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-lg text-gray-900 truncate">{listing.title}</CardTitle>
-                          {getStatusBadge(listing.status)}
+                        <div className="flex justify-between items-start gap-2">
+                          <CardTitle className="text-base sm:text-lg text-gray-900 truncate flex-1 min-w-0">
+                            {listing.title}
+                          </CardTitle>
+                          <div className="flex-shrink-0">
+                            {getStatusBadge(listing.status)}
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <MapPin className="w-4 h-4" />
+                          <MapPin className="w-4 h-4 flex-shrink-0" />
                           <span className="truncate">{listing.address || listing.description}</span>
                         </div>
                         
                         <div className="flex items-center gap-2 text-sm">
-                          <DollarSign className="w-4 h-4 text-green-500" />
+                          <DollarSign className="w-4 h-4 text-green-500 flex-shrink-0" />
                           <span className="font-semibold text-gray-900">
                             ${listing.price?.toLocaleString() || 'N/A'}/month
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-4 h-4 flex-shrink-0" />
                           <span>Available Now</span>
                         </div>
 
@@ -215,36 +239,36 @@ export function PropertyManagement() {
                           </div>
                         )}
 
-                        {/* Horizontally Scrollable Action Buttons */}
+                        {/* Responsive Action Buttons that fit on screen */}
                         <div className="pt-3 border-t border-gray-200">
-                          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                          <div className="grid grid-cols-3 gap-2">
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-shrink-0 min-w-[100px] bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 font-medium"
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 font-medium text-xs sm:text-sm p-2"
                               onClick={() => handleViewProperty(listing)}
                             >
-                              <Eye className="w-4 h-4 mr-2" />
-                              View
+                              <Eye className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                              <span className="hidden sm:inline">View</span>
                             </Button>
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="flex-shrink-0 min-w-[100px] bg-green-50 hover:bg-green-100 text-green-700 border-green-200 font-medium"
+                              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 font-medium text-xs sm:text-sm p-2"
                               onClick={() => handleEditProperty(listing)}
                             >
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit
+                              <Edit className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                              <span className="hidden sm:inline">Edit</span>
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
-                                  className="flex-shrink-0 min-w-[100px] bg-red-50 hover:bg-red-100 text-red-700 border-red-200 font-medium"
+                                  className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200 font-medium text-xs sm:text-sm p-2"
                                 >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Delete
+                                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                                  <span className="hidden sm:inline">Del</span>
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
