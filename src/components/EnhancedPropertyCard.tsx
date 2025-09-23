@@ -83,17 +83,23 @@ export function EnhancedPropertyCard({
     const xValue = x.get();
     if (xValue > 50) {
       return (
-        <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-          <div className="bg-green-500 rounded-full p-4">
-            <Flame className="w-8 h-8 text-white fill-white" />
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-red-500/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+          <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-full p-6 shadow-lg">
+            <div className="text-white text-2xl font-bold">🔥</div>
+          </div>
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
+            LIKE
           </div>
         </div>
       );
     } else if (xValue < -50) {
       return (
-        <div className="absolute inset-0 bg-red-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-          <div className="bg-red-500 rounded-full p-4">
-            <X className="w-8 h-8 text-white" />
+        <div className="absolute inset-0 bg-gray-600/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+          <div className="bg-white rounded-full p-6 shadow-lg">
+            <div className="text-gray-600 text-2xl font-bold">👎</div>
+          </div>
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
+            NOPE
           </div>
         </div>
       );
@@ -125,9 +131,9 @@ export function EnhancedPropertyCard({
       whileHover={{ scale: isTop ? 1.02 : 0.95 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <Card className="relative w-full h-[480px] sm:h-[580px] overflow-hidden bg-card border-border">
-        {/* Image Carousel */}
-        <div className="relative h-3/5 overflow-hidden">
+      <Card className="relative w-full h-full max-h-[calc(100vh-200px)] overflow-hidden bg-card border-none shadow-2xl rounded-2xl">
+        {/* Image Carousel - Takes most of the card */}
+        <div className="relative h-4/5 overflow-hidden">
           {listing.images && listing.images.length > 0 ? (
             <>
               <img
@@ -199,105 +205,48 @@ export function EnhancedPropertyCard({
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6 h-2/5 flex flex-col justify-between">
-          <div className="space-y-3">
-            {/* Title and Price */}
-            <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-foreground line-clamp-2 flex-1">
+        {/* Content - Compact bottom section */}
+        <div className="p-4 h-1/5 flex flex-col justify-center bg-white/95 backdrop-blur-sm">
+          <div className="flex justify-between items-center">
+            {/* Left side - Title and Location */}
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-foreground line-clamp-1">
                 {listing.title}
               </h3>
-              <div className="text-right ml-4">
-                <div className="text-2xl font-bold text-primary">
-                  ${listing.price?.toLocaleString()}
-                </div>
-                <div className="text-sm text-muted-foreground">per month</div>
+              <div className="flex items-center text-muted-foreground text-sm">
+                <MapPin className="w-3 h-3 mr-1" />
+                <span>{listing.neighborhood}, {listing.city}</span>
               </div>
-            </div>
-
-            {/* Match Percentage Badge */}
-            {'matchPercentage' in listing && (
-              <div className="flex justify-center">
-                <MatchPercentageBadge 
-                  percentage={listing.matchPercentage} 
-                  reasons={listing.matchReasons}
-                />
-              </div>
-            )}
-
-            {/* Location */}
-            <div className="flex items-center text-muted-foreground">
-              <MapPin className="w-4 h-4 mr-1" />
-              <span className="text-sm">
-                {listing.neighborhood}, {listing.city}
-              </span>
-            </div>
-
-            {/* Property Details */}
-            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-              {listing.beds && (
-                <div className="flex items-center">
-                  <Bed className="w-4 h-4 mr-1" />
-                  <span>{listing.beds} bed{listing.beds > 1 ? 's' : ''}</span>
-                </div>
-              )}
-              {listing.baths && (
-                <div className="flex items-center">
-                  <Bath className="w-4 h-4 mr-1" />
-                  <span>{listing.baths} bath{listing.baths > 1 ? 's' : ''}</span>
-                </div>
-              )}
-              {listing.square_footage && (
-                <div className="flex items-center">
-                  <Square className="w-4 h-4 mr-1" />
-                  <span>{listing.square_footage} sq ft</span>
-                </div>
-              )}
-            </div>
-
-            {/* Property Type & Features */}
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="capitalize">
-                {listing.property_type}
-              </Badge>
-              {listing.furnished && (
-                <Badge variant="outline">Furnished</Badge>
-              )}
-              {listing.pet_friendly && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <PawPrint className="w-3 h-3" />
-                  Pet OK
-                </Badge>
-              )}
-            </div>
-
-            {/* Amenities */}
-            {listing.amenities && listing.amenities.length > 0 && (
-              <div className="flex flex-wrap gap-1 max-h-8 overflow-hidden">
-                {listing.amenities.slice(0, 5).map((amenity, index) => {
-                  const IconComponent = getAmenityIcon(amenity);
-                  return (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
-                      className="text-xs flex items-center gap-1"
-                    >
-                      {typeof IconComponent === 'string' ? (
-                        <span>{IconComponent}</span>
-                      ) : (
-                        <IconComponent className="w-3 h-3" />
-                      )}
-                      <span className="capitalize">{amenity}</span>
-                    </Badge>
-                  );
-                })}
-                {listing.amenities.length > 5 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{listing.amenities.length - 5} more
-                  </Badge>
+              {/* Essential details in one line */}
+              <div className="flex items-center space-x-3 text-xs text-muted-foreground mt-1">
+                {listing.beds && (
+                  <div className="flex items-center">
+                    <Bed className="w-3 h-3 mr-1" />
+                    <span>{listing.beds}</span>
+                  </div>
+                )}
+                {listing.baths && (
+                  <div className="flex items-center">
+                    <Bath className="w-3 h-3 mr-1" />
+                    <span>{listing.baths}</span>
+                  </div>
+                )}
+                {listing.square_footage && (
+                  <div className="flex items-center">
+                    <Square className="w-3 h-3 mr-1" />
+                    <span>{listing.square_footage} ft²</span>
+                  </div>
                 )}
               </div>
-            )}
+            </div>
+            
+            {/* Right side - Price */}
+            <div className="text-right">
+              <div className="text-xl font-bold text-primary">
+                ${listing.price?.toLocaleString()}
+              </div>
+              <div className="text-xs text-muted-foreground">/month</div>
+            </div>
           </div>
         </div>
 

@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
-import { LocationBasedMatching } from '@/components/LocationBasedMatching';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { useListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Home, RefreshCw, Heart } from 'lucide-react';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { Menu, Flame, RotateCcw } from 'lucide-react';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
@@ -43,100 +41,73 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const selectedListing = listings.find(l => l.id === selectedListingId);
 
   return (
-    <DashboardLayout userRole="client">
-      <div className="w-full h-full flex flex-col">
-        <div className="flex-1 overflow-y-auto">
-          <div className="w-full max-w-md mx-auto px-4 pt-4 pb-6">
-            {/* Header Section */}
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Find Properties</h2>
-              <p className="text-white/80 text-base mt-2">
-                {user?.user_metadata?.full_name || 'Welcome back!'}
-              </p>
+    <SidebarProvider>
+      <div className="min-h-screen w-full flex bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
+        <AppSidebar userRole="client" />
+        
+        <main className="flex-1 relative overflow-hidden">
+          {/* Minimal Header */}
+          <header className="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center">
+            <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20" />
+            <div className="text-white text-lg font-semibold">
+              Discover
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => refetch()}
+              className="bg-white/20 hover:bg-white/30 text-white"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </Button>
+          </header>
 
-            {/* Stats Quick View */}
-            <div className="flex gap-4 justify-center mb-6">
-              <div className="bg-white/10 rounded-lg px-4 py-3 text-center min-w-[80px]">
-                <p className="text-lg font-semibold text-white">{listings.length}</p>
-                <p className="text-sm text-white/70">Properties</p>
+          {/* Full Screen Swipe Container */}
+          <div className="absolute inset-0 pt-16 pb-6 px-4">
+            {isLoading ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="animate-spin text-white">
+                  <Flame className="w-8 h-8" />
+                </div>
               </div>
-              <div className="bg-white/10 rounded-lg px-4 py-3 text-center min-w-[80px]">
-                <p className="text-lg font-semibold text-white">0</p>
-                <p className="text-sm text-white/70">Matches</p>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center h-full text-center text-white">
+                <div className="text-6xl mb-4">😞</div>
+                <h3 className="text-xl font-bold mb-2">Error loading</h3>
+                <p className="text-white/80 mb-4">Please try again.</p>
+                <Button 
+                  onClick={() => refetch()}
+                  variant="outline"
+                  className="gap-2 bg-white/20 border-white/30 text-white hover:bg-white/30"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Try Again
+                </Button>
               </div>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="w-full">
-              {isLoading ? (
-                <div className="flex justify-center">
-                  <div className="space-y-4 w-full max-w-sm">
-                    <div className="animate-pulse">
-                      <div className="w-full h-80 bg-white/10 rounded-lg mb-4"></div>
-                      <div className="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-white/10 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                </div>
-              ) : error ? (
-                <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
-                  <div className="text-4xl mb-2">😞</div>
-                  <h3 className="text-lg font-bold text-white">Error loading</h3>
-                  <p className="text-white/70 text-base max-w-sm leading-relaxed">Please try again.</p>
-                  <Button 
-                    onClick={() => refetch()}
-                    variant="outline"
-                    size="default"
-                    className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  >
-                    🔄 Try Again
-                  </Button>
-                </div>
-              ) : listings.length === 0 ? (
-                <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
-                  <div className="text-4xl mb-2">🏠</div>
-                  <h3 className="text-lg font-bold text-white">No Properties Found</h3>
-                  <p className="text-white/70 text-base max-w-sm leading-relaxed">Try adjusting filters or check back later.</p>
-                  <Button 
-                    onClick={() => refetch()}
-                    variant="outline"
-                    size="default"
-                    className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  >
-                    🔄 Refresh
-                  </Button>
-                </div>
-              ) : (
-                <div className="w-full">
-                  <TinderentSwipeContainer
-                    onListingTap={handleListingTap}
-                    onInsights={handleInsights}
-                    onMessageClick={onMessageClick}
-                    locationFilter={locationData}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Location Based Section - Shows when scrolled down */}
-            <div className="mt-8">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-white mb-2">Nearby Properties</h3>
-                <p className="text-white/70 text-sm">Find properties close to your location</p>
+            ) : listings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center text-white">
+                <div className="text-6xl mb-4">🏠</div>
+                <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
+                <p className="text-white/80 mb-4">Try adjusting filters or check back later.</p>
+                <Button 
+                  onClick={() => refetch()}
+                  variant="outline"
+                  className="gap-2 bg-white/20 border-white/30 text-white hover:bg-white/30"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Refresh
+                </Button>
               </div>
-              
-              <Button 
-                onClick={() => setLocationData(null)} // This would trigger location permission
-                variant="outline"
-                size="lg"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white border-orange-400 hover:border-orange-500"
-              >
-                📍 Enable Location
-              </Button>
-            </div>
+            ) : (
+              <TinderentSwipeContainer
+                onListingTap={handleListingTap}
+                onInsights={handleInsights}
+                onMessageClick={onMessageClick}
+                locationFilter={locationData}
+              />
+            )}
           </div>
-        </div>
+        </main>
       </div>
 
       <PropertyInsightsDialog
@@ -144,7 +115,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
         onOpenChange={setInsightsOpen}
         listing={selectedListing || null}
       />
-    </DashboardLayout>
+    </SidebarProvider>
   );
 };
 

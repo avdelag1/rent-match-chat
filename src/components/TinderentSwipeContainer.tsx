@@ -261,46 +261,36 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="w-full max-w-sm mx-auto space-y-6">
-      {/* Header with Progress and Filters */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center gap-4">
+    <div className="w-full h-full flex flex-col max-w-lg mx-auto">
+      {/* Minimal Top Controls */}
+      <div className="flex justify-between items-center p-4 z-10">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowFilters(true)}
+          className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-full px-4"
+        >
+          <SlidersHorizontal className="w-4 h-4 mr-2" />
+          Filters
+        </Button>
+        
+        {Object.keys(appliedFilters).length > 0 && (
           <Button
-            variant="outline"
-            size="default"
-            onClick={() => setShowFilters(true)}
-            className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:bg-primary/20 gap-2 flex-1"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setAppliedFilters({});
+              setCurrentIndex(0);
+            }}
+            className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-full"
           >
-            <SlidersHorizontal className="w-4 h-4" />
+            Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
           </Button>
-          
-          {Object.keys(appliedFilters).length > 0 && (
-            <Button
-              variant="outline"
-              size="default"
-              onClick={() => {
-                setAppliedFilters({});
-                setCurrentIndex(0);
-              }}
-              className="bg-gradient-to-r from-destructive/10 to-destructive/5 border-destructive/20 hover:bg-destructive/20"
-            >
-              Clear ({Object.values(appliedFilters).flat().filter(Boolean).length})
-            </Button>
-          )}
-        </div>
-
-        {/* Progress Bar */}
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Property {currentIndex + 1} of {listings.length}</span>
-            <span>{Math.round(progress)}% complete</span>
-          </div>
-          <Progress value={progress} className="h-3" />
-        </div>
+        )}
       </div>
 
-      {/* Cards Container - Proper Size */}
-      <div className="relative w-full h-[500px]">
+      {/* Full Screen Cards Container */}
+      <div className="flex-1 relative">
         <AnimatePresence>
           {nextListing && (
             <EnhancedPropertyCard
@@ -324,6 +314,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                 transition: { duration: 0.3 }
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute inset-0"
             >
               <EnhancedPropertyCard
                 listing={currentListing}
@@ -339,9 +330,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons */}
+      {/* Bottom Action Buttons - Fixed Position */}
       <motion.div 
-        className="flex justify-center gap-8 items-center"
+        className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -353,11 +344,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <Button
             size="lg"
             variant="outline"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-red-400/50 text-white hover:from-red-600 hover:to-orange-600 hover:border-red-500 transition-all duration-300 shadow-lg hover:shadow-red-500/25"
+            className="w-14 h-14 rounded-full bg-white border-2 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-lg"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            <X className="w-7 h-7" />
+            👎
           </Button>
         </motion.div>
         
@@ -367,14 +358,28 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         >
           <Button
             size="lg"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-2 border-orange-400/50 hover:border-orange-500"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-none"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            <Flame className="w-7 h-7 text-white" />
+            🔥
           </Button>
         </motion.div>
       </motion.div>
+
+      {/* Progress indicator - minimal */}
+      <div className="absolute top-20 left-4 right-4 z-10">
+        <div className="flex space-x-1">
+          {listings.slice(0, 5).map((_, index) => (
+            <div
+              key={index}
+              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                index <= currentIndex ? 'bg-white' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* Ultimate Filters Dialog */}
       <UltimateFilters
