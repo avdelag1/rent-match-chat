@@ -138,6 +138,26 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     );
   };
 
+  const uploadImageToStorage = async (file: File, userId: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('property-images')
+      .upload(fileName, file);
+
+    if (error) {
+      console.error('Upload error:', error);
+      throw error;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('property-images')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const handleImageAdd = async () => {
     if (images.length >= 30) {
       toast({
@@ -165,6 +185,16 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
         return;
       }
 
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to upload images.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       for (const file of files) {
         if (file.size > 10 * 1024 * 1024) { // 10MB limit
           toast({
@@ -175,20 +205,55 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
           continue;
         }
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            setImages(prev => [...prev, event.target!.result as string]);
-          }
-        };
-        reader.readAsDataURL(file);
+        try {
+          toast({
+            title: "Uploading...",
+            description: `Uploading ${file.name}`,
+          });
+
+          const imageUrl = await uploadImageToStorage(file, user.user.id);
+          setImages(prev => [...prev, imageUrl]);
+          
+          toast({
+            title: "Upload Successful",
+            description: `${file.name} uploaded successfully.`,
+          });
+        } catch (error: any) {
+          toast({
+            title: "Upload Failed",
+            description: `Failed to upload ${file.name}. Please try again.`,
+            variant: "destructive"
+          });
+          console.error('Upload error:', error);
+        }
       }
     };
     
     input.click();
   };
 
-  const handleImageRemove = (index: number) => {
+  const handleImageRemove = async (index: number) => {
+    const imageUrl = images[index];
+    
+    // If it's a Supabase storage URL, delete from storage
+    if (imageUrl.includes('property-images')) {
+      try {
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+          // Extract the file path from the URL
+          const urlParts = imageUrl.split('/property-images/');
+          if (urlParts.length > 1) {
+            const filePath = urlParts[1];
+            await supabase.storage
+              .from('property-images')
+              .remove([filePath]);
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting image from storage:', error);
+      }
+    }
+    
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
