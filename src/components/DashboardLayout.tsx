@@ -22,6 +22,7 @@ import { OwnerSettingsDialog } from '@/components/OwnerSettingsDialog'
 import { OwnerProfileDialog } from '@/components/OwnerProfileDialog'
 import OwnerClientSwipeDialog from '@/components/OwnerClientSwipeDialog'
 import { SupportDialog } from '@/components/SupportDialog'
+import { NotificationSystem } from '@/components/NotificationSystem'
 import { Button } from '@/components/ui/button'
 
 interface DashboardLayoutProps {
@@ -170,6 +171,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-900 relative">
+        <NotificationSystem />
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1 flex flex-col min-h-screen w-full">

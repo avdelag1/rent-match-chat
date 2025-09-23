@@ -65,7 +65,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Set up real-time subscription with notifications
+  // Set up real-time subscription with enhanced message updates
   useEffect(() => {
     if (!conversationId) return;
 
@@ -79,40 +79,57 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           table: 'conversation_messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        (payload) => {
-          console.log('New message received:', payload);
+        async (payload) => {
+          console.log('New message received in real-time:', payload);
+          
+          const newMessage = payload.new;
+          
+          // Get sender details for complete message object
+          const { data: senderProfile } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .eq('id', newMessage.sender_id)
+            .single();
+
+          const completeMessage = {
+            ...newMessage,
+            sender: senderProfile || { id: newMessage.sender_id, full_name: 'Unknown', avatar_url: null }
+          };
           
           // Show notification for messages from other users
-          const newMessage = payload.new;
           if (newMessage.sender_id !== user?.id) {
             toast({
-              title: "New Message",
+              title: "💬 New Message",
               description: `${otherUser.full_name}: ${newMessage.message_text.slice(0, 50)}${newMessage.message_text.length > 50 ? '...' : ''}`,
               duration: 4000,
             });
             
             // Browser notification if supported
             if (Notification.permission === 'granted') {
-              new Notification(`Message from ${otherUser.full_name}`, {
+              const notification = new Notification(`Message from ${otherUser.full_name}`, {
                 body: newMessage.message_text.slice(0, 100),
-                icon: otherUser.avatar_url || '/placeholder.svg'
+                icon: otherUser.avatar_url || '/placeholder.svg',
+                tag: `message-${newMessage.id}`
               });
+              
+              setTimeout(() => notification.close(), 5000);
             }
           }
           
-          // Immediately update messages in real-time
+          // Immediately update messages in real-time with complete data
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
-            if (!oldData) return [newMessage];
-            return [...oldData, newMessage];
+            if (!oldData) return [completeMessage];
+            
+            // Check if message already exists to prevent duplicates
+            const exists = oldData.some((msg: any) => msg.id === newMessage.id);
+            if (exists) return oldData;
+            
+            return [...oldData, completeMessage];
           });
           
-          // Also invalidate to ensure fresh data
-          queryClient.invalidateQueries({ 
-            queryKey: ['conversation-messages', conversationId] 
-          });
-          queryClient.invalidateQueries({ 
-            queryKey: ['conversations'] 
-          });
+          // Update conversations list with new message timestamp
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
         }
       )
       .subscribe();
@@ -143,21 +160,54 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     setNewMessage('');
 
     try {
-      await sendMessage.mutateAsync({
+      // Optimistically add message to UI immediately
+      const tempMessage = {
+        id: `temp-${Date.now()}`,
+        conversation_id: conversationId,
+        sender_id: user?.id,
+        message_text: messageText,
+        created_at: new Date().toISOString(),
+        is_read: false,
+        message_type: 'text',
+        sender: {
+          id: user?.id,
+          full_name: user?.user_metadata?.full_name || 'You',
+          avatar_url: user?.user_metadata?.avatar_url
+        }
+      };
+
+      // Add temp message to UI immediately
+      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
+        if (!oldData) return [tempMessage];
+        return [...oldData, tempMessage];
+      });
+
+      // Send the actual message
+      const result = await sendMessage.mutateAsync({
         conversationId,
         message: messageText
+      });
+      
+      // Replace temp message with real one
+      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
+        if (!oldData) return [];
+        return oldData.map((msg: any) => 
+          msg.id === tempMessage.id ? { ...result, sender: tempMessage.sender } : msg
+        );
       });
       
       // Decrement quota after successful send
       decrementMessageCount();
       
-      toast({
-        title: "Message Sent",
-        description: "Your message has been delivered!",
-        duration: 2000,
-      });
     } catch (error) {
       console.error('Failed to send message:', error);
+      
+      // Remove temp message on error
+      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
+        if (!oldData) return [];
+        return oldData.filter((msg: any) => !msg.id.startsWith('temp-'));
+      });
+      
       toast({
         title: "Failed to Send",
         description: "Please try again",
