@@ -88,7 +88,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 <p>Try adjusting your preferences</p>
               </div>
             ) : (
-              <div className="w-full max-w-md">
+              <div className="w-full h-[700px]">
                 <ClientSwipeContainer 
                   onClientTap={handleProfileTap}
                   onInsights={handleInsights}

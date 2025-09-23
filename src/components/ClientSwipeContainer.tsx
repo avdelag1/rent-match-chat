@@ -340,9 +340,9 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Centered */}
       <motion.div 
-        className="flex justify-center gap-8 items-center"
+        className="flex gap-8 items-center justify-center py-6 z-20"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -354,11 +354,11 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           <Button
             size="lg"
             variant="outline"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-orange-500 border-2 border-red-400/50 text-white hover:from-red-600 hover:to-orange-600 hover:border-red-500 transition-all duration-300 shadow-lg hover:shadow-red-500/25"
+            className="w-16 h-16 rounded-full bg-white border-0 shadow-xl hover:bg-gray-50 transition-all duration-300"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            <X className="w-7 h-7" />
+            <div className="text-3xl text-gray-600">👎</div>
           </Button>
         </motion.div>
         
@@ -368,11 +368,11 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         >
           <Button
             size="lg"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-lg hover:shadow-orange-500/25 border-2 border-orange-400/50 hover:border-orange-500"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/25 border-none"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            <Flame className="w-7 h-7 text-white" />
+            <div className="text-4xl">🔥</div>
           </Button>
         </motion.div>
       </motion.div>

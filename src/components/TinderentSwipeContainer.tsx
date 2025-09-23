@@ -330,9 +330,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </AnimatePresence>
       </div>
 
-      {/* Bottom Action Buttons - Fixed Position */}
+      {/* Bottom Action Buttons - Centered */}
       <motion.div 
-        className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
+        className="flex gap-8 items-center justify-center py-6 z-20"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -367,19 +367,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </motion.div>
       </motion.div>
 
-      {/* Progress indicator - minimal */}
-      <div className="absolute top-20 left-4 right-4 z-10">
-        <div className="flex space-x-1">
-          {listings.slice(0, 5).map((_, index) => (
-            <div
-              key={index}
-              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                index <= currentIndex ? 'bg-white' : 'bg-white/30'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
 
       {/* Ultimate Filters Dialog */}
       <UltimateFilters
