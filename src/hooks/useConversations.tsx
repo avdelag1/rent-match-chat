@@ -251,9 +251,7 @@ export function useSendMessage() {
       // Immediately add optimistic message to UI
       queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
         if (!oldData) return [optimisticMessage];
-        return [...oldData, optimisticMessage].sort((a, b) => 
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
+        return [...oldData, optimisticMessage];
       });
 
       const { data, error } = await supabase
@@ -287,8 +285,18 @@ export function useSendMessage() {
     onSuccess: (data, variables) => {
       console.log('✅ Message sent successfully via hook:', data);
       
-      // Force a refetch of messages to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['conversation-messages', variables.conversationId] });
+      // Replace optimistic message with real message
+      queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
+        if (!oldData) return [data];
+        
+        return oldData.map((msg: any) => 
+          msg.id.toString().startsWith('temp-') && msg.message_text === data.message_text
+            ? data
+            : msg
+        );
+      });
+      
+      // Invalidate conversations to update last message
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
     },
@@ -300,9 +308,6 @@ export function useSendMessage() {
         if (!oldData) return [];
         return oldData.filter((msg: any) => !msg.id.toString().startsWith('temp-'));
       });
-      
-      // Also invalidate to force refetch and ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['conversation-messages', variables.conversationId] });
       
       toast({
         title: 'Failed to Send Message',
