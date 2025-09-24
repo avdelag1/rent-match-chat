@@ -104,12 +104,6 @@ export function useRealtimeChat(conversationId: string) {
           
           const newMessage = payload.new;
           
-          // Validate message structure
-          if (!newMessage || !newMessage.message_text) {
-            console.warn('⚠️ Invalid message structure received:', newMessage);
-            return;
-          }
-          
           // Get sender details
           const { data: senderProfile } = await supabase
             .from('profiles')
@@ -148,10 +142,8 @@ export function useRealtimeChat(conversationId: string) {
           // Clear typing status for sender
           setTypingUsers(prev => prev.filter(u => u.userId !== newMessage.sender_id));
           
-          // Dispatch custom event for notifications with validation
-          if (newMessage.message_text) {
-            window.dispatchEvent(new CustomEvent('new-message', { detail: newMessage }));
-          }
+          // Dispatch custom event for notifications
+          window.dispatchEvent(new CustomEvent('new-message', { detail: newMessage }));
         }
       )
       .on('presence', { event: 'sync' }, () => {
