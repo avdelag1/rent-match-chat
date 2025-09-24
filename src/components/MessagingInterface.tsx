@@ -84,17 +84,20 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     
     // Subscribe to new message events for notifications only
     const handleNewMessage = (message: any) => {
-      if (message.sender_id !== user?.id) {
+      if (message.sender_id !== user?.id && message.message_text) {
+        const messageText = message.message_text || '';
+        const truncatedText = messageText.length > 50 ? `${messageText.slice(0, 50)}...` : messageText;
+        
         toast({
           title: "💬 New Message",
-          description: `${otherUser.full_name}: ${message.message_text.slice(0, 50)}${message.message_text.length > 50 ? '...' : ''}`,
+          description: `${otherUser.full_name}: ${truncatedText}`,
           duration: 4000,
         });
         
         // Browser notification if supported
-        if (Notification.permission === 'granted') {
+        if (Notification.permission === 'granted' && messageText) {
           const notification = new Notification(`Message from ${otherUser.full_name}`, {
-            body: message.message_text.slice(0, 100),
+            body: messageText.slice(0, 100),
             icon: otherUser.avatar_url || '/placeholder.svg',
             tag: `message-${message.id}`
           });
