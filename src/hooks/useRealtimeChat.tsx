@@ -120,27 +120,24 @@ export function useRealtimeChat(conversationId: string) {
             }
           };
           
-          // Update messages immediately
+          // Update messages immediately - force refetch to ensure consistency
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
             if (!oldData) return [completeMessage];
             
-            // Check for both real IDs and temporary optimistic IDs
-            const exists = oldData.some((msg: any) => 
-              msg.id === newMessage.id || 
-              (msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id)
+            // Check if message already exists (avoid duplicates)
+            const exists = oldData.some((msg: any) => msg.id === newMessage.id);
+            if (exists) return oldData;
+            
+            // Add new message and sort by created_at
+            const updatedData = [...oldData, completeMessage].sort((a, b) => 
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
             );
             
-            if (exists) {
-              // Replace optimistic message with real message if it exists
-              return oldData.map((msg: any) => 
-                msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id
-                  ? completeMessage
-                  : msg
-              );
-            }
-            
-            return [...oldData, completeMessage];
+            return updatedData;
           });
+
+          // Also invalidate to refetch from server
+          queryClient.invalidateQueries({ queryKey: ['conversation-messages', conversationId] });
 
           // Clear typing status for sender
           setTypingUsers(prev => prev.filter(u => u.userId !== newMessage.sender_id));

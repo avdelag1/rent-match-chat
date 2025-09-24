@@ -139,18 +139,21 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
       console.log('💬 Sending message:', messageText);
       
       // Send the actual message
-      await sendMessage.mutateAsync({
+      const result = await sendMessage.mutateAsync({
         conversationId,
         message: messageText
       });
       
-      console.log('✅ Message sent successfully');
+      console.log('✅ Message sent successfully:', result);
       
       // Decrement quota after successful send
       decrementMessageCount();
       
     } catch (error) {
       console.error('❌ Failed to send message:', error);
+      
+      // Restore the message text if sending failed
+      setNewMessage(messageText);
       
       toast({
         title: "Failed to Send",
