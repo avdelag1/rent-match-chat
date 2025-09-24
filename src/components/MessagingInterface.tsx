@@ -78,99 +78,39 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Set up real-time subscription with enhanced message updates
+  // Show notification for new messages (handled by useRealtimeChat hook)
   useEffect(() => {
     if (!conversationId) return;
-
-    console.log('Setting up real-time subscription for conversation:', conversationId);
-
-    const channel = supabase
-      .channel(`messages-${conversationId}`, {
-        config: {
-          presence: {
-            key: user?.id,
-          },
-        },
-      })
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversation_messages',
-          filter: `conversation_id=eq.${conversationId}`
-        },
-        async (payload) => {
-          console.log('📨 Real-time message received:', payload);
-          
-          const newMessage = payload.new;
-          
-          // Get sender details for complete message object
-          const { data: senderProfile } = await supabase
-            .from('profiles')
-            .select('id, full_name, avatar_url')
-            .eq('id', newMessage.sender_id)
-            .single();
-
-          const completeMessage = {
-            ...newMessage,
-            sender: senderProfile || { id: newMessage.sender_id, full_name: 'Unknown', avatar_url: null }
-          };
-          
-          console.log('📋 Complete message with sender:', completeMessage);
-          
-          // Show notification for messages from other users
-          if (newMessage.sender_id !== user?.id) {
-            toast({
-              title: "💬 New Message",
-              description: `${otherUser.full_name}: ${newMessage.message_text.slice(0, 50)}${newMessage.message_text.length > 50 ? '...' : ''}`,
-              duration: 4000,
-            });
-            
-            // Browser notification if supported
-            if (Notification.permission === 'granted') {
-              const notification = new Notification(`Message from ${otherUser.full_name}`, {
-                body: newMessage.message_text.slice(0, 100),
-                icon: otherUser.avatar_url || '/placeholder.svg',
-                tag: `message-${newMessage.id}`
-              });
-              
-              setTimeout(() => notification.close(), 5000);
-            }
-          }
-          
-          // Immediately update messages in real-time with complete data
-          queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
-            if (!oldData) {
-              console.log('📦 No existing data, returning new message');
-              return [completeMessage];
-            }
-            
-            // Check if message already exists to prevent duplicates
-            const exists = oldData.some((msg: any) => msg.id === newMessage.id);
-            if (exists) {
-              console.log('🔄 Message already exists, skipping duplicate');
-              return oldData;
-            }
-            
-            console.log('➕ Adding new message to existing data');
-            return [...oldData, completeMessage];
+    
+    // Subscribe to new message events for notifications only
+    const handleNewMessage = (message: any) => {
+      if (message.sender_id !== user?.id) {
+        toast({
+          title: "💬 New Message",
+          description: `${otherUser.full_name}: ${message.message_text.slice(0, 50)}${message.message_text.length > 50 ? '...' : ''}`,
+          duration: 4000,
+        });
+        
+        // Browser notification if supported
+        if (Notification.permission === 'granted') {
+          const notification = new Notification(`Message from ${otherUser.full_name}`, {
+            body: message.message_text.slice(0, 100),
+            icon: otherUser.avatar_url || '/placeholder.svg',
+            tag: `message-${message.id}`
           });
           
-          // Update conversations list with new message timestamp
-          queryClient.invalidateQueries({ queryKey: ['conversations'] });
-          queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
+          setTimeout(() => notification.close(), 5000);
         }
-      )
-      .subscribe((status) => {
-        console.log('📡 Subscription status:', status);
-      });
-
-    return () => {
-      console.log('🔌 Unsubscribing from real-time messages');
-      supabase.removeChannel(channel);
+      }
     };
-  }, [conversationId, queryClient, user?.id, otherUser]);
+
+    // Listen to the real-time subscription events (managed by useRealtimeChat)
+    window.addEventListener('new-message', handleNewMessage as EventListener);
+    
+    return () => {
+      window.removeEventListener('new-message', handleNewMessage as EventListener);
+    };
+  }, [conversationId, user?.id, otherUser]);
 
   // Request notification permission on component mount
   useEffect(() => {

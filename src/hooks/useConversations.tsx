@@ -232,6 +232,28 @@ export function useSendMessage() {
     }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
+      // Create optimistic message for immediate UI update
+      const optimisticMessage = {
+        id: `temp-${Date.now()}`,
+        conversation_id: conversationId,
+        sender_id: user.id,
+        message_text: message,
+        message_type: 'text',
+        created_at: new Date().toISOString(),
+        is_read: false,
+        sender: {
+          id: user.id,
+          full_name: user.user_metadata?.full_name || 'You',
+          avatar_url: user.user_metadata?.avatar_url
+        }
+      };
+
+      // Immediately add optimistic message to UI
+      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
+        if (!oldData) return [optimisticMessage];
+        return [...oldData, optimisticMessage];
+      });
+
       const { data, error } = await supabase
         .from('conversation_messages')
         .insert({
@@ -240,7 +262,14 @@ export function useSendMessage() {
           message_text: message,
           message_type: 'text'
         })
-        .select()
+        .select(`
+          *,
+          sender:profiles!conversation_messages_sender_id_fkey (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
         .single();
 
       if (error) throw error;
@@ -256,19 +285,30 @@ export function useSendMessage() {
     onSuccess: (data, variables) => {
       console.log('✅ Message sent successfully via hook:', data);
       
-      // Immediately invalidate and refetch to ensure UI updates
-      queryClient.invalidateQueries({ 
-        queryKey: ['conversation-messages', variables.conversationId] 
+      // Replace optimistic message with real message
+      queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
+        if (!oldData) return [data];
+        
+        return oldData.map((msg: any) => 
+          msg.id.toString().startsWith('temp-') && msg.message_text === data.message_text
+            ? data
+            : msg
+        );
       });
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
       
-      // Also trigger a manual refetch to be extra sure
-      queryClient.refetchQueries({ 
-        queryKey: ['conversation-messages', variables.conversationId] 
-      });
+      // Invalidate conversations to update last message
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, variables) => {
       console.error('❌ Failed to send message via hook:', error);
+      
+      // Remove optimistic message on error
+      queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
+        if (!oldData) return [];
+        return oldData.filter((msg: any) => !msg.id.toString().startsWith('temp-'));
+      });
+      
       toast({
         title: 'Failed to Send Message',
         description: error.message,

@@ -124,14 +124,29 @@ export function useRealtimeChat(conversationId: string) {
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
             if (!oldData) return [completeMessage];
             
-            const exists = oldData.some((msg: any) => msg.id === newMessage.id);
-            if (exists) return oldData;
+            // Check for both real IDs and temporary optimistic IDs
+            const exists = oldData.some((msg: any) => 
+              msg.id === newMessage.id || 
+              (msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id)
+            );
+            
+            if (exists) {
+              // Replace optimistic message with real message if it exists
+              return oldData.map((msg: any) => 
+                msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id
+                  ? completeMessage
+                  : msg
+              );
+            }
             
             return [...oldData, completeMessage];
           });
 
           // Clear typing status for sender
           setTypingUsers(prev => prev.filter(u => u.userId !== newMessage.sender_id));
+          
+          // Dispatch custom event for notifications
+          window.dispatchEvent(new CustomEvent('new-message', { detail: newMessage }));
         }
       )
       .on('presence', { event: 'sync' }, () => {
