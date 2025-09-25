@@ -12,6 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { PropertyPreviewDialog } from '@/components/PropertyPreviewDialog';
+import { PropertyForm } from '@/components/PropertyForm';
 
 export function PropertyManagement() {
   const { user } = useAuth();
@@ -19,9 +21,9 @@ export function PropertyManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [editingProperty, setEditingProperty] = useState<any>(null);
-  const [showPropertyForm, setShowPropertyForm] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [viewingProperty, setViewingProperty] = useState<any>(null);
-  const [showPropertyDetails, setShowPropertyDetails] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const queryClient = useQueryClient();
 
   // Filter listings to show only those owned by current user
@@ -48,6 +50,8 @@ export function PropertyManagement() {
   console.log('PropertyManagement - Filtered listings:', filteredListings.length);
 
   const handleAddProperty = () => {
+    setEditingProperty(null);
+    setShowForm(true);
     // Set hash so DashboardLayout opens the PropertyForm
     if (location.hash !== '#add-property') {
       location.hash = '#add-property';
@@ -57,7 +61,7 @@ export function PropertyManagement() {
   const handleEditProperty = (listing: any) => {
     console.log('Edit property:', listing.id);
     setEditingProperty(listing);
-    setShowPropertyForm(true);
+    setShowForm(true);
     // Set hash so DashboardLayout opens the PropertyForm with editing data
     if (location.hash !== '#add-property') {
       location.hash = '#add-property';
@@ -67,7 +71,20 @@ export function PropertyManagement() {
   const handleViewProperty = (listing: any) => {
     console.log('View property:', listing.id);
     setViewingProperty(listing);
-    setShowPropertyDetails(true);
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setViewingProperty(null);
+  };
+
+  const handleEditFromPreview = () => {
+    if (viewingProperty) {
+      setEditingProperty(viewingProperty);
+      setShowPreview(false);
+      setShowForm(true);
+    }
   };
 
   const handleDeleteProperty = async (listing: any) => {
@@ -333,6 +350,27 @@ export function PropertyManagement() {
             </TabsContent>
           </div>
         </Tabs>
+
+        {/* Property Form */}
+        {(showForm || editingProperty) && (
+          <PropertyForm
+            isOpen={showForm || !!editingProperty}
+            onClose={() => {
+              setShowForm(false);
+              setEditingProperty(null);
+            }}
+            editingProperty={editingProperty}
+          />
+        )}
+
+        {/* Property Preview */}
+        <PropertyPreviewDialog
+          isOpen={showPreview}
+          onClose={handleClosePreview}
+          property={viewingProperty}
+          onEdit={handleEditFromPreview}
+          showEditButton={true}
+        />
       </div>
     </div>
   );

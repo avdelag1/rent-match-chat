@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,6 +79,32 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     }
   });
 
+  // Populate form when editing property
+  useEffect(() => {
+    if (editingProperty && isOpen) {
+      // Set form values
+      reset(editingProperty);
+      
+      // Set amenities and images
+      setSelectedAmenities(editingProperty.amenities || []);
+      setImages(editingProperty.images || []);
+      
+      // Set select values that need manual setting
+      setValue('property_type', editingProperty.property_type);
+      setValue('listing_type', editingProperty.listing_type || 'rent');
+    } else if (!editingProperty && isOpen) {
+      // Reset for new property
+      reset({
+        furnished: false,
+        pet_friendly: false,
+        amenities: [],
+        images: []
+      });
+      setSelectedAmenities([]);
+      setImages([]);
+    }
+  }, [editingProperty, isOpen, reset, setValue]);
+
   const propertyType = watch('property_type');
 
   const createPropertyMutation = useMutation({
@@ -92,23 +118,37 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
         owner_id: user.user.id,
         amenities: selectedAmenities,
         images: images,
-        status: 'active' as const, // Use proper enum value
+        status: 'active' as const,
         is_active: true
       };
 
-      const { data: result, error } = await supabase
-        .from('listings')
-        .insert(propertyData)
-        .select()
-        .single();
+      if (editingProperty) {
+        // Update existing property
+        const { data: result, error } = await supabase
+          .from('listings')
+          .update(propertyData)
+          .eq('id', editingProperty.id)
+          .select()
+          .single();
 
-      if (error) throw error;
-      return result;
+        if (error) throw error;
+        return result;
+      } else {
+        // Create new property
+        const { data: result, error } = await supabase
+          .from('listings')
+          .insert(propertyData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return result;
+      }
     },
     onSuccess: () => {
       toast({
-        title: "Property Listed!",
-        description: "Your property has been successfully listed.",
+        title: editingProperty ? "Property Updated!" : "Property Listed!",
+        description: editingProperty ? "Your property has been successfully updated." : "Your property has been successfully listed.",
       });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
@@ -116,10 +156,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to create property listing. Please try again.",
+        description: editingProperty ? "Failed to update property. Please try again." : "Failed to create property listing. Please try again.",
         variant: "destructive"
       });
-      console.error('Property creation error:', error);
+      console.error('Property operation error:', error);
     }
   });
 
@@ -296,34 +336,40 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
                   )}
                 </div>
 
-                <div>
-                  <Label htmlFor="property_type">Property Type</Label>
-                  <Select onValueChange={(value) => setValue('property_type', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select property type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PROPERTY_TYPES.map(type => (
-                        <SelectItem key={type} value={type.toLowerCase()}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                 <div>
+                   <Label htmlFor="property_type">Property Type</Label>
+                   <Select 
+                     onValueChange={(value) => setValue('property_type', value)}
+                     value={watch('property_type')}
+                   >
+                     <SelectTrigger>
+                       <SelectValue placeholder="Select property type" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       {PROPERTY_TYPES.map(type => (
+                         <SelectItem key={type} value={type.toLowerCase()}>
+                           {type}
+                         </SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </div>
 
-                <div>
-                  <Label htmlFor="listing_type">Listing For</Label>
-                  <Select onValueChange={(value) => setValue('listing_type', value)} defaultValue="rent">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select listing type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="rent">For Rent</SelectItem>
-                      <SelectItem value="buy">For Sale</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                 <div>
+                   <Label htmlFor="listing_type">Listing For</Label>
+                   <Select 
+                     onValueChange={(value) => setValue('listing_type', value)} 
+                     value={watch('listing_type') || 'rent'}
+                   >
+                     <SelectTrigger>
+                       <SelectValue placeholder="Select listing type" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="rent">For Rent</SelectItem>
+                       <SelectItem value="buy">For Sale</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
               </div>
 
               <div>

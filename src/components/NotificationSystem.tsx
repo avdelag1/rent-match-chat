@@ -59,17 +59,19 @@ export function NotificationSystem() {
               const senderName = senderProfile?.full_name || 'Someone';
               const senderRole = senderProfile?.role === 'client' ? 'Client' : 'Property Owner';
               
-              // Show toast notification
+              // Show toast notification  
+              const messageText = newMessage.message_text || '';
               toast({
                 title: `💬 New Message from ${senderRole}`,
-                description: `${senderName}: ${newMessage.message_text.slice(0, 60)}${newMessage.message_text.length > 60 ? '...' : ''}`,
+                description: `${senderName}: ${messageText.slice(0, 60)}${messageText.length > 60 ? '...' : ''}`,
                 duration: 6000,
               });
 
               // Show browser notification if permission granted
               if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                const messageText = newMessage.message_text || 'New message';
                 const notification = new Notification(`New message from ${senderName}`, {
-                  body: newMessage.message_text.slice(0, 100),
+                  body: messageText.slice(0, 100),
                   icon: senderProfile?.avatar_url || '/placeholder.svg',
                   tag: `message-${newMessage.id}`,
                   badge: '/favicon.ico',
