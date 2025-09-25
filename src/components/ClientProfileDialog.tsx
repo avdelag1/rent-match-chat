@@ -64,7 +64,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
+      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b border-white/10">
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
             Complete Your Profile

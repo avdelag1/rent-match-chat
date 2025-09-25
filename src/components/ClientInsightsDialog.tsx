@@ -17,7 +17,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0">
+      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle>Client Profile Insights</DialogTitle>
         </DialogHeader>
