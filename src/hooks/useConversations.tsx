@@ -129,18 +129,27 @@ export function useStartConversation() {
       let conversationId = existingConversation?.id;
 
       if (!conversationId) {
-        // Determine roles
+        // Determine roles - Get current user's profile
         const { data: myProfile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
 
+        if (!myProfile) {
+          throw new Error('Your profile could not be found. Please try again.');
+        }
+
+        // Get other user's profile
         const { data: otherProfile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', otherUserId)
           .single();
+
+        if (!otherProfile) {
+          throw new Error('Property owner profile not found. Please try again.');
+        }
 
         const clientId = myProfile?.role === 'client' ? user.id : otherUserId;
         const ownerId = myProfile?.role === 'owner' ? user.id : otherUserId;
