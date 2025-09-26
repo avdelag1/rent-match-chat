@@ -1,14 +1,16 @@
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Bed, Bath, Square, Flame, MessageCircle, X } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Flame, MessageCircle, X, Camera } from 'lucide-react';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useHasPremiumFeature } from '@/hooks/useSubscription';
 import { Listing } from '@/hooks/useListings';
+import { PropertyImageGallery } from './PropertyImageGallery';
 
 interface PropertyDetailsProps {
   listingId: string | null;
@@ -20,6 +22,17 @@ interface PropertyDetailsProps {
 export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: PropertyDetailsProps) {
   const swipeMutation = useSwipe();
   const hasMessaging = useHasPremiumFeature('messaging');
+  const [galleryState, setGalleryState] = useState<{
+    isOpen: boolean;
+    images: string[];
+    alt: string;
+    initialIndex: number;
+  }>({
+    isOpen: false,
+    images: [],
+    alt: '',
+    initialIndex: 0
+  });
 
   const { data: listing, isLoading } = useQuery({
     queryKey: ['listing', listingId],
@@ -56,6 +69,17 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
     onClose();
   };
 
+  const handleImageClick = (listing: any, imageIndex: number = 0) => {
+    if (listing.images && listing.images.length > 0) {
+      setGalleryState({
+        isOpen: true,
+        images: listing.images,
+        alt: listing.title,
+        initialIndex: imageIndex
+      });
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -79,12 +103,23 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
             </DialogHeader>
             
             {/* Full Screen Image Gallery */}
-            <div className="relative h-[60vh] overflow-hidden">
+            <div 
+              className="relative h-[60vh] overflow-hidden cursor-pointer group"
+              onClick={() => handleImageClick(listing, 0)}
+            >
               <img
                 src={listing.images?.[0] || '/placeholder.svg'}
                 alt={listing.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
+              
+              {/* Image overlay with camera icon */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-3">
+                  <Camera className="w-6 h-6 text-gray-800" />
+                </div>
+              </div>
+              
               {listing.images && listing.images.length > 1 && (
                 <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-2 rounded-full text-sm backdrop-blur-sm">
                   1 / {listing.images.length}
@@ -218,6 +253,14 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
           </>
         ) : null}
       </DialogContent>
+
+      <PropertyImageGallery
+        images={galleryState.images}
+        alt={galleryState.alt}
+        isOpen={galleryState.isOpen}
+        onClose={() => setGalleryState(prev => ({ ...prev, isOpen: false }))}
+        initialIndex={galleryState.initialIndex}
+      />
     </Dialog>
   );
 }

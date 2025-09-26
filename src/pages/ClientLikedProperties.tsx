@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog";
 import { PropertyDetails } from "@/components/PropertyDetails";
+import { PropertyImageGallery } from "@/components/PropertyImageGallery";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,24 @@ import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
 import { useStartConversation, useConversationStats } from "@/hooks/useConversations";
 import { useNavigate } from "react-router-dom";
-import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw } from "lucide-react";
+import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, Camera } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const ClientLikedProperties = () => {
   const [showLikedDialog, setShowLikedDialog] = useState(false);
   const [showPropertyDetails, setShowPropertyDetails] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+  const [galleryState, setGalleryState] = useState<{
+    isOpen: boolean;
+    images: string[];
+    alt: string;
+    initialIndex: number;
+  }>({
+    isOpen: false,
+    images: [],
+    alt: '',
+    initialIndex: 0
+  });
   const { data: likedProperties = [], isLoading, refetch: refreshLikedProperties } = useLikedProperties();
   const { data: subscription } = useUserSubscription();
   const { data: conversationStats } = useConversationStats();
@@ -41,6 +53,12 @@ const ClientLikedProperties = () => {
     }
     
     try {
+      console.log('Starting conversation with:', {
+        otherUserId: property.owner_id,
+        listingId: property.id,
+        propertyTitle: property.title
+      });
+
       // Start a conversation with the property owner
       await startConversation.mutateAsync({
         otherUserId: property.owner_id,
@@ -56,11 +74,23 @@ const ClientLikedProperties = () => {
       // Navigate to messages
       navigate('/messages');
     } catch (error) {
+      console.error('Failed to start conversation:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
       toast({
         title: "Unable to start conversation",
         description: errorMessage,
         variant: "destructive"
+      });
+    }
+  };
+
+  const handleImageClick = (property: any, imageIndex: number = 0) => {
+    if (property.images && property.images.length > 0) {
+      setGalleryState({
+        isOpen: true,
+        images: property.images,
+        alt: property.title,
+        initialIndex: imageIndex
       });
     }
   };
@@ -106,13 +136,30 @@ const ClientLikedProperties = () => {
               {likedProperties.map((property) => (
                 <Card key={property.id} className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 overflow-hidden group">
                   {/* Property Image */}
-                  <div className="relative h-48 overflow-hidden">
+                  <div 
+                    className="relative h-48 overflow-hidden cursor-pointer group"
+                    onClick={() => handleImageClick(property, 0)}
+                  >
                     {property.images && property.images.length > 0 ? (
-                      <img
-                        src={property.images[0]}
-                        alt={property.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <>
+                        <img
+                          src={property.images[0]}
+                          alt={property.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {/* Image overlay with camera icon */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-2">
+                            <Camera className="w-5 h-5 text-gray-800" />
+                          </div>
+                        </div>
+                        {/* Image counter */}
+                        {property.images.length > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                            1 / {property.images.length}
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
                         <Flame className="w-12 h-12 text-muted-foreground/50" />
@@ -129,7 +176,10 @@ const ClientLikedProperties = () => {
                         size="sm"
                         variant="ghost"
                         className="bg-background/20 hover:bg-background/30 text-foreground"
-                        onClick={() => handlePropertySelect(property.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePropertySelect(property.id);
+                        }}
                       >
                         <ExternalLink className="w-4 h-4" />
                       </Button>
@@ -255,6 +305,14 @@ const ClientLikedProperties = () => {
             handleContactOwner(selectedProperty);
           }
         }}
+      />
+
+      <PropertyImageGallery
+        images={galleryState.images}
+        alt={galleryState.alt}
+        isOpen={galleryState.isOpen}
+        onClose={() => setGalleryState(prev => ({ ...prev, isOpen: false }))}
+        initialIndex={galleryState.initialIndex}
       />
     </DashboardLayout>
   );

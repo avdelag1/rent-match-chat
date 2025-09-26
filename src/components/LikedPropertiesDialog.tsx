@@ -3,12 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame, MapPin, Bed, Bath, Square, X } from 'lucide-react';
+import { Flame, MapPin, Bed, Bath, Square, X, Camera } from 'lucide-react';
 import { useLikedProperties } from '@/hooks/useLikedProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { PropertyImageGallery } from './PropertyImageGallery';
+import { useState } from 'react';
 
 interface LikedPropertiesDialogProps {
   isOpen: boolean;
@@ -19,6 +21,17 @@ interface LikedPropertiesDialogProps {
 export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: LikedPropertiesDialogProps) {
   const { data: likedProperties = [], isLoading, refetch } = useLikedProperties();
   const queryClient = useQueryClient();
+  const [galleryState, setGalleryState] = useState<{
+    isOpen: boolean;
+    images: string[];
+    alt: string;
+    initialIndex: number;
+  }>({
+    isOpen: false,
+    images: [],
+    alt: '',
+    initialIndex: 0
+  });
 
   const removeLikeMutation = useMutation({
     mutationFn: async (listingId: string) => {
@@ -50,6 +63,17 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
     if (onPropertySelect) {
       onPropertySelect(listingId);
       onClose();
+    }
+  };
+
+  const handleImageClick = (property: any, imageIndex: number = 0) => {
+    if (property.images && property.images.length > 0) {
+      setGalleryState({
+        isOpen: true,
+        images: property.images,
+        alt: property.title,
+        initialIndex: imageIndex
+      });
     }
   };
 
@@ -107,14 +131,31 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
                   <X className="w-4 h-4" />
                 </Button>
                 
-                <div onClick={() => handlePropertyClick(property.id)}>
-                  <div className="relative h-48 overflow-hidden rounded-t-lg">
+                <div>
+                  <div 
+                    className="relative h-48 overflow-hidden rounded-t-lg cursor-pointer group"
+                    onClick={() => handleImageClick(property, 0)}
+                  >
                     {property.images && property.images.length > 0 ? (
-                      <img
-                        src={property.images[0]}
-                        alt={property.title}
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <img
+                          src={property.images[0]}
+                          alt={property.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {/* Image overlay with camera icon */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-2">
+                            <Camera className="w-5 h-5 text-gray-800" />
+                          </div>
+                        </div>
+                        {/* Image counter */}
+                        {property.images.length > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                            1 / {property.images.length}
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                         <span className="text-gray-500">No image</span>
@@ -129,8 +170,8 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
                     </div>
                   </div>
 
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-1 line-clamp-1">{property.title}</h3>
+                  <CardContent className="p-4" onClick={() => handlePropertyClick(property.id)}>
+                    <h3 className="font-semibold text-lg mb-1 line-clamp-1 cursor-pointer">{property.title}</h3>
                     <div className="flex items-center text-muted-foreground mb-2">
                       <MapPin className="w-4 h-4 mr-1" />
                       <span className="text-sm line-clamp-1">{property.address}</span>
@@ -172,6 +213,14 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
           </div>
         )}
       </DialogContent>
+
+      <PropertyImageGallery
+        images={galleryState.images}
+        alt={galleryState.alt}
+        isOpen={galleryState.isOpen}
+        onClose={() => setGalleryState(prev => ({ ...prev, isOpen: false }))}
+        initialIndex={galleryState.initialIndex}
+      />
     </Dialog>
   );
 }
