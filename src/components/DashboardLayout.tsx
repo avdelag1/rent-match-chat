@@ -98,6 +98,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       case 'add-property':
         setShowPropertyForm(true)
         break
+      case 'filters':
+        // Handle filters for client - navigate to dashboard if not already there
+        if (userRole === 'client' && location.pathname !== '/client/dashboard') {
+          navigate('/client/dashboard');
+        } else if (userRole === 'owner' && location.pathname !== '/owner/dashboard') {
+          navigate('/owner/dashboard');
+        }
+        // The filters will be handled by the dashboard page itself
+        break
       case 'upgrade':
         setSubscriptionReason('Choose the perfect plan for your needs!')
         setShowSubscriptionPackages(true)

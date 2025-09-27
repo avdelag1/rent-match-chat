@@ -68,11 +68,13 @@ const ClientLikedProperties = () => {
       
       toast({
         title: "Conversation started!",
-        description: "You can now chat with the property owner.",
+        description: "Redirecting to chat...",
       });
       
-      // Navigate to messages
-      navigate('/messages');
+      // Navigate to messages after a brief delay to show the toast
+      setTimeout(() => {
+        navigate('/messages');
+      }, 1000);
     } catch (error) {
       console.error('Failed to start conversation:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
@@ -97,21 +99,21 @@ const ClientLikedProperties = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="p-8">
+      <div className="p-8 bg-white min-h-screen">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
               <Flame className="w-8 h-8 text-red-500" />
               Your Liked Properties
             </h1>
-            <p className="text-muted-foreground">Properties you've shown interest in.</p>
+            <p className="text-gray-600">Properties you've shown interest in.</p>
             <div className="flex items-center justify-center gap-4 mt-4">
               <Button
                 onClick={() => refreshLikedProperties()}
                 variant="outline"
                 size="sm"
                 disabled={isLoading}
-                className="bg-card/50 border-border text-foreground hover:bg-card"
+                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -126,15 +128,15 @@ const ClientLikedProperties = () => {
           </div>
 
           {isLoading ? (
-            <Card className="bg-card/50 backdrop-blur-sm border-border">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardContent className="flex items-center justify-center py-12">
-                <p className="text-muted-foreground">Loading your liked properties...</p>
+                <p className="text-gray-600">Loading your liked properties...</p>
               </CardContent>
             </Card>
           ) : likedProperties.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {likedProperties.map((property) => (
-                <Card key={property.id} className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 overflow-hidden group">
+                <Card key={property.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all duration-300 overflow-hidden group shadow-sm">
                   {/* Property Image */}
                   <div 
                     className="relative h-48 overflow-hidden cursor-pointer group"
@@ -187,9 +189,9 @@ const ClientLikedProperties = () => {
                   </div>
 
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-foreground text-lg flex items-center justify-between">
+                  <CardTitle className="text-gray-900 text-lg flex items-center justify-between">
                       <span className="truncate">{property.title}</span>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
                         {property.property_type}
                       </Badge>
                     </CardTitle>
@@ -197,13 +199,13 @@ const ClientLikedProperties = () => {
 
                   <CardContent className="space-y-4">
                     {/* Location */}
-                    <div className="flex items-center text-muted-foreground">
+                    <div className="flex items-center text-gray-600">
                       <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span className="text-sm truncate">{property.address}</span>
                     </div>
 
                     {/* Property Details */}
-                    <div className="flex items-center gap-4 text-muted-foreground text-sm">
+                    <div className="flex items-center gap-4 text-gray-600 text-sm">
                       {property.beds && (
                         <div className="flex items-center gap-1">
                           <Bed className="w-4 h-4" />
@@ -225,7 +227,7 @@ const ClientLikedProperties = () => {
                     </div>
 
                     {/* Price */}
-                    <div className="text-foreground font-bold text-xl">
+                    <div className="text-gray-900 font-bold text-xl">
                       ${property.price?.toLocaleString()}/month
                     </div>
 
@@ -238,7 +240,7 @@ const ClientLikedProperties = () => {
                           </span>
                         ))}
                         {property.amenities.length > 3 && (
-                          <span className="text-muted-foreground text-xs">+{property.amenities.length - 3} more</span>
+                          <span className="text-gray-500 text-xs">+{property.amenities.length - 3} more</span>
                         )}
                       </div>
                     )}
@@ -273,11 +275,11 @@ const ClientLikedProperties = () => {
               ))}
             </div>
           ) : (
-            <Card className="bg-card/50 backdrop-blur-sm border-border">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Flame className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">No Liked Properties</h3>
-                <p className="text-muted-foreground text-center">
+                <Flame className="w-16 h-16 text-gray-300 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Liked Properties</h3>
+                <p className="text-gray-600 text-center">
                   Properties you like will appear here.
                 </p>
               </CardContent>
