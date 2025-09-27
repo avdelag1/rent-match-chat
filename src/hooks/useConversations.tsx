@@ -167,8 +167,12 @@ export function useStartConversation() {
           .select()
           .single();
 
-        if (conversationError) throw conversationError;
+        if (conversationError) {
+          console.error('❌ Conversation creation error:', conversationError);
+          throw new Error(`Failed to create conversation: ${conversationError.message}`);
+        }
         conversationId = newConversation.id;
+        console.log('✅ New conversation created:', newConversation);
 
         // Optionally create a match record for tracking purposes (but don't block conversation if it fails)
         try {
@@ -183,9 +187,12 @@ export function useStartConversation() {
               client_liked_at: new Date().toISOString(),
               owner_liked_at: new Date().toISOString()
             });
+          console.log('✅ Match record created');
         } catch (matchError) {
-          console.log('Match creation failed, but conversation was created successfully:', matchError);
+          console.log('⚠️ Match creation failed, but conversation was created successfully:', matchError);
         }
+      } else {
+        console.log('✅ Using existing conversation:', conversationId);
       }
 
       // Send initial message
@@ -200,24 +207,35 @@ export function useStartConversation() {
         .select()
         .single();
 
-      if (messageError) throw messageError;
+      if (messageError) {
+        console.error('❌ Message creation error:', messageError);
+        throw new Error(`Failed to send message: ${messageError.message}`);
+      }
+      console.log('✅ Message sent:', message);
 
       // Update conversation last_message_at
-      await supabase
+      const { error: updateError } = await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+      if (updateError) {
+        console.error('⚠️ Failed to update conversation timestamp:', updateError);
+        // Don't throw error here as the message was sent successfully
+      }
+
       return { conversationId, message };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      console.log('✅ Conversation created successfully:', data);
       toast({
         title: '💬 Conversation Started',
-        description: 'Your message has been sent successfully!'
+        description: 'Redirecting to chat...'
       });
     },
     onError: (error: Error) => {
+      console.error('❌ Failed to start conversation:', error);
       toast({
         title: 'Failed to Send Message',
         description: error.message,

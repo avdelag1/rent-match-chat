@@ -60,23 +60,19 @@ const ClientLikedProperties = () => {
       });
 
       // Start a conversation with the property owner
-      await startConversation.mutateAsync({
+      const result = await startConversation.mutateAsync({
         otherUserId: property.owner_id,
         listingId: property.id,
         initialMessage: `Hi! I'm interested in your property: ${property.title}. Could you tell me more about it?`
       });
       
-      toast({
-        title: "Conversation started!",
-        description: "Redirecting to chat...",
-      });
+      console.log('✅ Conversation started successfully:', result);
       
-      // Navigate to messages after a brief delay to show the toast
-      setTimeout(() => {
-        navigate('/messages');
-      }, 1000);
+      // Navigate to messages immediately - the toast is handled by the mutation
+      navigate('/messages');
+      
     } catch (error) {
-      console.error('Failed to start conversation:', error);
+      console.error('❌ Failed to start conversation:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
       toast({
         title: "Unable to start conversation",
