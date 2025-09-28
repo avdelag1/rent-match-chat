@@ -22,13 +22,20 @@ async function fetchOwnProfile() {
   const uid = auth.user?.id;
   if (!uid) return null;
 
+  console.log('Fetching profile for user:', uid);
+
   const { data, error } = await supabase
     .from('client_profiles')
     .select('*')
     .eq('user_id', uid)
     .maybeSingle();
 
-  if (error && error.code !== 'PGRST116') throw error;
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching profile:', error);
+    throw error;
+  }
+  
+  console.log('Fetched profile data:', data);
   return data as ClientProfileLite | null;
 }
 
@@ -55,21 +62,31 @@ export function useSaveClientProfile() {
         .maybeSingle();
 
       if (existing?.id) {
+        console.log('Updating existing profile with:', updates);
         const { data, error } = await supabase
           .from('client_profiles')
           .update(updates)
           .eq('id', existing.id)
           .select()
           .single();
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating profile:', error);
+          throw error;
+        }
+        console.log('Updated profile data:', data);
         return data as ClientProfileLite;
       } else {
+        console.log('Creating new profile with:', updates);
         const { data, error } = await supabase
           .from('client_profiles')
           .insert([{ ...updates, user_id: uid }])
           .select()
           .single();
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating profile:', error);
+          throw error;
+        }
+        console.log('Created profile data:', data);
         return data as ClientProfileLite;
       }
     },
