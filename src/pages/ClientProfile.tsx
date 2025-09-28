@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ClientProfileDialog } from "@/components/ClientProfileDialog";
+import { PhotoPreview } from "@/components/PhotoPreview";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,8 @@ import { motion } from "framer-motion";
 
 const ClientProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showPhotoPreview, setShowPhotoPreview] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const { data: profile, isLoading } = useClientProfile();
 
   // Auto-open dialog if no profile exists yet
@@ -16,6 +19,11 @@ const ClientProfile = () => {
       setShowEditDialog(true);
     }
   }, [profile, isLoading]);
+
+  const handlePhotoClick = (index: number) => {
+    setSelectedPhotoIndex(index);
+    setShowPhotoPreview(true);
+  };
 
   return (
     <DashboardLayout userRole="client">
@@ -47,7 +55,36 @@ const ClientProfile = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {profile ? (
-                  <div className="grid gap-4">
+                  <div className="grid gap-6">
+                    {/* Profile Photos Section */}
+                    {profile.profile_images && profile.profile_images.length > 0 && (
+                      <div>
+                        <label className="text-muted-foreground text-sm font-medium">Photos</label>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mt-2">
+                          {profile.profile_images.map((image, index) => (
+                            <motion.div
+                              key={index}
+                              className="relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-muted"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => handlePhotoClick(index)}
+                            >
+                              <img
+                                src={image}
+                                alt={`Profile photo ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              {index === 0 && (
+                                <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded">
+                                  Main
+                                </div>
+                              )}
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-muted-foreground text-sm font-medium">Name</label>
@@ -107,6 +144,13 @@ const ClientProfile = () => {
       <ClientProfileDialog 
         open={showEditDialog} 
         onOpenChange={setShowEditDialog} 
+      />
+      
+      <PhotoPreview
+        photos={profile?.profile_images || []}
+        isOpen={showPhotoPreview}
+        onClose={() => setShowPhotoPreview(false)}
+        initialIndex={selectedPhotoIndex}
       />
     </DashboardLayout>
   );
