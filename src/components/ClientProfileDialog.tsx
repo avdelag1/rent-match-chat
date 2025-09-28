@@ -42,6 +42,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
 
   const handleImageUpload = async (file: File): Promise<string> => {
     try {
+      console.log('Starting image upload for:', file.name);
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
@@ -49,17 +50,24 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${user.data.user.id}/${fileName}`;
 
+      console.log('Uploading to path:', filePath);
+
       const { data, error } = await supabase.storage
         .from('profile-images')
         .upload(filePath, file);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Storage upload error:', error);
+        throw error;
+      }
+
+      console.log('Upload successful:', data);
 
       const { data: { publicUrl } } = supabase.storage
         .from('profile-images')
         .getPublicUrl(filePath);
 
-      console.log('Uploaded image to:', publicUrl);
+      console.log('Generated public URL:', publicUrl);
       return publicUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -68,6 +76,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
   };
 
   const handleSave = async () => {
+    console.log('Saving profile with images:', profileImages);
     const payload = {
       name: name || null,
       age: age === '' ? null : Number(age),
@@ -78,6 +87,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
       profile_images: profileImages,
     };
 
+    console.log('Profile payload:', payload);
     await saveMutation.mutateAsync(payload);
     toast({ title: 'Profile saved', description: 'Your profile has been updated.' });
     onOpenChange(false);
