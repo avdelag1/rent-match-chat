@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PhotoUploadManager } from '@/components/PhotoUploadManager';
 import { useClientProfile, useSaveClientProfile } from '@/hooks/useClientProfile';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 type Props = {
   open: boolean;
@@ -40,10 +41,30 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
   }, [data]);
 
   const handleImageUpload = async (file: File): Promise<string> => {
-    // For now, create object URL - in production, upload to Supabase Storage
-    const url = URL.createObjectURL(file);
-    console.log('Uploaded image:', file.name);
-    return url;
+    try {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${user.data.user.id}/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+
+      console.log('Uploaded image to:', publicUrl);
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
   };
 
   const handleSave = async () => {
