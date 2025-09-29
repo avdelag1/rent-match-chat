@@ -146,20 +146,47 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-background to-card">
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-background via-card to-background border-primary/20 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent flex items-center gap-3">
+            <Flame className="w-6 h-6 text-primary animate-pulse" />
             {userRole === 'client' ? '🏠 Sculpt Your Perfect Home' : '👥 Find Your Ideal Tenant'}
+            <Zap className="w-5 h-5 text-accent" />
           </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="basics" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="basics">Basics</TabsTrigger>
-            <TabsTrigger value="lifestyle">Lifestyle</TabsTrigger>
-            <TabsTrigger value="aesthetic">Aesthetic</TabsTrigger>
-            <TabsTrigger value="logistics">Logistics</TabsTrigger>
-            <TabsTrigger value="personality">Personality</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger 
+              value="basics"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Basics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="lifestyle"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Lifestyle
+            </TabsTrigger>
+            <TabsTrigger 
+              value="aesthetic"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Aesthetic
+            </TabsTrigger>
+            <TabsTrigger 
+              value="logistics"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Logistics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="personality"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Personality
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="basics" className="space-y-6">

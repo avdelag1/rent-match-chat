@@ -72,31 +72,36 @@ export default function LegendaryLandingPage() {
   return (
     <motion.div 
       ref={containerRef}
-      className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-red-400 via-red-500 to-orange-500 cursor-pointer"
+      className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800 cursor-pointer"
       onMouseMove={handleMouseMove}
       onClick={createRipple}
       animate={{
-        background: `linear-gradient(${135 + mousePosition.x}deg, rgb(248 113 113), rgb(239 68 68), rgb(251 146 60))`
+        background: `radial-gradient(circle at ${50 + mousePosition.x}% ${50 + mousePosition.y}%, rgb(17 17 17), rgb(0 0 0), rgb(23 23 23))`
       }}
       transition={{ duration: 0.3 }}
     >
-      {/* Optimized Floating Embers - reduced from 15 to 8 for better performance */}
+      {/* Animated Fire Sparks */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 8 }).map((_, i) => (
+        {Array.from({ length: 12 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full"
+            className="absolute"
             style={{
-              width: `${2 + Math.random() * 4}px`,
-              height: `${2 + Math.random() * 4}px`,
-              background: `radial-gradient(circle, ${
-                i % 3 === 0 ? '#fbbf24' : 
-                i % 3 === 1 ? '#f97316' : '#dc2626'
+              width: `${1 + Math.random() * 3}px`,
+              height: `${2 + Math.random() * 6}px`,
+              background: `linear-gradient(45deg, ${
+                i % 4 === 0 ? '#ff6b35' : 
+                i % 4 === 1 ? '#f7931e' : 
+                i % 4 === 2 ? '#ffcc02' :
+                '#ff4757'
               }, transparent)`,
-              boxShadow: `0 0 ${4 + Math.random() * 8}px ${
-                i % 3 === 0 ? '#fbbf24' : 
-                i % 3 === 1 ? '#f97316' : '#dc2626'
-              }60`,
+              boxShadow: `0 0 ${6 + Math.random() * 12}px ${
+                i % 4 === 0 ? '#ff6b35' : 
+                i % 4 === 1 ? '#f7931e' : 
+                i % 4 === 2 ? '#ffcc02' :
+                '#ff4757'
+              }80`,
+              borderRadius: '50%',
             }}
             animate={{
               x: [
@@ -107,19 +112,53 @@ export default function LegendaryLandingPage() {
               ],
               y: [
                 Math.random() * window.innerHeight,
+                Math.random() * window.innerHeight - 100,
                 Math.random() * window.innerHeight,
-                Math.random() * window.innerHeight,
-                Math.random() * window.innerHeight
+                Math.random() * window.innerHeight + 50
               ],
-              scale: [0.3, 1, 0.6, 1.2, 0.4],
-              opacity: [0.2, 0.8, 0.4, 0.9, 0.3],
-              rotate: [0, 180, 360, 540, 720]
+              scale: [0.2, 1.2, 0.4, 1.8, 0.1],
+              opacity: [0.1, 0.9, 0.3, 1, 0.2],
+              rotate: [0, 90, 180, 270, 360]
             }}
             transition={{
-              duration: 20 + Math.random() * 10, // Optimized: 20-30 seconds
+              duration: 15 + Math.random() * 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: Math.random() * 8
+            }}
+          />
+        ))}
+        
+        {/* Additional floating particles */}
+        {Array.from({ length: 8 }).map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute rounded-full"
+            style={{
+              width: `${0.5 + Math.random() * 2}px`,
+              height: `${0.5 + Math.random() * 2}px`,
+              background: `radial-gradient(circle, #ffa726, transparent)`,
+              boxShadow: `0 0 ${3 + Math.random() * 6}px #ffa726`,
+            }}
+            animate={{
+              x: [
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth
+              ],
+              y: [
+                window.innerHeight + 20,
+                Math.random() * window.innerHeight,
+                -20
+              ],
+              opacity: [0, 0.8, 0],
+              scale: [0.3, 1, 0.2]
+            }}
+            transition={{
+              duration: 25 + Math.random() * 15,
               repeat: Infinity,
               ease: "linear",
-              delay: Math.random() * 10 // Staggered start
+              delay: Math.random() * 10
             }}
           />
         ))}
@@ -130,21 +169,21 @@ export default function LegendaryLandingPage() {
         {ripples.map((ripple) => (
           <motion.div
             key={ripple.id}
-            className="absolute border-2 border-white/30 rounded-full pointer-events-none"
+            className="absolute border-2 border-orange-400/40 rounded-full pointer-events-none"
             style={{
               left: ripple.x - 25,
               top: ripple.y - 25,
             }}
             initial={{ width: 50, height: 50, opacity: 0.8 }}
             animate={{ 
-              width: 300, 
-              height: 300, 
+              width: 400, 
+              height: 400, 
               opacity: 0,
-              x: -125,
-              y: -125
+              x: -175,
+              y: -175
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
           />
         ))}
       </AnimatePresence>
