@@ -36,14 +36,21 @@ export function PropertyPreviewDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6">
+        <div className="flex-1 overflow-y-auto space-y-6 max-h-[calc(95vh-120px)]">
           {/* Image Gallery */}
-          {property.images && property.images.length > 0 && (
-            <div className="relative h-64 rounded-lg overflow-hidden">
+          {property.images && property.images.length > 0 ? (
+            <div className="relative h-80 rounded-lg overflow-hidden">
               <ImageCarousel 
                 images={property.images} 
                 alt={property.title || 'Property'} 
               />
+            </div>
+          ) : (
+            <div className="relative h-80 rounded-lg overflow-hidden bg-muted/30 flex items-center justify-center">
+              <div className="text-center space-y-2">
+                <div className="text-6xl text-muted-foreground">🏠</div>
+                <p className="text-muted-foreground">No images uploaded</p>
+              </div>
             </div>
           )}
 
