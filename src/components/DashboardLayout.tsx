@@ -32,6 +32,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showPropertyForm, setShowPropertyForm] = useState(false)
+  const [editingProperty, setEditingProperty] = useState<any>(null)
   const [showSubscriptionPackages, setShowSubscriptionPackages] = useState(false)
   const [showLikedProperties, setShowLikedProperties] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
@@ -77,7 +78,24 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Auto-open property form when the URL hash is "#add-property"
   useEffect(() => {
     if (location.hash === '#add-property') {
-      setShowPropertyForm(true)
+      // Check if there's an editing property in sessionStorage
+      const storedEditingProperty = sessionStorage.getItem('editingProperty');
+      if (storedEditingProperty) {
+        try {
+          const property = JSON.parse(storedEditingProperty);
+          setEditingProperty(property);
+          // Clear from sessionStorage after using
+          sessionStorage.removeItem('editingProperty');
+        } catch (error) {
+          console.error('Error parsing stored editing property:', error);
+        }
+      } else {
+        setEditingProperty(null);
+      }
+      setShowPropertyForm(true);
+    } else {
+      setShowPropertyForm(false);
+      setEditingProperty(null);
     }
   }, [location.hash])
 
@@ -229,8 +247,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       {userRole === 'owner' && (
         <PropertyForm
           isOpen={showPropertyForm}
-          onClose={() => setShowPropertyForm(false)}
-          editingProperty={null}
+          onClose={() => {
+            setShowPropertyForm(false);
+            setEditingProperty(null);
+            // Clear hash when closing form
+            if (location.hash === '#add-property') {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+          }}
+          editingProperty={editingProperty}
         />
       )}
 

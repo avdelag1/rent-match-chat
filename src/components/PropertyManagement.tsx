@@ -13,15 +13,13 @@ import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { PropertyPreviewDialog } from '@/components/PropertyPreviewDialog';
-import { PropertyForm } from '@/components/PropertyForm';
+
 
 export function PropertyManagement() {
   const { user } = useAuth();
   const { data: allListings = [], isLoading, error } = useListings();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [editingProperty, setEditingProperty] = useState<any>(null);
-  const [showForm, setShowForm] = useState(false);
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
   const queryClient = useQueryClient();
@@ -50,22 +48,16 @@ export function PropertyManagement() {
   console.log('PropertyManagement - Filtered listings:', filteredListings.length);
 
   const handleAddProperty = () => {
-    setEditingProperty(null);
-    setShowForm(true);
-    // Set hash so DashboardLayout opens the PropertyForm
-    if (location.hash !== '#add-property') {
-      location.hash = '#add-property';
-    }
+    // Clear any editing state and set hash for DashboardLayout PropertyForm
+    location.hash = '#add-property';
   };
 
   const handleEditProperty = (listing: any) => {
     console.log('Edit property:', listing.id);
-    setEditingProperty(listing);
-    setShowForm(true);
-    // Set hash so DashboardLayout opens the PropertyForm with editing data
-    if (location.hash !== '#add-property') {
-      location.hash = '#add-property';
-    }
+    // Store editing property in sessionStorage for DashboardLayout to pick up
+    sessionStorage.setItem('editingProperty', JSON.stringify(listing));
+    // Set hash to open DashboardLayout PropertyForm
+    location.hash = '#add-property';
   };
 
   const handleViewProperty = (listing: any) => {
@@ -81,9 +73,11 @@ export function PropertyManagement() {
 
   const handleEditFromPreview = () => {
     if (viewingProperty) {
-      setEditingProperty(viewingProperty);
+      // Store editing property in sessionStorage for DashboardLayout to pick up
+      sessionStorage.setItem('editingProperty', JSON.stringify(viewingProperty));
       setShowPreview(false);
-      setShowForm(true);
+      // Set hash to open DashboardLayout PropertyForm
+      location.hash = '#add-property';
     }
   };
 
@@ -351,17 +345,6 @@ export function PropertyManagement() {
           </div>
         </Tabs>
 
-        {/* Property Form */}
-        {(showForm || editingProperty) && (
-          <PropertyForm
-            isOpen={showForm || !!editingProperty}
-            onClose={() => {
-              setShowForm(false);
-              setEditingProperty(null);
-            }}
-            editingProperty={editingProperty}
-          />
-        )}
 
         {/* Property Preview */}
         <PropertyPreviewDialog
