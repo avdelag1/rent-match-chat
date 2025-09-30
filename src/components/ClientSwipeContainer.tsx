@@ -22,9 +22,10 @@ interface ClientSwipeContainerProps {
   onMessageClick?: () => void;
   showFilters?: boolean;
   onFiltersClose?: () => void;
+  onFiltersOpen?: () => void;
 }
 
-export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, showFilters = false, onFiltersClose }: ClientSwipeContainerProps) {
+export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, showFilters = false, onFiltersClose, onFiltersOpen }: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [appliedFilters, setAppliedFilters] = useState({});
@@ -36,7 +37,45 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   }>({ isOpen: false });
   
   const { data: swipedIds = [] } = useSwipedClientProfiles();
-  const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
+  const { data: allClientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
+  
+  // Apply local filtering based on appliedFilters
+  const clientProfiles = allClientProfiles.filter(profile => {
+    if (!appliedFilters || Object.keys(appliedFilters).length === 0) return true;
+    
+    // Age filter
+    if ((appliedFilters as any).ageRange && profile.age) {
+      if (profile.age < (appliedFilters as any).ageRange[0] || profile.age > (appliedFilters as any).ageRange[1]) {
+        return false;
+      }
+    }
+    
+    // Budget filter
+    if ((appliedFilters as any).budgetRange && (profile as any).budget_max) {
+      if ((profile as any).budget_max < (appliedFilters as any).budgetRange[0] || (profile as any).budget_max > (appliedFilters as any).budgetRange[1]) {
+        return false;
+      }
+    }
+    
+    // Lifestyle filter
+    if ((appliedFilters as any).lifestyleCompatibility && (appliedFilters as any).lifestyleCompatibility.length > 0) {
+      const profileLifestyle = profile.lifestyle_tags || [];
+      const hasMatchingLifestyle = (appliedFilters as any).lifestyleCompatibility.some((lifestyle: string) => 
+        profileLifestyle.includes(lifestyle)
+      );
+      if (!hasMatchingLifestyle) {
+        return false;
+      }
+    }
+    
+    // Verification filters
+    if ((appliedFilters as any).verifiedOnly && !(profile as any).income_verification) {
+      return false;
+    }
+    
+    return true;
+  });
+  
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
       setMatchCelebration({
@@ -141,6 +180,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   const handleApplyFilters = (filters: any) => {
     setAppliedFilters(filters);
     setCurrentIndex(0);
+    refetch(); // Force refetch with new filters
     
     const activeFiltersCount = Object.values(filters).flat().filter(Boolean).length;
     toast({
@@ -205,7 +245,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
           </p>
           <div className="space-y-2">
             <Button 
-              onClick={() => {}}
+              onClick={() => onFiltersOpen && onFiltersOpen()}
               variant="outline"
               className="gap-2 w-full"
             >
@@ -237,7 +277,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
           </p>
           <div className="space-y-2">
             <Button 
-              onClick={() => {}}
+              onClick={() => onFiltersOpen && onFiltersOpen()}
               variant="outline"
               className="gap-2 w-full"
             >

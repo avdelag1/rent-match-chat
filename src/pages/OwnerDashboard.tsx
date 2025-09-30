@@ -131,6 +131,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 onMessageClick={onMessageClick}
                 showFilters={showFilters}
                 onFiltersClose={() => setShowFilters(false)}
+                onFiltersOpen={() => setShowFilters(true)}
               />
             )}
           </div>

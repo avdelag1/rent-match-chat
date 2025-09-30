@@ -5,7 +5,6 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Eye, EyeOff, Flame, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
@@ -85,19 +84,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Tinderent
         </DialogDescription>
         <div className="max-h-[95vh] overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.2 }}
-          className="relative"
-        >
-          {/* Header with enhanced gradient background */}
+        <div className="relative">
+          {/* Header with gradient background */}
           <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-t-3xl px-6 py-10 shadow-2xl overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-400/20 via-purple-400/20 to-red-400/20 animate-pulse"></div>
-            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full animate-bounce [animation-delay:0.5s]"></div>
-            <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-white/15 rounded-full animate-bounce [animation-delay:1s]"></div>
             
             {/* Back Button */}
             <button 
@@ -110,114 +99,51 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
             {/* Header Content */}
             <div className="text-center text-white pt-4 relative z-10">
-              <motion.div 
-                className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm"
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 10, -10, 0]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
+              <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm">
                 <Flame className="w-10 h-10 text-white drop-shadow-lg" />
-              </motion.div>
-              <motion.h1 
-                className="text-3xl font-bold mb-3 drop-shadow-sm"
-                animate={{ 
-                  y: [0, -5, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
+              </div>
+              <h1 className="text-3xl font-bold mb-3 drop-shadow-sm">
                 {isLogin ? 'Welcome Back!' : 'Join Tinderent'}
-              </motion.h1>
-              <motion.p 
-                className="text-white/90 text-base capitalize font-medium"
-                animate={{ 
-                  opacity: [0.7, 1, 0.7],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
+              </h1>
+              <p className="text-white/90 text-base capitalize font-medium">
                 {isLogin ? 'Sign in' : 'Sign up'} as {role}
-              </motion.p>
+              </p>
             </div>
           </div>
 
           {/* Main Content */}
           <div className="bg-white rounded-b-3xl p-8 space-y-8 relative overflow-hidden">
-            {/* Floating decorative elements */}
-            <div className="absolute top-4 right-4 w-3 h-3 bg-orange-300 rounded-full animate-ping [animation-delay:0.5s]"></div>
-            <div className="absolute bottom-8 left-8 w-2 h-2 bg-red-300 rounded-full animate-ping [animation-delay:1.5s]"></div>
             
             {/* OAuth Buttons */}
             <div className="space-y-4 relative z-10">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              <Button
+                type="button"
+                onClick={() => handleOAuthSignIn('google')}
+                disabled={isLoading}
+                className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
               >
-                <Button
-                  type="button"
-                  onClick={() => handleOAuthSignIn('google')}
-                  disabled={isLoading}
-                  className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 relative overflow-hidden group"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                  <FaGoogle className="w-6 h-6 text-red-500 relative z-10" />
-                  <span className="relative z-10">Continue with Google</span>
-                </Button>
-              </motion.div>
+                <FaGoogle className="w-6 h-6 text-red-500" />
+                <span>Continue with Google</span>
+              </Button>
               
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              <Button
+                type="button"
+                onClick={() => handleOAuthSignIn('facebook')}
+                disabled={isLoading}
+                className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
               >
-                <Button
-                  type="button"
-                  onClick={() => handleOAuthSignIn('facebook')}
-                  disabled={isLoading}
-                  className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50 relative overflow-hidden group"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                  <FaFacebook className="w-6 h-6 relative z-10" />
-                  <span className="relative z-10">Continue with Facebook</span>
-                </Button>
-              </motion.div>
+                <FaFacebook className="w-6 h-6" />
+                <span>Continue with Facebook</span>
+              </Button>
             </div>
 
-            {/* Animated Divider */}
+            {/* Divider */}
             <div className="relative flex items-center py-4">
-              <motion.div 
-                className="flex-grow border-t border-gray-300"
-                animate={{ scaleX: [0.8, 1, 0.8] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              ></motion.div>
-              <motion.span 
-                className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2"
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  color: ["#6b7280", "#f97316", "#6b7280"]
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              >
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2">
                 or
-              </motion.span>
-              <motion.div 
-                className="flex-grow border-t border-gray-300"
-                animate={{ scaleX: [0.8, 1, 0.8] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-              ></motion.div>
+              </span>
+              <div className="flex-grow border-t border-gray-300"></div>
             </div>
 
             {/* Form */}
@@ -285,45 +211,25 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 </div>
               </div>
 
-              {/* Animated Submit Button */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8"
               >
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8 relative overflow-hidden group"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                  <div className="relative z-10 flex items-center gap-3">
-                    {isLoading ? (
-                      <>
-                        <motion.div 
-                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        />
-                        Please wait...
-                      </>
-                    ) : (
-                      <motion.span
-                        animate={{ 
-                          scale: [1, 1.05, 1],
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        {isLogin ? 'Sign In' : 'Create Account'}
-                      </motion.span>
-                    )}
-                  </div>
-                </Button>
-              </motion.div>
+                <div className="flex items-center gap-3">
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Please wait...
+                    </>
+                  ) : (
+                    <span>
+                      {isLogin ? 'Sign In' : 'Create Account'}
+                    </span>
+                  )}
+                </div>
+              </Button>
             </form>
 
             {/* Toggle Sign In/Up */}
@@ -393,7 +299,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>

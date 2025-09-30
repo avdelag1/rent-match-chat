@@ -21,6 +21,7 @@ interface TinderentSwipeContainerProps {
   onMessageClick?: () => void;
   showFilters?: boolean;
   onFiltersClose?: () => void;
+  onFiltersOpen?: () => void;
   locationFilter?: {
     latitude: number;
     longitude: number;
@@ -29,14 +30,60 @@ interface TinderentSwipeContainerProps {
   } | null;
 }
 
-export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, showFilters = false, onFiltersClose, locationFilter }: TinderentSwipeContainerProps) {
+export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, showFilters = false, onFiltersClose, onFiltersOpen, locationFilter }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [appliedFilters, setAppliedFilters] = useState({});
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
   const { data: swipedIds = [] } = useSwipedListings();
-  const { data: listings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
+  const { data: allListings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
   const swipeMutation = useSwipe();
+
+  // Apply local filtering based on appliedFilters
+  const listings = allListings.filter(listing => {
+    if (!appliedFilters || Object.keys(appliedFilters).length === 0) return true;
+    
+    // Price filter
+    if ((appliedFilters as any).priceRange && listing.price) {
+      if (listing.price < (appliedFilters as any).priceRange[0] || listing.price > (appliedFilters as any).priceRange[1]) {
+        return false;
+      }
+    }
+    
+    // Bedrooms filter
+    if ((appliedFilters as any).bedrooms && listing.beds) {
+      if (listing.beds < (appliedFilters as any).bedrooms[0] || listing.beds > (appliedFilters as any).bedrooms[1]) {
+        return false;
+      }
+    }
+    
+    // Property type filter
+    if ((appliedFilters as any).propertyTypes && (appliedFilters as any).propertyTypes.length > 0) {
+      if (!(appliedFilters as any).propertyTypes.includes(listing.property_type)) {
+        return false;
+      }
+    }
+    
+    // Location zones filter
+    if ((appliedFilters as any).locationZones && (appliedFilters as any).locationZones.length > 0) {
+      if (!(appliedFilters as any).locationZones.includes((listing as any).location_zone)) {
+        return false;
+      }
+    }
+    
+    // Amenities filter
+    if ((appliedFilters as any).amenitiesRequired && (appliedFilters as any).amenitiesRequired.length > 0) {
+      const listingAmenities = (listing as any).amenities || [];
+      const hasRequiredAmenities = (appliedFilters as any).amenitiesRequired.every((amenity: string) => 
+        listingAmenities.includes(amenity)
+      );
+      if (!hasRequiredAmenities) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
 
@@ -142,6 +189,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const handleApplyFilters = (filters: any) => {
     setAppliedFilters(filters);
     setCurrentIndex(0);
+    refetch(); // Force refetch with new filters
     
     const activeFiltersCount = Object.values(filters).flat().filter(Boolean).length;
     toast({
@@ -205,7 +253,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           </p>
           <div className="space-y-2">
             <Button 
-              onClick={() => {}}
+              onClick={() => onFiltersOpen && onFiltersOpen()}
               variant="outline"
               className="gap-2 w-full"
             >
@@ -237,7 +285,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           </p>
           <div className="space-y-2">
             <Button 
-              onClick={() => {}}
+              onClick={() => onFiltersOpen && onFiltersOpen()}
               variant="outline"
               className="gap-2 w-full"
             >

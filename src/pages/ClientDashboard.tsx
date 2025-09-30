@@ -112,6 +112,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
                 onMessageClick={onMessageClick}
                 showFilters={showFilters}
                 onFiltersClose={() => setShowFilters(false)}
+                onFiltersOpen={() => setShowFilters(true)}
                 locationFilter={locationData}
               />
             )}
