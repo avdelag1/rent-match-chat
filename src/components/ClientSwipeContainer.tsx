@@ -87,8 +87,9 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
 
-  console.log('ClientSwipeContainer - Profiles loaded:', clientProfiles.length, clientProfiles);
-  console.log('ClientSwipeContainer - Swiped IDs:', swipedIds.length);
+  console.log('ClientSwipeContainer - All profiles loaded:', allClientProfiles.length);
+  console.log('ClientSwipeContainer - Filtered profiles:', clientProfiles.length);
+  console.log('ClientSwipeContainer - Applied filters:', appliedFilters);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentClient = clientProfiles[currentIndex];

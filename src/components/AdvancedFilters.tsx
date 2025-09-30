@@ -52,6 +52,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   };
 
   const handleApply = () => {
+    console.log('AdvancedFilters: Applying filters:', filters);
     onApplyFilters(filters);
     onClose();
   };

@@ -333,8 +333,13 @@ export function useSmartClientMatching(listingId?: string) {
     queryKey: ['smart-clients', listingId],
     queryFn: async () => {
       try {
+        console.log('useSmartClientMatching: Starting fetch...');
         const { data: user } = await supabase.auth.getUser();
-        if (!user.user) return [];
+        if (!user.user) {
+          console.log('useSmartClientMatching: No authenticated user');
+          return [];
+        }
+        console.log('useSmartClientMatching: Authenticated user:', user.user.id);
 
         // Get owner's listing for matching criteria
         let listing: Listing | null = null;
@@ -349,6 +354,7 @@ export function useSmartClientMatching(listingId?: string) {
         }
 
         // Get client profiles
+        console.log('useSmartClientMatching: Fetching client profiles...');
         const { data: profiles, error } = await supabase
           .from('client_profiles')
           .select(`
@@ -357,8 +363,16 @@ export function useSmartClientMatching(listingId?: string) {
           `)
           .limit(50);
 
-        if (error) throw error;
-        if (!profiles?.length) return [];
+        console.log('useSmartClientMatching: Query result:', { profiles, error });
+        if (error) {
+          console.error('useSmartClientMatching: Database error:', error);
+          throw error;
+        }
+        if (!profiles?.length) {
+          console.log('useSmartClientMatching: No profiles found');
+          return [];
+        }
+        console.log('useSmartClientMatching: Found', profiles.length, 'profiles');
 
         // Calculate match percentage for each client
         const matchedClients: MatchedClientProfile[] = profiles.map(profile => {
@@ -391,14 +405,14 @@ export function useSmartClientMatching(listingId?: string) {
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
           .slice(0, 20);
 
-        console.log(`Matched ${sortedClients.length} clients with min 10% compatibility`);
+        console.log('useSmartClientMatching: Returning', sortedClients.length, 'sorted clients');
         return sortedClients;
       } catch (error) {
         console.error('Error in smart client matching:', error);
         return [];
       }
     },
-    enabled: !!listingId,
+    enabled: true, // Always enabled for general client browsing
     retry: 3,
     retryDelay: 1000,
   });
