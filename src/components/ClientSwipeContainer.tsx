@@ -106,9 +106,17 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
 
-  console.log('ClientSwipeContainer - All profiles loaded:', allClientProfiles.length);
-  console.log('ClientSwipeContainer - Filtered profiles:', clientProfiles.length);
-  console.log('ClientSwipeContainer - Applied filters:', appliedFilters);
+  console.log('[ClientSwipe] ===== COMPONENT STATE =====');
+  console.log('[ClientSwipe] All profiles loaded:', allClientProfiles.length);
+  console.log('[ClientSwipe] Applied filters:', JSON.stringify(appliedFilters, null, 2));
+  console.log('[ClientSwipe] Filtered profiles count:', clientProfiles.length);
+  if (clientProfiles.length > 0) {
+    console.log('[ClientSwipe] First profile sample:', {
+      user_id: clientProfiles[0].user_id,
+      name: clientProfiles[0].name,
+      preferred_listing_types: (clientProfiles[0] as any).preferred_listing_types
+    });
+  }
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentClient = clientProfiles[currentIndex];
@@ -198,15 +206,28 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   };
 
   const handleApplyFilters = (filters: any) => {
+    console.log('[ClientSwipe] ===== APPLYING FILTERS =====');
+    console.log('[ClientSwipe] Filters received:', JSON.stringify(filters, null, 2));
+    console.log('[ClientSwipe] Listing types filter:', filters.listingTypes);
+    
     setAppliedFilters(filters);
     setCurrentIndex(0);
     refetch(); // Force refetch with new filters
     
-    const activeFiltersCount = Object.values(filters).flat().filter(Boolean).length;
+    const listingTypesText = filters.listingTypes?.length > 0 
+      ? `Looking for: ${filters.listingTypes.join(' & ')}` 
+      : 'All types';
+    
     toast({
-      title: '✨ Filters Applied',
-      description: `Found tenants matching your ${activeFiltersCount} preferences.`,
+      title: '✅ Filters Applied!',
+      description: listingTypesText,
+      duration: 3000,
     });
+    
+    // Log after state update
+    setTimeout(() => {
+      console.log('[ClientSwipe] Applied filters state:', appliedFilters);
+    }, 100);
   };
 
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;

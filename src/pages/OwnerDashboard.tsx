@@ -131,6 +131,19 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 <MapPin className="w-4 h-4" />
                 Show Nearby
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(true)}
+                className="gap-2 rounded-full px-6 py-2 transition-all duration-300 bg-white/20 text-white border-white/30 hover:bg-white/30 relative"
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+                {Object.keys(showFilters ? {} : {}).length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {Object.keys(showFilters ? {} : {}).length}
+                  </span>
+                )}
+              </Button>
             </div>
           </header>
 

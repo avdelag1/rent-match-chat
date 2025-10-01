@@ -52,7 +52,11 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   };
 
   const handleApply = () => {
-    console.log('AdvancedFilters: Applying filters:', filters);
+    console.log('[AdvancedFilters] ===== APPLY CLICKED =====');
+    console.log('[AdvancedFilters] User role:', userRole);
+    console.log('[AdvancedFilters] Filters being applied:', JSON.stringify(filters, null, 2));
+    console.log('[AdvancedFilters] Listing types:', filters.listingTypes);
+    
     onApplyFilters(filters);
     onClose();
   };
@@ -80,9 +84,14 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            Advanced Filters - {userRole === 'client' ? 'Find Properties' : 'Find Clients'}
+          <DialogTitle className="text-2xl">
+            {userRole === 'owner' ? '🔍 Filter Clients' : '🏠 Filter Properties'}
           </DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            {userRole === 'owner' 
+              ? 'Select the type of clients you want to see based on their preferences' 
+              : 'Customize your property search preferences'}
+          </p>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -130,9 +139,16 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
           </div>
 
           {/* Looking For */}
-          <div>
-            <Label className="text-base font-semibold">Looking For</Label>
-            <div className="grid grid-cols-3 gap-2 mt-2">
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-4 rounded-lg border border-primary/20">
+            <Label className="text-base font-semibold flex items-center gap-2">
+              🏠 {userRole === 'owner' ? 'Client Looking For' : 'Looking For'}
+            </Label>
+            <p className="text-sm text-muted-foreground mb-3">
+              {userRole === 'owner' 
+                ? 'Filter clients by what type of property they want' 
+                : 'Are you looking to rent or buy?'}
+            </p>
+            <div className="grid grid-cols-3 gap-3 mt-2">
               {['rent', 'buy', 'both'].map((type) => (
                 <Badge
                   key={type}
@@ -141,8 +157,11 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                       ? (filters.listingTypes.includes('rent') && filters.listingTypes.includes('buy') ? 'default' : 'outline')
                       : (filters.listingTypes.includes(type) ? 'default' : 'outline')
                   }
-                  className="cursor-pointer text-center justify-center p-2"
+                  className="cursor-pointer text-center justify-center p-3 text-base font-medium transition-all hover:scale-105"
                   onClick={async () => {
+                    console.log('[AdvancedFilters] Listing type clicked:', type);
+                    console.log('[AdvancedFilters] Current listingTypes:', filters.listingTypes);
+                    
                     let newTypes;
                     if (type === 'both') {
                       newTypes = filters.listingTypes.includes('rent') && filters.listingTypes.includes('buy') 
@@ -154,6 +173,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                         : [type];
                     }
                     
+                    console.log('[AdvancedFilters] New listingTypes:', newTypes);
                     setFilters(prev => ({ ...prev, listingTypes: newTypes }));
                     
                     // Auto-save to user preferences
@@ -162,10 +182,13 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     }
                   }}
                 >
-                  {type === 'both' ? 'Rent & Buy' : type.charAt(0).toUpperCase() + type.slice(1)}
+                  {type === 'both' ? '🏡 Rent & Buy' : type === 'rent' ? '🏠 Rent' : '💰 Buy'}
                 </Badge>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Selected: {filters.listingTypes.join(' + ') || 'None'}
+            </p>
           </div>
 
           {userRole === 'client' && (
@@ -379,8 +402,11 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleApply}>
-            Apply Filters
+          <Button 
+            onClick={handleApply}
+            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold"
+          >
+            ✅ Apply Filters
           </Button>
         </DialogFooter>
       </DialogContent>
