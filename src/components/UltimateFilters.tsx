@@ -77,6 +77,7 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
     bedrooms: currentFilters.bedrooms || [1, 5],
     bathrooms: currentFilters.bathrooms || [1, 3],
     squareFootage: currentFilters.squareFootage || [300, 5000],
+    listingTypes: currentFilters.listingTypes || ['rent', 'buy'],
     
     // Lifestyle
     lifestyleCategories: currentFilters.lifestyleCategories || [],
@@ -124,6 +125,7 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
       bedrooms: [1, 5],
       bathrooms: [1, 3],
       squareFootage: [300, 5000],
+      listingTypes: ['rent', 'buy'],
       lifestyleCategories: [],
       aesthetic: [],
       commute: [],
@@ -190,6 +192,38 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
           </TabsList>
 
           <TabsContent value="basics" className="space-y-6">
+            {/* Looking For Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🔍 Looking For
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {['rent', 'buy'].map(type => (
+                    <Badge
+                      key={type}
+                      variant={filters.listingTypes?.includes(type) ? "default" : "outline"}
+                      className="cursor-pointer transition-all duration-200 hover:scale-105 capitalize text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => {
+                        const current = filters.listingTypes || [];
+                        const newTypes = current.includes(type)
+                          ? current.filter((t: string) => t !== type)
+                          : [...current, type];
+                        setFilters(prev => ({ ...prev, listingTypes: newTypes.length > 0 ? newTypes : ['rent', 'buy'] }));
+                      }}
+                    >
+                      {type === 'rent' ? '🏠 Rent' : '💰 Buy'}
+                      {filters.listingTypes?.includes(type) && (
+                        <X className="w-3 h-3 ml-1" />
+                      )}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-2 gap-6">
               {/* Price Range */}
               <Card>

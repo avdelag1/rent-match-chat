@@ -43,9 +43,21 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const listings = allListings.filter(listing => {
     if (!appliedFilters || Object.keys(appliedFilters).length === 0) return true;
     
+    console.log('[TinderentSwipe] Filtering listing:', listing.id, 'with filters:', appliedFilters);
+    
+    // Listing type filter (rent/buy)
+    if ((appliedFilters as any).listingTypes && (appliedFilters as any).listingTypes.length > 0) {
+      const listingType = listing.listing_type || 'rent';
+      if (!(appliedFilters as any).listingTypes.includes(listingType)) {
+        console.log('[TinderentSwipe] Listing filtered out by type:', listingType);
+        return false;
+      }
+    }
+    
     // Price filter
     if ((appliedFilters as any).priceRange && listing.price) {
       if (listing.price < (appliedFilters as any).priceRange[0] || listing.price > (appliedFilters as any).priceRange[1]) {
+        console.log('[TinderentSwipe] Listing filtered out by price');
         return false;
       }
     }
@@ -53,6 +65,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     // Bedrooms filter
     if ((appliedFilters as any).bedrooms && listing.beds) {
       if (listing.beds < (appliedFilters as any).bedrooms[0] || listing.beds > (appliedFilters as any).bedrooms[1]) {
+        console.log('[TinderentSwipe] Listing filtered out by bedrooms');
         return false;
       }
     }
@@ -60,6 +73,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     // Property type filter
     if ((appliedFilters as any).propertyTypes && (appliedFilters as any).propertyTypes.length > 0) {
       if (!(appliedFilters as any).propertyTypes.includes(listing.property_type)) {
+        console.log('[TinderentSwipe] Listing filtered out by property type');
         return false;
       }
     }
@@ -67,6 +81,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     // Location zones filter
     if ((appliedFilters as any).locationZones && (appliedFilters as any).locationZones.length > 0) {
       if (!(appliedFilters as any).locationZones.includes((listing as any).location_zone)) {
+        console.log('[TinderentSwipe] Listing filtered out by location zone');
         return false;
       }
     }
@@ -78,10 +93,12 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         listingAmenities.includes(amenity)
       );
       if (!hasRequiredAmenities) {
+        console.log('[TinderentSwipe] Listing filtered out by amenities');
         return false;
       }
     }
     
+    console.log('[TinderentSwipe] Listing passed all filters');
     return true;
   });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();

@@ -29,7 +29,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   const [filters, setFilters] = useState({
     priceRange: currentFilters.priceRange || [0, 100000],
     propertyTypes: currentFilters.propertyTypes || [],
-    listingTypes: currentFilters.listingTypes || ['rent'],
+    listingTypes: currentFilters.listingTypes || ['rent', 'buy'],
     bedrooms: currentFilters.bedrooms || [1, 10],
     bathrooms: currentFilters.bathrooms || [1, 5],
     amenities: currentFilters.amenities || [],
@@ -61,7 +61,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
     setFilters({
       priceRange: [0, 100000],
       propertyTypes: [],
-      listingTypes: ['rent'],
+      listingTypes: ['rent', 'buy'],
       bedrooms: [1, 10],
       bathrooms: [1, 5],
       amenities: [],

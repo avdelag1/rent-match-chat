@@ -43,9 +43,24 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   const clientProfiles = allClientProfiles.filter(profile => {
     if (!appliedFilters || Object.keys(appliedFilters).length === 0) return true;
     
+    console.log('[ClientSwipe] Filtering profile:', profile.user_id, 'with filters:', appliedFilters);
+    
+    // Client listing type preference filter (what they're looking for: rent/buy)
+    if ((appliedFilters as any).listingTypes && (appliedFilters as any).listingTypes.length > 0) {
+      const clientPreferredTypes = (profile as any).preferred_listing_types || ['rent'];
+      const hasMatchingType = (appliedFilters as any).listingTypes.some((type: string) =>
+        clientPreferredTypes.includes(type)
+      );
+      if (!hasMatchingType) {
+        console.log('[ClientSwipe] Profile filtered out by listing type preference');
+        return false;
+      }
+    }
+    
     // Age filter
     if ((appliedFilters as any).ageRange && profile.age) {
       if (profile.age < (appliedFilters as any).ageRange[0] || profile.age > (appliedFilters as any).ageRange[1]) {
+        console.log('[ClientSwipe] Profile filtered out by age');
         return false;
       }
     }
@@ -53,6 +68,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
     // Budget filter
     if ((appliedFilters as any).budgetRange && (profile as any).budget_max) {
       if ((profile as any).budget_max < (appliedFilters as any).budgetRange[0] || (profile as any).budget_max > (appliedFilters as any).budgetRange[1]) {
+        console.log('[ClientSwipe] Profile filtered out by budget');
         return false;
       }
     }
@@ -64,15 +80,18 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
         profileLifestyle.includes(lifestyle)
       );
       if (!hasMatchingLifestyle) {
+        console.log('[ClientSwipe] Profile filtered out by lifestyle');
         return false;
       }
     }
     
     // Verification filters
     if ((appliedFilters as any).verifiedOnly && !(profile as any).income_verification) {
+      console.log('[ClientSwipe] Profile filtered out by verification');
       return false;
     }
     
+    console.log('[ClientSwipe] Profile passed all filters');
     return true;
   });
   
