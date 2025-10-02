@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
+import { SupportDialog } from '@/components/SupportDialog';
 import { useListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Menu, Flame, RotateCcw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
@@ -17,6 +19,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [locationData, setLocationData] = useState<{
     latitude: number;
     longitude: number;
@@ -25,6 +28,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   } | null>(null);
   const { data: listings = [], isLoading, error, refetch } = useListings();
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const handleListingTap = (listingId: string) => {
     setSelectedListingId(listingId);
@@ -40,10 +44,13 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   };
 
   const handleMenuAction = (action: string) => {
+    console.log('[ClientDashboard] Menu action:', action);
     if (action === 'filters') {
       setShowFilters(true);
     } else if (action === 'premium-packages') {
-      window.location.href = '/subscription-packages';
+      navigate('/subscription-packages');
+    } else if (action === 'support') {
+      setShowSupport(true);
     }
   };
 
@@ -126,6 +133,12 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
         open={insightsOpen}
         onOpenChange={setInsightsOpen}
         listing={selectedListing || null}
+      />
+
+      <SupportDialog
+        isOpen={showSupport}
+        onClose={() => setShowSupport(false)}
+        userRole="client"
       />
     </SidebarProvider>
   );

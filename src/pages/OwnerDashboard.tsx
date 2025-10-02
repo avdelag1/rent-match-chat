@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
-
+import { SupportDialog } from '@/components/SupportDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -20,6 +20,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [showLocationMatching, setShowLocationMatching] = useState(false);
   const [smartMatchingEnabled, setSmartMatchingEnabled] = useState(true);
   const [nearbyEnabled, setNearbyEnabled] = useState(false);
@@ -61,10 +62,13 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   };
 
   const handleMenuAction = (action: string) => {
+    console.log('[OwnerDashboard] Menu action:', action);
     if (action === 'filters') {
       setShowFilters(true);
     } else if (action === 'premium-packages') {
-      window.location.href = '/subscription-packages';
+      navigate('/subscription-packages');
+    } else if (action === 'support') {
+      setShowSupport(true);
     }
   };
 
@@ -228,6 +232,12 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           role: 'client'
         }}
         onMessage={handleStartConversation}
+      />
+
+      <SupportDialog
+        isOpen={showSupport}
+        onClose={() => setShowSupport(false)}
+        userRole="owner"
       />
 
     </SidebarProvider>
