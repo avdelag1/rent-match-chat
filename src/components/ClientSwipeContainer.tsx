@@ -44,17 +44,24 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
     if (!appliedFilters || Object.keys(appliedFilters).length === 0) return true;
     
     console.log('[ClientSwipe] Filtering profile:', profile.user_id, 'with filters:', appliedFilters);
+    console.log('[ClientSwipe] Profile preferences:', profile.preferred_listing_types);
     
     // Client listing type preference filter (what they're looking for: rent/buy)
     if ((appliedFilters as any).listingTypes && (appliedFilters as any).listingTypes.length > 0) {
-      const clientPreferredTypes = (profile as any).preferred_listing_types || ['rent'];
+      const clientPreferredTypes = profile.preferred_listing_types || ['rent'];
       const hasMatchingType = (appliedFilters as any).listingTypes.some((type: string) =>
         clientPreferredTypes.includes(type)
       );
+      console.log('[ClientSwipe] Checking type match:', {
+        filterTypes: (appliedFilters as any).listingTypes,
+        clientTypes: clientPreferredTypes,
+        hasMatch: hasMatchingType
+      });
       if (!hasMatchingType) {
-        console.log('[ClientSwipe] Profile filtered out by listing type preference');
+        console.log('[ClientSwipe] ❌ Profile filtered out by listing type preference');
         return false;
       }
+      console.log('[ClientSwipe] ✅ Profile passed listing type filter');
     }
     
     // Age filter
@@ -110,11 +117,12 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   console.log('[ClientSwipe] All profiles loaded:', allClientProfiles.length);
   console.log('[ClientSwipe] Applied filters:', JSON.stringify(appliedFilters, null, 2));
   console.log('[ClientSwipe] Filtered profiles count:', clientProfiles.length);
-  if (clientProfiles.length > 0) {
-    console.log('[ClientSwipe] First profile sample:', {
-      user_id: clientProfiles[0].user_id,
-      name: clientProfiles[0].name,
-      preferred_listing_types: (clientProfiles[0] as any).preferred_listing_types
+  if (allClientProfiles.length > 0) {
+    console.log('[ClientSwipe] Sample profile with preferences:', {
+      user_id: allClientProfiles[0].user_id,
+      name: allClientProfiles[0].name,
+      preferred_listing_types: allClientProfiles[0].preferred_listing_types,
+      budget_max: allClientProfiles[0].budget_max
     });
   }
 

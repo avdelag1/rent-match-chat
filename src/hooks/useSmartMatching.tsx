@@ -21,6 +21,9 @@ export interface MatchedClientProfile {
   location: any;
   lifestyle_tags: string[];
   profile_images: string[];
+  preferred_listing_types?: string[];
+  budget_min?: number;
+  budget_max?: number;
   matchPercentage: number;
   matchReasons: string[];
   incompatibleReasons: string[];
@@ -353,28 +356,43 @@ export function useSmartClientMatching(listingId?: string) {
           listing = listingData as Listing;
         }
 
-        // Get client profiles (without the broken join)
+        // Get client profiles
         console.log('useSmartClientMatching: Fetching client profiles...');
-        const { data: profiles, error } = await supabase
+        const { data: profiles, error: profileError } = await supabase
           .from('client_profiles')
           .select('*')
           .limit(50);
 
-        console.log('useSmartClientMatching: Query result:', { profiles, error });
-        if (error) {
-          console.error('useSmartClientMatching: Database error:', error);
-          throw error;
+        console.log('useSmartClientMatching: Profile query result:', { count: profiles?.length, error: profileError });
+        if (profileError) {
+          console.error('useSmartClientMatching: Database error:', profileError);
+          throw profileError;
         }
         if (!profiles?.length) {
           console.log('useSmartClientMatching: No profiles found');
           return [];
         }
-        console.log('useSmartClientMatching: Found', profiles.length, 'profiles');
+
+        // Fetch preferences for all client profiles
+        const userIds = profiles.map(p => p.user_id);
+        const { data: preferences, error: prefError } = await supabase
+          .from('client_filter_preferences')
+          .select('user_id, preferred_listing_types, lifestyle_tags, min_price, max_price')
+          .in('user_id', userIds);
+
+        console.log('useSmartClientMatching: Preferences query result:', { count: preferences?.length, error: prefError });
+
+        // Create a map of user_id to preferences
+        const preferencesMap = new Map();
+        preferences?.forEach(pref => {
+          preferencesMap.set(pref.user_id, pref);
+        });
 
         // Calculate match percentage for each client
         const matchedClients: MatchedClientProfile[] = profiles.map(profile => {
+          const clientPrefs = preferencesMap.get(profile.user_id);
           const match = listing 
-            ? calculateClientMatch(listing, profile || {})
+            ? calculateClientMatch(listing, clientPrefs || {})
             : { percentage: 60, reasons: ['General compatibility'], incompatible: [] };
 
           return {
@@ -387,8 +405,11 @@ export function useSmartClientMatching(listingId?: string) {
             interests: profile.interests || [],
             preferred_activities: profile.preferred_activities || [],
             location: profile.location || {},
-            lifestyle_tags: [],
+            lifestyle_tags: clientPrefs?.lifestyle_tags || [],
             profile_images: profile.profile_images || [],
+            preferred_listing_types: clientPrefs?.preferred_listing_types || ['rent'],
+            budget_min: clientPrefs?.min_price || 0,
+            budget_max: clientPrefs?.max_price || 100000,
             matchPercentage: match.percentage,
             matchReasons: match.reasons,
             incompatibleReasons: match.incompatible
@@ -401,14 +422,14 @@ export function useSmartClientMatching(listingId?: string) {
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
           .slice(0, 20);
 
-        console.log('useSmartClientMatching: Returning', sortedClients.length, 'sorted clients');
+        console.log('useSmartClientMatching: Returning', sortedClients.length, 'sorted clients with preferences');
         return sortedClients;
       } catch (error) {
         console.error('Error in smart client matching:', error);
         return [];
       }
     },
-    enabled: true, // Always enabled for general client browsing
+    enabled: true,
     retry: 3,
     retryDelay: 1000,
   });
