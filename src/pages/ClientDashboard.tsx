@@ -42,6 +42,8 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const handleMenuAction = (action: string) => {
     if (action === 'filters') {
       setShowFilters(true);
+    } else if (action === 'premium-packages') {
+      window.location.href = '/subscription-packages';
     }
   };
 

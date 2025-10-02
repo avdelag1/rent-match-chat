@@ -63,6 +63,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const handleMenuAction = (action: string) => {
     if (action === 'filters') {
       setShowFilters(true);
+    } else if (action === 'premium-packages') {
+      window.location.href = '/subscription-packages';
     }
   };
 
