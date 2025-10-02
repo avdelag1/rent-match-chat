@@ -353,14 +353,11 @@ export function useSmartClientMatching(listingId?: string) {
           listing = listingData as Listing;
         }
 
-        // Get client profiles
+        // Get client profiles (without the broken join)
         console.log('useSmartClientMatching: Fetching client profiles...');
         const { data: profiles, error } = await supabase
           .from('client_profiles')
-          .select(`
-            *,
-            client_preferences_detailed (*)
-          `)
+          .select('*')
           .limit(50);
 
         console.log('useSmartClientMatching: Query result:', { profiles, error });
@@ -376,9 +373,8 @@ export function useSmartClientMatching(listingId?: string) {
 
         // Calculate match percentage for each client
         const matchedClients: MatchedClientProfile[] = profiles.map(profile => {
-          const detailedPrefs: any = profile.client_preferences_detailed?.[0];
           const match = listing 
-            ? calculateClientMatch(listing, detailedPrefs || {})
+            ? calculateClientMatch(listing, profile || {})
             : { percentage: 60, reasons: ['General compatibility'], incompatible: [] };
 
           return {
@@ -391,7 +387,7 @@ export function useSmartClientMatching(listingId?: string) {
             interests: profile.interests || [],
             preferred_activities: profile.preferred_activities || [],
             location: profile.location || {},
-            lifestyle_tags: Array.isArray(detailedPrefs?.lifestyle_compatibility) ? detailedPrefs.lifestyle_compatibility : [],
+            lifestyle_tags: [],
             profile_images: profile.profile_images || [],
             matchPercentage: match.percentage,
             matchReasons: match.reasons,
