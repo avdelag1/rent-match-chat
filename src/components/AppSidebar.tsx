@@ -1,4 +1,4 @@
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle, SlidersHorizontal } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -15,12 +15,6 @@ const clientMenuItems = [
     title: "Dashboard",
     url: "/client/dashboard",
     icon: Home,
-  },
-  {
-    title: "Search Filters",
-    url: "#filters",
-    icon: SlidersHorizontal,
-    action: "filters",
   },
   {
     title: "Liked Properties",
@@ -66,12 +60,6 @@ const ownerMenuItems = [
     title: "Dashboard",
     url: "/owner/dashboard",
     icon: Home,
-  },
-  {
-    title: "Search Filters",
-    url: "#filters",
-    icon: SlidersHorizontal,
-    action: "filters",
   },
   {
     title: "My Properties",
@@ -158,9 +146,6 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
         location.hash = '#add-property'
       }
       if (onMenuItemClick) onMenuItemClick('add-property')
-    } else if (item.action === 'filters') {
-      // Open filters dialog
-      if (onMenuItemClick) onMenuItemClick('filters')
     } else if (item.action === 'premium-packages') {
       // Open premium packages dialog directly
       if (onMenuItemClick) onMenuItemClick('premium-packages')

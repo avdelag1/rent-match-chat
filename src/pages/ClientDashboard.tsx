@@ -18,7 +18,6 @@ interface ClientDashboardProps {
 const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [locationData, setLocationData] = useState<{
     latitude: number;
@@ -45,9 +44,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
 
   const handleMenuAction = (action: string) => {
     console.log('[ClientDashboard] Menu action:', action);
-    if (action === 'filters') {
-      setShowFilters(true);
-    } else if (action === 'premium-packages') {
+    if (action === 'premium-packages') {
       navigate('/subscription-packages');
     } else if (action === 'support') {
       setShowSupport(true);
@@ -119,9 +116,6 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
                 onListingTap={handleListingTap}
                 onInsights={handleInsights}
                 onMessageClick={onMessageClick}
-                showFilters={showFilters}
-                onFiltersClose={() => setShowFilters(false)}
-                onFiltersOpen={() => setShowFilters(true)}
                 locationFilter={locationData}
               />
             )}

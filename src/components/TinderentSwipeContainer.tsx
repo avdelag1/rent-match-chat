@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { EnhancedPropertyCard } from './EnhancedPropertyCard';
-import { UltimateFilters } from './UltimateFilters';
 
 import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSmartListingMatching } from '@/hooks/useSmartMatching';
@@ -8,8 +7,9 @@ import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Flame, X, RotateCcw, Home, SlidersHorizontal, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Flame, X, RotateCcw, Home, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -19,9 +19,6 @@ interface TinderentSwipeContainerProps {
   onListingTap: (listingId: string) => void;
   onInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
-  showFilters?: boolean;
-  onFiltersClose?: () => void;
-  onFiltersOpen?: () => void;
   locationFilter?: {
     latitude: number;
     longitude: number;
@@ -30,77 +27,13 @@ interface TinderentSwipeContainerProps {
   } | null;
 }
 
-export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, showFilters = false, onFiltersClose, onFiltersOpen, locationFilter }: TinderentSwipeContainerProps) {
+export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [appliedFilters, setAppliedFilters] = useState({});
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
   const { data: swipedIds = [] } = useSwipedListings();
-  const { data: allListings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
+  const { data: listings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
   const swipeMutation = useSwipe();
-
-  // Apply local filtering based on appliedFilters
-  const listings = allListings.filter(listing => {
-    if (!appliedFilters || Object.keys(appliedFilters).length === 0) return true;
-    
-    console.log('[TinderentSwipe] Filtering listing:', listing.id, 'with filters:', appliedFilters);
-    
-    // Listing type filter (rent/buy)
-    if ((appliedFilters as any).listingTypes && (appliedFilters as any).listingTypes.length > 0) {
-      const listingType = listing.listing_type || 'rent';
-      if (!(appliedFilters as any).listingTypes.includes(listingType)) {
-        console.log('[TinderentSwipe] Listing filtered out by type:', listingType);
-        return false;
-      }
-    }
-    
-    // Price filter
-    if ((appliedFilters as any).priceRange && listing.price) {
-      if (listing.price < (appliedFilters as any).priceRange[0] || listing.price > (appliedFilters as any).priceRange[1]) {
-        console.log('[TinderentSwipe] Listing filtered out by price');
-        return false;
-      }
-    }
-    
-    // Bedrooms filter
-    if ((appliedFilters as any).bedrooms && listing.beds) {
-      if (listing.beds < (appliedFilters as any).bedrooms[0] || listing.beds > (appliedFilters as any).bedrooms[1]) {
-        console.log('[TinderentSwipe] Listing filtered out by bedrooms');
-        return false;
-      }
-    }
-    
-    // Property type filter
-    if ((appliedFilters as any).propertyTypes && (appliedFilters as any).propertyTypes.length > 0) {
-      if (!(appliedFilters as any).propertyTypes.includes(listing.property_type)) {
-        console.log('[TinderentSwipe] Listing filtered out by property type');
-        return false;
-      }
-    }
-    
-    // Location zones filter
-    if ((appliedFilters as any).locationZones && (appliedFilters as any).locationZones.length > 0) {
-      if (!(appliedFilters as any).locationZones.includes((listing as any).location_zone)) {
-        console.log('[TinderentSwipe] Listing filtered out by location zone');
-        return false;
-      }
-    }
-    
-    // Amenities filter
-    if ((appliedFilters as any).amenitiesRequired && (appliedFilters as any).amenitiesRequired.length > 0) {
-      const listingAmenities = (listing as any).amenities || [];
-      const hasRequiredAmenities = (appliedFilters as any).amenitiesRequired.every((amenity: string) => 
-        listingAmenities.includes(amenity)
-      );
-      if (!hasRequiredAmenities) {
-        console.log('[TinderentSwipe] Listing filtered out by amenities');
-        return false;
-      }
-    }
-    
-    console.log('[TinderentSwipe] Listing passed all filters');
-    return true;
-  });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
 
@@ -266,26 +199,16 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <div className="text-6xl mb-4">🏠</div>
           <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
           <p className="text-muted-foreground mb-4">
-            Try adjusting your filters to see more options.
+            Check back later or refresh for new properties.
           </p>
-          <div className="space-y-2">
-            <Button 
-              onClick={() => onFiltersOpen && onFiltersOpen()}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Adjust Filters
-            </Button>
-            <Button 
-              onClick={handleRefresh}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </div>
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2 w-full"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Refresh
+          </Button>
         </Card>
       </div>
     );
@@ -298,29 +221,20 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
           <p className="text-muted-foreground mb-4">
-            No more properties match your current filters.
+            Check back later for new properties.
           </p>
-          <div className="space-y-2">
-            <Button 
-              onClick={() => onFiltersOpen && onFiltersOpen()}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Expand Search
-            </Button>
-            <Button 
-              onClick={handleRefresh}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Check for New Listings
-            </Button>
-          </div>
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2 w-full"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Check for New Listings
+          </Button>
         </Card>
       </div>
     );
+  }
   }
 
   const currentListing = listings[currentIndex];
@@ -406,15 +320,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           </Button>
         </motion.div>
       </motion.div>
-
-      {/* Ultimate Filters Dialog */}
-      <UltimateFilters
-        isOpen={showFilters}
-        onClose={() => onFiltersClose?.()}
-        userRole="client"
-        onApplyFilters={handleApplyFilters}
-        currentFilters={appliedFilters}
-      />
     </div>
   );
 }
