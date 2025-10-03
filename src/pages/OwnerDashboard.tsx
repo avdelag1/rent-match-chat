@@ -8,7 +8,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Users, RefreshCw, MapPin, RotateCcw, Zap, Filter } from 'lucide-react';
+import { Users, RefreshCw, MapPin, RotateCcw, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface OwnerDashboardProps {
@@ -19,9 +19,7 @@ interface OwnerDashboardProps {
 const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProps) => {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-  const [showLocationMatching, setShowLocationMatching] = useState(false);
   const [smartMatchingEnabled, setSmartMatchingEnabled] = useState(true);
   const [nearbyEnabled, setNearbyEnabled] = useState(false);
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -63,9 +61,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   const handleMenuAction = (action: string) => {
     console.log('[OwnerDashboard] Menu action:', action);
-    if (action === 'filters') {
-      setShowFilters(true);
-    } else if (action === 'premium-packages') {
+    if (action === 'premium-packages') {
       navigate('/subscription-packages');
     } else if (action === 'support') {
       setShowSupport(true);
@@ -137,19 +133,6 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 <MapPin className="w-4 h-4" />
                 Show Nearby
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(true)}
-                className="gap-2 rounded-full px-6 py-2 transition-all duration-300 bg-white/20 text-white border-white/30 hover:bg-white/30 relative"
-              >
-                <Filter className="w-4 h-4" />
-                Filters
-                {Object.keys(showFilters ? {} : {}).length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {Object.keys(showFilters ? {} : {}).length}
-                  </span>
-                )}
-              </Button>
             </div>
           </header>
 
@@ -182,25 +165,16 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                     <Users className="w-10 h-10 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">No Tenants Found</h3>
-                  <p className="text-gray-600 mb-6">Try adjusting your filters to see more profiles.</p>
+                  <p className="text-gray-600 mb-6">Check back later for new profiles.</p>
                   
-                  <div className="space-y-3">
-                    <Button 
-                      onClick={() => setShowFilters(true)}
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-2xl py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                      <Filter className="w-5 h-5 mr-2" />
-                      Adjust Filters
-                    </Button>
-                    <Button 
-                      onClick={() => refetch()}
-                      variant="outline"
-                      className="w-full rounded-2xl py-3 border-2 border-gray-200 hover:bg-gray-50 transition-all duration-300"
-                    >
-                      <RotateCcw className="w-5 h-5 mr-2" />
-                      Refresh
-                    </Button>
-                  </div>
+                  <Button 
+                    onClick={() => refetch()}
+                    variant="outline"
+                    className="w-full rounded-2xl py-3 border-2 border-gray-200 hover:bg-gray-50 transition-all duration-300"
+                  >
+                    <RotateCcw className="w-5 h-5 mr-2" />
+                    Refresh
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -208,15 +182,6 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 onClientTap={handleProfileTap}
                 onInsights={handleInsights}
                 onMessageClick={onMessageClick}
-                showFilters={showFilters}
-                onFiltersClose={() => {
-                  console.log('[OwnerDashboard] Closing filters');
-                  setShowFilters(false);
-                }}
-                onFiltersOpen={() => {
-                  console.log('[OwnerDashboard] Opening filters');
-                  setShowFilters(true);
-                }}
               />
             )}
           </div>

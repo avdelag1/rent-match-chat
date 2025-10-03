@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Flame, X, RotateCcw, Users, Filter, Zap, ThumbsDown, ThumbsUp, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Flame, X, RotateCcw, Users, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,15 +20,11 @@ interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
   onInsights?: (clientId: string) => void;
   onMessageClick?: () => void;
-  showFilters?: boolean;
-  onFiltersClose?: () => void;
-  onFiltersOpen?: () => void;
 }
 
-export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, showFilters = false, onFiltersClose, onFiltersOpen }: ClientSwipeContainerProps) {
+export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [appliedFilters, setAppliedFilters] = useState({});
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
@@ -37,70 +33,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   }>({ isOpen: false });
   
   const { data: swipedIds = [] } = useSwipedClientProfiles();
-  const { data: allClientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
-  
-  // Apply local filtering based on appliedFilters
-  const clientProfiles = allClientProfiles.filter(profile => {
-    if (!appliedFilters || Object.keys(appliedFilters).length === 0) return true;
-    
-    console.log('[ClientSwipe] Filtering profile:', profile.user_id, 'with filters:', appliedFilters);
-    console.log('[ClientSwipe] Profile preferences:', profile.preferred_listing_types);
-    
-    // Client listing type preference filter (what they're looking for: rent/buy)
-    if ((appliedFilters as any).listingTypes && (appliedFilters as any).listingTypes.length > 0) {
-      const clientPreferredTypes = profile.preferred_listing_types || ['rent'];
-      const hasMatchingType = (appliedFilters as any).listingTypes.some((type: string) =>
-        clientPreferredTypes.includes(type)
-      );
-      console.log('[ClientSwipe] Checking type match:', {
-        filterTypes: (appliedFilters as any).listingTypes,
-        clientTypes: clientPreferredTypes,
-        hasMatch: hasMatchingType
-      });
-      if (!hasMatchingType) {
-        console.log('[ClientSwipe] ❌ Profile filtered out by listing type preference');
-        return false;
-      }
-      console.log('[ClientSwipe] ✅ Profile passed listing type filter');
-    }
-    
-    // Age filter
-    if ((appliedFilters as any).ageRange && profile.age) {
-      if (profile.age < (appliedFilters as any).ageRange[0] || profile.age > (appliedFilters as any).ageRange[1]) {
-        console.log('[ClientSwipe] Profile filtered out by age');
-        return false;
-      }
-    }
-    
-    // Budget filter
-    if ((appliedFilters as any).budgetRange && (profile as any).budget_max) {
-      if ((profile as any).budget_max < (appliedFilters as any).budgetRange[0] || (profile as any).budget_max > (appliedFilters as any).budgetRange[1]) {
-        console.log('[ClientSwipe] Profile filtered out by budget');
-        return false;
-      }
-    }
-    
-    // Lifestyle filter
-    if ((appliedFilters as any).lifestyleCompatibility && (appliedFilters as any).lifestyleCompatibility.length > 0) {
-      const profileLifestyle = profile.lifestyle_tags || [];
-      const hasMatchingLifestyle = (appliedFilters as any).lifestyleCompatibility.some((lifestyle: string) => 
-        profileLifestyle.includes(lifestyle)
-      );
-      if (!hasMatchingLifestyle) {
-        console.log('[ClientSwipe] Profile filtered out by lifestyle');
-        return false;
-      }
-    }
-    
-    // Verification filters
-    if ((appliedFilters as any).verifiedOnly && !(profile as any).income_verification) {
-      console.log('[ClientSwipe] Profile filtered out by verification');
-      return false;
-    }
-    
-    console.log('[ClientSwipe] Profile passed all filters');
-    return true;
-  });
+  const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
   
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
@@ -113,18 +46,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
   });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
 
-  console.log('[ClientSwipe] ===== COMPONENT STATE =====');
-  console.log('[ClientSwipe] All profiles loaded:', allClientProfiles.length);
-  console.log('[ClientSwipe] Applied filters:', JSON.stringify(appliedFilters, null, 2));
-  console.log('[ClientSwipe] Filtered profiles count:', clientProfiles.length);
-  if (allClientProfiles.length > 0) {
-    console.log('[ClientSwipe] Sample profile with preferences:', {
-      user_id: allClientProfiles[0].user_id,
-      name: allClientProfiles[0].name,
-      preferred_listing_types: allClientProfiles[0].preferred_listing_types,
-      budget_max: allClientProfiles[0].budget_max
-    });
-  }
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentClient = clientProfiles[currentIndex];
@@ -213,31 +134,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
     }
   };
 
-  const handleApplyFilters = (filters: any) => {
-    console.log('[ClientSwipe] ===== APPLYING FILTERS =====');
-    console.log('[ClientSwipe] Filters received:', JSON.stringify(filters, null, 2));
-    console.log('[ClientSwipe] Listing types filter:', filters.listingTypes);
-    
-    setAppliedFilters(filters);
-    setCurrentIndex(0);
-    refetch(); // Force refetch with new filters
-    
-    const listingTypesText = filters.listingTypes?.length > 0 
-      ? `Looking for: ${filters.listingTypes.join(' & ')}` 
-      : 'All types';
-    
-    toast({
-      title: '✅ Filters Applied!',
-      description: listingTypesText,
-      duration: 3000,
-    });
-    
-    // Log after state update
-    setTimeout(() => {
-      console.log('[ClientSwipe] Applied filters state:', appliedFilters);
-    }, 100);
-  };
-
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
 
   if (isLoading || isRefetching) {
@@ -290,26 +186,16 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
           <div className="text-6xl mb-4">👥</div>
           <h3 className="text-xl font-bold mb-2">No Tenants Found</h3>
           <p className="text-muted-foreground mb-4">
-            Try adjusting your filters to see more profiles.
+            Check back later or refresh for new profiles.
           </p>
-          <div className="space-y-2">
-            <Button 
-              onClick={() => onFiltersOpen && onFiltersOpen()}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Adjust Filters
-            </Button>
-            <Button 
-              onClick={handleRefresh}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </div>
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2 w-full"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Refresh
+          </Button>
         </div>
       </div>
     );
@@ -322,26 +208,16 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
           <p className="text-muted-foreground mb-4">
-            No more tenant profiles match your current filters.
+            Check back later for new profiles.
           </p>
-          <div className="space-y-2">
-            <Button 
-              onClick={() => onFiltersOpen && onFiltersOpen()}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Expand Search
-            </Button>
-            <Button 
-              onClick={handleRefresh}
-              variant="outline"
-              className="gap-2 w-full"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Check for New Profiles
-            </Button>
-          </div>
+          <Button 
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2 w-full"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Check for New Profiles
+          </Button>
         </div>
       </div>
     );
@@ -430,15 +306,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick, 
           </Button>
         </motion.div>
       </motion.div>
-
-      {/* Advanced Filters Dialog */}
-      <AdvancedFilters
-        isOpen={showFilters}
-        onClose={() => onFiltersClose?.()}
-        userRole="owner"
-        onApplyFilters={handleApplyFilters}
-        currentFilters={appliedFilters}
-      />
 
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
