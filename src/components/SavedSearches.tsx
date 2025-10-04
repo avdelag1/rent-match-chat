@@ -70,6 +70,24 @@ export function SavedSearches({ userRole }: SavedSearchesProps) {
     });
   };
 
+  const handleUpdateSearch = () => {
+    if (!editingSearch) return;
+    
+    setSavedSearches(prev => prev.map(search => 
+      search.id === editingSearch.id 
+        ? { ...editingSearch, name: newSearchName || editingSearch.name }
+        : search
+    ));
+    
+    toast({
+      title: 'Search Updated',
+      description: `"${newSearchName || editingSearch.name}" has been updated.`
+    });
+    
+    setEditingSearch(null);
+    setNewSearchName('');
+  };
+
   const handleDeleteSearch = (id: string) => {
     setSavedSearches(prev => prev.filter(search => search.id !== id));
     toast({
@@ -84,6 +102,22 @@ export function SavedSearches({ userRole }: SavedSearchesProps) {
       description: `Applying filters from "${search.name}"`
     });
     // Here you would apply the saved filters to the current search
+  };
+
+  const handleToggleAlerts = (id: string) => {
+    setSavedSearches(prev => prev.map(search =>
+      search.id === id
+        ? { ...search, alertsEnabled: !search.alertsEnabled }
+        : search
+    ));
+    
+    const search = savedSearches.find(s => s.id === id);
+    toast({
+      title: search?.alertsEnabled ? 'Alerts Paused' : 'Alerts Enabled',
+      description: search?.alertsEnabled 
+        ? 'You will no longer receive notifications for this search.'
+        : 'You will receive notifications when new matches are found.'
+    });
   };
 
   return (
@@ -199,6 +233,84 @@ export function SavedSearches({ userRole }: SavedSearchesProps) {
             </Button>
             <Button onClick={() => handleSaveSearch({}, newSearchName)}>
               Save Search
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editingSearch !== null} onOpenChange={(open) => {
+        if (!open) {
+          setEditingSearch(null);
+          setNewSearchName('');
+        }
+      }}>
+        <DialogContent className="bg-black/90 backdrop-blur border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit Search</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-white/90 text-sm font-medium">Search Name</label>
+              <Input
+                value={newSearchName || editingSearch?.name || ''}
+                onChange={(e) => setNewSearchName(e.target.value)}
+                placeholder="Enter a name for this search"
+                className="bg-white/10 border-white/20 text-white"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-white/90 text-sm font-medium">Current Filters</label>
+              <div className="flex flex-wrap gap-2">
+                {editingSearch?.filters.propertyType && (
+                  <Badge variant="secondary" className="text-xs">
+                    {editingSearch.filters.propertyType}
+                  </Badge>
+                )}
+                {(editingSearch?.filters.priceMin || editingSearch?.filters.priceMax) && (
+                  <Badge variant="secondary" className="text-xs">
+                    ${editingSearch.filters.priceMin || 0} - ${editingSearch.filters.priceMax || '∞'}
+                  </Badge>
+                )}
+                {editingSearch?.filters.location && (
+                  <Badge variant="secondary" className="text-xs">
+                    {editingSearch.filters.location}
+                  </Badge>
+                )}
+                {editingSearch?.filters.bedrooms && (
+                  <Badge variant="secondary" className="text-xs">
+                    {editingSearch.filters.bedrooms} bed
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+              <div>
+                <p className="text-white/90 text-sm font-medium">Email Alerts</p>
+                <p className="text-white/60 text-xs">Get notified when new matches appear</p>
+              </div>
+              <Button
+                variant={editingSearch?.alertsEnabled ? "default" : "outline"}
+                size="sm"
+                onClick={() => editingSearch && handleToggleAlerts(editingSearch.id)}
+              >
+                {editingSearch?.alertsEnabled ? 'Enabled' : 'Paused'}
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                setEditingSearch(null);
+                setNewSearchName('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateSearch}>
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
