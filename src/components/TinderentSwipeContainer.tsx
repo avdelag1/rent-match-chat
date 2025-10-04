@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { EnhancedPropertyCard } from './EnhancedPropertyCard';
-
 import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSmartListingMatching } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -8,8 +7,6 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Flame, X, RotateCcw, Home, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +27,7 @@ interface TinderentSwipeContainerProps {
 export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [appliedFilters, setAppliedFilters] = useState<any>({});
   
   const { data: swipedIds = [] } = useSwipedListings();
   const { data: listings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
@@ -234,7 +232,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </Card>
       </div>
     );
-  }
   }
 
   const currentListing = listings[currentIndex];
