@@ -1,0 +1,291 @@
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
+import { useOwnerClientPreferences, OwnerClientPreferences } from '@/hooks/useOwnerClientPreferences';
+
+interface OwnerClientFilterDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const LIFESTYLE_OPTIONS = [
+  'Digital Nomad',
+  'Professional',
+  'Student',
+  'Family-Oriented',
+  'Party-Friendly',
+  'Quiet',
+  'Social',
+  'Health-Conscious',
+  'Pet Lover',
+  'Eco-Friendly',
+];
+
+const OCCUPATION_OPTIONS = [
+  'Remote Worker',
+  'Entrepreneur',
+  'Student',
+  'Teacher',
+  'Healthcare',
+  'Tech',
+  'Creative',
+  'Hospitality',
+  'Finance',
+  'Retired',
+];
+
+export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilterDialogProps) {
+  const { preferences, updatePreferences, isUpdating } = useOwnerClientPreferences();
+  
+  const [formData, setFormData] = useState<Partial<OwnerClientPreferences>>({
+    min_budget: undefined,
+    max_budget: undefined,
+    min_age: 18,
+    max_age: 65,
+    compatible_lifestyle_tags: [],
+    allows_pets: true,
+    allows_smoking: false,
+    allows_parties: false,
+    requires_employment_proof: false,
+    requires_references: false,
+    min_monthly_income: undefined,
+    preferred_occupations: [],
+  });
+
+  useEffect(() => {
+    if (preferences) {
+      setFormData({
+        min_budget: preferences.min_budget,
+        max_budget: preferences.max_budget,
+        min_age: preferences.min_age || 18,
+        max_age: preferences.max_age || 65,
+        compatible_lifestyle_tags: preferences.compatible_lifestyle_tags || [],
+        allows_pets: preferences.allows_pets ?? true,
+        allows_smoking: preferences.allows_smoking ?? false,
+        allows_parties: preferences.allows_parties ?? false,
+        requires_employment_proof: preferences.requires_employment_proof ?? false,
+        requires_references: preferences.requires_references ?? false,
+        min_monthly_income: preferences.min_monthly_income,
+        preferred_occupations: preferences.preferred_occupations || [],
+      });
+    }
+  }, [preferences]);
+
+  const toggleLifestyleTag = (tag: string) => {
+    const current = formData.compatible_lifestyle_tags || [];
+    if (current.includes(tag)) {
+      setFormData({
+        ...formData,
+        compatible_lifestyle_tags: current.filter(t => t !== tag),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        compatible_lifestyle_tags: [...current, tag],
+      });
+    }
+  };
+
+  const toggleOccupation = (occupation: string) => {
+    const current = formData.preferred_occupations || [];
+    if (current.includes(occupation)) {
+      setFormData({
+        ...formData,
+        preferred_occupations: current.filter(o => o !== occupation),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        preferred_occupations: [...current, occupation],
+      });
+    }
+  };
+
+  const handleSave = () => {
+    updatePreferences(formData);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-white max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">Set Up Client Filters</DialogTitle>
+          <p className="text-muted-foreground">Configure your ideal client criteria</p>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          {/* Budget Range */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Budget Range</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm text-muted-foreground">Min Budget</Label>
+                <Input
+                  type="number"
+                  placeholder="Min $"
+                  value={formData.min_budget || ''}
+                  onChange={(e) => setFormData({ ...formData, min_budget: Number(e.target.value) || undefined })}
+                />
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">Max Budget</Label>
+                <Input
+                  type="number"
+                  placeholder="Max $"
+                  value={formData.max_budget || ''}
+                  onChange={(e) => setFormData({ ...formData, max_budget: Number(e.target.value) || undefined })}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Age Range */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Age Range</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm text-muted-foreground">Min Age</Label>
+                <Input
+                  type="number"
+                  min="18"
+                  max="100"
+                  value={formData.min_age || 18}
+                  onChange={(e) => setFormData({ ...formData, min_age: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">Max Age</Label>
+                <Input
+                  type="number"
+                  min="18"
+                  max="100"
+                  value={formData.max_age || 65}
+                  onChange={(e) => setFormData({ ...formData, max_age: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Lifestyle Tags */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Compatible Lifestyles</Label>
+            <div className="flex flex-wrap gap-2">
+              {LIFESTYLE_OPTIONS.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant={(formData.compatible_lifestyle_tags || []).includes(tag) ? "default" : "outline"}
+                  className="cursor-pointer hover:opacity-80"
+                  onClick={() => toggleLifestyleTag(tag)}
+                >
+                  {tag}
+                  {(formData.compatible_lifestyle_tags || []).includes(tag) && (
+                    <X className="w-3 h-3 ml-1" />
+                  )}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Preferred Occupations */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Preferred Occupations</Label>
+            <div className="flex flex-wrap gap-2">
+              {OCCUPATION_OPTIONS.map((occupation) => (
+                <Badge
+                  key={occupation}
+                  variant={(formData.preferred_occupations || []).includes(occupation) ? "default" : "outline"}
+                  className="cursor-pointer hover:opacity-80"
+                  onClick={() => toggleOccupation(occupation)}
+                >
+                  {occupation}
+                  {(formData.preferred_occupations || []).includes(occupation) && (
+                    <X className="w-3 h-3 ml-1" />
+                  )}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Property Rules */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Property Rules</Label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="allows-pets">Allows Pets</Label>
+                <Switch
+                  id="allows-pets"
+                  checked={formData.allows_pets ?? true}
+                  onCheckedChange={(checked) => setFormData({ ...formData, allows_pets: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="allows-smoking">Allows Smoking</Label>
+                <Switch
+                  id="allows-smoking"
+                  checked={formData.allows_smoking ?? false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, allows_smoking: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="allows-parties">Allows Parties</Label>
+                <Switch
+                  id="allows-parties"
+                  checked={formData.allows_parties ?? false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, allows_parties: checked })}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Requirements */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Client Requirements</Label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="requires-employment">Requires Employment Proof</Label>
+                <Switch
+                  id="requires-employment"
+                  checked={formData.requires_employment_proof ?? false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, requires_employment_proof: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="requires-references">Requires References</Label>
+                <Switch
+                  id="requires-references"
+                  checked={formData.requires_references ?? false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, requires_references: checked })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="min-income" className="text-sm text-muted-foreground">Minimum Monthly Income</Label>
+                <Input
+                  id="min-income"
+                  type="number"
+                  placeholder="Min monthly income $"
+                  value={formData.min_monthly_income || ''}
+                  onChange={(e) => setFormData({ ...formData, min_monthly_income: Number(e.target.value) || undefined })}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={isUpdating}>
+            {isUpdating ? 'Saving...' : 'Save Filters'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
