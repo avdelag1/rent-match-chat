@@ -12,6 +12,7 @@ import { useListings } from '@/hooks/useListings';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { useLocationBasedMatching } from '@/hooks/useLocationBasedMatching';
+import { NotificationSystem } from '@/components/NotificationSystem';
 import { 
   Flame, 
   Home, 
@@ -85,6 +86,7 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationF
 
   return (
     <DashboardLayout userRole="client">
+      <NotificationSystem />
       <NotificationBar
         notifications={notifications}
         onDismiss={dismissNotification}

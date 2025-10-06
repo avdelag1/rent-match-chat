@@ -14,6 +14,7 @@ import { useClientProfiles } from '@/hooks/useClientProfiles';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
+import { NotificationSystem } from '@/components/NotificationSystem';
 import { 
   Users, 
   Home, 
@@ -107,6 +108,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
 
   return (
     <DashboardLayout userRole="owner">
+      <NotificationSystem />
       <NotificationBar
         notifications={notifications}
         onDismiss={dismissNotification}

@@ -7,6 +7,8 @@ import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
 import { ThemeSelector } from "@/components/ThemeSelector"
 import { NotificationBadge } from "@/components/NotificationBadge"
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
+import { useUnreadLikes } from "@/hooks/useUnreadLikes"
+import { useUnreadMatches } from "@/hooks/useUnreadMatches"
 import { useState } from "react"
 
 // Menu items for different user types
@@ -133,6 +135,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const location = useLocation()
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
   const { unreadCount } = useUnreadMessageCount()
+  const { unreadCount: unreadLikes } = useUnreadLikes()
+  const { unreadCount: unreadMatches } = useUnreadMatches()
   
   // Resolve role safely (prevents TS literal narrowing issues)
   const userRole: 'client' | 'owner' = (propUserRole ?? 'owner')
@@ -223,10 +227,16 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                           {item.title}
                         </span>
                         {item.title === 'Messages' && unreadCount > 0 && (
-                          <NotificationBadge 
-                            count={unreadCount} 
-                            className="ml-auto"
-                          />
+                          <NotificationBadge count={unreadCount} className="ml-auto" />
+                        )}
+                        {item.title === 'Liked Properties' && unreadLikes > 0 && (
+                          <NotificationBadge count={unreadLikes} className="ml-auto" />
+                        )}
+                        {item.title === 'Liked Clients' && unreadLikes > 0 && (
+                          <NotificationBadge count={unreadLikes} className="ml-auto" />
+                        )}
+                        {item.title === 'Match History' && unreadMatches > 0 && (
+                          <NotificationBadge count={unreadMatches} className="ml-auto" />
                         )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
