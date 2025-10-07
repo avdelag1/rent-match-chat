@@ -1,16 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { EnhancedPropertyCard } from './EnhancedPropertyCard';
-import { useListings, useSwipedListings } from '@/hooks/useListings';
-import { useSmartListingMatching } from '@/hooks/useSmartMatching';
+import { useSwipedListings } from '@/hooks/useListings';
+import { useInfiniteListingMatching } from '@/hooks/useInfiniteListingMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Flame, X, RotateCcw, Home, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Flame, X, RotateCcw, Sparkles, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 interface TinderentSwipeContainerProps {
   onListingTap: (listingId: string) => void;
@@ -25,76 +26,49 @@ interface TinderentSwipeContainerProps {
 }
 
 export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter }: TinderentSwipeContainerProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [appliedFilters, setAppliedFilters] = useState<any>({});
+  const [swipedListings, setSwipedListings] = useState<Set<string>>(new Set());
   
   const { data: swipedIds = [] } = useSwipedListings();
-  const { data: listings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
+  const { 
+    data, 
+    isLoading, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage,
+    refetch,
+    error 
+  } = useInfiniteListingMatching(swipedIds);
+  
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
 
-  const handleSwipe = useCallback((direction: 'left' | 'right') => {
-    const currentListing = listings[currentIndex];
-    if (!currentListing) {
-      console.log('No current listing found for swipe');
-      return;
-    }
+  const listings = useMemo(() => {
+    return (data?.pages.flatMap(page => page.listings).filter(
+      listing => !swipedListings.has(listing.id)
+    ) || []) as any[];
+  }, [data, swipedListings]);
 
-    console.log('Starting swipe:', { 
-      listingId: currentListing.id, 
-      direction, 
-      currentIndex,
-      listingTitle: currentListing.title 
-    });
-
-    setSwipeDirection(direction);
+  const handleSwipe = useCallback((listingId: string, direction: 'left' | 'right') => {
+    setSwipedListings(prev => new Set(prev).add(listingId));
     
-    // Show visual feedback
-    setTimeout(() => {
-      swipeMutation.mutate({
-        targetId: currentListing.id,
-        direction,
-        targetType: 'listing'
-      });
-
-      // Success toast for right swipe
-      if (direction === 'right') {
-        toast({
-          title: "Liked! 💕",
-          description: "Added to your favorites. Maybe it's a match!",
-          duration: 2000,
-        });
-      }
-
-      setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 300);
-  }, [currentIndex, listings, swipeMutation]);
-
-  const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
     swipeMutation.mutate({
-      targetId,
-      direction: 'right',
-      targetType: targetType as 'listing' | 'profile'
+      targetId: listingId,
+      direction,
+      targetType: 'listing'
     });
-    
-    toast({
-      title: "Super Liked! ⭐",
-      description: "This property will know you're really interested!",
-      duration: 3000,
-    });
-    
-    setCurrentIndex(prev => prev + 1);
+
+    if (direction === 'right') {
+      toast({
+        title: "Liked! 💕",
+        description: "Added to your favorites. Maybe it's a match!",
+        duration: 2000,
+      });
+    }
   }, [swipeMutation]);
 
-  const handleButtonSwipe = (direction: 'left' | 'right') => {
-    handleSwipe(direction);
-  };
-
   const handleRefresh = async () => {
-    setCurrentIndex(0);
+    setSwipedListings(new Set());
     await refetch();
     toast({
       title: 'Properties Updated',
@@ -134,21 +108,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     }
   };
 
-  const handleApplyFilters = (filters: any) => {
-    setAppliedFilters(filters);
-    setCurrentIndex(0);
-    refetch(); // Force refetch with new filters
-    
-    const activeFiltersCount = Object.values(filters).flat().filter(Boolean).length;
-    toast({
-      title: '✨ Filters Applied',
-      description: `Found properties matching your ${activeFiltersCount} preferences.`,
-    });
-  };
-
-  const progress = listings.length > 0 ? ((currentIndex + 1) / listings.length) * 100 : 0;
-
-  if (isLoading || isRefetching) {
+  if (isLoading) {
     return (
       <div className="relative w-full h-[700px] max-w-sm mx-auto">
         <Card className="w-full h-[600px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
@@ -212,111 +172,55 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     );
   }
 
-  if (currentIndex >= listings.length) {
-    return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
-        <Card className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 p-8">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
-          <p className="text-muted-foreground mb-4">
-            Check back later for new properties.
-          </p>
-          <Button 
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2 w-full"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Check for New Listings
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  const currentListing = listings[currentIndex];
-  const nextListing = listings[currentIndex + 1];
-
   return (
-    <div className="w-full h-full flex flex-col">
-      {/* Full Screen Cards Container */}
-      <div className="flex-1 relative">
-        <AnimatePresence>
-          {nextListing && (
+    <div className="w-full h-full">
+      <InfiniteScroll
+        dataLength={listings.length}
+        next={fetchNextPage}
+        hasMore={!!hasNextPage}
+        loader={
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        }
+        endMessage={
+          <div className="text-center py-8">
+            <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20 p-6 max-w-sm mx-auto">
+              <div className="text-4xl mb-2">🎯</div>
+              <h3 className="text-lg font-bold mb-1">All caught up!</h3>
+              <p className="text-sm text-muted-foreground mb-3">Check back later for new properties.</p>
+              <Button onClick={handleRefresh} variant="outline" size="sm" className="gap-2">
+                <RotateCcw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </Card>
+          </div>
+        }
+        scrollThreshold={0.8}
+        className="space-y-4 pb-20"
+        height="100vh"
+      >
+        {listings.map((listing) => (
+          <motion.div
+            key={listing.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="max-w-sm mx-auto"
+          >
             <EnhancedPropertyCard
-              listing={nextListing}
-              onSwipe={() => {}}
-              onTap={() => {}}
-              onSuperLike={() => {}}
-              onMessage={() => {}}
-              isTop={false}
+              listing={listing}
+              onSwipe={(direction) => handleSwipe(listing.id, direction)}
+              onTap={() => onListingTap(listing.id)}
+              onSuperLike={() => handleSwipe(listing.id, 'right')}
+              onMessage={handleMessage}
+              isTop={true}
               hasPremium={hasPremiumMessaging}
             />
-          )}
-          {currentListing && (
-            <motion.div
-              key={currentListing.id}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ 
-                x: swipeDirection === 'right' ? 300 : swipeDirection === 'left' ? -300 : 0,
-                opacity: 0,
-                transition: { duration: 0.3 }
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="absolute inset-0"
-            >
-              <EnhancedPropertyCard
-                listing={currentListing}
-                onSwipe={handleSwipe}
-                onTap={() => onListingTap(currentListing.id)}
-                onSuperLike={() => handleSuperLike(currentListing.id, 'listing')}
-                onMessage={handleMessage}
-                isTop={true}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-
-      {/* Bottom Action Buttons - Enhanced Design */}
-      <motion.div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-8 items-center z-20"
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <motion.div
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            variant="outline"
-            className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20"
-            onClick={() => handleButtonSwipe('left')}
-            disabled={swipeMutation.isPending}
-          >
-            <X className="w-6 h-6" />
-          </Button>
-        </motion.div>
-        
-        <motion.div
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 border-2 border-orange-400/50 hover:border-orange-300"
-            onClick={() => handleButtonSwipe('right')}
-            disabled={swipeMutation.isPending}
-          >
-            <Flame className="w-8 h-8" />
-          </Button>
-        </motion.div>
-      </motion.div>
+          </motion.div>
+        ))}
+      </InfiniteScroll>
     </div>
   );
 }
