@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SwipeContainer } from '@/components/SwipeContainer';
+import { CategoryBrowseContainer } from '@/components/CategoryBrowseContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
 import { DashboardLayout } from '@/components/DashboardLayout';
@@ -116,8 +117,17 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationF
           {/* Main Content - Mobile First */}
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
             
-            {/* Swipe Section - Full width on mobile, larger on desktop */}
+            {/* Browse Section - Full width on mobile, larger on desktop */}
             <motion.div variants={itemVariants} className="flex-1 lg:flex-[2]">
+              <CategoryBrowseContainer
+                onListingTap={handleListingTap}
+                onInsights={handleInsights}
+                onMessageClick={onMessageClick}
+              />
+            </motion.div>
+
+            {/* Keep rest of sidebar - Full width on mobile, sidebar on desktop */}
+            <motion.div variants={itemVariants} className="lg:flex-[1]">
               <Card className="overflow-hidden shadow-lg">
                 <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6">
                   <div className="flex flex-wrap gap-2">

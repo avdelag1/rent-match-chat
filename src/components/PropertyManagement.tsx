@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { PropertyPreviewDialog } from '@/components/PropertyPreviewDialog';
+import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 
 
 export function PropertyManagement() {
@@ -22,6 +23,8 @@ export function PropertyManagement() {
   const [activeTab, setActiveTab] = useState('all');
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProperty, setEditingProperty] = useState<any>(null);
   const queryClient = useQueryClient();
 
   // Filter listings to show only those owned by current user
@@ -48,16 +51,14 @@ export function PropertyManagement() {
   console.log('PropertyManagement - Filtered listings:', filteredListings.length);
 
   const handleAddProperty = () => {
-    // Clear any editing state and set hash for DashboardLayout PropertyForm
-    location.hash = '#add-property';
+    setEditingProperty(null);
+    setIsFormOpen(true);
   };
 
   const handleEditProperty = (listing: any) => {
     console.log('Edit property:', listing.id);
-    // Store editing property in sessionStorage for DashboardLayout to pick up
-    sessionStorage.setItem('editingProperty', JSON.stringify(listing));
-    // Set hash to open DashboardLayout PropertyForm
-    location.hash = '#add-property';
+    setEditingProperty(listing);
+    setIsFormOpen(true);
   };
 
   const handleViewProperty = (listing: any) => {
@@ -73,11 +74,9 @@ export function PropertyManagement() {
 
   const handleEditFromPreview = () => {
     if (viewingProperty) {
-      // Store editing property in sessionStorage for DashboardLayout to pick up
-      sessionStorage.setItem('editingProperty', JSON.stringify(viewingProperty));
+      setEditingProperty(viewingProperty);
       setShowPreview(false);
-      // Set hash to open DashboardLayout PropertyForm
-      location.hash = '#add-property';
+      setIsFormOpen(true);
     }
   };
 
@@ -353,6 +352,16 @@ export function PropertyManagement() {
           property={viewingProperty}
           onEdit={handleEditFromPreview}
           showEditButton={true}
+        />
+
+        {/* Unified Listing Form */}
+        <UnifiedListingForm
+          isOpen={isFormOpen}
+          onClose={() => {
+            setIsFormOpen(false);
+            setEditingProperty(null);
+          }}
+          editingProperty={editingProperty}
         />
       </div>
     </div>

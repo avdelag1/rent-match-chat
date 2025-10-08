@@ -1299,28 +1299,47 @@ export type Database = {
           additional_rules: string | null
           address: string | null
           amenities: string[] | null
+          availability_calendar: Json | null
           availability_date: string | null
           balcony_count: number | null
           baths: number | null
+          battery_range: number | null
           beds: number | null
+          berths: number | null
+          brake_type: string | null
+          brand: string | null
+          category: string | null
           city: string | null
+          color: string | null
           common_areas: boolean | null
+          condition: string | null
           contacts: number | null
           coworking_space: boolean | null
           created_at: string | null
           deposit_amount: number | null
           description: string | null
+          description_full: string | null
+          description_short: string | null
           distance_to_beach: number | null
           distance_to_cowork: number | null
+          electric_assist: boolean | null
           elevator: boolean | null
+          engine_cc: number | null
+          engines: string | null
+          equipment: Json | null
           featured_image_url: string | null
           floor_level: number | null
           floorplan_url: string | null
+          frame_material: string | null
+          frame_size: string | null
+          fuel_type: string | null
           furnished: boolean | null
+          gear_type: string | null
           gym: boolean | null
           heating: boolean | null
           hoa_fees: number | null
           house_rules: string[] | null
+          hull_material: string | null
           id: string
           ideal_tenant_description: string | null
           images: string[] | null
@@ -1333,7 +1352,9 @@ export type Database = {
           lease_end_date: string | null
           lease_start_date: string | null
           lease_terms: string | null
+          length_m: number | null
           levels: number | null
+          license_required: string | null
           lifestyle_compatible: string[] | null
           likes: number | null
           listing_category: string | null
@@ -1344,7 +1365,11 @@ export type Database = {
           lockoff_unit: boolean | null
           longitude: number | null
           max_occupants: number | null
+          max_passengers: number | null
+          mileage: number | null
           min_rental_term_months: number | null
+          mode: string | null
+          model: string | null
           move_in_date: string | null
           nearby_attractions: string[] | null
           neighborhood: string | null
@@ -1359,6 +1384,7 @@ export type Database = {
           property_description: string | null
           property_type: string | null
           rental_duration_type: string | null
+          rental_rates: Json | null
           rules: string[] | null
           sea_mountain_view: boolean | null
           security_onsite: boolean | null
@@ -1369,41 +1395,64 @@ export type Database = {
           status: Database["public"]["Enums"]["listing_status"] | null
           subletting_allowed: boolean | null
           title: string | null
+          transmission: string | null
           transportation_access: string[] | null
           tulum_location: string | null
           unit_type: string | null
+          vehicle_type: string | null
           video_url: string | null
           view_count: number | null
           views: number | null
           washer_dryer: boolean | null
+          wheel_size: number | null
+          year: number | null
           year_built: number | null
         }
         Insert: {
           additional_rules?: string | null
           address?: string | null
           amenities?: string[] | null
+          availability_calendar?: Json | null
           availability_date?: string | null
           balcony_count?: number | null
           baths?: number | null
+          battery_range?: number | null
           beds?: number | null
+          berths?: number | null
+          brake_type?: string | null
+          brand?: string | null
+          category?: string | null
           city?: string | null
+          color?: string | null
           common_areas?: boolean | null
+          condition?: string | null
           contacts?: number | null
           coworking_space?: boolean | null
           created_at?: string | null
           deposit_amount?: number | null
           description?: string | null
+          description_full?: string | null
+          description_short?: string | null
           distance_to_beach?: number | null
           distance_to_cowork?: number | null
+          electric_assist?: boolean | null
           elevator?: boolean | null
+          engine_cc?: number | null
+          engines?: string | null
+          equipment?: Json | null
           featured_image_url?: string | null
           floor_level?: number | null
           floorplan_url?: string | null
+          frame_material?: string | null
+          frame_size?: string | null
+          fuel_type?: string | null
           furnished?: boolean | null
+          gear_type?: string | null
           gym?: boolean | null
           heating?: boolean | null
           hoa_fees?: number | null
           house_rules?: string[] | null
+          hull_material?: string | null
           id?: string
           ideal_tenant_description?: string | null
           images?: string[] | null
@@ -1416,7 +1465,9 @@ export type Database = {
           lease_end_date?: string | null
           lease_start_date?: string | null
           lease_terms?: string | null
+          length_m?: number | null
           levels?: number | null
+          license_required?: string | null
           lifestyle_compatible?: string[] | null
           likes?: number | null
           listing_category?: string | null
@@ -1427,7 +1478,11 @@ export type Database = {
           lockoff_unit?: boolean | null
           longitude?: number | null
           max_occupants?: number | null
+          max_passengers?: number | null
+          mileage?: number | null
           min_rental_term_months?: number | null
+          mode?: string | null
+          model?: string | null
           move_in_date?: string | null
           nearby_attractions?: string[] | null
           neighborhood?: string | null
@@ -1442,6 +1497,7 @@ export type Database = {
           property_description?: string | null
           property_type?: string | null
           rental_duration_type?: string | null
+          rental_rates?: Json | null
           rules?: string[] | null
           sea_mountain_view?: boolean | null
           security_onsite?: boolean | null
@@ -1452,41 +1508,64 @@ export type Database = {
           status?: Database["public"]["Enums"]["listing_status"] | null
           subletting_allowed?: boolean | null
           title?: string | null
+          transmission?: string | null
           transportation_access?: string[] | null
           tulum_location?: string | null
           unit_type?: string | null
+          vehicle_type?: string | null
           video_url?: string | null
           view_count?: number | null
           views?: number | null
           washer_dryer?: boolean | null
+          wheel_size?: number | null
+          year?: number | null
           year_built?: number | null
         }
         Update: {
           additional_rules?: string | null
           address?: string | null
           amenities?: string[] | null
+          availability_calendar?: Json | null
           availability_date?: string | null
           balcony_count?: number | null
           baths?: number | null
+          battery_range?: number | null
           beds?: number | null
+          berths?: number | null
+          brake_type?: string | null
+          brand?: string | null
+          category?: string | null
           city?: string | null
+          color?: string | null
           common_areas?: boolean | null
+          condition?: string | null
           contacts?: number | null
           coworking_space?: boolean | null
           created_at?: string | null
           deposit_amount?: number | null
           description?: string | null
+          description_full?: string | null
+          description_short?: string | null
           distance_to_beach?: number | null
           distance_to_cowork?: number | null
+          electric_assist?: boolean | null
           elevator?: boolean | null
+          engine_cc?: number | null
+          engines?: string | null
+          equipment?: Json | null
           featured_image_url?: string | null
           floor_level?: number | null
           floorplan_url?: string | null
+          frame_material?: string | null
+          frame_size?: string | null
+          fuel_type?: string | null
           furnished?: boolean | null
+          gear_type?: string | null
           gym?: boolean | null
           heating?: boolean | null
           hoa_fees?: number | null
           house_rules?: string[] | null
+          hull_material?: string | null
           id?: string
           ideal_tenant_description?: string | null
           images?: string[] | null
@@ -1499,7 +1578,9 @@ export type Database = {
           lease_end_date?: string | null
           lease_start_date?: string | null
           lease_terms?: string | null
+          length_m?: number | null
           levels?: number | null
+          license_required?: string | null
           lifestyle_compatible?: string[] | null
           likes?: number | null
           listing_category?: string | null
@@ -1510,7 +1591,11 @@ export type Database = {
           lockoff_unit?: boolean | null
           longitude?: number | null
           max_occupants?: number | null
+          max_passengers?: number | null
+          mileage?: number | null
           min_rental_term_months?: number | null
+          mode?: string | null
+          model?: string | null
           move_in_date?: string | null
           nearby_attractions?: string[] | null
           neighborhood?: string | null
@@ -1525,6 +1610,7 @@ export type Database = {
           property_description?: string | null
           property_type?: string | null
           rental_duration_type?: string | null
+          rental_rates?: Json | null
           rules?: string[] | null
           sea_mountain_view?: boolean | null
           security_onsite?: boolean | null
@@ -1535,13 +1621,17 @@ export type Database = {
           status?: Database["public"]["Enums"]["listing_status"] | null
           subletting_allowed?: boolean | null
           title?: string | null
+          transmission?: string | null
           transportation_access?: string[] | null
           tulum_location?: string | null
           unit_type?: string | null
+          vehicle_type?: string | null
           video_url?: string | null
           view_count?: number | null
           views?: number | null
           washer_dryer?: boolean | null
+          wheel_size?: number | null
+          year?: number | null
           year_built?: number | null
         }
         Relationships: [
