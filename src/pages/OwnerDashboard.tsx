@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
+import { NotificationsDialog } from '@/components/NotificationsDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -20,6 +21,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [smartMatchingEnabled, setSmartMatchingEnabled] = useState(true);
   const [nearbyEnabled, setNearbyEnabled] = useState(false);
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -65,6 +67,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
       navigate('/subscription-packages');
     } else if (action === 'support') {
       setShowSupport(true);
+    } else if (action === 'notifications') {
+      setShowNotifications(true);
     }
   };
 
@@ -209,6 +213,11 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         isOpen={showSupport}
         onClose={() => setShowSupport(false)}
         userRole="owner"
+      />
+
+      <NotificationsDialog
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
       />
 
     </SidebarProvider>

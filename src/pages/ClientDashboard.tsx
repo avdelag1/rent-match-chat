@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
+import { NotificationsDialog } from '@/components/NotificationsDialog';
+import { CategoryFilters } from '@/components/CategoryFilters';
 import { useListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -19,6 +21,10 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
+  const [filterMode, setFilterMode] = useState<'sale' | 'rent' | 'both'>('rent');
   const [locationData, setLocationData] = useState<{
     latitude: number;
     longitude: number;
@@ -48,6 +54,10 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
       navigate('/subscription-packages');
     } else if (action === 'support') {
       setShowSupport(true);
+    } else if (action === 'filters') {
+      setShowFilters(true);
+    } else if (action === 'notifications') {
+      setShowNotifications(true);
     }
   };
 
@@ -133,6 +143,23 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
         isOpen={showSupport}
         onClose={() => setShowSupport(false)}
         userRole="client"
+      />
+
+      <NotificationsDialog
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      <CategoryFilters
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        category={filterCategory}
+        mode={filterMode}
+        onApplyFilters={(filters) => {
+          console.log('Applied filters:', filters);
+          // TODO: Apply filters to listings
+          setShowFilters(false);
+        }}
       />
     </SidebarProvider>
   );
