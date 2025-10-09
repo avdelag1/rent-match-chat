@@ -1,4 +1,4 @@
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle, Filter, Bell } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -17,6 +17,18 @@ const clientMenuItems = [
     title: "Dashboard",
     url: "/client/dashboard",
     icon: Home,
+  },
+  {
+    title: "Filters",
+    url: "#filters",
+    icon: Filter,
+    action: 'filters'
+  },
+  {
+    title: "Notifications",
+    url: "#notifications",
+    icon: Bell,
+    action: 'notifications'
   },
   {
     title: "Liked Properties",
@@ -62,6 +74,12 @@ const ownerMenuItems = [
     title: "Dashboard",
     url: "/owner/dashboard",
     icon: Home,
+  },
+  {
+    title: "Notifications",
+    url: "#notifications",
+    icon: Bell,
+    action: 'notifications'
   },
   {
     title: "My Properties",
@@ -164,6 +182,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
     } else if (item.action === 'support') {
       // Open support dialog
       if (onMenuItemClick) onMenuItemClick('support')
+    } else if (item.action === 'filters') {
+      // Open filters dialog
+      if (onMenuItemClick) onMenuItemClick('filters')
+    } else if (item.action === 'notifications') {
+      // Open notifications dialog
+      if (onMenuItemClick) onMenuItemClick('notifications')
     } else {
       navigate(item.url)
       if (onMenuItemClick) onMenuItemClick('dashboard')

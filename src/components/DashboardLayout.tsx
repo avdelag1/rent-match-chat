@@ -23,6 +23,8 @@ import { OwnerProfileDialog } from '@/components/OwnerProfileDialog'
 import OwnerClientSwipeDialog from '@/components/OwnerClientSwipeDialog'
 import { SupportDialog } from '@/components/SupportDialog'
 import { NotificationSystem } from '@/components/NotificationSystem'
+import { NotificationsDialog } from '@/components/NotificationsDialog'
+import { CategoryFilters } from '@/components/CategoryFilters'
 import { Button } from '@/components/ui/button'
 
 interface DashboardLayoutProps {
@@ -56,6 +58,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   // Support dialog
   const [showSupport, setShowSupport] = useState(false)
+
+  // Filters dialog
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Notifications dialog
+  const [showNotifications, setShowNotifications] = useState(false)
+
+  // Category and mode state for filters
+  const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
+  const [filterMode, setFilterMode] = useState<'sale' | 'rent' | 'both'>('rent');
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -154,6 +166,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         break
       case 'support':
         setShowSupport(true)
+        break
+      case 'filters':
+        setShowFilters(true)
+        break
+      case 'notifications':
+        setShowNotifications(true)
         break
       case 'settings':
         if (userRole === 'owner') {
@@ -343,6 +361,24 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         onClose={() => setShowSupport(false)}
         userRole={userRole}
       />
+
+      <NotificationsDialog
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      {userRole === 'client' && (
+        <CategoryFilters
+          isOpen={showFilters}
+          onClose={() => setShowFilters(false)}
+          category={filterCategory}
+          mode={filterMode}
+          onApplyFilters={(filters) => {
+            console.log('Applied filters:', filters);
+            // TODO: Apply filters to listings
+          }}
+        />
+      )}
     </SidebarProvider>
   )
 }
