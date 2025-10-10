@@ -39,6 +39,158 @@ export function CategoryFilters({
     setFilters({});
   };
 
+  const renderPropertyFilters = () => (
+    <ScrollArea className="h-[60vh] pr-4">
+      <div className="space-y-6">
+        {/* Price Range */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">
+              {mode === 'sale' ? 'Price Range' : 'Monthly Rent'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Slider
+              value={filters.priceRange || [0, mode === 'sale' ? 10000000 : 50000]}
+              onValueChange={(value) => setFilters({ ...filters, priceRange: value })}
+              max={mode === 'sale' ? 10000000 : 50000}
+              min={0}
+              step={mode === 'sale' ? 100000 : 1000}
+            />
+            <div className="flex justify-between text-sm mt-2">
+              <span>${(filters.priceRange?.[0] || 0).toLocaleString()}</span>
+              <span>${(filters.priceRange?.[1] || (mode === 'sale' ? 10000000 : 50000)).toLocaleString()}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bedrooms */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Bedrooms</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {['Studio', '1', '2', '3', '4', '5+'].map(bed => (
+                <Badge
+                  key={bed}
+                  variant={filters.bedrooms === bed ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => setFilters({ ...filters, bedrooms: bed })}
+                >
+                  {bed}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bathrooms */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Bathrooms</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {['1', '1.5', '2', '2.5', '3+'].map(bath => (
+                <Badge
+                  key={bath}
+                  variant={filters.bathrooms === bath ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => setFilters({ ...filters, bathrooms: bath })}
+                >
+                  {bath}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Property Type */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Property Type</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {['Apartment', 'House', 'Villa', 'Studio', 'Loft', 'Condo'].map(type => (
+                <Badge
+                  key={type}
+                  variant={(filters.propertyTypes || []).includes(type) ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    const current = filters.propertyTypes || [];
+                    const updated = current.includes(type)
+                      ? current.filter((t: string) => t !== type)
+                      : [...current, type];
+                    setFilters({ ...filters, propertyTypes: updated });
+                  }}
+                >
+                  {type}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Amenities */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Amenities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {['Pool', 'Gym', 'Parking', 'WiFi', 'Security', 'Balcony', 'Pet Friendly', 'Furnished'].map(amenity => (
+                <Badge
+                  key={amenity}
+                  variant={(filters.amenities || []).includes(amenity) ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    const current = filters.amenities || [];
+                    const updated = current.includes(amenity)
+                      ? current.filter((a: string) => a !== amenity)
+                      : [...current, amenity];
+                    setFilters({ ...filters, amenities: updated });
+                  }}
+                >
+                  {amenity}
+                  {(filters.amenities || []).includes(amenity) && <X className="w-3 h-3 ml-1" />}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Location */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Location</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {['Tulum Centro', 'Zona Hotelera', 'Aldea Zama', 'La Veleta', 'Region 15'].map(loc => (
+                <Badge
+                  key={loc}
+                  variant={(filters.locations || []).includes(loc) ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    const current = filters.locations || [];
+                    const updated = current.includes(loc)
+                      ? current.filter((l: string) => l !== loc)
+                      : [...current, loc];
+                    setFilters({ ...filters, locations: updated });
+                  }}
+                >
+                  {loc}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </ScrollArea>
+  );
+
   const renderYachtFilters = () => (
     <ScrollArea className="h-[60vh] pr-4">
       <div className="space-y-6">
@@ -426,6 +578,7 @@ export function CategoryFilters({
           </DialogTitle>
         </DialogHeader>
 
+        {category === 'property' && renderPropertyFilters()}
         {category === 'yacht' && renderYachtFilters()}
         {category === 'motorcycle' && renderMotorcycleFilters()}
         {category === 'bicycle' && renderBicycleFilters()}
