@@ -155,8 +155,6 @@ export function CategoryBrowseContainer({
       <CategoryFilters
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        category={selectedCategory}
-        mode={selectedMode}
         onApplyFilters={handleApplyFilters}
         currentFilters={filters}
       />

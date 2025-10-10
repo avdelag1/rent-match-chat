@@ -23,8 +23,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const [showSupport, setShowSupport] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
-  const [filterMode, setFilterMode] = useState<'sale' | 'rent' | 'both'>('rent');
+  const [appliedFilters, setAppliedFilters] = useState<any>({});
   const [locationData, setLocationData] = useState<{
     latitude: number;
     longitude: number;
@@ -153,11 +152,10 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
       <CategoryFilters
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        category={filterCategory}
-        mode={filterMode}
+        currentFilters={appliedFilters}
         onApplyFilters={(filters) => {
+          setAppliedFilters(filters);
           console.log('Applied filters:', filters);
-          // TODO: Apply filters to listings
           setShowFilters(false);
         }}
       />

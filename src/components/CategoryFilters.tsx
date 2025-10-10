@@ -8,14 +8,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, RotateCcw } from 'lucide-react';
-import { Category, Mode } from './CategorySelector';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { X, RotateCcw, Home, Ship, Bike, Bike as Motorcycle } from 'lucide-react';
+
+type Category = 'property' | 'yacht' | 'motorcycle' | 'bicycle';
+type Mode = 'rent' | 'sale' | 'both';
 
 interface CategoryFiltersProps {
   isOpen: boolean;
   onClose: () => void;
-  category: Category;
-  mode: Mode;
   onApplyFilters: (filters: any) => void;
   currentFilters?: any;
 }
@@ -23,20 +24,22 @@ interface CategoryFiltersProps {
 export function CategoryFilters({ 
   isOpen, 
   onClose, 
-  category, 
-  mode,
   onApplyFilters, 
   currentFilters = {} 
 }: CategoryFiltersProps) {
+  const [category, setCategory] = useState<Category>(currentFilters.category || 'property');
+  const [mode, setMode] = useState<Mode>(currentFilters.mode || 'rent');
   const [filters, setFilters] = useState(currentFilters);
 
   const handleApply = () => {
-    onApplyFilters(filters);
+    onApplyFilters({ ...filters, category, mode });
     onClose();
   };
 
   const handleReset = () => {
     setFilters({});
+    setCategory('property');
+    setMode('rent');
   };
 
   const renderPropertyFilters = () => (
@@ -567,28 +570,90 @@ export function CategoryFilters({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Filter {category === 'property' ? 'Properties' : category === 'yacht' ? 'Yachts' : category === 'motorcycle' ? 'Motorcycles' : 'Bicycles'}</span>
+            <span className="text-xl font-bold">Find Your Perfect Match</span>
             <Button variant="ghost" size="sm" onClick={handleReset}>
               <RotateCcw className="w-4 h-4 mr-2" />
-              Reset
+              Reset All
             </Button>
           </DialogTitle>
         </DialogHeader>
 
-        {category === 'property' && renderPropertyFilters()}
-        {category === 'yacht' && renderYachtFilters()}
-        {category === 'motorcycle' && renderMotorcycleFilters()}
-        {category === 'bicycle' && renderBicycleFilters()}
+        <div className="space-y-6">
+          {/* Category Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">What are you looking for?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-4 gap-3">
+                <Button
+                  variant={category === 'property' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-2 h-auto py-4"
+                  onClick={() => setCategory('property')}
+                >
+                  <Home className="w-6 h-6" />
+                  <span className="text-sm">Property</span>
+                </Button>
+                <Button
+                  variant={category === 'yacht' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-2 h-auto py-4"
+                  onClick={() => setCategory('yacht')}
+                >
+                  <Ship className="w-6 h-6" />
+                  <span className="text-sm">Yacht</span>
+                </Button>
+                <Button
+                  variant={category === 'motorcycle' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-2 h-auto py-4"
+                  onClick={() => setCategory('motorcycle')}
+                >
+                  <Motorcycle className="w-6 h-6" />
+                  <span className="text-sm">Motorcycle</span>
+                </Button>
+                <Button
+                  variant={category === 'bicycle' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-2 h-auto py-4"
+                  onClick={() => setCategory('bicycle')}
+                >
+                  <Bike className="w-6 h-6" />
+                  <span className="text-sm">Bicycle</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-        <DialogFooter>
+          {/* Mode Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Looking to Rent or Buy?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="rent">Rent</TabsTrigger>
+                  <TabsTrigger value="sale">Buy</TabsTrigger>
+                  <TabsTrigger value="both">Both</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* Category-Specific Filters */}
+          {category === 'property' && renderPropertyFilters()}
+          {category === 'yacht' && renderYachtFilters()}
+          {category === 'motorcycle' && renderMotorcycleFilters()}
+          {category === 'bicycle' && renderBicycleFilters()}
+        </div>
+
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleApply}>
-            Apply Filters
+          <Button onClick={handleApply} size="lg">
+            Show Results
           </Button>
         </DialogFooter>
       </DialogContent>

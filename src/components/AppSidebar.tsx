@@ -76,6 +76,12 @@ const ownerMenuItems = [
     icon: Home,
   },
   {
+    title: "Find Clients",
+    url: "#filters",
+    icon: Filter,
+    action: 'filters'
+  },
+  {
     title: "Notifications",
     url: "#notifications",
     icon: Bell,

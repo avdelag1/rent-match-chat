@@ -3,6 +3,7 @@ import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
 import { NotificationsDialog } from '@/components/NotificationsDialog';
+import { OwnerClientFilters } from '@/components/OwnerClientFilters';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -22,6 +23,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<any>({});
   const [smartMatchingEnabled, setSmartMatchingEnabled] = useState(true);
   const [nearbyEnabled, setNearbyEnabled] = useState(false);
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -69,6 +72,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
       setShowSupport(true);
     } else if (action === 'notifications') {
       setShowNotifications(true);
+    } else if (action === 'filters') {
+      setShowFilters(true);
     }
   };
 
@@ -218,6 +223,17 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
       <NotificationsDialog
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
+      />
+
+      <OwnerClientFilters
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        currentFilters={appliedFilters}
+        onApplyFilters={(filters) => {
+          setAppliedFilters(filters);
+          console.log('Applied owner filters:', filters);
+          setShowFilters(false);
+        }}
       />
 
     </SidebarProvider>

@@ -371,8 +371,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <CategoryFilters
           isOpen={showFilters}
           onClose={() => setShowFilters(false)}
-          category={filterCategory}
-          mode={filterMode}
           onApplyFilters={(filters) => {
             console.log('Applied filters:', filters);
             // TODO: Apply filters to listings
