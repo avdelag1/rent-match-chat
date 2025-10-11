@@ -4028,6 +4028,36 @@ export type Database = {
           },
         ]
       }
+      saved_filters: {
+        Row: {
+          category: string
+          created_at: string
+          filters: Json
+          id: string
+          mode: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          filters?: Json
+          id?: string
+          mode?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          filters?: Json
+          id?: string
+          mode?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       saved_searches: {
         Row: {
           created_at: string

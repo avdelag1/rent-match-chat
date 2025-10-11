@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
@@ -6,6 +6,7 @@ import { NotificationsDialog } from '@/components/NotificationsDialog';
 import { CategoryFilters } from '@/components/CategoryFilters';
 import { useListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
+import { useSavedFilters } from '@/hooks/useSavedFilters';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -23,6 +24,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const [showSupport, setShowSupport] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const { savedFilters, loading: filtersLoading } = useSavedFilters();
   const [appliedFilters, setAppliedFilters] = useState<any>({});
   const [locationData, setLocationData] = useState<{
     latitude: number;
@@ -33,6 +35,17 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const { data: listings = [], isLoading, error, refetch } = useListings();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Load saved filters on mount
+  useEffect(() => {
+    if (savedFilters) {
+      setAppliedFilters({
+        category: savedFilters.category,
+        mode: savedFilters.mode,
+        ...savedFilters.filters
+      });
+    }
+  }, [savedFilters]);
   
   const handleListingTap = (listingId: string) => {
     setSelectedListingId(listingId);

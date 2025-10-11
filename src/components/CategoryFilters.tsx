@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, RotateCcw, Home, Ship, Bike, Bike as Motorcycle } from 'lucide-react';
+import { useSavedFilters } from '@/hooks/useSavedFilters';
 
 type Category = 'property' | 'yacht' | 'motorcycle' | 'bicycle';
 type Mode = 'rent' | 'sale' | 'both';
@@ -27,12 +28,28 @@ export function CategoryFilters({
   onApplyFilters, 
   currentFilters = {} 
 }: CategoryFiltersProps) {
-  const [category, setCategory] = useState<Category>(currentFilters.category || 'property');
-  const [mode, setMode] = useState<Mode>(currentFilters.mode || 'rent');
-  const [filters, setFilters] = useState(currentFilters);
+  const { savedFilters, saveFilters } = useSavedFilters();
+  const [category, setCategory] = useState<Category>(currentFilters.category || savedFilters?.category || 'property');
+  const [mode, setMode] = useState<Mode>(currentFilters.mode || savedFilters?.mode || 'rent');
+  const [filters, setFilters] = useState(currentFilters.filters || savedFilters?.filters || {});
 
-  const handleApply = () => {
-    onApplyFilters({ ...filters, category, mode });
+  // Load saved filters when dialog opens
+  useEffect(() => {
+    if (isOpen && savedFilters) {
+      setCategory(savedFilters.category as Category);
+      setMode(savedFilters.mode as Mode);
+      setFilters(savedFilters.filters || {});
+    }
+  }, [isOpen, savedFilters]);
+
+  const handleApply = async () => {
+    const filterData = { category, mode, filters };
+    
+    // Save filters to database
+    await saveFilters(filterData);
+    
+    // Apply filters to parent component
+    onApplyFilters(filterData);
     onClose();
   };
 
