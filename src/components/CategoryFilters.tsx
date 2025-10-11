@@ -48,21 +48,26 @@ export function CategoryFilters({
         {/* Price Range */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              {mode === 'sale' ? 'Price Range' : 'Monthly Rent'}
-            </CardTitle>
+            <CardTitle className="text-sm">Price Range</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Slider
-              value={filters.priceRange || [0, mode === 'sale' ? 10000000 : 50000]}
-              onValueChange={(value) => setFilters({ ...filters, priceRange: value })}
-              max={mode === 'sale' ? 10000000 : 50000}
-              min={0}
-              step={mode === 'sale' ? 100000 : 1000}
-            />
-            <div className="flex justify-between text-sm mt-2">
-              <span>${(filters.priceRange?.[0] || 0).toLocaleString()}</span>
-              <span>${(filters.priceRange?.[1] || (mode === 'sale' ? 10000000 : 50000)).toLocaleString()}</span>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Min Price</Label>
+              <Input
+                type="number"
+                placeholder="$0"
+                value={filters.minPrice || ''}
+                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Price</Label>
+              <Input
+                type="number"
+                placeholder="$10,000"
+                value={filters.maxPrice || ''}
+                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
@@ -73,16 +78,16 @@ export function CategoryFilters({
             <CardTitle className="text-sm">Bedrooms</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['Studio', '1', '2', '3', '4', '5+'].map(bed => (
-                <Badge
+            <div className="flex gap-2 flex-wrap">
+              {['1', '1.5', '2', '2.5', '3+'].map((bed) => (
+                <Button
                   key={bed}
                   variant={filters.bedrooms === bed ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  size="sm"
                   onClick={() => setFilters({ ...filters, bedrooms: bed })}
                 >
                   {bed}
-                </Badge>
+                </Button>
               ))}
             </div>
           </CardContent>
@@ -94,17 +99,44 @@ export function CategoryFilters({
             <CardTitle className="text-sm">Bathrooms</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['1', '1.5', '2', '2.5', '3+'].map(bath => (
-                <Badge
+            <div className="flex gap-2 flex-wrap">
+              {['1', '1.5', '2', '2.5', '3+'].map((bath) => (
+                <Button
                   key={bath}
                   variant={filters.bathrooms === bath ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  size="sm"
                   onClick={() => setFilters({ ...filters, bathrooms: bath })}
                 >
                   {bath}
-                </Badge>
+                </Button>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Square Footage */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Square Footage</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Min Sq Ft</Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={filters.minSqFt || ''}
+                onChange={(e) => setFilters({ ...filters, minSqFt: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Sq Ft</Label>
+              <Input
+                type="number"
+                placeholder="5000"
+                value={filters.maxSqFt || ''}
+                onChange={(e) => setFilters({ ...filters, maxSqFt: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
@@ -115,22 +147,49 @@ export function CategoryFilters({
             <CardTitle className="text-sm">Property Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['Apartment', 'House', 'Villa', 'Studio', 'Loft', 'Condo'].map(type => (
-                <Badge
+            <div className="flex gap-2 flex-wrap">
+              {['Apartment', 'House', 'Villa', 'Studio', 'Loft', 'Condo', 'Penthouse'].map((type) => (
+                <Button
                   key={type}
-                  variant={(filters.propertyTypes || []).includes(type) ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  variant={filters.propertyTypes?.includes(type) ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => {
-                    const current = filters.propertyTypes || [];
-                    const updated = current.includes(type)
-                      ? current.filter((t: string) => t !== type)
-                      : [...current, type];
-                    setFilters({ ...filters, propertyTypes: updated });
+                    const types = filters.propertyTypes || [];
+                    const newTypes = types.includes(type)
+                      ? types.filter((t: string) => t !== type)
+                      : [...types, type];
+                    setFilters({ ...filters, propertyTypes: newTypes });
                   }}
                 >
                   {type}
-                </Badge>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Location Zones */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Location Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Beach', 'Town', 'Jungle', 'Downtown', 'Holistika', 'Aldea Zama'].map((zone) => (
+                <Button
+                  key={zone}
+                  variant={filters.locationZones?.includes(zone) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    const zones = filters.locationZones || [];
+                    const newZones = zones.includes(zone)
+                      ? zones.filter((z: string) => z !== zone)
+                      : [...zones, zone];
+                    setFilters({ ...filters, locationZones: newZones });
+                  }}
+                >
+                  {zone}
+                </Button>
               ))}
             </div>
           </CardContent>
@@ -142,50 +201,57 @@ export function CategoryFilters({
             <CardTitle className="text-sm">Amenities</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['Pool', 'Gym', 'Parking', 'WiFi', 'Security', 'Balcony', 'Pet Friendly', 'Furnished'].map(amenity => (
-                <Badge
+            <div className="flex gap-2 flex-wrap">
+              {['Pool', 'Gym', 'Parking', 'WiFi', 'Security', 'Balcony', 'Pet Friendly', 'Furnished', 'AC', 'Ocean View', 'Rooftop', 'Coworking'].map((amenity) => (
+                <Button
                   key={amenity}
-                  variant={(filters.amenities || []).includes(amenity) ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  variant={filters.amenities?.includes(amenity) ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => {
-                    const current = filters.amenities || [];
-                    const updated = current.includes(amenity)
-                      ? current.filter((a: string) => a !== amenity)
-                      : [...current, amenity];
-                    setFilters({ ...filters, amenities: updated });
+                    const amenities = filters.amenities || [];
+                    const newAmenities = amenities.includes(amenity)
+                      ? amenities.filter((a: string) => a !== amenity)
+                      : [...amenities, amenity];
+                    setFilters({ ...filters, amenities: newAmenities });
                   }}
                 >
                   {amenity}
-                  {(filters.amenities || []).includes(amenity) && <X className="w-3 h-3 ml-1" />}
-                </Badge>
+                </Button>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Location */}
+        {/* Move-in Date */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Location</CardTitle>
+            <CardTitle className="text-sm">Move-in Date</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['Tulum Centro', 'Zona Hotelera', 'Aldea Zama', 'La Veleta', 'Region 15'].map(loc => (
-                <Badge
-                  key={loc}
-                  variant={(filters.locations || []).includes(loc) ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    const current = filters.locations || [];
-                    const updated = current.includes(loc)
-                      ? current.filter((l: string) => l !== loc)
-                      : [...current, loc];
-                    setFilters({ ...filters, locations: updated });
-                  }}
+            <Input
+              type="date"
+              value={filters.moveInDate || ''}
+              onChange={(e) => setFilters({ ...filters, moveInDate: e.target.value })}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Lease Duration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Lease Duration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Monthly', '3 Months', '6 Months', '1 Year', '2+ Years'].map((duration) => (
+                <Button
+                  key={duration}
+                  variant={filters.leaseDuration === duration ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, leaseDuration: duration })}
                 >
-                  {loc}
-                </Badge>
+                  {duration}
+                </Button>
               ))}
             </div>
           </CardContent>
@@ -200,41 +266,128 @@ export function CategoryFilters({
         {/* Price Range */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              {mode === 'sale' ? 'Price Range (USD)' : 'Rental Price Range'}
-            </CardTitle>
+            <CardTitle className="text-sm">Price Range (Daily)</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Slider
-              value={filters.priceRange || [0, mode === 'sale' ? 1000000 : 10000]}
-              onValueChange={(value) => setFilters({ ...filters, priceRange: value })}
-              max={mode === 'sale' ? 1000000 : 10000}
-              min={0}
-              step={mode === 'sale' ? 10000 : 100}
-            />
-            <div className="flex justify-between text-sm mt-2">
-              <span>${(filters.priceRange?.[0] || 0).toLocaleString()}</span>
-              <span>${(filters.priceRange?.[1] || (mode === 'sale' ? 1000000 : 10000)).toLocaleString()}</span>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Min Price</Label>
+              <Input
+                type="number"
+                placeholder="$0"
+                value={filters.minPrice || ''}
+                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Price</Label>
+              <Input
+                type="number"
+                placeholder="$5,000"
+                value={filters.maxPrice || ''}
+                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Length */}
+        {/* Yacht Length */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Length (meters)</CardTitle>
+            <CardTitle className="text-sm">Yacht Length (meters)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Min Length</Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={filters.minLength || ''}
+                onChange={(e) => setFilters({ ...filters, minLength: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Length</Label>
+              <Input
+                type="number"
+                placeholder="100"
+                value={filters.maxLength || ''}
+                onChange={(e) => setFilters({ ...filters, maxLength: e.target.value })}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Passengers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Max Passengers</CardTitle>
           </CardHeader>
           <CardContent>
-            <Slider
-              value={filters.lengthRange || [5, 50]}
-              onValueChange={(value) => setFilters({ ...filters, lengthRange: value })}
-              max={50}
-              min={5}
-              step={1}
-            />
-            <div className="flex justify-between text-sm mt-2">
-              <span>{filters.lengthRange?.[0] || 5}m</span>
-              <span>{filters.lengthRange?.[1] || 50}m</span>
+            <div className="flex gap-2 flex-wrap">
+              {['2-4', '5-8', '9-12', '13-20', '20+'].map((capacity) => (
+                <Button
+                  key={capacity}
+                  variant={filters.maxPassengers === capacity ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, maxPassengers: capacity })}
+                >
+                  {capacity}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Yacht Type */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Yacht Type</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Motor Yacht', 'Sailing Yacht', 'Catamaran', 'Speedboat', 'Luxury Yacht'].map((type) => (
+                <Button
+                  key={type}
+                  variant={filters.yachtTypes?.includes(type) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    const types = filters.yachtTypes || [];
+                    const newTypes = types.includes(type)
+                      ? types.filter((t: string) => t !== type)
+                      : [...types, type];
+                    setFilters({ ...filters, yachtTypes: newTypes });
+                  }}
+                >
+                  {type}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Features */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Crew Included', 'Fishing Equipment', 'Water Sports', 'Kitchen', 'Bar', 'AC', 'Sound System'].map((feature) => (
+                <Button
+                  key={feature}
+                  variant={filters.features?.includes(feature) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    const features = filters.features || [];
+                    const newFeatures = features.includes(feature)
+                      ? features.filter((f: string) => f !== feature)
+                      : [...features, feature];
+                    setFilters({ ...filters, features: newFeatures });
+                  }}
+                >
+                  {feature}
+                </Button>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -242,101 +395,44 @@ export function CategoryFilters({
         {/* Year */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Year</CardTitle>
+            <CardTitle className="text-sm">Year Built</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Min Year</Label>
-                <Input
-                  type="number"
-                  value={filters.yearMin || 1990}
-                  onChange={(e) => setFilters({ ...filters, yearMin: parseInt(e.target.value) })}
-                />
-              </div>
-              <div>
-                <Label>Max Year</Label>
-                <Input
-                  type="number"
-                  value={filters.yearMax || new Date().getFullYear()}
-                  onChange={(e) => setFilters({ ...filters, yearMax: parseInt(e.target.value) })}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Berths/Cabins */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Berths / Cabins</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Slider
-              value={filters.berthsRange || [1, 6]}
-              onValueChange={(value) => setFilters({ ...filters, berthsRange: value })}
-              max={6}
-              min={1}
-              step={1}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Equipment */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Equipment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['GPS', 'Autopilot', 'Air Conditioning', 'Generator'].map(eq => (
-                <Badge
-                  key={eq}
-                  variant={(filters.equipment || []).includes(eq) ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    const current = filters.equipment || [];
-                    const updated = current.includes(eq)
-                      ? current.filter((e: string) => e !== eq)
-                      : [...current, eq];
-                    setFilters({ ...filters, equipment: updated });
-                  }}
+            <div className="flex gap-2 flex-wrap">
+              {['2024', '2020-2023', '2015-2019', '2010-2014', 'Before 2010'].map((year) => (
+                <Button
+                  key={year}
+                  variant={filters.yearBuilt === year ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, yearBuilt: year })}
                 >
-                  {eq}
-                  {(filters.equipment || []).includes(eq) && <X className="w-3 h-3 ml-1" />}
-                </Badge>
+                  {year}
+                </Button>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {mode === 'rent' && (
-          <>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Rental Options</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="skipper"
-                    checked={filters.skipperIncluded || false}
-                    onCheckedChange={(checked) => setFilters({ ...filters, skipperIncluded: checked })}
-                  />
-                  <Label htmlFor="skipper">Skipper Included</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="insurance"
-                    checked={filters.insuranceIncluded || false}
-                    onCheckedChange={(checked) => setFilters({ ...filters, insuranceIncluded: checked })}
-                  />
-                  <Label htmlFor="insurance">Insurance Included</Label>
-                </div>
-              </CardContent>
-            </Card>
-          </>
-        )}
+        {/* Rental Duration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Rental Duration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Hourly', 'Half Day', 'Full Day', 'Multi-Day', 'Weekly'].map((duration) => (
+                <Button
+                  key={duration}
+                  variant={filters.rentalDuration === duration ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, rentalDuration: duration })}
+                >
+                  {duration}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </ScrollArea>
   );
@@ -347,114 +443,173 @@ export function CategoryFilters({
         {/* Price Range */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              {mode === 'sale' ? 'Price Range (MXN)' : 'Daily Rate (MXN)'}
-            </CardTitle>
+            <CardTitle className="text-sm">Price Range (Daily)</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Slider
-              value={filters.priceRange || [0, mode === 'sale' ? 200000 : 2000]}
-              onValueChange={(value) => setFilters({ ...filters, priceRange: value })}
-              max={mode === 'sale' ? 200000 : 2000}
-              min={0}
-              step={mode === 'sale' ? 5000 : 50}
-            />
-            <div className="flex justify-between text-sm mt-2">
-              <span>${(filters.priceRange?.[0] || 0).toLocaleString()}</span>
-              <span>${(filters.priceRange?.[1] || (mode === 'sale' ? 200000 : 2000)).toLocaleString()}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Engine CC */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Engine (cc)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Slider
-              value={filters.engineCCRange || [125, 1200]}
-              onValueChange={(value) => setFilters({ ...filters, engineCCRange: value })}
-              max={1200}
-              min={125}
-              step={25}
-            />
-            <div className="flex justify-between text-sm mt-2">
-              <span>{filters.engineCCRange?.[0] || 125} cc</span>
-              <span>{filters.engineCCRange?.[1] || 1200} cc</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {mode === 'sale' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Mileage (km)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Slider
-                value={filters.mileageRange || [0, 50000]}
-                onValueChange={(value) => setFilters({ ...filters, mileageRange: value })}
-                max={50000}
-                min={0}
-                step={1000}
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Min Price</Label>
+              <Input
+                type="number"
+                placeholder="$0"
+                value={filters.minPrice || ''}
+                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
               />
-            </CardContent>
-          </Card>
-        )}
+            </div>
+            <div className="space-y-2">
+              <Label>Max Price</Label>
+              <Input
+                type="number"
+                placeholder="$200"
+                value={filters.maxPrice || ''}
+                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Type */}
+        {/* Motorcycle Type */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Type</CardTitle>
+            <CardTitle className="text-sm">Motorcycle Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['Sport', 'Cruiser', 'Adventure', 'Touring', 'Scooter'].map(type => (
-                <Badge
+            <div className="flex gap-2 flex-wrap">
+              {['Sport', 'Cruiser', 'Scooter', 'Touring', 'Adventure', 'Dirt Bike'].map((type) => (
+                <Button
                   key={type}
-                  variant={(filters.types || []).includes(type) ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  variant={filters.motorcycleTypes?.includes(type) ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => {
-                    const current = filters.types || [];
-                    const updated = current.includes(type)
-                      ? current.filter((t: string) => t !== type)
-                      : [...current, type];
-                    setFilters({ ...filters, types: updated });
+                    const types = filters.motorcycleTypes || [];
+                    const newTypes = types.includes(type)
+                      ? types.filter((t: string) => t !== type)
+                      : [...types, type];
+                    setFilters({ ...filters, motorcycleTypes: newTypes });
                   }}
                 >
                   {type}
-                </Badge>
+                </Button>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {mode === 'rent' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Rental Includes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="helmet"
-                  checked={filters.helmetIncluded || false}
-                  onCheckedChange={(checked) => setFilters({ ...filters, helmetIncluded: checked })}
-                />
-                <Label htmlFor="helmet">Helmet Included</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="insurance"
-                  checked={filters.insuranceIncluded || false}
-                  onCheckedChange={(checked) => setFilters({ ...filters, insuranceIncluded: checked })}
-                />
-                <Label htmlFor="insurance">Insurance Included</Label>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Engine Size */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Engine Size (CC)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['50-125cc', '126-250cc', '251-500cc', '501-750cc', '750cc+'].map((engine) => (
+                <Button
+                  key={engine}
+                  variant={filters.engineSize === engine ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, engineSize: engine })}
+                >
+                  {engine}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Brand */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Brand</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Honda', 'Yamaha', 'Suzuki', 'Kawasaki', 'Harley-Davidson', 'BMW', 'Ducati', 'Other'].map((brand) => (
+                <Button
+                  key={brand}
+                  variant={filters.brands?.includes(brand) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    const brands = filters.brands || [];
+                    const newBrands = brands.includes(brand)
+                      ? brands.filter((b: string) => b !== brand)
+                      : [...brands, brand];
+                    setFilters({ ...filters, brands: newBrands });
+                  }}
+                >
+                  {brand}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Condition */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Condition</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['New', 'Like New', 'Good', 'Fair'].map((condition) => (
+                <Button
+                  key={condition}
+                  variant={filters.condition === condition ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, condition: condition })}
+                >
+                  {condition}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Features */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Helmet Included', 'Insurance', 'GPS', 'Storage Box', 'Phone Mount'].map((feature) => (
+                <Button
+                  key={feature}
+                  variant={filters.features?.includes(feature) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    const features = filters.features || [];
+                    const newFeatures = features.includes(feature)
+                      ? features.filter((f: string) => f !== feature)
+                      : [...features, feature];
+                    setFilters({ ...filters, features: newFeatures });
+                  }}
+                >
+                  {feature}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* License Required */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">License Required</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Yes', 'No'].map((option) => (
+                <Button
+                  key={option}
+                  variant={filters.licenseRequired === option ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, licenseRequired: option })}
+                >
+                  {option}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </ScrollArea>
   );
@@ -465,47 +620,52 @@ export function CategoryFilters({
         {/* Price Range */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              {mode === 'sale' ? 'Price Range' : 'Daily Rate'}
-            </CardTitle>
+            <CardTitle className="text-sm">Price Range (Daily)</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Slider
-              value={filters.priceRange || [0, mode === 'sale' ? 10000 : 500]}
-              onValueChange={(value) => setFilters({ ...filters, priceRange: value })}
-              max={mode === 'sale' ? 10000 : 500}
-              min={0}
-              step={mode === 'sale' ? 100 : 10}
-            />
-            <div className="flex justify-between text-sm mt-2">
-              <span>${(filters.priceRange?.[0] || 0).toLocaleString()}</span>
-              <span>${(filters.priceRange?.[1] || (mode === 'sale' ? 10000 : 500)).toLocaleString()}</span>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Min Price</Label>
+              <Input
+                type="number"
+                placeholder="$0"
+                value={filters.minPrice || ''}
+                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Price</Label>
+              <Input
+                type="number"
+                placeholder="$50"
+                value={filters.maxPrice || ''}
+                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Type */}
+        {/* Bicycle Type */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Type</CardTitle>
+            <CardTitle className="text-sm">Bicycle Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['Road', 'Mountain', 'E-bike', 'City', 'Hybrid'].map(type => (
-                <Badge
+            <div className="flex gap-2 flex-wrap">
+              {['Mountain', 'Road', 'Hybrid', 'Electric', 'Cruiser', 'BMX', 'Folding'].map((type) => (
+                <Button
                   key={type}
-                  variant={(filters.types || []).includes(type) ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  variant={filters.bicycleTypes?.includes(type) ? 'default' : 'outline'}
+                  size="sm"
                   onClick={() => {
-                    const current = filters.types || [];
-                    const updated = current.includes(type)
-                      ? current.filter((t: string) => t !== type)
-                      : [...current, type];
-                    setFilters({ ...filters, types: updated });
+                    const types = filters.bicycleTypes || [];
+                    const newTypes = types.includes(type)
+                      ? types.filter((t: string) => t !== type)
+                      : [...types, type];
+                    setFilters({ ...filters, bicycleTypes: newTypes });
                   }}
                 >
                   {type}
-                </Badge>
+                </Button>
               ))}
             </div>
           </CardContent>
@@ -517,22 +677,37 @@ export function CategoryFilters({
             <CardTitle className="text-sm">Frame Size</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['S', 'M', 'L', 'XL'].map(size => (
-                <Badge
+            <div className="flex gap-2 flex-wrap">
+              {['Small (15-17")', 'Medium (17-19")', 'Large (19-21")', 'XL (21"+)'].map((size) => (
+                <Button
                   key={size}
-                  variant={(filters.frameSizes || []).includes(size) ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    const current = filters.frameSizes || [];
-                    const updated = current.includes(size)
-                      ? current.filter((s: string) => s !== size)
-                      : [...current, size];
-                    setFilters({ ...filters, frameSizes: updated });
-                  }}
+                  variant={filters.frameSize === size ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, frameSize: size })}
                 >
                   {size}
-                </Badge>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Gear Type */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Gear Type</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Single Speed', '3-7 Gears', '8-21 Gears', '21+ Gears'].map((gear) => (
+                <Button
+                  key={gear}
+                  variant={filters.gearType === gear ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, gearType: gear })}
+                >
+                  {gear}
+                </Button>
               ))}
             </div>
           </CardContent>
@@ -541,27 +716,69 @@ export function CategoryFilters({
         {/* Electric Assist */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Options</CardTitle>
+            <CardTitle className="text-sm">Electric Assist</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="electric"
-                checked={filters.electricOnly || false}
-                onCheckedChange={(checked) => setFilters({ ...filters, electricOnly: checked })}
-              />
-              <Label htmlFor="electric">Electric Assist Only</Label>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Yes', 'No', 'Either'].map((option) => (
+                <Button
+                  key={option}
+                  variant={filters.electricAssist === option ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, electricAssist: option })}
+                >
+                  {option}
+                </Button>
+              ))}
             </div>
-            {mode === 'rent' && (
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="helmet"
-                  checked={filters.helmetIncluded || false}
-                  onCheckedChange={(checked) => setFilters({ ...filters, helmetIncluded: checked })}
-                />
-                <Label htmlFor="helmet">Helmet Included</Label>
-              </div>
-            )}
+          </CardContent>
+        </Card>
+
+        {/* Features */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['Helmet Included', 'Lock Included', 'Basket', 'Lights', 'Phone Mount', 'Water Bottle Holder'].map((feature) => (
+                <Button
+                  key={feature}
+                  variant={filters.features?.includes(feature) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    const features = filters.features || [];
+                    const newFeatures = features.includes(feature)
+                      ? features.filter((f: string) => f !== feature)
+                      : [...features, feature];
+                    setFilters({ ...filters, features: newFeatures });
+                  }}
+                >
+                  {feature}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Condition */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Condition</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 flex-wrap">
+              {['New', 'Like New', 'Good', 'Fair'].map((condition) => (
+                <Button
+                  key={condition}
+                  variant={filters.condition === condition ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, condition: condition })}
+                >
+                  {condition}
+                </Button>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -652,8 +869,8 @@ export function CategoryFilters({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleApply} size="lg">
-            Show Results
+          <Button onClick={handleApply} size="lg" className="min-w-[200px]">
+            Save & Show Results
           </Button>
         </DialogFooter>
       </DialogContent>
