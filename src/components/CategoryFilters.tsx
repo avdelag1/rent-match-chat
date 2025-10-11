@@ -43,8 +43,8 @@ export function CategoryFilters({
   };
 
   const renderPropertyFilters = () => (
-    <ScrollArea className="h-[60vh] pr-4">
-      <div className="space-y-6">
+    <ScrollArea className="h-[55vh] pr-4">
+      <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
           <CardHeader>
@@ -195,8 +195,8 @@ export function CategoryFilters({
   );
 
   const renderYachtFilters = () => (
-    <ScrollArea className="h-[60vh] pr-4">
-      <div className="space-y-6">
+    <ScrollArea className="h-[55vh] pr-4">
+      <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
           <CardHeader>
@@ -342,8 +342,8 @@ export function CategoryFilters({
   );
 
   const renderMotorcycleFilters = () => (
-    <ScrollArea className="h-[60vh] pr-4">
-      <div className="space-y-6">
+    <ScrollArea className="h-[55vh] pr-4">
+      <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
           <CardHeader>
@@ -460,8 +460,8 @@ export function CategoryFilters({
   );
 
   const renderBicycleFilters = () => (
-    <ScrollArea className="h-[60vh] pr-4">
-      <div className="space-y-6">
+    <ScrollArea className="h-[55vh] pr-4">
+      <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
           <CardHeader>

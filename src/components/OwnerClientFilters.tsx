@@ -71,8 +71,8 @@ export function OwnerClientFilters({
             </CardContent>
           </Card>
 
-          <ScrollArea className="h-[50vh] pr-4">
-            <div className="space-y-6">
+          <ScrollArea className="h-[55vh] pr-4">
+            <div className="space-y-4 pb-4">
               {/* Budget Range */}
               <Card>
                 <CardHeader>
