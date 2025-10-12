@@ -60,8 +60,7 @@ export function CategoryFilters({
   };
 
   const renderPropertyFilters = () => (
-    <ScrollArea className="h-[55vh] pr-4">
-      <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
           <CardHeader>
@@ -274,11 +273,9 @@ export function CategoryFilters({
           </CardContent>
         </Card>
       </div>
-    </ScrollArea>
   );
 
   const renderYachtFilters = () => (
-    <ScrollArea className="h-[55vh] pr-4">
       <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
@@ -451,11 +448,9 @@ export function CategoryFilters({
           </CardContent>
         </Card>
       </div>
-    </ScrollArea>
   );
 
   const renderMotorcycleFilters = () => (
-    <ScrollArea className="h-[55vh] pr-4">
       <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
@@ -628,11 +623,9 @@ export function CategoryFilters({
           </CardContent>
         </Card>
       </div>
-    </ScrollArea>
   );
 
   const renderBicycleFilters = () => (
-    <ScrollArea className="h-[55vh] pr-4">
       <div className="space-y-4 pb-4">
         {/* Price Range */}
         <Card>
@@ -799,13 +792,12 @@ export function CategoryFilters({
           </CardContent>
         </Card>
       </div>
-    </ScrollArea>
   );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-2 shrink-0">
           <DialogTitle className="flex items-center justify-between">
             <span className="text-xl font-bold">Find Your Perfect Match</span>
             <Button variant="ghost" size="sm" onClick={handleReset}>
@@ -815,74 +807,292 @@ export function CategoryFilters({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Category Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">What are you looking for?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-4 gap-3">
-                <Button
-                  variant={category === 'property' ? 'default' : 'outline'}
-                  className="flex flex-col items-center gap-2 h-auto py-4"
-                  onClick={() => setCategory('property')}
-                >
-                  <Home className="w-6 h-6" />
-                  <span className="text-sm">Property</span>
-                </Button>
-                <Button
-                  variant={category === 'yacht' ? 'default' : 'outline'}
-                  className="flex flex-col items-center gap-2 h-auto py-4"
-                  onClick={() => setCategory('yacht')}
-                >
-                  <Ship className="w-6 h-6" />
-                  <span className="text-sm">Yacht</span>
-                </Button>
-                <Button
-                  variant={category === 'motorcycle' ? 'default' : 'outline'}
-                  className="flex flex-col items-center gap-2 h-auto py-4"
-                  onClick={() => setCategory('motorcycle')}
-                >
-                  <Motorcycle className="w-6 h-6" />
-                  <span className="text-sm">Motorcycle</span>
-                </Button>
-                <Button
-                  variant={category === 'bicycle' ? 'default' : 'outline'}
-                  className="flex flex-col items-center gap-2 h-auto py-4"
-                  onClick={() => setCategory('bicycle')}
-                >
-                  <Bike className="w-6 h-6" />
-                  <span className="text-sm">Bicycle</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-4 pb-4">
+            {/* Category Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">What are you looking for?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-3">
+                  <Button
+                    variant={category === 'property' ? 'default' : 'outline'}
+                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    onClick={() => setCategory('property')}
+                  >
+                    <Home className="w-6 h-6" />
+                    <span className="text-sm">Property</span>
+                  </Button>
+                  <Button
+                    variant={category === 'yacht' ? 'default' : 'outline'}
+                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    onClick={() => setCategory('yacht')}
+                  >
+                    <Ship className="w-6 h-6" />
+                    <span className="text-sm">Yacht</span>
+                  </Button>
+                  <Button
+                    variant={category === 'motorcycle' ? 'default' : 'outline'}
+                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    onClick={() => setCategory('motorcycle')}
+                  >
+                    <Motorcycle className="w-6 h-6" />
+                    <span className="text-sm">Motorcycle</span>
+                  </Button>
+                  <Button
+                    variant={category === 'bicycle' ? 'default' : 'outline'}
+                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    onClick={() => setCategory('bicycle')}
+                  >
+                    <Bike className="w-6 h-6" />
+                    <span className="text-sm">Bicycle</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Mode Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Looking to Rent or Buy?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="rent">Rent</TabsTrigger>
-                  <TabsTrigger value="sale">Buy</TabsTrigger>
-                  <TabsTrigger value="both">Both</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardContent>
-          </Card>
+            {/* Mode Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Looking to Rent or Buy?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="rent">Rent</TabsTrigger>
+                    <TabsTrigger value="sale">Buy</TabsTrigger>
+                    <TabsTrigger value="both">Both</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardContent>
+            </Card>
 
-          {/* Category-Specific Filters */}
-          {category === 'property' && renderPropertyFilters()}
-          {category === 'yacht' && renderYachtFilters()}
-          {category === 'motorcycle' && renderMotorcycleFilters()}
-          {category === 'bicycle' && renderBicycleFilters()}
-        </div>
+            {/* Category-Specific Filters */}
+            <div className="space-y-4">
+              {category === 'property' && (
+                <div className="space-y-4 pb-4">
+                  {/* Price Range */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Price Range</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Min Price</Label>
+                        <Input
+                          type="number"
+                          placeholder="$0"
+                          value={filters.minPrice || ''}
+                          onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Max Price</Label>
+                        <Input
+                          type="number"
+                          placeholder="$10,000"
+                          value={filters.maxPrice || ''}
+                          onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
 
-        <DialogFooter className="gap-2">
+                  {/* Bedrooms */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Bedrooms</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['1', '1.5', '2', '2.5', '3+'].map((bed) => (
+                          <Button
+                            key={bed}
+                            variant={filters.bedrooms === bed ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({ ...filters, bedrooms: bed })}
+                          >
+                            {bed}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Bathrooms */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Bathrooms</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['1', '1.5', '2', '2.5', '3+'].map((bath) => (
+                          <Button
+                            key={bath}
+                            variant={filters.bathrooms === bath ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({ ...filters, bathrooms: bath })}
+                          >
+                            {bath}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Square Footage */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Square Footage</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Min Sq Ft</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={filters.minSqFt || ''}
+                          onChange={(e) => setFilters({ ...filters, minSqFt: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Max Sq Ft</Label>
+                        <Input
+                          type="number"
+                          placeholder="5000"
+                          value={filters.maxSqFt || ''}
+                          onChange={(e) => setFilters({ ...filters, maxSqFt: e.target.value })}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Property Type */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Property Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Apartment', 'House', 'Villa', 'Studio', 'Loft', 'Condo', 'Penthouse'].map((type) => (
+                          <Button
+                            key={type}
+                            variant={filters.propertyTypes?.includes(type) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              const types = filters.propertyTypes || [];
+                              const newTypes = types.includes(type)
+                                ? types.filter((t: string) => t !== type)
+                                : [...types, type];
+                              setFilters({ ...filters, propertyTypes: newTypes });
+                            }}
+                          >
+                            {type}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Location Zones */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Location Zone</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Beach', 'Town', 'Jungle', 'Downtown', 'Holistika', 'Aldea Zama'].map((zone) => (
+                          <Button
+                            key={zone}
+                            variant={filters.locationZones?.includes(zone) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              const zones = filters.locationZones || [];
+                              const newZones = zones.includes(zone)
+                                ? zones.filter((z: string) => z !== zone)
+                                : [...zones, zone];
+                              setFilters({ ...filters, locationZones: newZones });
+                            }}
+                          >
+                            {zone}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Amenities */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Amenities</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Pool', 'Gym', 'Parking', 'WiFi', 'Security', 'Balcony', 'Pet Friendly', 'Furnished', 'AC', 'Ocean View', 'Rooftop', 'Coworking'].map((amenity) => (
+                          <Button
+                            key={amenity}
+                            variant={filters.amenities?.includes(amenity) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              const amenities = filters.amenities || [];
+                              const newAmenities = amenities.includes(amenity)
+                                ? amenities.filter((a: string) => a !== amenity)
+                                : [...amenities, amenity];
+                              setFilters({ ...filters, amenities: newAmenities });
+                            }}
+                          >
+                            {amenity}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Move-in Date */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Move-in Date</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Input
+                        type="date"
+                        value={filters.moveInDate || ''}
+                        onChange={(e) => setFilters({ ...filters, moveInDate: e.target.value })}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Lease Duration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Lease Duration</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Monthly', '3 Months', '6 Months', '1 Year', '2+ Years'].map((duration) => (
+                          <Button
+                            key={duration}
+                            variant={filters.leaseDuration === duration ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({ ...filters, leaseDuration: duration })}
+                          >
+                            {duration}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+              {category === 'yacht' && renderYachtFilters()}
+              {category === 'motorcycle' && renderMotorcycleFilters()}
+              {category === 'bicycle' && renderBicycleFilters()}
+            </div>
+          </div>
+        </ScrollArea>
+
+        <DialogFooter className="px-6 py-4 border-t shrink-0 gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
