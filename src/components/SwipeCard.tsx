@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Bed, Bath, Square, Flame, MessageCircle, Eye } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Flame, MessageCircle, Eye, X } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 
 interface SwipeCardProps {
@@ -160,16 +160,17 @@ export function SwipeCard({
           {isTop && (
             <>
               {dragOffset.x > 50 && (
-                <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                  <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-lg flex items-center gap-2">
-                    <Flame className="w-6 h-6" />
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 to-emerald-500/30 backdrop-blur-sm flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-2xl flex items-center gap-3 shadow-2xl border-4 border-white/40 transform rotate-[-15deg] scale-110">
+                    <Flame className="w-8 h-8 animate-pulse" />
                     LIKE
                   </div>
                 </div>
               )}
               {dragOffset.x < -50 && (
-                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                  <div className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-rose-500/30 backdrop-blur-sm flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-2xl shadow-2xl border-4 border-white/40 transform rotate-[15deg] scale-110 flex items-center gap-3">
+                    <X className="w-8 h-8" />
                     PASS
                   </div>
                 </div>

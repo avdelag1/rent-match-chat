@@ -815,38 +815,38 @@ export function CategoryFilters({
                 <CardTitle className="text-base">What are you looking for?</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <Button
                     variant={category === 'property' ? 'default' : 'outline'}
-                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    className="flex flex-col items-center gap-2 h-auto min-h-[90px] py-3 px-2"
                     onClick={() => setCategory('property')}
                   >
-                    <Home className="w-6 h-6" />
-                    <span className="text-sm">Property</span>
+                    <Home className="w-7 h-7 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium leading-tight">Property</span>
                   </Button>
                   <Button
                     variant={category === 'yacht' ? 'default' : 'outline'}
-                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    className="flex flex-col items-center gap-2 h-auto min-h-[90px] py-3 px-2"
                     onClick={() => setCategory('yacht')}
                   >
-                    <Ship className="w-6 h-6" />
-                    <span className="text-sm">Yacht</span>
+                    <Ship className="w-7 h-7 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium leading-tight">Yacht</span>
                   </Button>
                   <Button
                     variant={category === 'motorcycle' ? 'default' : 'outline'}
-                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    className="flex flex-col items-center gap-2 h-auto min-h-[90px] py-3 px-2"
                     onClick={() => setCategory('motorcycle')}
                   >
-                    <Motorcycle className="w-6 h-6" />
-                    <span className="text-sm">Motorcycle</span>
+                    <Motorcycle className="w-7 h-7 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium leading-tight break-words text-center">Motorcycle</span>
                   </Button>
                   <Button
                     variant={category === 'bicycle' ? 'default' : 'outline'}
-                    className="flex flex-col items-center gap-2 h-auto py-4"
+                    className="flex flex-col items-center gap-2 h-auto min-h-[90px] py-3 px-2"
                     onClick={() => setCategory('bicycle')}
                   >
-                    <Bike className="w-6 h-6" />
-                    <span className="text-sm">Bicycle</span>
+                    <Bike className="w-7 h-7 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium leading-tight">Bicycle</span>
                   </Button>
                 </div>
               </CardContent>

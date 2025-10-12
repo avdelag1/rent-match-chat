@@ -288,7 +288,8 @@ export function EnhancedSwipeCard({
             className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [0, 150], [0, 1]) }}
           >
-            <div className="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-2xl border-4 border-green-400 animate-pulse">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
+              <Flame className="w-8 h-8 animate-pulse" />
               LIKE
             </div>
           </motion.div>
@@ -297,7 +298,8 @@ export function EnhancedSwipeCard({
             className="absolute top-1/4 right-8 transform rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [-150, 0], [1, 0]) }}
           >
-            <div className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-2xl border-4 border-red-400">
+            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
+              <X className="w-8 h-8" />
               NOPE
             </div>
           </motion.div>
