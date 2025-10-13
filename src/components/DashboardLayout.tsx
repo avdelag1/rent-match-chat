@@ -215,17 +215,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-900 relative">
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 relative">
         <NotificationSystem />
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1 flex flex-col min-h-screen w-full">
-          {/* Header with trigger - shown for both roles but styled differently */}
-          <header className={`flex h-12 shrink-0 items-center gap-2 px-3 shadow-lg border-b sticky top-0 z-50 ${
-            userRole === 'client' 
-              ? 'bg-gradient-to-r from-primary to-secondary' 
-              : 'bg-gray-900'
-          }`}>
+          {/* Header with trigger - same gradient for both roles */}
+          <header className="flex h-12 shrink-0 items-center gap-2 px-3 shadow-lg border-b sticky top-0 z-50 bg-gradient-to-r from-primary to-secondary">
             <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
               
               {/* Brand Header with Profile Photo - only show for client */}
@@ -249,7 +245,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               )}
             </header>
 
-          <main className="flex-1 overflow-y-auto bg-gray-900">
+          <main className="flex-1 overflow-y-auto bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
             <div className="w-full min-h-full relative">
               {
                 React.Children.map(children, (child) => {
