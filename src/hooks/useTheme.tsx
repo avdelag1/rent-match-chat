@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
 
 type Theme = 'default' | 'dark' | 'amber' | 'red';
 
@@ -10,18 +12,32 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('default');
+  const [theme, setThemeState] = useState<Theme>('default');
+  const { user } = useAuth();
 
+  // Load theme from database when user logs in
   useEffect(() => {
-    const stored = localStorage.getItem('tinderent-theme') as Theme;
-    if (stored && ['default', 'dark', 'amber', 'red'].includes(stored)) {
-      setTheme(stored);
+    if (user?.id) {
+      const loadUserTheme = async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('theme_preference')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (data?.theme_preference && ['default', 'dark', 'amber', 'red'].includes(data.theme_preference)) {
+          setThemeState(data.theme_preference as Theme);
+        }
+      };
+      loadUserTheme();
+    } else {
+      // Reset to default when logged out
+      setThemeState('default');
     }
-  }, []);
+  }, [user?.id]);
 
+  // Apply theme class to document
   useEffect(() => {
-    localStorage.setItem('tinderent-theme', theme);
-    
     const root = window.document.documentElement;
     root.classList.remove('dark', 'amber', 'red');
 
@@ -33,6 +49,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.add('red');
     }
   }, [theme]);
+
+  // Save theme to database and update state
+  const setTheme = async (newTheme: Theme) => {
+    setThemeState(newTheme);
+    
+    if (user?.id) {
+      await supabase
+        .from('profiles')
+        .update({ theme_preference: newTheme })
+        .eq('id', user.id);
+    }
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>

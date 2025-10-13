@@ -2503,6 +2503,51 @@ export type Database = {
           },
         ]
       }
+      payment_activations: {
+        Row: {
+          activated_at: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          payment_id: string | null
+          payment_provider: string | null
+          payment_status: string | null
+          plan_id: string
+          plan_name: string
+          price: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
+          plan_id: string
+          plan_name: string
+          price: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
+          plan_id?: string
+          plan_name?: string
+          price?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_providers: {
         Row: {
           api_key: string | null
@@ -2869,6 +2914,7 @@ export type Database = {
           social_level: string | null
           social_media_verification: string | null
           specializations: string[] | null
+          theme_preference: string | null
           travel_frequency: string | null
           updated_at: string | null
           usage_intent: string | null
@@ -3010,6 +3056,7 @@ export type Database = {
           social_level?: string | null
           social_media_verification?: string | null
           specializations?: string[] | null
+          theme_preference?: string | null
           travel_frequency?: string | null
           updated_at?: string | null
           usage_intent?: string | null
@@ -3151,6 +3198,7 @@ export type Database = {
           social_level?: string | null
           social_media_verification?: string | null
           specializations?: string[] | null
+          theme_preference?: string | null
           travel_frequency?: string | null
           updated_at?: string | null
           usage_intent?: string | null
