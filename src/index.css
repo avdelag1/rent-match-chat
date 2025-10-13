@@ -13,8 +13,6 @@
 .scrollbar-hide::-webkit-scrollbar { 
   display: none;  /* Safari and Chrome */
 }
-@tailwind components;
-@tailwind utilities;
 
 /* Global responsive foundation */
 html {

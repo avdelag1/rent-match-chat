@@ -19,14 +19,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (user?.id) {
       const loadUserTheme = async () => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('theme_preference')
-          .eq('id', user.id)
-          .maybeSingle();
-        
-        if (data?.theme_preference && ['default', 'dark', 'amber', 'red'].includes(data.theme_preference)) {
-          setThemeState(data.theme_preference as Theme);
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('theme_preference')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          if (error) throw error;
+          
+          if (data?.theme_preference && ['default', 'dark', 'amber', 'red'].includes(data.theme_preference)) {
+            setThemeState(data.theme_preference as Theme);
+          }
+        } catch (error) {
+          console.error('Failed to load theme preference:', error);
+          setThemeState('default');
         }
       };
       loadUserTheme();
@@ -55,10 +62,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(newTheme);
     
     if (user?.id) {
-      await supabase
-        .from('profiles')
-        .update({ theme_preference: newTheme })
-        .eq('id', user.id);
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ theme_preference: newTheme })
+          .eq('id', user.id);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error('Failed to save theme preference:', error);
+      }
     }
   };
 

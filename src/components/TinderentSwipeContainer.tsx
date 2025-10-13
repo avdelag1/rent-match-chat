@@ -288,7 +288,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
       {/* Bottom Action Buttons - 3 Button Layout */}
       <motion.div 
-        className="absolute bottom-8 left-16 flex gap-6 items-center z-20"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-6 items-center z-20"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -304,6 +304,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
+            aria-label="Pass on this property"
           >
             <ThumbsDown className="w-7 h-7 stroke-[2.5]" />
           </Button>
@@ -324,6 +325,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                 ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl hover:shadow-yellow-500/20' 
                 : 'bg-gray-200 border-2 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
             }`}
+            aria-label="Undo last swipe"
           >
             <motion.div
               animate={{ rotate: isUndoing ? 360 : 0 }}
@@ -345,6 +347,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
+            aria-label="Like this property"
           >
             <Flame className="w-11 h-11 fill-white stroke-white" />
           </Button>

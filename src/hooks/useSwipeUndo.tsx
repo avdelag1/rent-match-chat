@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -10,9 +10,32 @@ interface LastSwipe {
   timestamp: Date;
 }
 
+const UNDO_STORAGE_KEY = 'lastSwipe';
+
 export function useSwipeUndo() {
-  const [lastSwipe, setLastSwipe] = useState<LastSwipe | null>(null);
+  const [lastSwipe, setLastSwipe] = useState<LastSwipe | null>(() => {
+    // Load from localStorage on mount
+    const stored = localStorage.getItem(UNDO_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        return { ...parsed, timestamp: new Date(parsed.timestamp) };
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
   const queryClient = useQueryClient();
+
+  // Persist to localStorage whenever lastSwipe changes
+  useEffect(() => {
+    if (lastSwipe) {
+      localStorage.setItem(UNDO_STORAGE_KEY, JSON.stringify(lastSwipe));
+    } else {
+      localStorage.removeItem(UNDO_STORAGE_KEY);
+    }
+  }, [lastSwipe]);
 
   const recordSwipe = useCallback((targetId: string, targetType: 'listing' | 'profile', swipeType: 'like' | 'pass' | 'super_like') => {
     setLastSwipe({
