@@ -17,22 +17,63 @@ interface AuthDialogProps {
 
 export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp, signInWithOAuth } = useAuth();
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link.",
+      });
+      
+      setIsForgotPassword(false);
+      setEmail('');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isForgotPassword) {
+      return handleForgotPassword(e);
+    }
+    
     setIsLoading(true);
 
     try {
       if (isLogin) {
         const { error } = await signIn(email, password, role);
         if (!error) {
-          // Only close on successful sign in
+          // Store remember me preference
+          if (rememberMe) {
+            localStorage.setItem('rememberMe', 'true');
+          } else {
+            localStorage.removeItem('rememberMe');
+          }
           onClose();
         } else {
           throw error;
@@ -40,7 +81,6 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       } else {
         const { error } = await signUp(email, password, role, name);
         if (!error) {
-          // Only close on successful sign up
           onClose();
         } else {
           throw error;
@@ -103,10 +143,10 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 <Flame className="w-10 h-10 text-white drop-shadow-lg" />
               </div>
               <h1 className="text-3xl font-bold mb-3 drop-shadow-sm">
-                {isLogin ? 'Welcome Back!' : 'Join Tinderent'}
+                {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back!' : 'Join Tinderent'}
               </h1>
               <p className="text-white/90 text-base capitalize font-medium">
-                {isLogin ? 'Sign in' : 'Sign up'} as {role}
+                {isForgotPassword ? 'Enter your email to reset password' : `${isLogin ? 'Sign in' : 'Sign up'} as ${role}`}
               </p>
             </div>
           </div>
@@ -114,42 +154,46 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           {/* Main Content */}
           <div className="bg-white rounded-b-3xl p-8 space-y-8 relative overflow-hidden">
             
-            {/* OAuth Buttons */}
-            <div className="space-y-4 relative z-10">
-              <Button
-                type="button"
-                onClick={() => handleOAuthSignIn('google')}
-                disabled={isLoading}
-                className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
-              >
-                <FaGoogle className="w-6 h-6 text-red-500" />
-                <span>Continue with Google</span>
-              </Button>
-              
-              <Button
-                type="button"
-                onClick={() => handleOAuthSignIn('facebook')}
-                disabled={isLoading}
-                className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
-              >
-                <FaFacebook className="w-6 h-6" />
-                <span>Continue with Facebook</span>
-              </Button>
-            </div>
+            {!isForgotPassword && (
+              <>
+                {/* OAuth Buttons */}
+                <div className="space-y-4 relative z-10">
+                  <Button
+                    type="button"
+                    onClick={() => handleOAuthSignIn('google')}
+                    disabled={isLoading}
+                    className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
+                  >
+                    <FaGoogle className="w-6 h-6 text-red-500" />
+                    <span>Continue with Google</span>
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    onClick={() => handleOAuthSignIn('facebook')}
+                    disabled={isLoading}
+                    className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
+                  >
+                    <FaFacebook className="w-6 h-6" />
+                    <span>Continue with Facebook</span>
+                  </Button>
+                </div>
 
-            {/* Divider */}
-            <div className="relative flex items-center py-4">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2">
-                or
-              </span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
+                {/* Divider */}
+                <div className="relative flex items-center py-4">
+                  <div className="flex-grow border-t border-gray-300"></div>
+                  <span className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2">
+                    or
+                  </span>
+                  <div className="flex-grow border-t border-gray-300"></div>
+                </div>
+              </>
+            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Field (Sign Up Only) */}
-              {!isLogin && (
+              {!isLogin && !isForgotPassword && (
                 <div>
                   <Label htmlFor="name" className="text-gray-700 font-semibold text-base">
                     Full Name
@@ -186,30 +230,54 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               </div>
 
               {/* Password Field */}
-              <div>
-                <Label htmlFor="password" className="text-gray-700 font-semibold text-base">
-                  Password
-                </Label>
-                <div className="mt-2 relative">
-                  <Lock className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="pl-14 pr-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
-                    placeholder="Enter your password"
-                  />
+              {!isForgotPassword && (
+                <div>
+                  <Label htmlFor="password" className="text-gray-700 font-semibold text-base">
+                    Password
+                  </Label>
+                  <div className="mt-2 relative">
+                    <Lock className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="pl-14 pr-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
+                      placeholder="Enter your password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Remember Me & Forgot Password */}
+              {isLogin && !isForgotPassword && (
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm text-gray-600">Remember me</span>
+                  </label>
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-sm text-orange-600 hover:text-orange-700 font-semibold"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    Forgot password?
                   </button>
                 </div>
-              </div>
+              )}
 
               {/* Submit Button */}
               <Button 
@@ -225,7 +293,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     </>
                   ) : (
                     <span>
-                      {isLogin ? 'Sign In' : 'Create Account'}
+                      {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
                     </span>
                   )}
                 </div>
@@ -234,21 +302,36 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
             {/* Toggle Sign In/Up */}
             <div className="text-center pt-4">
-              <span className="text-gray-600 text-sm">
-                {isLogin ? "Don't have an account? " : "Already have an account? "}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setEmail('');
-                  setPassword('');
-                  setName('');
-                }}
-                className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-sm underline"
-              >
-                {isLogin ? 'Sign Up' : 'Sign In'}
-              </button>
+              {isForgotPassword ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setEmail('');
+                  }}
+                  className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-sm underline"
+                >
+                  Back to Sign In
+                </button>
+              ) : (
+                <>
+                  <span className="text-gray-600 text-sm">
+                    {isLogin ? "Don't have an account? " : "Already have an account? "}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setEmail('');
+                      setPassword('');
+                      setName('');
+                    }}
+                    className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-sm underline"
+                  >
+                    {isLogin ? 'Sign Up' : 'Sign In'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
