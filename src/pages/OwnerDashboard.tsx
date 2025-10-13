@@ -106,14 +106,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 <h1 className="text-white text-xl font-bold">Browse Clients</h1>
                 <p className="text-white/80 text-sm">Explore verified client profiles and connect with potential matches</p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => refetch()}
-                className="bg-white/20 hover:bg-white/30 text-white"
-              >
-                <RotateCcw className="w-5 h-5" />
-              </Button>
+              {/* Removed refresh button - undo is now in the swipe container */}
             </div>
 
             {/* Smart Filter Buttons */}

@@ -87,14 +87,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
             <div className="text-white text-lg font-semibold">
               Discover
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => refetch()}
-              className="bg-white/20 hover:bg-white/30 text-white"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </Button>
+            {/* Removed refresh button - undo is now in the swipe container */}
           </header>
 
           {/* Full Screen Swipe Container */}

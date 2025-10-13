@@ -4,6 +4,7 @@ import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSmartListingMatching } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
+import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Flame, X, RotateCcw, Home, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
@@ -34,6 +35,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
+  const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
@@ -59,6 +61,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         targetType: 'listing'
       });
 
+      // Record the swipe for undo functionality
+      recordSwipe(currentListing.id, 'listing', direction === 'right' ? 'like' : 'pass');
+
       // Success toast for right swipe
       if (direction === 'right') {
         toast({
@@ -71,7 +76,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
     }, 300);
-  }, [currentIndex, listings, swipeMutation]);
+  }, [currentIndex, listings, swipeMutation, recordSwipe]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
     swipeMutation.mutate({
@@ -281,39 +286,66 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
 
-      {/* Bottom Action Buttons - Enhanced Design */}
+      {/* Bottom Action Buttons - 3 Button Layout */}
       <motion.div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-8 items-center z-20"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
+        {/* Dislike Button - Left */}
         <motion.div
-          whileHover={{ scale: 1.15 }}
+          whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
             variant="outline"
-            className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20"
+            className="w-14 h-14 rounded-full bg-white border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-all duration-300 shadow-xl hover:shadow-red-500/20"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
             <X className="w-6 h-6" />
           </Button>
         </motion.div>
-        
+
+        {/* Undo Button - Center */}
         <motion.div
-          whileHover={{ scale: 1.15 }}
+          whileHover={{ scale: canUndo ? 1.1 : 1 }}
+          whileTap={{ scale: canUndo ? 0.9 : 1 }}
+        >
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => canUndo && undoLastSwipe()}
+            disabled={!canUndo || isUndoing}
+            className={`w-14 h-14 rounded-full transition-all duration-300 shadow-lg ${
+              canUndo 
+                ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl hover:shadow-yellow-500/20' 
+                : 'bg-gray-100 border-2 border-gray-300 text-gray-400 cursor-not-allowed opacity-50'
+            }`}
+          >
+            <motion.div
+              animate={{ rotate: isUndoing ? 360 : 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <RotateCcw className="w-6 h-6" />
+            </motion.div>
+          </Button>
+        </motion.div>
+        
+        {/* Like Button - Right */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 border-2 border-orange-400/50 hover:border-orange-300"
+            className="w-18 h-18 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            <Flame className="w-8 h-8" />
+            <Flame className="w-10 h-10 fill-white" />
           </Button>
         </motion.div>
       </motion.div>
