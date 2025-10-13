@@ -233,8 +233,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             </form>
 
             {/* Toggle Sign In/Up */}
-            <div className="text-center pt-6">
-              <span className="text-gray-600 text-base">
+            <div className="text-center pt-4">
+              <span className="text-gray-600 text-sm">
                 {isLogin ? "Don't have an account? " : "Already have an account? "}
               </span>
               <button
@@ -245,58 +245,10 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                   setPassword('');
                   setName('');
                 }}
-                className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-base underline"
+                className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-sm underline"
               >
                 {isLogin ? 'Sign Up' : 'Sign In'}
               </button>
-            </div>
-
-            {/* Benefits Section - Enhanced */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl p-6 mt-8 border border-gray-200">
-              <h3 className="font-bold text-gray-900 text-lg mb-4 flex items-center gap-2">
-                {role === 'client' ? (
-                  <>
-                    🏠 <span>Client Benefits</span>
-                  </>
-                ) : (
-                  <>
-                    🏢 <span>Owner Benefits</span>
-                  </>
-                )}
-              </h3>
-              <div className="grid grid-cols-1 gap-3 text-sm text-gray-700">
-                {role === 'client' ? (
-                  <>
-                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
-                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
-                      <span className="font-medium">Browse properties & smart matching</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
-                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
-                      <span className="font-medium">Chat with owners & save favorites</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
-                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
-                      <span className="font-medium">Personalized recommendations</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
-                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
-                      <span className="font-medium">List properties & manage portfolio</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
-                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
-                      <span className="font-medium">Connect with quality tenants</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white rounded-xl p-3 shadow-sm">
-                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
-                      <span className="font-medium">Advanced analytics & insights</span>
-                    </div>
-                  </>
-                )}
-              </div>
             </div>
           </div>
         </div>

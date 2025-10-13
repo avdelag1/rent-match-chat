@@ -82,12 +82,8 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
         
         <main className="flex-1 relative overflow-hidden">
           {/* Minimal Header */}
-          <header className="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center">
+          <header className="absolute top-0 left-0 right-0 z-20 p-4 flex justify-start items-center">
             <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20" />
-            <div className="text-white text-lg font-semibold">
-              Discover
-            </div>
-            {/* Removed refresh button - undo is now in the swipe container */}
           </header>
 
           {/* Full Screen Swipe Container */}

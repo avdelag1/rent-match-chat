@@ -160,9 +160,29 @@ body {
     --border: 0 0% 18%;
     --input: 0 0% 18%;
     --ring: 20 100% 62%;
+    --bg-primary: 0 0% 5%;
+    --bg-secondary: 0 0% 8%;
+    --bg-tertiary: 0 0% 12%;
   }
 
   .amber {
+    --background: 43 96% 97%;
+    --foreground: 30 100% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 100% 15%;
+    --primary: 30 95% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 43 91% 94%;
+    --secondary-foreground: 30 100% 15%;
+    --muted: 43 89% 85%;
+    --muted-foreground: 29 92% 32%;
+    --accent: 30 95% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 43 89% 85%;
+    --input: 43 89% 85%;
+    --ring: 30 95% 45%;
     --bg-primary: 43 96% 97%;
     --bg-secondary: 43 91% 94%;
     --bg-tertiary: 43 89% 85%;
@@ -179,58 +199,24 @@ body {
     --overlay: rgba(217, 119, 6, 0.3);
   }
 
-  .blue {
-    --bg-primary: 214 100% 97%;
-    --bg-secondary: 214 95% 93%;
-    --bg-tertiary: 214 95% 87%;
-    --text-primary: 224 76% 33%;
-    --text-secondary: 229 84% 47%;
-    --text-tertiary: 221 83% 59%;
-    --border-primary: 214 95% 87%;
-    --border-secondary: 213 97% 78%;
-    --accent-primary: 221 83% 59%;
-    --accent-secondary: 224 76% 56%;
-    --shadow-sm: 0 1px 2px 0 rgb(59 130 246 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(59 130 246 / 0.15), 0 2px 4px -2px rgb(59 130 246 / 0.15);
-    --shadow-lg: 0 10px 15px -3px rgb(59 130 246 / 0.2), 0 4px 6px -4px rgb(59 130 246 / 0.2);
-    --overlay: rgba(59, 130, 246, 0.3);
-  }
-
-  .green {
-    --bg-primary: 120 60% 97%;
-    --bg-secondary: 120 60% 94%;
-    --bg-tertiary: 120 60% 85%;
-    --text-primary: 150 100% 20%;
-    --text-secondary: 150 85% 24%;
-    --text-tertiary: 142 76% 36%;
-    --border-primary: 120 60% 85%;
-    --border-secondary: 120 83% 76%;
-    --accent-primary: 142 76% 36%;
-    --accent-secondary: 149 80% 30%;
-    --shadow-sm: 0 1px 2px 0 rgb(22 163 74 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(22 163 74 / 0.15), 0 2px 4px -2px rgb(22 163 74 / 0.15);
-    --shadow-lg: 0 10px 15px -3px rgb(22 163 74 / 0.2), 0 4px 6px -4px rgb(22 163 74 / 0.2);
-    --overlay: rgba(22, 163, 74, 0.3);
-  }
-
-  .purple {
-    --bg-primary: 270 100% 98%;
-    --bg-secondary: 270 100% 96%;
-    --bg-tertiary: 269 100% 91%;
-    --text-primary: 267 91% 33%;
-    --text-secondary: 262 83% 58%;
-    --text-tertiary: 258 90% 66%;
-    --border-primary: 269 100% 91%;
-    --border-secondary: 267 100% 86%;
-    --accent-primary: 258 90% 66%;
-    --accent-secondary: 262 83% 58%;
-    --shadow-sm: 0 1px 2px 0 rgb(139 92 246 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(139 92 246 / 0.15), 0 2px 4px -2px rgb(139 92 246 / 0.15);
-    --shadow-lg: 0 10px 15px -3px rgb(139 92 246 / 0.2), 0 4px 6px -4px rgb(139 92 246 / 0.2);
-    --overlay: rgba(139, 92, 246, 0.3);
-  }
-
   .red {
+    --background: 354 100% 97%;
+    --foreground: 356 75% 28%;
+    --card: 0 0% 100%;
+    --card-foreground: 356 75% 28%;
+    --primary: 354 64% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 354 100% 94%;
+    --secondary-foreground: 356 75% 28%;
+    --muted: 354 100% 88%;
+    --muted-foreground: 356 69% 40%;
+    --accent: 354 64% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 354 100% 88%;
+    --input: 354 100% 88%;
+    --ring: 354 64% 52%;
     --bg-primary: 354 100% 97%;
     --bg-secondary: 354 100% 94%;
     --bg-tertiary: 354 100% 88%;
