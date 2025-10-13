@@ -300,12 +300,12 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         >
           <Button
             size="lg"
-            variant="outline"
-            className="w-14 h-14 rounded-full bg-white border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-all duration-300 shadow-xl hover:shadow-red-500/20"
+            variant="ghost"
+            className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            <X className="w-6 h-6" />
+            <X className="w-7 h-7 stroke-[2.5]" />
           </Button>
         </motion.div>
 
@@ -316,20 +316,20 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         >
           <Button
             size="lg"
-            variant="outline"
+            variant="ghost"
             onClick={() => canUndo && undoLastSwipe()}
             disabled={!canUndo || isUndoing}
-            className={`w-14 h-14 rounded-full transition-all duration-300 shadow-lg ${
+            className={`w-16 h-16 rounded-full transition-all duration-300 shadow-lg p-0 ${
               canUndo 
                 ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl hover:shadow-yellow-500/20' 
-                : 'bg-gray-100 border-2 border-gray-300 text-gray-400 cursor-not-allowed opacity-50'
+                : 'bg-gray-200 border-2 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
             }`}
           >
             <motion.div
               animate={{ rotate: isUndoing ? 360 : 0 }}
               transition={{ duration: 0.6 }}
             >
-              <RotateCcw className="w-6 h-6" />
+              <RotateCcw className="w-7 h-7 stroke-[2.5]" />
             </motion.div>
           </Button>
         </motion.div>
@@ -341,11 +341,12 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         >
           <Button
             size="lg"
-            className="w-18 h-18 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30"
+            variant="ghost"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            <Flame className="w-10 h-10 fill-white" />
+            <Flame className="w-11 h-11 fill-white stroke-white" />
           </Button>
         </motion.div>
       </motion.div>
