@@ -277,7 +277,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
       {/* Action Buttons - 3 Button Layout */}
       <motion.div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
+        className="absolute bottom-8 left-16 flex gap-6 items-center z-20"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
