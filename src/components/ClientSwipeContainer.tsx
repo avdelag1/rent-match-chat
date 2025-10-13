@@ -12,7 +12,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Flame, X, RotateCcw, Users, Sparkles } from 'lucide-react';
+import { Flame, X, RotateCcw, Users, Sparkles, ThumbsDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -277,7 +277,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
       {/* Action Buttons - 3 Button Layout */}
       <motion.div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
+        className="absolute bottom-32 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -294,7 +294,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            <X className="w-7 h-7 stroke-[2.5]" />
+            <ThumbsDown className="w-7 h-7 stroke-[2.5]" />
           </Button>
         </motion.div>
 
