@@ -157,7 +157,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         </div>
         <div className="text-center mt-4 text-muted-foreground">
           <Sparkles className="w-5 h-5 mx-auto mb-2 animate-spin" />
-          Finding perfect tenants...
+          Finding perfect clients...
         </div>
       </div>
     );
@@ -170,7 +170,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load tenant profiles right now.</p>
+          <p className="text-muted-foreground mb-4">We couldn't load client profiles right now.</p>
           <Button 
             onClick={handleRefresh}
             variant="outline"
@@ -189,7 +189,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20 rounded-xl p-8">
           <div className="text-6xl mb-4">👥</div>
-          <h3 className="text-xl font-bold mb-2">No Tenants Found</h3>
+          <h3 className="text-xl font-bold mb-2">No Clients Found</h3>
           <p className="text-muted-foreground mb-4">
             Check back later or refresh for new profiles.
           </p>

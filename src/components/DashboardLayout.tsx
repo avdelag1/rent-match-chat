@@ -195,7 +195,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }
 
   const handleMessageClick = () => {
-    const roleText = userRole === 'owner' ? 'tenants' : 'owners'
+    const roleText = userRole === 'owner' ? 'clients' : 'owners'
     setSubscriptionReason(`Unlock messaging to connect with ${roleText}!`)
     setShowSubscriptionPackages(true)
   }
@@ -220,30 +220,34 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <AppSidebar userRole={userRole} onMenuItemClick={handleMenuItemClick} />
         
         <InsetComponent className="flex-1 flex flex-col min-h-screen w-full">
-          {/* Only show header for client role */}
-          {userRole === 'client' && (
-            <header className="flex h-12 shrink-0 items-center gap-2 bg-gradient-to-r from-primary to-secondary px-3 shadow-lg border-b sticky top-0 z-50">
-              <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
+          {/* Header with trigger - shown for both roles but styled differently */}
+          <header className={`flex h-12 shrink-0 items-center gap-2 px-3 shadow-lg border-b sticky top-0 z-50 ${
+            userRole === 'client' 
+              ? 'bg-gradient-to-r from-primary to-secondary' 
+              : 'bg-gray-900'
+          }`}>
+            <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
               
-              {/* Brand Header with Profile Photo */}
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                {/* Profile Photo - only in header when sidebar is closed */}
-                <ProfilePhotoUpload
-                  currentPhotoUrl={profilePhotoUrl}
-                  size="sm"
-                  onPhotoUpdate={setProfilePhotoUrl}
-                  className="flex-shrink-0"
-                />
-                
-                <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-md flex-shrink-0 bg-white/20">
-                  <Flame className="w-4 h-4 text-white" />
+              {/* Brand Header with Profile Photo - only show for client */}
+              {userRole === 'client' && (
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {/* Profile Photo - only in header when sidebar is closed */}
+                  <ProfilePhotoUpload
+                    currentPhotoUrl={profilePhotoUrl}
+                    size="sm"
+                    onPhotoUpdate={setProfilePhotoUrl}
+                    className="flex-shrink-0"
+                  />
+                  
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-md flex-shrink-0 bg-white/20">
+                    <Flame className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-white font-bold text-sm leading-tight truncate">TINDERENT</h1>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-white font-bold text-sm leading-tight truncate">TINDERENT</h1>
-                </div>
-              </div>
+              )}
             </header>
-          )}
 
           <main className="flex-1 overflow-y-auto bg-gray-900">
             <div className="w-full min-h-full relative">

@@ -292,7 +292,7 @@ export default function LegendaryLandingPage() {
             TINDERENT
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
-            Swipe your way to the perfect deal - rent, buy, or find clients
+            Find properties, yachts, motorcycles, bicycles - or clients to rent & buy
           </p>
         </motion.div>
 
