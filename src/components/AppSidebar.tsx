@@ -157,7 +157,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null)
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>(undefined)
   const { unreadCount } = useUnreadMessageCount()
   const { unreadCount: unreadLikes } = useUnreadLikes()
   const { unreadCount: unreadMatches } = useUnreadMatches()
@@ -212,7 +212,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
           <div className="flex flex-col items-center gap-3 text-center">
             {/* Large clickable profile photo */}
             <ProfilePhotoUpload
-              currentPhotoUrl={user?.user_metadata?.profile_photo_url || profilePhotoUrl}
+              currentPhotoUrl={profilePhotoUrl}
               size="lg"
               onPhotoUpdate={setProfilePhotoUrl}
             />

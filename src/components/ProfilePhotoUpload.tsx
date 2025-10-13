@@ -20,7 +20,31 @@ export function ProfilePhotoUpload({
   className = '' 
 }: ProfilePhotoUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | undefined>(currentPhotoUrl);
   const { user } = useAuth();
+
+  // Fetch current photo from profiles table on mount
+  useState(() => {
+    const fetchPhoto = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('avatar_url, profile_photo_url')
+        .eq('id', user.id)
+        .single();
+      
+      if (data && !error) {
+        const url = data.avatar_url || data.profile_photo_url;
+        if (url) {
+          setPhotoUrl(url);
+          onPhotoUpdate?.(url);
+        }
+      }
+    };
+    
+    fetchPhoto();
+  });
 
   const sizeClasses = {
     sm: 'w-8 h-8',
@@ -55,16 +79,32 @@ export function ProfilePhotoUpload({
         .from('profile-photos')
         .getPublicUrl(fileName);
 
-      // Update profile with new photo URL
+      // Update profile with new photo URL in both columns
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ profile_photo_url: publicUrl })
+        .update({ 
+          avatar_url: publicUrl,
+          profile_photo_url: publicUrl 
+        })
         .eq('id', user.id);
 
       if (updateError) {
         throw updateError;
       }
 
+      // Also update user metadata
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: {
+          avatar_url: publicUrl,
+          profile_photo_url: publicUrl
+        }
+      });
+
+      if (metadataError) {
+        console.error('Error updating user metadata:', metadataError);
+      }
+
+      setPhotoUrl(publicUrl);
       onPhotoUpdate?.(publicUrl);
       
       toast({
@@ -101,7 +141,7 @@ export function ProfilePhotoUpload({
       >
         <div className="relative group">
           <Avatar className={`${sizeClasses[size]} border-2 border-white/20 shadow-lg`}>
-            <AvatarImage src={currentPhotoUrl} alt="Profile" />
+            <AvatarImage src={photoUrl || currentPhotoUrl} alt="Profile" />
             <AvatarFallback className="bg-white/20 text-white">
               <User className={`w-${size === 'sm' ? '4' : size === 'md' ? '6' : '8'} h-${size === 'sm' ? '4' : size === 'md' ? '6' : '8'}`} />
             </AvatarFallback>

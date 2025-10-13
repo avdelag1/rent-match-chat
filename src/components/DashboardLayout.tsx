@@ -227,7 +227,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {/* Profile Photo - only in header when sidebar is closed */}
               <ProfilePhotoUpload
-                currentPhotoUrl={user?.user_metadata?.profile_photo_url || profilePhotoUrl}
+                currentPhotoUrl={profilePhotoUrl}
                 size="sm"
                 onPhotoUpdate={setProfilePhotoUrl}
                 className="flex-shrink-0"
