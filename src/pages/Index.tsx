@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import LegendaryLandingPage from "@/components/LegendaryLandingPage";
-import { MessagingTest } from "@/components/MessagingTest";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,11 +53,6 @@ const Index = () => {
     return (
       <div className="min-h-screen">
         <LegendaryLandingPage />
-        {user && !profile?.onboarding_completed && (
-          <div className="container mx-auto p-6">
-            <MessagingTest />
-          </div>
-        )}
       </div>
     );
   }
