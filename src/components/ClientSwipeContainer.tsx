@@ -272,37 +272,37 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
       {/* Action Buttons - Enhanced Design */}
       <motion.div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-8 items-center z-20"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-6 items-center z-20"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         <motion.div
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
         >
           <Button
             size="lg"
             variant="outline"
-            className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20"
+            className="w-16 h-16 rounded-full bg-white shadow-2xl border-0 flex items-center justify-center hover:scale-110 transition-transform"
             onClick={() => handleButtonSwipe('left')}
             disabled={swipeMutation.isPending}
           >
-            <X className="w-6 h-6" />
+            <X className="w-7 h-7 text-red-500 stroke-[2.5]" />
           </Button>
         </motion.div>
         
         <motion.div
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
         >
           <Button
             size="lg"
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 border-2 border-orange-400/50 hover:border-orange-300"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-2xl border-0 flex items-center justify-center"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
           >
-            <Flame className="w-8 h-8" />
+            <Flame className="w-9 h-9 fill-white stroke-white" />
           </Button>
         </motion.div>
       </motion.div>
