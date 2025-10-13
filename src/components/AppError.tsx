@@ -1,7 +1,6 @@
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
 
 interface AppErrorProps {
   error: Error;
@@ -9,11 +8,8 @@ interface AppErrorProps {
 }
 
 export function AppError({ error, resetError }: AppErrorProps) {
-  const navigate = useNavigate();
-
   const handleGoHome = () => {
-    navigate('/');
-    resetError();
+    window.location.href = '/';
   };
 
   const handleReload = () => {

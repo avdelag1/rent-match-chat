@@ -44,14 +44,14 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true
-          }}
-        >
-          <AuthProvider>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
+        <AuthProvider>
+          <ThemeProvider>
             <NotificationWrapper>
               <AppLayout>
                 <TooltipProvider>
@@ -264,9 +264,9 @@ const App = () => (
                 </TooltipProvider>
               </AppLayout>
             </NotificationWrapper>
-          </AuthProvider>
-        </BrowserRouter>
-      </ThemeProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   </ErrorBoundary>
 );
