@@ -24,13 +24,13 @@ export function MessageQuotaDialog({ isOpen, onClose, onUpgrade, userRole }: Mes
           </motion.div>
           
           <DialogTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Keep the Conversation Going! 💬
+            Start More Conversations! 💬
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 text-center">
           <p className="text-muted-foreground leading-relaxed">
-            You've used all your Direct Messages for this month. Upgrading your plan will unlock more connections and incredible benefits.
+            You've reached your limit for starting new conversations this month. Upgrade your plan to connect with more {userRole === 'client' ? 'properties' : 'clients'} and unlock unlimited messaging!
           </p>
 
           <div className="space-y-3">
@@ -55,7 +55,7 @@ export function MessageQuotaDialog({ isOpen, onClose, onUpgrade, userRole }: Mes
           <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-4">
             <div className="flex items-center justify-center gap-2 text-sm font-medium text-primary">
               <Sparkles className="w-4 h-4" />
-              Upgrade for unlimited messaging & premium features
+              Upgrade to start unlimited conversations & unlock premium features
             </div>
           </div>
         </div>

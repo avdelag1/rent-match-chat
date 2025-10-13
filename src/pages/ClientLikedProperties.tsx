@@ -12,6 +12,8 @@ import { useStartConversation, useConversationStats } from "@/hooks/useConversat
 import { useNavigate } from "react-router-dom";
 import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, Camera } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { useMessagingQuota } from "@/hooks/useMessagingQuota";
+import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
 
 const ClientLikedProperties = () => {
   const [showLikedDialog, setShowLikedDialog] = useState(false);
@@ -33,6 +35,8 @@ const ClientLikedProperties = () => {
   const { data: conversationStats } = useConversationStats();
   const startConversation = useStartConversation();
   const navigate = useNavigate();
+  const { canStartNewConversation } = useMessagingQuota();
+  const [showQuotaDialog, setShowQuotaDialog] = useState(false);
 
   // Get conversations remaining from the stats
   const conversationsRemaining = conversationStats?.conversationsLeft || 0;
@@ -43,12 +47,9 @@ const ClientLikedProperties = () => {
   };
 
   const handleContactOwner = async (property: any) => {
-    if (conversationsRemaining <= 0) {
-      toast({
-        title: "No conversation starters remaining",
-        description: "You've used all your weekly conversation starters. Upgrade for unlimited conversations.",
-        variant: "destructive"
-      });
+    // Check quota before attempting to start conversation
+    if (!canStartNewConversation) {
+      setShowQuotaDialog(true);
       return;
     }
     
@@ -63,7 +64,8 @@ const ClientLikedProperties = () => {
       const result = await startConversation.mutateAsync({
         otherUserId: property.owner_id,
         listingId: property.id,
-        initialMessage: `Hi! I'm interested in your property: ${property.title}. Could you tell me more about it?`
+        initialMessage: `Hi! I'm interested in your property: ${property.title}. Could you tell me more about it?`,
+        canStartNewConversation
       });
       
       console.log('✅ Conversation started successfully:', result);
@@ -72,13 +74,17 @@ const ClientLikedProperties = () => {
       navigate('/messages');
       
     } catch (error) {
-      console.error('❌ Failed to start conversation:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
-      toast({
-        title: "Unable to start conversation",
-        description: errorMessage,
-        variant: "destructive"
-      });
+      if ((error as Error).message === 'QUOTA_EXCEEDED') {
+        setShowQuotaDialog(true);
+      } else {
+        console.error('❌ Failed to start conversation:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
+        toast({
+          title: "Unable to start conversation",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -311,6 +317,16 @@ const ClientLikedProperties = () => {
         isOpen={galleryState.isOpen}
         onClose={() => setGalleryState(prev => ({ ...prev, isOpen: false }))}
         initialIndex={galleryState.initialIndex}
+      />
+
+      <MessageQuotaDialog
+        isOpen={showQuotaDialog}
+        onClose={() => setShowQuotaDialog(false)}
+        onUpgrade={() => {
+          setShowQuotaDialog(false);
+          navigate('/subscription-packages');
+        }}
+        userRole={'client'}
       />
     </DashboardLayout>
   );

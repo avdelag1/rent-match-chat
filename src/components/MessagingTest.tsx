@@ -4,11 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useMessagingQuota } from '@/hooks/useMessagingQuota';
+import { MessageQuotaDialog } from '@/components/MessageQuotaDialog';
+import { useState } from 'react';
 
 export function MessagingTest() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const startConversation = useStartConversation();
+  const { canStartNewConversation } = useMessagingQuota();
+  const [showQuotaDialog, setShowQuotaDialog] = useState(false);
 
   const testUsers = [
     { id: '997d9507-2b29-4566-9a1c-eb0f10357e14', name: 'Client 1', role: 'client' },
@@ -17,13 +22,24 @@ export function MessagingTest() {
   ];
 
   const handleStartTestConversation = (otherUserId: string, otherUserName: string) => {
+    if (!canStartNewConversation) {
+      setShowQuotaDialog(true);
+      return;
+    }
+
     startConversation.mutate({
       otherUserId,
       listingId: 'bb11772a-3cf4-4827-8359-d1f2f1349ed0',
-      initialMessage: `Hi ${otherUserName}! I'm interested in discussing this property. Can we chat?`
+      initialMessage: `Hi ${otherUserName}! I'm interested in discussing this property. Can we chat?`,
+      canStartNewConversation
     }, {
       onSuccess: () => {
         navigate('/messages');
+      },
+      onError: (error: Error) => {
+        if (error.message === 'QUOTA_EXCEEDED') {
+          setShowQuotaDialog(true);
+        }
       }
     });
   };
@@ -31,34 +47,46 @@ export function MessagingTest() {
   const otherUsers = testUsers.filter(u => u.id !== user?.id);
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Test Messaging System</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Start a test conversation with another user:
-        </p>
-        
-        {otherUsers.map((testUser) => (
+    <>
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Test Messaging System</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Start a test conversation with another user:
+          </p>
+          
+          {otherUsers.map((testUser) => (
+            <Button 
+              key={testUser.id}
+              onClick={() => handleStartTestConversation(testUser.id, testUser.name)}
+              disabled={startConversation.isPending}
+              className="w-full"
+              variant="outline"
+            >
+              {startConversation.isPending ? 'Starting...' : `Message ${testUser.name} (${testUser.role})`}
+            </Button>
+          ))}
+          
           <Button 
-            key={testUser.id}
-            onClick={() => handleStartTestConversation(testUser.id, testUser.name)}
-            disabled={startConversation.isPending}
+            onClick={() => navigate('/messages')} 
             className="w-full"
-            variant="outline"
           >
-            {startConversation.isPending ? 'Starting...' : `Message ${testUser.name} (${testUser.role})`}
+            Go to Messages
           </Button>
-        ))}
-        
-        <Button 
-          onClick={() => navigate('/messages')} 
-          className="w-full"
-        >
-          Go to Messages
-        </Button>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <MessageQuotaDialog
+        isOpen={showQuotaDialog}
+        onClose={() => setShowQuotaDialog(false)}
+        onUpgrade={() => {
+          setShowQuotaDialog(false);
+          navigate('/subscription-packages');
+        }}
+        userRole={'client'}
+      />
+    </>
   );
 }

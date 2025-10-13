@@ -16,9 +16,11 @@ export function useSubscriptionBenefits() {
   
   // Define benefits based on plan
   const benefits = {
-    // Messaging benefits
+    // Messaging benefits (conversations)
     canSendMessages: messagingQuota.canSendMessage,
-    remainingMessages: messagingQuota.remainingMessages,
+    canStartNewConversation: messagingQuota.canStartNewConversation,
+    remainingConversations: messagingQuota.remainingConversations,
+    conversationsStartedThisMonth: messagingQuota.conversationsStartedThisMonth,
     unlimitedMessages: messagingQuota.isUnlimited,
     
     // Property listing benefits (for owners)

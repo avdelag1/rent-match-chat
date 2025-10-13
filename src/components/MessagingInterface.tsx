@@ -43,7 +43,8 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
   
   // Get user's current role from profile
   const [userRole, setUserRole] = useState<'client' | 'owner'>('client');
-  const { canSendMessage, remainingMessages, decrementMessageCount, isUnlimited } = useMessagingQuota();
+  // Messages are unlimited within existing conversations - no quota check needed
+  const messagingQuota = useMessagingQuota();
   
   // Real-time chat features
   const { 
@@ -123,12 +124,7 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    // Check if user can send message
-    if (!canSendMessage) {
-      setShowQuotaDialog(true);
-      return;
-    }
-
+    // No quota check needed - messages are unlimited within existing conversations
     const messageText = newMessage.trim();
     setNewMessage('');
     
@@ -145,9 +141,6 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
       });
       
       console.log('✅ Message sent successfully');
-      
-      // Decrement quota after successful send
-      decrementMessageCount();
       
     } catch (error) {
       console.error('❌ Failed to send message:', error);
@@ -289,11 +282,9 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
           <p className="text-xs text-muted-foreground">
             Press Enter to send, Shift+Enter for new line
           </p>
-          {!isUnlimited && (
-            <p className="text-xs text-muted-foreground">
-              {remainingMessages} messages left this month
-            </p>
-          )}
+          <p className="text-xs text-success">
+            ✓ Unlimited messages in this conversation
+          </p>
         </div>
       </form>
       

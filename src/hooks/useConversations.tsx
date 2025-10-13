@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useMessagingQuota } from '@/hooks/useMessagingQuota';
 
 interface Conversation {
   id: string;
@@ -111,11 +112,13 @@ export function useStartConversation() {
     mutationFn: async ({ 
       otherUserId, 
       listingId, 
-      initialMessage 
+      initialMessage,
+      canStartNewConversation
     }: { 
       otherUserId: string; 
       listingId?: string; 
       initialMessage: string;
+      canStartNewConversation: boolean;
     }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
@@ -127,6 +130,11 @@ export function useStartConversation() {
         .maybeSingle();
 
       let conversationId = existingConversation?.id;
+      
+      // If conversation doesn't exist, check quota
+      if (!conversationId && !canStartNewConversation) {
+        throw new Error('QUOTA_EXCEEDED');
+      }
 
       if (!conversationId) {
         // Determine roles - Get current user's profile
@@ -228,6 +236,7 @@ export function useStartConversation() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['conversations-started-count'] });
       console.log('✅ Conversation created successfully:', data);
       toast({
         title: '💬 Conversation Started',
@@ -236,11 +245,20 @@ export function useStartConversation() {
     },
     onError: (error: Error) => {
       console.error('❌ Failed to start conversation:', error);
-      toast({
-        title: 'Failed to Send Message',
-        description: error.message,
-        variant: 'destructive'
-      });
+      
+      if (error.message === 'QUOTA_EXCEEDED') {
+        toast({
+          title: 'Conversation Limit Reached',
+          description: 'Upgrade your plan to start more conversations',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Failed to Send Message',
+          description: error.message,
+          variant: 'destructive'
+        });
+      }
     }
   });
 }

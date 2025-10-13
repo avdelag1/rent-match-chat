@@ -11,6 +11,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useStartConversation } from "@/hooks/useConversations";
+import { useMessagingQuota } from "@/hooks/useMessagingQuota";
+import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
 
 interface LikedClient {
   id: string;
@@ -35,8 +37,11 @@ export function LikedClients() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [showQuotaDialog, setShowQuotaDialog] = useState(false);
+  const [userRole, setUserRole] = useState<'client' | 'owner'>('owner');
   const queryClient = useQueryClient();
   const startConversation = useStartConversation();
+  const { canStartNewConversation } = useMessagingQuota();
 
   const { data: likedClients = [], isLoading } = useQuery({
     queryKey: ['liked-clients', user?.id],
@@ -107,10 +112,17 @@ export function LikedClients() {
   });
 
   const handleMessage = async (client: LikedClient) => {
+    // Check quota before attempting to start conversation
+    if (!canStartNewConversation) {
+      setShowQuotaDialog(true);
+      return;
+    }
+
     try {
       const result = await startConversation.mutateAsync({
         otherUserId: client.user_id,
-        initialMessage: `Hi ${client.name}! I'm interested in discussing potential rental opportunities with you.`
+        initialMessage: `Hi ${client.name}! I'm interested in discussing potential rental opportunities with you.`,
+        canStartNewConversation
       });
       
       if (result?.conversationId) {
@@ -118,8 +130,12 @@ export function LikedClients() {
         navigate('/messages');
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
-      toast.error("Failed to start conversation");
+      if ((error as Error).message === 'QUOTA_EXCEEDED') {
+        setShowQuotaDialog(true);
+      } else {
+        console.error('Failed to start conversation:', error);
+        toast.error("Failed to start conversation");
+      }
     }
   };
 
@@ -293,6 +309,16 @@ export function LikedClients() {
           </div>
         )}
       </div>
+
+      <MessageQuotaDialog
+        isOpen={showQuotaDialog}
+        onClose={() => setShowQuotaDialog(false)}
+        onUpgrade={() => {
+          setShowQuotaDialog(false);
+          navigate('/subscription-packages');
+        }}
+        userRole={userRole}
+      />
     </div>
   );
 }
