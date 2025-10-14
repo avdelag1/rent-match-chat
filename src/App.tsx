@@ -9,6 +9,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import ResetPassword from "./pages/ResetPassword";
@@ -59,15 +60,21 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                   <Routes>
-                    <Route path="/" element={<Index />} />
+                    <Route path="/" element={
+                      <SignupErrorBoundary>
+                        <Index />
+                      </SignupErrorBoundary>
+                    } />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     
                     <Route 
                       path="/onboarding" 
                       element={
-                        <ProtectedRoute>
-                          <Onboarding />
-                        </ProtectedRoute>
+                        <SignupErrorBoundary>
+                          <ProtectedRoute>
+                            <Onboarding />
+                          </ProtectedRoute>
+                        </SignupErrorBoundary>
                       } 
                     />
                     
