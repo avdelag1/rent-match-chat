@@ -28,19 +28,11 @@ const Index = () => {
     enabled: !!user,
   });
 
-  // Redirect authenticated users based on their status
+  // Redirect authenticated users to their dashboard
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile) {
-      if (!profile.onboarding_completed) {
-        // Redirect to onboarding if not completed
-        console.log('Redirecting to onboarding - incomplete profile');
-        navigate('/onboarding', { replace: true });
-      } else if (profile.onboarding_completed) {
-        // Redirect to dashboard if onboarding is complete
-        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
-        console.log('Redirecting to dashboard:', targetPath);
-        navigate(targetPath, { replace: true });
-      }
+    if (!loading && !profileLoading && user && profile?.onboarding_completed) {
+      const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      navigate(targetPath, { replace: true });
     }
   }, [user, profile, loading, profileLoading, navigate]);
 

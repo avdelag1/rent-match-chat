@@ -36,10 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle OAuth users - setup role but DON'T redirect (Index.tsx handles redirects)
+        // Handle OAuth users and role assignment
         if (event === 'SIGNED_IN' && session?.user) {
           setTimeout(() => {
-            handleOAuthUserSetupOnly(session.user);
+            handleOAuthUserSetup(session.user);
           }, 100);
         }
       }
@@ -59,15 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle OAuth user setup WITHOUT redirecting (Index.tsx handles redirects)
-  const handleOAuthUserSetupOnly = async (user: User) => {
+  const handleOAuthUserSetup = async (user: User) => {
     // For OAuth users, check URL params for role first
     const urlParams = new URLSearchParams(window.location.search);
     const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
     
     if (roleFromUrl) {
-      console.log('OAuth setup with role:', roleFromUrl);
-      
       // Use enhanced account linking for OAuth users
       const linkingResult = await linkOAuthAccount(user, roleFromUrl);
       
@@ -77,20 +74,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         newUrl.searchParams.delete('role');
         window.history.replaceState({}, '', newUrl.toString());
         
+        // Use the role from the linking result (might be different from requested if account existed)
         const finalRole = linkingResult.existingProfile?.role || roleFromUrl;
-        console.log('OAuth profile setup complete. Role:', finalRole);
-        
-        // Ensure profile exists with correct role
-        await createProfileIfMissing(user, finalRole);
+        await redirectUserBasedOnRole(user, finalRole);
       } else {
         console.error('OAuth account linking failed');
+        // Fallback to basic setup
+        await redirectUserBasedOnRole(user);
       }
     } else {
-      // Try to get existing profile or create one if we have role in metadata
-      const role = user.user_metadata?.role as 'client' | 'owner' | undefined;
-      if (role) {
-        await createProfileIfMissing(user, role);
+      await redirectUserBasedOnRole(user);
+    }
+  };
+
+  const redirectUserBasedOnRole = async (user: User, forceRole?: 'client' | 'owner') => {
+    try {
+      // First try to get role from forced role (for account linking), then user metadata
+      let role = forceRole || user.user_metadata?.role;
+      let profile = null;
+      
+      // Try to get or create profile
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, onboarding_completed')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileError);
+        return;
       }
+
+      if (existingProfile) {
+        profile = existingProfile;
+        role = role || profile.role; // Use metadata role if available, fallback to profile role
+      } else if (role) {
+        // Create profile if missing and we have role from metadata
+        profile = await createProfileIfMissing(user, role);
+        if (!profile) {
+          console.error('Failed to create profile');
+          return;
+        }
+      }
+      
+      console.log('User role:', role, 'profile:', profile);
+
+      // If user hasn't completed onboarding, redirect to onboarding
+      if (!profile?.onboarding_completed && (role === 'client' || role === 'owner')) {
+        if (location.pathname !== '/onboarding') {
+          console.log('Redirecting to onboarding');
+          navigate('/onboarding', { replace: true });
+        }
+        return;
+      }
+
+      const targetPath =
+        role === 'client'
+          ? '/client/dashboard'
+          : role === 'owner'
+          ? '/owner/dashboard'
+          : '/';
+
+      // Same-path guard to prevent loops
+      if (location.pathname !== targetPath) {
+        console.log('Redirecting to:', targetPath);
+        navigate(targetPath, { replace: true });
+      }
+    } catch (error) {
+      console.error('Error getting user profile:', error);
+      // If we can't determine role, stay on main page
     }
   };
 

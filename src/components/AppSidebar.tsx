@@ -206,9 +206,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
 
   return (
     <Sidebar className="border-none">
-      <div className="h-full bg-background shadow-xl border-r border-border flex flex-col">
+      <div className="h-full bg-white shadow-xl border-r border-gray-200 flex flex-col">
         {/* Sidebar Header with Large Profile Photo */}
-        <div className="p-4 border-b border-border flex-shrink-0">
+        <div className="p-4 border-b border-gray-200 flex-shrink-0">
           <div className="flex flex-col items-center gap-3 text-center">
             {/* Large clickable profile photo */}
             <ProfilePhotoUpload
@@ -218,8 +218,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
             />
             
             <div>
-              <h2 className="text-foreground font-bold text-lg">TINDERENT</h2>
-              <p className="text-muted-foreground text-xs font-medium">
+              <h2 className="text-gray-900 font-bold text-lg">TINDERENT</h2>
+              <p className="text-gray-600 text-xs font-medium">
                 {userRole === 'client' ? 'Client Portal' : 'Owner Portal'}
               </p>
             </div>
@@ -228,7 +228,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
 
         <SidebarContent className="p-3 flex-1 overflow-y-auto">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-foreground font-medium mb-3 px-2">
+            <SidebarGroupLabel className="text-gray-700 font-medium mb-3 px-2">
               Navigation
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -246,13 +246,14 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                         className={`
                           w-full rounded-lg p-2.5 transition-all duration-200 group border relative
                           ${isActive(item.url) 
-                            ? 'text-primary-foreground shadow-md border-primary/30 bg-primary' 
-                            : 'bg-secondary hover:bg-secondary/80 text-foreground border-border hover:border-border'
+                            ? 'text-white shadow-md border-orange-300' 
+                            : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 hover:border-gray-300'
                           }
                         `}
+                        style={isActive(item.url) ? { background: 'var(--button-gradient)' } : {}}
                       >
-                        <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                        <span className={`font-medium ml-3 ${isActive(item.url) ? 'text-primary-foreground' : 'text-foreground'}`}>
+                        <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-white' : 'text-gray-600'}`} />
+                        <span className={`font-medium ml-3 ${isActive(item.url) ? 'text-white' : 'text-gray-700'}`}>
                           {item.title}
                         </span>
                         {item.title === 'Messages' && unreadCount > 0 && (
@@ -279,14 +280,14 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                    transition={{ delay: menuItems.length * 0.1 }}
                  >
                    <SidebarMenuItem className="mt-4">
-                      <SidebarMenuButton 
-                        onClick={handleSignOut}
-                        className="w-full rounded-lg p-2.5 bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/30 hover:border-destructive/50 transition-all duration-200"
-                      >
-                       <LogOut className="w-5 h-5 text-destructive" />
-                       <span className="font-medium text-destructive ml-3">Sign Out</span>
-                     </SidebarMenuButton>
-                   </SidebarMenuItem>
+                     <SidebarMenuButton 
+                       onClick={handleSignOut}
+                       className="w-full rounded-lg p-2.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 transition-all duration-200"
+                     >
+                      <LogOut className="w-5 h-5 text-red-600" />
+                      <span className="font-medium text-red-700 ml-3">Sign Out</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </motion.div>
               </SidebarMenu>
             </SidebarGroupContent>
@@ -298,21 +299,21 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mt-4 p-3 bg-secondary rounded-lg border border-border flex-shrink-0"
+              className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 flex-shrink-0"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
-                  <User className="w-5 h-5 text-muted-foreground" />
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
+                  <User className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
-                  <p className="text-foreground font-medium text-sm">Welcome back!</p>
-                  <p className="text-muted-foreground text-xs">{user.email}</p>
+                  <p className="text-gray-900 font-medium text-sm">Welcome back!</p>
+                  <p className="text-gray-600 text-xs">{user.email}</p>
                 </div>
               </div>
               
               {/* Quick Theme Switcher */}
-              <div className="border-t border-border pt-3">
-                <p className="text-xs text-muted-foreground mb-2">Quick Theme</p>
+              <div className="border-t border-gray-200 pt-3">
+                <p className="text-xs text-gray-500 mb-2">Quick Theme</p>
                 <ThemeSelector compact showTitle={false} />
               </div>
             </motion.div>

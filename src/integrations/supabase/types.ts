@@ -5774,68 +5774,65 @@ export type Database = {
           baths: number | null
           beds: number | null
           city: string | null
+          contact_method: string | null
+          contact_status: string | null
           created_at: string | null
           description: string | null
+          furnished: boolean | null
           id: string | null
           images: string[] | null
-          is_active: boolean | null
+          location_zone: string | null
           neighborhood: string | null
-          owner_id: string | null
+          pet_friendly: boolean | null
           price: number | null
           property_type: string | null
-          status: Database["public"]["Enums"]["listing_status"] | null
+          square_footage: number | null
           title: string | null
+          view_count: number | null
         }
         Insert: {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
           city?: string | null
+          contact_method?: never
+          contact_status?: never
           created_at?: string | null
           description?: string | null
+          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
-          is_active?: boolean | null
+          location_zone?: string | null
           neighborhood?: string | null
-          owner_id?: string | null
+          pet_friendly?: boolean | null
           price?: number | null
           property_type?: string | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
+          square_footage?: number | null
           title?: string | null
+          view_count?: number | null
         }
         Update: {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
           city?: string | null
+          contact_method?: never
+          contact_status?: never
           created_at?: string | null
           description?: string | null
+          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
-          is_active?: boolean | null
+          location_zone?: string | null
           neighborhood?: string | null
-          owner_id?: string | null
+          pet_friendly?: boolean | null
           price?: number | null
           property_type?: string | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
+          square_footage?: number | null
           title?: string | null
+          view_count?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       listings_public: {
         Row: {
@@ -6197,10 +6194,6 @@ export type Database = {
           | { p_action: string; p_user_id: string }
         Returns: boolean
       }
-      can_view_profile: {
-        Args: { profile_user_id: string }
-        Returns: boolean
-      }
       cancel_user_subscription: {
         Args: { p_user_id: string }
         Returns: {
@@ -6240,12 +6233,7 @@ export type Database = {
         Args:
           | { p_required_role: string; p_user_id: string }
           | { p_user_id: string }
-        Returns: {
-          can_book_property: boolean
-          can_create_property: boolean
-          can_view_all_properties: boolean
-          user_role: string
-        }[]
+        Returns: boolean
       }
       complete_user_onboarding: {
         Args: { onboarding_data?: Json; user_id: string }
@@ -6636,26 +6624,7 @@ export type Database = {
       }
       get_potential_clients_for_owner: {
         Args: Record<PropertyKey, never> | { owner_user_id: string }
-        Returns: {
-          age: number
-          bio: string
-          budget: number
-          full_name: string
-          has_kids: boolean
-          has_pets: boolean
-          id: string
-          images: string[]
-          interests: string[]
-          location: string
-          looking_for: string
-          monthly_income_range: string
-          move_in_date: string
-          nationality: string
-          preferences: string[]
-          profession: string
-          relationship_status: string
-          verified: boolean
-        }[]
+        Returns: Record<string, unknown>[]
       }
       get_proj4_from_srid: {
         Args: { "": number }
@@ -6821,12 +6790,7 @@ export type Database = {
               p_verification_status: string
             }
           | { p_user_id: string; p_verification_status: string }
-        Returns: {
-          full_name: string
-          new_status: string
-          previous_status: string
-          user_id: string
-        }[]
+        Returns: boolean
       }
       path: {
         Args: { "": unknown }
@@ -6888,7 +6852,7 @@ export type Database = {
         Args:
           | { tbl_oid: unknown; use_typmod?: boolean }
           | { use_typmod?: boolean }
-        Returns: string
+        Returns: number
       }
       postgis_addbbox: {
         Args: { "": unknown }

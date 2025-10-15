@@ -23,10 +23,10 @@ export function NotificationBadge({ count, className = '', max = 99 }: Notificat
         <Badge 
           variant="destructive" 
           className={`
-            absolute -top-1 -right-1 min-w-[24px] h-6 px-2
-            bg-red-500 hover:bg-red-600 text-white text-sm font-bold
+            absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 
+            bg-red-500 hover:bg-red-600 text-white text-xs font-bold
             rounded-full flex items-center justify-center
-            animate-pulse shadow-lg ring-2 ring-white
+            animate-pulse
             ${className}
           `}
         >
