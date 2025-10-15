@@ -6217,6 +6217,10 @@ export type Database = {
           old_package_name: string
         }[]
       }
+      check_is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_property_availability: {
         Args: {
           p_end_date: string
@@ -6747,6 +6751,10 @@ export type Database = {
       }
       is_current_user_active: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_profile_owner: {
+        Args: { profile_user_id: string }
         Returns: boolean
       }
       is_user_blocked: {
