@@ -30,8 +30,9 @@ const Index = () => {
       return data?.role;
     },
     enabled: !!user,
-    retry: 3, // Retry up to 3 times for newly created users
-    retryDelay: 500, // Wait 500ms between retries
+    retry: 5, // More retries for newly created users
+    retryDelay: 1000, // Longer delay between retries
+    staleTime: 5000, // Cache role data for 5s to prevent immediate refetch
   });
 
   // Redirect authenticated users directly to dashboard

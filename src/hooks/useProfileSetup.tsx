@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CreateProfileData {
   id: string;
@@ -11,6 +12,7 @@ interface CreateProfileData {
 
 export function useProfileSetup() {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const queryClient = useQueryClient();
 
   const createProfileIfMissing = async (user: User, role: 'client' | 'owner') => {
     if (!user) return null;
@@ -114,6 +116,10 @@ export function useProfileSetup() {
       }
 
       console.log('Profile and role created successfully');
+      
+      // Invalidate role cache now that role is fully created
+      queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
+      
       return newProfile;
 
     } catch (error) {

@@ -146,11 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: new Error('Failed to complete account setup') };
         }
         
-        // Wait for database transaction to commit before invalidating cache
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // CRITICAL: Invalidate role cache to force fresh fetch
-        queryClient.invalidateQueries({ queryKey: ['user-role'] });
+        // Note: Cache invalidation moved to useProfileSetup after role creation completes
         
         toast({
           title: "Welcome to Tinderent!",
