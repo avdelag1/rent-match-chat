@@ -40,15 +40,18 @@ export function useProfileSetup() {
 
       console.log('Creating new profile:', profileData);
 
+      // Use upsert to handle race conditions
       const { data: newProfile, error } = await supabase
         .from('profiles')
-        .insert([{
+        .upsert([{
           ...profileData,
           is_active: true,
           onboarding_completed: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }])
+        }], {
+          onConflict: 'id'
+        })
         .select()
         .single();
 
