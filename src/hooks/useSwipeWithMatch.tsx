@@ -48,7 +48,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           .single();
 
         if (mutualLike) {
-          // It's a match! Create or update match record
+          // It's a match! Create or update match record with proper conflict handling
           const { data: match, error: matchError } = await supabase
             .from('matches')
             .upsert({
@@ -58,35 +58,46 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               client_liked_at: targetType === 'profile' ? mutualLike.created_at : like.created_at,
               owner_liked_at: targetType === 'profile' ? like.created_at : mutualLike.created_at,
               status: 'accepted'
+            }, {
+              onConflict: 'client_id,owner_id',
+              ignoreDuplicates: false
             })
             .select()
             .single();
 
           if (matchError) {
             console.error('Error creating match:', matchError);
-          } else {
-            // Get profiles for match celebration
-            const [clientProfile, ownerProfile] = await Promise.all([
-              supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', match.client_id)
-                .single(),
-              supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', match.owner_id)
-                .single()
-            ]);
+            toast.error("Match creation failed. Please try again.");
+          } else if (match) {
+            // Get profiles for match celebration with error handling
+            try {
+              const [clientProfile, ownerProfile] = await Promise.all([
+                supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('id', match.client_id)
+                  .single(),
+                supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('id', match.owner_id)
+                  .single()
+              ]);
 
-            // Trigger match celebration
-            if (options?.onMatch && clientProfile.data && ownerProfile.data) {
-              options.onMatch(clientProfile.data, ownerProfile.data);
+              // Trigger match celebration
+              if (options?.onMatch && clientProfile.data && ownerProfile.data) {
+                options.onMatch(clientProfile.data, ownerProfile.data);
+              }
+
+              toast.success("🎉 It's a Match!", {
+                description: "You both liked each other!"
+              });
+            } catch (profileError) {
+              console.error('Error fetching profiles for match:', profileError);
+              toast.success("🎉 It's a Match!", {
+                description: "You both liked each other!"
+              });
             }
-
-            toast.success("🎉 It's a Match!", {
-              description: "You both liked each other!"
-            });
           }
         }
       }

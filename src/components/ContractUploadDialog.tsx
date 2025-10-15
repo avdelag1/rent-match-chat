@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateContract } from '@/hooks/useContracts';
+import { toast } from '@/hooks/use-toast';
 import { Upload, FileText } from 'lucide-react';
 
 interface ContractUploadDialogProps {
@@ -27,14 +28,26 @@ export const ContractUploadDialog: React.FC<ContractUploadDialogProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      // Validate file type
       if (selectedFile.type !== 'application/pdf') {
-        alert('Please upload a PDF file');
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF file only.",
+          variant: "destructive"
+        });
         return;
       }
+      
+      // Validate file size
       if (selectedFile.size > 10 * 1024 * 1024) { // 10MB limit
-        alert('File size must be less than 10MB');
+        toast({
+          title: "File too large",
+          description: "File size must be less than 10MB. Please compress your PDF and try again.",
+          variant: "destructive"
+        });
         return;
       }
+      
       setFile(selectedFile);
     }
   };
@@ -42,8 +55,22 @@ export const ContractUploadDialog: React.FC<ContractUploadDialogProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !file) {
-      alert('Please fill in all required fields');
+    // Validate required fields
+    if (!title.trim()) {
+      toast({
+        title: "Missing title",
+        description: "Please enter a contract title.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!file) {
+      toast({
+        title: "Missing file",
+        description: "Please upload a contract PDF file.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -61,8 +88,18 @@ export const ContractUploadDialog: React.FC<ContractUploadDialogProps> = ({
       setFile(null);
       setTermsAndConditions('');
       onOpenChange(false);
+      
+      toast({
+        title: "Contract created",
+        description: "Your contract has been created successfully.",
+      });
     } catch (error) {
       console.error('Error creating contract:', error);
+      toast({
+        title: "Failed to create contract",
+        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 

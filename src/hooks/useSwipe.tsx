@@ -75,7 +75,7 @@ export function useSwipe() {
               .maybeSingle();
 
             if (ownerLike) {
-              // Create a match!
+              // Create a match with proper conflict handling!
               const { error: matchError } = await supabase.from('matches').upsert({
                 client_id: user.user.id,
                 owner_id: listing.owner_id,
@@ -84,9 +84,19 @@ export function useSwipe() {
                 owner_liked_at: ownerLike.created_at,
                 is_mutual: true,
                 status: 'accepted'
+              }, {
+                onConflict: 'client_id,owner_id',
+                ignoreDuplicates: false
               });
 
-              if (!matchError) {
+              if (matchError) {
+                console.error('Match creation error:', matchError);
+                toast({
+                  title: "Match Error",
+                  description: "Match created but couldn't be saved. Please refresh.",
+                  variant: 'destructive'
+                });
+              } else {
                 toast({
                   title: "It's a Match! 🎉",
                   description: "You and the owner both liked each other!",
@@ -105,7 +115,7 @@ export function useSwipe() {
             .maybeSingle();
 
           if (clientLike) {
-            // Create a match!
+            // Create a match with proper conflict handling!
             const { error: matchError } = await supabase.from('matches').upsert({
               client_id: targetId,
               owner_id: user.user.id,
@@ -113,9 +123,19 @@ export function useSwipe() {
               owner_liked_at: new Date().toISOString(),
               is_mutual: true,
               status: 'accepted'
+            }, {
+              onConflict: 'client_id,owner_id',
+              ignoreDuplicates: false
             });
 
-            if (!matchError) {
+            if (matchError) {
+              console.error('Match creation error:', matchError);
+              toast({
+                title: "Match Error",
+                description: "Match created but couldn't be saved. Please refresh.",
+                variant: 'destructive'
+              });
+            } else {
               toast({
                 title: "It's a Match! 🎉",
                 description: "You and the client both liked each other!",

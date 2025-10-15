@@ -5802,59 +5802,50 @@ export type Database = {
       listings_public: {
         Row: {
           amenities: string[] | null
-          availability_status: string | null
           baths: number | null
           beds: number | null
           city: string | null
-          contact_method: string | null
           created_at: string | null
           description: string | null
-          furnished: boolean | null
           id: string | null
           images: string[] | null
+          is_active: boolean | null
           neighborhood: string | null
-          pet_friendly: boolean | null
           price: number | null
           property_type: string | null
-          square_footage: number | null
+          status: Database["public"]["Enums"]["listing_status"] | null
           title: string | null
         }
         Insert: {
           amenities?: string[] | null
-          availability_status?: never
           baths?: number | null
           beds?: number | null
           city?: string | null
-          contact_method?: never
           created_at?: string | null
           description?: string | null
-          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
+          is_active?: boolean | null
           neighborhood?: string | null
-          pet_friendly?: boolean | null
           price?: number | null
           property_type?: string | null
-          square_footage?: number | null
+          status?: Database["public"]["Enums"]["listing_status"] | null
           title?: string | null
         }
         Update: {
           amenities?: string[] | null
-          availability_status?: never
           baths?: number | null
           beds?: number | null
           city?: string | null
-          contact_method?: never
           created_at?: string | null
           description?: string | null
-          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
+          is_active?: boolean | null
           neighborhood?: string | null
-          pet_friendly?: boolean | null
           price?: number | null
           property_type?: string | null
-          square_footage?: number | null
+          status?: Database["public"]["Enums"]["listing_status"] | null
           title?: string | null
         }
         Relationships: []
