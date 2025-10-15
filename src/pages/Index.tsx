@@ -32,24 +32,14 @@ const Index = () => {
     retry: 1,
   });
 
-  // Redirect authenticated users based on their status
+  // Redirect authenticated users directly to dashboard
   useEffect(() => {
     if (loading || profileLoading) return;
     
-    if (user) {
-      if (!profile) {
-        console.log('No profile found, staying on landing page');
-        return;
-      }
-      
-      if (!profile.onboarding_completed) {
-        console.log('Redirecting to onboarding - incomplete profile');
-        navigate('/onboarding', { replace: true });
-      } else {
-        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
-        console.log('Redirecting to dashboard:', targetPath);
-        navigate(targetPath, { replace: true });
-      }
+    if (user && profile) {
+      const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      console.log('Redirecting authenticated user to dashboard:', targetPath);
+      navigate(targetPath, { replace: true });
     }
   }, [user, profile, loading, profileLoading, navigate]);
 

@@ -67,18 +67,7 @@ const App = () => (
                     } />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     
-                    <Route 
-                      path="/onboarding" 
-                      element={
-                        <SignupErrorBoundary>
-                          <ProtectedRoute>
-                            <Onboarding />
-                          </ProtectedRoute>
-                        </SignupErrorBoundary>
-                      } 
-                    />
-                    
-                    <Route 
+                    <Route
                       path="/client/dashboard" 
                       element={
                         <ProtectedRoute requiredRole="client">

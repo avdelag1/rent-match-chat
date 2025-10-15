@@ -46,7 +46,7 @@ export function useProfileSetup() {
         .upsert([{
           ...profileData,
           is_active: true,
-          onboarding_completed: false,
+          onboarding_completed: true,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }], {
