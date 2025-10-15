@@ -139,14 +139,14 @@ export default function SubscriptionPackagesPage() {
     const fetchUserRole = async () => {
       if (!user) return;
       
-      const { data } = await supabase
-        .from('user_roles')
+      const { data: profile } = await supabase
+        .from('profiles')
         .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('id', user.id)
+        .single();
         
-      if (data?.role) {
-        setUserRole(data.role as 'client' | 'owner');
+      if (profile?.role) {
+        setUserRole(profile.role as 'client' | 'owner');
       }
     };
     

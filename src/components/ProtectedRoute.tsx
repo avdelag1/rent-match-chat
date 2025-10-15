@@ -16,19 +16,19 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: userRole, isLoading: profileLoading } = useQuery({
-    queryKey: ['user-role', user?.id],
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['user-profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
       
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
+        .from('profiles')
+        .select('role, onboarding_completed')
+        .eq('id', user.id)
         .maybeSingle();
 
       if (error) throw error;
-      return data?.role;
+      return data;
     },
     enabled: !!user,
   });
@@ -41,10 +41,23 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return;
     }
 
-    if (!profileLoading && userRole) {
+    if (!profileLoading && profile) {
+      // Check if user hasn't completed onboarding
+      if (!profile.onboarding_completed && location.pathname !== '/onboarding') {
+        navigate('/onboarding', { replace: true });
+        return;
+      }
+
+      // Check if user has completed onboarding but is still on onboarding page
+      if (profile.onboarding_completed && location.pathname === '/onboarding') {
+        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+        navigate(targetPath, { replace: true });
+        return;
+      }
+
       // Check role-based access for protected routes
-      if (requiredRole && userRole !== requiredRole) {
-        const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      if (requiredRole && profile.role !== requiredRole) {
+        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
         if (location.pathname !== targetPath) {
           navigate(targetPath, { replace: true });
         }
@@ -52,7 +65,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, user, profileLoading, userRole, requiredRole, navigate, location.pathname]);
+  }, [loading, user, profileLoading, profile, requiredRole, navigate, location.pathname]);
 
   if (loading || profileLoading) {
     return (
@@ -65,7 +78,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     );
   }
 
-  if (!user || (requiredRole && userRole !== requiredRole)) {
+  if (!user || (requiredRole && profile?.role !== requiredRole) || (profile && !profile.onboarding_completed && location.pathname !== '/onboarding')) {
     return null; // Will redirect via useEffect
   }
 

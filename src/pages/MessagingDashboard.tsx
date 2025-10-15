@@ -32,13 +32,13 @@ export function MessagingDashboard() {
     // Get user role from profile data via auth hook
     const getUserRole = async () => {
       try {
-        const { data: roleData } = await supabase
-          .from('user_roles')
+        const { data: profile } = await supabase
+          .from('profiles')
           .select('role')
-          .eq('user_id', user?.id)
+          .eq('id', user?.id)
           .maybeSingle();
         
-        const role = roleData?.role || user?.user_metadata?.role || 'client';
+        const role = profile?.role || user?.user_metadata?.role || 'client';
         if (role === 'owner') {
           navigate('/owner/dashboard');
         } else {

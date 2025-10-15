@@ -289,10 +289,10 @@ export default function LegendaryLandingPage() {
           className="space-y-4"
         >
           <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center">
-            TINDE<span className="text-red-500">R</span>ENT
+            TINDERENT
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
-            Swipe to discover your ideal property or perfect client - rent, buy & connect
+            Find properties, yachts, motorcycles, bicycles - or clients to rent & buy
           </p>
         </motion.div>
 
