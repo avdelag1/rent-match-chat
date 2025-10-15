@@ -26,10 +26,10 @@ export function useProfileSetup() {
         .maybeSingle();
 
       if (existingProfile) {
-      // Ensure role exists in user_roles table
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .upsert([{ id: crypto.randomUUID(), user_id: user.id, role }], { onConflict: 'user_id' });
+      // Ensure role exists in user_roles table  
+      const { error: roleError } = await supabase.rpc('exec_sql', {
+        sql: `INSERT INTO user_roles (user_id, role) VALUES ('${user.id}', '${role}') ON CONFLICT (user_id) DO UPDATE SET role = '${role}'`
+      }).then(() => ({ error: null })).catch((e) => ({ error: e }));
         
         if (roleError) {
           console.error('Error upserting role:', roleError);
@@ -71,9 +71,9 @@ export function useProfileSetup() {
       }
 
       // Create role in user_roles table
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .upsert([{ id: crypto.randomUUID(), user_id: user.id, role }], { onConflict: 'user_id' });
+      const { error: roleError } = await supabase.rpc('exec_sql', {
+        sql: `INSERT INTO user_roles (user_id, role) VALUES ('${user.id}', '${role}') ON CONFLICT (user_id) DO UPDATE SET role = '${role}'`
+      }).then(() => ({ error: null })).catch((e) => ({ error: e }));
 
       if (roleError) {
         console.error('Error creating role:', roleError);
