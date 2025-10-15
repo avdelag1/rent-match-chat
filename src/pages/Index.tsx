@@ -56,7 +56,7 @@ const Index = () => {
   }
 
   // Only show landing page if user is NOT authenticated
-  if (!user || !profile?.onboarding_completed) {
+  if (!user) {
     return (
       <div className="min-h-screen">
         <LegendaryLandingPage />

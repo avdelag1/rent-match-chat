@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -11,7 +11,6 @@ import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import Index from "./pages/Index";
-import Onboarding from "./pages/Onboarding";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ClientDashboard from "./pages/ClientDashboard";
@@ -66,6 +65,7 @@ const App = () => (
                       </SignupErrorBoundary>
                     } />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/onboarding" element={<Navigate to="/" replace />} />
                     
                     <Route
                       path="/client/dashboard" 
