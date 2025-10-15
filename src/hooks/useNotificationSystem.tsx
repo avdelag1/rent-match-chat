@@ -42,9 +42,15 @@ export function useNotificationSystem() {
           // Get swiper profile
           const { data: swiperProfile } = await supabase
             .from('profiles')
-            .select('full_name, avatar_url, role')
+            .select('full_name, avatar_url')
             .eq('id', swipe.user_id)
             .single();
+
+          const { data: swiperRoleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', swipe.user_id)
+            .maybeSingle();
 
           if (swiperProfile) {
             const notification: Notification = {
@@ -58,7 +64,7 @@ export function useNotificationSystem() {
               timestamp: new Date(),
               read: false,
               relatedUserId: swipe.user_id,
-              actionUrl: swiperProfile.role === 'client' ? '/owner/liked-clients' : '/client/liked-properties'
+              actionUrl: swiperRoleData?.role === 'client' ? '/owner/liked-clients' : '/client/liked-properties'
             };
             
             setNotifications(prev => [notification, ...prev]);

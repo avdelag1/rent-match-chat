@@ -33,34 +33,47 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
         const { data: profiles, error } = await supabase
           .from('profiles_public')
           .select('*')
-          .eq('role', 'client')
           .neq('id', user.id)
-          .limit(50);
+          .limit(100);
 
         if (error) {
           console.error('Error fetching client profiles:', error);
           return [];
         }
 
-        console.log('Found client profiles:', profiles?.length || 0, profiles);
+        // Filter to only clients by checking user_roles
+        const clientProfilesPromises = (profiles || []).map(async (profile) => {
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profile.id)
+            .maybeSingle();
+          
+          return roleData?.role === 'client' ? profile : null;
+        });
 
-        if (!profiles || profiles.length === 0) {
+        const clientProfilesWithNulls = await Promise.all(clientProfilesPromises);
+        const clientProfiles = clientProfilesWithNulls.filter(p => p !== null);
+
+        console.log('Found client profiles:', clientProfiles.length);
+
+        if (clientProfiles.length === 0) {
           console.log('No client profiles found');
           return [];
         }
 
         // Transform profiles to match interface
-        const transformedProfiles: ClientProfile[] = profiles.map((profile, index) => ({
+        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile, index) => ({
           id: index + 1,
-          user_id: profile.id,
-          name: profile.full_name || 'User',
-          age: profile.age || 25,
-          bio: profile.bio || 'No bio available',
-          gender: profile.gender || '',
-          interests: profile.interests || [],
-          preferred_activities: profile.preferred_activities || [],
-          profile_images: profile.images || [],
-          location: profile.location || null
+          user_id: profile!.id,
+          name: profile!.full_name || 'User',
+          age: profile!.age || 25,
+          bio: profile!.bio || 'No bio available',
+          gender: '',
+          interests: profile!.interests || [],
+          preferred_activities: profile!.preferred_activities || [],
+          profile_images: profile!.images || [],
+          location: profile!.location || null
         }));
         
         console.log('Transformed profiles:', transformedProfiles);
