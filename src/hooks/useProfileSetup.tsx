@@ -115,10 +115,15 @@ export function useProfileSetup() {
         return null;
       }
 
-      console.log('Profile and role created successfully');
+      console.log('[ProfileSetup] Profile and role created successfully');
       
       // Invalidate role cache now that role is fully created
+      console.log('[ProfileSetup] Invalidating role cache for user:', user.id);
       queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
+      
+      // Add small delay to ensure cache invalidation propagates
+      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log('[ProfileSetup] Cache invalidated, profile setup complete');
       
       return newProfile;
 

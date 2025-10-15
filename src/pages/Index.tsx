@@ -12,10 +12,12 @@ const Index = () => {
   const navigate = useNavigate();
   
   // Fetch user role from secure user_roles table
-  const { data: userRole, isLoading: profileLoading, refetch } = useQuery({
+  const { data: userRole, isLoading: profileLoading, refetch, error, isError } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
+      
+      console.log('[Index] Fetching role for user:', user.id);
       
       const { data, error } = await supabase
         .from('user_roles')
@@ -24,38 +26,74 @@ const Index = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('Role fetch error:', error);
-        return null;
+        console.error('[Index] Role fetch error:', error);
+        throw error; // Let React Query handle retries
       }
+      
+      console.log('[Index] Role fetched successfully:', data?.role);
       return data?.role;
     },
     enabled: !!user,
-    retry: 5, // More retries for newly created users
-    retryDelay: 1000, // Longer delay between retries
+    retry: 3, // Reduce retries from 5 to 3
+    retryDelay: 800, // Reduce delay from 1000ms to 800ms
     staleTime: 5000, // Cache role data for 5s to prevent immediate refetch
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: false, // Don't refetch on focus
   });
+
+  // Add timeout fallback - if query takes too long, force refetch
+  useEffect(() => {
+    if (user && profileLoading) {
+      const timeout = setTimeout(() => {
+        console.log('[Index] Query taking too long, forcing refetch...');
+        refetch();
+      }, 3000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [user, profileLoading, refetch]);
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
-    if (loading || profileLoading) return;
+    console.log('[Index] Redirect check:', { user: !!user, userRole, loading, profileLoading, isError });
+    
+    if (loading) return;
     
     if (user) {
-      if (!userRole) {
-        // Role not found after React Query retries - this shouldn't happen
-        console.error('User authenticated but no role found after retries');
+      // If query failed after all retries, show error
+      if (isError && !profileLoading) {
+        console.error('[Index] User authenticated but role query failed');
         toast({
           title: "Account setup incomplete",
-          description: "Please contact support if this persists.",
+          description: "Please refresh the page or contact support.",
           variant: "destructive"
         });
         return;
       }
       
+      // If still loading, wait
+      if (profileLoading) {
+        console.log('[Index] Still loading role...');
+        return;
+      }
+      
+      // If no role found after query completed
+      if (!userRole) {
+        console.error('[Index] No role found for authenticated user');
+        toast({
+          title: "Account setup incomplete",
+          description: "Please refresh the page or contact support.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Success - redirect
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      console.log('Redirecting authenticated user to dashboard:', targetPath);
+      console.log('[Index] Redirecting to:', targetPath);
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, navigate]);
+  }, [user, userRole, loading, profileLoading, isError, navigate]);
 
   // Show loading state while checking authentication
   if (loading || (user && profileLoading)) {
