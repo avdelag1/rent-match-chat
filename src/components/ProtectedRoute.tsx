@@ -16,7 +16,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: userRole, isLoading: profileLoading } = useQuery({
+  const { data: userRole, isLoading: profileLoading, refetch } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -27,10 +27,15 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Role fetch error in ProtectedRoute:', error);
+        return null;
+      }
       return data?.role;
     },
     enabled: !!user,
+    retry: 3,
+    retryDelay: 500,
   });
 
   useEffect(() => {
@@ -41,7 +46,17 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return;
     }
 
-    if (!profileLoading && userRole) {
+    if (!profileLoading && user) {
+      if (!userRole) {
+        // User is authenticated but has no role
+        // This can happen during signup - wait and retry
+        console.log('ProtectedRoute: User authenticated but no role found, waiting...');
+        const timer = setTimeout(() => {
+          refetch();
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+
       // Check role-based access for protected routes
       if (requiredRole && userRole !== requiredRole) {
         const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';

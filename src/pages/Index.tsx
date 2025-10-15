@@ -11,7 +11,7 @@ const Index = () => {
   const navigate = useNavigate();
   
   // Fetch user role from secure user_roles table
-  const { data: userRole, isLoading: profileLoading } = useQuery({
+  const { data: userRole, isLoading: profileLoading, refetch } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -29,19 +29,30 @@ const Index = () => {
       return data?.role;
     },
     enabled: !!user,
-    retry: 1,
+    retry: 3, // Retry up to 3 times for newly created users
+    retryDelay: 500, // Wait 500ms between retries
   });
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
     if (loading || profileLoading) return;
     
-    if (user && userRole) {
+    if (user) {
+      if (!userRole) {
+        // User is authenticated but has no role yet
+        // This can happen during signup - wait a bit and retry
+        console.log('User authenticated but no role found, waiting...');
+        const timer = setTimeout(() => {
+          refetch();
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+      
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
       console.log('Redirecting authenticated user to dashboard:', targetPath);
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, navigate]);
+  }, [user, userRole, loading, profileLoading, navigate, refetch]);
 
   // Show loading state while checking authentication
   if (loading || (user && profileLoading)) {
