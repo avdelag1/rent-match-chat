@@ -14,17 +14,12 @@ export function useProfileSetup() {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   const createProfileIfMissing = async (user: User, role: 'client' | 'owner') => {
-    if (!user) {
-      console.log('[useProfileSetup] No user provided');
-      return null;
-    }
+    if (!user) return null;
 
-    console.log('[useProfileSetup] Starting profile setup for user:', user.id, 'role:', role);
     setIsCreatingProfile(true);
     
     try {
       // Check if profile already exists
-      console.log('[useProfileSetup] Checking for existing profile...');
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id, role, onboarding_completed')
@@ -32,11 +27,8 @@ export function useProfileSetup() {
         .maybeSingle();
 
       if (existingProfile) {
-        console.log('[useProfileSetup] ✅ Profile already exists:', existingProfile);
         return existingProfile;
       }
-
-      console.log('[useProfileSetup] No existing profile, creating new one...');
 
       // Create new profile
       const profileData: CreateProfileData = {
@@ -46,7 +38,7 @@ export function useProfileSetup() {
         email: user.email || ''
       };
 
-      console.log('[useProfileSetup] Profile data prepared:', profileData);
+      console.log('Creating new profile:', profileData);
 
       // Use upsert to handle race conditions
       const { data: newProfile, error } = await supabase
@@ -64,7 +56,7 @@ export function useProfileSetup() {
         .single();
 
       if (error) {
-        console.error('[useProfileSetup] ❌ Error creating profile:', error);
+        console.error('Error creating profile:', error);
         toast({
           title: "Profile Creation Failed",
           description: "Failed to create user profile. Please try signing in again.",
@@ -73,15 +65,11 @@ export function useProfileSetup() {
         return null;
       }
 
-      console.log('[useProfileSetup] ✅ Profile created successfully:', newProfile);
-      toast({
-        title: "Account Created",
-        description: "Welcome! Let's set up your profile.",
-      });
+      console.log('Profile created successfully:', newProfile);
       return newProfile;
 
     } catch (error) {
-      console.error('[useProfileSetup] ❌ Exception in profile setup:', error);
+      console.error('Error in profile setup:', error);
       toast({
         title: "Setup Error",
         description: "An error occurred during profile setup.",
@@ -90,7 +78,6 @@ export function useProfileSetup() {
       return null;
     } finally {
       setIsCreatingProfile(false);
-      console.log('[useProfileSetup] Profile setup process completed');
     }
   };
 

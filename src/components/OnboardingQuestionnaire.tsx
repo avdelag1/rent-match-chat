@@ -117,85 +117,51 @@ export function OnboardingQuestionnaire({ userRole }: OnboardingQuestionnairePro
     try {
       setIsLoading(true);
       
-      console.log('[Onboarding] Starting completion...', { userId: user?.id, role: userRole });
+      console.log('Starting onboarding completion...', { userId: user?.id, formData });
       
-      // Update profile with onboarding completed flag
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          onboarding_completed: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user?.id);
-
-      if (profileError) {
-        console.error('[Onboarding] Profile update error:', profileError);
-        throw profileError;
-      }
-
-      console.log('[Onboarding] ✅ Profile marked as completed');
-
-      // Save client/owner specific data if provided
-      if (userRole === 'client' && Object.keys(formData).length > 0) {
-        const clientData = {
-          user_id: user?.id,
-          age: formData.age,
-          bio: formData.bio,
-          interests: formData.interests || [],
-          preferred_activities: formData.lifestyle_tags || []
-        };
-
-        const { error: clientError } = await supabase
-          .from('client_profiles')
-          .upsert(clientData, { onConflict: 'user_id' });
-
-        if (clientError) {
-          console.error('[Onboarding] Client profile error:', clientError);
-          // Don't throw - profile completion is more important
-        } else {
-          console.log('[Onboarding] ✅ Client data saved');
-        }
-
-        // Save filter preferences if provided
-        if (formData.preferred_property_types || formData.budget_min || formData.budget_max) {
-          const filterData = {
-            user_id: user?.id,
-            property_types: formData.preferred_property_types || [],
-            min_price: formData.budget_min,
-            max_price: formData.budget_max,
-            pet_friendly_required: formData.has_pets || false
-          };
-
-          const { error: filterError } = await supabase
-            .from('client_filter_preferences')
-            .upsert(filterData, { onConflict: 'user_id' });
-
-          if (filterError) {
-            console.error('[Onboarding] Filter preferences error:', filterError);
-          } else {
-            console.log('[Onboarding] ✅ Filter preferences saved');
-          }
-        }
-      }
-
-      toast({
-        title: "Profile completed!",
-        description: `Welcome to Tinderent! You're all set.`,
+      // Save onboarding data using the database function
+      const { error } = await supabase.rpc('complete_user_onboarding', {
+        user_id: user?.id,
+        onboarding_data: formData as any
       });
 
-      // Navigate to dashboard
-      const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      console.log('[Onboarding] ✅ Navigating to:', targetPath);
-      
-      setTimeout(() => {
-        navigate(targetPath, { replace: true });
-      }, 500);
+      if (error) {
+        console.error('Database function error:', error);
+        throw error;
+      }
 
+      console.log('Onboarding data saved successfully');
+
+      toast({
+        title: "Profile completed successfully!",
+        description: `Welcome to Tinderent! Your ${userRole === 'owner' ? 'business' : 'tenant'} profile has been saved.`,
+      });
+
+      // Verify the update worked by checking the profile
+      const { data: updatedProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('onboarding_completed, role')
+        .eq('id', user?.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching updated profile:', fetchError);
+      } else {
+        console.log('Updated profile:', updatedProfile);
+      }
+
+      // Small delay to show the toast before navigating
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Navigate to appropriate dashboard
+      const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      console.log('Navigating to:', targetPath);
+      navigate(targetPath, { replace: true });
     } catch (error) {
-      console.error('[Onboarding] ❌ Error:', error);
+      console.error('Error completing onboarding:', error);
       toast({
         title: "Error",
-        description: "Failed to complete onboarding. Please try again.",
+        description: "Failed to save profile. Please try again.",
         variant: "destructive"
       });
     } finally {
