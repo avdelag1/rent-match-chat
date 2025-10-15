@@ -138,13 +138,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       } else if (data.user) {
         // Auto-create profile for immediate sign-ups
+        console.log('[useAuth] Creating profile for user:', data.user.id, 'with role:', role);
         const profileResult = await createProfileIfMissing(data.user, role);
         
+        console.log('[useAuth] Profile creation result:', profileResult ? 'Success' : 'Failed');
+        
         if (!profileResult) {
-          // Profile/role creation failed - show error and sign out
+          // Profile/role creation failed
+          console.error('[useAuth] Profile creation failed, signing out user');
           await supabase.auth.signOut();
           return { error: new Error('Failed to complete account setup') };
         }
+        
+        console.log('[useAuth] Profile setup complete, user should be able to access dashboard');
         
         // Note: Cache invalidation moved to useProfileSetup after role creation completes
         

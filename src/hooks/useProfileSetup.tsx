@@ -37,6 +37,13 @@ export function useProfileSetup() {
         if (roleError) {
           console.error('Error upserting role:', roleError);
         }
+        
+        // CRITICAL: Invalidate cache for existing profiles too!
+        console.log('[ProfileSetup] Invalidating role cache for existing profile:', user.id);
+        queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
+        await new Promise(resolve => setTimeout(resolve, 100));
+        console.log('[ProfileSetup] Cache invalidated for existing profile');
+        
         return existingProfile;
       }
 

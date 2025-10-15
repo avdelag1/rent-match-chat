@@ -60,14 +60,21 @@ const Index = () => {
     if (loading) return;
     
     if (user) {
-      // If query failed after all retries, show error
+      // If query failed after all retries, show error ONLY if we're not in the middle of signup
       if (isError && !profileLoading) {
-        console.error('[Index] User authenticated but role query failed');
-        toast({
-          title: "Account setup incomplete",
-          description: "Please refresh the page or contact support.",
-          variant: "destructive"
-        });
+        console.error('[Index] User authenticated but role query failed after retries');
+        
+        // Don't show error immediately after signup - give cache more time
+        const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
+        if (userAge > 10000) { // Only show error if account is older than 10 seconds
+          toast({
+            title: "Account setup incomplete",
+            description: "Please refresh the page or contact support.",
+            variant: "destructive"
+          });
+        } else {
+          console.log('[Index] New user detected, waiting for cache to update...');
+        }
         return;
       }
       
