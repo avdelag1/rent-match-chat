@@ -71,17 +71,43 @@ export function useProfileSetup() {
         return null;
       }
 
-      // Create role in user_roles table
-      const { error: roleError } = await supabase.rpc('upsert_user_role', {
-        p_user_id: user.id,
-        p_role: role
-      });
+      // Add small delay to ensure profile is fully created
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (roleError) {
-        console.error('Error creating role:', roleError);
+      // Retry logic for role creation (up to 3 attempts)
+      let roleCreated = false;
+      let lastError = null;
+      
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const { error: roleError } = await supabase.rpc('upsert_user_role', {
+          p_user_id: user.id,
+          p_role: role
+        });
+
+        if (!roleError) {
+          roleCreated = true;
+          break;
+        }
+
+        lastError = roleError;
+        console.error(`Role creation attempt ${attempt} failed:`, {
+          message: roleError.message,
+          details: roleError.details,
+          hint: roleError.hint,
+          code: roleError.code
+        });
+
+        if (attempt < 3) {
+          // Wait before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, attempt * 200));
+        }
+      }
+
+      if (!roleCreated) {
+        console.error('Failed to create role after 3 attempts:', lastError);
         toast({
           title: "Role Setup Failed",
-          description: "Failed to assign user role. Please contact support.",
+          description: `Failed to assign user role: ${lastError?.message || 'Unknown error'}. Please contact support.`,
           variant: "destructive"
         });
         return null;
