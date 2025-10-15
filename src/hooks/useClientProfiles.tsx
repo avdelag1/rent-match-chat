@@ -29,12 +29,11 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
       try {
         console.log('Fetching client profiles for owner:', user.id);
         
-        // Get real client profiles from database
+        // Get real client profiles from database using public view
         const { data: profiles, error } = await supabase
-          .from('profiles')
+          .from('profiles_public')
           .select('*')
           .eq('role', 'client')
-          .eq('is_active', true)
           .neq('id', user.id)
           .limit(50);
 
