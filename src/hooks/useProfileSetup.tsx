@@ -26,10 +26,11 @@ export function useProfileSetup() {
         .maybeSingle();
 
       if (existingProfile) {
-      // Ensure role exists in user_roles table  
-      const { error: roleError } = await supabase.rpc('exec_sql', {
-        sql: `INSERT INTO user_roles (user_id, role) VALUES ('${user.id}', '${role}') ON CONFLICT (user_id) DO UPDATE SET role = '${role}'`
-      }).then(() => ({ error: null })).catch((e) => ({ error: e }));
+      // Ensure role exists in user_roles table
+      const { error: roleError } = await supabase.rpc('upsert_user_role', {
+        p_user_id: user.id,
+        p_role: role
+      });
         
         if (roleError) {
           console.error('Error upserting role:', roleError);
@@ -71,9 +72,10 @@ export function useProfileSetup() {
       }
 
       // Create role in user_roles table
-      const { error: roleError } = await supabase.rpc('exec_sql', {
-        sql: `INSERT INTO user_roles (user_id, role) VALUES ('${user.id}', '${role}') ON CONFLICT (user_id) DO UPDATE SET role = '${role}'`
-      }).then(() => ({ error: null })).catch((e) => ({ error: e }));
+      const { error: roleError } = await supabase.rpc('upsert_user_role', {
+        p_user_id: user.id,
+        p_role: role
+      });
 
       if (roleError) {
         console.error('Error creating role:', roleError);

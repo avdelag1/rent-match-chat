@@ -8184,6 +8184,10 @@ export type Database = {
         }
         Returns: string
       }
+      upsert_user_role: {
+        Args: { p_role: string; p_user_id: string }
+        Returns: undefined
+      }
       user_has_restriction: {
         Args:
           | Record<PropertyKey, never>
