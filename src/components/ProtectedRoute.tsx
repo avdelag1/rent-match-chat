@@ -23,7 +23,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('role, onboarding_completed')
+        .select('role')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -42,19 +42,6 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     }
 
     if (!profileLoading && profile) {
-      // Check if user hasn't completed onboarding
-      if (!profile.onboarding_completed && location.pathname !== '/onboarding') {
-        navigate('/onboarding', { replace: true });
-        return;
-      }
-
-      // Check if user has completed onboarding but is still on onboarding page
-      if (profile.onboarding_completed && location.pathname === '/onboarding') {
-        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
-        navigate(targetPath, { replace: true });
-        return;
-      }
-
       // Check role-based access for protected routes
       if (requiredRole && profile.role !== requiredRole) {
         const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
@@ -78,7 +65,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     );
   }
 
-  if (!user || (requiredRole && profile?.role !== requiredRole) || (profile && !profile.onboarding_completed && location.pathname !== '/onboarding')) {
+  if (!user || (requiredRole && profile?.role !== requiredRole)) {
     return null; // Will redirect via useEffect
   }
 
