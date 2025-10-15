@@ -61,7 +61,7 @@ export type Database = {
             foreignKeyName: "admin_actions_log_target_user_id_fkey"
             columns: ["target_user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -100,41 +100,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "admin_activity_logs_admin_user_id_fkey"
-            columns: ["admin_user_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      admin_credentials: {
-        Row: {
-          admin_user_id: string | null
-          created_at: string | null
-          email: string
-          id: string
-          password_hash: string
-          updated_at: string | null
-        }
-        Insert: {
-          admin_user_id?: string | null
-          created_at?: string | null
-          email: string
-          id?: string
-          password_hash: string
-          updated_at?: string | null
-        }
-        Update: {
-          admin_user_id?: string | null
-          created_at?: string | null
-          email?: string
-          id?: string
-          password_hash?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_credentials_admin_user_id_fkey"
             columns: ["admin_user_id"]
             isOneToOne: false
             referencedRelation: "admin_users"
@@ -599,7 +564,7 @@ export type Database = {
             foreignKeyName: "client_preferences_detailed_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -758,7 +723,7 @@ export type Database = {
             foreignKeyName: "conversation_messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -836,7 +801,7 @@ export type Database = {
             foreignKeyName: "conversations_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -878,7 +843,7 @@ export type Database = {
             foreignKeyName: "conversations_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -892,7 +857,7 @@ export type Database = {
             foreignKeyName: "fk_conversations_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -934,7 +899,7 @@ export type Database = {
             foreignKeyName: "fk_conversations_owner_id"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1223,7 +1188,7 @@ export type Database = {
             foreignKeyName: "favorites_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1646,7 +1611,7 @@ export type Database = {
             foreignKeyName: "listings_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1771,7 +1736,7 @@ export type Database = {
             foreignKeyName: "fk_matches_client_id"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -1806,7 +1771,7 @@ export type Database = {
             foreignKeyName: "fk_matches_owner_id"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -1820,7 +1785,7 @@ export type Database = {
             foreignKeyName: "matches_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -1855,7 +1820,7 @@ export type Database = {
             foreignKeyName: "matches_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1921,7 +1886,7 @@ export type Database = {
             foreignKeyName: "messages_receiver_id_fkey"
             columns: ["receiver_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -1935,7 +1900,7 @@ export type Database = {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2112,7 +2077,7 @@ export type Database = {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2181,7 +2146,7 @@ export type Database = {
             foreignKeyName: "owner_client_matches_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -2216,7 +2181,7 @@ export type Database = {
             foreignKeyName: "owner_client_matches_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2358,7 +2323,7 @@ export type Database = {
             foreignKeyName: "owner_likes_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -2393,7 +2358,7 @@ export type Database = {
             foreignKeyName: "owner_likes_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2498,7 +2463,7 @@ export type Database = {
             foreignKeyName: "package_usage_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2650,7 +2615,7 @@ export type Database = {
             foreignKeyName: "paypal_credentials_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2698,7 +2663,7 @@ export type Database = {
             foreignKeyName: "paypal_transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2755,7 +2720,7 @@ export type Database = {
             foreignKeyName: "profile_photos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2905,7 +2870,6 @@ export type Database = {
           rental_duration_preference: string | null
           rental_philosophy: string | null
           required_amenities: string[] | null
-          role: string | null
           sexual_orientation: string | null
           size_preference: string | null
           smoking: boolean | null
@@ -3047,7 +3011,6 @@ export type Database = {
           rental_duration_preference?: string | null
           rental_philosophy?: string | null
           required_amenities?: string[] | null
-          role?: string | null
           sexual_orientation?: string | null
           size_preference?: string | null
           smoking?: boolean | null
@@ -3189,7 +3152,6 @@ export type Database = {
           rental_duration_preference?: string | null
           rental_philosophy?: string | null
           required_amenities?: string[] | null
-          role?: string | null
           sexual_orientation?: string | null
           size_preference?: string | null
           smoking?: boolean | null
@@ -3390,7 +3352,7 @@ export type Database = {
             foreignKeyName: "property_comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3447,7 +3409,7 @@ export type Database = {
             foreignKeyName: "property_favorites_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3707,7 +3669,7 @@ export type Database = {
             foreignKeyName: "property_ratings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3892,7 +3854,7 @@ export type Database = {
             foreignKeyName: "property_tours_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4071,7 +4033,7 @@ export type Database = {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4467,7 +4429,7 @@ export type Database = {
             foreignKeyName: "swipe_analytics_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4509,7 +4471,7 @@ export type Database = {
             foreignKeyName: "fk_swipes_user_id"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4638,7 +4600,7 @@ export type Database = {
             foreignKeyName: "user_activity_logs_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4674,7 +4636,7 @@ export type Database = {
             foreignKeyName: "user_activity_tracking_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4740,7 +4702,7 @@ export type Database = {
             foreignKeyName: "user_block_list_blocked_user_id_fkey"
             columns: ["blocked_user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -4754,7 +4716,7 @@ export type Database = {
             foreignKeyName: "user_block_list_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4845,7 +4807,7 @@ export type Database = {
             foreignKeyName: "user_complaints_complainant_id_fkey"
             columns: ["complainant_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -4866,7 +4828,7 @@ export type Database = {
             foreignKeyName: "user_complaints_reported_user_id_fkey"
             columns: ["reported_user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4941,7 +4903,7 @@ export type Database = {
             foreignKeyName: "user_documents_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4980,7 +4942,7 @@ export type Database = {
             foreignKeyName: "user_feedback_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5087,7 +5049,7 @@ export type Database = {
             foreignKeyName: "user_notification_preferences_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5145,7 +5107,7 @@ export type Database = {
             foreignKeyName: "user_package_overrides_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5187,7 +5149,7 @@ export type Database = {
             foreignKeyName: "user_payment_methods_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5229,7 +5191,7 @@ export type Database = {
             foreignKeyName: "user_preferences_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5268,7 +5230,7 @@ export type Database = {
             foreignKeyName: "user_privacy_settings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5431,7 +5393,7 @@ export type Database = {
             foreignKeyName: "user_restrictions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5459,15 +5421,15 @@ export type Database = {
           {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "user_roles_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
+            isOneToOne: true
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5545,7 +5507,7 @@ export type Database = {
             foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5644,7 +5606,7 @@ export type Database = {
             foreignKeyName: "user_warnings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5719,7 +5681,7 @@ export type Database = {
             foreignKeyName: "vendors_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5774,65 +5736,68 @@ export type Database = {
           baths: number | null
           beds: number | null
           city: string | null
-          contact_method: string | null
-          contact_status: string | null
           created_at: string | null
           description: string | null
-          furnished: boolean | null
           id: string | null
           images: string[] | null
-          location_zone: string | null
+          is_active: boolean | null
           neighborhood: string | null
-          pet_friendly: boolean | null
+          owner_id: string | null
           price: number | null
           property_type: string | null
-          square_footage: number | null
+          status: Database["public"]["Enums"]["listing_status"] | null
           title: string | null
-          view_count: number | null
         }
         Insert: {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
           city?: string | null
-          contact_method?: never
-          contact_status?: never
           created_at?: string | null
           description?: string | null
-          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
-          location_zone?: string | null
+          is_active?: boolean | null
           neighborhood?: string | null
-          pet_friendly?: boolean | null
+          owner_id?: string | null
           price?: number | null
           property_type?: string | null
-          square_footage?: number | null
+          status?: Database["public"]["Enums"]["listing_status"] | null
           title?: string | null
-          view_count?: number | null
         }
         Update: {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
           city?: string | null
-          contact_method?: never
-          contact_status?: never
           created_at?: string | null
           description?: string | null
-          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
-          location_zone?: string | null
+          is_active?: boolean | null
           neighborhood?: string | null
-          pet_friendly?: boolean | null
+          owner_id?: string | null
           price?: number | null
           property_type?: string | null
-          square_footage?: number | null
+          status?: Database["public"]["Enums"]["listing_status"] | null
           title?: string | null
-          view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "listings_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       listings_public: {
         Row: {
@@ -5894,35 +5859,65 @@ export type Database = {
         }
         Relationships: []
       }
-      public_profiles: {
+      profiles_public: {
         Row: {
           age: number | null
           avatar_url: string | null
-          created_at: string | null
+          bio: string | null
           full_name: string | null
-          general_location: string | null
+          has_pets: boolean | null
           id: string | null
-          role: string | null
+          images: string[] | null
+          interests: string[] | null
+          latitude: number | null
+          lifestyle_tags: string[] | null
+          location: string | null
+          longitude: number | null
+          monthly_income: string | null
+          nationality: string | null
+          occupation: string | null
+          preferred_activities: string[] | null
+          smoking: boolean | null
           verified: boolean | null
         }
         Insert: {
           age?: number | null
-          avatar_url?: never
-          created_at?: string | null
+          avatar_url?: string | null
+          bio?: string | null
           full_name?: string | null
-          general_location?: never
+          has_pets?: boolean | null
           id?: string | null
-          role?: string | null
+          images?: string[] | null
+          interests?: string[] | null
+          latitude?: number | null
+          lifestyle_tags?: string[] | null
+          location?: string | null
+          longitude?: number | null
+          monthly_income?: string | null
+          nationality?: string | null
+          occupation?: string | null
+          preferred_activities?: string[] | null
+          smoking?: boolean | null
           verified?: boolean | null
         }
         Update: {
           age?: number | null
-          avatar_url?: never
-          created_at?: string | null
+          avatar_url?: string | null
+          bio?: string | null
           full_name?: string | null
-          general_location?: never
+          has_pets?: boolean | null
           id?: string | null
-          role?: string | null
+          images?: string[] | null
+          interests?: string[] | null
+          latitude?: number | null
+          lifestyle_tags?: string[] | null
+          location?: string | null
+          longitude?: number | null
+          monthly_income?: string | null
+          nationality?: string | null
+          occupation?: string | null
+          preferred_activities?: string[] | null
+          smoking?: boolean | null
           verified?: boolean | null
         }
         Relationships: []
@@ -6194,6 +6189,10 @@ export type Database = {
           | { p_action: string; p_user_id: string }
         Returns: boolean
       }
+      can_view_profile: {
+        Args: { profile_user_id: string }
+        Returns: boolean
+      }
       cancel_user_subscription: {
         Args: { p_user_id: string }
         Returns: {
@@ -6209,6 +6208,10 @@ export type Database = {
           new_package_name: string
           old_package_name: string
         }[]
+      }
+      check_is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       check_property_availability: {
         Args: {
@@ -6233,7 +6236,12 @@ export type Database = {
         Args:
           | { p_required_role: string; p_user_id: string }
           | { p_user_id: string }
-        Returns: boolean
+        Returns: {
+          can_book_property: boolean
+          can_create_property: boolean
+          can_view_all_properties: boolean
+          user_role: string
+        }[]
       }
       complete_user_onboarding: {
         Args: { onboarding_data?: Json; user_id: string }
@@ -6624,7 +6632,26 @@ export type Database = {
       }
       get_potential_clients_for_owner: {
         Args: Record<PropertyKey, never> | { owner_user_id: string }
-        Returns: Record<string, unknown>[]
+        Returns: {
+          age: number
+          bio: string
+          budget: number
+          full_name: string
+          has_kids: boolean
+          has_pets: boolean
+          id: string
+          images: string[]
+          interests: string[]
+          location: string
+          looking_for: string
+          monthly_income_range: string
+          move_in_date: string
+          nationality: string
+          preferences: string[]
+          profession: string
+          relationship_status: string
+          verified: boolean
+        }[]
       }
       get_proj4_from_srid: {
         Args: { "": number }
@@ -6718,6 +6745,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_profile_owner: {
+        Args: { profile_user_id: string }
+        Returns: boolean
+      }
       is_user_blocked: {
         Args: { potential_blocked_id: string; potential_blocker_id: string }
         Returns: boolean
@@ -6790,7 +6821,12 @@ export type Database = {
               p_verification_status: string
             }
           | { p_user_id: string; p_verification_status: string }
-        Returns: boolean
+        Returns: {
+          full_name: string
+          new_status: string
+          previous_status: string
+          user_id: string
+        }[]
       }
       path: {
         Args: { "": unknown }
@@ -6852,7 +6888,7 @@ export type Database = {
         Args:
           | { tbl_oid: unknown; use_typmod?: boolean }
           | { use_typmod?: boolean }
-        Returns: number
+        Returns: string
       }
       postgis_addbbox: {
         Args: { "": unknown }

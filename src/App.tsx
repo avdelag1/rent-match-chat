@@ -2,15 +2,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import Index from "./pages/Index";
-import Onboarding from "./pages/Onboarding";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientProfile from "./pages/ClientProfile";
@@ -58,18 +59,14 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                   <Routes>
-                    <Route path="/" element={<Index />} />
+                    <Route path="/" element={
+                      <SignupErrorBoundary>
+                        <Index />
+                      </SignupErrorBoundary>
+                    } />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     
-                    <Route 
-                      path="/onboarding" 
-                      element={
-                        <ProtectedRoute>
-                          <Onboarding />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    <Route 
+                    <Route
                       path="/client/dashboard" 
                       element={
                         <ProtectedRoute requiredRole="client">

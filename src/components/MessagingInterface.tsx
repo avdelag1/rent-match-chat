@@ -60,14 +60,14 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     const fetchUserRole = async () => {
       if (!user) return;
       
-      const { data: profile } = await supabase
-        .from('profiles')
+      const { data } = await supabase
+        .from('user_roles')
         .select('role')
-        .eq('id', user.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
         
-      if (profile?.role) {
-        setUserRole(profile.role as 'client' | 'owner');
+      if (data?.role) {
+        setUserRole(data.role as 'client' | 'owner');
       }
     };
     

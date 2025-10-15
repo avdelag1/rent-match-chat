@@ -87,7 +87,6 @@ export function useLocationBasedMatching() {
           .select('*')
           .neq('id', user.id)
           .eq('is_active', true)
-          .eq('onboarding_completed', true)
           .not('location', 'is', null);
 
         if (error) {
@@ -98,7 +97,7 @@ export function useLocationBasedMatching() {
         if (!profiles || profiles.length === 0) return [];
 
         // Filter and calculate distances
-        const profilesWithDistance = profiles
+        const profilesWithDistanceData = profiles
           .map(profile => {
             // Parse location data (could be JSON or coordinates)
             let locationData = null;
@@ -135,22 +134,39 @@ export function useLocationBasedMatching() {
             }
 
             return {
-              id: profile.id,
-              user_id: profile.id,
-              full_name: profile.full_name || 'Unknown User',
-              age: profile.age,
-              bio: profile.bio,
-              images: profile.images || [],
-              location: locationData,
-              distance: Math.round(distance * 100) / 100, // Round to 2 decimal places
-              verified: profile.verified || false,
-              role: profile.role as 'client' | 'owner',
+              profileData: profile,
+              locationData,
+              distance: Math.round(distance * 100) / 100
             };
           })
-          .filter(profile => profile !== null)
+          .filter(item => item !== null)
           .sort((a, b) => (a!.distance || 0) - (b!.distance || 0));
 
-        return profilesWithDistance as LocationBasedProfile[];
+        // Fetch roles for all profiles
+        const profilesWithRoles = await Promise.all(
+          profilesWithDistanceData.map(async (item) => {
+            const { data: roleData } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', item!.profileData.id)
+              .maybeSingle();
+
+            return {
+              id: item!.profileData.id,
+              user_id: item!.profileData.id,
+              full_name: item!.profileData.full_name || 'Unknown User',
+              age: item!.profileData.age,
+              bio: item!.profileData.bio,
+              images: item!.profileData.images || [],
+              location: item!.locationData,
+              distance: item!.distance,
+              verified: item!.profileData.verified || false,
+              role: (roleData?.role as 'client' | 'owner') || 'client',
+            };
+          })
+        );
+
+        return profilesWithRoles;
 
       } catch (error) {
         console.error('Error in nearby profiles query:', error);

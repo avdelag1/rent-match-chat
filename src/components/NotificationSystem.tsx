@@ -52,12 +52,18 @@ export function NotificationSystem() {
               // Get sender info
               const { data: senderProfile } = await supabase
                 .from('profiles')
-                .select('full_name, avatar_url, role')
+                .select('full_name, avatar_url')
                 .eq('id', newMessage.sender_id)
                 .single();
 
+              const { data: senderRoleData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', newMessage.sender_id)
+                .maybeSingle();
+
               const senderName = senderProfile?.full_name || 'Someone';
-              const senderRole = senderProfile?.role === 'client' ? 'Client' : 'Property Owner';
+              const senderRole = senderRoleData?.role === 'client' ? 'Client' : 'Property Owner';
               
               // Show toast notification  
               const messageText = newMessage.message_text || '';
@@ -122,12 +128,18 @@ export function NotificationSystem() {
             // Get liker info
             const { data: likerProfile } = await supabase
               .from('profiles')
-              .select('full_name, avatar_url, role')
+              .select('full_name, avatar_url')
               .eq('id', newLike.user_id)
               .single();
 
+            const { data: likerRoleData } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', newLike.user_id)
+              .maybeSingle();
+
             const likerName = likerProfile?.full_name || 'Someone';
-            const likerRole = likerProfile?.role === 'client' ? 'Client' : 'Property Owner';
+            const likerRole = likerRoleData?.role === 'client' ? 'Client' : 'Property Owner';
             
             // Show toast notification
             toast({

@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import { loginSchema, signupSchema, forgotPasswordSchema } from '@/schemas/auth';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -31,7 +32,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const validated = forgotPasswordSchema.parse({ email });
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(validated.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -45,11 +48,19 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       setIsForgotPassword(false);
       setEmail('');
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send reset email. Please try again.",
-        variant: "destructive",
-      });
+      if (error.errors) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0]?.message || "Please check your input.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to send reset email.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -66,9 +77,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
     try {
       if (isLogin) {
-        const { error } = await signIn(email, password, role);
+        const validated = loginSchema.parse({ email, password });
+        const { error } = await signIn(validated.email, validated.password, role);
         if (!error) {
-          // Store remember me preference
           if (rememberMe) {
             localStorage.setItem('rememberMe', 'true');
           } else {
@@ -79,7 +90,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           throw error;
         }
       } else {
-        const { error } = await signUp(email, password, role, name);
+        const validated = signupSchema.parse({ name, email, password });
+        const { error } = await signUp(validated.email, validated.password, role, validated.name);
         if (!error) {
           onClose();
         } else {
@@ -87,11 +99,19 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         }
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      if (error.errors) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0]?.message || "Please check your input.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Authentication failed.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

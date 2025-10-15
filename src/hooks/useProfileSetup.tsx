@@ -5,7 +5,6 @@ import { User } from '@supabase/supabase-js';
 
 interface CreateProfileData {
   id: string;
-  role: 'client' | 'owner';
   full_name?: string;
   email?: string;
 }
@@ -22,33 +21,42 @@ export function useProfileSetup() {
       // Check if profile already exists
       const { data: existingProfile } = await supabase
         .from('profiles')
-        .select('id, role, onboarding_completed')
+        .select('id')
         .eq('id', user.id)
         .maybeSingle();
 
       if (existingProfile) {
+      // Ensure role exists in user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .upsert([{ id: crypto.randomUUID(), user_id: user.id, role }], { onConflict: 'user_id' });
+        
+        if (roleError) {
+          console.error('Error upserting role:', roleError);
+        }
         return existingProfile;
       }
 
-      // Create new profile
+      // Create new profile (without role column)
       const profileData: CreateProfileData = {
         id: user.id,
-        role: role,
         full_name: user.user_metadata?.name || user.user_metadata?.full_name || '',
         email: user.email || ''
       };
 
       console.log('Creating new profile:', profileData);
 
+      // Use upsert to handle race conditions
       const { data: newProfile, error } = await supabase
         .from('profiles')
-        .insert([{
+        .upsert([{
           ...profileData,
           is_active: true,
-          onboarding_completed: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }])
+        }], {
+          onConflict: 'id'
+        })
         .select()
         .single();
 
@@ -62,7 +70,22 @@ export function useProfileSetup() {
         return null;
       }
 
-      console.log('Profile created successfully:', newProfile);
+      // Create role in user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .upsert([{ id: crypto.randomUUID(), user_id: user.id, role }], { onConflict: 'user_id' });
+
+      if (roleError) {
+        console.error('Error creating role:', roleError);
+        toast({
+          title: "Role Setup Failed",
+          description: "Failed to assign user role. Please contact support.",
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      console.log('Profile and role created successfully');
       return newProfile;
 
     } catch (error) {

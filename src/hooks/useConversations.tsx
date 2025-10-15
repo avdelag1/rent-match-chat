@@ -53,8 +53,15 @@ export function useConversations() {
 
           const { data: profile } = await supabase
             .from('profiles')
-            .select('id, full_name, avatar_url, role')
+            .select('id, full_name, avatar_url')
             .eq('id', otherUserId)
+            .maybeSingle();
+
+          // Get role from user_roles table
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', otherUserId)
             .maybeSingle();
 
           // Get last message
@@ -68,7 +75,7 @@ export function useConversations() {
 
           return {
             ...conversation,
-            other_user: profile,
+            other_user: profile ? { ...profile, role: roleData?.role || 'client' } : undefined,
             last_message: lastMessage
           };
         })
@@ -159,8 +166,14 @@ export function useStartConversation() {
           throw new Error('Property owner profile not found. Please try again.');
         }
 
-        const clientId = myProfile?.role === 'client' ? user.id : otherUserId;
-        const ownerId = myProfile?.role === 'owner' ? user.id : otherUserId;
+        const { data: myRoleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        const clientId = myRoleData?.role === 'client' ? user.id : otherUserId;
+        const ownerId = myRoleData?.role === 'owner' ? user.id : otherUserId;
 
         // Create conversation without requiring a match first (match_id is now nullable)
         const { data: newConversation, error: conversationError } = await supabase
