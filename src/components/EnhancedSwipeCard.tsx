@@ -126,19 +126,8 @@ export function EnhancedSwipeCard({
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3 }}
                 onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = `
-                      <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                        <div class="text-center text-gray-500">
-                          <div class="text-4xl mb-2">🏠</div>
-                          <p class="text-sm">Photo unavailable</p>
-                        </div>
-                      </div>
-                    `;
-                  }
+                  e.currentTarget.src = '/api/placeholder/600/400';
+                  e.currentTarget.alt = `${listing.title} - Image unavailable`;
                 }}
             />
             

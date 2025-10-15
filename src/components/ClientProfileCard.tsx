@@ -185,21 +185,8 @@ export function ClientProfileCard({
           draggable={false}
           onClick={handleImageClick}
           onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            const parent = target.parentElement;
-            if (parent) {
-              parent.innerHTML = `
-                <div class="w-full h-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
-                  <div class="text-center text-gray-600">
-                    <div class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
-                      <span class="text-3xl font-bold">${profile.name?.[0] || '?'}</span>
-                    </div>
-                    <p class="text-lg">No Photo</p>
-                  </div>
-                </div>
-              `;
-            }
+            e.currentTarget.src = '/api/placeholder/400/600';
+            e.currentTarget.alt = `${profile.name} - Profile photo unavailable`;
           }}
         />
         
