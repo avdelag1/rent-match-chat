@@ -35,7 +35,6 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           .select('*')
           .eq('role', 'client')
           .eq('is_active', true)
-          .eq('onboarding_completed', true)
           .neq('id', user.id)
           .limit(50);
 
@@ -47,7 +46,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
         console.log('Found client profiles:', profiles?.length || 0, profiles);
 
         if (!profiles || profiles.length === 0) {
-          console.log('No client profiles found - this is normal if no clients have completed onboarding');
+          console.log('No client profiles found');
           return [];
         }
 

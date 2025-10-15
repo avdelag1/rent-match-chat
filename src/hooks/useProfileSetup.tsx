@@ -22,7 +22,7 @@ export function useProfileSetup() {
       // Check if profile already exists
       const { data: existingProfile } = await supabase
         .from('profiles')
-        .select('id, role, onboarding_completed')
+        .select('id, role')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -46,7 +46,6 @@ export function useProfileSetup() {
         .upsert([{
           ...profileData,
           is_active: true,
-          onboarding_completed: true,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }], {

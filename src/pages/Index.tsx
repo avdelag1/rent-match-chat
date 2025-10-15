@@ -18,7 +18,7 @@ const Index = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('role, onboarding_completed')
+        .select('role')
         .eq('id', user.id)
         .maybeSingle();
 

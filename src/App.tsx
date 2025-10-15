@@ -65,7 +65,6 @@ const App = () => (
                       </SignupErrorBoundary>
                     } />
                     <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/onboarding" element={<Navigate to="/" replace />} />
                     
                     <Route
                       path="/client/dashboard" 

@@ -87,7 +87,6 @@ export function useLocationBasedMatching() {
           .select('*')
           .neq('id', user.id)
           .eq('is_active', true)
-          .eq('onboarding_completed', true)
           .not('location', 'is', null);
 
         if (error) {

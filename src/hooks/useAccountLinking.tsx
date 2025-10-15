@@ -19,7 +19,7 @@ export function useAccountLinking() {
       // Check if there's an existing profile with this email
       const { data: existingProfile, error } = await supabase
         .from('profiles')
-        .select('id, role, email, full_name, onboarding_completed, created_at')
+        .select('id, role, email, full_name, created_at')
         .eq('email', email)
         .maybeSingle();
 
@@ -152,7 +152,6 @@ export function useAccountLinking() {
         email: oauthUser.email || '',
         avatar_url: oauthUser.user_metadata?.avatar_url || null,
         is_active: true,
-        onboarding_completed: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
