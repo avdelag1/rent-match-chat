@@ -78,7 +78,15 @@ const Index = () => {
     );
   }
 
-  return null; // Will redirect via useEffect
+  // Show loading state while navigating to dashboard
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
+      <div className="space-y-4 text-center">
+        <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
+        <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
+      </div>
+    </div>
+  );
 };
 
 export default Index;
