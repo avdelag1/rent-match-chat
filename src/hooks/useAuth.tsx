@@ -136,7 +136,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       } else if (data.user) {
         // Auto-create profile for immediate sign-ups
-        await createProfileIfMissing(data.user, role);
+        const profileResult = await createProfileIfMissing(data.user, role);
+        
+        if (!profileResult) {
+          // Profile/role creation failed - show error and sign out
+          await supabase.auth.signOut();
+          return { error: new Error('Failed to complete account setup') };
+        }
+        
         toast({
           title: "Welcome to Tinderent!",
           description: "Your account has been created successfully.",
