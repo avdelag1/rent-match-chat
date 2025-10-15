@@ -22,21 +22,30 @@ const Index = () => {
         .eq('id', user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile fetch error:', error);
+        return null;
+      }
       return data;
     },
     enabled: !!user,
+    retry: 1,
   });
 
   // Redirect authenticated users based on their status
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile) {
+    if (loading || profileLoading) return;
+    
+    if (user) {
+      if (!profile) {
+        console.log('No profile found, staying on landing page');
+        return;
+      }
+      
       if (!profile.onboarding_completed) {
-        // Redirect to onboarding if not completed
         console.log('Redirecting to onboarding - incomplete profile');
         navigate('/onboarding', { replace: true });
-      } else if (profile.onboarding_completed) {
-        // Redirect to dashboard if onboarding is complete
+      } else {
         const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
         console.log('Redirecting to dashboard:', targetPath);
         navigate(targetPath, { replace: true });
