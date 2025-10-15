@@ -46,13 +46,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Apply theme class to document
   useEffect(() => {
     const root = window.document.documentElement;
-    
-    // Remove ALL theme classes first
-    root.classList.remove('dark', 'amber', 'red', 'default');
+    root.classList.remove('dark', 'amber', 'red');
 
-    // Only add theme class if not default
-    if (theme !== 'default') {
-      root.classList.add(theme);
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'amber') {
+      root.classList.add('amber');
+    } else if (theme === 'red') {
+      root.classList.add('red');
     }
   }, [theme]);
 
