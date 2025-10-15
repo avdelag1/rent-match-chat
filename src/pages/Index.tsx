@@ -10,23 +10,23 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   
-  // Fetch user profile to determine role
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ['user-profile', user?.id],
+  // Fetch user role from secure user_roles table
+  const { data: userRole, isLoading: profileLoading } = useQuery({
+    queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
       
       const { data, error } = await supabase
-        .from('profiles')
+        .from('user_roles')
         .select('role')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) {
-        console.error('Profile fetch error:', error);
+        console.error('Role fetch error:', error);
         return null;
       }
-      return data;
+      return data?.role;
     },
     enabled: !!user,
     retry: 1,
@@ -36,12 +36,12 @@ const Index = () => {
   useEffect(() => {
     if (loading || profileLoading) return;
     
-    if (user && profile) {
-      const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+    if (user && userRole) {
+      const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
       console.log('Redirecting authenticated user to dashboard:', targetPath);
       navigate(targetPath, { replace: true });
     }
-  }, [user, profile, loading, profileLoading, navigate]);
+  }, [user, userRole, loading, profileLoading, navigate]);
 
   // Show loading state while checking authentication
   if (loading || (user && profileLoading)) {

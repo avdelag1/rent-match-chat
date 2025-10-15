@@ -16,19 +16,19 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ['user-profile', user?.id],
+  const { data: userRole, isLoading: profileLoading } = useQuery({
+    queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
       
       const { data, error } = await supabase
-        .from('profiles')
+        .from('user_roles')
         .select('role')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      return data?.role;
     },
     enabled: !!user,
   });
@@ -41,10 +41,10 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return;
     }
 
-    if (!profileLoading && profile) {
+    if (!profileLoading && userRole) {
       // Check role-based access for protected routes
-      if (requiredRole && profile.role !== requiredRole) {
-        const targetPath = profile.role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      if (requiredRole && userRole !== requiredRole) {
+        const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
         if (location.pathname !== targetPath) {
           navigate(targetPath, { replace: true });
         }
@@ -52,7 +52,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, user, profileLoading, profile, requiredRole, navigate, location.pathname]);
+  }, [loading, user, profileLoading, userRole, requiredRole, navigate, location.pathname]);
 
   if (loading || profileLoading) {
     return (
@@ -65,7 +65,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     );
   }
 
-  if (!user || (requiredRole && profile?.role !== requiredRole)) {
+  if (!user || (requiredRole && userRole !== requiredRole)) {
     return null; // Will redirect via useEffect
   }
 

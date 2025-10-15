@@ -19,7 +19,7 @@ export function useAccountLinking() {
       // Check if there's an existing profile with this email
       const { data: existingProfile, error } = await supabase
         .from('profiles')
-        .select('id, role, email, full_name, created_at')
+        .select('id, email, full_name, created_at')
         .eq('email', email)
         .maybeSingle();
 
@@ -28,8 +28,19 @@ export function useAccountLinking() {
         return { profile: null, hasConflict: false };
       }
 
+      if (!existingProfile) {
+        return { profile: null, hasConflict: false };
+      }
+
+      // Fetch role from user_roles table
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', existingProfile.id)
+        .maybeSingle();
+
       return { 
-        profile: existingProfile, 
+        profile: { ...existingProfile, role: roleData?.role }, 
         hasConflict: false // We'll determine this in the linking logic
       };
     } catch (error) {
@@ -55,6 +66,11 @@ export function useAccountLinking() {
           title: "Account Found",
           description: `You already have an account as a ${existingProfile.role}. You'll be signed in with your existing role.`,
         });
+      } else {
+        // Upsert role if no conflict
+        await supabase
+          .from('user_roles')
+          .upsert([{ user_id: existingProfile.id, role: requestedRole }], { onConflict: 'user_id,role' });
       }
 
       // Update the OAuth user's metadata to match existing account
@@ -147,7 +163,6 @@ export function useAccountLinking() {
     try {
       const profileData = {
         id: oauthUser.id,
-        role: role,
         full_name: oauthUser.user_metadata?.name || oauthUser.user_metadata?.full_name || '',
         email: oauthUser.email || '',
         avatar_url: oauthUser.user_metadata?.avatar_url || null,
@@ -165,6 +180,16 @@ export function useAccountLinking() {
       if (error) {
         console.error('Error creating OAuth profile:', error);
         throw error;
+      }
+
+      // Create role in user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: oauthUser.id, role }]);
+
+      if (roleError) {
+        console.error('Error creating role:', roleError);
+        throw roleError;
       }
 
       // Update user metadata
