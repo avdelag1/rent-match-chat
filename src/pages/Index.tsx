@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import LegendaryLandingPage from "@/components/LegendaryLandingPage";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [hasRedirected, setHasRedirected] = useState(false);
   const [redirectMessage, setRedirectMessage] = useState<string | null>(null);
   
@@ -46,6 +47,13 @@ const Index = () => {
 
   // Redirect authenticated users based on their status
   useEffect(() => {
+    // If user is on an invalid route (not /), redirect to home first
+    if (location.pathname !== '/') {
+      console.log('[Index] Invalid route detected:', location.pathname, '- redirecting to /');
+      navigate('/', { replace: true });
+      return;
+    }
+
     if (loading || profileLoading || !user || hasRedirected) {
       return;
     }
@@ -79,7 +87,7 @@ const Index = () => {
         navigate(targetPath, { replace: true });
       }, 100);
     }
-  }, [user, profile, loading, profileLoading, profileError, navigate, hasRedirected]);
+  }, [user, profile, loading, profileLoading, profileError, navigate, hasRedirected, location.pathname]);
 
   // Show error state if profile fetch failed after retry
   if (profileError && user) {
