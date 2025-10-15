@@ -29,7 +29,7 @@ export function useProfileSetup() {
         // Ensure role exists in user_roles table
         const { error: roleError } = await supabase
           .from('user_roles')
-          .upsert([{ user_id: user.id, role }], { onConflict: 'user_id,role' });
+          .upsert([{ id: crypto.randomUUID(), user_id: user.id, role }], { onConflict: 'user_id,role' });
         
         if (roleError) {
           console.error('Error upserting role:', roleError);
@@ -73,7 +73,7 @@ export function useProfileSetup() {
       // Create role in user_roles table
       const { error: roleError } = await supabase
         .from('user_roles')
-        .insert([{ user_id: user.id, role }]);
+        .insert([{ id: crypto.randomUUID(), user_id: user.id, role }]);
 
       if (roleError) {
         console.error('Error creating role:', roleError);

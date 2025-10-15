@@ -70,7 +70,7 @@ export function useAccountLinking() {
         // Upsert role if no conflict
         await supabase
           .from('user_roles')
-          .upsert([{ user_id: existingProfile.id, role: requestedRole }], { onConflict: 'user_id,role' });
+          .upsert([{ id: crypto.randomUUID(), user_id: existingProfile.id, role: requestedRole }], { onConflict: 'user_id,role' });
       }
 
       // Update the OAuth user's metadata to match existing account
@@ -185,7 +185,7 @@ export function useAccountLinking() {
       // Create role in user_roles table
       const { error: roleError } = await supabase
         .from('user_roles')
-        .insert([{ user_id: oauthUser.id, role }]);
+        .insert([{ id: crypto.randomUUID(), user_id: oauthUser.id, role }]);
 
       if (roleError) {
         console.error('Error creating role:', roleError);
