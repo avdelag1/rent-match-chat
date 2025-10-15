@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProfileSetup } from './useProfileSetup';
 import { useAccountLinking } from './useAccountLinking';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const { createProfileIfMissing } = useProfileSetup();
   const { handleOAuthUserSetup: linkOAuthAccount, checkExistingAccount } = useAccountLinking();
 
@@ -143,6 +145,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await supabase.auth.signOut();
           return { error: new Error('Failed to complete account setup') };
         }
+        
+        // CRITICAL: Invalidate role cache to force fresh fetch
+        queryClient.invalidateQueries({ queryKey: ['user-role'] });
         
         toast({
           title: "Welcome to Tinderent!",

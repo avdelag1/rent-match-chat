@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,7 +17,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: userRole, isLoading: profileLoading, refetch } = useQuery({
+  const { data: userRole, isLoading: profileLoading } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -39,35 +40,37 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   });
 
   useEffect(() => {
-    if (!loading && !user) {
-      if (location.pathname !== '/') {
-        navigate('/', { replace: true });
-      }
+    // Show loading while checking auth/role
+    if (loading || profileLoading) {
       return;
     }
 
-    if (!profileLoading && user) {
-      if (!userRole) {
-        // User is authenticated but has no role
-        // This can happen during signup - wait and retry
-        console.log('ProtectedRoute: User authenticated but no role found, waiting...');
-        const timer = setTimeout(() => {
-          refetch();
-        }, 1000);
-        return () => clearTimeout(timer);
-      }
-
-      // Check role-based access for protected routes
-      if (requiredRole && userRole !== requiredRole) {
-        const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-        if (location.pathname !== targetPath) {
-          navigate(targetPath, { replace: true });
-        }
-        return;
-      }
+    // Redirect to login if not authenticated
+    if (!user) {
+      console.log('No user found, redirecting to login');
+      navigate('/', { replace: true, state: { from: location } });
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, user, profileLoading, userRole, requiredRole, navigate, location.pathname]);
+
+    if (!userRole) {
+      // Role not found after React Query retries - this shouldn't happen
+      console.error('ProtectedRoute: User authenticated but no role found after retries');
+      toast({
+        title: "Account setup incomplete",
+        description: "Please contact support if this persists.",
+        variant: "destructive"
+      });
+      navigate('/', { replace: true });
+      return;
+    }
+
+    // Check role-based access for protected routes
+    if (requiredRole && userRole !== requiredRole) {
+      const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
+      console.log('User has wrong role for this route, redirecting to:', targetPath);
+      navigate(targetPath, { replace: true });
+    }
+  }, [user, userRole, loading, profileLoading, navigate, location, requiredRole]);
 
   if (loading || profileLoading) {
     return (

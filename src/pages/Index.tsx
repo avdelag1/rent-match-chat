@@ -5,6 +5,7 @@ import LegendaryLandingPage from "@/components/LegendaryLandingPage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -39,20 +40,21 @@ const Index = () => {
     
     if (user) {
       if (!userRole) {
-        // User is authenticated but has no role yet
-        // This can happen during signup - wait a bit and retry
-        console.log('User authenticated but no role found, waiting...');
-        const timer = setTimeout(() => {
-          refetch();
-        }, 1000);
-        return () => clearTimeout(timer);
+        // Role not found after React Query retries - this shouldn't happen
+        console.error('User authenticated but no role found after retries');
+        toast({
+          title: "Account setup incomplete",
+          description: "Please contact support if this persists.",
+          variant: "destructive"
+        });
+        return;
       }
       
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
       console.log('Redirecting authenticated user to dashboard:', targetPath);
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, navigate, refetch]);
+  }, [user, userRole, loading, profileLoading, navigate]);
 
   // Show loading state while checking authentication
   if (loading || (user && profileLoading)) {
