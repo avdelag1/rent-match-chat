@@ -7,22 +7,67 @@ export interface Listing {
   title: string;
   price: number;
   images: string[];
-  address: string;
-  city: string;
-  neighborhood: string;
-  property_type: string;
-  beds: number;
-  baths: number;
-  square_footage: number;
-  furnished: boolean;
-  pet_friendly: boolean;
   owner_id: string;
   description: string;
-  amenities: string[];
   status: string;
-  listing_type: string;
-  tulum_location: string;
-  lifestyle_compatible: string[];
+  
+  // Mode and category
+  category?: string;
+  mode?: string;
+  
+  // Property fields
+  address?: string;
+  city?: string;
+  neighborhood?: string;
+  property_type?: string;
+  beds?: number;
+  baths?: number;
+  square_footage?: number;
+  furnished?: boolean;
+  pet_friendly?: boolean;
+  amenities?: string[];
+  listing_type?: string;
+  tulum_location?: string;
+  lifestyle_compatible?: string[];
+  
+  // Common fields (vehicles)
+  brand?: string;
+  model?: string;
+  year?: number;
+  condition?: string;
+  latitude?: number;
+  longitude?: number;
+  
+  // Yacht fields
+  length_m?: number;
+  berths?: number;
+  max_passengers?: number;
+  hull_material?: string;
+  engines?: string;
+  fuel_type?: string;
+  equipment?: string[];
+  rental_rates?: any;
+  
+  // Motorcycle fields
+  mileage?: number;
+  engine_cc?: number;
+  transmission?: string;
+  color?: string;
+  license_required?: string;
+  vehicle_type?: string;
+  
+  // Bicycle fields
+  frame_size?: string;
+  wheel_size?: number;
+  frame_material?: string;
+  brake_type?: string;
+  gear_type?: string;
+  electric_assist?: boolean;
+  battery_range?: number;
+  
+  // Additional details
+  description_short?: string;
+  description_full?: string;
 }
 
 export function useListings(excludeSwipedIds: string[] = []) {

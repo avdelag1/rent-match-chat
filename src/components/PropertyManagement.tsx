@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
-import { PropertyPreviewDialog } from '@/components/PropertyPreviewDialog';
+import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 
 
@@ -238,7 +238,18 @@ export function PropertyManagement() {
                           <CardTitle className="text-base sm:text-lg text-gray-900 truncate flex-1 min-w-0">
                             {listing.title}
                           </CardTitle>
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0 flex gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {listing.category === 'yacht' ? '⛵ Yacht' :
+                               listing.category === 'motorcycle' ? '🏍️ Moto' :
+                               listing.category === 'bicycle' ? '🚴 Bike' :
+                               '🏠 Property'}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {listing.mode === 'both' ? '💰🏠 Both' :
+                               listing.mode === 'sale' ? '💰 Sale' :
+                               '🏠 Rent'}
+                            </Badge>
                             {getStatusBadge(listing.status)}
                           </div>
                         </div>
@@ -252,19 +263,40 @@ export function PropertyManagement() {
                         <div className="flex items-center gap-2 text-sm">
                           <DollarSign className="w-4 h-4 text-green-500 flex-shrink-0" />
                           <span className="font-semibold text-gray-900">
-                            ${listing.price?.toLocaleString() || 'N/A'}/month
+                            ${listing.price?.toLocaleString() || 'N/A'}
+                            {listing.mode === 'rent' ? '/month' : ''}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar className="w-4 h-4 flex-shrink-0" />
-                          <span>Available Now</span>
-                        </div>
-
-                        {listing.beds && listing.baths && (
+                        {/* Category-specific details */}
+                        {listing.category === 'property' && listing.beds && listing.baths && (
                           <div className="text-sm text-gray-600">
                             {listing.beds} bed{listing.beds !== 1 ? 's' : ''} • {listing.baths} bath{listing.baths !== 1 ? 's' : ''}
                             {listing.square_footage && ` • ${listing.square_footage} sq ft`}
+                          </div>
+                        )}
+                        
+                        {listing.category === 'yacht' && (
+                          <div className="text-sm text-gray-600">
+                            {listing.length_m && `${listing.length_m}m`}
+                            {listing.berths && ` • ${listing.berths} berths`}
+                            {listing.max_passengers && ` • ${listing.max_passengers} passengers`}
+                          </div>
+                        )}
+                        
+                        {listing.category === 'motorcycle' && (
+                          <div className="text-sm text-gray-600">
+                            {listing.brand} {listing.model}
+                            {listing.engine_cc && ` • ${listing.engine_cc}cc`}
+                            {listing.year && ` • ${listing.year}`}
+                          </div>
+                        )}
+                        
+                        {listing.category === 'bicycle' && (
+                          <div className="text-sm text-gray-600">
+                            {listing.brand} {listing.model}
+                            {listing.electric_assist && ' • ⚡ Electric'}
+                            {listing.frame_size && ` • ${listing.frame_size}`}
                           </div>
                         )}
 
@@ -345,8 +377,8 @@ export function PropertyManagement() {
         </Tabs>
 
 
-        {/* Property Preview */}
-        <PropertyPreviewDialog
+        {/* Listing Preview */}
+        <ListingPreviewDialog
           isOpen={showPreview}
           onClose={handleClosePreview}
           property={viewingProperty}

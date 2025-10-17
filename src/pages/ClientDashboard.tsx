@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
+import { CategoryBrowseContainer } from '@/components/CategoryBrowseContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
 import { NotificationsDialog } from '@/components/NotificationsDialog';
@@ -127,12 +127,11 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
                 </Button>
               </div>
             ) : (
-              <TinderentSwipeContainer
-                onListingTap={handleListingTap}
-                onInsights={handleInsights}
-                onMessageClick={onMessageClick}
-                locationFilter={locationData}
-              />
+          <CategoryBrowseContainer
+            onListingTap={handleListingTap}
+            onInsights={handleInsights}
+            onMessageClick={onMessageClick}
+          />
             )}
           </div>
         </main>
