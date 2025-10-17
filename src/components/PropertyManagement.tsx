@@ -16,11 +16,15 @@ import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 
 
-export function PropertyManagement() {
+interface PropertyManagementProps {
+  initialCategory?: string | null;
+}
+
+export function PropertyManagement({ initialCategory }: PropertyManagementProps) {
   const { user } = useAuth();
   const { data: allListings = [], isLoading, error } = useListings();
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState(initialCategory || 'all');
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -37,12 +41,17 @@ export function PropertyManagement() {
       listing.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       listing.neighborhood?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (activeTab === 'all') return matchesSearch;
-    if (activeTab === 'active') return matchesSearch && listing.status === 'active';
-    if (activeTab === 'rented') return matchesSearch && listing.status === 'rented';
-    if (activeTab === 'maintenance') return matchesSearch && listing.status === 'maintenance';
+    // Filter by category
+    let matchesCategory = true;
+    if (activeTab === 'property') matchesCategory = !listing.category || listing.category === 'property';
+    else if (activeTab === 'yacht') matchesCategory = listing.category === 'yacht';
+    else if (activeTab === 'motorcycle') matchesCategory = listing.category === 'motorcycle';
+    else if (activeTab === 'bicycle') matchesCategory = listing.category === 'bicycle';
+    else if (activeTab === 'active') matchesCategory = listing.status === 'active';
+    else if (activeTab === 'rented') matchesCategory = listing.status === 'rented';
+    else if (activeTab === 'maintenance') matchesCategory = listing.status === 'maintenance';
     
-    return matchesSearch;
+    return matchesSearch && matchesCategory;
   });
 
   console.log('PropertyManagement - Current user:', user?.id);
@@ -179,14 +188,46 @@ export function PropertyManagement() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm h-auto">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 bg-white/10 backdrop-blur-sm h-auto">
             <TabsTrigger 
               value="all" 
               className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
             >
-              <span className="hidden sm:inline">All Properties</span>
+              <span className="hidden sm:inline">All</span>
               <span className="sm:hidden">All</span>
               <span className="ml-1">({listings.length})</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="property" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">Properties</span>
+              <span className="sm:hidden">Prop</span>
+              <span className="ml-1">({listings.filter(l => !l.category || l.category === 'property').length})</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="yacht" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">Yachts</span>
+              <span className="sm:hidden">Yac</span>
+              <span className="ml-1">({listings.filter(l => l.category === 'yacht').length})</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="motorcycle" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">Motorcycles</span>
+              <span className="sm:hidden">Moto</span>
+              <span className="ml-1">({listings.filter(l => l.category === 'motorcycle').length})</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="bicycle" 
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
+            >
+              <span className="hidden sm:inline">Bicycles</span>
+              <span className="sm:hidden">Bike</span>
+              <span className="ml-1">({listings.filter(l => l.category === 'bicycle').length})</span>
             </TabsTrigger>
             <TabsTrigger 
               value="active" 
@@ -203,14 +244,6 @@ export function PropertyManagement() {
               <span className="hidden sm:inline">Rented</span>
               <span className="sm:hidden">Rent</span>
               <span className="ml-1">({listings.filter(l => l.status === 'rented').length})</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="maintenance" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">Maintenance</span>
-              <span className="sm:hidden">Main</span>
-              <span className="ml-1">({listings.filter(l => l.status === 'maintenance').length})</span>
             </TabsTrigger>
           </TabsList>
 

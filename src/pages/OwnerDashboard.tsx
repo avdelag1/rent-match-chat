@@ -4,6 +4,7 @@ import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
 import { NotificationsDialog } from '@/components/NotificationsDialog';
 import { OwnerClientFilters } from '@/components/OwnerClientFilters';
+import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -27,6 +28,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const [showSupport, setShowSupport] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<any>({});
   const [smartMatchingEnabled, setSmartMatchingEnabled] = useState(true);
   const [nearbyEnabled, setNearbyEnabled] = useState(false);
@@ -78,9 +80,23 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     navigate('/messaging');
   };
 
+  const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
+    navigate(`/owner/properties#add-${category}`);
+  };
+
+  const handleStatCardClick = (category: string) => {
+    if (category === 'total') {
+      navigate('/owner/properties');
+    } else {
+      navigate(`/owner/properties?category=${category}`);
+    }
+  };
+
   const handleMenuAction = (action: string) => {
     console.log('[OwnerDashboard] Menu action:', action);
-    if (action === 'premium-packages') {
+    if (action === 'add-listing') {
+      setShowCategoryDialog(true);
+    } else if (action === 'premium-packages') {
       navigate('/subscription-packages');
     } else if (action === 'support') {
       setShowSupport(true);
@@ -121,7 +137,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 <p className="text-white/80 text-sm">Manage your listings and find potential tenants</p>
               </div>
               <Button
-                onClick={() => navigate('/owner/properties#add-property')}
+                onClick={() => setShowCategoryDialog(true)}
                 className="bg-white text-orange-500 hover:bg-white/90 gap-2"
               >
                 <Plus className="h-4 w-4" />
@@ -131,7 +147,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
             {/* Listing Stats Cards */}
             <div className="grid grid-cols-5 gap-2">
-              <Card className="bg-white/90 backdrop-blur border-white/20">
+              <Card 
+                className="bg-white/90 backdrop-blur border-white/20 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleStatCardClick('property')}
+              >
                 <CardContent className="p-3 flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-gradient-primary">
                     <Home className="h-4 w-4 text-white" />
@@ -143,7 +162,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/90 backdrop-blur border-white/20">
+              <Card 
+                className="bg-white/90 backdrop-blur border-white/20 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleStatCardClick('yacht')}
+              >
                 <CardContent className="p-3 flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-gradient-primary">
                     <Ship className="h-4 w-4 text-white" />
@@ -155,7 +177,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/90 backdrop-blur border-white/20">
+              <Card 
+                className="bg-white/90 backdrop-blur border-white/20 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleStatCardClick('motorcycle')}
+              >
                 <CardContent className="p-3 flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-gradient-primary">
                     <BikeIcon className="h-4 w-4 text-white" />
@@ -167,7 +192,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/90 backdrop-blur border-white/20">
+              <Card 
+                className="bg-white/90 backdrop-blur border-white/20 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleStatCardClick('bicycle')}
+              >
                 <CardContent className="p-3 flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-gradient-primary">
                     <Bike className="h-4 w-4 text-white" />
@@ -179,7 +207,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/90 backdrop-blur border-white/20">
+              <Card 
+                className="bg-white/90 backdrop-blur border-white/20 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleStatCardClick('total')}
+              >
                 <CardContent className="p-3 flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-gradient-primary">
                     <Users className="h-4 w-4 text-white" />
@@ -316,6 +347,12 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           console.log('Applied owner filters:', filters);
           setShowFilters(false);
         }}
+      />
+
+      <CategorySelectionDialog
+        open={showCategoryDialog}
+        onOpenChange={setShowCategoryDialog}
+        onCategorySelect={handleCategorySelect}
       />
 
     </SidebarProvider>

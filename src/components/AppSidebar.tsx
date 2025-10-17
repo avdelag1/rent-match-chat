@@ -77,9 +77,8 @@ const ownerMenuItems = [
   },
   {
     title: "Find Clients",
-    url: "#filters",
+    url: "/owner/find-clients",
     icon: Filter,
-    action: 'filters'
   },
   {
     title: "Notifications",
@@ -88,15 +87,15 @@ const ownerMenuItems = [
     action: 'notifications'
   },
   {
-    title: "My Properties",
+    title: "My Listings",
     url: "/owner/properties",
     icon: Building2,
   },
   {
-    title: "Add Property",
-    url: "#add-property",
+    title: "Add Listing",
+    url: "#add-listing",
     icon: PlusCircle,
-    action: "add-property",
+    action: "add-listing",
   },
   {
     title: "Client Filters",
@@ -173,7 +172,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   }
 
   const handleMenuClick = (item: any) => {
-    if (item.action === 'add-property') {
+    if (item.action === 'add-listing') {
+      // Trigger category selection dialog in OwnerDashboard
+      if (onMenuItemClick) onMenuItemClick('add-listing')
+    } else if (item.action === 'add-property') {
       // Use URL hash so DashboardLayout can auto-open the form
       if (location.hash !== '#add-property') {
         location.hash = '#add-property'

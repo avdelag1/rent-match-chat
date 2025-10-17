@@ -19,6 +19,8 @@ interface PropertyFormProps {
   isOpen: boolean;
   onClose: () => void;
   editingProperty?: any;
+  initialCategory?: 'property' | 'yacht' | 'motorcycle' | 'bicycle';
+  initialMode?: 'rent' | 'sale' | 'both';
 }
 
 interface PropertyFormData {

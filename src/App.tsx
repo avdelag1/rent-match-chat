@@ -31,6 +31,7 @@ import OwnerSecurity from "./pages/OwnerSecurity";
 import { MessagingDashboard } from "./pages/MessagingDashboard";
 import OwnerProperties from "./pages/OwnerProperties";
 import OwnerLikedClients from "./pages/OwnerLikedClients";
+import OwnerClientDiscovery from "./pages/OwnerClientDiscovery";
 import ClientContracts from "./pages/ClientContracts";
 import OwnerContracts from "./pages/OwnerContracts";
 import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
@@ -179,6 +180,15 @@ const App = () => (
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerLikedClients />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
+                      path="/owner/find-clients" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <OwnerClientDiscovery />
                         </ProtectedRoute>
                       } 
                     />

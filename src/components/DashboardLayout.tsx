@@ -87,9 +87,17 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     console.error('DashboardLayout - Profiles error:', profilesError);
   }
 
-  // Auto-open property form when the URL hash is "#add-property"
+  // Auto-open property form when the URL hash matches any category
   useEffect(() => {
-    if (location.hash === '#add-property') {
+    const hash = location.hash;
+    const categoryMap: Record<string, string> = {
+      '#add-property': 'property',
+      '#add-yacht': 'yacht',
+      '#add-motorcycle': 'motorcycle',
+      '#add-bicycle': 'bicycle',
+    };
+
+    if (hash && categoryMap[hash]) {
       // Check if there's an editing property in sessionStorage
       const storedEditingProperty = sessionStorage.getItem('editingProperty');
       if (storedEditingProperty) {
@@ -104,8 +112,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       } else {
         setEditingProperty(null);
       }
+      
+      // Set category from hash
+      const category = categoryMap[hash] as 'property' | 'yacht' | 'motorcycle' | 'bicycle';
+      setFilterCategory(category);
       setShowPropertyForm(true);
-    } else {
+    } else if (!hash) {
       setShowPropertyForm(false);
       setEditingProperty(null);
     }
@@ -125,6 +137,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const handleMenuItemClick = (item: string) => {
     
     switch (item) {
+      case 'add-listing':
+        // This will be handled by the CategorySelectionDialog in OwnerDashboard
+        break
       case 'add-property':
         setShowPropertyForm(true)
         break
@@ -265,18 +280,18 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       </div>
 
       {/* Modals */}
-      {userRole === 'owner' && (
+      {userRole === 'owner' && showPropertyForm && (
         <PropertyForm
           isOpen={showPropertyForm}
           onClose={() => {
             setShowPropertyForm(false);
             setEditingProperty(null);
             // Clear hash when closing form
-            if (location.hash === '#add-property') {
-              window.history.replaceState(null, '', window.location.pathname);
-            }
+            window.history.replaceState(null, '', window.location.pathname);
           }}
           editingProperty={editingProperty}
+          initialCategory={filterCategory}
+          initialMode={filterMode}
         />
       )}
 
