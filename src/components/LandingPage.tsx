@@ -22,49 +22,61 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-10">
+      {/* Enhanced background decorative elements with staggered animations */}
+      <div className="absolute inset-0 opacity-20">
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-red-500 to-orange-500 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-pink-500 to-red-500 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-red-500 to-orange-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-pink-500 to-red-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute top-40 right-20 w-28 h-28 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
       <div className="relative z-10 w-full max-w-lg mx-auto px-8 sm:px-12">
-        {/* Logo and title */}
-        <div className="text-center mb-16">
+        {/* Logo and title with enhanced animations */}
+        <div className="text-center mb-16 animate-fade-in">
           <div className="flex flex-col items-center justify-center mb-8">
             <div className="relative mb-4 w-full flex justify-center px-4">
-              <h1 className="font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg text-center">
+              <h1 className="font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg text-center animate-scale-in">
                 TINDERENT
               </h1>
-              {/* Clean modern shadow */}
+              {/* Enhanced layered shadow */}
               <div className="absolute inset-0 font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white/20 blur-sm transform translate-x-0.5 translate-y-0.5">
                 TINDERENT
               </div>
+              <div className="absolute inset-0 font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-orange-400/30 blur-md transform translate-x-1 translate-y-1">
+                TINDERENT
+              </div>
             </div>
-            <span className="text-3xl animate-bounce filter drop-shadow-md">🔥</span>
+            <div className="text-5xl animate-bounce filter drop-shadow-2xl">🔥</div>
           </div>
-          <p className="text-lg text-gray-200 px-6 leading-relaxed font-light text-center">
+          <p className="text-lg text-gray-200 px-6 leading-relaxed font-light text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
             Find your perfect rental property or tenant with ease.
           </p>
         </div>
 
-        {/* Role selection buttons */}
-        <div className="space-y-4 mb-8">
+        {/* Role selection buttons with enhanced animations */}
+        <div className="space-y-4 mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <Button 
             onClick={() => openAuthDialog('client')}
-            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold text-lg py-6 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 active:animate-elastic-bounce"
+            className="group w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold text-lg py-7 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 relative overflow-hidden"
             size="lg"
           >
-            I'm a Client
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <Home className="w-5 h-5" />
+              I'm a Client
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </Button>
 
           <Button 
             onClick={() => openAuthDialog('owner')}
-            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold text-lg py-6 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 active:animate-elastic-bounce"
+            className="group w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold text-lg py-7 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 relative overflow-hidden"
             size="lg"
           >
-            I'm an Owner
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <Shield className="w-5 h-5" />
+              I'm an Owner
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-red-700 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </Button>
         </div>
       </div>

@@ -145,34 +145,39 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         </DialogDescription>
         <div className="max-h-[95vh] overflow-y-auto">
         <div className="relative">
-          {/* Header with gradient background */}
+          {/* Header with enhanced gradient background and animated blobs */}
           <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-t-3xl px-6 py-10 shadow-2xl overflow-hidden">
+            {/* Animated gradient blobs */}
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-pink-400 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-red-600 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+            </div>
             
-            {/* Back Button */}
+            {/* Back Button with enhanced animation */}
             <button 
               onClick={onClose}
-              className="absolute top-5 left-5 flex items-center gap-2 text-white/90 hover:text-white transition-all duration-200 text-sm bg-white/10 px-3 py-2 rounded-xl backdrop-blur-sm hover:bg-white/20 transform hover:scale-105"
+              className="absolute top-5 left-5 flex items-center gap-2 text-white/90 hover:text-white transition-all duration-300 text-sm bg-white/10 px-3 py-2 rounded-xl backdrop-blur-sm hover:bg-white/20 transform hover:scale-105 hover:shadow-lg active:scale-95"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
 
-            {/* Header Content */}
+            {/* Header Content with animations */}
             <div className="text-center text-white pt-4 relative z-10">
-              <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm">
-                <Flame className="w-10 h-10 text-white drop-shadow-lg" />
+              <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm transform transition-all duration-300 hover:scale-110 hover:rotate-3">
+                <Flame className="w-10 h-10 text-white drop-shadow-lg animate-pulse" />
               </div>
-              <h1 className="text-3xl font-bold mb-3 drop-shadow-sm">
+              <h1 className="text-3xl font-bold mb-3 drop-shadow-sm animate-fade-in">
                 {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back!' : 'Join Tinderent'}
               </h1>
-              <p className="text-white/90 text-base capitalize font-medium">
+              <p className="text-white/90 text-base capitalize font-medium animate-fade-in" style={{ animationDelay: '0.1s' }}>
                 {isForgotPassword ? 'Enter your email to reset password' : `${isLogin ? 'Sign in' : 'Sign up'} as ${role}`}
               </p>
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="bg-white rounded-b-3xl p-8 space-y-8 relative overflow-hidden">
+          {/* Main Content with glass morphism effect */}
+          <div className="bg-white rounded-b-3xl p-8 space-y-8 relative overflow-hidden backdrop-blur-sm">
             
             {!isForgotPassword && (
               <>
@@ -224,7 +229,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="mt-2 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
+                    className="mt-2 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 font-medium transform focus:scale-[1.02]"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -243,7 +248,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
+                    className="pl-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 font-medium transform focus:scale-[1.02]"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -263,7 +268,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-14 pr-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-300 transition-all duration-200 font-medium"
+                      className="pl-14 pr-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 font-medium transform focus:scale-[1.02]"
                       placeholder="Enter your password"
                     />
                     <button
@@ -303,16 +308,16 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               <Button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8"
+                className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center gap-3">
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Please wait...
                     </>
                   ) : (
-                    <span>
+                    <span className="flex items-center gap-2">
                       {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
                     </span>
                   )}

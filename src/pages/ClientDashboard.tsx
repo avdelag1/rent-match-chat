@@ -81,9 +81,13 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
         <AppSidebar userRole="client" onMenuItemClick={handleMenuAction} />
         
         <main className="flex-1 relative overflow-hidden">
-          {/* Minimal Header */}
-          <header className="absolute top-0 left-0 right-0 z-20 p-4 flex justify-start items-center">
-            <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20" />
+          {/* Enhanced Header with glass morphism */}
+          <header className="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center backdrop-blur-sm bg-white/10">
+            <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20 transition-all duration-300 hover:scale-105 active:scale-95" />
+            <div className="text-white text-center flex-1">
+              <h1 className="text-lg font-bold">Discover Properties</h1>
+              <p className="text-xs text-white/80">Swipe to find your perfect match</p>
+            </div>
           </header>
 
           {/* Full Screen Swipe Container */}
