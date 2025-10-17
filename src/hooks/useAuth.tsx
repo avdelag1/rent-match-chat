@@ -186,6 +186,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string, role: 'client' | 'owner') => {
     try {
+      console.log('[Auth] Starting sign in for role:', role);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -197,38 +199,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Check existing profile to see if role matches
-        const { profile: existingProfile } = await checkExistingAccount(data.user.email || '');
-        
-        if (existingProfile && existingProfile.role !== role) {
-          // Role mismatch - use existing profile's role
+        // Check user's role from user_roles table
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+
+        if (roleError) {
+          console.error('[Auth] Role check error:', roleError);
+          throw new Error('Failed to verify user role');
+        }
+
+        console.log('[Auth] User role from DB:', roleData?.role);
+
+        // STRICT ROLE VALIDATION - Block login if role mismatch
+        if (roleData && roleData.role !== role) {
+          console.error('[Auth] ROLE MISMATCH - Blocking login. DB has:', roleData.role, 'but selected:', role);
+          
+          // Sign out the user immediately
+          await supabase.auth.signOut();
+          
+          const errorMessage = roleData.role === 'client' 
+            ? 'These credentials are for a client account. Please use the client login page.'
+            : 'These credentials are for an owner account. Please use the owner login page.';
+          
           toast({
-            title: "Welcome back!",
-            description: `Signed in as ${existingProfile.role}. Your existing role has been preserved.`,
+            title: "Wrong Login Page",
+            description: errorMessage,
+            variant: "destructive",
           });
           
-          // Update metadata to match existing profile
-          await supabase.auth.updateUser({
-            data: { role: existingProfile.role }
-          });
-        } else {
-          // Update user metadata with the selected role
-          try {
-            await supabase.auth.updateUser({
-              data: { role: role }
-            });
-          } catch (metadataError) {
-            console.error('Error updating user metadata:', metadataError);
-          }
+          return { error: new Error(errorMessage) };
+        }
 
-          toast({
-            title: "Welcome back!",
-            description: "Successfully signed in.",
-          });
+        // If no role exists, create it (new user)
+        if (!roleData) {
+          console.log('[Auth] No existing role, creating new role:', role);
+          const { error: insertError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: data.user.id,
+              role: role,
+            });
+
+          if (insertError) {
+            console.error('[Auth] Failed to create user role:', insertError);
+            throw new Error('Failed to set up user account');
+          }
         }
 
         // Ensure profile exists
-        await createProfileIfMissing(data.user, existingProfile?.role || role);
+        await createProfileIfMissing(data.user, role);
+
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
       }
 
       return { error: null };

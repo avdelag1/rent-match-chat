@@ -8197,6 +8197,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      validate_user_role_access: {
+        Args: { p_required_role: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       contract_type: "lease" | "rental" | "purchase" | "rental_agreement"

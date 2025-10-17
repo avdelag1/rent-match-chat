@@ -10,8 +10,11 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Users, RefreshCw, MapPin, RotateCcw, Zap } from 'lucide-react';
+import { Users, MapPin, RotateCcw, Zap, Home, Ship, Bike, BikeIcon, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useListings } from '@/hooks/useListings';
+import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
 
 interface OwnerDashboardProps {
   onClientInsights?: (profileId: string) => void;
@@ -33,8 +36,19 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     ownerProfile?: any;
   }>({ isOpen: false });
   
+  const { user } = useAuth();
   const { data: profiles = [], isLoading, error, refetch } = useSmartClientMatching();
+  const { data: allListings = [] } = useListings();
   const navigate = useNavigate();
+  
+  // Calculate listing stats by category
+  const listingStats = {
+    properties: allListings.filter(l => l.category === 'property' && l.owner_id === user?.id).length,
+    yachts: allListings.filter(l => l.category === 'yacht' && l.owner_id === user?.id).length,
+    motorcycles: allListings.filter(l => l.category === 'motorcycle' && l.owner_id === user?.id).length,
+    bicycles: allListings.filter(l => l.category === 'bicycle' && l.owner_id === user?.id).length,
+    total: allListings.filter(l => l.owner_id === user?.id).length,
+  };
   
   // Initialize notifications
   useNotifications();
@@ -98,48 +112,123 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         <AppSidebar userRole="owner" onMenuItemClick={handleMenuAction} />
         
         <main className="flex-1 relative overflow-hidden">
-          {/* Enhanced Header */}
+          {/* Enhanced Header with Stats */}
           <header className="absolute top-0 left-0 right-0 z-20 p-4 space-y-4">
             <div className="flex justify-between items-center">
               <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20" />
               <div className="text-center flex-1">
-                <h1 className="text-white text-xl font-bold">Browse Clients</h1>
-                <p className="text-white/80 text-sm">Explore verified client profiles and connect with potential matches</p>
+                <h1 className="text-white text-xl font-bold">Owner Dashboard</h1>
+                <p className="text-white/80 text-sm">Manage your listings and find potential tenants</p>
               </div>
-              {/* Removed refresh button - undo is now in the swipe container */}
+              <Button
+                onClick={() => navigate('/owner/properties#add-property')}
+                className="bg-white text-orange-500 hover:bg-white/90 gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Listing
+              </Button>
             </div>
 
-            {/* Smart Filter Buttons */}
-            <div className="flex justify-center gap-3">
-              <Button
-                variant={smartMatchingEnabled ? "default" : "outline"}
-                onClick={handleSmartMatching}
-                className={`gap-2 rounded-full px-6 py-2 transition-all duration-300 ${
-                  smartMatchingEnabled 
-                    ? 'bg-white text-orange-500 hover:bg-white/90 shadow-lg' 
-                    : 'bg-white/20 text-white border-white/30 hover:bg-white/30'
-                }`}
-              >
-                <Zap className="w-4 h-4" />
-                Smart Matching
-              </Button>
-              <Button
-                variant={nearbyEnabled ? "default" : "outline"}
-                onClick={handleShowNearby}
-                className={`gap-2 rounded-full px-6 py-2 transition-all duration-300 ${
-                  nearbyEnabled 
-                    ? 'bg-white text-orange-500 hover:bg-white/90 shadow-lg' 
-                    : 'bg-white/20 text-white border-white/30 hover:bg-white/30'
-                }`}
-              >
-                <MapPin className="w-4 h-4" />
-                Show Nearby
-              </Button>
+            {/* Listing Stats Cards */}
+            <div className="grid grid-cols-5 gap-2">
+              <Card className="bg-white/90 backdrop-blur border-white/20">
+                <CardContent className="p-3 flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-primary">
+                    <Home className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Properties</p>
+                    <p className="text-lg font-bold">{listingStats.properties}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/90 backdrop-blur border-white/20">
+                <CardContent className="p-3 flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-primary">
+                    <Ship className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Yachts</p>
+                    <p className="text-lg font-bold">{listingStats.yachts}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/90 backdrop-blur border-white/20">
+                <CardContent className="p-3 flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-primary">
+                    <BikeIcon className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Motorcycles</p>
+                    <p className="text-lg font-bold">{listingStats.motorcycles}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/90 backdrop-blur border-white/20">
+                <CardContent className="p-3 flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-primary">
+                    <Bike className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Bicycles</p>
+                    <p className="text-lg font-bold">{listingStats.bicycles}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/90 backdrop-blur border-white/20">
+                <CardContent className="p-3 flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-primary">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total</p>
+                    <p className="text-lg font-bold">{listingStats.total}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Client Matching Section Title */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-white text-lg font-semibold">Find Your Perfect Tenant</h2>
+              {/* Smart Filter Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  variant={smartMatchingEnabled ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleSmartMatching}
+                  className={`gap-2 rounded-full px-4 py-1 transition-all duration-300 ${
+                    smartMatchingEnabled 
+                      ? 'bg-white text-orange-500 hover:bg-white/90 shadow-lg' 
+                      : 'bg-white/20 text-white border-white/30 hover:bg-white/30'
+                  }`}
+                >
+                  <Zap className="w-3 h-3" />
+                  Smart Match
+                </Button>
+                <Button
+                  variant={nearbyEnabled ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleShowNearby}
+                  className={`gap-2 rounded-full px-4 py-1 transition-all duration-300 ${
+                    nearbyEnabled 
+                      ? 'bg-white text-orange-500 hover:bg-white/90 shadow-lg' 
+                      : 'bg-white/20 text-white border-white/30 hover:bg-white/30'
+                  }`}
+                >
+                  <MapPin className="w-3 h-3" />
+                  Nearby
+                </Button>
+              </div>
             </div>
           </header>
 
           {/* Content Area */}
-          <div className="absolute inset-0 pt-32 pb-6 px-4">
+          <div className="absolute inset-0 pt-80 pb-6 px-4">
             {isLoading ? (
               <div className="flex justify-center items-center h-full">
                 <div className="animate-spin text-white">
