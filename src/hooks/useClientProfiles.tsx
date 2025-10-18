@@ -29,11 +29,10 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
       try {
         console.log('Fetching client profiles for owner:', user.id);
         
-        // Get real client profiles from database using public view
+        // Get real client profiles from database using secure public view
         const { data: profiles, error } = await supabase
           .from('profiles_public')
           .select('*')
-          .neq('id', user.id)
           .limit(100);
 
         if (error) {
@@ -73,7 +72,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           interests: profile!.interests || [],
           preferred_activities: profile!.preferred_activities || [],
           profile_images: profile!.images || [],
-          location: profile!.location || null
+          location: profile!.city ? { city: profile!.city } : null
         }));
         
         console.log('Transformed profiles:', transformedProfiles);

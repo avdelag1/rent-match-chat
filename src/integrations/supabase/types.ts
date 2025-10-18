@@ -5735,16 +5735,21 @@ export type Database = {
           amenities: string[] | null
           baths: number | null
           beds: number | null
+          category: string | null
           city: string | null
           created_at: string | null
           description: string | null
+          furnished: boolean | null
           id: string | null
           images: string[] | null
           is_active: boolean | null
+          listing_type: string | null
           neighborhood: string | null
           owner_id: string | null
+          pet_friendly: boolean | null
           price: number | null
           property_type: string | null
+          square_footage: number | null
           status: Database["public"]["Enums"]["listing_status"] | null
           title: string | null
         }
@@ -5752,16 +5757,21 @@ export type Database = {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
+          category?: string | null
           city?: string | null
           created_at?: string | null
           description?: string | null
+          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
           is_active?: boolean | null
+          listing_type?: string | null
           neighborhood?: string | null
           owner_id?: string | null
+          pet_friendly?: boolean | null
           price?: number | null
           property_type?: string | null
+          square_footage?: number | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           title?: string | null
         }
@@ -5769,16 +5779,21 @@ export type Database = {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
+          category?: string | null
           city?: string | null
           created_at?: string | null
           description?: string | null
+          furnished?: boolean | null
           id?: string | null
           images?: string[] | null
           is_active?: boolean | null
+          listing_type?: string | null
           neighborhood?: string | null
           owner_id?: string | null
+          pet_friendly?: boolean | null
           price?: number | null
           property_type?: string | null
+          square_footage?: number | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           title?: string | null
         }
@@ -5804,12 +5819,14 @@ export type Database = {
           amenities: string[] | null
           baths: number | null
           beds: number | null
+          category: string | null
           city: string | null
           created_at: string | null
           description: string | null
           id: string | null
           images: string[] | null
           is_active: boolean | null
+          listing_type: string | null
           neighborhood: string | null
           price: number | null
           property_type: string | null
@@ -5820,12 +5837,14 @@ export type Database = {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
+          category?: string | null
           city?: string | null
           created_at?: string | null
           description?: string | null
           id?: string | null
           images?: string[] | null
           is_active?: boolean | null
+          listing_type?: string | null
           neighborhood?: string | null
           price?: number | null
           property_type?: string | null
@@ -5836,12 +5855,14 @@ export type Database = {
           amenities?: string[] | null
           baths?: number | null
           beds?: number | null
+          category?: string | null
           city?: string | null
           created_at?: string | null
           description?: string | null
           id?: string | null
           images?: string[] | null
           is_active?: boolean | null
+          listing_type?: string | null
           neighborhood?: string | null
           price?: number | null
           property_type?: string | null
@@ -5855,60 +5876,51 @@ export type Database = {
           age: number | null
           avatar_url: string | null
           bio: string | null
+          city: string | null
+          created_at: string | null
           full_name: string | null
-          has_pets: boolean | null
           id: string | null
           images: string[] | null
           interests: string[] | null
-          latitude: number | null
+          is_active: boolean | null
           lifestyle_tags: string[] | null
-          location: string | null
-          longitude: number | null
-          monthly_income: string | null
-          nationality: string | null
           occupation: string | null
+          onboarding_completed: boolean | null
           preferred_activities: string[] | null
-          smoking: boolean | null
           verified: boolean | null
         }
         Insert: {
           age?: number | null
           avatar_url?: string | null
           bio?: string | null
+          city?: string | null
+          created_at?: string | null
           full_name?: string | null
-          has_pets?: boolean | null
           id?: string | null
           images?: string[] | null
           interests?: string[] | null
-          latitude?: number | null
+          is_active?: boolean | null
           lifestyle_tags?: string[] | null
-          location?: string | null
-          longitude?: number | null
-          monthly_income?: string | null
-          nationality?: string | null
           occupation?: string | null
+          onboarding_completed?: boolean | null
           preferred_activities?: string[] | null
-          smoking?: boolean | null
           verified?: boolean | null
         }
         Update: {
           age?: number | null
           avatar_url?: string | null
           bio?: string | null
+          city?: string | null
+          created_at?: string | null
           full_name?: string | null
-          has_pets?: boolean | null
           id?: string | null
           images?: string[] | null
           interests?: string[] | null
-          latitude?: number | null
+          is_active?: boolean | null
           lifestyle_tags?: string[] | null
-          location?: string | null
-          longitude?: number | null
-          monthly_income?: string | null
-          nationality?: string | null
           occupation?: string | null
+          onboarding_completed?: boolean | null
           preferred_activities?: string[] | null
-          smoking?: boolean | null
           verified?: boolean | null
         }
         Relationships: []
