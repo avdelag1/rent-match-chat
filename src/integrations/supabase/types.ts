@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_usage_log: {
+        Row: {
+          activation_context: string | null
+          activation_id: string
+          conversation_id: string | null
+          id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          activation_context?: string | null
+          activation_id: string
+          conversation_id?: string | null
+          id?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          activation_context?: string | null
+          activation_id?: string
+          conversation_id?: string | null
+          id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_usage_log_activation_id_fkey"
+            columns: ["activation_id"]
+            isOneToOne: false
+            referencedRelation: "message_activations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_usage_log_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_actions_log: {
         Row: {
           action_details: Json
@@ -243,6 +285,30 @@ export type Database = {
           id?: string
           record_id?: string
           table_name?: string
+        }
+        Relationships: []
+      }
+      best_deal_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          notifications_available: number | null
+          reset_date: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notifications_available?: number | null
+          reset_date?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notifications_available?: number | null
+          reset_date?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1193,8 +1259,39 @@ export type Database = {
           },
         ]
       }
+      legal_document_quota: {
+        Row: {
+          created_at: string | null
+          id: string
+          monthly_limit: number | null
+          reset_date: string | null
+          updated_at: string | null
+          used_this_month: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          monthly_limit?: number | null
+          reset_date?: string | null
+          updated_at?: string | null
+          used_this_month?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          monthly_limit?: number | null
+          reset_date?: string | null
+          updated_at?: string | null
+          used_this_month?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       legal_documents: {
         Row: {
+          cost: number | null
           created_at: string | null
           document_type: string
           file_name: string
@@ -1202,12 +1299,14 @@ export type Database = {
           file_size: number
           id: string
           mime_type: string
+          paid_separately: boolean | null
           status: string
           updated_at: string | null
           user_id: string
           verification_notes: string | null
         }
         Insert: {
+          cost?: number | null
           created_at?: string | null
           document_type: string
           file_name: string
@@ -1215,12 +1314,14 @@ export type Database = {
           file_size: number
           id?: string
           mime_type: string
+          paid_separately?: boolean | null
           status?: string
           updated_at?: string | null
           user_id: string
           verification_notes?: string | null
         }
         Update: {
+          cost?: number | null
           created_at?: string | null
           document_type?: string
           file_name?: string
@@ -1228,6 +1329,7 @@ export type Database = {
           file_size?: number
           id?: string
           mime_type?: string
+          paid_separately?: boolean | null
           status?: string
           updated_at?: string | null
           user_id?: string
@@ -1824,6 +1926,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      message_activations: {
+        Row: {
+          activation_type: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          remaining_activations: number | null
+          reset_date: string | null
+          total_activations: number
+          updated_at: string | null
+          used_activations: number
+          user_id: string
+        }
+        Insert: {
+          activation_type: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          remaining_activations?: number | null
+          reset_date?: string | null
+          total_activations?: number
+          updated_at?: string | null
+          used_activations?: number
+          user_id: string
+        }
+        Update: {
+          activation_type?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          remaining_activations?: number | null
+          reset_date?: string | null
+          total_activations?: number
+          updated_at?: string | null
+          used_activations?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -4199,39 +4340,72 @@ export type Database = {
       }
       subscription_packages: {
         Row: {
+          advanced_match_tips: boolean | null
+          availability_sync: boolean | null
+          best_deal_notifications: number | null
           created_at: string | null
+          duration_days: number | null
+          early_profile_access: boolean | null
           features: Json | null
           id: number
           is_active: boolean | null
+          legal_documents_included: number | null
+          market_reports: boolean | null
           max_daily_matches: number | null
+          max_listings: number | null
           max_property_listings: number | null
           max_property_views: number | null
+          message_activations: number | null
           name: string
+          package_category: string | null
           price: number | null
+          seeker_insights: boolean | null
           tier: string | null
         }
         Insert: {
+          advanced_match_tips?: boolean | null
+          availability_sync?: boolean | null
+          best_deal_notifications?: number | null
           created_at?: string | null
+          duration_days?: number | null
+          early_profile_access?: boolean | null
           features?: Json | null
           id?: never
           is_active?: boolean | null
+          legal_documents_included?: number | null
+          market_reports?: boolean | null
           max_daily_matches?: number | null
+          max_listings?: number | null
           max_property_listings?: number | null
           max_property_views?: number | null
+          message_activations?: number | null
           name: string
+          package_category?: string | null
           price?: number | null
+          seeker_insights?: boolean | null
           tier?: string | null
         }
         Update: {
+          advanced_match_tips?: boolean | null
+          availability_sync?: boolean | null
+          best_deal_notifications?: number | null
           created_at?: string | null
+          duration_days?: number | null
+          early_profile_access?: boolean | null
           features?: Json | null
           id?: never
           is_active?: boolean | null
+          legal_documents_included?: number | null
+          market_reports?: boolean | null
           max_daily_matches?: number | null
+          max_listings?: number | null
           max_property_listings?: number | null
           max_property_views?: number | null
+          message_activations?: number | null
           name?: string
+          package_category?: string | null
           price?: number | null
+          seeker_insights?: boolean | null
           tier?: string | null
         }
         Relationships: []
@@ -7022,6 +7196,14 @@ export type Database = {
         Returns: string
       }
       refresh_user_engagement_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      reset_monthly_legal_quotas: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      reset_monthly_message_activations: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }

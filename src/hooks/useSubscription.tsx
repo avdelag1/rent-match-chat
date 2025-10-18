@@ -8,6 +8,17 @@ type SubscriptionPackageLite = {
   name: string;
   tier?: string;
   features?: unknown;
+  package_category?: string;
+  message_activations?: number;
+  legal_documents_included?: number;
+  best_deal_notifications?: number;
+  max_listings?: number;
+  duration_days?: number;
+  early_profile_access?: boolean;
+  advanced_match_tips?: boolean;
+  seeker_insights?: boolean;
+  availability_sync?: boolean;
+  market_reports?: boolean;
 } | null;
 
 type UserSubscriptionLite = {
@@ -47,7 +58,7 @@ export function useUserSubscription() {
       // Limit columns and break inference to avoid TS2589
       const { data, error }: any = await (supabase
         .from('user_subscriptions' as any)
-        .select('id,user_id,is_active,payment_status,subscription_packages(id,name,tier,features)')
+        .select('id,user_id,is_active,payment_status,subscription_packages(id,name,tier,features,package_category,message_activations,legal_documents_included,early_profile_access,advanced_match_tips,seeker_insights,availability_sync,market_reports,max_listings)')
         .eq('user_id', user.user.id)
         .eq('is_active', true)
         .maybeSingle());
@@ -68,6 +79,15 @@ export function useUserSubscription() {
               name: data.subscription_packages.name as string,
               tier: data.subscription_packages.tier as string | undefined,
               features: data.subscription_packages.features as unknown,
+              package_category: data.subscription_packages.package_category as string | undefined,
+              message_activations: data.subscription_packages.message_activations as number | undefined,
+              legal_documents_included: data.subscription_packages.legal_documents_included as number | undefined,
+              early_profile_access: data.subscription_packages.early_profile_access as boolean | undefined,
+              advanced_match_tips: data.subscription_packages.advanced_match_tips as boolean | undefined,
+              seeker_insights: data.subscription_packages.seeker_insights as boolean | undefined,
+              availability_sync: data.subscription_packages.availability_sync as boolean | undefined,
+              market_reports: data.subscription_packages.market_reports as boolean | undefined,
+              max_listings: data.subscription_packages.max_listings as number | undefined,
             }
           : null,
       };

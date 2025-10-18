@@ -1,60 +1,64 @@
 import { useUserSubscription } from './useSubscription';
-import { useMessagingQuota } from './useMessagingQuota';
+import { useMessageActivations } from './useMessageActivations';
+import { useLegalDocumentQuota } from './useLegalDocumentQuota';
 import { usePropertyLimits } from './usePropertyLimits';
 
 /**
  * Central hook to check all subscription benefits
+ * Simplified to focus on message activations and legal documents
  */
 export function useSubscriptionBenefits() {
   const { data: subscription } = useUserSubscription();
-  const messagingQuota = useMessagingQuota();
+  const messageActivations = useMessageActivations();
+  const legalDocQuota = useLegalDocumentQuota();
   const propertyLimits = usePropertyLimits();
   
   const planName = subscription?.subscription_packages?.name || 'free';
   const tier = subscription?.subscription_packages?.tier || 'free';
+  const packageCategory = subscription?.subscription_packages?.package_category;
   const isActive = subscription?.is_active || false;
   
-  // Define benefits based on plan
+  // Define benefits based on new simplified plan
   const benefits = {
-    // Messaging benefits (conversations)
-    canSendMessages: messagingQuota.canSendMessage,
-    canStartNewConversation: messagingQuota.canStartNewConversation,
-    remainingConversations: messagingQuota.remainingConversations,
-    conversationsStartedThisMonth: messagingQuota.conversationsStartedThisMonth,
-    unlimitedMessages: messagingQuota.isUnlimited,
+    // Message activation benefits
+    canSendMessage: messageActivations.canSendMessage,
+    remainingActivations: messageActivations.totalActivations,
+    totalActivations: messageActivations.totalActivations,
+    hasPayPerUse: messageActivations.payPerUseCount > 0,
+    hasMonthlyActivations: messageActivations.monthlyCount > 0,
     
-    // Property listing benefits (for owners)
+    // Legal document benefits
+    canUseLegalDocument: !legalDocQuota.needsToPay,
+    remainingLegalDocuments: legalDocQuota.remaining,
+    usedLegalDocuments: legalDocQuota.used,
+    unlimitedLegalDocuments: legalDocQuota.isUnlimited,
+    legalDocumentCost: legalDocQuota.needsToPay ? 500 : 0,
+    
+    // Property listing benefits (for owners only)
     canCreateProperties: propertyLimits.canCreateMore,
     remainingProperties: propertyLimits.remainingListings,
     unlimitedProperties: propertyLimits.isUnlimited,
     activeProperties: propertyLimits.activePropertyCount,
     maxProperties: propertyLimits.maxListings,
     
-    // Visibility benefits
-    visibility: getVisibility(planName),
-    isPriority: planName.includes('UNLIMITED'),
-    
-    // Premium features
-    canSeeLikes: !planName.includes('free'),
-    canSuperLike: !planName.includes('free'),
-    hasAdvancedFilters: planName.includes('PREMIUM') || planName.includes('UNLIMITED'),
-    hasPremiumBadge: planName.includes('PREMIUM') || planName.includes('UNLIMITED'),
-    hasAnalytics: planName.includes('MAX') || planName.includes('UNLIMITED'),
+    // Premium features from subscription packages
+    hasEarlyProfileAccess: subscription?.subscription_packages?.early_profile_access || false,
+    hasAdvancedMatchTips: subscription?.subscription_packages?.advanced_match_tips || false,
+    hasSeekerInsights: subscription?.subscription_packages?.seeker_insights || false,
+    hasAvailabilitySync: subscription?.subscription_packages?.availability_sync || false,
+    hasMarketReports: subscription?.subscription_packages?.market_reports || false,
     
     // Plan info
     planName,
     tier,
+    packageCategory,
     isActive,
     isFree: tier === 'free',
+    isPayPerUse: packageCategory?.includes('pay_per_use'),
+    isMonthly: packageCategory?.includes('monthly'),
+    isClient: packageCategory?.includes('client'),
+    isOwner: packageCategory?.includes('owner'),
   };
   
   return benefits;
-}
-
-function getVisibility(planName: string): number {
-  if (planName.includes('UNLIMITED')) return 100;
-  if (planName.includes('MAX')) return 80;
-  if (planName.includes('++')) return 50;
-  if (planName.includes('+')) return 25;
-  return 10; // Free tier
 }
