@@ -160,8 +160,10 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
         currentFilters={appliedFilters}
         onApplyFilters={(filters) => {
           setAppliedFilters(filters);
-          console.log('Applied filters:', filters);
+          console.log('Applied comprehensive filters:', filters);
           setShowFilters(false);
+          // Optionally refetch listings with new filters
+          refetch();
         }}
       />
     </SidebarProvider>

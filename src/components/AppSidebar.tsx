@@ -6,9 +6,11 @@ import { motion } from "framer-motion"
 import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
 import { ThemeSelector } from "@/components/ThemeSelector"
 import { NotificationBadge } from "@/components/NotificationBadge"
+import { Badge } from "@/components/ui/badge"
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount"
 import { useUnreadLikes } from "@/hooks/useUnreadLikes"
 import { useUnreadMatches } from "@/hooks/useUnreadMatches"
+import { useSavedFilters } from "@/hooks/useSavedFilters"
 import { useState } from "react"
 
 // Menu items for different user types
@@ -160,11 +162,22 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const { unreadCount } = useUnreadMessageCount()
   const { unreadCount: unreadLikes } = useUnreadLikes()
   const { unreadCount: unreadMatches } = useUnreadMatches()
+  const { savedFilters } = useSavedFilters()
   
   // Resolve role safely (prevents TS literal narrowing issues)
   const userRole: 'client' | 'owner' = (propUserRole ?? 'owner')
 
   const menuItems = userRole === 'client' ? clientMenuItems : ownerMenuItems
+  
+  // Count active filters
+  const activeFilterCount = savedFilters?.filters ? Object.keys(savedFilters.filters).filter(key => {
+    const value = savedFilters.filters[key];
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'string') return value.length > 0;
+    if (typeof value === 'number') return true;
+    if (typeof value === 'boolean') return value;
+    return false;
+  }).length : 0;
 
   const isActive = (url: string) => {
     if (url === "#add-property") return false
@@ -257,6 +270,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                         <span className={`font-medium ml-3 ${isActive(item.url) ? 'text-primary-foreground' : 'text-foreground'}`}>
                           {item.title}
                         </span>
+                        {item.title === 'Filters' && activeFilterCount > 0 && (
+                          <Badge variant="default" className="ml-auto px-2 py-0.5 text-xs">
+                            {activeFilterCount}
+                          </Badge>
+                        )}
                         {item.title === 'Messages' && unreadCount > 0 && (
                           <NotificationBadge count={unreadCount} className="ml-auto" />
                         )}
