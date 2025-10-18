@@ -105,7 +105,7 @@ export function CategoryFilters({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 pt-6 pb-2 shrink-0 border-b">
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export function CategoryFilters({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4">
+        <ScrollArea className="flex-1 px-6 py-4 overflow-y-auto">
           <Tabs defaultValue="basics" className="w-full">
             <TabsList className="grid w-full grid-cols-6 mb-6">
               <TabsTrigger value="basics">Basics</TabsTrigger>

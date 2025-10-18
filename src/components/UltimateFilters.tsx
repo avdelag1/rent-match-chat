@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Flame, Home, Zap, Car, PawPrint, Palette, Camera, Music, Coffee, RotateCcw } from 'lucide-react';
 
 interface UltimateFiltersProps {

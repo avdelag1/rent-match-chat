@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Bed, Bath, Square, Heart, MessageCircle, X, Flame, Share2 } from 'lucide-react';
 import { ImageCarousel } from '@/components/ImageCarousel';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -81,12 +82,13 @@ export function ClientPropertyPreview({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Property Details</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6">
+        <ScrollArea className="flex-1 overflow-y-auto">
+        <div className="space-y-6">
           {/* Image Gallery */}
           {property.images && property.images.length > 0 && (
             <div className="relative h-64 rounded-lg overflow-hidden">
@@ -256,9 +258,10 @@ export function ClientPropertyPreview({
             )}
           </div>
         </div>
+        </ScrollArea>
 
         {/* Action Buttons - Fixed at bottom */}
-        <div className="p-6 border-t bg-background/95 backdrop-blur-sm">
+        <div className="shrink-0 p-6 border-t bg-background/95 backdrop-blur-sm">
           <div className="flex gap-4">
             <Button
               variant="outline"

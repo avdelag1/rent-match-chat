@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
 import { CategorySelector, Category, Mode } from './CategorySelector';
@@ -211,13 +212,14 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle>
             {editingProperty ? 'Edit Listing' : 'Create New Listing'}
           </DialogTitle>
         </DialogHeader>
 
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-6">
           {/* Category & Mode Selector */}
           <CategorySelector
@@ -316,8 +318,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             </CardContent>
           </Card>
 
+        </div>
+        </ScrollArea>
+
           {/* Submit */}
-          <div className="flex justify-end gap-2">
+          <div className="shrink-0 flex justify-end gap-2 px-6 py-4 border-t">
             <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
@@ -325,7 +330,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
               {createListingMutation.isPending ? 'Publishing...' : 'Publish Listing'}
             </Button>
           </div>
-        </div>
       </DialogContent>
     </Dialog>
   );

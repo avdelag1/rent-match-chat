@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Flame, MapPin, Bed, Bath, Square, X, Camera } from 'lucide-react';
 import { useLikedProperties } from '@/hooks/useLikedProperties';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -81,14 +82,15 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
             <Flame className="w-6 h-6 text-red-500" />
             Liked Properties
           </DialogTitle>
         </DialogHeader>
 
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
         {isLoading ? (
           <div className="grid md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
@@ -212,6 +214,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
             ))}
           </div>
         )}
+        </ScrollArea>
       </DialogContent>
 
       <PropertyImageGallery

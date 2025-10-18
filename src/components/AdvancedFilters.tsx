@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { X } from 'lucide-react';
 import { useAutoSaveListingTypes } from '@/hooks/useAutoSaveListingTypes';
 
@@ -82,7 +83,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             {userRole === 'owner' ? '🔍 Filter Clients' : '🏠 Filter Properties'}

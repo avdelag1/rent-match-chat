@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Bed, Bath, Square, Calendar, DollarSign, Home, Users, Car, Anchor, Bike, Bike as Motorcycle } from 'lucide-react';
 import { ImageCarousel } from '@/components/ImageCarousel';
 
@@ -27,8 +28,8 @@ export function ListingPreviewDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <DialogTitle className="text-2xl font-bold">
@@ -51,7 +52,8 @@ export function ListingPreviewDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6 max-h-[calc(95vh-120px)]">
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="space-y-6">
           {/* Image Gallery */}
           {listing.images && listing.images.length > 0 ? (
             <div className="relative h-80 rounded-lg overflow-hidden">
@@ -336,6 +338,7 @@ export function ListingPreviewDialog({
             </div>
           </div>
         </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

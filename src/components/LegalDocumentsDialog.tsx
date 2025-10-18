@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, File, Trash2, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
@@ -226,8 +227,8 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto bg-white/10 backdrop-blur border border-white/20 text-white">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 bg-white/10 backdrop-blur border border-white/20 text-white">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
             Legal Documents
@@ -238,6 +239,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
           </DialogDescription>
         </DialogHeader>
 
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-6">
           {/* Upload Section */}
           <Card className="bg-white/5 border-white/20">
@@ -364,6 +366,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
             </CardContent>
           </Card>
         </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

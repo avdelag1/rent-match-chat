@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, Bed, Bath, Square, Flame, MessageCircle, X, Camera } from 'lucide-react';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useHasPremiumFeature } from '@/hooks/useSubscription';
@@ -84,7 +85,7 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden p-0">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         {isLoading ? (
           <div className="p-6 space-y-4">
             <Skeleton className="h-64 w-full rounded-lg" />
@@ -131,7 +132,8 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <ScrollArea className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
               {/* Property Info */}
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -215,10 +217,11 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
                   </div>
                 </div>
               )}
-            </div>
+              </div>
+            </ScrollArea>
 
             {/* Action Buttons - Fixed at bottom */}
-            <div className="p-6 border-t bg-background/95 backdrop-blur-sm">
+            <div className="shrink-0 p-6 border-t bg-background/95 backdrop-blur-sm">
               <div className="flex gap-4">
                 <Button
                   variant="outline"

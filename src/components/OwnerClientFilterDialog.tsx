@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { X } from 'lucide-react';
 import { useOwnerClientPreferences, OwnerClientPreferences } from '@/hooks/useOwnerClientPreferences';
 
@@ -113,13 +114,14 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="bg-white max-w-2xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="text-2xl">Set Up Client Filters</DialogTitle>
           <p className="text-muted-foreground">Configure your ideal client criteria</p>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="space-y-6">
           {/* Budget Range */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Budget Range</Label>
@@ -276,8 +278,9 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
             </div>
           </div>
         </div>
+        </ScrollArea>
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0 px-6 py-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

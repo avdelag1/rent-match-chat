@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, Crown, Zap, Star } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -158,8 +159,8 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="text-2xl font-bold text-center">
             Upgrade to Premium
           </DialogTitle>
@@ -170,6 +171,7 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
           )}
         </DialogHeader>
 
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {plans.map((pkg) => (
             <Card
@@ -224,6 +226,7 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
           <p>Cancel anytime. Secure payments powered by PayPal.</p>
           <p>Questions? Contact support at help@tinderent.com</p>
         </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

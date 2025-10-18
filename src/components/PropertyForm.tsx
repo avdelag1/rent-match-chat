@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { Upload, X, Plus } from 'lucide-react';
 
@@ -311,14 +312,16 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle>
             {editingProperty ? 'Edit Property' : 'List New Property'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col min-h-0">
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="space-y-6">
           {/* Basic Information */}
           <Card>
             <CardHeader>
@@ -575,8 +578,11 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
             </CardContent>
           </Card>
 
+        </div>
+        </ScrollArea>
+
           {/* Form Actions */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="shrink-0 flex gap-3 px-6 py-4 border-t">
             <Button
               type="button"
               variant="outline"
