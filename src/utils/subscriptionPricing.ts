@@ -46,3 +46,25 @@ export function getPackageTypeLabel(packageCategory: string): string {
   };
   return labels[packageCategory] || packageCategory;
 }
+
+/**
+ * Check if user has both client and owner subscriptions (bundle eligibility)
+ */
+export async function checkBundleEligibility(userId: string, supabase: any): Promise<boolean> {
+  const { data: subscriptions } = await supabase
+    .from('user_subscriptions')
+    .select('package_id, subscription_packages(package_category)')
+    .eq('user_id', userId)
+    .eq('is_active', true);
+
+  if (!subscriptions || subscriptions.length < 2) return false;
+
+  const hasClient = subscriptions.some((s: any) => 
+    s.subscription_packages?.package_category?.includes('client_monthly')
+  );
+  const hasOwner = subscriptions.some((s: any) => 
+    s.subscription_packages?.package_category?.includes('owner_monthly')
+  );
+
+  return hasClient && hasOwner;
+}

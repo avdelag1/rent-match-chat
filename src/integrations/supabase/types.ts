@@ -4358,6 +4358,7 @@ export type Database = {
           message_activations: number | null
           name: string
           package_category: string | null
+          paypal_link: string | null
           price: number | null
           seeker_insights: boolean | null
           tier: string | null
@@ -4381,6 +4382,7 @@ export type Database = {
           message_activations?: number | null
           name: string
           package_category?: string | null
+          paypal_link?: string | null
           price?: number | null
           seeker_insights?: boolean | null
           tier?: string | null
@@ -4404,6 +4406,7 @@ export type Database = {
           message_activations?: number | null
           name?: string
           package_category?: string | null
+          paypal_link?: string | null
           price?: number | null
           seeker_insights?: boolean | null
           tier?: string | null

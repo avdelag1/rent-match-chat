@@ -24,6 +24,7 @@ interface SubscriptionPackage {
   max_listings?: number;
   duration_days?: number;
   features: string[];
+  paypal_link?: string;
 }
 
 export default function SubscriptionPackagesPage() {
@@ -48,11 +49,11 @@ export default function SubscriptionPackagesPage() {
 
         if (roleData) setUserRole(roleData.role as 'client' | 'owner');
 
-        const { data: packagesData, error } = await supabase
-          .from('subscription_packages')
-          .select('*')
-          .eq('is_active', true)
-          .order('price', { ascending: true });
+      const { data: packagesData, error } = await supabase
+        .from('subscription_packages')
+        .select('*, paypal_link')
+        .eq('is_active', true)
+        .order('price', { ascending: true });
 
         if (error) throw error;
         setPackages(packagesData as any || []);
@@ -68,13 +69,24 @@ export default function SubscriptionPackagesPage() {
   }, [user]);
 
   const handleSubscribe = (pkg: SubscriptionPackage) => {
-    localStorage.setItem('selected_package', JSON.stringify({
-      id: pkg.id,
-      name: pkg.name,
-      price: pkg.price,
-      category: pkg.package_category,
+    if (!pkg.paypal_link) {
+      toast.error('Payment link not configured. Please contact support.');
+      console.error(`Missing PayPal link for package: ${pkg.name} (ID: ${pkg.id})`);
+      return;
+    }
+
+    if (!user?.id) {
+      toast.error('Please log in to purchase');
+      return;
+    }
+
+    localStorage.setItem('pending_purchase', JSON.stringify({
+      package_id: pkg.id,
+      user_id: user.id,
+      timestamp: new Date().toISOString(),
     }));
-    toast.success(`Selected ${pkg.name}. Payment integration coming soon!`);
+
+    window.location.href = pkg.paypal_link;
   };
 
   const getPackageIcon = (tier: string) => {
@@ -196,7 +208,12 @@ export default function SubscriptionPackagesPage() {
                     ))}
                   </ul>
 
-                  <Button onClick={() => handleSubscribe(pkg)} className="w-full" variant="outline">
+                  <Button 
+                    onClick={() => handleSubscribe(pkg)} 
+                    className="w-full" 
+                    variant="outline"
+                    disabled={!pkg.paypal_link}
+                  >
                     Buy Now
                   </Button>
                 </Card>

@@ -35,6 +35,8 @@ import OwnerClientDiscovery from "./pages/OwnerClientDiscovery";
 import ClientContracts from "./pages/ClientContracts";
 import OwnerContracts from "./pages/OwnerContracts";
 import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancel from "./pages/PaymentCancel";
 
 const queryClient = new QueryClient();
 
@@ -264,6 +266,9 @@ const App = () => (
                         </ProtectedRoute>
                       } 
                     />
+
+                    <Route path="/payment/success" element={<PaymentSuccess />} />
+                    <Route path="/payment/cancel" element={<PaymentCancel />} />
                     
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
