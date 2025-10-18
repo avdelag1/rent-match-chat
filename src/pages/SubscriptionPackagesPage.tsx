@@ -1,255 +1,217 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, Zap, Star, ArrowLeft } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Zap, Crown, Rocket, Star, MessageCircle, FileText, ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserSubscription } from '@/hooks/useSubscription';
+import { formatPriceMXN } from '@/utils/subscriptionPricing';
+import { toast } from 'sonner';
 
-type Plan = {
-  id: string;
+type PackageCategory = 'client_monthly' | 'owner_monthly' | 'client_pay_per_use' | 'owner_pay_per_use';
+
+interface SubscriptionPackage {
+  id: number;
   name: string;
-  price: string;
-  benefits: string[];
-  paypalUrl: string;
-  highlight?: boolean;
-};
-
-const ownerPlans: Plan[] = [
-  {
-    id: 'owner-unlimited',
-    name: 'UNLIMITED OWNER',
-    price: '$299 MXN',
-    benefits: [
-      'Unlimited properties',
-      'Unlimited messages per month',
-      'Top visibility (100%)',
-      'Always listed first in search',
-      'Full access to tools, filters, and stats',
-    ],
-    paypalUrl: 'https://www.paypal.com/ncp/payment/P2YZA6FWZAACQ',
-    highlight: true,
-  },
-  {
-    id: 'owner-premium-max',
-    name: 'PREMIUM MAX OWNER',
-    price: '$199 MXN',
-    benefits: [
-      'Up to 10 properties',
-      '500 messages per month',
-      'High visibility (80%)',
-      'Advanced client filters',
-      '"Premium Profile" badge',
-    ],
-    paypalUrl: 'https://www.paypal.com/ncp/payment/4LG62YGVETM4L',
-  },
-  {
-    id: 'owner-premium-plus-plus',
-    name: 'PREMIUM ++ OWNER',
-    price: '$149 MXN',
-    benefits: [
-      'Up to 5 properties',
-      '250 messages per month',
-      'Medium-high visibility (50%)',
-      'Filters to choose ideal clients',
-      'Highlighted profile',
-    ],
-    paypalUrl: 'https://www.paypal.com/ncp/payment/J5NKCX6KQRCYW',
-  },
-  {
-    id: 'owner-premium-plus',
-    name: 'PREMIUM + OWNER',
-    price: '$99 MXN',
-    benefits: [
-      'Up to 2 active properties',
-      '100 messages per month',
-      'See who liked you',
-      'Unlimited likes',
-      'Medium visibility (25%)',
-    ],
-    paypalUrl: 'https://www.paypal.com/ncp/payment/GSA6TBVY9PFDU',
-  },
-];
-
-const clientPlans: Plan[] = [
-  {
-    id: 'client-unlimited',
-    name: 'UNLIMITED CLIENT',
-    price: '$199 MXN',
-    benefits: [
-      'Unlimited messages per month',
-      'Unlimited superlikes',
-      'Full visibility (100%)',
-      'Priority in search results',
-      'Access to all premium features',
-    ],
-    paypalUrl: 'https://www.paypal.com/ncp/payment/7E6R38L33LYUJ',
-    highlight: true,
-  },
-  {
-    id: 'client-premium-plus-plus',
-    name: 'PREMIUM ++ CLIENT',
-    price: '$149 MXN',
-    benefits: [
-      '150 messages per month',
-      'See who visited your profile',
-      'Highlighted profile',
-      'Medium visibility (50%)',
-      'Unlimited superlikes',
-    ],
-    paypalUrl: 'https://www.paypal.com/ncp/payment/HUESWJ68BRUSY',
-  },
-  {
-    id: 'client-premium',
-    name: 'PREMIUM CLIENT',
-    price: '$99 MXN',
-    benefits: [
-      '50 messages per month',
-      'See who liked you',
-      'More visibility (25%)',
-      'Access to additional filters',
-      'Highlighted profile in regular search',
-    ],
-    paypalUrl: 'https://www.paypal.com/ncp/payment/QSRXCJYYQ2UGY',
-  },
-];
-
-const getPackageIcon = (packageName: string) => {
-  if (packageName.includes('UNLIMITED')) return <Zap className="w-5 h-5" />;
-  if (packageName.includes('VIP')) return <Crown className="w-5 h-5" />;
-  if (packageName.includes('PREMIUM')) return <Star className="w-5 h-5" />;
-  return <Check className="w-5 h-5" />;
-};
-
-const getPackageColor = (packageName: string) => {
-  if (packageName.includes('UNLIMITED')) return 'from-blue-500 to-cyan-500';
-  if (packageName.includes('VIP')) return 'from-purple-500 to-pink-500';
-  if (packageName.includes('PREMIUM')) return 'from-green-500 to-emerald-500';
-  return 'from-gray-500 to-slate-500';
-};
+  tier: string;
+  package_category: PackageCategory;
+  price: number;
+  message_activations: number;
+  legal_documents_included: number;
+  max_listings?: number;
+  duration_days?: number;
+  features: string[];
+}
 
 export default function SubscriptionPackagesPage() {
   const { user } = useAuth();
+  const { data: currentSubscription } = useUserSubscription();
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState<'client' | 'owner'>('client');
+  const [userRole, setUserRole] = useState<'client' | 'owner' | null>(null);
+  const [packages, setPackages] = useState<SubscriptionPackage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<'monthly' | 'pay_per_use'>('monthly');
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
-        
-      if (data?.role) {
-        setUserRole(data.role as 'client' | 'owner');
+    const fetchData = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        if (roleData) setUserRole(roleData.role as 'client' | 'owner');
+
+        const { data: packagesData, error } = await supabase
+          .from('subscription_packages')
+          .select('*')
+          .eq('is_active', true)
+          .order('price', { ascending: true });
+
+        if (error) throw error;
+        setPackages(packagesData as any || []);
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('Failed to load packages');
+      } finally {
+        setLoading(false);
       }
     };
-    
-    fetchUserRole();
+
+    fetchData();
   }, [user]);
 
-  const plans = userRole === 'owner' ? ownerPlans : clientPlans;
-
-  const handleSubscribe = (plan: Plan) => {
-    const selection = { 
-      role: userRole, 
-      planId: plan.id, 
-      name: plan.name, 
-      price: plan.price, 
-      at: new Date().toISOString() 
-    };
-    localStorage.setItem('tinderent_selected_plan', JSON.stringify(selection));
-
-    window.open(plan.paypalUrl, '_blank');
-
-    toast({
-      title: 'Redirecting to PayPal',
-      description: `Selected: ${plan.name} (${plan.price})`,
-    });
+  const handleSubscribe = (pkg: SubscriptionPackage) => {
+    localStorage.setItem('selected_package', JSON.stringify({
+      id: pkg.id,
+      name: pkg.name,
+      price: pkg.price,
+      category: pkg.package_category,
+    }));
+    toast.success(`Selected ${pkg.name}. Payment integration coming soon!`);
   };
 
-  const handleBack = () => {
-    navigate(-1);
+  const getPackageIcon = (tier: string) => {
+    switch (tier) {
+      case 'unlimited': return Crown;
+      case 'premium': case 'premium_plus': return Rocket;
+      case 'basic': return Star;
+      default: return Zap;
+    }
   };
+
+  const getPackageGradient = (tier: string) => {
+    switch (tier) {
+      case 'unlimited': return 'from-amber-500 to-yellow-600';
+      case 'premium': case 'premium_plus': return 'from-purple-500 to-pink-600';
+      case 'basic': return 'from-blue-500 to-cyan-600';
+      default: return 'from-gray-500 to-gray-600';
+    }
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+
+  const filteredPackages = packages.filter(pkg => {
+    if (!userRole) return false;
+    const isRoleMatch = pkg.package_category.includes(userRole);
+    const isTypeMatch = selectedCategory === 'monthly' 
+      ? pkg.package_category.includes('monthly')
+      : pkg.package_category.includes('pay_per_use');
+    return isRoleMatch && isTypeMatch;
+  });
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-background via-accent/5 to-background">
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
 
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">
-            Upgrade to Premium
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            Choose Your Plan
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Choose the perfect plan for your {userRole} needs
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Simple pricing focused on message activations and legal documents
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {plans.map((pkg) => (
-            <Card
-              key={pkg.id}
-              className={`relative overflow-hidden ${pkg.highlight ? 'ring-2 ring-primary shadow-xl' : ''}`}
-            >
-              {pkg.highlight && (
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">
-                  POPULAR
-                </div>
-              )}
+        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as any)} className="mb-8">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+            <TabsTrigger value="monthly">Monthly Plans</TabsTrigger>
+            <TabsTrigger value="pay_per_use">Pay-Per-Use</TabsTrigger>
+          </TabsList>
 
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className={`p-3 rounded-lg bg-gradient-to-r ${getPackageColor(pkg.name)} text-white`}>
-                    {getPackageIcon(pkg.name)}
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold">{pkg.price}</span>
-                      <span className="text-sm text-muted-foreground">/month</span>
+          <TabsContent value="monthly" className="mt-8">
+            <div className="grid md:grid-cols-3 gap-6">
+              {filteredPackages.map((pkg) => {
+                const Icon = getPackageIcon(pkg.tier);
+                const isPopular = pkg.tier === 'premium';
+
+                return (
+                  <Card key={pkg.id} className={`relative p-6 hover:shadow-2xl transition-all ${isPopular ? 'border-2 border-primary shadow-xl scale-105' : ''}`}>
+                    {isPopular && (
+                      <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-primary">
+                        MOST POPULAR
+                      </Badge>
+                    )}
+
+                    <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${getPackageGradient(pkg.tier)} flex items-center justify-center`}>
+                      <Icon className="w-8 h-8 text-white" />
                     </div>
-                  </div>
-                </div>
-              </CardHeader>
 
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  {pkg.benefits.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-sm">
-                        {feature}
-                      </span>
+                    <h3 className="text-2xl font-bold text-center mb-2">{pkg.name}</h3>
+                    <div className="text-center mb-6">
+                      <span className="text-4xl font-bold">{formatPriceMXN(pkg.price)}</span>
+                      <span className="text-muted-foreground">/month</span>
                     </div>
-                  ))}
-                </div>
 
-                <Button
-                  className={`w-full h-12 bg-gradient-to-r ${getPackageColor(pkg.name)} hover:opacity-90 text-white font-semibold`}
-                  onClick={() => handleSubscribe(pkg)}
-                  size="lg"
-                >
-                  Buy Now
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    <ul className="space-y-3 mb-6">
+                      {pkg.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <MessageCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-        <div className="text-center text-sm text-muted-foreground mt-12 space-y-2">
-          <p>Cancel anytime. Secure payments powered by PayPal.</p>
-          <p>Questions? Contact support at help@tinderent.com</p>
+                    <Button onClick={() => handleSubscribe(pkg)} className="w-full" variant={isPopular ? 'default' : 'outline'} size="lg">
+                      {currentSubscription?.subscription_packages?.id === pkg.id ? 'Current Plan' : 'Subscribe'}
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="pay_per_use" className="mt-8">
+            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {filteredPackages.map((pkg) => (
+                <Card key={pkg.id} className="p-6 hover:shadow-lg transition-all">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+
+                  <h3 className="text-xl font-bold text-center mb-2">{pkg.name}</h3>
+                  <div className="text-center mb-4">
+                    <span className="text-3xl font-bold">{formatPriceMXN(pkg.price)}</span>
+                  </div>
+                  <p className="text-center text-sm text-muted-foreground mb-6">
+                    Valid for {pkg.duration_days} days
+                  </p>
+
+                  <ul className="space-y-2 mb-6">
+                    {pkg.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <FileText className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button onClick={() => handleSubscribe(pkg)} className="w-full" variant="outline">
+                    Buy Now
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="mt-16 text-center space-y-4">
+          <p className="text-sm text-muted-foreground">
+            All payments processed securely through PayPal
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Questions? <a href="/support" className="text-primary hover:underline">Contact Support</a>
+          </p>
         </div>
       </div>
     </div>

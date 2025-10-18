@@ -30,7 +30,7 @@ export function MessageQuotaDialog({ isOpen, onClose, onUpgrade, userRole }: Mes
 
         <div className="space-y-6 text-center">
           <p className="text-muted-foreground leading-relaxed">
-            You've reached your limit for starting new conversations this month. Upgrade your plan to connect with more {userRole === 'client' ? 'properties' : 'clients'} and unlock unlimited messaging!
+            You've used all your message activations. Upgrade your plan or buy more activations to continue connecting with {userRole === 'client' ? 'properties' : 'clients'}!
           </p>
 
           <div className="space-y-3">
@@ -55,7 +55,7 @@ export function MessageQuotaDialog({ isOpen, onClose, onUpgrade, userRole }: Mes
           <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-4">
             <div className="flex items-center justify-center gap-2 text-sm font-medium text-primary">
               <Sparkles className="w-4 h-4" />
-              Upgrade to start unlimited conversations & unlock premium features
+              Upgrade for more message activations & premium features
             </div>
           </div>
         </div>
