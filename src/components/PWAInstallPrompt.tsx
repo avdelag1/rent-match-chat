@@ -77,7 +77,11 @@ export function PWAInstallPrompt() {
           <Card className="bg-gradient-primary text-white shadow-2xl border-0">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Download className="w-5 h-5 flex-shrink-0" />
+                <img 
+                  src="/favicon.ico" 
+                  alt="Tinderent" 
+                  className="w-8 h-8 flex-shrink-0 rounded-lg"
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold leading-tight">
                     Download the app 👉
