@@ -30,40 +30,23 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
       console.log('Swipe with match auth check passed:', { userId: currentUser.id, targetId, direction });
 
-      // Check for existing like to prevent duplicates
-      const { data: existingLike } = await supabase
+      // Use atomic upsert to prevent race conditions
+      const { data: like, error: likeError } = await supabase
         .from('likes')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('target_id', targetId)
-        .maybeSingle();
+        .upsert({
+          user_id: user.id,
+          target_id: targetId,
+          direction
+        }, {
+          onConflict: 'user_id,target_id',
+          ignoreDuplicates: false
+        })
+        .select()
+        .single();
 
-      let like;
-      if (existingLike) {
-        // Update existing like
-        const { data: updatedLike, error: likeError } = await supabase
-          .from('likes')
-          .update({ direction })
-          .eq('id', existingLike.id)
-          .select()
-          .single();
-
-        if (likeError) throw likeError;
-        like = updatedLike;
-      } else {
-        // Insert new like
-        const { data: newLike, error: likeError } = await supabase
-          .from('likes')
-          .insert({
-            user_id: user.id,
-            target_id: targetId,
-            direction
-          })
-          .select()
-          .single();
-
-        if (likeError) throw likeError;
-        like = newLike;
+      if (likeError) {
+        console.error('Error saving like:', likeError);
+        throw likeError;
       }
 
       // If it's a right swipe, check for mutual likes
@@ -110,13 +93,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             .upsert({
               client_id: targetType === 'profile' ? targetId : user.id,
               owner_id: targetType === 'profile' ? user.id : targetId,
+              listing_id: targetType === 'listing' ? targetId : null,
               is_mutual: true,
               client_liked_at: targetType === 'profile' ? mutualLike.created_at : like.created_at,
               owner_liked_at: targetType === 'profile' ? like.created_at : mutualLike.created_at,
               status: 'accepted'
             }, {
-              onConflict: 'client_id,owner_id',
-              ignoreDuplicates: false
+              onConflict: 'client_id,owner_id,listing_id',
+              ignoreDuplicates: true
             })
             .select()
             .single();
