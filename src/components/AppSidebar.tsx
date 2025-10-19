@@ -100,6 +100,11 @@ const ownerMenuItems = [
     action: "add-listing",
   },
   {
+    title: "Client Filters",
+    url: "/owner/saved-searches",
+    icon: Settings,
+  },
+  {
     title: "Contracts",
     url: "/owner/contracts",
     icon: FileText,

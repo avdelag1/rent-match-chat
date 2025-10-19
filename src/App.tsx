@@ -28,6 +28,7 @@ const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
 const EnhancedOwnerDashboard = lazy(() => import("./components/EnhancedOwnerDashboard"));
 const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
 const OwnerSettings = lazy(() => import("./pages/OwnerSettings"));
+const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
 const OwnerMatchHistory = lazy(() => import("./pages/OwnerMatchHistory"));
 const OwnerActivityFeed = lazy(() => import("./pages/OwnerActivityFeed"));
 const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
@@ -207,7 +208,16 @@ const App = () => (
                     />
 
                     <Route 
-                      path="/owner/match-history"
+                      path="/owner/saved-searches" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <OwnerSavedSearches />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
+                      path="/owner/match-history" 
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerMatchHistory />
