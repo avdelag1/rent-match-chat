@@ -139,17 +139,32 @@ export function ClientProfileCard({
       
       {/* Main Image - Full Screen */}
       <div className="relative h-[85%] overflow-hidden">
-        <img
-          src={images[imageIndex] || '/api/placeholder/400/600'}
-          alt={profile.name}
-          className="w-full h-full object-cover cursor-pointer"
-          draggable={false}
-          onClick={handleImageClick}
-          onError={(e) => {
-            e.currentTarget.src = '/api/placeholder/400/600';
-            e.currentTarget.alt = `${profile.name} - Profile photo unavailable`;
-          }}
-        />
+        {images.length > 0 ? (
+          <img
+            src={images[imageIndex]}
+            alt={profile.name}
+            className="w-full h-full object-cover cursor-pointer"
+            draggable={false}
+            onClick={handleImageClick}
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder-avatar.svg';
+            }}
+          />
+        ) : (
+          <div 
+            className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center cursor-pointer"
+            onClick={handleImageClick}
+          >
+            <div className="text-center">
+              <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                <span className="text-6xl font-bold text-primary">
+                  {profile.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <p className="text-muted-foreground text-sm">No photo available</p>
+            </div>
+          </div>
+        )}
         
         {/* Left/Right Click Areas for Navigation */}
         <div className="absolute inset-0 flex">
