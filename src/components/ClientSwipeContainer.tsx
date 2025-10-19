@@ -32,6 +32,10 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     clientProfile?: any;
     ownerProfile?: any;
   }>({ isOpen: false });
+  const [emojiAnimation, setEmojiAnimation] = useState<{
+    show: boolean;
+    type: 'like' | 'dislike';
+  }>({ show: false, type: 'like' });
   
   const { data: swipedIds = [] } = useSwipedClientProfiles();
   const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
@@ -57,6 +61,14 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
     setSwipeDirection(direction);
     
+    // Show emoji animation immediately
+    setEmojiAnimation({ show: true, type: direction === 'right' ? 'like' : 'dislike' });
+    
+    // Hide emoji after 800ms
+    setTimeout(() => {
+      setEmojiAnimation({ show: false, type: direction === 'right' ? 'like' : 'dislike' });
+    }, 800);
+    
     // Show visual feedback
     setTimeout(() => {
       swipeMutation.mutate({
@@ -67,14 +79,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
       // Record the swipe for undo functionality
       recordSwipe(currentClient.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
-
-      // Show success message for owners
-      if (direction === 'right') {
-        toast({
-          title: '💚 Liked!',
-          description: `You liked ${currentClient.name}'s profile.`,
-        });
-      }
 
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
@@ -235,6 +239,23 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     <div className="w-full h-full flex flex-col">
       {/* Full Screen Cards Container */}
       <div className="flex-1 relative">
+        {/* Emoji Animation Overlay */}
+        <AnimatePresence>
+          {emojiAnimation.show && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0, rotate: -20 }}
+              animate={{ scale: 1.5, opacity: 1, rotate: 0 }}
+              exit={{ scale: 2, opacity: 0, rotate: 20 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none"
+            >
+              <div className="text-9xl drop-shadow-2xl">
+                {emojiAnimation.type === 'like' ? '❤️' : '👎'}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
         <AnimatePresence>
           {nextClient && (
             <ClientProfileCard

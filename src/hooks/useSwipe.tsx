@@ -151,8 +151,11 @@ export function useSwipe() {
       console.log('Swipe successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['likes'] });
       queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['liked-clients'] });
       queryClient.invalidateQueries({ queryKey: ['owner-swipes'] });
       queryClient.invalidateQueries({ queryKey: ['client-profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['matches'] });
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
     },
     onError: (error) => {
       console.error('Swipe failed:', error);
