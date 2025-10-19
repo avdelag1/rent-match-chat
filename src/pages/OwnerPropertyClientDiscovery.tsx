@@ -183,7 +183,7 @@ export default function OwnerPropertyClientDiscovery() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => navigate(`/client/profile/${client.id}`)}
+                            onClick={() => navigate(`/owner/view-client/${client.user_id}`)}
                           >
                             View
                           </Button>

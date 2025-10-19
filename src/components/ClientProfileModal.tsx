@@ -71,13 +71,6 @@ export function ClientProfileModal({
                   ))}
                 </div>
               )}
-
-              {/* Match Badge */}
-              {matchPercentage && (
-                <Badge className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white border-green-400">
-                  {matchPercentage}% Match
-                </Badge>
-              )}
             </div>
           )}
 

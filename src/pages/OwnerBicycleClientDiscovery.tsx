@@ -174,7 +174,7 @@ export default function OwnerBicycleClientDiscovery() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => navigate(`/client/profile/${client.id}`)}
+                            onClick={() => navigate(`/owner/view-client/${client.user_id || client.id}`)}
                           >
                             View
                           </Button>
