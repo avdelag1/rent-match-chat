@@ -199,7 +199,7 @@ const App = () => (
                     />
 
                     <Route 
-                      path="/owner/find-clients" 
+                      path="/owner/client-discovery" 
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerClientDiscovery />

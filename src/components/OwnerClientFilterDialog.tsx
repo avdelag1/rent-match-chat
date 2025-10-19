@@ -165,10 +165,10 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white max-w-2xl h-[90vh] flex flex-col p-0">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
-          <DialogTitle className="text-2xl">Client Discovery Preferences</DialogTitle>
-          <p className="text-muted-foreground">Set your preferences to improve Smart Match recommendations</p>
+      <DialogContent className="bg-white max-w-2xl w-[95vw] max-h-[85vh] sm:h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b">
+          <DialogTitle className="text-xl sm:text-2xl">Client Discovery Preferences</DialogTitle>
+          <p className="text-sm sm:text-base text-muted-foreground">Set your preferences to improve Smart Match recommendations</p>
           <div className="mt-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
             <p className="text-sm text-foreground">
               <strong>Note:</strong> All active clients will always be visible. These filters help prioritize matches based on your preferences.
@@ -176,7 +176,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
+        <ScrollArea className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="space-y-6">
           {/* Looking For Section */}
           <div className="space-y-3">
@@ -187,7 +187,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                 <Badge
                   key={option.value}
                   variant={selectedClientTypes.includes(option.value) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80 text-sm py-2 px-4"
+                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
                   onClick={() => {
                     if (selectedClientTypes.includes(option.value)) {
                       setSelectedClientTypes(selectedClientTypes.filter(t => t !== option.value));
@@ -214,7 +214,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                 <Badge
                   key={option.value}
                   variant={selectedListingTypes.includes(option.value) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80 text-sm py-2 px-4"
+                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
                   onClick={() => {
                     if (selectedListingTypes.includes(option.value)) {
                       setSelectedListingTypes(selectedListingTypes.filter(t => t !== option.value));
@@ -235,12 +235,13 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           {/* Budget Range */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Budget Range</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label className="text-sm text-muted-foreground">Min Budget</Label>
                 <Input
                   type="number"
                   placeholder="Min $"
+                  className="text-base"
                   value={formData.min_budget || ''}
                   onChange={(e) => setFormData({ ...formData, min_budget: Number(e.target.value) || undefined })}
                 />
@@ -250,6 +251,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                 <Input
                   type="number"
                   placeholder="Max $"
+                  className="text-base"
                   value={formData.max_budget || ''}
                   onChange={(e) => setFormData({ ...formData, max_budget: Number(e.target.value) || undefined })}
                 />
@@ -260,13 +262,14 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           {/* Age Range */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Age Range</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label className="text-sm text-muted-foreground">Min Age</Label>
                 <Input
                   type="number"
                   min="18"
                   max="100"
+                  className="text-base"
                   value={formData.min_age || 18}
                   onChange={(e) => setFormData({ ...formData, min_age: Number(e.target.value) })}
                 />
@@ -277,6 +280,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                   type="number"
                   min="18"
                   max="100"
+                  className="text-base"
                   value={formData.max_age || 65}
                   onChange={(e) => setFormData({ ...formData, max_age: Number(e.target.value) })}
                 />
@@ -292,7 +296,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                 <Badge
                   key={tag}
                   variant={(formData.compatible_lifestyle_tags || []).includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80"
+                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
                   onClick={() => toggleLifestyleTag(tag)}
                 >
                   {tag}
@@ -312,7 +316,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                 <Badge
                   key={occupation}
                   variant={(formData.preferred_occupations || []).includes(occupation) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80"
+                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
                   onClick={() => toggleOccupation(occupation)}
                 >
                   {occupation}
@@ -381,6 +385,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                   id="min-income"
                   type="number"
                   placeholder="Min monthly income $"
+                  className="text-base"
                   value={formData.min_monthly_income || ''}
                   onChange={(e) => setFormData({ ...formData, min_monthly_income: Number(e.target.value) || undefined })}
                 />
@@ -390,7 +395,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
         </div>
         </ScrollArea>
 
-        <DialogFooter className="shrink-0 px-6 py-4 border-t gap-2">
+        <DialogFooter className="shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-t gap-2 flex-col sm:flex-row">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
