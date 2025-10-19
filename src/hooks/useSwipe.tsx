@@ -59,33 +59,74 @@ export function useSwipe() {
       console.log('Like saved successfully');
       
       // Check if this creates a match (both users liked each other)
+      // Wrap in try-catch to prevent match detection errors from failing the entire swipe
       if (direction === 'right') {
-        if (targetType === 'listing') {
-          // Get the listing owner
-          const { data: listing } = await supabase
-            .from('listings')
-            .select('owner_id')
-            .eq('id', targetId)
-            .maybeSingle();
+        try {
+          if (targetType === 'listing') {
+            // Get the listing owner
+            const { data: listing } = await supabase
+              .from('listings')
+              .select('owner_id')
+              .eq('id', targetId)
+              .maybeSingle();
 
-          if (listing) {
-            // Check if owner also liked this client
-            const { data: ownerLike } = await supabase
+            if (listing) {
+              // Check if owner also liked this client
+              const { data: ownerLike } = await supabase
+                .from('likes')
+                .select('*')
+                .eq('user_id', listing.owner_id)
+                .eq('target_id', user.id)
+                .eq('direction', 'right')
+                .maybeSingle();
+
+              if (ownerLike) {
+                // Create a match with proper conflict handling!
+                const { error: matchError } = await supabase.from('matches').upsert({
+                  client_id: user.id,
+                  owner_id: listing.owner_id,
+                  listing_id: targetId,
+                  client_liked_at: new Date().toISOString(),
+                  owner_liked_at: ownerLike.created_at,
+                  is_mutual: true,
+                  status: 'accepted'
+                }, {
+                  onConflict: 'client_id,owner_id',
+                  ignoreDuplicates: false
+                });
+
+                if (matchError) {
+                  console.error('Match creation error:', matchError);
+                  toast({
+                    title: "Match Error",
+                    description: "Match created but couldn't be saved. Please refresh.",
+                    variant: 'destructive'
+                  });
+                } else {
+                  toast({
+                    title: "It's a Match! 🎉",
+                    description: "You and the owner both liked each other!",
+                  });
+                }
+              }
+            }
+          } else if (targetType === 'profile') {
+            // Check if the client also liked this owner (owner is swiping on client profiles)
+            const { data: clientLike } = await supabase
               .from('likes')
               .select('*')
-              .eq('user_id', listing.owner_id)
+              .eq('user_id', targetId)
               .eq('target_id', user.id)
               .eq('direction', 'right')
               .maybeSingle();
 
-            if (ownerLike) {
+            if (clientLike) {
               // Create a match with proper conflict handling!
               const { error: matchError } = await supabase.from('matches').upsert({
-                client_id: user.id,
-                owner_id: listing.owner_id,
-                listing_id: targetId,
-                client_liked_at: new Date().toISOString(),
-                owner_liked_at: ownerLike.created_at,
+                client_id: targetId,
+                owner_id: user.id,
+                client_liked_at: clientLike.created_at,
+                owner_liked_at: new Date().toISOString(),
                 is_mutual: true,
                 status: 'accepted'
               }, {
@@ -103,49 +144,14 @@ export function useSwipe() {
               } else {
                 toast({
                   title: "It's a Match! 🎉",
-                  description: "You and the owner both liked each other!",
+                  description: "You and the client both liked each other!",
                 });
               }
             }
           }
-        } else if (targetType === 'profile') {
-          // Check if the client also liked this owner (owner is swiping on client profiles)
-          const { data: clientLike } = await supabase
-            .from('likes')
-            .select('*')
-            .eq('user_id', targetId)
-            .eq('target_id', user.id)
-            .eq('direction', 'right')
-            .maybeSingle();
-
-          if (clientLike) {
-            // Create a match with proper conflict handling!
-            const { error: matchError } = await supabase.from('matches').upsert({
-              client_id: targetId,
-              owner_id: user.id,
-              client_liked_at: clientLike.created_at,
-              owner_liked_at: new Date().toISOString(),
-              is_mutual: true,
-              status: 'accepted'
-            }, {
-              onConflict: 'client_id,owner_id',
-              ignoreDuplicates: false
-            });
-
-            if (matchError) {
-              console.error('Match creation error:', matchError);
-              toast({
-                title: "Match Error",
-                description: "Match created but couldn't be saved. Please refresh.",
-                variant: 'destructive'
-              });
-            } else {
-              toast({
-                title: "It's a Match! 🎉",
-                description: "You and the client both liked each other!",
-              });
-            }
-          }
+        } catch (matchError) {
+          // Log match detection errors but don't fail the entire swipe
+          console.error('Match detection error (non-critical):', matchError);
         }
       }
 

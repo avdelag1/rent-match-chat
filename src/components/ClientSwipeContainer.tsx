@@ -62,24 +62,22 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
     setSwipeDirection(direction);
     
+    // Show emoji immediately for better UX
+    setEmojiAnimation({ 
+      show: true, 
+      type: direction === 'right' ? 'like' : 'dislike',
+      position: direction === 'right' ? 'right' : 'left'
+    });
+    
+    setTimeout(() => {
+      setEmojiAnimation({ show: false, type: 'like', position: 'right' });
+    }, 1200);
+    
     // Record swipe with match checking
     swipeMutation.mutate({
       targetId: currentClient.user_id,
       direction,
       targetType: 'profile'
-    }, {
-      onSuccess: () => {
-        // Only show emoji on successful swipe
-        setEmojiAnimation({ 
-          show: true, 
-          type: direction === 'right' ? 'like' : 'dislike',
-          position: direction === 'right' ? 'right' : 'left'
-        });
-        
-        setTimeout(() => {
-          setEmojiAnimation({ show: false, type: 'like', position: 'right' });
-        }, 1000);
-      }
     });
 
     // Record the swipe for undo functionality
@@ -244,43 +242,60 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Full Screen Cards Container */}
-      <div className="flex-1 relative">
-        {/* Emoji Animation Overlay */}
+      {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
           <motion.div
-            initial={{ 
-              scale: 0, 
-              opacity: 0, 
-              x: emojiAnimation.position === 'right' ? 100 : -100,
-              rotate: emojiAnimation.position === 'right' ? 20 : -20
-            }}
-            animate={{ 
-              scale: 2, 
-              opacity: 1, 
-              x: emojiAnimation.position === 'right' ? 50 : -50,
-              rotate: emojiAnimation.position === 'right' ? 10 : -10
-            }}
-            exit={{ 
-              scale: 3, 
-              opacity: 0, 
-              y: -100
-            }}
-            transition={{ 
-              duration: 0.8, 
-              ease: [0.68, -0.55, 0.265, 1.55]
-            }}
-            className={`absolute top-1/2 z-30 pointer-events-none ${
-              emojiAnimation.position === 'right' ? 'right-8' : 'left-8'
-            }`}
+            className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <div className="text-[120px] drop-shadow-2xl filter brightness-110">
-              {emojiAnimation.type === 'like' ? '👍' : '👎'}
-            </div>
+            <motion.div
+              initial={{ 
+                scale: 0, 
+                opacity: 0, 
+                x: emojiAnimation.position === 'right' ? 200 : -200,
+                rotate: emojiAnimation.position === 'right' ? 45 : -45
+              }}
+              animate={{ 
+                scale: 3.5, 
+                opacity: 1, 
+                x: emojiAnimation.position === 'right' ? 100 : -100,
+                rotate: 0
+              }}
+              exit={{ 
+                scale: 5, 
+                opacity: 0, 
+                y: -200
+              }}
+              transition={{ 
+                duration: 1.2, 
+                ease: [0.68, -0.55, 0.265, 1.55]
+              }}
+              className={`absolute ${
+                emojiAnimation.position === 'right' ? 'right-12' : 'left-12'
+              } top-1/3`}
+            >
+              <div className="relative">
+                {/* Glow effect */}
+                <div className={`absolute inset-0 blur-3xl opacity-50 ${
+                  emojiAnimation.type === 'like' 
+                    ? 'bg-gradient-to-r from-green-400 to-blue-500' 
+                    : 'bg-gradient-to-r from-red-400 to-orange-500'
+                }`} />
+                {/* Emoji */}
+                <div className="relative text-[180px] drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">
+                  {emojiAnimation.type === 'like' ? '👍' : '👎'}
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Full Screen Cards Container */}
+      <div className="flex-1 relative">
         
         <AnimatePresence>
           {nextClient && (
