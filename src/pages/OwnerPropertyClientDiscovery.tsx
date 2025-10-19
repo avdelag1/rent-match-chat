@@ -14,10 +14,10 @@ import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 export default function OwnerPropertyClientDiscovery() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const { data: clients = [], refetch } = useSmartClientMatching('property');
 
-  const filteredClients = clients.filter(client =>
+  const filteredClients = (clients || []).filter(client =>
     client.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -45,7 +45,7 @@ export default function OwnerPropertyClientDiscovery() {
               <div>
                 <h1 className="text-2xl font-bold">Property Clients</h1>
                 <p className="text-sm text-muted-foreground">
-                  Showing {filteredClients.length} of {clients.length} clients
+                  Showing {filteredClients?.length || 0} of {clients?.length || 0} clients
                 </p>
               </div>
               <Button variant="outline" onClick={() => navigate('/owner/properties')}>
@@ -173,7 +173,7 @@ export default function OwnerPropertyClientDiscovery() {
                         {/* Action Buttons */}
                         <div className="flex gap-2">
                           <Button 
-                            onClick={() => handleConnect(client.id)}
+                            onClick={() => handleConnect(client.user_id)}
                             className="flex-1"
                             size="sm"
                           >

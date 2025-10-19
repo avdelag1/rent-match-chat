@@ -40,6 +40,10 @@ const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
 const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/PaymentCancel"));
+const OwnerPropertyClientDiscovery = lazy(() => import("./pages/OwnerPropertyClientDiscovery"));
+const OwnerMotoClientDiscovery = lazy(() => import("./pages/OwnerMotoClientDiscovery"));
+const OwnerBicycleClientDiscovery = lazy(() => import("./pages/OwnerBicycleClientDiscovery"));
+const OwnerYachtClientDiscovery = lazy(() => import("./pages/OwnerYachtClientDiscovery"));
 
 const queryClient = new QueryClient();
 
@@ -201,7 +205,7 @@ const App = () => (
                       path="/owner/clients/property" 
                       element={
                         <ProtectedRoute requiredRole="owner">
-                          <lazy(() => import("./pages/OwnerPropertyClientDiscovery"))} />
+                          <OwnerPropertyClientDiscovery />
                         </ProtectedRoute>
                       } 
                     />
@@ -210,7 +214,7 @@ const App = () => (
                       path="/owner/clients/moto" 
                       element={
                         <ProtectedRoute requiredRole="owner">
-                          <lazy(() => import("./pages/OwnerMotoClientDiscovery"))} />
+                          <OwnerMotoClientDiscovery />
                         </ProtectedRoute>
                       } 
                     />
@@ -219,7 +223,7 @@ const App = () => (
                       path="/owner/clients/bicycle" 
                       element={
                         <ProtectedRoute requiredRole="owner">
-                          <lazy(() => import("./pages/OwnerBicycleClientDiscovery"))} />
+                          <OwnerBicycleClientDiscovery />
                         </ProtectedRoute>
                       } 
                     />
@@ -228,7 +232,7 @@ const App = () => (
                       path="/owner/clients/yacht" 
                       element={
                         <ProtectedRoute requiredRole="owner">
-                          <lazy(() => import("./pages/OwnerYachtClientDiscovery"))} />
+                          <OwnerYachtClientDiscovery />
                         </ProtectedRoute>
                       } 
                     />

@@ -14,10 +14,10 @@ import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 export default function OwnerMotoClientDiscovery() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const { data: clients = [], refetch } = useSmartClientMatching('moto');
 
-  const filteredClients = clients.filter(client =>
+  const filteredClients = (clients || []).filter(client =>
     client.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -164,7 +164,7 @@ export default function OwnerMotoClientDiscovery() {
 
                         <div className="flex gap-2">
                           <Button 
-                            onClick={() => handleConnect(client.id)}
+                            onClick={() => handleConnect(client.user_id)}
                             className="flex-1"
                             size="sm"
                           >

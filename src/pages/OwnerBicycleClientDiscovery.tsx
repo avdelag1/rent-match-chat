@@ -14,10 +14,10 @@ import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 export default function OwnerBicycleClientDiscovery() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const { data: clients = [], refetch } = useSmartClientMatching('bicycle');
 
-  const filteredClients = clients.filter(client =>
+  const filteredClients = (clients || []).filter(client =>
     client.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

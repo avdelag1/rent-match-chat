@@ -354,9 +354,9 @@ function calculateClientMatch(listing: Listing, clientProfile: any): {
   };
 }
 
-export function useSmartClientMatching(listingId?: string) {
+export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle' | 'yacht') {
   return useQuery({
-    queryKey: ['smart-clients', listingId],
+    queryKey: ['smart-clients', category],
     queryFn: async () => {
       try {
         console.log('🎯 useSmartClientMatching: Starting fetch with OWNER preferences...');
@@ -368,11 +368,17 @@ export function useSmartClientMatching(listingId?: string) {
         console.log('✅ Owner ID:', user.user.id);
 
         // 🔥 GET OWNER'S FILTER PREFERENCES FIRST!
-        const { data: ownerPrefs, error: ownerPrefsError } = await supabase
+        let query = supabase
           .from('owner_client_preferences')
           .select('*')
-          .eq('user_id', user.user.id)
-          .maybeSingle();
+          .eq('user_id', user.user.id);
+        
+        // Filter by category if provided
+        if (category) {
+          query = query.eq('category', category);
+        }
+        
+        const { data: ownerPrefs, error: ownerPrefsError } = await query.maybeSingle();
 
         console.log('📋 Owner preferences loaded:', ownerPrefs ? 'YES' : 'NO', ownerPrefs);
         if (ownerPrefsError) console.error('Owner prefs error:', ownerPrefsError);

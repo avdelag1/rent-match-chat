@@ -260,40 +260,76 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <SidebarMenuItem>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item)}
-                        className={`
-                          w-full rounded-lg p-2.5 transition-all duration-200 group border relative
-                          ${isActive(item.url) 
-                            ? 'text-primary-foreground shadow-md border-primary/30 bg-primary' 
-                            : 'bg-secondary hover:bg-secondary/80 text-foreground border-border hover:border-border'
-                          }
-                        `}
-                      >
-                        <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                        <span className={`font-medium ml-3 ${isActive(item.url) ? 'text-primary-foreground' : 'text-foreground'}`}>
-                          {item.title}
-                        </span>
-                        {item.title === 'Filters' && activeFilterCount > 0 && (
-                          <Badge variant="default" className="ml-auto px-2 py-0.5 text-xs">
-                            {activeFilterCount}
-                          </Badge>
-                        )}
-                        {item.title === 'Messages' && unreadCount > 0 && (
-                          <NotificationBadge count={unreadCount} className="ml-auto" />
-                        )}
-                        {item.title === 'Liked Properties' && unreadLikes > 0 && (
-                          <NotificationBadge count={unreadLikes} className="ml-auto" />
-                        )}
-                        {item.title === 'Liked Clients' && unreadLikes > 0 && (
-                          <NotificationBadge count={unreadLikes} className="ml-auto" />
-                        )}
-                        {item.title === 'Match History' && unreadMatches > 0 && (
-                          <NotificationBadge count={unreadMatches} className="ml-auto" />
-                        )}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    {item.children ? (
+                      // Render parent with children
+                      <div className="space-y-1">
+                        <SidebarMenuItem>
+                          <div className="w-full rounded-lg p-2.5 transition-all duration-200 group border bg-secondary hover:bg-secondary/80 text-foreground border-border hover:border-border">
+                            <div className="flex items-center">
+                              <item.icon className="w-5 h-5 text-muted-foreground" />
+                              <span className="font-medium ml-3 text-foreground">{item.title}</span>
+                            </div>
+                          </div>
+                        </SidebarMenuItem>
+                        {/* Render children */}
+                        <div className="ml-6 space-y-1">
+                          {item.children.map((child: any) => (
+                            <SidebarMenuItem key={child.title}>
+                              <SidebarMenuButton
+                                onClick={() => navigate(child.url)}
+                                className={`
+                                  w-full rounded-lg p-2 transition-all duration-200 border text-sm
+                                  ${isActive(child.url)
+                                    ? 'text-primary-foreground shadow-md border-primary/30 bg-primary'
+                                    : 'bg-secondary/50 hover:bg-secondary text-foreground border-border hover:border-border'
+                                  }
+                                `}
+                              >
+                                <span className={`font-medium ${isActive(child.url) ? 'text-primary-foreground' : 'text-foreground'}`}>
+                                  {child.title}
+                                </span>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      // Render regular menu item
+                      <SidebarMenuItem>
+                        <SidebarMenuButton 
+                          onClick={() => handleMenuClick(item)}
+                          className={`
+                            w-full rounded-lg p-2.5 transition-all duration-200 group border relative
+                            ${isActive(item.url) 
+                              ? 'text-primary-foreground shadow-md border-primary/30 bg-primary' 
+                              : 'bg-secondary hover:bg-secondary/80 text-foreground border-border hover:border-border'
+                            }
+                          `}
+                        >
+                          <item.icon className={`w-5 h-5 ${isActive(item.url) ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                          <span className={`font-medium ml-3 ${isActive(item.url) ? 'text-primary-foreground' : 'text-foreground'}`}>
+                            {item.title}
+                          </span>
+                          {item.title === 'Filters' && activeFilterCount > 0 && (
+                            <Badge variant="default" className="ml-auto px-2 py-0.5 text-xs">
+                              {activeFilterCount}
+                            </Badge>
+                          )}
+                          {item.title === 'Messages' && unreadCount > 0 && (
+                            <NotificationBadge count={unreadCount} className="ml-auto" />
+                          )}
+                          {item.title === 'Liked Properties' && unreadLikes > 0 && (
+                            <NotificationBadge count={unreadLikes} className="ml-auto" />
+                          )}
+                          {item.title === 'Liked Clients' && unreadLikes > 0 && (
+                            <NotificationBadge count={unreadLikes} className="ml-auto" />
+                          )}
+                          {item.title === 'Match History' && unreadMatches > 0 && (
+                            <NotificationBadge count={unreadMatches} className="ml-auto" />
+                          )}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )}
                   </motion.div>
                 ))}
                 
