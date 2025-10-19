@@ -195,6 +195,14 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
           throw new Error('Property ID is missing. Cannot update.');
         }
         
+        // Optimistically update the cache
+        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+          if (!oldData) return oldData;
+          return oldData.map(item => 
+            item.id === editingId ? { ...item, ...propertyData } : item
+          );
+        });
+        
         const { data: result, error } = await supabase
           .from('listings')
           .update(propertyData)
@@ -219,18 +227,29 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
           console.error('Insert error:', error);
           throw new Error(error.message || 'Failed to create property');
         }
+        
+        // Optimistically add to cache
+        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+          return oldData ? [result, ...oldData] : [result];
+        });
+        
         return result;
       }
     },
     onSuccess: () => {
       toast({
         title: editingId ? "Property Updated!" : "Property Listed!",
-        description: editingId ? "Your property has been successfully updated." : "Your property has been successfully listed.",
+        description: "Your changes are now visible.",
+        duration: 2000,
       });
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
     },
     onError: (error) => {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
       toast({
         title: "Error",
         description: editingId ? "Failed to update property. Please try again." : "Failed to create property listing. Please try again.",

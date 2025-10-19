@@ -28,6 +28,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const [images, setImages] = useState<string[]>([]);
   const [location, setLocation] = useState<{ lat?: number; lng?: number }>({});
   const [formData, setFormData] = useState<any>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   const queryClient = useQueryClient();
 
@@ -36,6 +37,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     
     if (editingProperty?.id) {
       // Editing existing listing - load all data
+      setEditingId(editingProperty.id);
       setSelectedCategory(editingProperty.category || 'property');
       setSelectedMode(editingProperty.mode || 'rent');
       setImages(editingProperty.images || []);
@@ -46,6 +48,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       });
     } else if (editingProperty?.category) {
       // New listing with pre-selected category from CategoryDialog
+      setEditingId(null);
       setSelectedCategory(editingProperty.category);
       setSelectedMode(editingProperty.mode || 'rent');
       setImages([]);
@@ -53,6 +56,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       setLocation({});
     } else {
       // Completely new listing - reset everything
+      setEditingId(null);
       setSelectedCategory('property');
       setSelectedMode('rent');
       setImages([]);
@@ -82,11 +86,25 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         is_active: true
       };
 
-      if (editingProperty) {
+      if (editingId) {
+        console.log('Updating listing with ID:', editingId);
+        
+        if (!editingId) {
+          throw new Error('Listing ID is missing. Cannot update.');
+        }
+        
+        // Optimistically update the cache
+        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+          if (!oldData) return oldData;
+          return oldData.map(item => 
+            item.id === editingId ? { ...item, ...listingData } : item
+          );
+        });
+
         const { data, error } = await supabase
           .from('listings')
           .update(listingData)
-          .eq('id', editingProperty.id)
+          .eq('id', editingId)
           .select()
           .single();
 
@@ -100,23 +118,33 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           .single();
 
         if (error) throw error;
+        
+        // Optimistically add to cache
+        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+          return oldData ? [data, ...oldData] : [data];
+        });
+        
         return data;
       }
     },
     onSuccess: () => {
       toast({
-        title: editingProperty?.id ? "Listing Updated!" : "Listing Created!",
-        description: "Your listing has been successfully saved and is now visible.",
-        duration: 3000,
+        title: editingId ? "Listing Updated!" : "Listing Created!",
+        description: "Your changes are now visible.",
+        duration: 2000,
       });
+      // Still invalidate to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
     },
     onError: (error: any) => {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
       toast({
         title: "Error",
-        description: error.message || "Failed to save listing. Please try again.",
+        description: error.message || "Failed to save listing.",
         variant: "destructive"
       });
     }
@@ -127,6 +155,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     setFormData({});
     setSelectedCategory('property');
     setSelectedMode('rent');
+    setEditingId(null);
     onClose();
   };
 
@@ -267,7 +296,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle>
-            {editingProperty ? 'Edit Listing' : 'Create New Listing'}
+            {editingId ? 'Edit Listing' : 'Create New Listing'}
           </DialogTitle>
         </DialogHeader>
 

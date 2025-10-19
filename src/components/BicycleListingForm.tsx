@@ -10,6 +10,7 @@ import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { toast } from '@/hooks/use-toast';
 
 export interface BicycleFormData {
+  id?: string;
   title: string;
   wheel_size_option?: string;
   motor_power?: string;
@@ -166,6 +167,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           <div>
             <Label htmlFor="vehicle_type">Type *</Label>
             <Select 
+              value={formData.vehicle_type}
               onValueChange={(value) => {
                 setValue('vehicle_type', value);
                 onDataChange({ ...formData, vehicle_type: value });
@@ -207,6 +209,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           <div>
             <Label htmlFor="frame_size">Frame Size *</Label>
             <Select 
+              value={formData.frame_size}
               onValueChange={(value) => {
                 setValue('frame_size', value);
                 onDataChange({ ...formData, frame_size: value });
@@ -228,6 +231,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           <div>
             <Label htmlFor="wheel_size">Wheel Size</Label>
             <Select 
+              value={formData.wheel_size_option}
               onValueChange={(value) => {
                 setValue('wheel_size_option', value);
                 onDataChange({ ...formData, wheel_size_option: value });
@@ -249,6 +253,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           <div>
             <Label htmlFor="frame_material">Frame Material *</Label>
             <Select 
+              value={formData.frame_material}
               onValueChange={(value) => {
                 setValue('frame_material', value);
                 onDataChange({ ...formData, frame_material: value });
@@ -270,6 +275,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           <div>
             <Label htmlFor="brake_type">Brake Type *</Label>
             <Select 
+              value={formData.brake_type}
               onValueChange={(value) => {
                 setValue('brake_type', value);
                 onDataChange({ ...formData, brake_type: value });
@@ -291,6 +297,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           <div>
             <Label htmlFor="gear_type">Gear System *</Label>
             <Select 
+              value={formData.gear_type}
               onValueChange={(value) => {
                 setValue('gear_type', value);
                 onDataChange({ ...formData, gear_type: value });
@@ -312,6 +319,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           <div>
             <Label htmlFor="condition">Condition *</Label>
             <Select 
+              value={formData.condition}
               onValueChange={(value) => {
                 setValue('condition', value);
                 onDataChange({ ...formData, condition: value });
@@ -348,6 +356,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
                 <div>
                   <Label htmlFor="motor_power">Motor Power</Label>
                   <Select 
+                    value={formData.motor_power}
                     onValueChange={(value) => {
                       setValue('motor_power', value);
                       onDataChange({ ...formData, motor_power: value });

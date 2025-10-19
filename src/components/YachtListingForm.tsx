@@ -11,6 +11,7 @@ import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { toast } from '@/hooks/use-toast';
 
 export interface YachtFormData {
+  id?: string;
   title: string;
   yacht_type?: string;
   mode: 'sale' | 'rent' | 'both';
@@ -114,6 +115,7 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           <div>
             <Label htmlFor="yacht_type">Yacht Type *</Label>
             <Select 
+              value={formData.yacht_type}
               onValueChange={(value) => {
                 setValue('yacht_type', value);
                 onDataChange({ ...formData, yacht_type: value });
@@ -244,6 +246,7 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           <div>
             <Label htmlFor="hull_material">Hull Material</Label>
             <Select 
+              value={formData.hull_material}
               onValueChange={(value) => {
                 setValue('hull_material', value);
                 onDataChange({ ...formData, hull_material: value });
@@ -265,6 +268,7 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           <div>
             <Label htmlFor="engine_type">Engine Configuration</Label>
             <Select 
+              value={formData.engine_type}
               onValueChange={(value) => {
                 setValue('engine_type', value);
                 onDataChange({ ...formData, engine_type: value });
@@ -286,6 +290,7 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           <div>
             <Label htmlFor="fuel_type">Fuel Type</Label>
             <Select 
+              value={formData.fuel_type}
               onValueChange={(value) => {
                 setValue('fuel_type', value);
                 onDataChange({ ...formData, fuel_type: value });
@@ -329,6 +334,7 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           <div>
             <Label htmlFor="condition">Condition</Label>
             <Select 
+              value={formData.condition}
               onValueChange={(value) => {
                 setValue('condition', value);
                 onDataChange({ ...formData, condition: value });
@@ -350,6 +356,7 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           <div>
             <Label htmlFor="crew">Crew Arrangement</Label>
             <Select 
+              value={formData.crew_option}
               onValueChange={(value) => {
                 setValue('crew_option', value);
                 onDataChange({ ...formData, crew_option: value });

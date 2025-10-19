@@ -10,6 +10,7 @@ import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { toast } from '@/hooks/use-toast';
 
 export interface MotorcycleFormData {
+  id?: string;
   title: string;
   motorcycle_type?: string;
   engine_size_range?: string;
@@ -100,6 +101,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           <div>
             <Label htmlFor="motorcycle_type">Motorcycle Type</Label>
             <Select 
+              value={formData.motorcycle_type}
               onValueChange={(value) => {
                 setValue('motorcycle_type', value);
                 onDataChange({ ...formData, motorcycle_type: value });
@@ -230,6 +232,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           <div>
             <Label htmlFor="transmission">Transmission *</Label>
             <Select 
+              value={formData.transmission}
               onValueChange={(value) => {
                 setValue('transmission', value);
                 onDataChange({ ...formData, transmission: value });
@@ -251,6 +254,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           <div>
             <Label htmlFor="fuel_type">Fuel Type *</Label>
             <Select 
+              value={formData.fuel_type}
               onValueChange={(value) => {
                 setValue('fuel_type', value);
                 onDataChange({ ...formData, fuel_type: value });
@@ -272,6 +276,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           <div>
             <Label htmlFor="condition">Condition *</Label>
             <Select 
+              value={formData.condition}
               onValueChange={(value) => {
                 setValue('condition', value);
                 onDataChange({ ...formData, condition: value });
@@ -293,6 +298,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           <div>
             <Label htmlFor="engine_size">Engine Size</Label>
             <Select 
+              value={formData.engine_size_range}
               onValueChange={(value) => {
                 setValue('engine_size_range', value);
                 onDataChange({ ...formData, engine_size_range: value });
@@ -314,6 +320,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           <div>
             <Label htmlFor="mileage_range">Mileage Range</Label>
             <Select 
+              value={formData.mileage_range}
               onValueChange={(value) => {
                 setValue('mileage_range', value);
                 onDataChange({ ...formData, mileage_range: value });
