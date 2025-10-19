@@ -14,6 +14,18 @@ interface OwnerClientFilterDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const LISTING_TYPE_OPTIONS = [
+  { value: 'property', label: 'Properties' },
+  { value: 'motorcycle', label: 'Motorcycles' },
+  { value: 'bicycle', label: 'Bicycles' },
+  { value: 'yacht', label: 'Yachts' },
+];
+
+const CLIENT_TYPE_OPTIONS = [
+  { value: 'tenant', label: 'Tenants (Renters)' },
+  { value: 'buyer', label: 'Buyers' },
+];
+
 const LIFESTYLE_OPTIONS = [
   'Digital Nomad',
   'Professional',
@@ -57,6 +69,9 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
     min_monthly_income: undefined,
     preferred_occupations: [],
   });
+
+  const [selectedListingTypes, setSelectedListingTypes] = useState<string[]>(['property']);
+  const [selectedClientTypes, setSelectedClientTypes] = useState<string[]>(['tenant']);
 
   useEffect(() => {
     if (preferences) {
@@ -116,12 +131,71 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-white max-w-2xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
-          <DialogTitle className="text-2xl">Set Up Client Filters</DialogTitle>
-          <p className="text-muted-foreground">Configure your ideal client criteria</p>
+          <DialogTitle className="text-2xl">Client Discovery Preferences</DialogTitle>
+          <p className="text-muted-foreground">Set your preferences to improve Smart Match recommendations</p>
+          <div className="mt-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+            <p className="text-sm text-foreground">
+              <strong>Note:</strong> All active clients will always be visible. These filters help prioritize matches based on your preferences.
+            </p>
+          </div>
         </DialogHeader>
 
         <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-6">
+          {/* Looking For Section */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Looking For</Label>
+            <p className="text-sm text-muted-foreground">What type of clients are you looking for?</p>
+            <div className="flex flex-wrap gap-2">
+              {CLIENT_TYPE_OPTIONS.map((option) => (
+                <Badge
+                  key={option.value}
+                  variant={selectedClientTypes.includes(option.value) ? "default" : "outline"}
+                  className="cursor-pointer hover:opacity-80 text-sm py-2 px-4"
+                  onClick={() => {
+                    if (selectedClientTypes.includes(option.value)) {
+                      setSelectedClientTypes(selectedClientTypes.filter(t => t !== option.value));
+                    } else {
+                      setSelectedClientTypes([...selectedClientTypes, option.value]);
+                    }
+                  }}
+                >
+                  {option.label}
+                  {selectedClientTypes.includes(option.value) && (
+                    <X className="w-3 h-3 ml-1" />
+                  )}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Listing Types Section */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Your Listings</Label>
+            <p className="text-sm text-muted-foreground">What do you have available to rent/sell?</p>
+            <div className="flex flex-wrap gap-2">
+              {LISTING_TYPE_OPTIONS.map((option) => (
+                <Badge
+                  key={option.value}
+                  variant={selectedListingTypes.includes(option.value) ? "default" : "outline"}
+                  className="cursor-pointer hover:opacity-80 text-sm py-2 px-4"
+                  onClick={() => {
+                    if (selectedListingTypes.includes(option.value)) {
+                      setSelectedListingTypes(selectedListingTypes.filter(t => t !== option.value));
+                    } else {
+                      setSelectedListingTypes([...selectedListingTypes, option.value]);
+                    }
+                  }}
+                >
+                  {option.label}
+                  {selectedListingTypes.includes(option.value) && (
+                    <X className="w-3 h-3 ml-1" />
+                  )}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
           {/* Budget Range */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Budget Range</Label>

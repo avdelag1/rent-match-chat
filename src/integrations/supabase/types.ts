@@ -2332,6 +2332,7 @@ export type Database = {
           allows_extra_guests: boolean | null
           allows_parties: boolean | null
           allows_pets: boolean | null
+          allows_smoking: boolean | null
           cleanliness_important: boolean | null
           compatible_lifestyle_tags: string[] | null
           created_at: string | null
@@ -2357,6 +2358,7 @@ export type Database = {
           allows_extra_guests?: boolean | null
           allows_parties?: boolean | null
           allows_pets?: boolean | null
+          allows_smoking?: boolean | null
           cleanliness_important?: boolean | null
           compatible_lifestyle_tags?: string[] | null
           created_at?: string | null
@@ -2382,6 +2384,7 @@ export type Database = {
           allows_extra_guests?: boolean | null
           allows_parties?: boolean | null
           allows_pets?: boolean | null
+          allows_smoking?: boolean | null
           cleanliness_important?: boolean | null
           compatible_lifestyle_tags?: string[] | null
           created_at?: string | null
