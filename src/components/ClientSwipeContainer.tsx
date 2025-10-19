@@ -244,7 +244,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const nextClient = clientProfiles[currentIndex + 1];
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col relative z-0">
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (

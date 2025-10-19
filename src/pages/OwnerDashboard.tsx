@@ -60,16 +60,24 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   };
 
   const handleMenuAction = (action: string) => {
+    console.log('🔧 Menu action triggered:', action);
+    
     if (action === 'add-listing') {
+      console.log('➕ Opening category dialog');
       setShowCategoryDialog(true);
     } else if (action === 'premium-packages') {
+      console.log('💎 Navigating to premium packages');
       navigate('/subscription-packages');
     } else if (action === 'support') {
+      console.log('💬 Opening support dialog');
       setShowSupport(true);
     } else if (action === 'notifications') {
+      console.log('🔔 Opening notifications dialog');
       setShowNotifications(true);
     } else if (action === 'filters') {
+      console.log('✅ Opening filters dialog');
       setShowFilters(true);
+      console.log('📊 showFilters state set to:', true);
     }
   };
 
@@ -81,8 +89,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         <AppSidebar userRole="owner" onMenuItemClick={handleMenuAction} />
         
         <main className="flex-1 relative overflow-hidden">
-          {/* Simple Header */}
-          <header className="absolute top-0 left-0 right-0 z-20 p-3 sm:p-4">
+          {/* Simple Header - z-10 */}
+          <header className="absolute top-0 left-0 right-0 z-10 p-3 sm:p-4">
             <div className="flex justify-between items-center">
               <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20" />
               <div className="text-center flex-1">
@@ -110,8 +118,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
             </div>
           </header>
 
-          {/* Swipable Client Cards - Full Screen */}
-          <div className="absolute inset-0 pt-16 sm:pt-20 pb-4 px-2 sm:px-4 flex items-center justify-center">
+          {/* Swipable Client Cards - Full Screen - z-0 */}
+          <div className="absolute inset-0 pt-16 sm:pt-20 pb-4 px-2 sm:px-4 flex items-center justify-center z-0">
             <ClientSwipeContainer 
               onClientTap={handleProfileTap}
               onInsights={handleInsights}
@@ -120,6 +128,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           </div>
         </main>
       </div>
+
+      {/* All Dialogs - z-50+ to appear above everything */}
 
       <ClientInsightsDialog
         open={insightsOpen}
@@ -152,9 +162,10 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
       <OwnerClientFilterDialog
         open={showFilters}
         onOpenChange={(open) => {
+          console.log('🎛️ Filter dialog open state changed to:', open);
           setShowFilters(open);
           if (!open) {
-            // Refetch clients after filter dialog closes
+            console.log('🔄 Refetching clients after filter dialog closed');
             refetch();
           }
         }}
