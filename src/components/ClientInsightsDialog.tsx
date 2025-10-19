@@ -6,6 +6,34 @@ import { MapPin, User, Calendar, Flame, Star } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 import { ImageCarousel } from './ImageCarousel';
 
+// Tag categories for organized display
+const PROPERTY_TAGS = [
+  'Looking to rent long-term', 'Short-term rental seeker', 'Interested in purchasing property',
+  'Open to rent-to-own', 'Flexible lease terms', 'Corporate housing needed',
+  'Family-friendly housing', 'Student accommodation',
+];
+
+const TRANSPORTATION_TAGS = [
+  'Need motorcycle rental', 'Looking to buy motorcycle', 'Bicycle enthusiast',
+  'Need yacht charter', 'Interested in yacht purchase', 'Daily commuter', 'Weekend explorer',
+];
+
+const LIFESTYLE_TAGS = [
+  'Pet-friendly required', 'Eco-conscious living', 'Digital nomad', 'Fitness & wellness focused',
+  'Beach lover', 'City center preference', 'Quiet neighborhood', 'Social & community-oriented',
+  'Work-from-home setup', 'Minimalist lifestyle',
+];
+
+const FINANCIAL_TAGS = [
+  'Verified income', 'Excellent credit score', 'Landlord references available',
+  'Long-term employment', 'Flexible budget',
+];
+
+// Helper to filter tags by category
+function filterTagsByCategory(allTags: string[], categoryTags: string[]): string[] {
+  return allTags.filter(tag => categoryTags.includes(tag));
+}
+
 interface ClientInsightsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -54,35 +82,67 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               </div>
             </div>
 
-            {/* Bio */}
-            {profile.bio && (
-              <div>
-                <h4 className="font-semibold mb-2">About</h4>
-                <p className="text-muted-foreground">{profile.bio}</p>
-              </div>
-            )}
+            {/* Profile Tags by Category */}
+            {((profile.interests && profile.interests.length > 0) || 
+              (profile.preferred_activities && profile.preferred_activities.length > 0)) && (
+              <div className="space-y-4">
+                <h4 className="font-semibold">Profile Tags</h4>
+                
+                {/* Property Interest Tags */}
+                {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], PROPERTY_TAGS).length > 0 && (
+                  <div>
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">Property & Housing</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], PROPERTY_TAGS).map((tag, index) => (
+                        <Badge key={index} className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* Interests */}
-            {profile.interests && profile.interests.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-2">Interests</h4>
-                <div className="flex flex-wrap gap-2">
-                  {profile.interests.map((interest, index) => (
-                    <Badge key={index} variant="secondary">{interest}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+                {/* Transportation Tags */}
+                {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], TRANSPORTATION_TAGS).length > 0 && (
+                  <div>
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">Transportation & Mobility</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], TRANSPORTATION_TAGS).map((tag, index) => (
+                        <Badge key={index} className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* Preferred Activities */}
-            {profile.preferred_activities && profile.preferred_activities.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-2">Preferred Activities</h4>
-                <div className="flex flex-wrap gap-2">
-                  {profile.preferred_activities.map((activity, index) => (
-                    <Badge key={index} variant="outline">{activity}</Badge>
-                  ))}
-                </div>
+                {/* Lifestyle Tags */}
+                {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], LIFESTYLE_TAGS).length > 0 && (
+                  <div>
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">Lifestyle & Preferences</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], LIFESTYLE_TAGS).map((tag, index) => (
+                        <Badge key={index} className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Financial & Verification Tags */}
+                {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], FINANCIAL_TAGS).length > 0 && (
+                  <div>
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">Financial & Verification</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], FINANCIAL_TAGS).map((tag, index) => (
+                        <Badge key={index} className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -91,9 +151,9 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               <h4 className="font-semibold mb-2">Profile Analysis</h4>
               <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                 <p className="text-sm">📋 Profile completeness: {getProfileCompleteness(profile)}%</p>
-                <p className="text-sm">🏠 Looking for: {profile.preferred_activities?.length > 0 ? 'Active lifestyle community' : 'Housing accommodations'}</p>
+                <p className="text-sm">🏠 Profile tags: {(profile.interests?.length || 0) + (profile.preferred_activities?.length || 0)} selected</p>
                 {profile.age && <p className="text-sm">👤 Age group: {getAgeGroup(profile.age)}</p>}
-                {profile.bio && <p className="text-sm">✍️ Profile details: Well-described background</p>}
+                <p className="text-sm">✍️ Profile type: {getProfileType(profile)}</p>
               </div>
             </div>
 
@@ -111,7 +171,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm">Profile: {profile.bio ? 'Detailed bio' : 'Basic info'}</span>
+                  <span className="text-sm">Profile: {getProfileType(profile)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-green-500" />
@@ -129,7 +189,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 // Helper functions for profile analysis
 function getProfileCompleteness(profile: ClientProfile): number {
   let completeness = 0;
-  const fields = ['name', 'age', 'bio', 'interests', 'preferred_activities', 'profile_images'];
+  const fields = ['name', 'age', 'interests', 'preferred_activities', 'profile_images'];
   
   fields.forEach(field => {
     const value = profile[field as keyof ClientProfile];
@@ -147,4 +207,17 @@ function getAgeGroup(age: number): string {
   if (age < 35) return 'Professional';
   if (age < 50) return 'Experienced professional';
   return 'Mature professional';
+}
+
+function getProfileType(profile: ClientProfile): string {
+  const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
+  const hasProperty = allTags.some(tag => PROPERTY_TAGS.includes(tag));
+  const hasTransport = allTags.some(tag => TRANSPORTATION_TAGS.includes(tag));
+  const hasFinancial = allTags.some(tag => FINANCIAL_TAGS.includes(tag));
+  
+  if (hasProperty && hasTransport) return 'Property & Transport Seeker';
+  if (hasProperty && hasFinancial) return 'Verified Property Seeker';
+  if (hasProperty) return 'Property Seeker';
+  if (hasTransport) return 'Transport Seeker';
+  return 'General Profile';
 }

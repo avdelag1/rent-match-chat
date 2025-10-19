@@ -5,12 +5,35 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PhotoUploadManager } from '@/components/PhotoUploadManager';
 import { useClientProfile, useSaveClientProfile } from '@/hooks/useClientProfile';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+
+// Predefined tag categories
+const PROPERTY_TAGS = [
+  'Looking to rent long-term', 'Short-term rental seeker', 'Interested in purchasing property',
+  'Open to rent-to-own', 'Flexible lease terms', 'Corporate housing needed',
+  'Family-friendly housing', 'Student accommodation',
+];
+
+const TRANSPORTATION_TAGS = [
+  'Need motorcycle rental', 'Looking to buy motorcycle', 'Bicycle enthusiast',
+  'Need yacht charter', 'Interested in yacht purchase', 'Daily commuter', 'Weekend explorer',
+];
+
+const LIFESTYLE_TAGS = [
+  'Pet-friendly required', 'Eco-conscious living', 'Digital nomad', 'Fitness & wellness focused',
+  'Beach lover', 'City center preference', 'Quiet neighborhood', 'Social & community-oriented',
+  'Work-from-home setup', 'Minimalist lifestyle',
+];
+
+const FINANCIAL_TAGS = [
+  'Verified income', 'Excellent credit score', 'Landlord references available',
+  'Long-term employment', 'Flexible budget',
+];
 
 type Props = {
   open: boolean;
@@ -24,9 +47,8 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
   const [name, setName] = useState<string>('');
   const [age, setAge] = useState<number | ''>('');
   const [gender, setGender] = useState<string>('');
-  const [bio, setBio] = useState<string>('');
-  const [interests, setInterests] = useState<string>('');
-  const [activities, setActivities] = useState<string>('');
+  const [interests, setInterests] = useState<string[]>([]);
+  const [activities, setActivities] = useState<string[]>([]);
   const [profileImages, setProfileImages] = useState<string[]>([]);
 
   useEffect(() => {
@@ -34,9 +56,8 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
     setName(data.name ?? '');
     setAge(data.age ?? '');
     setGender(data.gender ?? '');
-    setBio(data.bio ?? '');
-    setInterests((data.interests ?? []).join(', '));
-    setActivities((data.preferred_activities ?? []).join(', '));
+    setInterests(data.interests ?? []);
+    setActivities(data.preferred_activities ?? []);
     setProfileImages(data.profile_images ?? []);
   }, [data]);
 
@@ -81,9 +102,9 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
       name: name || null,
       age: age === '' ? null : Number(age),
       gender: gender || null,
-      bio: bio || null,
-      interests: interests ? interests.split(',').map((s) => s.trim()).filter(Boolean) : [],
-      preferred_activities: activities ? activities.split(',').map((s) => s.trim()).filter(Boolean) : [],
+      bio: null, // No longer using bio field
+      interests: interests,
+      preferred_activities: activities,
       profile_images: profileImages,
     };
 
@@ -91,6 +112,24 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
     await saveMutation.mutateAsync(payload);
     toast({ title: 'Profile saved', description: 'Your profile has been updated.' });
     onOpenChange(false);
+  };
+
+  const toggleTag = (tag: string, isInterestTag: boolean) => {
+    const totalTags = interests.length + activities.length;
+    
+    if (isInterestTag) {
+      if (interests.includes(tag)) {
+        setInterests(interests.filter(t => t !== tag));
+      } else if (totalTags < 10) {
+        setInterests([...interests, tag]);
+      }
+    } else {
+      if (activities.includes(tag)) {
+        setActivities(activities.filter(t => t !== tag));
+      } else if (totalTags < 10) {
+        setActivities([...activities, tag]);
+      }
+    }
   };
 
   return (
@@ -161,41 +200,122 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bio" className="text-white/90 font-medium">About Me</Label>
-                <Textarea 
-                  id="bio" 
-                  value={bio} 
-                  onChange={(e) => setBio(e.target.value)} 
-                  placeholder="Tell property owners about yourself, your lifestyle, hobbies, and what makes you a great tenant..." 
-                  className="min-h-[120px] bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400 resize-none"
-                  maxLength={500}
-                />
-                <p className="text-white/40 text-xs">{bio.length}/500 characters</p>
-              </div>
+              {/* Profile Description Tags */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white/90 text-lg font-semibold">Profile Tags</Label>
+                  <p className="text-white/60 text-sm mt-1">Select 5-10 tags that best describe your needs (max 10)</p>
+                </div>
+                
+                {/* Property Interest Tags */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-orange-400">Property & Housing</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PROPERTY_TAGS.map(tag => (
+                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                        interests.includes(tag) 
+                          ? 'bg-blue-500/20 border-blue-400 text-white' 
+                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={interests.includes(tag)}
+                          onChange={() => toggleTag(tag, true)}
+                          className="rounded"
+                        />
+                        <span className="text-xs">{tag}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="interests" className="text-white/90 font-medium">Interests & Hobbies</Label>
-                <Input 
-                  id="interests" 
-                  value={interests} 
-                  onChange={(e) => setInterests(e.target.value)} 
-                  placeholder="Cooking, Yoga, Surfing, Photography, Music" 
-                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
-                />
-                <p className="text-white/40 text-xs">Separate with commas</p>
-              </div>
+                {/* Transportation Tags */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-orange-400">Transportation & Mobility</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {TRANSPORTATION_TAGS.map(tag => (
+                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                        activities.includes(tag)
+                          ? 'bg-orange-500/20 border-orange-400 text-white'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={activities.includes(tag)}
+                          onChange={() => toggleTag(tag, false)}
+                          className="rounded"
+                        />
+                        <span className="text-xs">{tag}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="activities" className="text-white/90 font-medium">Preferred Activities</Label>
-                <Input 
-                  id="activities" 
-                  value={activities} 
-                  onChange={(e) => setActivities(e.target.value)} 
-                  placeholder="Hiking, Biking, Beach walks, Coworking, Nightlife" 
-                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
-                />
-                <p className="text-white/40 text-xs">What do you like to do in your free time?</p>
+                {/* Lifestyle Tags */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-orange-400">Lifestyle & Preferences</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {LIFESTYLE_TAGS.map(tag => (
+                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                        interests.includes(tag)
+                          ? 'bg-purple-500/20 border-purple-400 text-white'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={interests.includes(tag)}
+                          onChange={() => toggleTag(tag, true)}
+                          className="rounded"
+                        />
+                        <span className="text-xs">{tag}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Financial & Verification Tags */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-orange-400">Financial & Verification</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {FINANCIAL_TAGS.map(tag => (
+                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                        activities.includes(tag)
+                          ? 'bg-green-500/20 border-green-400 text-white'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={activities.includes(tag)}
+                          onChange={() => toggleTag(tag, false)}
+                          className="rounded"
+                        />
+                        <span className="text-xs">{tag}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Selected Tags Display */}
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-white">Selected: {interests.length + activities.length} / 10</span>
+                    {interests.length + activities.length >= 10 && (
+                      <Badge className="bg-orange-500/20 text-orange-400 border-orange-400">Maximum reached</Badge>
+                    )}
+                  </div>
+                  {(interests.length > 0 || activities.length > 0) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInterests([]);
+                        setActivities([]);
+                      }}
+                      className="text-sm text-red-400 hover:text-red-300 hover:underline"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -6,6 +6,29 @@ import { Badge } from '@/components/ui/badge';
 import { Flame, X, MessageCircle, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 
+// Tag categories for color coding
+const PROPERTY_TAGS = [
+  'Looking to rent long-term', 'Short-term rental seeker', 'Interested in purchasing property',
+  'Open to rent-to-own', 'Flexible lease terms', 'Corporate housing needed',
+  'Family-friendly housing', 'Student accommodation',
+];
+
+const TRANSPORTATION_TAGS = [
+  'Need motorcycle rental', 'Looking to buy motorcycle', 'Bicycle enthusiast',
+  'Need yacht charter', 'Interested in yacht purchase', 'Daily commuter', 'Weekend explorer',
+];
+
+const LIFESTYLE_TAGS = [
+  'Pet-friendly required', 'Eco-conscious living', 'Digital nomad', 'Fitness & wellness focused',
+  'Beach lover', 'City center preference', 'Quiet neighborhood', 'Social & community-oriented',
+  'Work-from-home setup', 'Minimalist lifestyle',
+];
+
+const FINANCIAL_TAGS = [
+  'Verified income', 'Excellent credit score', 'Landlord references available',
+  'Long-term employment', 'Flexible budget',
+];
+
 interface ClientProfileCardProps {
   profile: ClientProfile;
   onSwipe: (direction: 'left' | 'right') => void;
@@ -189,29 +212,41 @@ export function ClientProfileCard({
       {/* Bottom Content - Compact */}
       <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent">
         <div className="space-y-2">
-          {/* Name and Bio */}
+          {/* Name */}
           <div>
-            <h3 className="text-2xl font-bold text-foreground mb-1">{profile.name}</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
-              {profile.bio}
-            </p>
+            <h3 className="text-2xl font-bold text-foreground mb-2">{profile.name}</h3>
           </div>
           
-          {/* Interests */}
-          {profile.interests && profile.interests.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {profile.interests.slice(0, 4).map((interest, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="text-xs bg-primary/10 text-primary hover:bg-primary/20"
-                >
-                  {interest}
-                </Badge>
-              ))}
-              {profile.interests.length > 4 && (
-                <Badge variant="outline" className="text-xs">
-                  +{profile.interests.length - 4} more
+          {/* Profile Tags */}
+          {((profile.interests && profile.interests.length > 0) || 
+            (profile.preferred_activities && profile.preferred_activities.length > 0)) && (
+            <div className="flex flex-wrap gap-1.5">
+              {[...(profile.interests || []), ...(profile.preferred_activities || [])]
+                .slice(0, 4)
+                .map((tag, index) => {
+                  // Determine tag color based on category
+                  let badgeClass = "text-xs";
+                  if (PROPERTY_TAGS.includes(tag)) {
+                    badgeClass += " bg-blue-500/20 text-blue-600 dark:text-blue-300 border-blue-500/30";
+                  } else if (TRANSPORTATION_TAGS.includes(tag)) {
+                    badgeClass += " bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/30";
+                  } else if (LIFESTYLE_TAGS.includes(tag)) {
+                    badgeClass += " bg-purple-500/20 text-purple-600 dark:text-purple-300 border-purple-500/30";
+                  } else if (FINANCIAL_TAGS.includes(tag)) {
+                    badgeClass += " bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30";
+                  } else {
+                    badgeClass += " bg-primary/10 text-primary border-primary/20";
+                  }
+                  
+                  return (
+                    <Badge key={index} variant="outline" className={badgeClass}>
+                      {tag}
+                    </Badge>
+                  );
+                })}
+              {([...(profile.interests || []), ...(profile.preferred_activities || [])].length > 4) && (
+                <Badge variant="outline" className="text-xs bg-muted">
+                  +{[...(profile.interests || []), ...(profile.preferred_activities || [])].length - 4} more
                 </Badge>
               )}
             </div>
