@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { Flame, X, RotateCcw, Sparkles, Heart } from 'lucide-react';
+import { X, RotateCcw, Sparkles, Heart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -257,12 +257,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           <span className="text-white text-sm font-medium">
             Showing {currentIndex + 1} of {clientProfiles.length}
           </span>
-          {currentClient?.matchPercentage && (
-            <MatchPercentageBadge 
-              percentage={currentClient.matchPercentage} 
-              reasons={currentClient.matchReasons}
-            />
-          )}
         </div>
       </div>
 
@@ -403,17 +397,17 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           </Button>
         </motion.div>
 
-        {/* Super Like Button (Star/Flame) */}
+        {/* Return/Back Button */}
         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <Button
             size="lg"
             variant="ghost"
-            className="w-14 h-14 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg transition-all p-0"
-            onClick={() => currentClient && handleSuperLike(currentClient.user_id, 'profile')}
-            disabled={swipeMutation.isPending || !currentClient}
-            aria-label="Super Like"
+            className="w-14 h-14 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg transition-all p-0"
+            onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
+            disabled={swipeMutation.isPending || !currentClient || currentIndex === 0}
+            aria-label="Go Back"
           >
-            <Flame className="w-6 h-6 fill-white" />
+            <RotateCcw className="w-6 h-6" />
           </Button>
         </motion.div>
 

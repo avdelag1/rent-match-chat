@@ -1,4 +1,4 @@
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle, Filter, Bell } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle, Filter, Bell, ChevronDown, ChevronUp } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -160,6 +160,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const location = useLocation()
   const { setOpenMobile } = useSidebar()
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>(undefined)
+  const [filterClientsExpanded, setFilterClientsExpanded] = useState(false)
   const { unreadCount } = useUnreadMessageCount()
   const { unreadCount: unreadLikes } = useUnreadLikes()
   const { unreadCount: unreadMatches } = useUnreadMatches()
@@ -261,37 +262,49 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
                     transition={{ delay: index * 0.1 }}
                   >
                     {item.children ? (
-                      // Render parent with children
+                      // Render parent with children (collapsible)
                       <div className="space-y-1">
                         <SidebarMenuItem>
-                          <div className="w-full rounded-lg p-2.5 transition-all duration-200 group border bg-secondary hover:bg-secondary/80 text-foreground border-border hover:border-border">
-                            <div className="flex items-center">
-                              <item.icon className="w-5 h-5 text-muted-foreground" />
-                              <span className="font-medium ml-3 text-foreground">{item.title}</span>
+                          <div 
+                            onClick={() => setFilterClientsExpanded(!filterClientsExpanded)}
+                            className="w-full rounded-lg p-2.5 transition-all duration-200 group border bg-secondary hover:bg-secondary/80 text-foreground border-border hover:border-border cursor-pointer"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <item.icon className="w-5 h-5 text-muted-foreground" />
+                                <span className="font-medium ml-3 text-foreground">{item.title}</span>
+                              </div>
+                              {filterClientsExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                              )}
                             </div>
                           </div>
                         </SidebarMenuItem>
-                        {/* Render children */}
-                        <div className="ml-6 space-y-1">
-                          {item.children.map((child: any) => (
-                            <SidebarMenuItem key={child.title}>
-                              <SidebarMenuButton
-                                onClick={() => navigate(child.url)}
-                                className={`
-                                  w-full rounded-lg p-2 transition-all duration-200 border text-sm
-                                  ${isActive(child.url)
-                                    ? 'text-primary-foreground shadow-md border-primary/30 bg-primary'
-                                    : 'bg-secondary/50 hover:bg-secondary text-foreground border-border hover:border-border'
-                                  }
-                                `}
-                              >
-                                <span className={`font-medium ${isActive(child.url) ? 'text-primary-foreground' : 'text-foreground'}`}>
-                                  {child.title}
-                                </span>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          ))}
-                        </div>
+                        {/* Render children only when expanded */}
+                        {filterClientsExpanded && (
+                          <div className="ml-6 space-y-1">
+                            {item.children.map((child: any) => (
+                              <SidebarMenuItem key={child.title}>
+                                <SidebarMenuButton
+                                  onClick={() => navigate(child.url)}
+                                  className={`
+                                    w-full rounded-lg p-2 transition-all duration-200 border text-sm
+                                    ${isActive(child.url)
+                                      ? 'text-primary-foreground shadow-md border-primary/30 bg-primary'
+                                      : 'bg-secondary/50 hover:bg-secondary text-foreground border-border hover:border-border'
+                                    }
+                                  `}
+                                >
+                                  <span className={`font-medium ${isActive(child.url) ? 'text-primary-foreground' : 'text-foreground'}`}>
+                                    {child.title}
+                                  </span>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       // Render regular menu item
