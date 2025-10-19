@@ -145,21 +145,39 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         </DialogDescription>
         <div className="max-h-[95vh] overflow-y-auto">
         <div className="relative">
-          {/* Header with enhanced gradient background and animated blobs */}
-          <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-t-3xl px-6 py-10 shadow-2xl overflow-hidden">
-            {/* Animated gradient blobs */}
+          {/* Header with role-specific gradient background and animated blobs */}
+          <div className={`relative rounded-t-3xl px-6 py-10 shadow-2xl overflow-hidden ${
+            role === 'client' 
+              ? 'bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600' 
+              : 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-600'
+          }`}>
+            {/* Animated gradient blobs - role-specific */}
             <div className="absolute inset-0 opacity-30">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-pink-400 rounded-full blur-3xl animate-pulse"></div>
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-red-600 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+              {role === 'client' ? (
+                <>
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-cyan-400 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-700 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-indigo-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                </>
+              ) : (
+                <>
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-pink-400 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-700 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-1/2 left-1/2 w-36 h-36 bg-orange-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                </>
+              )}
             </div>
             
-            {/* Back Button with enhanced animation */}
+            {/* Back Button with modern circular design */}
             <button 
               onClick={onClose}
-              className="absolute top-5 left-5 flex items-center gap-2 text-white/90 hover:text-white transition-all duration-300 text-sm bg-white/10 px-3 py-2 rounded-xl backdrop-blur-sm hover:bg-white/20 transform hover:scale-105 hover:shadow-lg active:scale-95"
+              className={`absolute top-5 left-5 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center text-white border-2 border-white/20 transition-all duration-300 transform hover:scale-110 hover:rotate-12 active:scale-95 ${
+                role === 'client'
+                  ? 'bg-gradient-to-br from-blue-600/80 to-indigo-700/80 hover:shadow-lg hover:shadow-blue-500/50'
+                  : 'bg-gradient-to-br from-orange-600/80 to-red-700/80 hover:shadow-lg hover:shadow-orange-500/50'
+              }`}
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back
+              <ArrowLeft className="w-5 h-5" />
             </button>
 
             {/* Header Content with animations */}

@@ -26,13 +26,8 @@ export function PWAInstallPrompt() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
       if (isStandalone) return;
       
-      // Show notification-style prompt periodically
-      const dismissCount = parseInt(localStorage.getItem('pwa-install-dismiss-count') || '0');
-      
-      // Show after 2 seconds initially, then every session if dismissed less than 3 times
-      if (dismissCount < 3) {
-        setTimeout(() => setShowPrompt(true), 2000);
-      }
+      // Show install prompt immediately every time
+      setTimeout(() => setShowPrompt(true), 500);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -56,8 +51,6 @@ export function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    const dismissCount = parseInt(localStorage.getItem('pwa-install-dismiss-count') || '0');
-    localStorage.setItem('pwa-install-dismiss-count', String(dismissCount + 1));
   };
 
   // Check if app is already installed
