@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { Home, Ship, Bike, BikeIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Home, Anchor, Bike, CircleDot } from "lucide-react";
 
 interface CategorySelectionDialogProps {
   open: boolean;
@@ -14,92 +15,157 @@ export function CategorySelectionDialog({
   onOpenChange, 
   onCategorySelect 
 }: CategorySelectionDialogProps) {
-  const categories = [
-    {
-      id: 'property' as const,
-      title: 'Property',
-      icon: Home,
-      description: 'Houses, apartments, condos',
-      color: 'from-blue-500 to-blue-600',
-    },
-    {
-      id: 'yacht' as const,
-      title: 'Yacht',
-      icon: Ship,
-      description: 'Boats, yachts, vessels',
-      color: 'from-cyan-500 to-cyan-600',
-    },
-    {
-      id: 'motorcycle' as const,
-      title: 'Motorcycle',
-      icon: Bike,
-      description: 'Motorcycles, scooters',
-      color: 'from-orange-500 to-orange-600',
-    },
-    {
-      id: 'bicycle' as const,
-      title: 'Bicycle',
-      icon: BikeIcon,
-      description: 'Bikes, e-bikes',
-      color: 'from-green-500 to-green-600',
-    },
-  ];
-
-  const modes: Array<{ id: 'rent' | 'sale' | 'both', label: string }> = [
-    { id: 'rent', label: 'For Rent' },
-    { id: 'sale', label: 'For Sale' },
-    { id: 'both', label: 'Both' },
-  ];
+  const handleSelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
+    onCategorySelect(category, mode);
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="text-2xl">Add New Listing</DialogTitle>
         </DialogHeader>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          {categories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <Card 
-                key={category.id}
-                className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/50"
-              >
-                <CardContent className="p-6">
-                  <div className={cn(
-                    "w-16 h-16 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-4",
-                    category.color
-                  )}>
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                    {category.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {category.description}
-                  </p>
-                  
-                  <div className="flex gap-2">
-                    {modes.map((mode) => (
-                      <button
-                        key={mode.id}
-                        onClick={() => {
-                          onCategorySelect(category.id, mode.id);
-                          onOpenChange(false);
-                        }}
-                        className="flex-1 px-3 py-2 text-sm rounded-lg border border-border hover:bg-primary hover:text-primary-foreground transition-colors"
-                      >
-                        {mode.label}
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+
+        <ScrollArea className="flex-1 px-6 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Property Card */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Home className="w-6 h-6 text-primary" />
+                  <CardTitle>Property</CardTitle>
+                </div>
+                <CardDescription>Apartments, houses, condos</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  onClick={() => handleSelect('property', 'rent')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Rent
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('property', 'sale')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Sale
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('property', 'both')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Both
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Yacht Card */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Anchor className="w-6 h-6 text-primary" />
+                  <CardTitle>Yacht</CardTitle>
+                </div>
+                <CardDescription>Boats, yachts, sailing vessels</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  onClick={() => handleSelect('yacht', 'rent')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Rent
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('yacht', 'sale')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Sale
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('yacht', 'both')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Both
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Motorcycle Card */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <CircleDot className="w-6 h-6 text-primary" />
+                  <CardTitle>Motorcycle</CardTitle>
+                </div>
+                <CardDescription>Motorcycles, scooters</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  onClick={() => handleSelect('motorcycle', 'rent')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Rent
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('motorcycle', 'sale')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Sale
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('motorcycle', 'both')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Both
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Bicycle Card */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Bike className="w-6 h-6 text-primary" />
+                  <CardTitle>Bicycle</CardTitle>
+                </div>
+                <CardDescription>Bikes, e-bikes</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  onClick={() => handleSelect('bicycle', 'rent')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Rent
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('bicycle', 'sale')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Sale
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('bicycle', 'both')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Both
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,6 +45,10 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
   });
 
   const formData = watch();
+
+  useEffect(() => {
+    onDataChange(formData);
+  }, [formData, onDataChange]);
 
   return (
     <div className="space-y-6">

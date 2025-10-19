@@ -31,23 +31,32 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (editingProperty && isOpen) {
-      // If editing an existing property with id
-      if (editingProperty.id) {
-        setSelectedCategory(editingProperty.category || 'property');
-        setSelectedMode(editingProperty.mode || 'rent');
-        setImages(editingProperty.images || []);
-        setFormData(editingProperty);
-      } else {
-        // New listing with pre-selected category and mode
-        setSelectedCategory(editingProperty.category || 'property');
-        setSelectedMode(editingProperty.mode || 'rent');
-        setImages([]);
-        setFormData({});
-      }
-    } else if (!editingProperty && isOpen) {
+    if (!isOpen) return;
+    
+    if (editingProperty?.id) {
+      // Editing existing listing - load all data
+      setSelectedCategory(editingProperty.category || 'property');
+      setSelectedMode(editingProperty.mode || 'rent');
+      setImages(editingProperty.images || []);
+      setFormData(editingProperty);
+      setLocation({
+        lat: editingProperty.latitude,
+        lng: editingProperty.longitude
+      });
+    } else if (editingProperty?.category) {
+      // New listing with pre-selected category from CategoryDialog
+      setSelectedCategory(editingProperty.category);
+      setSelectedMode(editingProperty.mode || 'rent');
       setImages([]);
       setFormData({});
+      setLocation({});
+    } else {
+      // Completely new listing - reset everything
+      setSelectedCategory('property');
+      setSelectedMode('rent');
+      setImages([]);
+      setFormData({});
+      setLocation({});
     }
   }, [editingProperty, isOpen]);
 
@@ -95,9 +104,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     },
     onSuccess: () => {
       toast({
-        title: editingProperty ? "Listing Updated!" : "Listing Created!",
-        description: "Your listing has been successfully saved.",
+        title: editingProperty?.id ? "Listing Updated!" : "Listing Created!",
+        description: "Your listing has been successfully saved and is now visible.",
+        duration: 3000,
       });
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
     },
@@ -209,6 +220,46 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       });
       return;
     }
+    
+    if (!formData.city) {
+      toast({
+        title: "City Required",
+        description: "Please enter the city where your listing is located.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Category-specific validation
+    if (selectedCategory === 'yacht') {
+      if (!formData.title || !formData.brand || !formData.length_m) {
+        toast({
+          title: "Required Fields Missing",
+          description: "Please fill in title, brand, and length for your yacht.",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else if (selectedCategory === 'motorcycle') {
+      if (!formData.title || !formData.brand || !formData.year) {
+        toast({
+          title: "Required Fields Missing",
+          description: "Please fill in title, brand, and year for your motorcycle.",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else if (selectedCategory === 'bicycle') {
+      if (!formData.title || !formData.vehicle_type) {
+        toast({
+          title: "Required Fields Missing",
+          description: "Please fill in title and type for your bicycle.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
     createListingMutation.mutate();
   };
 
@@ -268,7 +319,29 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="lat">Latitude</Label>
+                  <Label htmlFor="city">City *</Label>
+                  <Input
+                    id="city"
+                    value={formData.city || ''}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    placeholder="e.g., Tulum"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="neighborhood">Neighborhood</Label>
+                  <Input
+                    id="neighborhood"
+                    value={formData.neighborhood || ''}
+                    onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                    placeholder="e.g., Aldea Zama"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="lat">Latitude (Optional)</Label>
                   <Input
                     id="lat"
                     type="number"
@@ -279,7 +352,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lng">Longitude</Label>
+                  <Label htmlFor="lng">Longitude (Optional)</Label>
                   <Input
                     id="lng"
                     type="number"
@@ -290,8 +363,9 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
                   />
                 </div>
               </div>
+              
               <p className="text-sm text-muted-foreground">
-                Tip: Use a map tool to find exact coordinates for your listing location.
+                💡 City is required. Coordinates are optional but help with map features.
               </p>
             </CardContent>
           </Card>
