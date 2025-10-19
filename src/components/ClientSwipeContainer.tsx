@@ -71,7 +71,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     
     setTimeout(() => {
       setEmojiAnimation({ show: false, type: 'like', position: 'right' });
-    }, 1200);
+    }, 600);
     
     // Record swipe with match checking
     swipeMutation.mutate({
@@ -87,7 +87,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
-    }, 300);
+    }, 200);
   }, [currentIndex, clientProfiles, swipeMutation, recordSwipe]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
@@ -255,24 +255,24 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
               initial={{ 
                 scale: 0, 
                 opacity: 0, 
-                x: emojiAnimation.position === 'right' ? 150 : -100,
-                rotate: emojiAnimation.position === 'right' ? 30 : -30
+                x: emojiAnimation.position === 'right' ? 100 : -100,
+                rotate: emojiAnimation.position === 'right' ? 20 : -20
               }}
               animate={{ 
-                scale: 2, 
+                scale: 2.2, 
                 opacity: 1, 
-                x: emojiAnimation.position === 'right' ? 80 : -50,
+                x: emojiAnimation.position === 'right' ? 50 : -50,
                 rotate: 0
               }}
               exit={{ 
-                scale: emojiAnimation.type === 'like' ? 2.5 : 1.5,
+                scale: emojiAnimation.type === 'like' ? 3 : 1.2,
                 opacity: 0, 
-                y: emojiAnimation.type === 'like' ? -150 : -100,
-                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -200 : 200),
-                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -45 : 45)
+                y: emojiAnimation.type === 'like' ? -200 : -80,
+                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -250 : 250),
+                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -60 : 60)
               }}
               transition={{ 
-                duration: 0.7, 
+                duration: 0.4, 
                 ease: [0.34, 1.56, 0.64, 1]
               }}
               className={`absolute ${

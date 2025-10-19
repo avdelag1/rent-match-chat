@@ -58,10 +58,10 @@ export function EnhancedPropertyCard({
   const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
 
   const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 100;
+    const threshold = 60;
     const velocity = Math.abs(info.velocity.x);
     
-    if (Math.abs(info.offset.x) > threshold || velocity > 1000) {
+    if (Math.abs(info.offset.x) > threshold || velocity > 600) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
@@ -101,22 +101,16 @@ export function EnhancedPropertyCard({
     const xValue = x.get();
     if (xValue > 50) {
       return (
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-red-500/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-          <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-full p-6 shadow-lg">
-            <div className="text-white text-2xl font-bold">🔥</div>
-          </div>
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+          <div className="absolute top-1/3 text-white font-bold text-4xl drop-shadow-2xl rotate-12">
             LIKE
           </div>
         </div>
       );
     } else if (xValue < -50) {
       return (
-        <div className="absolute inset-0 bg-gray-600/30 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-          <div className="bg-white rounded-full p-6 shadow-lg">
-            <div className="text-gray-600 text-2xl font-bold">👎</div>
-          </div>
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white font-bold text-xl">
+        <div className="absolute inset-0 bg-gray-600/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+          <div className="absolute top-1/3 text-white font-bold text-4xl drop-shadow-2xl -rotate-12">
             NOPE
           </div>
         </div>
@@ -143,10 +137,11 @@ export function EnhancedPropertyCard({
       style={cardStyle}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.7}
       onDragEnd={handleDragEnd}
       className="cursor-pointer"
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ type: "spring", stiffness: 200, damping: 25 }}
     >
       <Card className="relative w-full h-[calc(100vh-120px)] overflow-hidden bg-card border-none shadow-2xl rounded-3xl">
         {/* Full Screen Image */}
