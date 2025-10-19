@@ -3,7 +3,7 @@ import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
 import { NotificationsDialog } from '@/components/NotificationsDialog';
-import { OwnerClientFilters } from '@/components/OwnerClientFilters';
+import { OwnerClientFilterDialog } from '@/components/OwnerClientFilterDialog';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -11,7 +11,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Users, MapPin, RotateCcw, Zap, Home, Ship, Bike, BikeIcon, Plus } from 'lucide-react';
+import { Users, MapPin, RotateCcw, Zap, Home, Ship, Bike, BikeIcon, Plus, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useListings } from '@/hooks/useListings';
 import { Card, CardContent } from '@/components/ui/card';
@@ -139,18 +139,27 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         <main className="flex-1 relative overflow-hidden">
           {/* Enhanced Header with Stats */}
           <header className="absolute top-0 left-0 right-0 z-20 p-4 space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20" />
               <div className="text-center flex-1">
                 <h1 className="text-white text-xl font-bold">Owner Dashboard</h1>
-                <p className="text-white/80 text-sm">Manage your listings and find potential tenants</p>
+                <p className="text-white/80 text-sm">Find your perfect tenants</p>
               </div>
+              <Button
+                onClick={() => setShowFilters(true)}
+                className="bg-white/20 hover:bg-white/30 text-white border-white/20 gap-2"
+                size="sm"
+              >
+                <Filter className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+              </Button>
               <Button
                 onClick={() => setShowCategoryDialog(true)}
                 className="bg-white text-orange-500 hover:bg-white/90 gap-2"
+                size="sm"
               >
                 <Plus className="h-4 w-4" />
-                Add Listing
+                <span className="hidden sm:inline">Add</span>
               </Button>
             </div>
 
@@ -347,14 +356,14 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         onClose={() => setShowNotifications(false)}
       />
 
-      <OwnerClientFilters
-        isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
-        currentFilters={appliedFilters}
-        onApplyFilters={(filters) => {
-          setAppliedFilters(filters);
-          console.log('Applied owner filters:', filters);
-          setShowFilters(false);
+      <OwnerClientFilterDialog
+        open={showFilters}
+        onOpenChange={(open) => {
+          setShowFilters(open);
+          if (!open) {
+            // Refetch clients after filter dialog closes
+            refetch();
+          }
         }}
       />
 

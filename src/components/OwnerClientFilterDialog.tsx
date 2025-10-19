@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Save } from 'lucide-react';
 import { useOwnerClientPreferences, OwnerClientPreferences } from '@/hooks/useOwnerClientPreferences';
 import { useSavedFilters } from '@/hooks/useSavedFilters';
+import { useToast } from '@/hooks/use-toast';
 
 interface OwnerClientFilterDialogProps {
   open: boolean;
@@ -56,6 +57,7 @@ const OCCUPATION_OPTIONS = [
 export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilterDialogProps) {
   const { preferences, updatePreferences, isUpdating } = useOwnerClientPreferences();
   const { saveFilter } = useSavedFilters();
+  const { toast } = useToast();
   
   const [filterName, setFilterName] = useState('');
   const [showSaveAs, setShowSaveAs] = useState(false);
@@ -128,6 +130,10 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
 
   const handleSave = async () => {
     await updatePreferences(formData);
+    toast({
+      title: "Filters Applied",
+      description: "Client cards will refresh with your preferences.",
+    });
     onOpenChange(false);
   };
 
@@ -158,6 +164,10 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
     });
 
     await updatePreferences(formData);
+    toast({
+      title: "Filter Saved!",
+      description: `"${filterName}" saved successfully. Client cards will refresh.`,
+    });
     setFilterName('');
     setShowSaveAs(false);
     onOpenChange(false);

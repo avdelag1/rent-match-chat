@@ -96,8 +96,9 @@ const ownerMenuItems = [
   },
   {
     title: "Client Filters",
-    url: "/owner/saved-searches",
+    url: "#filters",
     icon: Settings,
+    action: "filters",
   },
   {
     title: "Contracts",
