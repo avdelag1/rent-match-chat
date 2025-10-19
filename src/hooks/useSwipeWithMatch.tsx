@@ -38,7 +38,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           target_id: targetId,
           direction
         }, {
-          onConflict: 'user_id,target_id',
+          onConflict: 'user_id,target_id,direction',
           ignoreDuplicates: false
         })
         .select()
@@ -52,30 +52,45 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       // If it's a right swipe, check for mutual likes
       if (direction === 'right') {
         let mutualLike = null;
+        let matchClientId: string;
+        let matchOwnerId: string;
+        let matchListingId: string | null = null;
 
         if (targetType === 'listing') {
-          // Get the listing owner first
+          // Client swiping on a listing
           const { data: listing } = await supabase
             .from('listings')
             .select('owner_id')
             .eq('id', targetId)
             .maybeSingle();
 
-          if (listing) {
-            // Check if owner liked this client
-            const { data: ownerLike } = await supabase
-              .from('likes')
-              .select('*')
-              .eq('user_id', listing.owner_id)
-              .eq('target_id', user.id)
-              .eq('direction', 'right')
-              .maybeSingle();
-
-            mutualLike = ownerLike;
+          if (!listing) {
+            console.error('Listing not found');
+            return like;
           }
+
+          matchClientId = user.id;  // Current user is the client
+          matchOwnerId = listing.owner_id;  // Listing owner
+          matchListingId = targetId;  // The listing
+
+          // Check if owner liked this client
+          const { data: ownerLike } = await supabase
+            .from('likes')
+            .select('*')
+            .eq('user_id', listing.owner_id)
+            .eq('target_id', user.id)
+            .eq('direction', 'right')
+            .maybeSingle();
+
+          mutualLike = ownerLike;
         } else {
-          // For profiles, check if target liked this user
-          const { data: targetLike } = await supabase
+          // Owner swiping on a client profile
+          matchClientId = targetId;  // Target is the client
+          matchOwnerId = user.id;  // Current user is the owner
+          matchListingId = null;  // No specific listing
+
+          // Check if client liked this owner
+          const { data: clientLike } = await supabase
             .from('likes')
             .select('*')
             .eq('user_id', targetId)
@@ -83,17 +98,17 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             .eq('direction', 'right')
             .maybeSingle();
 
-          mutualLike = targetLike;
+          mutualLike = clientLike;
         }
 
         if (mutualLike) {
-          // It's a match! Create or update match record with proper conflict handling
+          // It's a match! Create or update match record
           const { data: match, error: matchError } = await supabase
             .from('matches')
             .upsert({
-              client_id: targetType === 'profile' ? targetId : user.id,
-              owner_id: targetType === 'profile' ? user.id : targetId,
-              listing_id: targetType === 'listing' ? targetId : null,
+              client_id: matchClientId,
+              owner_id: matchOwnerId,
+              listing_id: matchListingId,
               is_mutual: true,
               client_liked_at: targetType === 'profile' ? mutualLike.created_at : like.created_at,
               owner_liked_at: targetType === 'profile' ? like.created_at : mutualLike.created_at,
