@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { AppLoadingScreen } from './AppLoadingScreen';
-import { PWAInstallPrompt } from './PWAInstallPrompt';
 import { UpdateNotification } from './UpdateNotification';
 import { SkipToMainContent, useFocusManagement } from './AccessibilityHelpers';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -44,7 +43,6 @@ export function AppLayout({ children }: AppLayoutProps) {
           {children}
         </div>
       </main>
-      <PWAInstallPrompt />
       <UpdateNotification />
     </div>
   );

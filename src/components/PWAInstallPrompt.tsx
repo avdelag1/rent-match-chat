@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Download, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -18,16 +18,21 @@ export function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
+    // Check if app is already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    if (isStandalone) return;
+
+    // Check if dismissed in this session
+    const dismissedThisSession = sessionStorage.getItem('pwa-prompt-dismissed');
+    if (dismissedThisSession) return;
+
+    // Show banner on every visit
+    setTimeout(() => setShowPrompt(true), 500);
+
+    // Listen for native install prompt
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      
-      // Check if app is already installed
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      if (isStandalone) return;
-      
-      // Show install prompt immediately every time
-      setTimeout(() => setShowPrompt(true), 500);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -35,27 +40,44 @@ export function PWAInstallPrompt() {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('PWA installed');
-      localStorage.setItem('pwa-install-dismiss-count', '999'); // Don't show again
+    if (deferredPrompt) {
+      // Native install available
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        console.log('PWA installed');
+      }
+      
+      setDeferredPrompt(null);
+    } else {
+      // Show manual install instructions
+      const userAgent = navigator.userAgent.toLowerCase();
+      let instructions = '';
+      
+      if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+        instructions = 'Tap the Share button and select "Add to Home Screen"';
+      } else if (userAgent.includes('android')) {
+        instructions = 'Tap the menu button and select "Add to Home Screen" or "Install App"';
+      } else {
+        instructions = 'Use your browser menu to install this app';
+      }
+      
+      alert(instructions);
     }
     
-    setDeferredPrompt(null);
     setShowPrompt(false);
+    sessionStorage.setItem('pwa-prompt-dismissed', 'true');
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    sessionStorage.setItem('pwa-prompt-dismissed', 'true');
   };
 
   // Check if app is already installed
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-  if (!deferredPrompt || isStandalone) return null;
+  if (isStandalone) return null;
 
   return (
     <AnimatePresence>
