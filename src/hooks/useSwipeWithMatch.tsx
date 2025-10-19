@@ -21,7 +21,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       direction: 'left' | 'right'; 
       targetType: 'listing' | 'profile' 
     }) => {
-      if (!user?.id) throw new Error('User not authenticated');
+      // Defensive auth check
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser?.id || !user?.id) {
+        console.error('Auth check failed:', { currentUser: currentUser?.id, user: user?.id });
+        throw new Error('User not authenticated. Please refresh the page.');
+      }
+
+      console.log('Swipe with match auth check passed:', { userId: currentUser.id, targetId, direction });
 
       // Check for existing like to prevent duplicates
       const { data: existingLike } = await supabase

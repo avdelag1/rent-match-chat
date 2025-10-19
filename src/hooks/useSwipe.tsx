@@ -12,16 +12,20 @@ export function useSwipe() {
       direction: 'left' | 'right';
       targetType?: 'listing' | 'profile';
     }) => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Not authenticated');
+      // Defensive auth check
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) {
+        console.error('Auth check failed - user not authenticated');
+        throw new Error('User not authenticated. Please refresh the page.');
+      }
 
-      console.log('Swiping:', { targetId, direction, targetType, userId: user.user.id });
+      console.log('Swipe auth check passed:', { userId: user.id, targetId, direction, targetType });
 
       // Check if user has already swiped on this target to prevent duplicates
       const { data: existingLike } = await supabase
         .from('likes')
         .select('*')
-        .eq('user_id', user.user.id)
+        .eq('user_id', user.id)
         .eq('target_id', targetId)
         .maybeSingle();
 
@@ -41,7 +45,7 @@ export function useSwipe() {
         const { error } = await supabase
           .from('likes')
           .insert({
-            user_id: user.user.id,
+            user_id: user.id,
             target_id: targetId,
             direction
           });
@@ -70,14 +74,14 @@ export function useSwipe() {
               .from('likes')
               .select('*')
               .eq('user_id', listing.owner_id)
-              .eq('target_id', user.user.id)
+              .eq('target_id', user.id)
               .eq('direction', 'right')
               .maybeSingle();
 
             if (ownerLike) {
               // Create a match with proper conflict handling!
               const { error: matchError } = await supabase.from('matches').upsert({
-                client_id: user.user.id,
+                client_id: user.id,
                 owner_id: listing.owner_id,
                 listing_id: targetId,
                 client_liked_at: new Date().toISOString(),
@@ -110,7 +114,7 @@ export function useSwipe() {
             .from('likes')
             .select('*')
             .eq('user_id', targetId)
-            .eq('target_id', user.user.id)
+            .eq('target_id', user.id)
             .eq('direction', 'right')
             .maybeSingle();
 
@@ -118,7 +122,7 @@ export function useSwipe() {
             // Create a match with proper conflict handling!
             const { error: matchError } = await supabase.from('matches').upsert({
               client_id: targetId,
-              owner_id: user.user.id,
+              owner_id: user.id,
               client_liked_at: clientLike.created_at,
               owner_liked_at: new Date().toISOString(),
               is_mutual: true,
