@@ -36,7 +36,7 @@ const ClientProfile = () => {
   return (
     <DashboardLayout userRole="client">
       <motion.div 
-        className="p-8"
+        className="p-4 sm:p-8 pb-24 sm:pb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -127,7 +127,7 @@ const ClientProfile = () => {
 
                     <Button 
                       onClick={() => setShowEditDialog(true)}
-                      className="group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="hidden sm:flex group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
                     >
                       <span className="group-hover:animate-pulse">Edit Profile</span>
                     </Button>
@@ -137,7 +137,7 @@ const ClientProfile = () => {
                     <p className="text-muted-foreground mb-4">Complete your profile to get better matches!</p>
                     <Button 
                       onClick={() => setShowEditDialog(true)}
-                      className="group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="hidden sm:flex group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95 mx-auto"
                     >
                       <span className="group-hover:animate-pulse">Create Profile</span>
                     </Button>
@@ -147,6 +147,21 @@ const ClientProfile = () => {
             </Card>
           </motion.div>
         </div>
+      </motion.div>
+
+      {/* Sticky Mobile Edit Button */}
+      <motion.div
+        className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-50"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+      >
+        <Button 
+          onClick={() => setShowEditDialog(true)}
+          className="w-full h-14 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-lg shadow-lg transform transition-all duration-200 active:scale-95"
+        >
+          {profile ? '✏️ Edit Profile' : '➕ Create Profile'}
+        </Button>
       </motion.div>
 
       <ClientProfileDialog 
