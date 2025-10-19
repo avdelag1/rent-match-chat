@@ -124,6 +124,24 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             console.error('Error creating match:', matchError);
             toast.error("Match creation failed. Please try again.");
           } else if (match) {
+            // Create conversation explicitly after match is created
+            const { error: conversationError } = await supabase
+              .from('conversations')
+              .upsert({
+                match_id: match.id,
+                client_id: match.client_id,
+                owner_id: match.owner_id,
+                listing_id: match.listing_id,
+                status: 'active'
+              }, {
+                onConflict: 'client_id,owner_id',
+                ignoreDuplicates: true
+              });
+
+            if (conversationError) {
+              console.error('Error creating conversation:', conversationError);
+            }
+
             // Get profiles for match celebration with error handling
             try {
               const [clientProfile, ownerProfile] = await Promise.all([
