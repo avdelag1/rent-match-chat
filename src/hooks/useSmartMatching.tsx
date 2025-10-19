@@ -176,7 +176,7 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
 
 export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
   return useQuery({
-    queryKey: ['smart-listings', excludeSwipedIds],
+    queryKey: ['smart-listings'], // Removed excludeSwipedIds from key
     queryFn: async () => {
       try {
         // Get current user's preferences
@@ -189,21 +189,14 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Get active listings
-        let query = supabase
+        // Get ALL active listings - no exclusions
+        const { data: listings, error } = await supabase
           .from('listings')
           .select('*')
           .eq('status', 'active')
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .limit(50);
 
-        // Exclude swiped properties
-        if (excludeSwipedIds.length > 0) {
-          query = query.not('id', 'in', `(${excludeSwipedIds.join(',')})`);
-        }
-
-        query = query.limit(50); // Get more listings for better matching
-
-        const { data: listings, error } = await query;
         if (error) throw error;
 
         if (!preferences || !listings?.length) {
@@ -387,13 +380,13 @@ export function useSmartClientMatching(listingId?: string) {
 
         const clientUserIds = clientRoles.map(r => r.user_id);
 
-        // Get profiles for these client users
+        // Get ALL profiles for these client users - no exclusions based on swipes
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .in('id', clientUserIds)
           .eq('is_active', true)
-          .neq('id', user.user.id) // Exclude current owner
+          .neq('id', user.user.id) // Only exclude current owner
           .limit(50);
 
         console.log('useSmartClientMatching: Profiles result:', { count: profiles?.length, error: profileError });

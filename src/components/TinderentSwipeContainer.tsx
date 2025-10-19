@@ -35,22 +35,20 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
   
-  const { data: swipedIds = [] } = useSwipedListings();
-  
-  // Try smart matching first, fallback to regular listings if needed
+  // Get ALL listings - no swipe filtering
   const { 
     data: smartListings = [], 
     isLoading: smartLoading, 
     error: smartError,
     isRefetching: smartRefetching,
     refetch: refetchSmart
-  } = useSmartListingMatching(swipedIds);
+  } = useSmartListingMatching([]);
   
   const { 
     data: regularListings = [], 
     isLoading: regularLoading,
     refetch: refetchRegular
-  } = useListings(swipedIds);
+  } = useListings([]);
 
   // Use smart listings if available, otherwise fallback to regular
   const listings = smartListings.length > 0 ? smartListings : regularListings;
@@ -58,6 +56,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const error = smartError;
   const isRefetching = smartRefetching;
   const refetch = useCallback(() => {
+    setCurrentIndex(0); // Reset to first listing on refresh
     refetchSmart();
     refetchRegular();
   }, [refetchSmart, refetchRegular]);
@@ -132,11 +131,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   };
 
   const handleRefresh = async () => {
-    setCurrentIndex(0);
+    setCurrentIndex(0); // Reset to first listing
     await refetch();
     toast({
       title: 'Properties Updated',
-      description: 'Latest listings loaded.',
+      description: 'All listings reloaded.',
     });
   };
 

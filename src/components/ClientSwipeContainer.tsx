@@ -38,7 +38,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
   
-  const { data: swipedIds = [] } = useSwipedClientProfiles();
+  // Get ALL client profiles - no swipe filtering
   const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
   
   const swipeMutation = useSwipeWithMatch({
