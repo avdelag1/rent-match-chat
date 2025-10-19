@@ -62,9 +62,11 @@ export function useSwipe() {
                 .eq('direction', 'right')
                 .maybeSingle();
 
-              if (ownerLike) {
-                // Create a match with proper conflict handling!
-                const { error: matchError } = await supabase.from('matches').upsert({
+            if (ownerLike) {
+              // Create a match with proper conflict handling!
+              const { data: matchData, error: matchError } = await supabase
+                .from('matches')
+                .upsert({
                   client_id: user.id,
                   owner_id: listing.owner_id,
                   listing_id: targetId,
@@ -75,22 +77,26 @@ export function useSwipe() {
                 }, {
                   onConflict: 'client_id,owner_id,listing_id',
                   ignoreDuplicates: true
-                });
+                })
+                .select();
 
-                if (matchError) {
-                  console.error('Match creation error:', matchError);
-                  toast({
-                    title: "Match Error",
-                    description: "Match created but couldn't be saved. Please refresh.",
-                    variant: 'destructive'
-                  });
-                } else {
-                  toast({
-                    title: "It's a Match! 🎉",
-                    description: "You and the owner both liked each other!",
-                  });
-                }
+              // Only show error if there's a real error (not just duplicate being ignored)
+              if (matchError) {
+                console.error('Match creation error:', matchError);
+              } else {
+                // Show match notification (works for both new and existing matches)
+                toast({
+                  title: "It's a Match! 🎉",
+                  description: "You and the owner both liked each other!",
+                });
               }
+            } else {
+              // No mutual match yet, just show that we saved the like
+              toast({
+                title: "✨ Liked & Saved!",
+                description: "We'll notify you if there's a match.",
+              });
+            }
             }
           } else if (targetType === 'profile') {
             // Check if the client also liked this owner (owner is swiping on client profiles)
@@ -104,32 +110,38 @@ export function useSwipe() {
 
             if (clientLike) {
               // Create a match with proper conflict handling!
-              const { error: matchError } = await supabase.from('matches').upsert({
-                client_id: targetId,
-                owner_id: user.id,
-                listing_id: null,
-                client_liked_at: clientLike.created_at,
-                owner_liked_at: new Date().toISOString(),
-                is_mutual: true,
-                status: 'accepted'
-              }, {
-                onConflict: 'client_id,owner_id,listing_id',
-                ignoreDuplicates: true
-              });
+              const { data: matchData, error: matchError } = await supabase
+                .from('matches')
+                .upsert({
+                  client_id: targetId,
+                  owner_id: user.id,
+                  listing_id: null,
+                  client_liked_at: clientLike.created_at,
+                  owner_liked_at: new Date().toISOString(),
+                  is_mutual: true,
+                  status: 'accepted'
+                }, {
+                  onConflict: 'client_id,owner_id,listing_id',
+                  ignoreDuplicates: true
+                })
+                .select();
 
+              // Only show error if there's a real error (not just duplicate being ignored)
               if (matchError) {
                 console.error('Match creation error:', matchError);
-                toast({
-                  title: "Match Error",
-                  description: "Match created but couldn't be saved. Please refresh.",
-                  variant: 'destructive'
-                });
               } else {
+                // Show match notification (works for both new and existing matches)
                 toast({
                   title: "It's a Match! 🎉",
                   description: "You and the client both liked each other!",
                 });
               }
+            } else {
+              // No mutual match yet, just show that we saved the like
+              toast({
+                title: "✨ Liked & Saved!",
+                description: "We'll notify you if there's a match.",
+              });
             }
           }
         } catch (matchError) {
