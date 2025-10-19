@@ -148,16 +148,16 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           {/* Header with role-specific gradient background and animated blobs */}
           <div className={`relative rounded-t-3xl px-6 py-10 shadow-2xl overflow-hidden ${
             role === 'client' 
-              ? 'bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600' 
+              ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-orange-600' 
               : 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-600'
           }`}>
             {/* Animated gradient blobs - role-specific */}
             <div className="absolute inset-0 opacity-30">
               {role === 'client' ? (
                 <>
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-cyan-400 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-700 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-                  <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-indigo-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-amber-300 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-600 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-yellow-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                 </>
               ) : (
                 <>
@@ -173,7 +173,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               onClick={onClose}
               className={`absolute top-5 left-5 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center text-white border-2 border-white/20 transition-all duration-300 transform hover:scale-110 hover:rotate-12 active:scale-95 ${
                 role === 'client'
-                  ? 'bg-gradient-to-br from-blue-600/80 to-indigo-700/80 hover:shadow-lg hover:shadow-blue-500/50'
+                  ? 'bg-gradient-to-br from-yellow-500/80 to-orange-600/80 hover:shadow-lg hover:shadow-orange-500/50'
                   : 'bg-gradient-to-br from-orange-600/80 to-red-700/80 hover:shadow-lg hover:shadow-orange-500/50'
               }`}
             >
