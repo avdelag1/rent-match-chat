@@ -11,6 +11,16 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   
+  // Remove static loading screen when actual content is ready
+  useEffect(() => {
+    if (!loading && !user) {
+      const loadingScreen = document.getElementById('app-loading-screen');
+      if (loadingScreen) {
+        loadingScreen.remove();
+      }
+    }
+  }, [loading, user]);
+  
   // Fetch user role from secure user_roles table
   const { data: userRole, isLoading: profileLoading, refetch, error, isError } = useQuery({
     queryKey: ['user-role', user?.id],
@@ -116,14 +126,6 @@ const Index = () => {
 
   // Only show landing page if user is NOT authenticated
   if (!user) {
-    // Remove static loading screen just before showing landing page for optimal LCP
-    useEffect(() => {
-      const loadingScreen = document.getElementById('app-loading-screen');
-      if (loadingScreen) {
-        loadingScreen.remove();
-      }
-    }, []);
-    
     return (
       <div className="min-h-screen">
         <LegendaryLandingPage />
