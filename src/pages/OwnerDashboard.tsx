@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { SupportDialog } from '@/components/SupportDialog';
@@ -54,6 +54,15 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   
   // Initialize notifications
   useNotifications();
+  
+  // Auto-refresh every 5 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [refetch]);
   
   const handleProfileTap = (profileId: string) => {
     setSelectedProfileId(profileId);

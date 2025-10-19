@@ -227,6 +227,9 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
         return [];
       }
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
     retry: 3,
     retryDelay: 1000,
   });
@@ -344,7 +347,51 @@ export function useSmartClientMatching(listingId?: string) {
         }
         console.log('useSmartClientMatching: Authenticated user:', user.user.id);
 
-        // Get owner's listing for matching criteria
+        // Get client user IDs from user_roles table
+        const { data: clientRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'client');
+
+        console.log('useSmartClientMatching: Client roles result:', { count: clientRoles?.length, error: rolesError });
+        if (rolesError) throw rolesError;
+        if (!clientRoles?.length) {
+          console.log('useSmartClientMatching: No client roles found');
+          return [];
+        }
+
+        const clientUserIds = clientRoles.map(r => r.user_id);
+
+        // Get profiles for these client users
+        const { data: profiles, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', clientUserIds)
+          .eq('is_active', true)
+          .neq('id', user.user.id) // Exclude current owner
+          .limit(50);
+
+        console.log('useSmartClientMatching: Profiles result:', { count: profiles?.length, error: profileError });
+        if (profileError) throw profileError;
+        if (!profiles?.length) {
+          console.log('useSmartClientMatching: No active client profiles found');
+          return [];
+        }
+
+        // Fetch preferences for matching
+        const { data: preferences } = await supabase
+          .from('client_filter_preferences')
+          .select('user_id, preferred_listing_types, lifestyle_tags, min_price, max_price')
+          .in('user_id', clientUserIds);
+
+        console.log('useSmartClientMatching: Preferences result:', { count: preferences?.length });
+
+        const preferencesMap = new Map();
+        preferences?.forEach(pref => {
+          preferencesMap.set(pref.user_id, pref);
+        });
+
+        // Get owner's listing for matching (if provided)
         let listing: Listing | null = null;
         if (listingId) {
           const { data: listingData } = await supabase
@@ -352,61 +399,29 @@ export function useSmartClientMatching(listingId?: string) {
             .select('*')
             .eq('id', listingId)
             .eq('owner_id', user.user.id)
-            .single();
+            .maybeSingle();
           listing = listingData as Listing;
         }
 
-        // Get client profiles
-        console.log('useSmartClientMatching: Fetching client profiles...');
-        const { data: profiles, error: profileError } = await supabase
-          .from('client_profiles')
-          .select('*')
-          .limit(50);
-
-        console.log('useSmartClientMatching: Profile query result:', { count: profiles?.length, error: profileError });
-        if (profileError) {
-          console.error('useSmartClientMatching: Database error:', profileError);
-          throw profileError;
-        }
-        if (!profiles?.length) {
-          console.log('useSmartClientMatching: No profiles found');
-          return [];
-        }
-
-        // Fetch preferences for all client profiles
-        const userIds = profiles.map(p => p.user_id);
-        const { data: preferences, error: prefError } = await supabase
-          .from('client_filter_preferences')
-          .select('user_id, preferred_listing_types, lifestyle_tags, min_price, max_price')
-          .in('user_id', userIds);
-
-        console.log('useSmartClientMatching: Preferences query result:', { count: preferences?.length, error: prefError });
-
-        // Create a map of user_id to preferences
-        const preferencesMap = new Map();
-        preferences?.forEach(pref => {
-          preferencesMap.set(pref.user_id, pref);
-        });
-
-        // Calculate match percentage for each client
+        // Calculate match scores
         const matchedClients: MatchedClientProfile[] = profiles.map(profile => {
-          const clientPrefs = preferencesMap.get(profile.user_id);
+          const clientPrefs = preferencesMap.get(profile.id);
           const match = listing 
             ? calculateClientMatch(listing, clientPrefs || {})
             : { percentage: 60, reasons: ['General compatibility'], incompatible: [] };
 
           return {
-            id: profile.id,
-            user_id: profile.user_id || '',
-            name: profile.name || 'Anonymous',
+            id: Math.floor(Math.random() * 1000000), // Generate unique ID
+            user_id: profile.id,
+            name: profile.full_name || 'Anonymous',
             bio: profile.bio || '',
             age: profile.age || 0,
-            gender: profile.gender || '',
+            gender: '',
             interests: profile.interests || [],
             preferred_activities: profile.preferred_activities || [],
-            location: profile.location || {},
+            location: profile.city ? { city: profile.city } : {},
             lifestyle_tags: clientPrefs?.lifestyle_tags || [],
-            profile_images: profile.profile_images || [],
+            profile_images: profile.images || [],
             preferred_listing_types: clientPrefs?.preferred_listing_types || ['rent'],
             budget_min: clientPrefs?.min_price || 0,
             budget_max: clientPrefs?.max_price || 100000,
@@ -416,13 +431,13 @@ export function useSmartClientMatching(listingId?: string) {
           };
         });
 
-        // Sort by match percentage and filter
+        // Sort and filter
         const sortedClients = matchedClients
           .filter(client => client.matchPercentage >= 10)
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
           .slice(0, 20);
 
-        console.log('useSmartClientMatching: Returning', sortedClients.length, 'sorted clients with preferences');
+        console.log('useSmartClientMatching: Returning', sortedClients.length, 'clients');
         return sortedClients;
       } catch (error) {
         console.error('Error in smart client matching:', error);
@@ -430,6 +445,9 @@ export function useSmartClientMatching(listingId?: string) {
       }
     },
     enabled: true,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true, // Refetch when user returns
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
     retry: 3,
     retryDelay: 1000,
   });
