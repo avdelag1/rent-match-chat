@@ -1,5 +1,5 @@
 import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle, Filter, Bell } from "lucide-react"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
@@ -154,6 +154,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { setOpenMobile } = useSidebar()
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>(undefined)
   const { unreadCount } = useUnreadMessageCount()
   const { unreadCount: unreadLikes } = useUnreadLikes()
@@ -200,8 +201,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
       // Open support dialog
       if (onMenuItemClick) onMenuItemClick('support')
     } else if (item.action === 'filters') {
-      // Open filters dialog
-      if (onMenuItemClick) onMenuItemClick('filters')
+      // Close sidebar first on mobile, then open filters
+      console.log('🎛️ Closing sidebar, opening filters...')
+      setOpenMobile(false)
+      setTimeout(() => {
+        if (onMenuItemClick) onMenuItemClick('filters')
+      }, 150)
     } else if (item.action === 'notifications') {
       // Open notifications dialog
       if (onMenuItemClick) onMenuItemClick('notifications')

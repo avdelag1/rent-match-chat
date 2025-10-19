@@ -177,7 +177,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="z-[100] bg-white max-w-2xl w-[95vw] max-h-[85vh] sm:h-[90vh] flex flex-col p-0">
+      <DialogContent className="bg-white max-w-2xl w-[95vw] max-h-[85vh] sm:h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b">
           <DialogTitle className="text-xl sm:text-2xl">Client Discovery Preferences</DialogTitle>
           <p className="text-sm sm:text-base text-muted-foreground">Set your preferences to improve Smart Match recommendations</p>
