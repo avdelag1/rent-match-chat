@@ -1340,24 +1340,24 @@ export type Database = {
       likes: {
         Row: {
           created_at: string | null
-          direction: string | null
+          direction: string
           id: string
-          target_id: string | null
-          user_id: string | null
+          target_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
-          direction?: string | null
+          direction: string
           id?: string
-          target_id?: string | null
-          user_id?: string | null
+          target_id: string
+          user_id: string
         }
         Update: {
           created_at?: string | null
-          direction?: string | null
+          direction?: string
           id?: string
-          target_id?: string | null
-          user_id?: string | null
+          target_id?: string
+          user_id?: string
         }
         Relationships: []
       }
