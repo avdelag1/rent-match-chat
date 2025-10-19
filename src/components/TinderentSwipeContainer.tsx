@@ -7,7 +7,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Flame, X, RotateCcw, Home, Sparkles, Crown, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Flame, RotateCcw, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -36,7 +36,32 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   }>({ show: false, type: 'like', position: 'right' });
   
   const { data: swipedIds = [] } = useSwipedListings();
-  const { data: listings = [], isLoading, refetch, isRefetching, error } = useSmartListingMatching(swipedIds);
+  
+  // Try smart matching first, fallback to regular listings if needed
+  const { 
+    data: smartListings = [], 
+    isLoading: smartLoading, 
+    error: smartError,
+    isRefetching: smartRefetching,
+    refetch: refetchSmart
+  } = useSmartListingMatching(swipedIds);
+  
+  const { 
+    data: regularListings = [], 
+    isLoading: regularLoading,
+    refetch: refetchRegular
+  } = useListings(swipedIds);
+
+  // Use smart listings if available, otherwise fallback to regular
+  const listings = smartListings.length > 0 ? smartListings : regularListings;
+  const isLoading = smartLoading || regularLoading;
+  const error = smartError;
+  const isRefetching = smartRefetching;
+  const refetch = useCallback(() => {
+    refetchSmart();
+    refetchRegular();
+  }, [refetchSmart, refetchRegular]);
+  
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();

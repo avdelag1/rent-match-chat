@@ -51,13 +51,17 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
     matchedReasons.push(`Matches ${listing.listing_type} preference`);
   }
 
-  // Price range matching
+  // Price range matching with 20% flexibility
   if (preferences.min_price && preferences.max_price) {
+    const priceFlexibility = 0.2;
+    const adjustedMinPrice = preferences.min_price * (1 - priceFlexibility);
+    const adjustedMaxPrice = preferences.max_price * (1 + priceFlexibility);
+    const priceInRange = listing.price >= adjustedMinPrice && listing.price <= adjustedMaxPrice;
     criteria.push({
       weight: 20,
-      matches: listing.price >= preferences.min_price && listing.price <= preferences.max_price,
-      reason: `Price ${listing.price} within budget ${preferences.min_price}-${preferences.max_price}`,
-      incompatibleReason: `Price ${listing.price} outside budget ${preferences.min_price}-${preferences.max_price}`
+      matches: priceInRange,
+      reason: `Price $${listing.price} within flexible budget`,
+      incompatibleReason: `Price $${listing.price} outside flexible budget range`
     });
   }
 
@@ -81,8 +85,8 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
     });
   }
 
-  // Property type matching
-  if (preferences.property_types?.length) {
+  // Property type matching - only check if listing has property_type
+  if (preferences.property_types?.length && listing.property_type) {
     criteria.push({
       weight: 15,
       matches: preferences.property_types.includes(listing.property_type),
@@ -111,8 +115,8 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
     });
   }
 
-  // Location zone matching
-  if (preferences.location_zones?.length) {
+  // Location zone matching - only check if listing has location data
+  if (preferences.location_zones?.length && (listing.tulum_location || listing.neighborhood)) {
     criteria.push({
       weight: 18,
       matches: preferences.location_zones.some(zone => 
@@ -121,6 +125,14 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
       ),
       reason: `Location matches preferred zones`,
       incompatibleReason: `Location not in preferred zones`
+    });
+  } else if (preferences.location_zones?.length && !listing.tulum_location && !listing.neighborhood) {
+    // Don't penalize listings without location data
+    criteria.push({
+      weight: 18,
+      matches: true,
+      reason: 'Location not specified',
+      incompatibleReason: ''
     });
   }
 
@@ -214,13 +226,26 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
           };
         });
 
-        // Sort by match percentage (highest first) and filter out 0% matches
+        // Sort by match percentage - show all listings, even low matches
         const sortedListings = matchedListings
-          .filter(listing => listing.matchPercentage >= 10) // Minimum 10% match
+          .filter(listing => listing.matchPercentage >= 0)
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
-          .slice(0, 20); // Limit final results
+          .slice(0, 50); // Limit final results
 
-        console.log(`Matched ${sortedListings.length} listings with min 10% compatibility`);
+        console.log(`Smart matching: ${sortedListings.length} listings. Top matches:`, 
+          sortedListings.slice(0, 3).map(l => `${l.title?.slice(0, 30)}... (${l.matchPercentage}%)`));
+        
+        // Fallback: if no matches found but we have listings, show them all with default score
+        if (sortedListings.length === 0 && listings.length > 0) {
+          console.log('No smart matches found, showing all', listings.length, 'listings');
+          return listings.map(listing => ({
+            ...listing as Listing,
+            matchPercentage: 20,
+            matchReasons: ['General listing'],
+            incompatibleReasons: []
+          })).slice(0, 50);
+        }
+
         return sortedListings;
       } catch (error) {
         console.error('Error in smart listing matching:', error);
