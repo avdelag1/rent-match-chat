@@ -359,13 +359,23 @@ export function useSmartClientMatching(listingId?: string) {
     queryKey: ['smart-clients', listingId],
     queryFn: async () => {
       try {
-        console.log('useSmartClientMatching: Starting fetch...');
+        console.log('🎯 useSmartClientMatching: Starting fetch with OWNER preferences...');
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) {
-          console.log('useSmartClientMatching: No authenticated user');
+          console.log('❌ useSmartClientMatching: No authenticated user');
           return [];
         }
-        console.log('useSmartClientMatching: Authenticated user:', user.user.id);
+        console.log('✅ Owner ID:', user.user.id);
+
+        // 🔥 GET OWNER'S FILTER PREFERENCES FIRST!
+        const { data: ownerPrefs, error: ownerPrefsError } = await supabase
+          .from('owner_client_preferences')
+          .select('*')
+          .eq('user_id', user.user.id)
+          .maybeSingle();
+
+        console.log('📋 Owner preferences loaded:', ownerPrefs ? 'YES' : 'NO', ownerPrefs);
+        if (ownerPrefsError) console.error('Owner prefs error:', ownerPrefsError);
 
         // Get client user IDs from user_roles table
         const { data: clientRoles, error: rolesError } = await supabase
@@ -373,65 +383,144 @@ export function useSmartClientMatching(listingId?: string) {
           .select('user_id')
           .eq('role', 'client');
 
-        console.log('useSmartClientMatching: Client roles result:', { count: clientRoles?.length, error: rolesError });
+        console.log('👥 Client roles found:', clientRoles?.length || 0);
         if (rolesError) throw rolesError;
         if (!clientRoles?.length) {
-          console.log('useSmartClientMatching: No client roles found');
+          console.log('❌ No client roles found');
           return [];
         }
 
         const clientUserIds = clientRoles.map(r => r.user_id);
 
-        // Get ALL profiles for these client users - no exclusions based on swipes
+        // Get ALL profiles for these client users
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .in('id', clientUserIds)
           .eq('is_active', true)
-          .neq('id', user.user.id) // Only exclude current owner
-          .limit(50);
+          .neq('id', user.user.id)
+          .limit(100); // Get more initially to filter
 
-        console.log('useSmartClientMatching: Profiles result:', { count: profiles?.length, error: profileError });
+        console.log('📊 Total profiles fetched:', profiles?.length || 0);
         if (profileError) throw profileError;
         if (!profiles?.length) {
-          console.log('useSmartClientMatching: No active client profiles found');
+          console.log('❌ No active client profiles found');
           return [];
         }
 
-        // Fetch preferences for matching
-        const { data: preferences } = await supabase
-          .from('client_filter_preferences')
-          .select('user_id, preferred_listing_types, lifestyle_tags, min_price, max_price')
-          .in('user_id', clientUserIds);
+        // 🔥 APPLY OWNER'S FILTERS
+        let filteredProfiles = profiles;
 
-        console.log('useSmartClientMatching: Preferences result:', { count: preferences?.length });
+        if (ownerPrefs) {
+          console.log('🎯 Applying owner filters...');
+          
+          filteredProfiles = profiles.filter(profile => {
+            const reasons = [];
+            
+            // Age filter
+            if (ownerPrefs.min_age && ownerPrefs.max_age) {
+              if (!profile.age || profile.age < ownerPrefs.min_age || profile.age > ownerPrefs.max_age) {
+                console.log(`❌ ${profile.full_name}: Age ${profile.age} outside range ${ownerPrefs.min_age}-${ownerPrefs.max_age}`);
+                return false;
+              }
+              reasons.push(`Age ${profile.age} in range`);
+            }
 
-        const preferencesMap = new Map();
-        preferences?.forEach(pref => {
-          preferencesMap.set(pref.user_id, pref);
-        });
+            // Budget filter
+            if (ownerPrefs.min_budget || ownerPrefs.max_budget) {
+              const budgetMax = profile.budget_max ? Number(profile.budget_max) : null;
+              const monthlyIncome = profile.monthly_income ? Number(profile.monthly_income) : null;
+              const clientBudget = budgetMax || monthlyIncome;
+              
+              if (ownerPrefs.min_budget && clientBudget && clientBudget < ownerPrefs.min_budget) {
+                console.log(`❌ ${profile.full_name}: Budget ${clientBudget} below min ${ownerPrefs.min_budget}`);
+                return false;
+              }
+              if (ownerPrefs.max_budget && clientBudget && clientBudget > ownerPrefs.max_budget) {
+                console.log(`❌ ${profile.full_name}: Budget ${clientBudget} above max ${ownerPrefs.max_budget}`);
+                return false;
+              }
+              reasons.push('Budget compatible');
+            }
 
-        // Get owner's listing for matching (if provided)
-        let listing: Listing | null = null;
-        if (listingId) {
-          const { data: listingData } = await supabase
-            .from('listings')
-            .select('*')
-            .eq('id', listingId)
-            .eq('owner_id', user.user.id)
-            .maybeSingle();
-          listing = listingData as Listing;
+            // Pet filter
+            if (ownerPrefs.allows_pets === false && profile.has_pets === true) {
+              console.log(`❌ ${profile.full_name}: Has pets but not allowed`);
+              return false;
+            }
+
+            // Smoking filter
+            if (ownerPrefs.allows_smoking === false && profile.smoking === true) {
+              console.log(`❌ ${profile.full_name}: Smokes but not allowed`);
+              return false;
+            }
+
+            // Party filter
+            if (ownerPrefs.allows_parties === false && profile.party_friendly === true) {
+              console.log(`❌ ${profile.full_name}: Party-friendly but not allowed`);
+              return false;
+            }
+
+            // Lifestyle compatibility
+            if (ownerPrefs.compatible_lifestyle_tags?.length && profile.lifestyle_tags?.length) {
+              const hasMatch = ownerPrefs.compatible_lifestyle_tags.some(tag => 
+                profile.lifestyle_tags?.includes(tag)
+              );
+              if (!hasMatch) {
+                console.log(`❌ ${profile.full_name}: No lifestyle match`);
+                return false;
+              }
+              reasons.push('Compatible lifestyle');
+            }
+
+            // Occupation filter
+            if (ownerPrefs.preferred_occupations?.length && profile.occupation) {
+              const hasMatch = ownerPrefs.preferred_occupations.includes(profile.occupation);
+              if (!hasMatch) {
+                console.log(`❌ ${profile.full_name}: Occupation ${profile.occupation} not preferred`);
+                return false;
+              }
+              reasons.push(`Preferred occupation: ${profile.occupation}`);
+            }
+
+            console.log(`✅ ${profile.full_name}: PASSED filters -`, reasons.join(', '));
+            return true;
+          });
+
+          console.log(`🎯 After filtering: ${filteredProfiles.length}/${profiles.length} clients match`);
         }
 
-        // Calculate match scores
-        const matchedClients: MatchedClientProfile[] = profiles.map(profile => {
-          const clientPrefs = preferencesMap.get(profile.id);
-          const match = listing 
-            ? calculateClientMatch(listing, clientPrefs || {})
-            : { percentage: 60, reasons: ['General compatibility'], incompatible: [] };
+        // Calculate match scores for filtered profiles
+        const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
+          let matchPercentage = 70; // Base score
+          const matchReasons = [];
+
+          if (ownerPrefs) {
+            // Bonus points for perfect matches
+            if (profile.age && ownerPrefs.min_age && ownerPrefs.max_age) {
+              const ageInRange = profile.age >= ownerPrefs.min_age && profile.age <= ownerPrefs.max_age;
+              if (ageInRange) {
+                matchPercentage += 10;
+                matchReasons.push(`Perfect age match (${profile.age})`);
+              }
+            }
+
+            if (ownerPrefs.compatible_lifestyle_tags?.length && profile.lifestyle_tags?.length) {
+              const matches = ownerPrefs.compatible_lifestyle_tags.filter(tag => 
+                profile.lifestyle_tags?.includes(tag)
+              );
+              matchPercentage += matches.length * 5;
+              matchReasons.push(`${matches.length} lifestyle matches`);
+            }
+
+            if (profile.verified) {
+              matchPercentage += 10;
+              matchReasons.push('Verified profile');
+            }
+          }
 
           return {
-            id: Math.floor(Math.random() * 1000000), // Generate unique ID
+            id: Math.floor(Math.random() * 1000000),
             user_id: profile.id,
             name: profile.full_name || 'Anonymous',
             age: profile.age || 0,
@@ -439,37 +528,35 @@ export function useSmartClientMatching(listingId?: string) {
             interests: profile.interests || [],
             preferred_activities: profile.preferred_activities || [],
             location: profile.city ? { city: profile.city } : {},
-            lifestyle_tags: clientPrefs?.lifestyle_tags || [],
+            lifestyle_tags: profile.lifestyle_tags || [],
             profile_images: profile.images || [],
-            preferred_listing_types: clientPrefs?.preferred_listing_types || ['rent'],
-            budget_min: clientPrefs?.min_price || 0,
-            budget_max: clientPrefs?.max_price || 100000,
-            matchPercentage: match.percentage,
-            matchReasons: match.reasons,
-            incompatibleReasons: match.incompatible,
+            preferred_listing_types: ['rent'],
+            budget_min: profile.budget_min || 0,
+            budget_max: profile.budget_max || 100000,
+            matchPercentage: Math.min(matchPercentage, 100),
+            matchReasons,
+            incompatibleReasons: [],
             city: profile.city || undefined,
             avatar_url: profile.avatar_url || undefined,
             verified: profile.verified || false
           };
         });
 
-        // Sort and filter
+        // Sort by match score
         const sortedClients = matchedClients
-          .filter(client => client.matchPercentage >= 10)
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
-          .slice(0, 20);
+          .slice(0, 50);
 
-        console.log('useSmartClientMatching: Returning', sortedClients.length, 'clients');
+        console.log('🎯 FINAL RESULT:', sortedClients.length, 'clients to show');
         return sortedClients;
       } catch (error) {
-        console.error('Error in smart client matching:', error);
+        console.error('❌ Error in smart client matching:', error);
         return [];
       }
     },
     enabled: true,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true, // Refetch when user returns
-    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
+    staleTime: 30 * 1000, // 30 seconds - shorter to reflect filter changes faster
+    refetchOnWindowFocus: true,
     retry: 3,
     retryDelay: 1000,
   });
