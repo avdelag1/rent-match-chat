@@ -13,7 +13,6 @@ export interface MatchedClientProfile {
   id: number;
   user_id: string;
   name: string;
-  bio: string;
   age: number;
   gender: string;
   interests: string[];
@@ -27,6 +26,9 @@ export interface MatchedClientProfile {
   matchPercentage: number;
   matchReasons: string[];
   incompatibleReasons: string[];
+  city?: string;
+  avatar_url?: string;
+  verified?: boolean;
 }
 
 // Calculate match percentage between client preferences and listing
@@ -432,7 +434,6 @@ export function useSmartClientMatching(listingId?: string) {
             id: Math.floor(Math.random() * 1000000), // Generate unique ID
             user_id: profile.id,
             name: profile.full_name || 'Anonymous',
-            bio: profile.bio || '',
             age: profile.age || 0,
             gender: '',
             interests: profile.interests || [],
@@ -445,7 +446,10 @@ export function useSmartClientMatching(listingId?: string) {
             budget_max: clientPrefs?.max_price || 100000,
             matchPercentage: match.percentage,
             matchReasons: match.reasons,
-            incompatibleReasons: match.incompatible
+            incompatibleReasons: match.incompatible,
+            city: profile.city || undefined,
+            avatar_url: profile.avatar_url || undefined,
+            verified: profile.verified || false
           };
         });
 

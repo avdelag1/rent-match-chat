@@ -7,12 +7,14 @@ export interface ClientProfile {
   user_id: string;
   name: string;
   age: number;
-  bio: string;
   gender: string;
   interests: string[];
   preferred_activities: string[];
   profile_images: string[];
   location: any;
+  city?: string;
+  avatar_url?: string;
+  verified?: boolean;
 }
 
 export function useClientProfiles(excludeSwipedIds: string[] = []) {
@@ -27,52 +29,52 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
       }
 
       try {
-        console.log('Fetching client profiles for owner:', user.id);
+        console.log('useClientProfiles: Fetching client profiles for owner:', user.id, {
+          timestamp: new Date().toISOString(),
+          excludedCount: excludeSwipedIds.length
+        });
         
-        // Get real client profiles from database using secure public view
-        const { data: profiles, error } = await supabase
+        // OPTIMIZED: Get client profiles with role in ONE query using JOIN
+        const { data: clientProfiles, error } = await supabase
           .from('profiles_public')
-          .select('*')
+          .select(`
+            *,
+            user_roles!inner(role)
+          `)
+          .eq('user_roles.role', 'client')
           .limit(100);
 
         if (error) {
-          console.error('Error fetching client profiles:', error);
-          return [];
+          console.error('useClientProfiles: Supabase error:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+          throw error; // Don't silently fail
         }
 
-        // Filter to only clients by checking user_roles
-        const clientProfilesPromises = (profiles || []).map(async (profile) => {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profile.id)
-            .maybeSingle();
-          
-          return roleData?.role === 'client' ? profile : null;
-        });
-
-        const clientProfilesWithNulls = await Promise.all(clientProfilesPromises);
-        const clientProfiles = clientProfilesWithNulls.filter(p => p !== null);
-
-        console.log('Found client profiles:', clientProfiles.length);
+        console.log('useClientProfiles: Successfully fetched', clientProfiles?.length || 0, 'client profiles');
 
         if (clientProfiles.length === 0) {
           console.log('No client profiles found');
           return [];
         }
 
-        // Transform profiles to match interface
+        // Transform profiles to match interface (no bio field)
         const transformedProfiles: ClientProfile[] = clientProfiles.map((profile, index) => ({
           id: index + 1,
-          user_id: profile!.id,
-          name: profile!.full_name || 'User',
-          age: profile!.age || 25,
-          bio: profile!.bio || 'No bio available',
+          user_id: profile.id,
+          name: profile.full_name || 'User',
+          age: profile.age || 25,
           gender: '',
-          interests: profile!.interests || [],
-          preferred_activities: profile!.preferred_activities || [],
-          profile_images: profile!.images || [],
-          location: profile!.city ? { city: profile!.city } : null
+          interests: profile.interests || [],
+          preferred_activities: profile.preferred_activities || [],
+          profile_images: profile.images || [],
+          location: profile.city ? { city: profile.city } : null,
+          city: profile.city || undefined,
+          avatar_url: profile.avatar_url || undefined,
+          verified: profile.verified || false
         }));
         
         console.log('Transformed profiles:', transformedProfiles);

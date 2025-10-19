@@ -108,13 +108,16 @@ export function ClientProfileCard({
   const cardStyle = {
     x,
     rotate: isTop ? rotate : 0,
-    scale: isTop ? 1 : 0.95,
+    scale: isTop ? 1 : 0.92,
     zIndex: isTop ? 10 : 1,
     position: 'absolute' as const,
-    top: isTop ? 0 : 8,
-    left: isTop ? 0 : 4,
-    right: isTop ? 0 : 4,
-    willChange: 'transform'
+    top: isTop ? 0 : 12,
+    left: isTop ? 0 : 8,
+    right: isTop ? 0 : 8,
+    opacity: isTop ? 1 : 0.8,
+    filter: isTop ? 'none' : 'blur(2px)',
+    willChange: 'transform',
+    transform: 'translateZ(0)'
   };
 
   return (
@@ -129,7 +132,7 @@ export function ClientProfileCard({
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
     >
-      <Card className="w-full h-[calc(100vh-120px)] bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="w-full max-h-[600px] sm:max-h-[700px] h-[85vh] bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
 
       {/* Swipe Indicator */}
       {getSwipeIndicator()}

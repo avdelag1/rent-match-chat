@@ -302,8 +302,8 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         )}
       </AnimatePresence>
 
-      {/* Full Screen Cards Container */}
-      <div className="flex-1 relative">
+      {/* Cards Container with Fixed Height */}
+      <div className="flex-1 relative min-h-[600px] max-h-[700px] mx-auto max-w-md">
         
         <AnimatePresence>
           {nextClient && (

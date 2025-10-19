@@ -32,7 +32,7 @@ export function TenantScreening() {
   };
 
   const filteredProfiles = clientProfiles.filter(profile => {
-    const matchesSearch = profile.bio?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = profile.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const status = getVerificationStatus(profile);
     const matchesFilter = filterStatus === 'all' || status === filterStatus;
     return matchesSearch && matchesFilter;
@@ -103,8 +103,8 @@ export function TenantScreening() {
                         </div>
                         
                         <div>
-                          <h3 className="font-semibold text-lg">{profile.bio || 'Anonymous User'}</h3>
-                          <p className="text-muted-foreground">{profile.bio || 'No bio provided'}</p>
+                          <h3 className="font-semibold text-lg">{profile.name || 'Anonymous User'}</h3>
+                          <p className="text-muted-foreground">Age: {profile.age || 'N/A'} • {profile.location?.city || 'Location not specified'}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="flex items-center gap-1">
                               {[...Array(5)].map((_, i) => (
