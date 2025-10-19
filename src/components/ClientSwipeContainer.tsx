@@ -1,18 +1,15 @@
 import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { ClientProfileCard } from './ClientProfileCard';
-import { AdvancedFilters } from './AdvancedFilters';
-import { SuperLikeButton } from './SuperLikeButton';
 import { MatchCelebration } from './MatchCelebration';
-import { useClientProfiles, useSwipedClientProfiles } from '@/hooks/useClientProfiles';
+import { MatchPercentageBadge } from './MatchPercentageBadge';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Flame, X, RotateCcw, Users, Sparkles } from 'lucide-react';
+import { Flame, X, RotateCcw, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -199,20 +196,22 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   if (clientProfiles.length === 0) {
     return (
       <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20 rounded-xl p-8">
-          <div className="text-6xl mb-4">👥</div>
-          <h3 className="text-xl font-bold mb-2">No Clients Found</h3>
+        <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-bold mb-2 text-foreground">No Clients Found</h3>
           <p className="text-muted-foreground mb-4">
-            Check back later or refresh for new profiles.
+            Your filters might be too restrictive.<br />Try adjusting them to see more profiles.
           </p>
-          <Button 
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2 w-full"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Refresh
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button 
+              onClick={handleRefresh}
+              variant="default"
+              className="gap-2 w-full"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -245,6 +244,21 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
 
   return (
     <div className="w-full h-full flex flex-col relative z-0">
+      {/* Client Counter */}
+      <div className="text-center mb-2 z-20">
+        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+          <span className="text-white text-sm font-medium">
+            Showing {currentIndex + 1} of {clientProfiles.length}
+          </span>
+          {currentClient?.matchPercentage && (
+            <MatchPercentageBadge 
+              percentage={currentClient.matchPercentage} 
+              reasons={currentClient.matchReasons}
+            />
+          )}
+        </div>
+      </div>
+
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
