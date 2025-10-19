@@ -6,10 +6,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { validateNoContactInfo } from '@/utils/contactInfoValidation';
+import { toast } from '@/hooks/use-toast';
 
 export interface BicycleFormData {
   title: string;
-  description_full: string;
+  wheel_size_option?: string;
+  motor_power?: string;
   mode: 'sale' | 'rent' | 'both';
   price?: number;
   rental_rates?: {
@@ -35,12 +38,20 @@ interface BicycleListingFormProps {
   initialData?: Partial<BicycleFormData>;
 }
 
-const BICYCLE_TYPES = ['Road', 'Mountain', 'Hybrid', 'City', 'E-bike', 'Folding', 'Kids'];
-const FRAME_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
-const FRAME_MATERIALS = ['Aluminum', 'Carbon', 'Steel', 'Titanium'];
-const BRAKE_TYPES = ['Disc', 'Rim', 'Hydraulic Disc'];
-const GEAR_TYPES = ['Derailleur', 'Internal Hub', 'Single Speed'];
+const BICYCLE_TYPES = ['Road Bike', 'Mountain Bike', 'Hybrid', 'City/Commuter', 'Electric (E-Bike)', 'Cruiser', 'BMX', 'Folding', 'Cargo', 'Gravel'];
+const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const FRAME_MATERIALS = ['Aluminum', 'Carbon Fiber', 'Steel', 'Titanium', 'Chromoly'];
+const WHEEL_SIZES = ['12"', '16"', '20"', '24"', '26"', '27.5"', '29"', '700c'];
+const BRAKE_TYPES = ['Disc (Hydraulic)', 'Disc (Mechanical)', 'Rim Brakes', 'V-Brakes', 'Coaster Brake'];
+const GEAR_TYPES = ['Single Speed', '3-Speed', '7-Speed', '8-Speed', '9-Speed', '10-Speed', '11-Speed', '12-Speed+'];
+const MOTOR_POWERS = ['250W', '350W', '500W', '750W', '1000W+'];
 const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs Work'];
+
+const BICYCLE_FEATURES = {
+  'Included': ['Helmet', 'Lock', 'Lights', 'Bell', 'Kickstand', 'Fenders', 'Rack'],
+  'Suspension': ['Front Suspension', 'Full Suspension', 'Rigid'],
+  'Extras': ['Water Bottle Holder', 'Phone Mount', 'Bike Computer', 'Panniers', 'Child Seat']
+};
 
 export function BicycleListingForm({ onDataChange, initialData }: BicycleListingFormProps) {
   const { register, watch, setValue } = useForm<BicycleFormData>({
@@ -50,6 +61,17 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
   const formData = watch();
 
   useEffect(() => {
+    // Validate title for contact info
+    if (formData.title) {
+      const error = validateNoContactInfo(formData.title);
+      if (error) {
+        toast({
+          title: "Invalid Title",
+          description: error,
+          variant: "destructive"
+        });
+      }
+    }
     onDataChange(formData);
   }, [formData, onDataChange]);
 
@@ -69,17 +91,9 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
               onChange={(e) => onDataChange({ ...formData, title: e.target.value })}
               placeholder="2022 Specialized Turbo Levo"
             />
-          </div>
-
-          <div>
-            <Label htmlFor="description_full">Description *</Label>
-            <Textarea
-              id="description_full"
-              {...register('description_full', { required: true })}
-              onChange={(e) => onDataChange({ ...formData, description_full: e.target.value })}
-              placeholder="Include specs and accessories..."
-              rows={6}
-            />
+            <p className="text-xs text-muted-foreground mt-1">
+              No contact info allowed - share after messaging connection
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -212,14 +226,24 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           </div>
 
           <div>
-            <Label htmlFor="wheel_size">Wheel Size (inches) *</Label>
-            <Input
-              id="wheel_size"
-              type="number"
-              {...register('wheel_size', { required: true })}
-              onChange={(e) => onDataChange({ ...formData, wheel_size: parseFloat(e.target.value) })}
-              placeholder="26, 27.5, or 29"
-            />
+            <Label htmlFor="wheel_size">Wheel Size</Label>
+            <Select 
+              onValueChange={(value) => {
+                setValue('wheel_size_option', value);
+                onDataChange({ ...formData, wheel_size_option: value });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select wheel size" />
+              </SelectTrigger>
+              <SelectContent>
+                {WHEEL_SIZES.map(size => (
+                  <SelectItem key={size} value={size}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -320,18 +344,62 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
             </div>
 
             {formData.electric_assist && (
-              <div>
-                <Label htmlFor="battery_range">Battery Range (km)</Label>
-                <Input
-                  id="battery_range"
-                  type="number"
-                  {...register('battery_range')}
-                  onChange={(e) => onDataChange({ ...formData, battery_range: parseFloat(e.target.value) })}
-                  placeholder="Range in kilometers"
-                />
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="motor_power">Motor Power</Label>
+                  <Select 
+                    onValueChange={(value) => {
+                      setValue('motor_power', value);
+                      onDataChange({ ...formData, motor_power: value });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select motor power" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MOTOR_POWERS.map(power => (
+                        <SelectItem key={power} value={power}>
+                          {power}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="battery_range">Battery Range (km)</Label>
+                  <Input
+                    id="battery_range"
+                    type="number"
+                    {...register('battery_range')}
+                    onChange={(e) => onDataChange({ ...formData, battery_range: parseFloat(e.target.value) })}
+                    placeholder="e.g., 80 km"
+                  />
+                </div>
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Features */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Features & Accessories</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {Object.entries(BICYCLE_FEATURES).map(([category, items]) => (
+            <div key={category}>
+              <h4 className="font-medium text-sm mb-3 text-muted-foreground">{category}</h4>
+              <div className="grid md:grid-cols-2 gap-2">
+                {items.map(feature => (
+                  <Label key={feature} className="text-sm cursor-pointer flex items-center gap-2">
+                    <Checkbox />
+                    {feature}
+                  </Label>
+                ))}
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

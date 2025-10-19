@@ -7,12 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { validateNoContactInfo } from '@/utils/contactInfoValidation';
+import { toast } from '@/hooks/use-toast';
 
 export interface YachtFormData {
   title: string;
-  description_short: string;
-  description_full: string;
+  yacht_type?: string;
   mode: 'sale' | 'rent' | 'both';
+  engine_type?: string;
+  crew_option?: string;
   price?: number;
   rental_rates?: {
     per_day?: number;
@@ -37,11 +40,23 @@ interface YachtListingFormProps {
   initialData?: Partial<YachtFormData>;
 }
 
-const HULL_MATERIALS = ['Fiberglass', 'Aluminum', 'Steel', 'Composite', 'Other'];
+const YACHT_TYPES = ['Sailing Yacht', 'Motor Yacht', 'Catamaran', 'Trimaran', 'Gulet', 'Mega Yacht'];
+const HULL_MATERIALS = ['Fiberglass', 'Aluminum', 'Steel', 'Wood', 'Carbon Fiber', 'Composite'];
+const ENGINE_TYPES = ['Single Engine', 'Twin Engine', 'Triple Engine', 'Electric', 'Hybrid'];
 const FUEL_TYPES = ['Diesel', 'Gasoline', 'Hybrid', 'Electric'];
-const CONDITIONS = ['New', 'Like New', 'Excellent', 'Good', 'Needs Work'];
-const COMMON_EQUIPMENT = ['GPS', 'Autopilot', 'Radar', 'Air Conditioning', 'Generator', 'Life Jackets', 
-  'Anchoring System', 'Radio', 'Fish Finder', 'Swim Platform', 'Bimini Top', 'Navigation Lights'];
+const CONDITIONS = ['Excellent', 'Very Good', 'Good', 'Fair'];
+const CREW_OPTIONS = ['Captain Only', 'Captain + Crew', 'Bareboat'];
+
+const YACHT_EQUIPMENT = {
+  'Navigation': ['GPS', 'Autopilot', 'Radar', 'Chart Plotter', 'VHF Radio', 'AIS System'],
+  'Safety': ['Life Jackets', 'Life Raft', 'Fire Extinguisher', 'Flares', 'EPIRB', 'First Aid Kit'],
+  'Comfort': ['Air Conditioning', 'Heating', 'Generator', 'Water Maker', 'Hot Water', 'Refrigerator'],
+  'Entertainment': ['TV', 'Sound System', 'WiFi', 'Satellite TV', 'DVD Player'],
+  'Water Toys': ['Tender/Dinghy', 'Jet Ski', 'Kayak', 'Paddleboard', 'Snorkeling Gear', 'Fishing Equipment'],
+  'Deck': ['Bimini Top', 'Swim Platform', 'Deck Shower', 'Sun Cushions', 'Teak Deck', 'BBQ Grill']
+};
+
+const ALL_EQUIPMENT = Object.values(YACHT_EQUIPMENT).flat();
 
 export function YachtListingForm({ onDataChange, initialData }: YachtListingFormProps) {
   const { register, watch, setValue } = useForm<YachtFormData>({
@@ -52,6 +67,17 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
   const formData = watch();
 
   useEffect(() => {
+    // Validate title for contact info
+    if (formData.title) {
+      const error = validateNoContactInfo(formData.title);
+      if (error) {
+        toast({
+          title: "Invalid Title",
+          description: error,
+          variant: "destructive"
+        });
+      }
+    }
     onDataChange({ ...formData, equipment: selectedEquipment });
   }, [formData, selectedEquipment, onDataChange]);
 
@@ -80,28 +106,30 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
               placeholder="Example: 2018 Sunseeker Predator 50"
               maxLength={100}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              No contact info allowed - share details after messaging connection
+            </p>
           </div>
 
           <div>
-            <Label htmlFor="description_short">Short Description *</Label>
-            <Input
-              id="description_short"
-              {...register('description_short', { required: true })}
-              onChange={(e) => onDataChange({ ...formData, description_short: e.target.value })}
-              placeholder="Write a short summary for quick view"
-              maxLength={150}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description_full">Full Description *</Label>
-            <Textarea
-              id="description_full"
-              {...register('description_full', { required: true })}
-              onChange={(e) => onDataChange({ ...formData, description_full: e.target.value })}
-              placeholder="Describe features, maintenance, and extras..."
-              rows={6}
-            />
+            <Label htmlFor="yacht_type">Yacht Type *</Label>
+            <Select 
+              onValueChange={(value) => {
+                setValue('yacht_type', value);
+                onDataChange({ ...formData, yacht_type: value });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select yacht type" />
+              </SelectTrigger>
+              <SelectContent>
+                {YACHT_TYPES.map(type => (
+                  <SelectItem key={type} value={type.toLowerCase()}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -214,7 +242,7 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           </div>
 
           <div>
-            <Label htmlFor="hull_material">Hull Material *</Label>
+            <Label htmlFor="hull_material">Hull Material</Label>
             <Select 
               onValueChange={(value) => {
                 setValue('hull_material', value);
@@ -235,7 +263,28 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           </div>
 
           <div>
-            <Label htmlFor="fuel_type">Fuel Type *</Label>
+            <Label htmlFor="engine_type">Engine Configuration</Label>
+            <Select 
+              onValueChange={(value) => {
+                setValue('engine_type', value);
+                onDataChange({ ...formData, engine_type: value });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select engine type" />
+              </SelectTrigger>
+              <SelectContent>
+                {ENGINE_TYPES.map(type => (
+                  <SelectItem key={type} value={type.toLowerCase()}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="fuel_type">Fuel Type</Label>
             <Select 
               onValueChange={(value) => {
                 setValue('fuel_type', value);
@@ -256,39 +305,29 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
           </div>
 
           <div>
-            <Label htmlFor="engines">Engine Type *</Label>
-            <Input
-              id="engines"
-              {...register('engines', { required: true })}
-              onChange={(e) => onDataChange({ ...formData, engines: e.target.value })}
-              placeholder="2x Volvo Penta 600 HP"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="berths">Berths / Cabins *</Label>
+            <Label htmlFor="berths">Berths / Cabins</Label>
             <Input
               id="berths"
               type="number"
-              {...register('berths', { required: true })}
+              {...register('berths')}
               onChange={(e) => onDataChange({ ...formData, berths: parseInt(e.target.value) })}
               placeholder="e.g. 3"
             />
           </div>
 
           <div>
-            <Label htmlFor="max_passengers">Max Passengers *</Label>
+            <Label htmlFor="max_passengers">Max Passengers</Label>
             <Input
               id="max_passengers"
               type="number"
-              {...register('max_passengers', { required: true })}
+              {...register('max_passengers')}
               onChange={(e) => onDataChange({ ...formData, max_passengers: parseInt(e.target.value) })}
               placeholder="e.g. 12"
             />
           </div>
 
           <div>
-            <Label htmlFor="condition">Condition *</Label>
+            <Label htmlFor="condition">Condition</Label>
             <Select 
               onValueChange={(value) => {
                 setValue('condition', value);
@@ -307,6 +346,27 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
               </SelectContent>
             </Select>
           </div>
+
+          <div>
+            <Label htmlFor="crew">Crew Arrangement</Label>
+            <Select 
+              onValueChange={(value) => {
+                setValue('crew_option', value);
+                onDataChange({ ...formData, crew_option: value });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select crew option" />
+              </SelectTrigger>
+              <SelectContent>
+                {CREW_OPTIONS.map(opt => (
+                  <SelectItem key={opt} value={opt.toLowerCase()}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
@@ -315,20 +375,25 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
         <CardHeader>
           <CardTitle>Equipment & Amenities</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {COMMON_EQUIPMENT.map(item => (
-              <Badge
-                key={item}
-                variant={selectedEquipment.includes(item) ? 'default' : 'outline'}
-                className="cursor-pointer transition-all hover:scale-105"
-                onClick={() => handleEquipmentToggle(item)}
-              >
-                {item}
-                {selectedEquipment.includes(item) && <X className="w-3 h-3 ml-1" />}
-              </Badge>
-            ))}
-          </div>
+        <CardContent className="space-y-6">
+          {Object.entries(YACHT_EQUIPMENT).map(([category, items]) => (
+            <div key={category}>
+              <h4 className="font-medium text-sm mb-3 text-muted-foreground">{category}</h4>
+              <div className="flex flex-wrap gap-2">
+                {items.map(item => (
+                  <Badge
+                    key={item}
+                    variant={selectedEquipment.includes(item) ? 'default' : 'outline'}
+                    className="cursor-pointer transition-all hover:scale-105"
+                    onClick={() => handleEquipmentToggle(item)}
+                  >
+                    {item}
+                    {selectedEquipment.includes(item) && <X className="w-3 h-3 ml-1" />}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

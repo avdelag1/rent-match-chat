@@ -5,10 +5,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { validateNoContactInfo } from '@/utils/contactInfoValidation';
+import { toast } from '@/hooks/use-toast';
 
 export interface MotorcycleFormData {
   title: string;
-  description_full: string;
+  motorcycle_type?: string;
+  engine_size_range?: string;
+  mileage_range?: string;
   mode: 'sale' | 'rent' | 'both';
   price?: number;
   rental_rates?: {
@@ -33,11 +38,21 @@ interface MotorcycleListingFormProps {
   initialData?: Partial<MotorcycleFormData>;
 }
 
-const TRANSMISSIONS = ['Manual', 'Automatic', 'Semi-auto'];
+const MOTORCYCLE_TYPES = ['Sport Bike', 'Cruiser', 'Touring', 'Adventure', 'Dual-Sport', 'Dirt Bike', 'Standard', 'Cafe Racer', 'Chopper', 'Scooter', 'Electric'];
+const ENGINE_SIZES = ['Under 125cc', '125-250cc', '251-400cc', '401-600cc', '601-800cc', '801-1000cc', '1000cc+'];
+const MILEAGE_RANGES = ['Under 1,000 km', '1,000-5,000 km', '5,000-10,000 km', '10,000-20,000 km', '20,000-50,000 km', '50,000+ km'];
+const TRANSMISSIONS = ['Manual', 'Automatic', 'Semi-Auto'];
 const FUEL_TYPES = ['Gasoline', 'Electric', 'Hybrid'];
 const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs Work'];
-const LICENSE_TYPES = ['A1', 'A2', 'A', 'None Required'];
-const VEHICLE_TYPES = ['Cruiser', 'Sport', 'Naked', 'Adventure', 'Scooter', 'Dirt', 'Touring', 'Custom'];
+
+const MOTORCYCLE_FEATURES = {
+  'Safety': ['ABS', 'Traction Control', 'Cornering ABS', 'Riding Modes', 'Slipper Clutch'],
+  'Comfort': ['Heated Grips', 'Adjustable Suspension', 'Cruise Control', 'Windscreen', 'Comfort Seat'],
+  'Storage': ['Saddlebags', 'Top Case', 'Tank Bag', 'Under-Seat Storage'],
+  'Electronics': ['Digital Display', 'Bluetooth', 'USB Charging', 'GPS Mount', 'Phone Holder'],
+  'Performance': ['Quick Shifter', 'Power Commander', 'Aftermarket Exhaust', 'Performance Brakes'],
+  'Protection': ['Crash Bars', 'Frame Sliders', 'Hand Guards', 'Engine Guard', 'Skid Plate']
+};
 
 export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleListingFormProps) {
   const { register, watch, setValue } = useForm<MotorcycleFormData>({
@@ -47,6 +62,17 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
   const formData = watch();
 
   useEffect(() => {
+    // Validate title for contact info
+    if (formData.title) {
+      const error = validateNoContactInfo(formData.title);
+      if (error) {
+        toast({
+          title: "Invalid Title",
+          description: error,
+          variant: "destructive"
+        });
+      }
+    }
     onDataChange(formData);
   }, [formData, onDataChange]);
 
@@ -66,17 +92,30 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
               onChange={(e) => onDataChange({ ...formData, title: e.target.value })}
               placeholder="2021 Yamaha MT-07"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              No contact info allowed - share after messaging connection
+            </p>
           </div>
 
           <div>
-            <Label htmlFor="description_full">Description *</Label>
-            <Textarea
-              id="description_full"
-              {...register('description_full', { required: true })}
-              onChange={(e) => onDataChange({ ...formData, description_full: e.target.value })}
-              placeholder="Include service history and extras..."
-              rows={6}
-            />
+            <Label htmlFor="motorcycle_type">Motorcycle Type</Label>
+            <Select 
+              onValueChange={(value) => {
+                setValue('motorcycle_type', value);
+                onDataChange({ ...formData, motorcycle_type: value });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {MOTORCYCLE_TYPES.map(type => (
+                  <SelectItem key={type} value={type.toLowerCase()}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -252,20 +291,41 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           </div>
 
           <div>
-            <Label htmlFor="vehicle_type">Type *</Label>
+            <Label htmlFor="engine_size">Engine Size</Label>
             <Select 
               onValueChange={(value) => {
-                setValue('vehicle_type', value);
-                onDataChange({ ...formData, vehicle_type: value });
+                setValue('engine_size_range', value);
+                onDataChange({ ...formData, engine_size_range: value });
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder="Select engine size" />
               </SelectTrigger>
               <SelectContent>
-                {VEHICLE_TYPES.map(type => (
-                  <SelectItem key={type} value={type.toLowerCase()}>
-                    {type}
+                {ENGINE_SIZES.map(size => (
+                  <SelectItem key={size} value={size.toLowerCase()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="mileage_range">Mileage Range</Label>
+            <Select 
+              onValueChange={(value) => {
+                setValue('mileage_range', value);
+                onDataChange({ ...formData, mileage_range: value });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select mileage range" />
+              </SelectTrigger>
+              <SelectContent>
+                {MILEAGE_RANGES.map(range => (
+                  <SelectItem key={range} value={range.toLowerCase()}>
+                    {range}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -281,27 +341,28 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
               placeholder="Red, Black..."
             />
           </div>
+        </CardContent>
+      </Card>
 
-          <div>
-            <Label htmlFor="license_required">License Required</Label>
-            <Select 
-              onValueChange={(value) => {
-                setValue('license_required', value);
-                onDataChange({ ...formData, license_required: value });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select license type" />
-              </SelectTrigger>
-              <SelectContent>
-                {LICENSE_TYPES.map(type => (
-                  <SelectItem key={type} value={type.toLowerCase()}>
-                    {type}
-                  </SelectItem>
+      {/* Features */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Features & Extras</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {Object.entries(MOTORCYCLE_FEATURES).map(([category, items]) => (
+            <div key={category}>
+              <h4 className="font-medium text-sm mb-3 text-muted-foreground">{category}</h4>
+              <div className="grid md:grid-cols-2 gap-2">
+                {items.map(feature => (
+                  <Label key={feature} className="text-sm cursor-pointer flex items-center gap-2">
+                    <Checkbox />
+                    {feature}
+                  </Label>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

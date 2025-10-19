@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
+import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { CategorySelector, Category, Mode } from './CategorySelector';
 import { YachtListingForm, YachtFormData } from './YachtListingForm';
 import { MotorcycleListingForm, MotorcycleFormData } from './MotorcycleListingForm';
@@ -221,43 +222,26 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       return;
     }
     
-    if (!formData.city) {
+    // Validate title for contact info
+    if (formData.title) {
+      const titleError = validateNoContactInfo(formData.title);
+      if (titleError) {
+        toast({
+          title: "Invalid Title",
+          description: titleError,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
+    if (!formData.title) {
       toast({
-        title: "City Required",
-        description: "Please enter the city where your listing is located.",
+        title: "Title Required",
+        description: "Please enter a title for your listing.",
         variant: "destructive"
       });
       return;
-    }
-    
-    // Category-specific validation
-    if (selectedCategory === 'yacht') {
-      if (!formData.title || !formData.brand || !formData.length_m) {
-        toast({
-          title: "Required Fields Missing",
-          description: "Please fill in title, brand, and length for your yacht.",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else if (selectedCategory === 'motorcycle') {
-      if (!formData.title || !formData.brand || !formData.year) {
-        toast({
-          title: "Required Fields Missing",
-          description: "Please fill in title, brand, and year for your motorcycle.",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else if (selectedCategory === 'bicycle') {
-      if (!formData.title || !formData.vehicle_type) {
-        toast({
-          title: "Required Fields Missing",
-          description: "Please fill in title and type for your bicycle.",
-          variant: "destructive"
-        });
-        return;
-      }
     }
     
     createListingMutation.mutate();
@@ -339,33 +323,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
                 </div>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="lat">Latitude (Optional)</Label>
-                  <Input
-                    id="lat"
-                    type="number"
-                    step="any"
-                    value={location.lat || ''}
-                    onChange={(e) => setLocation({ ...location, lat: parseFloat(e.target.value) })}
-                    placeholder="20.2114"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lng">Longitude (Optional)</Label>
-                  <Input
-                    id="lng"
-                    type="number"
-                    step="any"
-                    value={location.lng || ''}
-                    onChange={(e) => setLocation({ ...location, lng: parseFloat(e.target.value) })}
-                    placeholder="-87.4654"
-                  />
-                </div>
-              </div>
-              
               <p className="text-sm text-muted-foreground">
-                💡 City is required. Coordinates are optional but help with map features.
+                🔒 Only city and neighborhood are visible. Exact address shared after messaging activation.
               </p>
             </CardContent>
           </Card>
@@ -410,7 +369,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={createListingMutation.isPending}>
-              {createListingMutation.isPending ? 'Publishing...' : 'Publish Listing'}
+              {createListingMutation.isPending ? 'Saving...' : 'Save Listing'}
             </Button>
           </div>
       </DialogContent>

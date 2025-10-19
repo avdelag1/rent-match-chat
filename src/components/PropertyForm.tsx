@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { Upload, X, Plus } from 'lucide-react';
+import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 
 interface PropertyFormProps {
   isOpen: boolean;
@@ -26,16 +27,16 @@ interface PropertyFormProps {
 
 interface PropertyFormData {
   title: string;
-  description: string;
   property_type: string;
   listing_type: string;
   price: number;
-  address: string;
   city: string;
   neighborhood: string;
   beds: number;
   baths: number;
-  square_footage: number;
+  square_footage_range?: string;
+  condition?: string;
+  lease_terms?: string;
   furnished: boolean;
   pet_friendly: boolean;
   amenities: string[];
@@ -53,20 +54,30 @@ const PROPERTY_TYPES = [
   'Townhouse'
 ];
 
-const COMMON_AMENITIES = [
-  'Air Conditioning',
-  'WiFi',
-  'Kitchen',
-  'Washing Machine',
-  'Parking',
-  'Pool',
-  'Gym',
-  'Balcony',
-  'Garden',
-  'Security',
-  'Elevator',
-  'Storage'
-];
+const BEDROOMS_OPTIONS = ['Studio', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
+const BATHROOMS_OPTIONS = ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6+'];
+const SQFT_OPTIONS = ['Under 500', '500-750', '750-1000', '1000-1500', '1500-2000', '2000-3000', '3000-5000', '5000+'];
+const PROPERTY_CONDITIONS = ['New Construction', 'Recently Renovated', 'Move-In Ready', 'Needs Updates'];
+const LEASE_TERMS = ['Short-Term (1-6 months)', 'Medium-Term (6-12 months)', 'Long-Term (1+ year)', 'Flexible'];
+
+const COMPREHENSIVE_AMENITIES = {
+  'Cooling & Heating': ['Air Conditioning', 'Central AC', 'Ceiling Fans', 'Heating', 'Fireplace'],
+  'Kitchen': ['Full Kitchen', 'Modern Appliances', 'Dishwasher', 'Microwave', 'Oven', 'Refrigerator'],
+  'Laundry': ['Washer/Dryer In-Unit', 'Laundry Room', 'Dryer', 'Washing Machine'],
+  'Water Features': ['Pool', 'Infinity Pool', 'Plunge Pool', 'Jacuzzi', 'Hot Tub'],
+  'Outdoor': ['Balcony', 'Rooftop Access', 'Garden', 'Patio', 'Terrace', 'BBQ Area'],
+  'Parking': ['Parking', 'Garage', 'Street Parking', 'Covered Parking'],
+  'Security': ['Security', '24/7 Security', 'Gated Community', 'Doorman', 'CCTV'],
+  'Building': ['Elevator', 'Ground Floor', 'Double Height Ceilings', 'Storage'],
+  'Work/Lifestyle': ['WiFi', 'Home Office', 'Gym', 'Workspace'],
+  'Pet-Friendly': ['Pet Allowed', 'Pet Wash Station', 'Dog Park Nearby'],
+  'Furnishing': ['Fully Furnished', 'Partially Furnished', 'Unfurnished'],
+  'Views': ['Ocean View', 'City View', 'Mountain View', 'Garden View'],
+  'Utilities': ['Utilities Included', 'Electric Included', 'Water Included'],
+  'Special': ['Smart Home', 'Solar Panels', 'Wheelchair Accessible', 'Soundproof']
+};
+
+const COMMON_AMENITIES = Object.values(COMPREHENSIVE_AMENITIES).flat();
 
 export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormProps) {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -301,6 +312,17 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
   };
 
   const onSubmit = (data: PropertyFormData) => {
+    // Validate title for contact info
+    const titleError = validateNoContactInfo(data.title);
+    if (titleError) {
+      toast({
+        title: "Invalid Title",
+        description: titleError,
+        variant: "destructive"
+      });
+      return;
+    }
+
     createPropertyMutation.mutate({
       ...data,
       amenities: selectedAmenities,
@@ -328,19 +350,22 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
               <CardTitle className="text-lg">Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="title">Property Title</Label>
-                  <Input
-                    id="title"
-                    {...register('title', { required: 'Title is required' })}
-                    placeholder="e.g., Modern 2BR Apartment in Downtown"
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
-                  )}
-                </div>
+              <div>
+                <Label htmlFor="title">Property Title *</Label>
+                <Input
+                  id="title"
+                  {...register('title', { required: 'Title is required' })}
+                  placeholder="e.g., Modern 2BR Apartment in Tulum"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  No contact info allowed - share details after connecting via messages
+                </p>
+                {errors.title && (
+                  <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+                )}
+              </div>
 
+              <div className="grid md:grid-cols-2 gap-4">
                  <div>
                    <Label htmlFor="property_type">Property Type</Label>
                    <Select 
@@ -375,19 +400,38 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
                      </SelectContent>
                    </Select>
                  </div>
-              </div>
 
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  {...register('description', { required: 'Description is required' })}
-                  placeholder="Describe your property..."
-                  rows={4}
-                />
-                {errors.description && (
-                  <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>
-                )}
+                 <div>
+                   <Label htmlFor="condition">Property Condition</Label>
+                   <Select onValueChange={(value) => setValue('condition', value)}>
+                     <SelectTrigger>
+                       <SelectValue placeholder="Select condition" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       {PROPERTY_CONDITIONS.map(cond => (
+                         <SelectItem key={cond} value={cond.toLowerCase()}>
+                           {cond}
+                         </SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </div>
+
+                 <div>
+                   <Label htmlFor="lease_terms">Lease Terms</Label>
+                   <Select onValueChange={(value) => setValue('lease_terms', value)}>
+                     <SelectTrigger>
+                       <SelectValue placeholder="Select lease terms" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       {LEASE_TERMS.map(term => (
+                         <SelectItem key={term} value={term.toLowerCase()}>
+                           {term}
+                         </SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </div>
               </div>
             </CardContent>
           </Card>
@@ -398,25 +442,13 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
               <CardTitle className="text-lg">Location</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  {...register('address', { required: 'Address is required' })}
-                  placeholder="Full street address"
-                />
-                {errors.address && (
-                  <p className="text-sm text-red-500 mt-1">{errors.address.message}</p>
-                )}
-              </div>
-
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">City *</Label>
                   <Input
                     id="city"
                     {...register('city', { required: 'City is required' })}
-                    placeholder="City"
+                    placeholder="e.g., Tulum"
                   />
                   {errors.city && (
                     <p className="text-sm text-red-500 mt-1">{errors.city.message}</p>
@@ -428,10 +460,13 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
                   <Input
                     id="neighborhood"
                     {...register('neighborhood')}
-                    placeholder="Neighborhood (optional)"
+                    placeholder="e.g., Aldea Zama"
                   />
                 </div>
               </div>
+              <p className="text-sm text-muted-foreground">
+                🔒 Exact address hidden for privacy. Share after messaging connection.
+              </p>
             </CardContent>
           </Card>
 
@@ -441,9 +476,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
               <CardTitle className="text-lg">Property Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-4 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="price">Monthly Rent ($)</Label>
+                  <Label htmlFor="price">Price (USD) *</Label>
                   <Input
                     id="price"
                     type="number"
@@ -461,33 +496,50 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                 <div>
                   <Label htmlFor="beds">Bedrooms</Label>
-                  <Input
-                    id="beds"
-                    type="number"
-                    {...register('beds', { valueAsNumber: true })}
-                    placeholder="2"
-                  />
+                  <Select onValueChange={(value) => setValue('beds', value === '10+' ? 10 : parseInt(value))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select bedrooms" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BEDROOMS_OPTIONS.map(opt => (
+                        <SelectItem key={opt} value={opt}>
+                          {opt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
                   <Label htmlFor="baths">Bathrooms</Label>
-                  <Input
-                    id="baths"
-                    type="number"
-                    step="0.5"
-                    {...register('baths', { valueAsNumber: true })}
-                    placeholder="1.5"
-                  />
+                  <Select onValueChange={(value) => setValue('baths', value === '6+' ? 6 : parseFloat(value))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select bathrooms" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BATHROOMS_OPTIONS.map(opt => (
+                        <SelectItem key={opt} value={opt}>
+                          {opt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
-                  <Label htmlFor="square_footage">Square Feet</Label>
-                  <Input
-                    id="square_footage"
-                    type="number"
-                    {...register('square_footage', { valueAsNumber: true })}
-                    placeholder="1200"
-                  />
+                  <Label htmlFor="square_footage">Square Footage</Label>
+                  <Select onValueChange={(value) => setValue('square_footage_range', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select size range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SQFT_OPTIONS.map(opt => (
+                        <SelectItem key={opt} value={opt}>
+                          {opt} sq ft
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -514,21 +566,26 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
           {/* Amenities */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Amenities</CardTitle>
+              <CardTitle className="text-lg">Amenities & Features</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-3">
-                {COMMON_AMENITIES.map(amenity => (
-                  <div key={amenity} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={amenity}
-                      checked={selectedAmenities.includes(amenity)}
-                      onCheckedChange={() => handleAmenityToggle(amenity)}
-                    />
-                    <Label htmlFor={amenity} className="text-sm">{amenity}</Label>
+            <CardContent className="space-y-6">
+              {Object.entries(COMPREHENSIVE_AMENITIES).map(([category, items]) => (
+                <div key={category}>
+                  <h4 className="font-medium text-sm mb-3 text-muted-foreground">{category}</h4>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    {items.map(amenity => (
+                      <div key={amenity} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={amenity}
+                          checked={selectedAmenities.includes(amenity)}
+                          onCheckedChange={() => handleAmenityToggle(amenity)}
+                        />
+                        <Label htmlFor={amenity} className="text-sm cursor-pointer">{amenity}</Label>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
