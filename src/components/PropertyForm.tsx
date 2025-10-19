@@ -26,6 +26,7 @@ interface PropertyFormProps {
 }
 
 interface PropertyFormData {
+  id?: string;
   title: string;
   property_type: string;
   listing_type: string;
@@ -82,6 +83,7 @@ const COMMON_AMENITIES = Object.values(COMPREHENSIVE_AMENITIES).flat();
 export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormProps) {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<PropertyFormData>({
@@ -96,6 +98,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
   // Populate form when editing property
   useEffect(() => {
     if (editingProperty && isOpen) {
+      // Store the ID separately
+      setEditingId(editingProperty.id || null);
+      
       // Set form values
       reset(editingProperty);
       
@@ -121,6 +126,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
       }
     } else if (!editingProperty && isOpen) {
       // Reset for new property
+      setEditingId(null);
       reset({
         furnished: false,
         pet_friendly: false,
@@ -181,12 +187,18 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
         propertyData.lease_terms = data.lease_terms;
       }
 
-      if (editingProperty) {
+      if (editingId) {
         // Update existing property
+        console.log('Updating property with ID:', editingId);
+        
+        if (!editingId) {
+          throw new Error('Property ID is missing. Cannot update.');
+        }
+        
         const { data: result, error } = await supabase
           .from('listings')
           .update(propertyData)
-          .eq('id', editingProperty.id)
+          .eq('id', editingId)
           .select()
           .single();
 
@@ -212,8 +224,8 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     },
     onSuccess: () => {
       toast({
-        title: editingProperty ? "Property Updated!" : "Property Listed!",
-        description: editingProperty ? "Your property has been successfully updated." : "Your property has been successfully listed.",
+        title: editingId ? "Property Updated!" : "Property Listed!",
+        description: editingId ? "Your property has been successfully updated." : "Your property has been successfully listed.",
       });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
@@ -221,7 +233,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     onError: (error) => {
       toast({
         title: "Error",
-        description: editingProperty ? "Failed to update property. Please try again." : "Failed to create property listing. Please try again.",
+        description: editingId ? "Failed to update property. Please try again." : "Failed to create property listing. Please try again.",
         variant: "destructive"
       });
       console.error('Property operation error:', error);
@@ -232,6 +244,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     reset();
     setSelectedAmenities([]);
     setImages([]);
+    setEditingId(null);
     onClose();
   };
 
@@ -394,7 +407,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle>
-            {editingProperty ? 'Edit Property' : 'List New Property'}
+            {editingId ? 'Edit Property' : 'List New Property'}
           </DialogTitle>
         </DialogHeader>
 
