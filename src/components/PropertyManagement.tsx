@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useListings } from '@/hooks/useListings';
+import { useOwnerListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
+import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 
 
 interface PropertyManagementProps {
@@ -22,17 +23,15 @@ interface PropertyManagementProps {
 
 export function PropertyManagement({ initialCategory }: PropertyManagementProps) {
   const { user } = useAuth();
-  const { data: allListings = [], isLoading, error } = useListings();
+  const { data: listings = [], isLoading, error } = useOwnerListings();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(initialCategory || 'all');
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProperty, setEditingProperty] = useState<any>(null);
   const queryClient = useQueryClient();
-
-  // Filter listings to show only those owned by current user
-  const listings = allListings.filter(listing => listing.owner_id === user?.id);
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -55,12 +54,17 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
   });
 
   console.log('PropertyManagement - Current user:', user?.id);
-  console.log('PropertyManagement - All listings:', allListings.length);
   console.log('PropertyManagement - Owner listings:', listings.length);
   console.log('PropertyManagement - Filtered listings:', filteredListings.length);
 
   const handleAddProperty = () => {
     setEditingProperty(null);
+    setShowCategoryDialog(true);
+  };
+
+  const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
+    setEditingProperty({ category, mode });
+    setShowCategoryDialog(false);
     setIsFormOpen(true);
   };
 
@@ -183,7 +187,7 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
             onClick={handleAddProperty}
           >
             <Plus className="w-4 h-4" />
-            <span className="text-sm sm:text-base">Add Property</span>
+            <span className="text-sm sm:text-base">Add Listing</span>
           </Button>
         </div>
 
@@ -417,6 +421,13 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
           property={viewingProperty}
           onEdit={handleEditFromPreview}
           showEditButton={true}
+        />
+
+        {/* Category Selection Dialog */}
+        <CategorySelectionDialog
+          open={showCategoryDialog}
+          onOpenChange={setShowCategoryDialog}
+          onCategorySelect={handleCategorySelect}
         />
 
         {/* Unified Listing Form */}

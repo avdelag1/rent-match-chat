@@ -32,10 +32,19 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   useEffect(() => {
     if (editingProperty && isOpen) {
-      setSelectedCategory(editingProperty.category || 'property');
-      setSelectedMode(editingProperty.mode || 'rent');
-      setImages(editingProperty.images || []);
-      setFormData(editingProperty);
+      // If editing an existing property with id
+      if (editingProperty.id) {
+        setSelectedCategory(editingProperty.category || 'property');
+        setSelectedMode(editingProperty.mode || 'rent');
+        setImages(editingProperty.images || []);
+        setFormData(editingProperty);
+      } else {
+        // New listing with pre-selected category and mode
+        setSelectedCategory(editingProperty.category || 'property');
+        setSelectedMode(editingProperty.mode || 'rent');
+        setImages([]);
+        setFormData({});
+      }
     } else if (!editingProperty && isOpen) {
       setImages([]);
       setFormData({});

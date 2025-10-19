@@ -134,6 +134,42 @@ export function useListings(excludeSwipedIds: string[] = []) {
   });
 }
 
+// Hook for owners to view their own listings (no filtering by listing type)
+export function useOwnerListings() {
+  return useQuery({
+    queryKey: ['owner-listings'],
+    queryFn: async () => {
+      try {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) {
+          console.log('No authenticated user for owner listings');
+          return [];
+        }
+
+        const { data: listings, error } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('owner_id', user.user.id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Owner listings query error:', error);
+          throw error;
+        }
+        
+        console.log(`Loaded ${listings?.length || 0} owner listings for user ${user.user.id}:`, listings);
+        return (listings as Listing[]) || [];
+      } catch (error) {
+        console.error('Error in useOwnerListings:', error);
+        return [];
+      }
+    },
+    retry: 3,
+    retryDelay: 1000,
+  });
+}
+
 export function useSwipedListings() {
   return useQuery({
     queryKey: ['swipes'],

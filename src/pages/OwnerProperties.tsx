@@ -1,20 +1,27 @@
 import { useState, useEffect } from 'react';
 import { PropertyManagement } from "@/components/PropertyManagement";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { useListings } from "@/hooks/useListings";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 
 const OwnerProperties = () => {
-  const { data: listings = [], isLoading, error } = useListings();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [initialCategory, setInitialCategory] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check for category in search params
     const category = searchParams.get('category');
     if (category) {
       setInitialCategory(category);
     }
-  }, [searchParams]);
+    
+    // Check for hash-based navigation (e.g., #add-yacht)
+    const hash = location.hash;
+    if (hash.startsWith('#add-')) {
+      const hashCategory = hash.replace('#add-', '');
+      setInitialCategory(hashCategory);
+    }
+  }, [searchParams, location.hash]);
 
   return (
     <DashboardLayout userRole="owner">
