@@ -107,12 +107,13 @@ export function useSwipe() {
               const { error: matchError } = await supabase.from('matches').upsert({
                 client_id: targetId,
                 owner_id: user.id,
+                listing_id: null,
                 client_liked_at: clientLike.created_at,
                 owner_liked_at: new Date().toISOString(),
                 is_mutual: true,
                 status: 'accepted'
               }, {
-                onConflict: 'client_id,owner_id',
+                onConflict: 'client_id,owner_id,listing_id',
                 ignoreDuplicates: true
               });
 
