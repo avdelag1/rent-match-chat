@@ -2340,15 +2340,19 @@ export type Database = {
           languages_spoken: string[] | null
           listing_id: string | null
           max_age: number | null
+          max_budget: number | null
           max_extra_guests: number | null
           maximum_stay_days: number | null
           min_age: number | null
+          min_budget: number | null
+          min_monthly_income: number | null
           minimum_stay_days: number | null
           no_smoking: boolean | null
           preferred_nationalities: string[] | null
           preferred_occupations: string[] | null
           punctual_payments_required: boolean | null
           quiet_hours_required: boolean | null
+          requires_employment_proof: boolean | null
           requires_references: boolean | null
           respects_building_rules: boolean | null
           updated_at: string | null
@@ -2366,15 +2370,19 @@ export type Database = {
           languages_spoken?: string[] | null
           listing_id?: string | null
           max_age?: number | null
+          max_budget?: number | null
           max_extra_guests?: number | null
           maximum_stay_days?: number | null
           min_age?: number | null
+          min_budget?: number | null
+          min_monthly_income?: number | null
           minimum_stay_days?: number | null
           no_smoking?: boolean | null
           preferred_nationalities?: string[] | null
           preferred_occupations?: string[] | null
           punctual_payments_required?: boolean | null
           quiet_hours_required?: boolean | null
+          requires_employment_proof?: boolean | null
           requires_references?: boolean | null
           respects_building_rules?: boolean | null
           updated_at?: string | null
@@ -2392,15 +2400,19 @@ export type Database = {
           languages_spoken?: string[] | null
           listing_id?: string | null
           max_age?: number | null
+          max_budget?: number | null
           max_extra_guests?: number | null
           maximum_stay_days?: number | null
           min_age?: number | null
+          min_budget?: number | null
+          min_monthly_income?: number | null
           minimum_stay_days?: number | null
           no_smoking?: boolean | null
           preferred_nationalities?: string[] | null
           preferred_occupations?: string[] | null
           punctual_payments_required?: boolean | null
           quiet_hours_required?: boolean | null
+          requires_employment_proof?: boolean | null
           requires_references?: boolean | null
           respects_building_rules?: boolean | null
           updated_at?: string | null

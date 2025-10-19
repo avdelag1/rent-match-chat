@@ -129,10 +129,18 @@ export function useGeolocation() {
         error: null,
       }));
 
-      toast({
-        title: "Location detected",
-        description: `${locationInfo.city || 'Unknown city'}, ${locationInfo.country || 'Unknown country'}`,
-      });
+      // Only show toast if we have valid location data
+      if (locationInfo.city && locationInfo.country) {
+        toast({
+          title: "Location detected",
+          description: `${locationInfo.city}, ${locationInfo.country}`,
+        });
+      } else {
+        console.warn('Coordinates obtained but reverse geocoding incomplete:', {
+          coordinates,
+          locationInfo
+        });
+      }
 
     } catch (error: any) {
       let errorMessage = 'Failed to get your location';
