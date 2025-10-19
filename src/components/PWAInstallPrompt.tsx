@@ -29,9 +29,9 @@ export function PWAInstallPrompt() {
       // Show notification-style prompt periodically
       const dismissCount = parseInt(localStorage.getItem('pwa-install-dismiss-count') || '0');
       
-      // Show after 5 seconds initially, then every session if dismissed less than 3 times
+      // Show after 2 seconds initially, then every session if dismissed less than 3 times
       if (dismissCount < 3) {
-        setTimeout(() => setShowPrompt(true), 5000);
+        setTimeout(() => setShowPrompt(true), 2000);
       }
     };
 
@@ -80,7 +80,7 @@ export function PWAInstallPrompt() {
                 <Download className="w-5 h-5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold leading-tight">
-                    Get the app here 👈
+                    Download the app 👉
                   </p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
