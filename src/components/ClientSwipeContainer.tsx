@@ -307,36 +307,45 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         
         <AnimatePresence>
           {nextClient && (
-            <ClientProfileCard
-              profile={nextClient}
-              onSwipe={() => {}}
-              onTap={() => {}}
-              onInsights={() => {}}
-              onMessage={() => {}}
-              isTop={false}
-              hasPremium={hasPremiumMessaging}
-            />
+            <motion.div
+              key={`next-${nextClient.user_id}`}
+              initial={{ scale: 0.95, opacity: 1 }}
+              animate={{ scale: 0.95, opacity: 1 }}
+              className="absolute inset-0"
+              style={{ willChange: 'transform', zIndex: 1 }}
+            >
+              <ClientProfileCard
+                profile={nextClient}
+                onSwipe={() => {}}
+                onTap={() => {}}
+                onInsights={() => {}}
+                onMessage={() => {}}
+                isTop={false}
+                hasPremium={hasPremiumMessaging}
+              />
+            </motion.div>
           )}
           {currentClient && (
             <motion.div
               key={currentClient.user_id}
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 1, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ 
-                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
-                opacity: 0,
-                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
-                scale: 0.8,
+                x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
+                opacity: 1,
+                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                scale: 0.9,
                 transition: { 
                   type: "spring",
-                  stiffness: 300,
-                  damping: 25,
-                  mass: 0.5
+                  stiffness: 400,
+                  damping: 30,
+                  mass: 0.4,
+                  duration: 0.3
                 }
               }}
-              transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.6 }}
+              transition={{ type: "spring", stiffness: 600, damping: 40, mass: 0.5 }}
               className="absolute inset-0"
-              style={{ willChange: 'transform, opacity' }}
+              style={{ willChange: 'transform', zIndex: 10 }}
             >
               <ClientProfileCard
                 profile={currentClient}

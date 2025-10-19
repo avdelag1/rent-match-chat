@@ -53,7 +53,6 @@ export function EnhancedPropertyCard({
   const cardRef = useRef<HTMLDivElement>(null);
   
   const x = useMotionValue(0);
-  const opacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
 
@@ -125,7 +124,6 @@ export function EnhancedPropertyCard({
 
   const cardStyle = {
     x,
-    opacity: isTop ? opacity : 0.8,
     rotate: isTop ? rotate : 0,
     scale: isTop ? scale : 0.95,
     zIndex: isTop ? 10 : 1,

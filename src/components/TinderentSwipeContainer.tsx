@@ -342,36 +342,45 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         
         <AnimatePresence>
           {nextListing && (
-            <EnhancedPropertyCard
-              listing={nextListing}
-              onSwipe={() => {}}
-              onTap={() => {}}
-              onSuperLike={() => {}}
-              onMessage={() => {}}
-              isTop={false}
-              hasPremium={hasPremiumMessaging}
-            />
+            <motion.div
+              key={`next-${nextListing.id}`}
+              initial={{ scale: 0.95, opacity: 1 }}
+              animate={{ scale: 0.95, opacity: 1 }}
+              className="absolute inset-0"
+              style={{ willChange: 'transform', zIndex: 1 }}
+            >
+              <EnhancedPropertyCard
+                listing={nextListing}
+                onSwipe={() => {}}
+                onTap={() => {}}
+                onSuperLike={() => {}}
+                onMessage={() => {}}
+                isTop={false}
+                hasPremium={hasPremiumMessaging}
+              />
+            </motion.div>
           )}
           {currentListing && (
             <motion.div
               key={currentListing.id}
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 1, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ 
-                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
-                opacity: 0,
-                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
-                scale: 0.8,
+                x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
+                opacity: 1,
+                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                scale: 0.9,
                 transition: { 
                   type: "spring",
-                  stiffness: 300,
-                  damping: 25,
-                  mass: 0.5
+                  stiffness: 400,
+                  damping: 30,
+                  mass: 0.4,
+                  duration: 0.3
                 }
               }}
-              transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.6 }}
+              transition={{ type: "spring", stiffness: 600, damping: 40, mass: 0.5 }}
               className="absolute inset-0"
-              style={{ willChange: 'transform, opacity' }}
+              style={{ willChange: 'transform', zIndex: 10 }}
             >
               <EnhancedPropertyCard
                 listing={currentListing}

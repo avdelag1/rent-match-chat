@@ -91,8 +91,8 @@ export function useSwipe() {
                   is_mutual: true,
                   status: 'accepted'
                 }, {
-                  onConflict: 'client_id,owner_id',
-                  ignoreDuplicates: false
+                  onConflict: 'client_id,owner_id,listing_id',
+                  ignoreDuplicates: true
                 });
 
                 if (matchError) {
@@ -131,7 +131,7 @@ export function useSwipe() {
                 status: 'accepted'
               }, {
                 onConflict: 'client_id,owner_id',
-                ignoreDuplicates: false
+                ignoreDuplicates: true
               });
 
               if (matchError) {
