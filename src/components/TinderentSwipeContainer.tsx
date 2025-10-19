@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { triggerHaptic } from '@/utils/haptics';
 import { EnhancedPropertyCard } from './EnhancedPropertyCard';
 import { useListings, useSwipedListings } from '@/hooks/useListings';
 import { useSmartListingMatching } from '@/hooks/useSmartMatching';
@@ -82,6 +83,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
     setSwipeDirection(direction);
     
+    // Trigger haptic feedback
+    triggerHaptic(direction === 'right' ? 'success' : 'light');
+    
     // Show emoji immediately for better UX
     setEmojiAnimation({ 
       show: true, 
@@ -91,7 +95,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     
     setTimeout(() => {
       setEmojiAnimation({ show: false, type: 'like', position: 'right' });
-    }, 600);
+    }, 400);
     
     // Record swipe
     swipeMutation.mutate({
@@ -107,7 +111,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
-    }, 200);
+    }, 150);
   }, [currentIndex, listings, swipeMutation, recordSwipe]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
@@ -289,26 +293,29 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               initial={{ 
                 scale: 0, 
                 opacity: 0, 
-                x: emojiAnimation.position === 'right' ? 100 : -100,
-                rotate: emojiAnimation.position === 'right' ? 20 : -20
+                x: emojiAnimation.position === 'right' ? 80 : -80,
+                rotate: emojiAnimation.position === 'right' ? 15 : -15
               }}
               animate={{ 
-                scale: 2.2, 
+                scale: 2.5, 
                 opacity: 1, 
-                x: emojiAnimation.position === 'right' ? 50 : -50,
+                x: emojiAnimation.position === 'right' ? 40 : -40,
                 rotate: 0
               }}
               exit={{ 
-                scale: emojiAnimation.type === 'like' ? 3 : 1.2,
+                scale: emojiAnimation.type === 'like' ? 3.5 : 1.5,
                 opacity: 0, 
-                y: emojiAnimation.type === 'like' ? -200 : -80,
-                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -250 : 250),
-                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -60 : 60)
+                y: emojiAnimation.type === 'like' ? -250 : -100,
+                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -300 : 300),
+                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -75 : 75)
               }}
               transition={{ 
-                duration: 0.4, 
-                ease: [0.34, 1.56, 0.64, 1]
+                type: "spring",
+                stiffness: 500,
+                damping: 30,
+                mass: 0.5
               }}
+              style={{ willChange: 'transform, opacity' }}
               className={`absolute ${
                 emojiAnimation.position === 'right' ? 'right-8' : 'left-8'
               } top-1/3`}
@@ -348,15 +355,23 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           {currentListing && (
             <motion.div
               key={currentListing.id}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ 
-                x: swipeDirection === 'right' ? 300 : swipeDirection === 'left' ? -300 : 0,
+                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
                 opacity: 0,
-                transition: { duration: 0.3 }
+                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
+                scale: 0.8,
+                transition: { 
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 25,
+                  mass: 0.5
+                }
               }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.6 }}
               className="absolute inset-0"
+              style={{ willChange: 'transform, opacity' }}
             >
               <EnhancedPropertyCard
                 listing={currentListing}
