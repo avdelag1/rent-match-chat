@@ -92,10 +92,10 @@ export function ClientProfileCard({
     const velocity = info.velocity.x;
     const absVelocity = Math.abs(velocity);
     
-    // Lower threshold if high velocity (flick gesture)
-    const effectiveThreshold = absVelocity > 800 ? 40 : 60;
+    // ✅ FIX #2: Lower threshold for more responsive swipes
+    const effectiveThreshold = absVelocity > 600 ? 30 : 40;
     
-    if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 600) {
+    if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 350) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
@@ -125,10 +125,10 @@ export function ClientProfileCard({
       ref={cardRef}
       style={cardStyle}
       drag={isTop ? "x" : false}
-      dragConstraints={{ left: 0, right: 0 }}
+      dragConstraints={isTop ? { left: -400, right: 400 } : { left: 0, right: 0 }}
       dragElastic={0.7}
       onDragEnd={handleDragEnd}
-      className="cursor-pointer transform-gpu"
+      className={`transform-gpu ${isTop ? 'cursor-pointer' : 'pointer-events-none cursor-default'}`}
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
     >

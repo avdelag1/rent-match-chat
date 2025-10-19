@@ -190,6 +190,37 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
 
         <ScrollArea className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="space-y-6">
+          {/* ✅ FIX #6: Added Interest Type Filter */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Interest Type</Label>
+            <p className="text-sm text-muted-foreground">What are clients looking for?</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: 'rent', label: 'Rent Only' },
+                { value: 'buy', label: 'Buy Only' },
+                { value: 'both', label: 'Rent or Buy' },
+              ].map((option) => (
+                <Badge
+                  key={option.value}
+                  variant={selectedClientTypes.includes(option.value) ? "default" : "outline"}
+                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-2 px-4"
+                  onClick={() => {
+                    if (selectedClientTypes.includes(option.value)) {
+                      setSelectedClientTypes(selectedClientTypes.filter(t => t !== option.value));
+                    } else {
+                      setSelectedClientTypes([option.value]);
+                    }
+                  }}
+                >
+                  {option.label}
+                  {selectedClientTypes.includes(option.value) && (
+                    <X className="w-3 h-3 ml-1" />
+                  )}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
           {/* Looking For Section */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Looking For</Label>

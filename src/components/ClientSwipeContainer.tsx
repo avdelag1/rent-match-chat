@@ -196,22 +196,29 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   if (clientProfiles.length === 0) {
     return (
       <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl">
+        <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-bold mb-2 text-foreground">No Clients Found</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
           <p className="text-muted-foreground mb-4">
-            Your filters might be too restrictive.<br />Try adjusting them to see more profiles.
+            No clients match your current preferences.
           </p>
-          <div className="flex flex-col gap-2">
-            <Button 
-              onClick={handleRefresh}
-              variant="default"
-              className="gap-2 w-full"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Refresh
-            </Button>
+          <div className="text-sm text-muted-foreground space-y-2 bg-muted/30 p-4 rounded-lg mb-4">
+            <p className="font-semibold">Tips to find more clients:</p>
+            <ul className="list-disc list-inside text-left space-y-1">
+              <li>Adjust your budget range</li>
+              <li>Expand age preferences</li>
+              <li>Remove lifestyle filters</li>
+              <li>Ensure clients have photos uploaded</li>
+            </ul>
           </div>
+          <Button 
+            onClick={handleRefresh}
+            variant="default"
+            className="gap-2 w-full"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Refresh
+          </Button>
         </div>
       </div>
     );

@@ -496,6 +496,12 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           console.log(`🎯 After filtering: ${filteredProfiles.length}/${profiles.length} clients match`);
         }
 
+        // ✅ FIX #5: Filter out clients without photos (Tinder-style)
+        filteredProfiles = filteredProfiles.filter(profile => 
+          profile.images && profile.images.length > 0
+        );
+        console.log(`📸 After photo filter: ${filteredProfiles.length} clients with photos`);
+
         // Calculate match scores for filtered profiles
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
           let matchPercentage = 70; // Base score
