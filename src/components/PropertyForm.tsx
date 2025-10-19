@@ -32,9 +32,9 @@ interface PropertyFormData {
   price: number;
   city: string;
   neighborhood: string;
-  beds: number;
-  baths: number;
-  square_footage_range?: string;
+  beds?: number;
+  baths?: number;
+  square_footage?: number;
   condition?: string;
   lease_terms?: string;
   furnished: boolean;
@@ -496,7 +496,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                 <div>
                   <Label htmlFor="beds">Bedrooms</Label>
-                  <Select onValueChange={(value) => setValue('beds', value === '10+' ? 10 : parseInt(value))}>
+                  <Select onValueChange={(value) => {
+                    const numValue = value === 'Studio' ? 0 : value === '10+' ? 10 : parseInt(value);
+                    setValue('beds', numValue);
+                  }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select bedrooms" />
                     </SelectTrigger>
@@ -512,7 +515,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                 <div>
                   <Label htmlFor="baths">Bathrooms</Label>
-                  <Select onValueChange={(value) => setValue('baths', value === '6+' ? 6 : parseFloat(value))}>
+                  <Select onValueChange={(value) => {
+                    const numValue = value === '6+' ? 6 : parseFloat(value);
+                    setValue('baths', numValue);
+                  }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select bathrooms" />
                     </SelectTrigger>
@@ -528,7 +534,20 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                 <div>
                   <Label htmlFor="square_footage">Square Footage</Label>
-                  <Select onValueChange={(value) => setValue('square_footage_range', value)}>
+                  <Select onValueChange={(value) => {
+                    // Convert range to approximate midpoint number
+                    const rangeMap: { [key: string]: number } = {
+                      'Under 500': 400,
+                      '500-750': 625,
+                      '750-1000': 875,
+                      '1000-1500': 1250,
+                      '1500-2000': 1750,
+                      '2000-3000': 2500,
+                      '3000-5000': 4000,
+                      '5000+': 6000
+                    };
+                    setValue('square_footage', rangeMap[value] || 1000);
+                  }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select size range" />
                     </SelectTrigger>
