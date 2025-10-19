@@ -21,39 +21,21 @@ export function useSwipe() {
 
       console.log('Swipe auth check passed:', { userId: user.id, targetId, direction, targetType });
 
-      // Check if user has already swiped on this target to prevent duplicates
-      const { data: existingLike } = await supabase
+      // Use atomic upsert to prevent race conditions
+      const { error } = await supabase
         .from('likes')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('target_id', targetId)
-        .maybeSingle();
+        .upsert({
+          user_id: user.id,
+          target_id: targetId,
+          direction
+        }, {
+          onConflict: 'user_id,target_id,direction',
+          ignoreDuplicates: true
+        });
 
-      if (existingLike) {
-        // Update existing like instead of creating new one
-        const { error } = await supabase
-          .from('likes')
-          .update({ direction })
-          .eq('id', existingLike.id);
-
-        if (error) {
-          console.error('Error updating like:', error);
-          throw error;
-        }
-      } else {
-        // Create new like
-        const { error } = await supabase
-          .from('likes')
-          .insert({
-            user_id: user.id,
-            target_id: targetId,
-            direction
-          });
-
-        if (error) {
-          console.error('Error inserting like:', error);
-          throw error;
-        }
+      if (error) {
+        console.error('Error saving like:', error);
+        throw error;
       }
 
       console.log('Like saved successfully');
