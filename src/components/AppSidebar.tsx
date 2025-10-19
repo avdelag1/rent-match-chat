@@ -95,10 +95,14 @@ const ownerMenuItems = [
     action: "add-listing",
   },
   {
-    title: "Client Filters",
-    url: "#filters",
-    icon: Settings,
-    action: "filters",
+    title: "Filter Clients",
+    icon: Filter,
+    children: [
+      { title: "Property Clients", url: "/owner/clients/property" },
+      { title: "Moto Clients", url: "/owner/clients/moto" },
+      { title: "Bicycle Clients", url: "/owner/clients/bicycle" },
+      { title: "Yacht Clients", url: "/owner/clients/yacht" },
+    ]
   },
   {
     title: "Contracts",

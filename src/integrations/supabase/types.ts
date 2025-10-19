@@ -392,6 +392,36 @@ export type Database = {
           },
         ]
       }
+      client_category_preferences: {
+        Row: {
+          category: string
+          created_at: string | null
+          filters: Json
+          id: string
+          interest_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          filters?: Json
+          id?: string
+          interest_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          filters?: Json
+          id?: string
+          interest_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_filter_preferences: {
         Row: {
           amenities_required: string[] | null
@@ -2333,10 +2363,13 @@ export type Database = {
           allows_parties: boolean | null
           allows_pets: boolean | null
           allows_smoking: boolean | null
+          category: string | null
+          category_filters: Json | null
           cleanliness_important: boolean | null
           compatible_lifestyle_tags: string[] | null
           created_at: string | null
           id: string
+          interest_type: string | null
           languages_spoken: string[] | null
           listing_id: string | null
           max_age: number | null
@@ -2363,10 +2396,13 @@ export type Database = {
           allows_parties?: boolean | null
           allows_pets?: boolean | null
           allows_smoking?: boolean | null
+          category?: string | null
+          category_filters?: Json | null
           cleanliness_important?: boolean | null
           compatible_lifestyle_tags?: string[] | null
           created_at?: string | null
           id?: string
+          interest_type?: string | null
           languages_spoken?: string[] | null
           listing_id?: string | null
           max_age?: number | null
@@ -2393,10 +2429,13 @@ export type Database = {
           allows_parties?: boolean | null
           allows_pets?: boolean | null
           allows_smoking?: boolean | null
+          category?: string | null
+          category_filters?: Json | null
           cleanliness_important?: boolean | null
           compatible_lifestyle_tags?: string[] | null
           created_at?: string | null
           id?: string
+          interest_type?: string | null
           languages_spoken?: string[] | null
           listing_id?: string | null
           max_age?: number | null

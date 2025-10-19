@@ -6,7 +6,7 @@ import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
 import { SupportButton } from '@/components/SupportButton';
-import { LocationBasedMatching } from '@/components/LocationBasedMatching';
+
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { NotificationBar } from '@/components/NotificationBar';
@@ -42,7 +42,7 @@ interface EnhancedOwnerDashboardProps {
 const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOwnerDashboardProps) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
-  const [showLocationMatching, setShowLocationMatching] = useState(false);
+  
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
@@ -155,31 +155,16 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                       <Zap className="w-3 h-3 mr-1" />
                       Smart Matching
                     </Badge>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowLocationMatching(!showLocationMatching)}
-                      className="border-primary/50 text-primary hover:bg-primary/10 text-xs"
-                    >
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {showLocationMatching ? 'Hide Location' : 'Show Nearby'}
-                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="flex justify-center pb-6 sm:pb-8 px-3 sm:px-6">
-                  {showLocationMatching ? (
-                    <div className="w-full max-w-4xl">
-                      <LocationBasedMatching />
-                    </div>
-                  ) : (
-                    <div className="w-full max-w-4xl">
-                      <ClientSwipeContainer 
-                        onClientTap={handleClientTap} 
-                        onInsights={handleInsights}
-                        onMessageClick={onMessageClick}
-                      />
-                    </div>
-                  )}
+                  <div className="w-full max-w-4xl">
+                    <ClientSwipeContainer 
+                      onClientTap={handleClientTap} 
+                      onInsights={handleInsights}
+                      onMessageClick={onMessageClick}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

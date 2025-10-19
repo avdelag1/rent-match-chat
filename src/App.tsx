@@ -198,8 +198,39 @@ const App = () => (
                     />
 
                     <Route 
-                      path="/owner/client-discovery" 
-                      element={<Navigate to="/owner/dashboard" replace />}
+                      path="/owner/clients/property" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <lazy(() => import("./pages/OwnerPropertyClientDiscovery"))} />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
+                    <Route 
+                      path="/owner/clients/moto" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <lazy(() => import("./pages/OwnerMotoClientDiscovery"))} />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
+                    <Route 
+                      path="/owner/clients/bicycle" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <lazy(() => import("./pages/OwnerBicycleClientDiscovery"))} />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
+                    <Route 
+                      path="/owner/clients/yacht" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <lazy(() => import("./pages/OwnerYachtClientDiscovery"))} />
+                        </ProtectedRoute>
+                      } 
                     />
 
                     <Route 

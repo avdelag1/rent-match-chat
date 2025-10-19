@@ -12,7 +12,7 @@ import { SupportButton } from '@/components/SupportButton';
 import { useListings } from '@/hooks/useListings';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
-import { useLocationBasedMatching } from '@/hooks/useLocationBasedMatching';
+
 import { NotificationSystem } from '@/components/NotificationSystem';
 import { 
   Flame, 
