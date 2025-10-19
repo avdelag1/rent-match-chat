@@ -10,11 +10,13 @@ import { LocationBasedMatching } from '@/components/LocationBasedMatching';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { NotificationBar } from '@/components/NotificationBar';
+import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { NotificationSystem } from '@/components/NotificationSystem';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Home, 
@@ -41,12 +43,14 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [showLocationMatching, setShowLocationMatching] = useState(false);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
     clientProfile?: any;
     ownerProfile?: any;
   }>({ isOpen: false });
   
+  const navigate = useNavigate();
   const { data: clientProfiles = [] } = useClientProfiles();
   const { data: subscription } = useUserSubscription();
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
@@ -79,6 +83,10 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   const handleStartConversation = () => {
     // Navigate to messaging or implement conversation start
     console.log('Starting conversation...');
+  };
+
+  const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
+    navigate(`/owner/properties#add-${category}`);
   };
 
   const selectedClient = clientProfiles.find(c => c.user_id === selectedClientId);
@@ -173,8 +181,13 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Refresh
                         </Button>
-                        <Button size="sm" className="text-xs">
-                          Add Properties
+                        <Button 
+                          size="sm" 
+                          className="text-xs"
+                          onClick={() => setShowCategoryDialog(true)}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Listing
                         </Button>
                       </div>
                     </div>
@@ -216,6 +229,12 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
           role: 'client'
         }}
         onMessage={handleStartConversation}
+      />
+
+      <CategorySelectionDialog
+        open={showCategoryDialog}
+        onOpenChange={setShowCategoryDialog}
+        onCategorySelect={handleCategorySelect}
       />
     </DashboardLayout>
   );
