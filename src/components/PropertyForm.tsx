@@ -106,13 +106,27 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
       // Set select values that need manual setting
       setValue('property_type', editingProperty.property_type);
       setValue('listing_type', editingProperty.listing_type || 'rent');
+      setValue('condition', editingProperty.condition);
+      setValue('lease_terms', editingProperty.lease_terms);
+      
+      // Set numeric fields with proper defaults for Select components
+      if (editingProperty.beds !== undefined) {
+        setValue('beds', editingProperty.beds);
+      }
+      if (editingProperty.baths !== undefined) {
+        setValue('baths', editingProperty.baths);
+      }
+      if (editingProperty.square_footage !== undefined) {
+        setValue('square_footage', editingProperty.square_footage);
+      }
     } else if (!editingProperty && isOpen) {
       // Reset for new property
       reset({
         furnished: false,
         pet_friendly: false,
         amenities: [],
-        images: []
+        images: [],
+        listing_type: 'rent'
       });
       setSelectedAmenities([]);
       setImages([]);
@@ -126,15 +140,46 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
-      const propertyData = {
-        ...data,
+      // Validate minimum 3 photos
+      if (images.length < 3) {
+        throw new Error('Please upload at least 3 photos');
+      }
+
+      // Clean and prepare data - ensure numeric fields are numbers
+      const propertyData: any = {
+        title: data.title,
+        property_type: data.property_type,
         listing_type: data.listing_type || 'rent',
+        price: Number(data.price),
+        city: data.city,
+        neighborhood: data.neighborhood || null,
+        furnished: Boolean(data.furnished),
+        pet_friendly: Boolean(data.pet_friendly),
+        category: 'property',
+        mode: data.listing_type || 'rent',
         owner_id: user.user.id,
         amenities: selectedAmenities,
         images: images,
         status: 'active' as const,
         is_active: true
       };
+
+      // Add optional numeric fields only if they exist
+      if (data.beds !== undefined && data.beds !== null) {
+        propertyData.beds = Number(data.beds);
+      }
+      if (data.baths !== undefined && data.baths !== null) {
+        propertyData.baths = Number(data.baths);
+      }
+      if (data.square_footage !== undefined && data.square_footage !== null) {
+        propertyData.square_footage = Number(data.square_footage);
+      }
+      if (data.condition) {
+        propertyData.condition = data.condition;
+      }
+      if (data.lease_terms) {
+        propertyData.lease_terms = data.lease_terms;
+      }
 
       if (editingProperty) {
         // Update existing property
@@ -145,7 +190,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw new Error(error.message || 'Failed to update property');
+        }
         return result;
       } else {
         // Create new property
@@ -155,7 +203,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw new Error(error.message || 'Failed to create property');
+        }
         return result;
       }
     },
@@ -312,6 +363,16 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
   };
 
   const onSubmit = (data: PropertyFormData) => {
+    // Validate minimum 3 photos
+    if (images.length < 3) {
+      toast({
+        title: "More Photos Needed",
+        description: "Please upload at least 3 photos to publish your listing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Validate title for contact info
     const titleError = validateNoContactInfo(data.title);
     if (titleError) {
@@ -323,11 +384,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
       return;
     }
 
-    createPropertyMutation.mutate({
-      ...data,
-      amenities: selectedAmenities,
-      images: images
-    });
+    createPropertyMutation.mutate(data);
   };
 
   if (!isOpen) return null;
@@ -403,7 +460,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                  <div>
                    <Label htmlFor="condition">Property Condition</Label>
-                   <Select onValueChange={(value) => setValue('condition', value)}>
+                   <Select 
+                     onValueChange={(value) => setValue('condition', value)}
+                     value={watch('condition')}
+                   >
                      <SelectTrigger>
                        <SelectValue placeholder="Select condition" />
                      </SelectTrigger>
@@ -419,7 +479,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                  <div>
                    <Label htmlFor="lease_terms">Lease Terms</Label>
-                   <Select onValueChange={(value) => setValue('lease_terms', value)}>
+                   <Select 
+                     onValueChange={(value) => setValue('lease_terms', value)}
+                     value={watch('lease_terms')}
+                   >
                      <SelectTrigger>
                        <SelectValue placeholder="Select lease terms" />
                      </SelectTrigger>
@@ -496,10 +559,13 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                 <div>
                   <Label htmlFor="beds">Bedrooms</Label>
-                  <Select onValueChange={(value) => {
-                    const numValue = value === 'Studio' ? 0 : value === '10+' ? 10 : parseInt(value);
-                    setValue('beds', numValue);
-                  }}>
+                  <Select 
+                    onValueChange={(value) => {
+                      const numValue = value === 'Studio' ? 0 : value === '10+' ? 10 : parseInt(value);
+                      setValue('beds', numValue);
+                    }}
+                    value={watch('beds') !== undefined ? (watch('beds') === 0 ? 'Studio' : watch('beds') >= 10 ? '10+' : String(watch('beds'))) : undefined}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select bedrooms" />
                     </SelectTrigger>
@@ -515,10 +581,13 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                 <div>
                   <Label htmlFor="baths">Bathrooms</Label>
-                  <Select onValueChange={(value) => {
-                    const numValue = value === '6+' ? 6 : parseFloat(value);
-                    setValue('baths', numValue);
-                  }}>
+                  <Select 
+                    onValueChange={(value) => {
+                      const numValue = value === '6+' ? 6 : parseFloat(value);
+                      setValue('baths', numValue);
+                    }}
+                    value={watch('baths') !== undefined ? (watch('baths') >= 6 ? '6+' : String(watch('baths'))) : undefined}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select bathrooms" />
                     </SelectTrigger>
@@ -534,20 +603,34 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
                 <div>
                   <Label htmlFor="square_footage">Square Footage</Label>
-                  <Select onValueChange={(value) => {
-                    // Convert range to approximate midpoint number
-                    const rangeMap: { [key: string]: number } = {
-                      'Under 500': 400,
-                      '500-750': 625,
-                      '750-1000': 875,
-                      '1000-1500': 1250,
-                      '1500-2000': 1750,
-                      '2000-3000': 2500,
-                      '3000-5000': 4000,
-                      '5000+': 6000
-                    };
-                    setValue('square_footage', rangeMap[value] || 1000);
-                  }}>
+                  <Select 
+                    onValueChange={(value) => {
+                      // Convert range to approximate midpoint number
+                      const rangeMap: { [key: string]: number } = {
+                        'Under 500': 400,
+                        '500-750': 625,
+                        '750-1000': 875,
+                        '1000-1500': 1250,
+                        '1500-2000': 1750,
+                        '2000-3000': 2500,
+                        '3000-5000': 4000,
+                        '5000+': 6000
+                      };
+                      setValue('square_footage', rangeMap[value] || 1000);
+                    }}
+                    value={watch('square_footage') !== undefined ? 
+                      Object.entries({
+                        'Under 500': 400,
+                        '500-750': 625,
+                        '750-1000': 875,
+                        '1000-1500': 1250,
+                        '1500-2000': 1750,
+                        '2000-3000': 2500,
+                        '3000-5000': 4000,
+                        '5000+': 6000
+                      }).find(([_, val]) => val === watch('square_footage'))?.[0] : undefined
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select size range" />
                     </SelectTrigger>

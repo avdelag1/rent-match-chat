@@ -249,9 +249,17 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   if (!isOpen) return null;
 
-  // Use old PropertyForm for property category
+  // Use PropertyForm for property category - pass all necessary props
   if (selectedCategory === 'property') {
-    return <PropertyForm isOpen={isOpen} onClose={handleClose} editingProperty={editingProperty} />;
+    return (
+      <PropertyForm 
+        isOpen={isOpen} 
+        onClose={handleClose} 
+        editingProperty={editingProperty}
+        initialCategory={selectedCategory}
+        initialMode={selectedMode}
+      />
+    );
   }
 
   return (
