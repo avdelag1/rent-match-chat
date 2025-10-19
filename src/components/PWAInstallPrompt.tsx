@@ -68,26 +68,26 @@ export function PWAInstallPrompt() {
     <AnimatePresence>
       {showPrompt && (
         <motion.div
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 100 }}
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-4 left-4 z-50 w-auto max-w-[280px]"
+          className="fixed top-4 left-4 z-50 w-auto max-w-[320px]"
         >
           <Card className="bg-gradient-primary text-white shadow-2xl border-0">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <Download className="w-4 h-4 flex-shrink-0" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Download className="w-5 h-5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium leading-tight">
-                    Install App
+                  <p className="text-sm font-semibold leading-tight">
+                    Get the app here 👈
                   </p>
                 </div>
-                <div className="flex gap-1 flex-shrink-0">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button
                     onClick={handleInstall}
-                    size="sm"
-                    className="h-7 px-3 text-xs bg-white text-primary hover:bg-white/90 font-semibold"
+                    size="default"
+                    className="h-9 px-4 text-sm bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                   >
                     Install
                   </Button>
@@ -95,9 +95,9 @@ export function PWAInstallPrompt() {
                     onClick={handleDismiss}
                     size="sm"
                     variant="ghost"
-                    className="h-7 w-7 p-0 text-white hover:bg-white/20"
+                    className="h-9 w-9 p-0 text-white hover:bg-white/20"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
