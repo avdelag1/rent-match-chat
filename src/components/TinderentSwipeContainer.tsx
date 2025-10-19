@@ -7,7 +7,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Flame, RotateCcw, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Flame, X, RotateCcw, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -299,9 +299,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                 rotate: 0
               }}
               exit={{ 
-                scale: 2.5, 
+                scale: emojiAnimation.type === 'like' ? 2.5 : 1.5,
                 opacity: 0, 
-                y: -150
+                y: emojiAnimation.type === 'like' ? -150 : -100,
+                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -200 : 200),
+                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -45 : 45)
               }}
               transition={{ 
                 duration: 0.7, 
@@ -315,12 +317,12 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                 {/* Glow effect */}
                 <div className={`absolute inset-0 blur-3xl opacity-50 ${
                   emojiAnimation.type === 'like' 
-                    ? 'bg-gradient-to-r from-green-400 to-blue-500' 
-                    : 'bg-gradient-to-r from-red-400 to-orange-500'
+                    ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                    : 'bg-gradient-to-r from-gray-400 to-blue-300'
                 }`} />
                 {/* Emoji */}
                 <div className="relative text-[100px] drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">
-                  {emojiAnimation.type === 'like' ? '👍' : '👎'}
+                  {emojiAnimation.type === 'like' ? '🔥' : '💨'}
                 </div>
               </div>
             </motion.div>
@@ -391,7 +393,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             disabled={swipeMutation.isPending}
             aria-label="Pass on this property"
           >
-            <ThumbsDown className="w-7 h-7 stroke-[2.5]" />
+            <X className="w-8 h-8 stroke-[2.5]" />
           </Button>
         </motion.div>
 
