@@ -7,13 +7,12 @@ import { OwnerClientFilterDialog } from '@/components/OwnerClientFilterDialog';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { ActiveFiltersBar } from '@/components/ActiveFiltersBar';
+import { BottomNav } from '@/components/BottomNav';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useOwnerClientPreferences } from '@/hooks/useOwnerClientPreferences';
 import { Button } from '@/components/ui/button';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
-import { Plus } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
@@ -114,48 +113,52 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId);
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full flex bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
-        <AppSidebar userRole="owner" onMenuItemClick={handleMenuAction} />
-        
-        <main className="flex-1 relative overflow-hidden">
-          {/* Simple Header - z-10 */}
-          <header className="absolute top-0 left-0 right-0 z-10">
-            <div className="p-3 sm:p-4 flex justify-between items-center">
-              <SidebarTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/20" />
-              <div className="text-center flex-1">
-                <h1 className="text-white text-lg sm:text-xl font-bold">Find Clients</h1>
-                {profiles.length > 0 && (
-                  <p className="text-white/80 text-xs sm:text-sm">{profiles.length} clients available</p>
-                )}
-              </div>
-              <Button
-                onClick={() => setShowCategoryDialog(true)}
-                className="bg-white text-orange-500 hover:bg-white/90 gap-2"
-                size="sm"
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Listing</span>
-              </Button>
-            </div>
-
-            {/* Active Filters Bar */}
-            <ActiveFiltersBar 
-              onClearFilters={handleClearFilters}
-              onOpenFilters={() => setShowFilters(true)}
-            />
-          </header>
-
-          {/* Swipable Client Cards - Full Screen - z-0 */}
-          <div className="absolute inset-0 pt-20 sm:pt-24 pb-4 px-2 sm:px-4 flex items-center justify-center z-0">
-            <ClientSwipeContainer 
-              onClientTap={handleProfileTap}
-              onInsights={handleInsights}
-              onMessageClick={onMessageClick}
-            />
+    <div className="min-h-screen w-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 pb-20">
+      {/* Simple Header - Fixed at top */}
+      <header className="fixed top-0 left-0 right-0 z-10 bg-gradient-to-r from-orange-500 to-pink-500">
+        <div className="p-3 sm:p-4 flex justify-between items-center max-w-2xl mx-auto">
+          <Button
+            onClick={() => setShowFilters(true)}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20"
+          >
+            <SlidersHorizontal className="h-5 w-5" />
+          </Button>
+          <div className="text-center flex-1">
+            <h1 className="text-white text-lg sm:text-xl font-bold">Find Clients</h1>
+            {profiles.length > 0 && (
+              <p className="text-white/80 text-xs sm:text-sm">{profiles.length} available</p>
+            )}
           </div>
-        </main>
-      </div>
+          <Button
+            onClick={() => navigate('/owner/properties')}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20 text-xs"
+          >
+            My Listings
+          </Button>
+        </div>
+
+        {/* Active Filters Bar */}
+        <ActiveFiltersBar 
+          onClearFilters={handleClearFilters}
+          onOpenFilters={() => setShowFilters(true)}
+        />
+      </header>
+
+      {/* Swipable Client Cards - Full Screen */}
+      <main className="pt-24 pb-4 px-2 sm:px-4 flex items-center justify-center min-h-screen max-w-2xl mx-auto">
+        <ClientSwipeContainer 
+          onClientTap={handleProfileTap}
+          onInsights={handleInsights}
+          onMessageClick={onMessageClick}
+        />
+      </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav active="home" userRole="owner" />
 
       {/* All Dialogs - z-50+ to appear above everything */}
 
@@ -205,7 +208,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         onCategorySelect={handleCategorySelect}
       />
 
-    </SidebarProvider>
+    </div>
   );
 };
 

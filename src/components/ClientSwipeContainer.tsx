@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { Flame, X, RotateCcw, Sparkles } from 'lucide-react';
+import { Flame, X, RotateCcw, Sparkles, Heart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -376,18 +376,35 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
       </div>
 
 
-      {/* Action Buttons - 3 Button Layout */}
+      {/* Action Buttons - 5 Button Tinder Layout */}
       <motion.div 
-        className="absolute bottom-8 left-0 right-0 flex justify-center gap-6 items-center z-20 px-4"
+        className="absolute bottom-8 left-0 right-0 flex justify-center gap-4 items-center z-20 px-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        {/* Dislike Button - Left */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
+        {/* Rewind/Undo */}
+        <motion.div whileHover={{ scale: canUndo ? 1.1 : 1 }} whileTap={{ scale: canUndo ? 0.9 : 1 }}>
+          <Button
+            size="lg"
+            variant="ghost"
+            onClick={() => canUndo && undoLastSwipe()}
+            disabled={!canUndo || isUndoing}
+            className={`w-14 h-14 rounded-full transition-all duration-300 shadow-lg p-0 ${
+              canUndo 
+                ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl' 
+                : 'bg-gray-200 border-2 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
+            }`}
+            aria-label="Undo last swipe"
+          >
+            <motion.div animate={{ rotate: isUndoing ? 360 : 0 }} transition={{ duration: 0.6 }}>
+              <RotateCcw className="w-6 h-6" />
+            </motion.div>
+          </Button>
+        </motion.div>
+
+        {/* Pass (X) */}
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <Button
             size="lg"
             variant="ghost"
@@ -400,46 +417,49 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
           </Button>
         </motion.div>
 
-        {/* Undo Button - Center */}
-        <motion.div
-          whileHover={{ scale: canUndo ? 1.1 : 1 }}
-          whileTap={{ scale: canUndo ? 0.9 : 1 }}
-        >
+        {/* Super Like (Star) */}
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <Button
             size="lg"
             variant="ghost"
-            onClick={() => canUndo && undoLastSwipe()}
-            disabled={!canUndo || isUndoing}
-            className={`w-16 h-16 rounded-full transition-all duration-300 shadow-lg p-0 ${
-              canUndo 
-                ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl hover:shadow-yellow-500/20' 
-                : 'bg-gray-200 border-2 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
-            }`}
-            aria-label="Undo last swipe"
+            className="w-14 h-14 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 shadow-lg hover:shadow-blue-500/30 p-0 border-0"
+            onClick={() => currentClient && handleSuperLike(currentClient.user_id, 'profile')}
+            disabled={swipeMutation.isPending}
+            aria-label="Super like this client"
           >
-            <motion.div
-              animate={{ rotate: isUndoing ? 360 : 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <RotateCcw className="w-7 h-7 stroke-[2.5]" />
-            </motion.div>
+            <Flame className="w-6 h-6 fill-white" />
           </Button>
         </motion.div>
-        
-        {/* Like Button - Right */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
+
+        {/* Like (Heart) */}
+        <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
           <Button
             size="lg"
             variant="ghost"
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-2xl hover:shadow-orange-500/40 p-0 border-0"
             onClick={() => handleButtonSwipe('right')}
             disabled={swipeMutation.isPending}
             aria-label="Like this client"
           >
-            <Flame className="w-11 h-11 fill-white stroke-white" />
+            <Heart className="w-10 h-10 fill-white stroke-white stroke-[1.5]" />
+          </Button>
+        </motion.div>
+
+        {/* Boost (Lightning) */}
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-14 h-14 rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-all duration-300 shadow-lg hover:shadow-purple-500/30 p-0 border-0"
+            onClick={() => {
+              toast({
+                title: '⚡ Boost Coming Soon!',
+                description: 'Increase your visibility to top clients.',
+              });
+            }}
+            aria-label="Boost your profile"
+          >
+            <Sparkles className="w-6 h-6 fill-white" />
           </Button>
         </motion.div>
       </motion.div>
