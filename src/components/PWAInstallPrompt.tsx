@@ -68,40 +68,37 @@ export function PWAInstallPrompt() {
     <AnimatePresence>
       {showPrompt && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="fixed top-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96"
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="fixed bottom-4 left-4 z-50 w-auto max-w-[280px]"
         >
           <Card className="bg-gradient-primary text-white shadow-2xl border-0">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Download className="w-5 h-5" />
-                    <h3 className="font-semibold">Install Tinderent App</h3>
-                  </div>
-                  <p className="text-sm opacity-90 mb-3">
-                    Test our app on your phone! Install for a native app experience with offline features.
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <Download className="w-4 h-4 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium leading-tight">
+                    Install App
                   </p>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleInstall}
-                      size="sm"
-                      variant="secondary"
-                      className="flex-1 bg-white/20 hover:bg-white/30 border-white/30 text-white"
-                    >
-                      Install Now
-                    </Button>
-                    <Button
-                      onClick={handleDismiss}
-                      size="sm"
-                      variant="ghost"
-                      className="px-3 text-white/80 hover:text-white hover:bg-white/20"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  <Button
+                    onClick={handleInstall}
+                    size="sm"
+                    className="h-7 px-3 text-xs bg-white text-primary hover:bg-white/90 font-semibold"
+                  >
+                    Install
+                  </Button>
+                  <Button
+                    onClick={handleDismiss}
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0 text-white hover:bg-white/20"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
                 </div>
               </div>
             </CardContent>
