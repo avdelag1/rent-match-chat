@@ -11,12 +11,7 @@ import { ErrorBoundaryWrapper } from './components/ErrorBoundaryWrapper'
 logBundleSize();
 setupUpdateChecker();
 
-// Remove static loading screen once React is ready
-const loadingScreen = document.getElementById('app-loading-screen');
-if (loadingScreen) {
-  loadingScreen.remove();
-}
-
+// Don't remove loading screen here - let components remove it when ready to paint
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundaryWrapper>

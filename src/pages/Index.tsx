@@ -116,6 +116,14 @@ const Index = () => {
 
   // Only show landing page if user is NOT authenticated
   if (!user) {
+    // Remove static loading screen just before showing landing page for optimal LCP
+    useEffect(() => {
+      const loadingScreen = document.getElementById('app-loading-screen');
+      if (loadingScreen) {
+        loadingScreen.remove();
+      }
+    }, []);
+    
     return (
       <div className="min-h-screen">
         <LegendaryLandingPage />
