@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,33 +11,36 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
+import { Skeleton } from "@/components/ui/skeleton";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
-import ClientDashboard from "./pages/ClientDashboard";
-import ClientProfile from "./pages/ClientProfile";
-import ClientSettings from "./pages/ClientSettings";
-import ClientLikedProperties from "./pages/ClientLikedProperties";
-import ClientSavedSearches from "./pages/ClientSavedSearches";
-import ClientMatchHistory from "./pages/ClientMatchHistory";
-import ClientActivityFeed from "./pages/ClientActivityFeed";
-import ClientSecurity from "./pages/ClientSecurity";
-import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
-import OwnerProfile from "./pages/OwnerProfile";
-import OwnerSettings from "./pages/OwnerSettings";
-import OwnerSavedSearches from "./pages/OwnerSavedSearches";
-import OwnerMatchHistory from "./pages/OwnerMatchHistory";
-import OwnerActivityFeed from "./pages/OwnerActivityFeed";
-import OwnerSecurity from "./pages/OwnerSecurity";
-import { MessagingDashboard } from "./pages/MessagingDashboard";
-import OwnerProperties from "./pages/OwnerProperties";
-import OwnerLikedClients from "./pages/OwnerLikedClients";
-import OwnerClientDiscovery from "./pages/OwnerClientDiscovery";
-import ClientContracts from "./pages/ClientContracts";
-import OwnerContracts from "./pages/OwnerContracts";
-import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import PaymentCancel from "./pages/PaymentCancel";
+
+// Lazy load all dashboard and authenticated pages for better performance
+const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
+const ClientProfile = lazy(() => import("./pages/ClientProfile"));
+const ClientSettings = lazy(() => import("./pages/ClientSettings"));
+const ClientLikedProperties = lazy(() => import("./pages/ClientLikedProperties"));
+const ClientSavedSearches = lazy(() => import("./pages/ClientSavedSearches"));
+const ClientMatchHistory = lazy(() => import("./pages/ClientMatchHistory"));
+const ClientActivityFeed = lazy(() => import("./pages/ClientActivityFeed"));
+const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
+const EnhancedOwnerDashboard = lazy(() => import("./components/EnhancedOwnerDashboard"));
+const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
+const OwnerSettings = lazy(() => import("./pages/OwnerSettings"));
+const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
+const OwnerMatchHistory = lazy(() => import("./pages/OwnerMatchHistory"));
+const OwnerActivityFeed = lazy(() => import("./pages/OwnerActivityFeed"));
+const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
+const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })));
+const OwnerProperties = lazy(() => import("./pages/OwnerProperties"));
+const OwnerLikedClients = lazy(() => import("./pages/OwnerLikedClients"));
+const OwnerClientDiscovery = lazy(() => import("./pages/OwnerClientDiscovery"));
+const ClientContracts = lazy(() => import("./pages/ClientContracts"));
+const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
+const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const PaymentCancel = lazy(() => import("./pages/PaymentCancel"));
 
 const queryClient = new QueryClient();
 
@@ -61,7 +65,15 @@ const App = () => (
                 <TooltipProvider>
                   <Toaster />
                   <Sonner />
-                  <Routes>
+                  <Suspense fallback={
+                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
+                      <div className="space-y-4 text-center">
+                        <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
+                        <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
+                      </div>
+                    </div>
+                  }>
+                    <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
                         <Index />
@@ -272,7 +284,8 @@ const App = () => (
                     
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
-                  </Routes>
+                    </Routes>
+                  </Suspense>
                 </TooltipProvider>
               </AppLayout>
             </NotificationWrapper>
