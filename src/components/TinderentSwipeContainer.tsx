@@ -265,26 +265,26 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               initial={{ 
                 scale: 0, 
                 opacity: 0, 
-                x: emojiAnimation.position === 'right' ? 200 : -200,
-                rotate: emojiAnimation.position === 'right' ? 45 : -45
+                x: emojiAnimation.position === 'right' ? 150 : -100,
+                rotate: emojiAnimation.position === 'right' ? 30 : -30
               }}
               animate={{ 
-                scale: 3.5, 
+                scale: 2, 
                 opacity: 1, 
-                x: emojiAnimation.position === 'right' ? 100 : -100,
+                x: emojiAnimation.position === 'right' ? 80 : -50,
                 rotate: 0
               }}
               exit={{ 
-                scale: 5, 
+                scale: 2.5, 
                 opacity: 0, 
-                y: -200
+                y: -150
               }}
               transition={{ 
-                duration: 1.2, 
-                ease: [0.68, -0.55, 0.265, 1.55]
+                duration: 0.7, 
+                ease: [0.34, 1.56, 0.64, 1]
               }}
               className={`absolute ${
-                emojiAnimation.position === 'right' ? 'right-12' : 'left-12'
+                emojiAnimation.position === 'right' ? 'right-8' : 'left-8'
               } top-1/3`}
             >
               <div className="relative">
@@ -295,7 +295,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                     : 'bg-gradient-to-r from-red-400 to-orange-500'
                 }`} />
                 {/* Emoji */}
-                <div className="relative text-[180px] drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">
+                <div className="relative text-[100px] drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">
                   {emojiAnimation.type === 'like' ? '👍' : '👎'}
                 </div>
               </div>
