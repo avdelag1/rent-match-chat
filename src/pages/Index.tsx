@@ -11,16 +11,6 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   
-  // Remove static loading screen when actual content is ready
-  useEffect(() => {
-    if (!loading && !user) {
-      const loadingScreen = document.getElementById('app-loading-screen');
-      if (loadingScreen) {
-        loadingScreen.remove();
-      }
-    }
-  }, [loading, user]);
-  
   // Fetch user role from secure user_roles table
   const { data: userRole, isLoading: profileLoading, refetch, error, isError } = useQuery({
     queryKey: ['user-role', user?.id],
