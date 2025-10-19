@@ -375,6 +375,56 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
         </AnimatePresence>
       </div>
 
+      {/* Simple 3-Button Tinder Action Layout */}
+      <motion.div 
+        className="flex justify-center items-center gap-6 mt-6 mb-4"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        {/* Pass Button (X) */}
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-16 h-16 rounded-full bg-white shadow-xl border-2 border-red-500 text-red-500 hover:bg-red-50 transition-all p-0"
+            onClick={() => handleSwipe('left')}
+            disabled={swipeMutation.isPending || !currentClient}
+            aria-label="Pass"
+          >
+            <X className="w-8 h-8 stroke-[2.5]" />
+          </Button>
+        </motion.div>
+
+        {/* Super Like Button (Star/Flame) */}
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-14 h-14 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg transition-all p-0"
+            onClick={() => currentClient && handleSuperLike(currentClient.user_id, 'profile')}
+            disabled={swipeMutation.isPending || !currentClient}
+            aria-label="Super Like"
+          >
+            <Flame className="w-6 h-6 fill-white" />
+          </Button>
+        </motion.div>
+
+        {/* Like Button (Heart) */}
+        <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-2xl transition-all p-0"
+            onClick={() => handleSwipe('right')}
+            disabled={swipeMutation.isPending || !currentClient}
+            aria-label="Like"
+          >
+            <Heart className="w-10 h-10 fill-white stroke-white stroke-[1.5]" />
+          </Button>
+        </motion.div>
+      </motion.div>
+
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
         onClose={() => setMatchCelebration({ isOpen: false })}
