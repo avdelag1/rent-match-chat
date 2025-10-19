@@ -132,21 +132,38 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
     }
   };
 
+  const totalTags = interests.length + activities.length;
+  const completionPercentage = Math.round(
+    ((name ? 25 : 0) + (age ? 15 : 0) + (gender ? 10 : 0) + (profileImages.length > 0 ? 20 : 0) + (totalTags >= 5 ? 30 : totalTags * 6)) / 100 * 100
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
-        <DialogHeader className="px-6 py-4 border-b border-white/10">
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-            Complete Your Profile
-          </DialogTitle>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
+        <DialogHeader className="px-4 sm:px-6 py-4 border-b border-white/10 shrink-0">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+              Edit Your Profile
+            </DialogTitle>
+            <Badge variant="outline" className="bg-white/10 border-white/20 text-white">
+              {completionPercentage}% Complete
+            </Badge>
+          </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6">
-          <div className="grid gap-6 py-4">
-            {/* Profile Photos Section */}
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <div className="px-4 sm:px-6 py-4 space-y-6">
+            {/* Profile Photos Section - Priority #1 */}
             <div className="space-y-3">
-              <Label className="text-white/90 text-lg font-semibold">Profile Photos</Label>
-              <p className="text-white/60 text-sm">Add up to 10 photos to showcase yourself</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-white text-lg sm:text-xl font-bold">📸 Profile Photos</Label>
+                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add up to 10 photos • First photo is your main photo</p>
+                </div>
+                <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-400">
+                  {profileImages.length}/10
+                </Badge>
+              </div>
               <PhotoUploadManager
                 maxPhotos={10}
                 currentPhotos={profileImages}
@@ -156,39 +173,41 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
               />
             </div>
 
-            {/* Basic Info */}
-            <div className="grid gap-6">
+            {/* Basic Info Section */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">👤 Basic Information</Label>
+              
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-white/90 font-medium">Full Name *</Label>
+                <Label htmlFor="name" className="text-white/90 text-sm sm:text-base">Full Name *</Label>
                 <Input 
                   id="name" 
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
-                  placeholder="Your full name" 
-                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  placeholder="Enter your full name" 
+                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="age" className="text-white/90 font-medium">Age</Label>
+                  <Label htmlFor="age" className="text-white/90 text-sm sm:text-base">Age</Label>
                   <Input
                     id="age"
                     type="number"
                     value={age}
                     onChange={(e) => setAge(e.target.value ? Number(e.target.value) : '')}
                     placeholder="25"
-                    className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                    className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
                     min="18"
                     max="99"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white/90 font-medium">Gender</Label>
+                  <Label className="text-white/90 text-sm sm:text-base">Gender</Label>
                   <Select value={gender ?? ''} onValueChange={setGender}>
-                    <SelectTrigger className="bg-white/5 border-white/20 text-white focus:border-orange-400">
-                      <SelectValue placeholder="Select gender" />
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                      <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-white/20 text-white">
                       <SelectItem value="male">Male</SelectItem>
@@ -199,140 +218,157 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   </Select>
                 </div>
               </div>
+            </div>
 
-              {/* Profile Description Tags */}
+              {/* Profile Tags Section */}
               <div className="space-y-4">
                 <div>
-                  <Label className="text-white/90 text-lg font-semibold">Profile Tags</Label>
-                  <p className="text-white/60 text-sm mt-1">Select 5-10 tags that best describe your needs (max 10)</p>
+                  <Label className="text-white text-lg sm:text-xl font-bold">🏷️ Describe Yourself</Label>
+                  <p className="text-white/60 text-xs sm:text-sm mt-1">Select 5-10 tags that best describe your needs and preferences</p>
                 </div>
                 
                 {/* Property Interest Tags */}
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-orange-400">Property & Housing</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-3">
+                  <h4 className="text-sm sm:text-base font-semibold text-blue-400 flex items-center gap-2">
+                    🏠 Property & Housing
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {PROPERTY_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
                         interests.includes(tag) 
-                          ? 'bg-blue-500/20 border-blue-400 text-white' 
+                          ? 'bg-blue-500/20 border-blue-400 text-white shadow-lg shadow-blue-500/20' 
                           : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                       }`}>
                         <input
                           type="checkbox"
                           checked={interests.includes(tag)}
                           onChange={() => toggleTag(tag, true)}
-                          className="rounded"
+                          className="w-5 h-5 rounded accent-blue-500"
                         />
-                        <span className="text-xs">{tag}</span>
+                        <span className="text-xs sm:text-sm leading-tight">{tag}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
                 {/* Transportation Tags */}
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-orange-400">Transportation & Mobility</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-3">
+                  <h4 className="text-sm sm:text-base font-semibold text-orange-400 flex items-center gap-2">
+                    🚗 Transportation & Mobility
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {TRANSPORTATION_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
                         activities.includes(tag)
-                          ? 'bg-orange-500/20 border-orange-400 text-white'
+                          ? 'bg-orange-500/20 border-orange-400 text-white shadow-lg shadow-orange-500/20'
                           : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                       }`}>
                         <input
                           type="checkbox"
                           checked={activities.includes(tag)}
                           onChange={() => toggleTag(tag, false)}
-                          className="rounded"
+                          className="w-5 h-5 rounded accent-orange-500"
                         />
-                        <span className="text-xs">{tag}</span>
+                        <span className="text-xs sm:text-sm leading-tight">{tag}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
                 {/* Lifestyle Tags */}
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-orange-400">Lifestyle & Preferences</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-3">
+                  <h4 className="text-sm sm:text-base font-semibold text-purple-400 flex items-center gap-2">
+                    ✨ Lifestyle & Preferences
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {LIFESTYLE_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
                         interests.includes(tag)
-                          ? 'bg-purple-500/20 border-purple-400 text-white'
+                          ? 'bg-purple-500/20 border-purple-400 text-white shadow-lg shadow-purple-500/20'
                           : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                       }`}>
                         <input
                           type="checkbox"
                           checked={interests.includes(tag)}
                           onChange={() => toggleTag(tag, true)}
-                          className="rounded"
+                          className="w-5 h-5 rounded accent-purple-500"
                         />
-                        <span className="text-xs">{tag}</span>
+                        <span className="text-xs sm:text-sm leading-tight">{tag}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
                 {/* Financial & Verification Tags */}
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-orange-400">Financial & Verification</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-3">
+                  <h4 className="text-sm sm:text-base font-semibold text-green-400 flex items-center gap-2">
+                    💰 Financial & Verification
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {FINANCIAL_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${
+                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
                         activities.includes(tag)
-                          ? 'bg-green-500/20 border-green-400 text-white'
+                          ? 'bg-green-500/20 border-green-400 text-white shadow-lg shadow-green-500/20'
                           : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                       }`}>
                         <input
                           type="checkbox"
                           checked={activities.includes(tag)}
                           onChange={() => toggleTag(tag, false)}
-                          className="rounded"
+                          className="w-5 h-5 rounded accent-green-500"
                         />
-                        <span className="text-xs">{tag}</span>
+                        <span className="text-xs sm:text-sm leading-tight">{tag}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                {/* Selected Tags Display */}
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white">Selected: {interests.length + activities.length} / 10</span>
-                    {interests.length + activities.length >= 10 && (
-                      <Badge className="bg-orange-500/20 text-orange-400 border-orange-400">Maximum reached</Badge>
-                    )}
+                {/* Tag Counter & Clear Button */}
+                <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border-2 border-white/20">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-sm sm:text-lg">
+                      {totalTags}
+                    </div>
+                    <div>
+                      <p className="text-sm sm:text-base font-semibold text-white">
+                        {totalTags} / 10 tags selected
+                      </p>
+                      <p className="text-xs text-white/60">
+                        {totalTags < 5 ? 'Select at least 5 tags' : totalTags >= 10 ? 'Maximum reached!' : 'Good progress!'}
+                      </p>
+                    </div>
                   </div>
-                  {(interests.length > 0 || activities.length > 0) && (
-                    <button
+                  {totalTags > 0 && (
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
                         setInterests([]);
                         setActivities([]);
                       }}
-                      className="text-sm text-red-400 hover:text-red-300 hover:underline"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-10 px-4"
                     >
                       Clear all
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
             </div>
-          </div>
-        </ScrollArea>
+          </ScrollArea>
 
-        <DialogFooter className="px-6 py-4 border-t border-white/10 flex gap-3">
+        <DialogFooter className="px-4 sm:px-6 py-4 border-t border-white/10 flex-row gap-3 shrink-0">
           <Button 
             variant="ghost" 
             onClick={() => onOpenChange(false)}
-            className="text-white/70 hover:text-white hover:bg-white/10"
+            className="flex-1 h-12 text-white/70 hover:text-white hover:bg-white/10"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSave} 
             disabled={saveMutation.isPending || isLoading || !name.trim()}
-            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-8"
+            className="flex-1 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-base"
           >
             {saveMutation.isPending ? 'Saving...' : 'Save Profile'}
           </Button>

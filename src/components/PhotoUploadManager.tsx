@@ -120,63 +120,22 @@ export function PhotoUploadManager({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Photos</h3>
-          <p className="text-sm text-muted-foreground">
-            {currentPhotos.length} / {maxPhotos} photos uploaded
-          </p>
-        </div>
-        
-        <Badge variant={currentPhotos.length >= maxPhotos ? "destructive" : "secondary"}>
-          {uploadType === 'property' ? '30 max' : '10 max'}
-        </Badge>
-      </div>
-
-      {/* Upload Area */}
-      {currentPhotos.length < maxPhotos && (
-        <Card
-          className={`border-2 border-dashed transition-colors cursor-pointer ${
-            dragOver 
-              ? 'border-primary bg-primary/5' 
-              : 'border-muted-foreground/25 hover:border-primary/50'
-          }`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => document.getElementById('photo-upload')?.click()}
-        >
-          <CardContent className="p-8 text-center">
-            <Upload className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-lg font-medium mb-2">
-              Drop photos here or click to browse
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Supports JPG, PNG, WebP up to 10MB each
-            </p>
-            <Button disabled={uploading}>
-              {uploading ? 'Uploading...' : 'Select Photos'}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      <input
-        id="photo-upload"
-        type="file"
-        multiple
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => handleFileSelect(e.target.files)}
-      />
-
-      {/* Photo Grid */}
+      {/* Existing Photos Grid - Show First */}
       {currentPhotos.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {currentPhotos.map((photo, index) => (
-            <div key={index} className="relative group">
-              <Card className="overflow-hidden">
-                <div className="aspect-square relative">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <p className="text-sm font-medium text-white/90">
+              Your Photos ({currentPhotos.length}/{maxPhotos})
+            </p>
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+              {currentPhotos.length >= maxPhotos ? 'Full' : `${maxPhotos - currentPhotos.length} left`}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+            {currentPhotos.map((photo, index) => (
+              <div key={index} className="relative group">
+                <div className="aspect-square relative rounded-lg overflow-hidden border-2 border-white/20">
                   <img
                     src={photo}
                     alt={`${uploadType} photo ${index + 1}`}
@@ -185,19 +144,19 @@ export function PhotoUploadManager({
                   
                   {/* Main Photo Badge */}
                   {index === 0 && (
-                    <Badge 
-                      className="absolute top-2 left-2 bg-yellow-500 text-black"
-                    >
-                      <Star className="w-3 h-3 mr-1 fill-current" />
-                      Main
-                    </Badge>
+                    <div className="absolute top-1 left-1">
+                      <Badge className="bg-yellow-500 text-black text-[10px] h-5 px-1.5">
+                        <Star className="w-2.5 h-2.5 mr-0.5 fill-current" />
+                        Main
+                      </Badge>
+                    </div>
                   )}
 
-                  {/* Remove Button */}
+                  {/* Remove Button - Always visible on mobile */}
                   <Button
                     size="sm"
                     variant="destructive"
-                    className="absolute top-2 right-2 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 w-7 h-7 p-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity touch-manipulation"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemovePhoto(index);
@@ -209,15 +168,64 @@ export function PhotoUploadManager({
                   {/* Photo Number */}
                   <Badge 
                     variant="outline" 
-                    className="absolute bottom-2 left-2 bg-black/60 text-white border-white/20"
+                    className="absolute bottom-1 left-1 bg-black/70 text-white border-white/30 text-[10px] h-5 px-1.5"
                   >
-                    {index + 1}
+                    #{index + 1}
                   </Badge>
                 </div>
-              </Card>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Upload Area */}
+      {currentPhotos.length < maxPhotos && (
+        <>
+          <div
+            className={`border-2 border-dashed rounded-xl transition-all cursor-pointer touch-manipulation ${
+              dragOver 
+                ? 'border-orange-400 bg-orange-500/10' 
+                : 'border-white/30 hover:border-white/50 bg-white/5'
+            }`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => document.getElementById('photo-upload')?.click()}
+          >
+            <div className="p-6 sm:p-8 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-orange-500/20 flex items-center justify-center">
+                  <Upload className="w-6 h-6 sm:w-7 sm:h-7 text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-sm sm:text-base font-semibold text-white mb-1">
+                    {currentPhotos.length === 0 ? 'Add Your Photos' : 'Add More Photos'}
+                  </p>
+                  <p className="text-xs sm:text-sm text-white/60">
+                    Tap to browse • JPG, PNG, WebP • Max 10MB
+                  </p>
+                </div>
+                <Button 
+                  type="button"
+                  disabled={uploading}
+                  className="h-10 sm:h-11 px-6 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                >
+                  {uploading ? 'Uploading...' : currentPhotos.length === 0 ? 'Select Photos' : `Add More (${maxPhotos - currentPhotos.length} left)`}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <input
+            id="photo-upload"
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleFileSelect(e.target.files)}
+          />
+        </>
       )}
 
       {/* Tips */}
