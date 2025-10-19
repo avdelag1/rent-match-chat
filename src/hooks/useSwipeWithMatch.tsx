@@ -103,7 +103,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
         if (mutualLike) {
           // It's a match! Create or update match record
-          const { data: match, error: matchError } = await supabase
+          const { data: matchData, error: matchError } = await supabase
             .from('matches')
             .upsert({
               client_id: matchClientId,
@@ -117,8 +117,22 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               onConflict: 'client_id,owner_id,listing_id',
               ignoreDuplicates: true
             })
-            .select()
-            .single();
+            .select();
+
+          let match = matchData?.[0];
+
+          // If no match returned (duplicate was ignored), fetch the existing one
+          if (!match && !matchError) {
+            const { data: existingMatch } = await supabase
+              .from('matches')
+              .select()
+              .eq('client_id', matchClientId)
+              .eq('owner_id', matchOwnerId)
+              .eq('listing_id', matchListingId)
+              .maybeSingle();
+            
+            match = existingMatch;
+          }
 
           if (matchError) {
             console.error('Error creating match:', matchError);
