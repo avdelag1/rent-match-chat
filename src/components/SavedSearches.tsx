@@ -1,320 +1,131 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Trash2, Search, Plus, Edit3 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-
-interface SavedSearch {
-  id: string;
-  name: string;
-  filters: {
-    priceMin?: number;
-    priceMax?: number;
-    propertyType?: string;
-    location?: string;
-    bedrooms?: number;
-    bathrooms?: number;
-  };
-  alertsEnabled: boolean;
-  createdAt: Date;
-  lastNotified?: Date;
-}
+import { Trash2, Search, Check, Star } from 'lucide-react';
+import { useSavedFilters } from '@/hooks/useSavedFilters';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SavedSearchesProps {
   userRole: 'client' | 'owner';
+  onApplyFilter?: (filterId: string) => void;
 }
 
-export function SavedSearches({ userRole }: SavedSearchesProps) {
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([
-    {
-      id: '1',
-      name: 'Beach Apartments',
-      filters: { priceMin: 1000, priceMax: 3000, propertyType: 'apartment', location: 'Zona Hotelera' },
-      alertsEnabled: true,
-      createdAt: new Date(),
-    },
-    {
-      id: '2', 
-      name: 'Family Homes',
-      filters: { bedrooms: 3, location: 'Downtown' },
-      alertsEnabled: false,
-      createdAt: new Date(),
+export function SavedSearches({ userRole, onApplyFilter }: SavedSearchesProps) {
+  const { savedFilters, activeFilter, loading, deleteFilter, setAsActive } = useSavedFilters();
+
+  const handleApplyFilter = async (filterId: string) => {
+    await setAsActive(filterId);
+    if (onApplyFilter) {
+      onApplyFilter(filterId);
     }
-  ]);
-  
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [newSearchName, setNewSearchName] = useState('');
-  const [editingSearch, setEditingSearch] = useState<SavedSearch | null>(null);
-
-  const handleSaveSearch = (filters: any, name?: string) => {
-    const searchName = name || newSearchName || `Search ${savedSearches.length + 1}`;
-    
-    const newSearch: SavedSearch = {
-      id: Date.now().toString(),
-      name: searchName,
-      filters,
-      alertsEnabled: true,
-      createdAt: new Date()
-    };
-    
-    setSavedSearches(prev => [newSearch, ...prev]);
-    setNewSearchName('');
-    setShowCreateDialog(false);
-    
-    toast({
-      title: 'Search Saved',
-      description: `"${searchName}" has been saved to your searches.`
-    });
   };
 
-  const handleUpdateSearch = () => {
-    if (!editingSearch) return;
-    
-    setSavedSearches(prev => prev.map(search => 
-      search.id === editingSearch.id 
-        ? { ...editingSearch, name: newSearchName || editingSearch.name }
-        : search
-    ));
-    
-    toast({
-      title: 'Search Updated',
-      description: `"${newSearchName || editingSearch.name}" has been updated.`
-    });
-    
-    setEditingSearch(null);
-    setNewSearchName('');
-  };
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
 
-  const handleDeleteSearch = (id: string) => {
-    setSavedSearches(prev => prev.filter(search => search.id !== id));
-    toast({
-      title: 'Search Deleted',
-      description: 'The saved search has been removed.'
-    });
-  };
-
-  const handleRunSearch = (search: SavedSearch) => {
-    toast({
-      title: 'Running Search',
-      description: `Applying filters from "${search.name}"`
-    });
-    // Here you would apply the saved filters to the current search
-  };
-
-  const handleToggleAlerts = (id: string) => {
-    setSavedSearches(prev => prev.map(search =>
-      search.id === id
-        ? { ...search, alertsEnabled: !search.alertsEnabled }
-        : search
-    ));
-    
-    const search = savedSearches.find(s => s.id === id);
-    toast({
-      title: search?.alertsEnabled ? 'Alerts Paused' : 'Alerts Enabled',
-      description: search?.alertsEnabled 
-        ? 'You will no longer receive notifications for this search.'
-        : 'You will receive notifications when new matches are found.'
-    });
-  };
+  if (savedFilters.length === 0) {
+    return (
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+        <CardContent className="p-6 text-center">
+          <Search className="w-12 h-12 mx-auto text-white/50 mb-4" />
+          <p className="text-white/70">No saved filters yet</p>
+          <p className="text-white/50 text-sm">
+            {userRole === 'owner' 
+              ? 'Save your client discovery filters for quick access' 
+              : 'Save your property search filters for quick access'}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Saved Searches</h3>
-        <Button 
-          onClick={() => setShowCreateDialog(true)}
-          size="sm"
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Save Current Search
-        </Button>
-      </div>
-
-      {savedSearches.length === 0 ? (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardContent className="p-6 text-center">
-            <Search className="w-12 h-12 mx-auto text-white/50 mb-4" />
-            <p className="text-white/70">No saved searches yet</p>
-            <p className="text-white/50 text-sm">Save your filter combinations for quick access</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-3">
-          {savedSearches.map((search) => (
-            <Card key={search.id} className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-white mb-1">{search.name}</h4>
-                    <p className="text-white/60 text-sm">
-                      Saved {search.createdAt.toLocaleDateString()}
-                      {search.alertsEnabled ? ' • Alerts enabled' : ' • Alerts paused'}
-                    </p>
+    <div className="space-y-3">
+      {savedFilters.map((filter) => {
+        const isActive = activeFilter?.id === filter.id;
+        
+        return (
+          <Card key={filter.id} className={`bg-white/10 backdrop-blur-sm border-white/20 transition-all ${
+            isActive ? 'ring-2 ring-primary shadow-lg shadow-primary/20' : ''
+          }`}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-medium text-white">{filter.name}</h4>
+                    {isActive && (
+                      <Badge className="bg-primary/20 text-primary border-primary/30">
+                        <Star className="w-3 h-3 mr-1 fill-primary" />
+                        Active
+                      </Badge>
+                    )}
                   </div>
-                  <div className="flex gap-2">
+                  <p className="text-white/60 text-sm">
+                    Saved {new Date(filter.created_at!).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {!isActive && (
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleRunSearch(search)}
+                      onClick={() => handleApplyFilter(filter.id!)}
                       className="text-white/70 hover:text-white hover:bg-white/10"
                     >
-                      <Search className="w-4 h-4" />
+                      <Check className="w-4 h-4 mr-1" />
+                      Apply
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingSearch(search)}
-                      className="text-white/70 hover:text-white hover:bg-white/10"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeleteSearch(search.id)}
-                      className="text-white/70 hover:text-red-400 hover:bg-white/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => deleteFilter(filter.id!)}
+                    className="text-white/70 hover:text-red-400 hover:bg-white/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {search.filters.propertyType && (
-                    <Badge variant="secondary" className="text-xs">
-                      {search.filters.propertyType}
-                    </Badge>
-                  )}
-                  {(search.filters.priceMin || search.filters.priceMax) && (
-                    <Badge variant="secondary" className="text-xs">
-                      ${search.filters.priceMin || 0} - ${search.filters.priceMax || '∞'}
-                    </Badge>
-                  )}
-                  {search.filters.location && (
-                    <Badge variant="secondary" className="text-xs">
-                      {search.filters.location}
-                    </Badge>
-                  )}
-                  {search.filters.bedrooms && (
-                    <Badge variant="secondary" className="text-xs">
-                      {search.filters.bedrooms} bed
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="bg-black/90 backdrop-blur border-white/20">
-          <DialogHeader>
-            <DialogTitle className="text-white">Save Current Search</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-white/90 text-sm font-medium">Search Name</label>
-              <Input
-                value={newSearchName}
-                onChange={(e) => setNewSearchName(e.target.value)}
-                placeholder="Enter a name for this search"
-                className="bg-white/10 border-white/20 text-white"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowCreateDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => handleSaveSearch({}, newSearchName)}>
-              Save Search
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={editingSearch !== null} onOpenChange={(open) => {
-        if (!open) {
-          setEditingSearch(null);
-          setNewSearchName('');
-        }
-      }}>
-        <DialogContent className="bg-black/90 backdrop-blur border-white/20">
-          <DialogHeader>
-            <DialogTitle className="text-white">Edit Search</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-white/90 text-sm font-medium">Search Name</label>
-              <Input
-                value={newSearchName || editingSearch?.name || ''}
-                onChange={(e) => setNewSearchName(e.target.value)}
-                placeholder="Enter a name for this search"
-                className="bg-white/10 border-white/20 text-white"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-white/90 text-sm font-medium">Current Filters</label>
+              </div>
+              
               <div className="flex flex-wrap gap-2">
-                {editingSearch?.filters.propertyType && (
+                {filter.client_types && filter.client_types.length > 0 && (
                   <Badge variant="secondary" className="text-xs">
-                    {editingSearch.filters.propertyType}
+                    {filter.client_types.join(', ')}
                   </Badge>
                 )}
-                {(editingSearch?.filters.priceMin || editingSearch?.filters.priceMax) && (
+                {(filter.min_budget || filter.max_budget) && (
                   <Badge variant="secondary" className="text-xs">
-                    ${editingSearch.filters.priceMin || 0} - ${editingSearch.filters.priceMax || '∞'}
+                    ${filter.min_budget || 0} - ${filter.max_budget || '∞'}
                   </Badge>
                 )}
-                {editingSearch?.filters.location && (
+                {(filter.min_age || filter.max_age) && (
                   <Badge variant="secondary" className="text-xs">
-                    {editingSearch.filters.location}
+                    Age {filter.min_age || 18}-{filter.max_age || 65}
                   </Badge>
                 )}
-                {editingSearch?.filters.bedrooms && (
+                {filter.lifestyle_tags && filter.lifestyle_tags.length > 0 && (
                   <Badge variant="secondary" className="text-xs">
-                    {editingSearch.filters.bedrooms} bed
+                    {filter.lifestyle_tags.length} lifestyle tags
+                  </Badge>
+                )}
+                {filter.preferred_occupations && filter.preferred_occupations.length > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {filter.preferred_occupations.length} occupations
                   </Badge>
                 )}
               </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div>
-                <p className="text-white/90 text-sm font-medium">Email Alerts</p>
-                <p className="text-white/60 text-xs">Get notified when new matches appear</p>
-              </div>
-              <Button
-                variant={editingSearch?.alertsEnabled ? "default" : "outline"}
-                size="sm"
-                onClick={() => editingSearch && handleToggleAlerts(editingSearch.id)}
-              >
-                {editingSearch?.alertsEnabled ? 'Enabled' : 'Paused'}
-              </Button>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="ghost" 
-              onClick={() => {
-                setEditingSearch(null);
-                setNewSearchName('');
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateSearch}>
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

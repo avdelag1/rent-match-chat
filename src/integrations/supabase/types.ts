@@ -4196,29 +4196,77 @@ export type Database = {
       }
       saved_filters: {
         Row: {
+          allows_parties: boolean | null
+          allows_pets: boolean | null
+          allows_smoking: boolean | null
           category: string
+          client_types: string[] | null
           created_at: string
           filters: Json
           id: string
+          is_active: boolean | null
+          lifestyle_tags: string[] | null
+          listing_types: string[] | null
+          max_age: number | null
+          max_budget: number | null
+          min_age: number | null
+          min_budget: number | null
+          min_monthly_income: number | null
           mode: string
+          name: string | null
+          preferred_occupations: string[] | null
+          requires_employment_proof: boolean | null
+          requires_references: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          allows_parties?: boolean | null
+          allows_pets?: boolean | null
+          allows_smoking?: boolean | null
           category?: string
+          client_types?: string[] | null
           created_at?: string
           filters?: Json
           id?: string
+          is_active?: boolean | null
+          lifestyle_tags?: string[] | null
+          listing_types?: string[] | null
+          max_age?: number | null
+          max_budget?: number | null
+          min_age?: number | null
+          min_budget?: number | null
+          min_monthly_income?: number | null
           mode?: string
+          name?: string | null
+          preferred_occupations?: string[] | null
+          requires_employment_proof?: boolean | null
+          requires_references?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          allows_parties?: boolean | null
+          allows_pets?: boolean | null
+          allows_smoking?: boolean | null
           category?: string
+          client_types?: string[] | null
           created_at?: string
           filters?: Json
           id?: string
+          is_active?: boolean | null
+          lifestyle_tags?: string[] | null
+          listing_types?: string[] | null
+          max_age?: number | null
+          max_budget?: number | null
+          min_age?: number | null
+          min_budget?: number | null
+          min_monthly_income?: number | null
           mode?: string
+          name?: string | null
+          preferred_occupations?: string[] | null
+          requires_employment_proof?: boolean | null
+          requires_references?: boolean | null
           updated_at?: string
           user_id?: string
         }

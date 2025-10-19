@@ -55,25 +55,30 @@ export function CategoryFilters({
   onApplyFilters, 
   currentFilters = {} 
 }: CategoryFiltersProps) {
-  const { savedFilters, saveFilters } = useSavedFilters();
-  const [category, setCategory] = useState<Category>(currentFilters.category || savedFilters?.category || 'property');
-  const [mode, setMode] = useState<Mode>(currentFilters.mode || savedFilters?.mode || 'rent');
-  const [filters, setFilters] = useState(currentFilters.filters || savedFilters?.filters || {});
+  const { activeFilter, saveFilter } = useSavedFilters();
+  const [category, setCategory] = useState<Category>(currentFilters.category || activeFilter?.category || 'property');
+  const [mode, setMode] = useState<Mode>(currentFilters.mode || activeFilter?.mode || 'rent');
+  const [filters, setFilters] = useState(currentFilters.filters || activeFilter?.filters || {});
 
   // Load saved filters when dialog opens
   useEffect(() => {
-    if (isOpen && savedFilters) {
-      setCategory(savedFilters.category as Category);
-      setMode(savedFilters.mode as Mode);
-      setFilters(savedFilters.filters || {});
+    if (isOpen && activeFilter) {
+      setCategory(activeFilter.category as Category);
+      setMode(activeFilter.mode as Mode);
+      setFilters(activeFilter.filters || {});
     }
-  }, [isOpen, savedFilters]);
+  }, [isOpen, activeFilter]);
 
   const handleApply = async () => {
     const filterData = { category, mode, filters };
     
     // Save filters to database
-    await saveFilters(filterData);
+    await saveFilter({
+      name: `${category} ${mode} filters`,
+      category,
+      mode,
+      filters
+    });
     
     // Apply filters to parent component
     onApplyFilters(filterData);

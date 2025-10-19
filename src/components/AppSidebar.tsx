@@ -157,22 +157,22 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
   const { unreadCount } = useUnreadMessageCount()
   const { unreadCount: unreadLikes } = useUnreadLikes()
   const { unreadCount: unreadMatches } = useUnreadMatches()
-  const { savedFilters } = useSavedFilters()
+  const { savedFilters, activeFilter } = useSavedFilters()
   
   // Resolve role safely (prevents TS literal narrowing issues)
   const userRole: 'client' | 'owner' = (propUserRole ?? 'owner')
 
   const menuItems = userRole === 'client' ? clientMenuItems : ownerMenuItems
   
-  // Count active filters
-  const activeFilterCount = savedFilters?.filters ? Object.keys(savedFilters.filters).filter(key => {
-    const value = savedFilters.filters[key];
-    if (Array.isArray(value)) return value.length > 0;
-    if (typeof value === 'string') return value.length > 0;
-    if (typeof value === 'number') return true;
-    if (typeof value === 'boolean') return value;
-    return false;
-  }).length : 0;
+  // Count active filters - count based on active filter criteria
+  const activeFilterCount = activeFilter ? (
+    (activeFilter.listing_types?.length || 0) +
+    (activeFilter.client_types?.length || 0) +
+    (activeFilter.lifestyle_tags?.length || 0) +
+    (activeFilter.preferred_occupations?.length || 0) +
+    (activeFilter.min_budget || activeFilter.max_budget ? 1 : 0) +
+    (activeFilter.min_age || activeFilter.max_age ? 1 : 0)
+  ) : 0;
 
   const isActive = (url: string) => {
     if (url === "#add-property") return false

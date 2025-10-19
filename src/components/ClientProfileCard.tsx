@@ -152,16 +152,19 @@ export function ClientProfileCard({
           />
         ) : (
           <div 
-            className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center cursor-pointer"
+            className="w-full h-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center cursor-pointer relative overflow-hidden"
             onClick={handleImageClick}
           >
-            <div className="text-center">
-              <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                <span className="text-6xl font-bold text-primary">
-                  {profile.name?.charAt(0).toUpperCase()}
+            <div className="absolute inset-0 bg-black/20" />
+            <div className="text-center relative z-10">
+              <div className="w-32 h-32 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border-4 border-white/50">
+                <span className="text-6xl font-bold text-white">
+                  {profile.name?.charAt(0).toUpperCase() || '?'}
                 </span>
               </div>
-              <p className="text-muted-foreground text-sm">No photo available</p>
+              <p className="text-white text-sm font-medium">
+                {profile.name || 'Client Profile'}
+              </p>
             </div>
           </div>
         )}
@@ -235,11 +238,13 @@ export function ClientProfileCard({
             <h3 className="text-2xl font-bold text-foreground mb-2">{profile.name}</h3>
           </div>
           
-          {/* Profile Tags */}
-          {((profile.interests && profile.interests.length > 0) || 
-            (profile.preferred_activities && profile.preferred_activities.length > 0)) && (
-            <div className="flex flex-wrap gap-1.5">
-              {[...(profile.interests || []), ...(profile.preferred_activities || [])]
+          {/* Profile Tags with Defaults */}
+          <div className="flex flex-wrap gap-1.5">
+            {(() => {
+              const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
+              const defaultTags = allTags.length === 0 ? ['Digital Nomad', 'Professional', 'Verified Client'] : allTags;
+              
+              return defaultTags
                 .slice(0, 4)
                 .map((tag, index) => {
                   // Determine tag color based on category
@@ -261,14 +266,14 @@ export function ClientProfileCard({
                       {tag}
                     </Badge>
                   );
-                })}
-              {([...(profile.interests || []), ...(profile.preferred_activities || [])].length > 4) && (
-                <Badge variant="outline" className="text-xs bg-muted">
-                  +{[...(profile.interests || []), ...(profile.preferred_activities || [])].length - 4} more
-                </Badge>
-              )}
-            </div>
-          )}
+                });
+            })()}
+            {([...(profile.interests || []), ...(profile.preferred_activities || [])].length > 4) && (
+              <Badge variant="outline" className="text-xs bg-muted">
+                +{[...(profile.interests || []), ...(profile.preferred_activities || [])].length - 4} more
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
       </Card>

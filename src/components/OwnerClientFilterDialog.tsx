@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X } from 'lucide-react';
+import { X, Save } from 'lucide-react';
 import { useOwnerClientPreferences, OwnerClientPreferences } from '@/hooks/useOwnerClientPreferences';
+import { useSavedFilters } from '@/hooks/useSavedFilters';
 
 interface OwnerClientFilterDialogProps {
   open: boolean;
@@ -54,7 +55,10 @@ const OCCUPATION_OPTIONS = [
 
 export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilterDialogProps) {
   const { preferences, updatePreferences, isUpdating } = useOwnerClientPreferences();
+  const { saveFilter } = useSavedFilters();
   
+  const [filterName, setFilterName] = useState('');
+  const [showSaveAs, setShowSaveAs] = useState(false);
   const [formData, setFormData] = useState<Partial<OwnerClientPreferences>>({
     min_budget: undefined,
     max_budget: undefined,
@@ -122,8 +126,40 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
     }
   };
 
-  const handleSave = () => {
-    updatePreferences(formData);
+  const handleSave = async () => {
+    await updatePreferences(formData);
+    onOpenChange(false);
+  };
+
+  const handleSaveAs = async () => {
+    if (!filterName.trim()) {
+      return;
+    }
+
+    await saveFilter({
+      name: filterName,
+      category: 'client',
+      mode: 'discovery',
+      filters: formData,
+      listing_types: selectedListingTypes,
+      client_types: selectedClientTypes,
+      min_budget: formData.min_budget,
+      max_budget: formData.max_budget,
+      min_age: formData.min_age,
+      max_age: formData.max_age,
+      lifestyle_tags: formData.compatible_lifestyle_tags,
+      preferred_occupations: formData.preferred_occupations,
+      allows_pets: formData.allows_pets,
+      allows_smoking: formData.allows_smoking,
+      allows_parties: formData.allows_parties,
+      requires_employment_proof: formData.requires_employment_proof,
+      requires_references: formData.requires_references,
+      min_monthly_income: formData.min_monthly_income,
+    });
+
+    await updatePreferences(formData);
+    setFilterName('');
+    setShowSaveAs(false);
     onOpenChange(false);
   };
 
@@ -354,13 +390,37 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
         </div>
         </ScrollArea>
 
-        <DialogFooter className="shrink-0 px-6 py-4 border-t">
+        <DialogFooter className="shrink-0 px-6 py-4 border-t gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isUpdating}>
-            {isUpdating ? 'Saving...' : 'Save Filters'}
-          </Button>
+          {showSaveAs ? (
+            <>
+              <Input
+                placeholder="Filter name..."
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                className="max-w-xs"
+              />
+              <Button onClick={handleSaveAs} disabled={!filterName.trim()}>
+                <Save className="w-4 h-4 mr-2" />
+                Save As
+              </Button>
+              <Button variant="ghost" onClick={() => setShowSaveAs(false)}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => setShowSaveAs(true)}>
+                <Save className="w-4 h-4 mr-2" />
+                Save As New Filter
+              </Button>
+              <Button onClick={handleSave} disabled={isUpdating}>
+                {isUpdating ? 'Saving...' : 'Apply & Save'}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -24,7 +24,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   const [showSupport, setShowSupport] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const { savedFilters, loading: filtersLoading } = useSavedFilters();
+  const { savedFilters, activeFilter, loading: filtersLoading } = useSavedFilters();
   const [appliedFilters, setAppliedFilters] = useState<any>({});
   const [locationData, setLocationData] = useState<{
     latitude: number;
@@ -38,14 +38,14 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
 
   // Load saved filters on mount
   useEffect(() => {
-    if (savedFilters) {
+    if (activeFilter) {
       setAppliedFilters({
-        category: savedFilters.category,
-        mode: savedFilters.mode,
-        ...savedFilters.filters
+        category: activeFilter.category,
+        mode: activeFilter.mode,
+        ...activeFilter.filters
       });
     }
-  }, [savedFilters]);
+  }, [activeFilter]);
   
   const handleListingTap = (listingId: string) => {
     setSelectedListingId(listingId);
