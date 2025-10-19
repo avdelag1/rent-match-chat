@@ -11,7 +11,7 @@ import { MatchCelebration } from '@/components/MatchCelebration';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { NotificationBar } from '@/components/NotificationBar';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
-import { useClientProfiles } from '@/hooks/useClientProfiles';
+import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
@@ -51,7 +51,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   }>({ isOpen: false });
   
   const navigate = useNavigate();
-  const { data: clientProfiles = [] } = useClientProfiles();
+  const { data: clientProfiles = [] } = useSmartClientMatching();
   const { data: subscription } = useUserSubscription();
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
   
@@ -167,31 +167,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
                   </div>
                 </CardHeader>
                 <CardContent className="flex justify-center pb-6 sm:pb-8 px-3 sm:px-6">
-                  {clientProfiles.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center space-y-4 py-8 sm:py-12 text-center max-w-md mx-auto">
-                      <Users className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground/40" />
-                      <div className="space-y-2">
-                        <h3 className="text-lg sm:text-xl font-semibold">No Clients Found</h3>
-                        <p className="text-muted-foreground text-xs sm:text-sm max-w-sm">
-                          Try adjusting your filters to see potential matches in your area.
-                        </p>
-                      </div>
-                      <div className="flex gap-2 flex-wrap justify-center">
-                        <Button variant="outline" size="sm" className="text-xs">
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Refresh
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          className="text-xs"
-                          onClick={() => setShowCategoryDialog(true)}
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Listing
-                        </Button>
-                      </div>
-                    </div>
-                  ) : showLocationMatching ? (
+                  {showLocationMatching ? (
                     <div className="w-full max-w-4xl">
                       <LocationBasedMatching />
                     </div>
