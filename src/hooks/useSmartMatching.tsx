@@ -423,30 +423,33 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           filteredProfiles = profiles.filter(profile => {
             const reasons = [];
             
-            // Age filter
-            if (ownerPrefs.min_age && ownerPrefs.max_age) {
-              if (!profile.age || profile.age < ownerPrefs.min_age || profile.age > ownerPrefs.max_age) {
+            // Age filter - only apply if BOTH min and max are set
+            if (ownerPrefs.min_age && ownerPrefs.max_age && profile.age) {
+              if (profile.age < ownerPrefs.min_age || profile.age > ownerPrefs.max_age) {
                 console.log(`❌ ${profile.full_name}: Age ${profile.age} outside range ${ownerPrefs.min_age}-${ownerPrefs.max_age}`);
                 return false;
               }
               reasons.push(`Age ${profile.age} in range`);
             }
 
-            // Budget filter
-            if (ownerPrefs.min_budget || ownerPrefs.max_budget) {
+            // Budget filter - only apply if meaningful values exist
+            if ((ownerPrefs.min_budget && ownerPrefs.min_budget > 0) || (ownerPrefs.max_budget && ownerPrefs.max_budget < 999999)) {
               const budgetMax = profile.budget_max ? Number(profile.budget_max) : null;
               const monthlyIncome = profile.monthly_income ? Number(profile.monthly_income) : null;
               const clientBudget = budgetMax || monthlyIncome;
               
-              if (ownerPrefs.min_budget && clientBudget && clientBudget < ownerPrefs.min_budget) {
-                console.log(`❌ ${profile.full_name}: Budget ${clientBudget} below min ${ownerPrefs.min_budget}`);
-                return false;
+              // Only filter if client has budget data
+              if (clientBudget) {
+                if (ownerPrefs.min_budget && ownerPrefs.min_budget > 0 && clientBudget < ownerPrefs.min_budget) {
+                  console.log(`❌ ${profile.full_name}: Budget ${clientBudget} below min ${ownerPrefs.min_budget}`);
+                  return false;
+                }
+                if (ownerPrefs.max_budget && ownerPrefs.max_budget < 999999 && clientBudget > ownerPrefs.max_budget) {
+                  console.log(`❌ ${profile.full_name}: Budget ${clientBudget} above max ${ownerPrefs.max_budget}`);
+                  return false;
+                }
+                reasons.push('Budget compatible');
               }
-              if (ownerPrefs.max_budget && clientBudget && clientBudget > ownerPrefs.max_budget) {
-                console.log(`❌ ${profile.full_name}: Budget ${clientBudget} above max ${ownerPrefs.max_budget}`);
-                return false;
-              }
-              reasons.push('Budget compatible');
             }
 
             // Pet filter

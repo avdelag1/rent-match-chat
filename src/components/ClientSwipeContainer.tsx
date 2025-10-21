@@ -38,6 +38,15 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   // Get ALL client profiles - no swipe filtering
   const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
   
+  // Debug logging
+  console.log('📊 ClientSwipeContainer state:', {
+    profileCount: clientProfiles.length,
+    isLoading,
+    isRefetching,
+    hasError: !!error,
+    currentIndex
+  });
+  
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
       setMatchCelebration({
