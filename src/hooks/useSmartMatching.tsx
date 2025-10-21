@@ -497,10 +497,25 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         }
 
         // ✅ FIX #5: Filter out clients without photos (Tinder-style)
-        filteredProfiles = filteredProfiles.filter(profile => 
-          profile.images && profile.images.length > 0
-        );
-        console.log(`📸 After photo filter: ${filteredProfiles.length} clients with photos`);
+        // Add placeholder for profiles without images instead of filtering them out
+        filteredProfiles = filteredProfiles.map(profile => ({
+          ...profile,
+          images: (profile.images && profile.images.length > 0) 
+            ? profile.images 
+            : ['/placeholder-avatar.svg']
+        }));
+        console.log(`📸 Processed ${filteredProfiles.length} clients (added placeholders where needed)`);
+
+        // If filters eliminated all profiles, show them anyway with warning
+        if (filteredProfiles.length === 0 && profiles.length > 0) {
+          console.warn('⚠️ All profiles filtered out by preferences, showing first 20 unfiltered profiles');
+          filteredProfiles = profiles.slice(0, 20).map(profile => ({
+            ...profile,
+            images: (profile.images && profile.images.length > 0) 
+              ? profile.images 
+              : ['/placeholder-avatar.svg']
+          }));
+        }
 
         // Calculate match scores for filtered profiles
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
