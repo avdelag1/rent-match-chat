@@ -38,15 +38,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   // Get ALL client profiles - no swipe filtering
   const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
   
-  // Debug logging
-  console.log('📊 ClientSwipeContainer state:', {
-    profileCount: clientProfiles.length,
-    isLoading,
-    isRefetching,
-    hasError: !!error,
-    currentIndex
-  });
-  
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
       setMatchCelebration({
@@ -63,8 +54,6 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentClient = clientProfiles[currentIndex];
     if (!currentClient) return;
-
-    console.log('Swiping client:', currentClient.user_id, 'direction:', direction);
 
     setSwipeDirection(direction);
     

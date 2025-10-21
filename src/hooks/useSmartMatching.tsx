@@ -359,13 +359,8 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
     queryKey: ['smart-clients', category],
     queryFn: async () => {
       try {
-        console.log('🎯 useSmartClientMatching: Starting fetch with OWNER preferences...');
         const { data: user } = await supabase.auth.getUser();
-        if (!user.user) {
-          console.log('❌ useSmartClientMatching: No authenticated user');
-          return [];
-        }
-        console.log('✅ Owner ID:', user.user.id);
+        if (!user.user) return [];
 
         // 🔥 GET OWNER'S FILTER PREFERENCES FIRST!
         let query = supabase
@@ -380,21 +375,14 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         const { data: ownerPrefs, error: ownerPrefsError } = await query.maybeSingle();
 
-        console.log('📋 Owner preferences loaded:', ownerPrefs ? 'YES' : 'NO', ownerPrefs);
-        if (ownerPrefsError) console.error('Owner prefs error:', ownerPrefsError);
-
         // Get client user IDs from user_roles table
         const { data: clientRoles, error: rolesError } = await supabase
           .from('user_roles')
           .select('user_id')
           .eq('role', 'client');
 
-        console.log('👥 Client roles found:', clientRoles?.length || 0);
         if (rolesError) throw rolesError;
-        if (!clientRoles?.length) {
-          console.log('❌ No client roles found');
-          return [];
-        }
+        if (!clientRoles?.length) return [];
 
         const clientUserIds = clientRoles.map(r => r.user_id);
 
@@ -405,28 +393,21 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           .in('id', clientUserIds)
           .eq('is_active', true)
           .neq('id', user.user.id)
-          .limit(100); // Get more initially to filter
+          .limit(100);
 
-        console.log('📊 Total profiles fetched:', profiles?.length || 0);
         if (profileError) throw profileError;
-        if (!profiles?.length) {
-          console.log('❌ No active client profiles found');
-          return [];
-        }
+        if (!profiles?.length) return [];
 
-        // 🔥 APPLY OWNER'S FILTERS
+        // Apply owner's filters
         let filteredProfiles = profiles;
 
         if (ownerPrefs) {
-          console.log('🎯 Applying owner filters...');
-          
           filteredProfiles = profiles.filter(profile => {
             const reasons = [];
             
             // Age filter - only apply if BOTH min and max are set
             if (ownerPrefs.min_age && ownerPrefs.max_age && profile.age) {
               if (profile.age < ownerPrefs.min_age || profile.age > ownerPrefs.max_age) {
-                console.log(`❌ ${profile.full_name}: Age ${profile.age} outside range ${ownerPrefs.min_age}-${ownerPrefs.max_age}`);
                 return false;
               }
               reasons.push(`Age ${profile.age} in range`);
