@@ -182,9 +182,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       case 'support':
         setShowSupport(true)
         break
-      case 'filters':
-        setShowFilters(true)
-        break
       case 'notifications':
         setShowNotifications(true)
         break
