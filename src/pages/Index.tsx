@@ -34,8 +34,8 @@ const Index = () => {
       return data?.role;
     },
     enabled: !!user,
-    retry: 3, // Reduce retries from 5 to 3
-    retryDelay: 800, // Reduce delay from 1000ms to 800ms
+    retry: 2, // Reduce from 3 to 2
+    retryDelay: 500, // Reduce from 800ms to 500ms for faster retries
     staleTime: 5000, // Cache role data for 5s to prevent immediate refetch
     refetchOnMount: true, // Always refetch on mount
     refetchOnWindowFocus: false, // Don't refetch on focus
@@ -47,7 +47,7 @@ const Index = () => {
       const timeout = setTimeout(() => {
         console.log('[Index] Query taking too long, forcing refetch...');
         refetch();
-      }, 3000);
+      }, 5000); // Increase from 3s to 5s for new users
       
       return () => clearTimeout(timeout);
     }
@@ -66,14 +66,14 @@ const Index = () => {
         
         // Don't show error immediately after signup - give cache more time
         const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
-        if (userAge > 10000) { // Only show error if account is older than 10 seconds
+        if (userAge > 15000) { // Increase from 10s to 15s for new users
           toast({
-            title: "Account setup incomplete",
-            description: "Please refresh the page or contact support.",
+            title: "Account Setup Issue",
+            description: "Taking longer than expected. Please refresh the page.",
             variant: "destructive"
           });
         } else {
-          console.log('[Index] New user detected, waiting for cache to update...');
+          console.log('[Index] New user detected, waiting for profile setup...');
         }
         return;
       }
@@ -87,9 +87,17 @@ const Index = () => {
       // If no role found after query completed
       if (!userRole) {
         console.error('[Index] No role found for authenticated user');
+        const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
+        
+        // For brand new users, be more patient
+        if (userAge < 15000) {
+          console.log('[Index] Brand new user, waiting for role creation...');
+          return;
+        }
+        
         toast({
-          title: "Account setup incomplete",
-          description: "Please refresh the page or contact support.",
+          title: "Account Setup Incomplete",
+          description: "Please refresh the page or contact support if this persists.",
           variant: "destructive"
         });
         return;

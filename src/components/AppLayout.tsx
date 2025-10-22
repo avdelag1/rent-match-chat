@@ -13,7 +13,6 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const { loading } = useAuth();
   
   // Initialize app features
   useKeyboardShortcuts();
@@ -22,7 +21,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   useErrorReporting();
 
   useEffect(() => {
-    // Simulate initial app loading
+    // Show initial app loading screen only on first load
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
     }, 1500);
@@ -30,8 +29,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Show loading screen during initial load or auth loading
-  if (isInitialLoading || loading) {
+  // Show loading screen ONLY during initial app load, not on navigation
+  if (isInitialLoading) {
     return <AppLoadingScreen />;
   }
 

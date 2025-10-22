@@ -137,6 +137,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: "Please check your email to verify your account.",
         });
       } else if (data.user) {
+        // Show feedback to user
+        toast({
+          title: "Creating your account...",
+          description: "Setting up your profile.",
+        });
+        
         // Auto-create profile for immediate sign-ups
         console.log('[useAuth] Creating profile for user:', data.user.id, 'with role:', role);
         const profileResult = await createProfileIfMissing(data.user, role);
@@ -147,8 +153,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Profile/role creation failed
           console.error('[useAuth] Profile creation failed, signing out user');
           await supabase.auth.signOut();
+          toast({
+            title: "Setup Failed",
+            description: "Could not complete account setup. Please try again.",
+            variant: "destructive"
+          });
           return { error: new Error('Failed to complete account setup') };
         }
+        
+        // Wait for database consistency
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         console.log('[useAuth] Profile setup complete, user should be able to access dashboard');
         
@@ -156,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         toast({
           title: "Welcome to Tinderent!",
-          description: "Your account has been created successfully.",
+          description: "Redirecting to your dashboard...",
         });
       }
 
