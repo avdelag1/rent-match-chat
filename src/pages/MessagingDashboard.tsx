@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,25 +8,94 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, Search, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useConversations, useConversationStats } from '@/hooks/useConversations';
+import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
 import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export function MessagingDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isStartingConversation, setIsStartingConversation] = useState(false);
   
-  const { data: conversations = [], isLoading } = useConversations();
+  const { data: conversations = [], isLoading, refetch } = useConversations();
   const { data: stats } = useConversationStats();
+  const startConversation = useStartConversation();
 
   const filteredConversations = conversations.filter(conv =>
     conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
+
+  // Handle auto-start conversation from URL parameter
+  useEffect(() => {
+    const startConversationUserId = searchParams.get('startConversation');
+    if (startConversationUserId && !isStartingConversation) {
+      handleAutoStartConversation(startConversationUserId);
+    }
+  }, [searchParams]);
+
+  const handleAutoStartConversation = async (userId: string) => {
+    setIsStartingConversation(true);
+    
+    try {
+      // Check if conversation already exists
+      const existingConv = conversations.find(c => 
+        c.other_user?.id === userId
+      );
+      
+      if (existingConv) {
+        toast({
+          title: 'Opening conversation',
+          description: 'Loading your existing conversation...',
+        });
+        setSelectedConversationId(existingConv.id);
+        setSearchParams({}); // Clear URL param
+        setIsStartingConversation(false);
+        return;
+      }
+      
+      // Create new conversation
+      toast({
+        title: 'Starting conversation',
+        description: 'Creating a new conversation...',
+      });
+
+      const result = await startConversation.mutateAsync({
+        otherUserId: userId,
+        initialMessage: "Hi! I'm interested in connecting.",
+        canStartNewConversation: true,
+      });
+
+      if (result.conversationId) {
+        // Wait a moment for the conversation to be available
+        setTimeout(async () => {
+          await refetch();
+          setSelectedConversationId(result.conversationId);
+          setSearchParams({});
+          toast({
+            title: 'Conversation started',
+            description: 'You can now send messages!',
+          });
+          setIsStartingConversation(false);
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Error auto-starting conversation:', error);
+      toast({
+        title: 'Could not start conversation',
+        description: error instanceof Error ? error.message : 'Please try again later.',
+        variant: 'destructive',
+      });
+      setSearchParams({});
+      setIsStartingConversation(false);
+    }
+  };
 
   const handleBackToDashboard = () => {
     // Get user role from profile data via auth hook

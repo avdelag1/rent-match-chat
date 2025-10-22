@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import { Listing } from './useListings';
 import { ClientFilterPreferences } from './useClientFilterPreferences';
 
@@ -381,8 +382,21 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           .select('user_id')
           .eq('role', 'client');
 
-        if (rolesError) throw rolesError;
-        if (!clientRoles?.length) return [];
+        if (rolesError) {
+          console.error('❌ Error fetching client roles:', rolesError);
+          throw rolesError;
+        }
+        
+        if (!clientRoles?.length) {
+          console.warn('⚠️ No clients found in user_roles table');
+          toast({
+            title: 'No Clients Available',
+            description: 'There are no registered clients yet. Check back soon!',
+          });
+          return [];
+        }
+        
+        console.log(`✅ Found ${clientRoles.length} client user IDs`);
 
         const clientUserIds = clientRoles.map(r => r.user_id);
 
@@ -395,8 +409,21 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           .neq('id', user.user.id)
           .limit(100);
 
-        if (profileError) throw profileError;
-        if (!profiles?.length) return [];
+        if (profileError) {
+          console.error('❌ Error fetching profiles:', profileError);
+          throw profileError;
+        }
+        
+        if (!profiles?.length) {
+          console.warn('⚠️ No active profiles found for client users');
+          toast({
+            title: 'No Client Profiles',
+            description: 'Client users exist but have no active profiles set up.',
+          });
+          return [];
+        }
+        
+        console.log(`✅ Found ${profiles.length} active client profiles`);
 
         // Apply owner's filters
         let filteredProfiles = profiles;
