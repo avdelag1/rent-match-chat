@@ -80,8 +80,12 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     }
   };
 
-  const handleStartConversation = () => {
-    navigate('/messaging');
+  const handleStartConversation = (clientId?: string) => {
+    if (clientId) {
+      navigate(`/messages?startConversation=${clientId}`);
+    } else {
+      navigate('/messages');
+    }
   };
 
   const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
@@ -153,7 +157,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         <ClientSwipeContainer 
           onClientTap={handleProfileTap}
           onInsights={handleInsights}
-          onMessageClick={onMessageClick}
+          onMessageClick={(clientId) => handleStartConversation(clientId)}
         />
       </main>
 
@@ -176,7 +180,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           avatar: matchCelebration.clientProfile?.images?.[0],
           role: 'client'
         }}
-        onMessage={handleStartConversation}
+        onMessage={() => handleStartConversation(matchCelebration.clientProfile?.user_id)}
       />
 
       <SupportDialog

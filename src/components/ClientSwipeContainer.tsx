@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
   onInsights?: (clientId: string) => void;
-  onMessageClick?: () => void;
+  onMessageClick?: (clientId: string) => void;
 }
 
 export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
@@ -127,9 +127,12 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
   };
 
   const handleStartConversation = (clientId: string) => {
-    // Always navigate to messaging with this specific client
     console.log('💬 Starting conversation with client:', clientId);
-    navigate(`/messages?startConversation=${clientId}`);
+    if (onMessageClick) {
+      onMessageClick(clientId);
+    } else {
+      navigate(`/messages?startConversation=${clientId}`);
+    }
   };
 
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;

@@ -511,16 +511,18 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         }));
         console.log(`📸 Processed ${filteredProfiles.length} clients (added placeholders where needed)`);
 
-        // If filters eliminated all profiles, show them anyway with warning
+        // CRITICAL FIX: Always show clients even if filters are too restrictive
         if (filteredProfiles.length === 0 && profiles.length > 0) {
-          console.warn('⚠️ All profiles filtered out by preferences, showing first 20 unfiltered profiles');
-          filteredProfiles = profiles.slice(0, 20).map(profile => ({
+          console.warn('⚠️ BYPASSING FILTERS: All profiles filtered out. Showing ALL profiles.');
+          filteredProfiles = profiles.map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0) 
               ? profile.images 
               : ['/placeholder-avatar.svg']
           }));
         }
+        
+        console.log(`🎯 FINAL: Returning ${filteredProfiles.length} client profiles to display`);
 
         // Calculate match scores for filtered profiles
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
