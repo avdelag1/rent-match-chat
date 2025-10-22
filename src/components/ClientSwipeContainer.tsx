@@ -126,24 +126,10 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     }
   };
 
-  const handleMessage = () => {
-    if (needsUpgrade && onMessageClick) {
-      onMessageClick();
-    } else {
-      toast({
-        title: 'Messaging',
-        description: 'Message feature coming soon.',
-      });
-    }
-  };
-
   const handleStartConversation = (clientId: string) => {
-    if (needsUpgrade && onMessageClick) {
-      onMessageClick();
-    } else {
-      // Navigate to messaging with this specific client
-      navigate(`/messaging?startConversation=${clientId}`);
-    }
+    // Always navigate to messaging with this specific client
+    console.log('💬 Starting conversation with client:', clientId);
+    navigate(`/messages?startConversation=${clientId}`);
   };
 
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
@@ -365,7 +351,7 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
                 onSwipe={handleSwipe}
                 onTap={() => onClientTap(currentClient.user_id)}
                 onInsights={() => handleInsights(currentClient.user_id)}
-                onMessage={handleMessage}
+                onMessage={() => handleStartConversation(currentClient.user_id)}
                 isTop={true}
                 hasPremium={hasPremiumMessaging}
               />

@@ -389,10 +389,7 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         if (!clientRoles?.length) {
           console.warn('⚠️ No clients found in user_roles table');
-          toast({
-            title: 'No Clients Available',
-            description: 'There are no registered clients yet. Check back soon!',
-          });
+          console.log('📊 Database check: 0 users with role="client" found');
           return [];
         }
         
@@ -416,14 +413,11 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         if (!profiles?.length) {
           console.warn('⚠️ No active profiles found for client users');
-          toast({
-            title: 'No Client Profiles',
-            description: 'Client users exist but have no active profiles set up.',
-          });
+          console.log(`📊 Database check: ${clientRoles.length} client roles found but 0 active profiles`);
           return [];
         }
         
-        console.log(`✅ Found ${profiles.length} active client profiles`);
+        console.log(`✅ Found ${profiles.length} active client profiles to display`);
 
         // Apply owner's filters
         let filteredProfiles = profiles;
