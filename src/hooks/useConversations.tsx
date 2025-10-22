@@ -144,36 +144,30 @@ export function useStartConversation() {
       }
 
       if (!conversationId) {
-        // Determine roles - Get current user's profile
-        const { data: myProfile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        if (!myProfile) {
-          throw new Error('Your profile could not be found. Please try again.');
-        }
-
-        // Get other user's profile
-        const { data: otherProfile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', otherUserId)
-          .single();
-
-        if (!otherProfile) {
-          throw new Error('Property owner profile not found. Please try again.');
-        }
-
+        // Get both users' roles directly from user_roles table
         const { data: myRoleData } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        const clientId = myRoleData?.role === 'client' ? user.id : otherUserId;
-        const ownerId = myRoleData?.role === 'owner' ? user.id : otherUserId;
+        if (!myRoleData) {
+          throw new Error('Your profile could not be found. Please try again.');
+        }
+
+        const { data: otherRoleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', otherUserId)
+          .maybeSingle();
+
+        if (!otherRoleData) {
+          throw new Error('User profile not found. Please try again.');
+        }
+
+        // Determine client and owner IDs based on roles
+        const clientId = myRoleData.role === 'client' ? user.id : otherUserId;
+        const ownerId = myRoleData.role === 'owner' ? user.id : otherUserId;
 
         // Create conversation without requiring a match first (match_id is now nullable)
         const { data: newConversation, error: conversationError } = await supabase
