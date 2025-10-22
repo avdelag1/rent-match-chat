@@ -51,12 +51,52 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   }>({ isOpen: false });
   
   const navigate = useNavigate();
-  const { data: clientProfiles = [] } = useSmartClientMatching();
+  const { data: clientProfiles = [], isLoading, error, refetch } = useSmartClientMatching();
   const { data: subscription } = useUserSubscription();
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
   
   // Initialize notifications
   useNotifications();
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <DashboardLayout userRole="owner">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-lg font-medium">Loading client profiles...</p>
+            <p className="text-sm text-muted-foreground mt-2">This may take a moment</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <DashboardLayout userRole="owner">
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <Card className="p-8 max-w-md w-full">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <RefreshCw className="w-8 h-8 text-destructive" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Unable to Load Clients</h3>
+              <p className="text-muted-foreground mb-6">
+                We're having trouble loading client profiles. Please try again.
+              </p>
+              <Button onClick={() => refetch()} size="lg" className="w-full">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const handleClientTap = (clientId: string) => {
     console.log('Client tapped:', clientId);

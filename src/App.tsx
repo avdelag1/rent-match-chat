@@ -48,7 +48,16 @@ const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile
 const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
 function NotificationWrapper({ children }: { children: React.ReactNode }) {
   useNotifications();
@@ -56,14 +65,14 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true
-        }}
-      >
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
+      <ErrorBoundary>
         <AuthProvider>
           <ThemeProvider>
             <NotificationWrapper>
@@ -342,9 +351,9 @@ const App = () => (
             </NotificationWrapper>
           </ThemeProvider>
         </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
-  </ErrorBoundary>
+      </ErrorBoundary>
+    </BrowserRouter>
+  </QueryClientProvider>
 );
 
 export default App;
