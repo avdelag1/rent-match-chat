@@ -1,5 +1,5 @@
-// Dynamic cache versioning to force updates
-const CACHE_VERSION = `tinderent-v${Date.now()}`;
+// Simplified cache versioning - only update on actual SW changes
+const CACHE_VERSION = 'tinderent-v1.0.0';
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
@@ -7,10 +7,7 @@ const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
 const urlsToCache = [
   '/',
   '/manifest.json',
-  // Add versioned assets
-  `/index.html?v=${Date.now()}`,
-  `/assets/index.css?v=${Date.now()}`,
-  `/assets/index.js?v=${Date.now()}`
+  '/index.html'
 ];
 
 // Install service worker with immediate activation

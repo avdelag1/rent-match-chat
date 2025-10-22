@@ -28,27 +28,27 @@ export function UpdateNotification() {
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in-smooth">
-      <div className="bg-gradient-primary text-white p-4 rounded-lg shadow-theme-lg max-w-sm">
-        <div className="flex items-start justify-between gap-3">
+      <div className="bg-gradient-primary text-white p-3 rounded-lg shadow-theme-lg max-w-xs">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <div className="font-semibold text-sm mb-1">🎉 App Updated!</div>
-            <div className="text-xs opacity-90 mb-3">
-              A new version is available with the latest features and improvements.
+            <div className="font-semibold text-xs mb-1">🎉 Updated!</div>
+            <div className="text-[10px] opacity-90 mb-2">
+              New version available with latest features.
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button
                 onClick={handleUpdate}
                 size="sm"
                 variant="secondary"
-                className="flex-1 text-xs bg-white/20 hover:bg-white/30 border-white/30"
+                className="flex-1 text-[10px] h-7 bg-white/20 hover:bg-white/30 border-white/30"
               >
-                Refresh Now
+                Refresh
               </Button>
               <Button
                 onClick={handleDismiss}
                 size="sm"
                 variant="ghost"
-                className="px-2 text-white/80 hover:text-white hover:bg-white/20"
+                className="px-1.5 h-7 text-white/80 hover:text-white hover:bg-white/20"
               >
                 <X className="w-3 h-3" />
               </Button>

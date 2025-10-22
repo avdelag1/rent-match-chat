@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,6 +25,9 @@ export function CategorySelectionDialog({
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="text-2xl">Add New Listing</DialogTitle>
+          <DialogDescription>
+            Choose the category and type of listing you want to create.
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 px-6 py-4">

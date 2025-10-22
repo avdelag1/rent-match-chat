@@ -32,8 +32,8 @@ export function checkForUpdates(): void {
 // Set up automatic update checking
 export function setupUpdateChecker(): void {
   if ('serviceWorker' in navigator) {
-    // Check for updates every 30 seconds
-    setInterval(checkForUpdates, 30000);
+    // Check for updates every 5 minutes (reduced from 30 seconds)
+    setInterval(checkForUpdates, 300000);
     
     // Check immediately on focus
     window.addEventListener('focus', checkForUpdates);

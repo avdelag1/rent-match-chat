@@ -25,6 +25,7 @@ import { SupportDialog } from '@/components/SupportDialog'
 import { NotificationSystem } from '@/components/NotificationSystem'
 import { NotificationsDialog } from '@/components/NotificationsDialog'
 import { CategoryFilters } from '@/components/CategoryFilters'
+import { CategorySelectionDialog } from '@/components/CategorySelectionDialog'
 import { Button } from '@/components/ui/button'
 
 interface DashboardLayoutProps {
@@ -64,6 +65,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   // Notifications dialog
   const [showNotifications, setShowNotifications] = useState(false)
+
+  // Category selection dialog
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false)
 
   // Category and mode state for filters
   const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
@@ -138,7 +142,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     
     switch (item) {
       case 'add-listing':
-        // This will be handled by the CategorySelectionDialog in OwnerDashboard
+        setShowCategoryDialog(true)
         break
       case 'add-property':
         setShowPropertyForm(true)
@@ -367,6 +371,22 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           <LegalDocumentsDialog
             open={showLegalDocuments}
             onOpenChange={setShowLegalDocuments}
+          />
+
+          <CategorySelectionDialog
+            open={showCategoryDialog}
+            onOpenChange={setShowCategoryDialog}
+            onCategorySelect={(category, mode) => {
+              const categoryHashMap = {
+                property: '#add-property',
+                yacht: '#add-yacht',
+                motorcycle: '#add-motorcycle',
+                bicycle: '#add-bicycle',
+              };
+              setFilterCategory(category);
+              setFilterMode(mode);
+              navigate(`/owner/properties${categoryHashMap[category]}`);
+            }}
           />
         </>
       )}
