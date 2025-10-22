@@ -87,26 +87,26 @@ export function PWAInstallPrompt() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -100 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed top-4 left-4 z-50 w-auto max-w-[320px]"
+          className="fixed top-4 left-4 z-50 w-auto max-w-[280px]"
         >
           <Card className="bg-gradient-primary text-white shadow-2xl border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
                 <img 
                   src="/favicon.ico" 
                   alt="Tinderent" 
-                  className="w-8 h-8 flex-shrink-0 rounded-lg"
+                  className="w-7 h-7 flex-shrink-0 rounded-lg"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold leading-tight">
-                    Download the app 👉
+                  <p className="text-xs font-semibold leading-tight">
+                    Download app 👉
                   </p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-1.5 flex-shrink-0">
                   <Button
                     onClick={handleInstall}
-                    size="default"
-                    className="h-9 px-4 text-sm bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
+                    size="sm"
+                    className="h-8 px-3 text-xs bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                   >
                     Install
                   </Button>
@@ -114,9 +114,9 @@ export function PWAInstallPrompt() {
                     onClick={handleDismiss}
                     size="sm"
                     variant="ghost"
-                    className="h-9 w-9 p-0 text-white hover:bg-white/20"
+                    className="h-8 w-8 p-0 text-white hover:bg-white/20"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               </div>

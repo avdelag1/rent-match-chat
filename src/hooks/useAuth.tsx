@@ -63,23 +63,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Handle OAuth user setup WITHOUT redirecting (Index.tsx handles redirects)
   const handleOAuthUserSetupOnly = async (user: User) => {
-    // For OAuth users, check URL params for role first
+    // For OAuth users, check localStorage for pending role FIRST, then URL params
+    const pendingRole = localStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
     const urlParams = new URLSearchParams(window.location.search);
     const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
     
-    if (roleFromUrl) {
-      console.log('OAuth setup with role:', roleFromUrl);
+    const roleToUse = pendingRole || roleFromUrl;
+    
+    if (roleToUse) {
+      console.log('OAuth setup with role:', roleToUse);
+      
+      // Clear the pending role from localStorage
+      localStorage.removeItem('pendingOAuthRole');
       
       // Use enhanced account linking for OAuth users
-      const linkingResult = await linkOAuthAccount(user, roleFromUrl);
+      const linkingResult = await linkOAuthAccount(user, roleToUse);
       
       if (linkingResult.success) {
-        // Clear role from URL params
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.delete('role');
-        window.history.replaceState({}, '', newUrl.toString());
+        // Clear role from URL params if present
+        if (roleFromUrl) {
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('role');
+          window.history.replaceState({}, '', newUrl.toString());
+        }
         
-        const finalRole = linkingResult.existingProfile?.role || roleFromUrl;
+        const finalRole = linkingResult.existingProfile?.role || roleToUse;
         console.log('OAuth profile setup complete. Role:', finalRole);
         
         // Ensure profile exists with correct role
@@ -298,24 +306,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithOAuth = async (provider: 'google' | 'facebook', role: 'client' | 'owner') => {
     try {
+      // Store the role in localStorage BEFORE OAuth redirect
+      localStorage.setItem('pendingOAuthRole', role);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            role: role
-          }
         }
       });
 
       if (error) {
         console.error(`${provider} OAuth error:`, error);
+        localStorage.removeItem('pendingOAuthRole');
         throw error;
       }
 
       return { error: null };
     } catch (error: any) {
       console.error(`${provider} OAuth error:`, error);
+      localStorage.removeItem('pendingOAuthRole');
       let errorMessage = `Failed to sign in with ${provider}. Please try again.`;
       
       if (error.message?.includes('Email link is invalid')) {
