@@ -49,3 +49,58 @@ export function forceClearVersion(): void {
   localStorage.setItem('tinderent_last_clear', currentVersion);
   clearAllCaches();
 }
+
+// Get current app version from meta tag
+export function getCurrentVersion(): string | null {
+  const metaTag = document.querySelector('meta[name="app-version"]');
+  return metaTag ? metaTag.getAttribute('content') : null;
+}
+
+// Check if app version has changed and clear cache if needed
+export function checkAppVersion(): void {
+  const currentVersion = getCurrentVersion();
+  const storedVersion = localStorage.getItem('app_version');
+  
+  if (currentVersion && storedVersion && currentVersion !== storedVersion) {
+    console.log('🔄 New version detected:', currentVersion);
+    console.log('📦 Old version was:', storedVersion);
+    
+    // Clear caches immediately
+    clearAllCaches().then(() => {
+      localStorage.setItem('app_version', currentVersion);
+    });
+  } else if (currentVersion && !storedVersion) {
+    // First time visiting, store current version
+    localStorage.setItem('app_version', currentVersion);
+  }
+}
+
+// Force update check by comparing service worker version
+export function forceVersionCheck(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      const messageChannel = new MessageChannel();
+      
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data && event.data.type === 'VERSION_INFO') {
+          const swVersion = event.data.version;
+          const storedVersion = localStorage.getItem('app_version');
+          
+          if (swVersion !== storedVersion) {
+            console.log('🔄 Version mismatch detected');
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        }
+      };
+      
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'GET_VERSION' },
+        [messageChannel.port2]
+      );
+    } else {
+      resolve(false);
+    }
+  });
+}

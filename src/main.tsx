@@ -4,11 +4,12 @@ import App from './App.tsx'
 import './index.css'
 import './styles/responsive.css'
 import { logBundleSize } from './utils/performance'
-import { setupUpdateChecker } from './utils/cacheManager'
+import { setupUpdateChecker, checkAppVersion } from './utils/cacheManager'
 import { ErrorBoundaryWrapper } from './components/ErrorBoundaryWrapper'
 
 // Initialize performance monitoring and update checking
 logBundleSize();
+checkAppVersion();
 setupUpdateChecker();
 
 // Remove static loading screen once React is ready to mount

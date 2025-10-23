@@ -1,5 +1,5 @@
-// Simplified cache versioning - only update on actual SW changes
-const CACHE_VERSION = 'tinderent-v1.0.0';
+// Dynamic cache versioning - automatically updated on each build
+const CACHE_VERSION = 'tinderent-v__BUILD_TIME__';
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
@@ -9,6 +9,20 @@ const urlsToCache = [
   '/manifest.json',
   '/index.html'
 ];
+
+// Message handler for version requests
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage({
+      type: 'VERSION_INFO',
+      version: CACHE_VERSION
+    });
+  }
+  
+  if (event.data && event.data.type === 'CHECK_UPDATE') {
+    self.registration.update();
+  }
+});
 
 // Install service worker with immediate activation
 self.addEventListener('install', (event) => {
@@ -27,12 +41,22 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch event - network-first strategy for HTML, cache-first for assets
+// Fetch event - improved strategy for different resource types
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  const url = new URL(request.url);
   
   // Skip non-GET requests
   if (request.method !== 'GET') return;
+  
+  // Network-first for Supabase API calls (always fetch fresh data)
+  if (url.hostname.includes('supabase')) {
+    event.respondWith(
+      fetch(request)
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
   
   // Network-first for HTML pages to ensure fresh content
   if (request.destination === 'document') {
@@ -49,12 +73,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Cache-first for static assets with network fallback
+  // Cache-first for static assets (JS, CSS, images) with network fallback
   event.respondWith(
     caches.match(request)
       .then(response => {
         if (response) {
-          console.log('[SW] Serving from cache:', request.url);
           return response;
         }
         

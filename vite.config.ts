@@ -3,6 +3,28 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+// Build version injector plugin for automatic cache busting
+function buildVersionPlugin() {
+  const buildTime = Date.now().toString();
+  return {
+    name: 'build-version-injector',
+    transformIndexHtml(html: string) {
+      // Inject version into HTML meta tag for reference
+      return html.replace(
+        '</head>',
+        `<meta name="app-version" content="${buildTime}" />\n</head>`
+      );
+    },
+    transform(code: string, id: string) {
+      // Replace __BUILD_TIME__ in service worker
+      if (id.endsWith('sw.js')) {
+        return code.replace(/__BUILD_TIME__/g, buildTime);
+      }
+      return code;
+    }
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -11,6 +33,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    buildVersionPlugin(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
