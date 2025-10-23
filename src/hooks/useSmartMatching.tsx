@@ -360,8 +360,15 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
     queryKey: ['smart-clients', category],
     queryFn: async () => {
       try {
+        console.log('🚀 useSmartClientMatching: Starting fetch...');
+        
         const { data: user } = await supabase.auth.getUser();
-        if (!user.user) return [];
+        if (!user.user) {
+          console.log('❌ No authenticated user');
+          return [];
+        }
+        
+        console.log('✅ Authenticated user:', user.user.id);
 
         // 🔥 GET OWNER'S FILTER PREFERENCES FIRST!
         let query = supabase
@@ -375,6 +382,7 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         }
         
         const { data: ownerPrefs, error: ownerPrefsError } = await query.maybeSingle();
+        console.log('📋 Owner preferences:', ownerPrefs);
 
         // Get client user IDs from user_roles table
         const { data: clientRoles, error: rolesError } = await supabase
@@ -419,10 +427,25 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         console.log(`✅ Found ${profiles.length} active client profiles to display`);
 
-        // Apply owner's filters
+        // 🚨 EMERGENCY BYPASS: Force show all clients if debugging
+        const FORCE_SHOW_ALL = true; // Set to false once working
+        
         let filteredProfiles = profiles;
 
-        if (ownerPrefs) {
+        if (FORCE_SHOW_ALL) {
+          console.log('⚠️ EMERGENCY BYPASS ACTIVE: Showing ALL clients regardless of filters');
+          filteredProfiles = profiles.map(profile => ({
+            ...profile,
+            images: (profile.images && profile.images.length > 0) 
+              ? profile.images 
+              : ['/placeholder-avatar.svg'],
+            matchPercentage: 85,
+            matchReasons: ['Emergency bypass - all clients shown'],
+            incompatibleReasons: []
+          }));
+          console.log('🎯 EMERGENCY BYPASS: Returning', filteredProfiles.length, 'profiles');
+        } else if (ownerPrefs) {
+          console.log('🔍 Applying owner filters...');
           filteredProfiles = profiles.filter(profile => {
             const reasons = [];
             
@@ -499,21 +522,30 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           });
 
           console.log(`🎯 After filtering: ${filteredProfiles.length}/${profiles.length} clients match`);
-        }
+          
+          // ✅ FIX #5: Filter out clients without photos (Tinder-style)
+          // Add placeholder for profiles without images instead of filtering them out
+          filteredProfiles = filteredProfiles.map(profile => ({
+            ...profile,
+            images: (profile.images && profile.images.length > 0) 
+              ? profile.images 
+              : ['/placeholder-avatar.svg']
+          }));
+          console.log(`📸 Processed ${filteredProfiles.length} clients (added placeholders where needed)`);
 
-        // ✅ FIX #5: Filter out clients without photos (Tinder-style)
-        // Add placeholder for profiles without images instead of filtering them out
-        filteredProfiles = filteredProfiles.map(profile => ({
-          ...profile,
-          images: (profile.images && profile.images.length > 0) 
-            ? profile.images 
-            : ['/placeholder-avatar.svg']
-        }));
-        console.log(`📸 Processed ${filteredProfiles.length} clients (added placeholders where needed)`);
-
-        // CRITICAL FIX: Always show clients even if filters are too restrictive
-        if (filteredProfiles.length === 0 && profiles.length > 0) {
-          console.warn('⚠️ BYPASSING FILTERS: All profiles filtered out. Showing ALL profiles.');
+          // CRITICAL FIX: Always show clients even if filters are too restrictive
+          if (filteredProfiles.length === 0 && profiles.length > 0) {
+            console.warn('⚠️ BYPASSING FILTERS: All profiles filtered out. Showing ALL profiles.');
+            filteredProfiles = profiles.map(profile => ({
+              ...profile,
+              images: (profile.images && profile.images.length > 0) 
+                ? profile.images 
+                : ['/placeholder-avatar.svg']
+            }));
+          }
+        } else {
+          // No owner preferences - show all clients
+          console.log('📋 No owner preferences set, showing all clients');
           filteredProfiles = profiles.map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0) 

@@ -34,7 +34,12 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     ownerProfile?: any;
   }>({ isOpen: false });
   
-  const { data: profiles = [], refetch } = useSmartClientMatching();
+  const { data: profiles = [], refetch, isLoading, error, isError } = useSmartClientMatching();
+  
+  // Debug logging
+  console.log('🏠 OwnerDashboard: profiles count:', profiles.length);
+  console.log('🏠 OwnerDashboard: isLoading:', isLoading);
+  console.log('🏠 OwnerDashboard: error:', error);
   const { updatePreferences } = useOwnerClientPreferences();
   const navigate = useNavigate();
   
@@ -116,6 +121,36 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId);
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-xl font-bold">Finding Clients...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError || error) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center">
+        <div className="text-white text-center p-8 max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-4">Error Loading Clients</h2>
+          <p className="mb-4 bg-white/20 p-4 rounded-lg text-sm">
+            {error?.message || 'Unknown error occurred'}
+          </p>
+          <Button onClick={() => refetch()} variant="secondary" size="lg">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 pb-20">
       {/* Simple Header - Fixed at top */}
@@ -159,6 +194,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           onInsights={handleInsights}
           onMessageClick={(clientId) => handleStartConversation(clientId)}
           profiles={profiles}
+          isLoading={isLoading}
+          error={error}
         />
       </main>
 

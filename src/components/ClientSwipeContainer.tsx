@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Heart } from 'lucide-react';
+import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -51,6 +51,13 @@ export function ClientSwipeContainer({
   const clientProfiles = externalProfiles || internalProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
   const error = externalError !== undefined ? externalError : internalError;
+  
+  // Comprehensive logging
+  console.log('🎴 ClientSwipeContainer: external profiles:', externalProfiles?.length || 0);
+  console.log('🎴 ClientSwipeContainer: internal profiles:', internalProfiles?.length || 0);
+  console.log('🎴 ClientSwipeContainer: final profiles:', clientProfiles?.length || 0);
+  console.log('🎴 ClientSwipeContainer: isLoading:', isLoading);
+  console.log('🎴 ClientSwipeContainer: error:', error);
   
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
@@ -203,6 +210,18 @@ export function ClientSwipeContainer({
           <p className="text-muted-foreground mb-4">
             No clients match your current preferences.
           </p>
+          
+          {/* Debug Information */}
+          <div className="text-sm text-muted-foreground space-y-2 bg-orange-100 p-4 rounded-lg mb-4">
+            <p className="font-semibold text-orange-900">🐛 Debug Info:</p>
+            <ul className="text-left space-y-1 text-orange-800">
+              <li>External Profiles: {externalProfiles?.length || 0}</li>
+              <li>Internal Profiles: {internalProfiles?.length || 0}</li>
+              <li>Final Profiles: {clientProfiles?.length || 0}</li>
+              <li>Loading: {isLoading ? 'Yes' : 'No'}</li>
+            </ul>
+          </div>
+          
           <div className="text-sm text-muted-foreground space-y-2 bg-muted/30 p-4 rounded-lg mb-4">
             <p className="font-semibold">Tips to find more clients:</p>
             <ul className="list-disc list-inside text-left space-y-1">
@@ -212,14 +231,25 @@ export function ClientSwipeContainer({
               <li>Ensure clients have photos uploaded</li>
             </ul>
           </div>
-          <Button 
-            onClick={handleRefresh}
-            variant="default"
-            className="gap-2 w-full"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Refresh
-          </Button>
+          
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/owner/filters')}
+              variant="outline"
+              className="gap-2 flex-1"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Clear Filters
+            </Button>
+            <Button 
+              onClick={handleRefresh}
+              variant="default"
+              className="gap-2 flex-1"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
     );
