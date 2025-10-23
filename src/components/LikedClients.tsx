@@ -141,7 +141,7 @@ export function LikedClients() {
       
       if (result?.conversationId) {
         toast.success("Conversation started!");
-        navigate('/messages');
+        navigate(`/messages?startConversation=${client.user_id}`);
       }
     } catch (error) {
       if ((error as Error).message === 'QUOTA_EXCEEDED') {

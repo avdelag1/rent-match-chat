@@ -32,7 +32,7 @@ export default function OwnerPropertyClientDiscovery() {
   };
 
   const handleConnect = (clientId: string) => {
-    navigate('/messages', { state: { clientId } });
+    navigate(`/messages?startConversation=${clientId}`);
   };
 
   return (

@@ -29,7 +29,7 @@ export default function OwnerViewClientProfile() {
   });
 
   const handleConnect = () => {
-    navigate('/messages', { state: { clientId } });
+    navigate(`/messages?startConversation=${clientId}`);
     toast.success('Starting conversation...');
   };
 
