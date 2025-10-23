@@ -149,11 +149,15 @@ export function ClientSwipeContainer({
 
   const handleStartConversation = (clientId: string) => {
     console.log('💬 Starting conversation with client:', clientId);
-    if (onMessageClick) {
-      onMessageClick(clientId);
-    } else {
-      navigate(`/messages?startConversation=${clientId}`);
-    }
+    
+    // Always navigate to messages with the client ID
+    navigate(`/messages?startConversation=${clientId}`);
+    
+    // Show toast to confirm
+    toast({
+      title: 'Opening Chat',
+      description: 'Starting conversation...',
+    });
   };
 
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;

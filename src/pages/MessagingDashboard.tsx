@@ -69,7 +69,7 @@ export function MessagingDashboard() {
       const result = await startConversation.mutateAsync({
         otherUserId: userId,
         initialMessage: "Hi! I'm interested in connecting.",
-        canStartNewConversation: true,
+        canStartNewConversation: true, // Always allow starting new conversations
       });
 
       if (result.conversationId) {

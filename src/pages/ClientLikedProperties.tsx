@@ -47,12 +47,9 @@ const ClientLikedProperties = () => {
   };
 
   const handleContactOwner = async (property: any) => {
-    // Check quota before attempting to start conversation
-    if (!canStartNewConversation) {
-      setShowQuotaDialog(true);
-      return;
-    }
+    console.log('💬 Starting conversation with property owner');
     
+    // Always allow messaging - bypass quota
     try {
       console.log('Starting conversation with:', {
         otherUserId: property.owner_id,
@@ -65,7 +62,7 @@ const ClientLikedProperties = () => {
         otherUserId: property.owner_id,
         listingId: property.id,
         initialMessage: `Hi! I'm interested in your property: ${property.title}. Could you tell me more about it?`,
-        canStartNewConversation
+        canStartNewConversation: true // Always allow
       });
       
       console.log('✅ Conversation started successfully:', result);
@@ -74,17 +71,13 @@ const ClientLikedProperties = () => {
       navigate('/messages');
       
     } catch (error) {
-      if ((error as Error).message === 'QUOTA_EXCEEDED') {
-        setShowQuotaDialog(true);
-      } else {
-        console.error('❌ Failed to start conversation:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
-        toast({
-          title: "Unable to start conversation",
-          description: errorMessage,
-          variant: "destructive"
-        });
-      }
+      console.error('❌ Failed to start conversation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
+      toast({
+        title: "Unable to start conversation",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
   };
 

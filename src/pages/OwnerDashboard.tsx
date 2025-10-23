@@ -86,8 +86,14 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   };
 
   const handleStartConversation = (clientId?: string) => {
+    console.log('💬 Opening chat with client:', clientId);
+    
     if (clientId) {
       navigate(`/messages?startConversation=${clientId}`);
+      toast({
+        title: 'Opening Chat',
+        description: 'Loading conversation...',
+      });
     } else {
       navigate('/messages');
     }

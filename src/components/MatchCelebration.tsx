@@ -28,6 +28,7 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
   }, [isOpen]);
 
   const handleStartConversation = () => {
+    console.log('💬 Starting conversation from match celebration');
     onMessage();
     onClose();
   };

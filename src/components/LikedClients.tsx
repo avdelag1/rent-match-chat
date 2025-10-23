@@ -126,17 +126,14 @@ export function LikedClients() {
   });
 
   const handleMessage = async (client: LikedClient) => {
-    // Check quota before attempting to start conversation
-    if (!canStartNewConversation) {
-      setShowQuotaDialog(true);
-      return;
-    }
-
+    console.log('💬 Starting conversation with liked client:', client.name);
+    
+    // Always allow messaging - bypass quota
     try {
       const result = await startConversation.mutateAsync({
         otherUserId: client.user_id,
         initialMessage: `Hi ${client.name}! I'm interested in discussing potential rental opportunities with you.`,
-        canStartNewConversation
+        canStartNewConversation: true // Always allow
       });
       
       if (result?.conversationId) {
@@ -144,12 +141,8 @@ export function LikedClients() {
         navigate(`/messages?startConversation=${client.user_id}`);
       }
     } catch (error) {
-      if ((error as Error).message === 'QUOTA_EXCEEDED') {
-        setShowQuotaDialog(true);
-      } else {
-        console.error('Failed to start conversation:', error);
-        toast.error("Failed to start conversation");
-      }
+      console.error('Failed to start conversation:', error);
+      toast.error("Failed to start conversation. Please try again.");
     }
   };
 
