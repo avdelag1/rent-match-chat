@@ -18,9 +18,19 @@ interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
   onInsights?: (clientId: string) => void;
   onMessageClick?: (clientId: string) => void;
+  profiles?: any[]; // Accept profiles from parent
+  isLoading?: boolean;
+  error?: any;
 }
 
-export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }: ClientSwipeContainerProps) {
+export function ClientSwipeContainer({ 
+  onClientTap, 
+  onInsights, 
+  onMessageClick,
+  profiles: externalProfiles,
+  isLoading: externalIsLoading,
+  error: externalError 
+}: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
@@ -35,8 +45,12 @@ export function ClientSwipeContainer({ onClientTap, onInsights, onMessageClick }
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
   
-  // Get ALL client profiles - no swipe filtering
-  const { data: clientProfiles = [], isLoading, refetch, isRefetching, error } = useSmartClientMatching();
+  // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching();
+  
+  const clientProfiles = externalProfiles || internalProfiles;
+  const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
+  const error = externalError !== undefined ? externalError : internalError;
   
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {

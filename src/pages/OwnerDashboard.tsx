@@ -158,6 +158,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
           onClientTap={handleProfileTap}
           onInsights={handleInsights}
           onMessageClick={(clientId) => handleStartConversation(clientId)}
+          profiles={profiles}
         />
       </main>
 
