@@ -353,7 +353,7 @@ export function ClientSwipeContainer({
       </AnimatePresence>
 
       {/* Cards Container with Fixed Height */}
-      <div className="relative w-full h-[600px] sm:h-[700px] mx-auto max-w-md">
+      <div className="relative w-full h-[calc(100vh-180px)] max-h-[800px] mx-auto max-w-md">
         
         <AnimatePresence>
           {nextClient && (

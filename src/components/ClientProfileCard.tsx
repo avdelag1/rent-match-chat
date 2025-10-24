@@ -88,17 +88,16 @@ export function ClientProfileCard({
   };
 
   const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 60;
+    const threshold = 100; // Increased for more intentional swipes
     const velocity = info.velocity.x;
     const absVelocity = Math.abs(velocity);
     
-    // ✅ FIX #2: Lower threshold for more responsive swipes
-    const effectiveThreshold = absVelocity > 600 ? 30 : 40;
-    
-    if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 350) {
+    // Only swipe if user dragged FAR ENOUGH or FAST ENOUGH
+    if (Math.abs(info.offset.x) > threshold || absVelocity > 500) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
+    // If not swiped, card will automatically snap back due to dragElastic
   };
 
   const getSwipeIndicator = () => {
@@ -125,14 +124,14 @@ export function ClientProfileCard({
       ref={cardRef}
       style={cardStyle}
       drag={isTop ? "x" : false}
-      dragConstraints={isTop ? { left: -400, right: 400 } : { left: 0, right: 0 }}
-      dragElastic={0.7}
+      dragConstraints={isTop ? { left: -200, right: 200 } : { left: 0, right: 0 }}
+      dragElastic={0.8}
       onDragEnd={handleDragEnd}
-      className={`transform-gpu ${isTop ? 'cursor-pointer' : 'pointer-events-none cursor-default'}`}
+      className={`transform-gpu ${isTop ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none cursor-default'}`}
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      <Card className="w-full max-h-[600px] sm:max-h-[700px] h-[85vh] bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="w-full h-[calc(100vh-180px)] max-h-[800px] bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
 
       {/* Swipe Indicator */}
       {getSwipeIndicator()}
