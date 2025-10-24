@@ -402,6 +402,343 @@ export function CategoryFilters({
                   </div>
                 </>
               )}
+
+              {category === 'motorcycle' && (
+                <>
+                  {/* Motorcycle Type */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">🏍️ Motorcycle Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Sport', 'Cruiser', 'Touring', 'Adventure', 'Naked', 'Scooter', 'Cafe Racer', 'Dirt Bike'].map((type) => (
+                          <Button
+                            key={type}
+                            variant={filters.motorcycleType === type ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({ ...filters, motorcycleType: type })}
+                          >
+                            {type}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Engine Size */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">⚙️ Engine Size (cc)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['<125', '125-250', '250-500', '500-750', '750-1000', '1000+'].map((size) => (
+                          <Button
+                            key={size}
+                            variant={filters.engineSize === size ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({ ...filters, engineSize: size })}
+                          >
+                            {size}cc
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Year & Condition */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">📅 Year</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Input
+                          type="number"
+                          placeholder="e.g., 2020"
+                          value={filters.year || ''}
+                          onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+                        />
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">✨ Condition</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {['New', 'Excellent', 'Good', 'Fair'].map((condition) => (
+                            <Button
+                              key={condition}
+                              variant={filters.condition === condition ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setFilters({ ...filters, condition })}
+                            >
+                              {condition}
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Features */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">✨ Features</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['ABS', 'Traction Control', 'Heated Grips', 'Cruise Control', 'Quick Shifter', 'Bluetooth', 'GPS', 'Luggage Included', 'Helmets Included'].map((feature) => (
+                          <Button
+                            key={feature}
+                            variant={filters.motorcycleFeatures?.includes(feature) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              const features = filters.motorcycleFeatures || [];
+                              const newFeatures = features.includes(feature)
+                                ? features.filter((f: string) => f !== feature)
+                                : [...features, feature];
+                              setFilters({ ...filters, motorcycleFeatures: newFeatures });
+                            }}
+                          >
+                            {feature}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+
+              {category === 'bicycle' && (
+                <>
+                  {/* Bicycle Type */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">🚴 Bicycle Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Road', 'Mountain', 'Hybrid', 'Electric', 'BMX', 'Cruiser', 'Gravel', 'Folding'].map((type) => (
+                          <Button
+                            key={type}
+                            variant={filters.bicycleType === type ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({ ...filters, bicycleType: type })}
+                          >
+                            {type}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Frame Size & Electric */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">📏 Frame Size</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
+                            <Button
+                              key={size}
+                              variant={filters.frameSize === size ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setFilters({ ...filters, frameSize: size })}
+                            >
+                              {size}
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">⚡ Electric</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {['Yes', 'No', 'Either'].map((option) => (
+                            <Button
+                              key={option}
+                              variant={filters.electric === option ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setFilters({ ...filters, electric: option })}
+                            >
+                              {option}
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Features */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">✨ Features</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Carbon Frame', 'Disc Brakes', 'Suspension', 'Lights', 'Lock Included', 'Basket', 'Rear Rack', 'Helmet Included'].map((feature) => (
+                          <Button
+                            key={feature}
+                            variant={filters.bicycleFeatures?.includes(feature) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              const features = filters.bicycleFeatures || [];
+                              const newFeatures = features.includes(feature)
+                                ? features.filter((f: string) => f !== feature)
+                                : [...features, feature];
+                              setFilters({ ...filters, bicycleFeatures: newFeatures });
+                            }}
+                          >
+                            {feature}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+
+              {category === 'yacht' && (
+                <>
+                  {/* Yacht Type */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">⛵ Yacht Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Motor Yacht', 'Sailing Yacht', 'Catamaran', 'Speedboat', 'Luxury Yacht', 'Sport Fishing', 'Houseboat'].map((type) => (
+                          <Button
+                            key={type}
+                            variant={filters.yachtType === type ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({ ...filters, yachtType: type })}
+                          >
+                            {type}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Length & Cabins */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">📐 Length (feet)</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {['<30', '30-50', '50-75', '75-100', '100+'].map((length) => (
+                            <Button
+                              key={length}
+                              variant={filters.yachtLength === length ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setFilters({ ...filters, yachtLength: length })}
+                            >
+                              {length}ft
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">🛏️ Cabins</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {['1', '2', '3', '4', '5+'].map((cabins) => (
+                            <Button
+                              key={cabins}
+                              variant={filters.cabins === cabins ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setFilters({ ...filters, cabins })}
+                            >
+                              {cabins}
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Year & Overnight */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">📅 Year</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Input
+                          type="number"
+                          placeholder="e.g., 2020"
+                          value={filters.yachtYear || ''}
+                          onChange={(e) => setFilters({ ...filters, yachtYear: e.target.value })}
+                        />
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">🌙 Overnight Capable</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {['Yes', 'No', 'Either'].map((option) => (
+                            <Button
+                              key={option}
+                              variant={filters.overnight === option ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => setFilters({ ...filters, overnight: option })}
+                            >
+                              {option}
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Features */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">✨ Features</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Captain Included', 'Crew Included', 'AC', 'WiFi', 'Jet Ski', 'Fishing Gear', 'Kitchen', 'BBQ', 'Diving Equipment', 'Water Sports'].map((feature) => (
+                          <Button
+                            key={feature}
+                            variant={filters.yachtFeatures?.includes(feature) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              const features = filters.yachtFeatures || [];
+                              const newFeatures = features.includes(feature)
+                                ? features.filter((f: string) => f !== feature)
+                                : [...features, feature];
+                              setFilters({ ...filters, yachtFeatures: newFeatures });
+                            }}
+                          >
+                            {feature}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
             </TabsContent>
 
             {/* LIFESTYLE TAB */}

@@ -54,6 +54,140 @@ const OCCUPATION_OPTIONS = [
   'Retired',
 ];
 
+const GENDER_OPTIONS = [
+  'Any Gender',
+  'Male',
+  'Female',
+  'Non-Binary',
+  'Prefer Not to Specify',
+];
+
+const NATIONALITY_OPTIONS = [
+  'Any Nationality',
+  'United States',
+  'Canada',
+  'Mexico',
+  'United Kingdom',
+  'Germany',
+  'France',
+  'Spain',
+  'Italy',
+  'Netherlands',
+  'Australia',
+  'Brazil',
+  'Argentina',
+  'Colombia',
+  'India',
+  'China',
+  'Japan',
+  'South Korea',
+  'Other',
+];
+
+const LANGUAGE_OPTIONS = [
+  'English',
+  'Spanish',
+  'French',
+  'German',
+  'Italian',
+  'Portuguese',
+  'Mandarin',
+  'Japanese',
+  'Korean',
+  'Arabic',
+  'Russian',
+  'Dutch',
+  'Other',
+];
+
+const RELATIONSHIP_STATUS_OPTIONS = [
+  'Any Status',
+  'Single',
+  'Couple',
+  'Family with Children',
+  'Group/Roommates',
+];
+
+const SMOKING_HABITS = [
+  'Any',
+  'Non-Smoker',
+  'Occasional Smoker',
+  'Regular Smoker',
+  'Vaper Only',
+];
+
+const DRINKING_HABITS = [
+  'Any',
+  'Non-Drinker',
+  'Social Drinker',
+  'Regular Drinker',
+];
+
+const CLEANLINESS_LEVELS = [
+  'Any',
+  'Very Clean',
+  'Clean',
+  'Average',
+  'Relaxed',
+];
+
+const NOISE_TOLERANCE = [
+  'Any',
+  'Very Quiet',
+  'Moderate',
+  'Flexible',
+  'Lively OK',
+];
+
+const WORK_SCHEDULES = [
+  'Any',
+  '9-5 Traditional',
+  'Night Shift',
+  'Remote Worker',
+  'Flexible Hours',
+  'Retired',
+  'Student',
+];
+
+const DIETARY_PREFERENCES = [
+  'No Preference',
+  'Omnivore',
+  'Vegetarian',
+  'Vegan',
+  'Pescatarian',
+  'Gluten-Free',
+  'Halal',
+  'Kosher',
+  'Other Dietary Needs',
+];
+
+const PERSONALITY_TRAITS = [
+  'Introvert',
+  'Extrovert',
+  'Ambivert',
+  'Early Bird',
+  'Night Owl',
+  'Highly Organized',
+  'Relaxed/Casual',
+  'Adventurous',
+  'Homebody',
+];
+
+const INTEREST_CATEGORIES = [
+  'Sports & Fitness',
+  'Arts & Culture',
+  'Food & Cooking',
+  'Travel',
+  'Technology & Gaming',
+  'Nature & Outdoors',
+  'Reading & Writing',
+  'Music & Concerts',
+  'Photography',
+  'Yoga & Meditation',
+  'Entrepreneurship',
+  'Volunteering',
+];
+
 export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilterDialogProps) {
   console.log('🎛️ OwnerClientFilterDialog rendered, open:', open);
   
@@ -77,6 +211,25 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
     min_monthly_income: undefined,
     preferred_occupations: [],
   });
+
+  // New demographic filter states
+  const [selectedGenders, setSelectedGenders] = useState<string[]>(['Any Gender']);
+  const [selectedNationalities, setSelectedNationalities] = useState<string[]>(['Any Nationality']);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedRelationshipStatus, setSelectedRelationshipStatus] = useState<string[]>(['Any Status']);
+  const [allowsChildren, setAllowsChildren] = useState<boolean | null>(null);
+
+  // Lifestyle habit filter states
+  const [smokingHabit, setSmokingHabit] = useState<string>('Any');
+  const [drinkingHabit, setDrinkingHabit] = useState<string>('Any');
+  const [cleanlinessLevel, setCleanlinessLevel] = useState<string>('Any');
+  const [noiseTolerance, setNoiseTolerance] = useState<string>('Any');
+  const [workSchedule, setWorkSchedule] = useState<string>('Any');
+
+  // Cultural and personality filter states
+  const [selectedDietaryPreferences, setSelectedDietaryPreferences] = useState<string[]>(['No Preference']);
+  const [selectedPersonalityTraits, setSelectedPersonalityTraits] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
   const [selectedListingTypes, setSelectedListingTypes] = useState<string[]>(['property']);
   const [selectedClientTypes, setSelectedClientTypes] = useState<string[]>(['tenant']);
@@ -345,6 +498,190 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
             </div>
           </div>
 
+          {/* Demographic Preferences Section */}
+          <div className="space-y-3 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200">
+            <Label className="text-base font-semibold text-orange-900">Demographic Preferences</Label>
+            <p className="text-sm text-orange-700">
+              These filters help match you with compatible clients. All selections are optional and used only for improving match quality.
+            </p>
+          </div>
+
+          {/* Gender Preference */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Gender Preference</Label>
+            <p className="text-sm text-muted-foreground">Select all genders you're open to working with</p>
+            <div className="flex flex-wrap gap-2">
+              {GENDER_OPTIONS.map((gender) => {
+                const isSelected = selectedGenders.includes(gender);
+                return (
+                  <Badge
+                    key={gender}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (gender === 'Any Gender') {
+                        setSelectedGenders(['Any Gender']);
+                      } else {
+                        const filtered = selectedGenders.filter(g => g !== 'Any Gender');
+                        if (isSelected) {
+                          const newSelection = filtered.filter(g => g !== gender);
+                          setSelectedGenders(newSelection.length === 0 ? ['Any Gender'] : newSelection);
+                        } else {
+                          setSelectedGenders([...filtered, gender]);
+                        }
+                      }
+                    }}
+                  >
+                    {gender}
+                    {isSelected && gender !== 'Any Gender' && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Nationality Preference */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Nationality Preference</Label>
+            <p className="text-sm text-muted-foreground">Select nationalities you prefer (optional, for cultural matching)</p>
+            <div className="flex flex-wrap gap-2">
+              {NATIONALITY_OPTIONS.map((nationality) => {
+                const isSelected = selectedNationalities.includes(nationality);
+                return (
+                  <Badge
+                    key={nationality}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (nationality === 'Any Nationality') {
+                        setSelectedNationalities(['Any Nationality']);
+                      } else {
+                        const filtered = selectedNationalities.filter(n => n !== 'Any Nationality');
+                        if (isSelected) {
+                          const newSelection = filtered.filter(n => n !== nationality);
+                          setSelectedNationalities(newSelection.length === 0 ? ['Any Nationality'] : newSelection);
+                        } else {
+                          setSelectedNationalities([...filtered, nationality]);
+                        }
+                      }
+                    }}
+                  >
+                    {nationality}
+                    {isSelected && nationality !== 'Any Nationality' && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Languages Spoken */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Languages Spoken</Label>
+            <p className="text-sm text-muted-foreground">Select languages your ideal client speaks</p>
+            <div className="flex flex-wrap gap-2">
+              {LANGUAGE_OPTIONS.map((language) => {
+                const isSelected = selectedLanguages.includes(language);
+                return (
+                  <Badge
+                    key={language}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedLanguages(selectedLanguages.filter(l => l !== language));
+                      } else {
+                        setSelectedLanguages([...selectedLanguages, language]);
+                      }
+                    }}
+                  >
+                    {language}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Relationship Status */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Relationship Status</Label>
+            <p className="text-sm text-muted-foreground">Who will be renting/buying?</p>
+            <div className="flex flex-wrap gap-2">
+              {RELATIONSHIP_STATUS_OPTIONS.map((status) => {
+                const isSelected = selectedRelationshipStatus.includes(status);
+                return (
+                  <Badge
+                    key={status}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (status === 'Any Status') {
+                        setSelectedRelationshipStatus(['Any Status']);
+                      } else {
+                        const filtered = selectedRelationshipStatus.filter(s => s !== 'Any Status');
+                        if (isSelected) {
+                          const newSelection = filtered.filter(s => s !== status);
+                          setSelectedRelationshipStatus(newSelection.length === 0 ? ['Any Status'] : newSelection);
+                        } else {
+                          setSelectedRelationshipStatus([...filtered, status]);
+                        }
+                      }
+                    }}
+                  >
+                    {status}
+                    {isSelected && status !== 'Any Status' && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Children */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Children</Label>
+            <p className="text-sm text-muted-foreground">Are you open to clients with children?</p>
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { value: null, label: 'No Preference' },
+                { value: true, label: 'Allows Children' },
+                { value: false, label: 'No Children' },
+              ].map((option) => (
+                <Button
+                  key={String(option.value)}
+                  variant={allowsChildren === option.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setAllowsChildren(option.value)}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           {/* Lifestyle Tags */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Compatible Lifestyles</Label>
@@ -399,9 +736,107 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
             </div>
           </div>
 
-          {/* Property Rules */}
+          {/* Lifestyle Habits Section */}
+          <div className="space-y-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <Label className="text-base font-semibold text-blue-900">Lifestyle Habits</Label>
+            <p className="text-sm text-blue-700">
+              Detailed preferences for client lifestyle and habits
+            </p>
+          </div>
+
+          {/* Smoking Habits */}
           <div className="space-y-3">
-            <Label className="text-base font-semibold">Property Rules</Label>
+            <Label className="text-base font-semibold">Smoking Habits</Label>
+            <p className="text-sm text-muted-foreground">What smoking habits are acceptable?</p>
+            <div className="flex flex-wrap gap-2">
+              {SMOKING_HABITS.map((habit) => (
+                <Button
+                  key={habit}
+                  variant={smokingHabit === habit ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSmokingHabit(habit)}
+                >
+                  {habit}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Drinking Habits */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Drinking Habits</Label>
+            <p className="text-sm text-muted-foreground">What drinking habits are acceptable?</p>
+            <div className="flex flex-wrap gap-2">
+              {DRINKING_HABITS.map((habit) => (
+                <Button
+                  key={habit}
+                  variant={drinkingHabit === habit ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setDrinkingHabit(habit)}
+                >
+                  {habit}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cleanliness Level */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Cleanliness Standard</Label>
+            <p className="text-sm text-muted-foreground">Expected cleanliness level</p>
+            <div className="flex flex-wrap gap-2">
+              {CLEANLINESS_LEVELS.map((level) => (
+                <Button
+                  key={level}
+                  variant={cleanlinessLevel === level ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCleanlinessLevel(level)}
+                >
+                  {level}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Noise Tolerance */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Noise Tolerance</Label>
+            <p className="text-sm text-muted-foreground">Acceptable noise level</p>
+            <div className="flex flex-wrap gap-2">
+              {NOISE_TOLERANCE.map((level) => (
+                <Button
+                  key={level}
+                  variant={noiseTolerance === level ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNoiseTolerance(level)}
+                >
+                  {level}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Work Schedule */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Work Schedule</Label>
+            <p className="text-sm text-muted-foreground">Preferred client work schedule</p>
+            <div className="flex flex-wrap gap-2">
+              {WORK_SCHEDULES.map((schedule) => (
+                <Button
+                  key={schedule}
+                  variant={workSchedule === schedule ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setWorkSchedule(schedule)}
+                >
+                  {schedule}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Property Rules (Kept for backward compatibility) */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Additional Property Rules</Label>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label htmlFor="allows-pets">Allows Pets</Label>
@@ -409,14 +844,6 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                   id="allows-pets"
                   checked={formData.allows_pets ?? true}
                   onCheckedChange={(checked) => setFormData({ ...formData, allows_pets: checked })}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="allows-smoking">Allows Smoking</Label>
-                <Switch
-                  id="allows-smoking"
-                  checked={formData.allows_smoking ?? false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, allows_smoking: checked })}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -461,6 +888,122 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
                   onChange={(e) => setFormData({ ...formData, min_monthly_income: Number(e.target.value) || undefined })}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Cultural & Personality Section */}
+          <div className="space-y-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+            <Label className="text-base font-semibold text-purple-900">Cultural & Personality</Label>
+            <p className="text-sm text-purple-700">
+              Match based on lifestyle preferences and personality compatibility
+            </p>
+          </div>
+
+          {/* Dietary Preferences */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Dietary Preferences</Label>
+            <p className="text-sm text-muted-foreground">Dietary needs or preferences to consider</p>
+            <div className="flex flex-wrap gap-2">
+              {DIETARY_PREFERENCES.map((diet) => {
+                const isSelected = selectedDietaryPreferences.includes(diet);
+                return (
+                  <Badge
+                    key={diet}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (diet === 'No Preference') {
+                        setSelectedDietaryPreferences(['No Preference']);
+                      } else {
+                        const filtered = selectedDietaryPreferences.filter(d => d !== 'No Preference');
+                        if (isSelected) {
+                          const newSelection = filtered.filter(d => d !== diet);
+                          setSelectedDietaryPreferences(newSelection.length === 0 ? ['No Preference'] : newSelection);
+                        } else {
+                          setSelectedDietaryPreferences([...filtered, diet]);
+                        }
+                      }
+                    }}
+                  >
+                    {diet}
+                    {isSelected && diet !== 'No Preference' && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Personality Traits */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Personality Traits</Label>
+            <p className="text-sm text-muted-foreground">Personality characteristics you prefer</p>
+            <div className="flex flex-wrap gap-2">
+              {PERSONALITY_TRAITS.map((trait) => {
+                const isSelected = selectedPersonalityTraits.includes(trait);
+                return (
+                  <Badge
+                    key={trait}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedPersonalityTraits(selectedPersonalityTraits.filter(t => t !== trait));
+                      } else {
+                        setSelectedPersonalityTraits([...selectedPersonalityTraits, trait]);
+                      }
+                    }}
+                  >
+                    {trait}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Interests & Hobbies */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Interests & Hobbies</Label>
+            <p className="text-sm text-muted-foreground">Common interests to share with clients</p>
+            <div className="flex flex-wrap gap-2">
+              {INTEREST_CATEGORIES.map((interest) => {
+                const isSelected = selectedInterests.includes(interest);
+                return (
+                  <Badge
+                    key={interest}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedInterests(selectedInterests.filter(i => i !== interest));
+                      } else {
+                        setSelectedInterests([...selectedInterests, interest]);
+                      }
+                    }}
+                  >
+                    {interest}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
         </div>
