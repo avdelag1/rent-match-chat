@@ -226,25 +226,32 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
             <Label className="text-base font-semibold">Looking For</Label>
             <p className="text-sm text-muted-foreground">What type of clients are you looking for?</p>
             <div className="flex flex-wrap gap-2">
-              {CLIENT_TYPE_OPTIONS.map((option) => (
-                <Badge
-                  key={option.value}
-                  variant={selectedClientTypes.includes(option.value) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
-                  onClick={() => {
-                    if (selectedClientTypes.includes(option.value)) {
-                      setSelectedClientTypes(selectedClientTypes.filter(t => t !== option.value));
-                    } else {
-                      setSelectedClientTypes([...selectedClientTypes, option.value]);
-                    }
-                  }}
-                >
-                  {option.label}
-                  {selectedClientTypes.includes(option.value) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
-                </Badge>
-              ))}
+              {CLIENT_TYPE_OPTIONS.map((option) => {
+                const isSelected = selectedClientTypes.includes(option.value);
+                return (
+                  <Badge
+                    key={option.value}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedClientTypes(selectedClientTypes.filter(t => t !== option.value));
+                      } else {
+                        setSelectedClientTypes([...selectedClientTypes, option.value]);
+                      }
+                    }}
+                  >
+                    {option.label}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 
@@ -253,25 +260,32 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
             <Label className="text-base font-semibold">Your Listings</Label>
             <p className="text-sm text-muted-foreground">What do you have available to rent/sell?</p>
             <div className="flex flex-wrap gap-2">
-              {LISTING_TYPE_OPTIONS.map((option) => (
-                <Badge
-                  key={option.value}
-                  variant={selectedListingTypes.includes(option.value) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
-                  onClick={() => {
-                    if (selectedListingTypes.includes(option.value)) {
-                      setSelectedListingTypes(selectedListingTypes.filter(t => t !== option.value));
-                    } else {
-                      setSelectedListingTypes([...selectedListingTypes, option.value]);
-                    }
-                  }}
-                >
-                  {option.label}
-                  {selectedListingTypes.includes(option.value) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
-                </Badge>
-              ))}
+              {LISTING_TYPE_OPTIONS.map((option) => {
+                const isSelected = selectedListingTypes.includes(option.value);
+                return (
+                  <Badge
+                    key={option.value}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedListingTypes(selectedListingTypes.filter(t => t !== option.value));
+                      } else {
+                        setSelectedListingTypes([...selectedListingTypes, option.value]);
+                      }
+                    }}
+                  >
+                    {option.label}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 
@@ -335,19 +349,26 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           <div className="space-y-3">
             <Label className="text-base font-semibold">Compatible Lifestyles</Label>
             <div className="flex flex-wrap gap-2">
-              {LIFESTYLE_OPTIONS.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant={(formData.compatible_lifestyle_tags || []).includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
-                  onClick={() => toggleLifestyleTag(tag)}
-                >
-                  {tag}
-                  {(formData.compatible_lifestyle_tags || []).includes(tag) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
-                </Badge>
-              ))}
+              {LIFESTYLE_OPTIONS.map((tag) => {
+                const isSelected = (formData.compatible_lifestyle_tags || []).includes(tag);
+                return (
+                  <Badge
+                    key={tag}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => toggleLifestyleTag(tag)}
+                  >
+                    {tag}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 
@@ -355,19 +376,26 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           <div className="space-y-3">
             <Label className="text-base font-semibold">Preferred Occupations</Label>
             <div className="flex flex-wrap gap-2">
-              {OCCUPATION_OPTIONS.map((occupation) => (
-                <Badge
-                  key={occupation}
-                  variant={(formData.preferred_occupations || []).includes(occupation) ? "default" : "outline"}
-                  className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4"
-                  onClick={() => toggleOccupation(occupation)}
-                >
-                  {occupation}
-                  {(formData.preferred_occupations || []).includes(occupation) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
-                </Badge>
-              ))}
+              {OCCUPATION_OPTIONS.map((occupation) => {
+                const isSelected = (formData.preferred_occupations || []).includes(occupation);
+                return (
+                  <Badge
+                    key={occupation}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => toggleOccupation(occupation)}
+                  >
+                    {occupation}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 

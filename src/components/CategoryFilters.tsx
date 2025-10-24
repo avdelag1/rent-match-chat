@@ -421,19 +421,26 @@ export function CategoryFilters({
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {items.map(item => (
-                        <Badge
-                          key={item}
-                          variant={(filters.lifestyleCategories || []).includes(item) ? "default" : "outline"}
-                          className="cursor-pointer hover:scale-105 transition-all"
-                          onClick={() => handleToggleArrayItem(filters.lifestyleCategories || [], item, 'lifestyleCategories')}
-                        >
-                          {item}
-                          {(filters.lifestyleCategories || []).includes(item) && (
-                            <X className="w-3 h-3 ml-1" />
-                          )}
-                        </Badge>
-                      ))}
+                      {items.map(item => {
+                        const isSelected = (filters.lifestyleCategories || []).includes(item);
+                        return (
+                          <Badge
+                            key={item}
+                            variant={isSelected ? "default" : "outline"}
+                            className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                              isSelected
+                                ? 'shadow-md'
+                                : 'hover:shadow-sm'
+                            }`}
+                            onClick={() => handleToggleArrayItem(filters.lifestyleCategories || [], item, 'lifestyleCategories')}
+                          >
+                            {item}
+                            {isSelected && (
+                              <X className="w-3 h-3 ml-1.5 opacity-90" />
+                            )}
+                          </Badge>
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -448,17 +455,24 @@ export function CategoryFilters({
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {AESTHETIC_PREFERENCES.map(style => (
-                      <Badge
-                        key={style}
-                        variant={(filters.aesthetic || []).includes(style) ? "default" : "outline"}
-                        className="cursor-pointer hover:scale-105 transition-all"
-                        onClick={() => handleToggleArrayItem(filters.aesthetic || [], style, 'aesthetic')}
-                      >
-                        {style}
-                        {(filters.aesthetic || []).includes(style) && <X className="w-3 h-3 ml-1" />}
-                      </Badge>
-                    ))}
+                    {AESTHETIC_PREFERENCES.map(style => {
+                      const isSelected = (filters.aesthetic || []).includes(style);
+                      return (
+                        <Badge
+                          key={style}
+                          variant={isSelected ? "default" : "outline"}
+                          className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                            isSelected
+                              ? 'shadow-md'
+                              : 'hover:shadow-sm'
+                          }`}
+                          onClick={() => handleToggleArrayItem(filters.aesthetic || [], style, 'aesthetic')}
+                        >
+                          {style}
+                          {isSelected && <X className="w-3 h-3 ml-1.5 opacity-90" />}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -469,17 +483,24 @@ export function CategoryFilters({
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {UNUSUAL_MUST_HAVES.map(feature => (
-                      <Badge
-                        key={feature}
-                        variant={(filters.unusualFeatures || []).includes(feature) ? "default" : "outline"}
-                        className="cursor-pointer hover:scale-105 transition-all"
-                        onClick={() => handleToggleArrayItem(filters.unusualFeatures || [], feature, 'unusualFeatures')}
-                      >
-                        {feature}
-                        {(filters.unusualFeatures || []).includes(feature) && <X className="w-3 h-3 ml-1" />}
-                      </Badge>
-                    ))}
+                    {UNUSUAL_MUST_HAVES.map(feature => {
+                      const isSelected = (filters.unusualFeatures || []).includes(feature);
+                      return (
+                        <Badge
+                          key={feature}
+                          variant={isSelected ? "default" : "outline"}
+                          className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                            isSelected
+                              ? 'shadow-md'
+                              : 'hover:shadow-sm'
+                          }`}
+                          onClick={() => handleToggleArrayItem(filters.unusualFeatures || [], feature, 'unusualFeatures')}
+                        >
+                          {feature}
+                          {isSelected && <X className="w-3 h-3 ml-1.5 opacity-90" />}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -490,17 +511,24 @@ export function CategoryFilters({
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {SOCIAL_PREFERENCES.map(pref => (
-                      <Badge
-                        key={pref}
-                        variant={(filters.socialStyle || []).includes(pref) ? "default" : "outline"}
-                        className="cursor-pointer hover:scale-105 transition-all"
-                        onClick={() => handleToggleArrayItem(filters.socialStyle || [], pref, 'socialStyle')}
-                      >
-                        {pref}
-                        {(filters.socialStyle || []).includes(pref) && <X className="w-3 h-3 ml-1" />}
-                      </Badge>
-                    ))}
+                    {SOCIAL_PREFERENCES.map(pref => {
+                      const isSelected = (filters.socialStyle || []).includes(pref);
+                      return (
+                        <Badge
+                          key={pref}
+                          variant={isSelected ? "default" : "outline"}
+                          className={`text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                            isSelected
+                              ? 'shadow-md'
+                              : 'hover:shadow-sm'
+                          }`}
+                          onClick={() => handleToggleArrayItem(filters.socialStyle || [], pref, 'socialStyle')}
+                        >
+                          {pref}
+                          {isSelected && <X className="w-3 h-3 ml-1.5 opacity-90" />}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
