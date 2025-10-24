@@ -46,7 +46,6 @@ const OwnerBicycleClientDiscovery = lazy(() => import("./pages/OwnerBicycleClien
 const OwnerYachtClientDiscovery = lazy(() => import("./pages/OwnerYachtClientDiscovery"));
 const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
 const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
-const TestPage = lazy(() => import("./pages/TestPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
