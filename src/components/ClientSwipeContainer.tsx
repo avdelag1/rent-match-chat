@@ -285,9 +285,9 @@ export function ClientSwipeContainer({
   const nextClient = clientProfiles[currentIndex + 1];
 
   return (
-    <div className="w-full h-full flex flex-col relative z-0">
+    <div className="w-full min-h-[calc(100vh-200px)] flex flex-col relative z-0 py-4">
       {/* Client Counter */}
-      <div className="text-center mb-2 z-20">
+      <div className="text-center mb-4 z-20">
         <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
           <span className="text-white text-sm font-medium">
             Showing {currentIndex + 1} of {clientProfiles.length}
@@ -353,7 +353,7 @@ export function ClientSwipeContainer({
       </AnimatePresence>
 
       {/* Cards Container with Fixed Height */}
-      <div className="flex-1 relative min-h-[600px] max-h-[700px] mx-auto max-w-md">
+      <div className="relative w-full h-[600px] sm:h-[700px] mx-auto max-w-md">
         
         <AnimatePresence>
           {nextClient && (
