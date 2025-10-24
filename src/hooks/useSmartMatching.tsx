@@ -541,6 +541,17 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         console.log(`🎯 FINAL: Returning ${filteredProfiles.length} client profiles to display`);
 
+        // DEBUG: Log first profile before transformation
+        if (filteredProfiles.length > 0) {
+          console.log('🔍 Sample profile BEFORE transformation:', {
+            full_name: filteredProfiles[0].full_name,
+            age: filteredProfiles[0].age,
+            images: filteredProfiles[0].images,
+            hasImages: !!filteredProfiles[0].images,
+            imagesLength: filteredProfiles[0].images?.length || 0
+          });
+        }
+
         // Calculate match scores for filtered profiles
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
           let matchPercentage = 70; // Base score
@@ -599,6 +610,19 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           .slice(0, 50);
 
         console.log('🎯 FINAL RESULT:', sortedClients.length, 'clients to show');
+
+        // DEBUG: Log first transformed client
+        if (sortedClients.length > 0) {
+          console.log('🔍 Sample client AFTER transformation:', {
+            name: sortedClients[0].name,
+            age: sortedClients[0].age,
+            profile_images: sortedClients[0].profile_images,
+            hasImages: !!sortedClients[0].profile_images,
+            imagesLength: sortedClients[0].profile_images?.length || 0,
+            firstImage: sortedClients[0].profile_images?.[0]
+          });
+        }
+
         return sortedClients;
       } catch (error) {
         console.error('❌ Error in smart client matching:', error);

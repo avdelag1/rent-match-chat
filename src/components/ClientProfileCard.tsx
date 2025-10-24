@@ -57,6 +57,17 @@ export function ClientProfileCard({
   const images = profile.profile_images || [];
   const hasMultipleImages = images.length > 1;
 
+  // DEBUG logging
+  console.log('🎴 ClientProfileCard rendering:', {
+    name: profile.name,
+    age: profile.age,
+    profile_images: profile.profile_images,
+    hasImages: !!profile.profile_images,
+    imagesCount: images.length,
+    firstImage: images[0],
+    isTop
+  });
+
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasMultipleImages) {
@@ -132,7 +143,7 @@ export function ClientProfileCard({
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
     >
-      <Card className="w-full max-h-[600px] sm:max-h-[700px] h-[85vh] bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="w-full h-full bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
 
       {/* Swipe Indicator */}
       {getSwipeIndicator()}

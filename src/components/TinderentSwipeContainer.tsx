@@ -279,7 +279,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full flex flex-col">
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
@@ -338,7 +338,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </AnimatePresence>
 
       {/* Full Screen Cards Container */}
-      <div className="flex-1 relative">
+      <div className="relative h-[650px] w-full mx-auto max-w-md">
         
         <AnimatePresence>
           {nextListing && (
