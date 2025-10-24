@@ -427,24 +427,9 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         console.log(`✅ Found ${profiles.length} active client profiles to display`);
 
-        // 🚨 EMERGENCY BYPASS: Force show all clients if debugging
-        const FORCE_SHOW_ALL = true; // Set to false once working
-        
         let filteredProfiles = profiles;
 
-        if (FORCE_SHOW_ALL) {
-          console.log('⚠️ EMERGENCY BYPASS ACTIVE: Showing ALL clients regardless of filters');
-          filteredProfiles = profiles.map(profile => ({
-            ...profile,
-            images: (profile.images && profile.images.length > 0) 
-              ? profile.images 
-              : ['/placeholder-avatar.svg'],
-            matchPercentage: 85,
-            matchReasons: ['Emergency bypass - all clients shown'],
-            incompatibleReasons: []
-          }));
-          console.log('🎯 EMERGENCY BYPASS: Returning', filteredProfiles.length, 'profiles');
-        } else if (ownerPrefs) {
+        if (ownerPrefs) {
           console.log('🔍 Applying owner filters...');
           filteredProfiles = profiles.filter(profile => {
             const reasons = [];
