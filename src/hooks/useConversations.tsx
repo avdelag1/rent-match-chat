@@ -129,12 +129,13 @@ export function useStartConversation() {
     }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      // Check if conversation already exists
-      const { data: existingConversation } = await supabase
+      // Check if conversation already exists (check both directions)
+      const { data: existingConversations } = await supabase
         .from('conversations')
         .select('id')
-        .or(`and(client_id.eq.${user.id},owner_id.eq.${otherUserId}),and(client_id.eq.${otherUserId},owner_id.eq.${user.id})`)
-        .maybeSingle();
+        .or(`and(client_id.eq.${user.id},owner_id.eq.${otherUserId}),and(client_id.eq.${otherUserId},owner_id.eq.${user.id})`);
+
+      const existingConversation = existingConversations?.[0];
 
       let conversationId = existingConversation?.id;
       
