@@ -250,6 +250,25 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
         min_monthly_income: preferences.min_monthly_income,
         preferred_occupations: preferences.preferred_occupations || [],
       });
+
+      // Load new demographic filter fields
+      if (preferences.selected_genders) setSelectedGenders(preferences.selected_genders);
+      if (preferences.selected_nationalities) setSelectedNationalities(preferences.selected_nationalities);
+      if (preferences.selected_languages) setSelectedLanguages(preferences.selected_languages);
+      if (preferences.selected_relationship_status) setSelectedRelationshipStatus(preferences.selected_relationship_status);
+      if (preferences.allows_children !== undefined) setAllowsChildren(preferences.allows_children);
+
+      // Load lifestyle habit filters
+      if (preferences.smoking_habit) setSmokingHabit(preferences.smoking_habit);
+      if (preferences.drinking_habit) setDrinkingHabit(preferences.drinking_habit);
+      if (preferences.cleanliness_level) setCleanlinessLevel(preferences.cleanliness_level);
+      if (preferences.noise_tolerance) setNoiseTolerance(preferences.noise_tolerance);
+      if (preferences.work_schedule) setWorkSchedule(preferences.work_schedule);
+
+      // Load cultural and personality filters
+      if (preferences.selected_dietary_preferences) setSelectedDietaryPreferences(preferences.selected_dietary_preferences);
+      if (preferences.selected_personality_traits) setSelectedPersonalityTraits(preferences.selected_personality_traits);
+      if (preferences.selected_interests) setSelectedInterests(preferences.selected_interests);
     }
   }, [preferences]);
 
@@ -284,10 +303,28 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
   };
 
   const handleSave = async () => {
-    await updatePreferences(formData);
+    // Combine all filter data including new demographic fields
+    const completePreferences = {
+      ...formData,
+      selected_genders: selectedGenders,
+      selected_nationalities: selectedNationalities,
+      selected_languages: selectedLanguages,
+      selected_relationship_status: selectedRelationshipStatus,
+      allows_children: allowsChildren,
+      smoking_habit: smokingHabit,
+      drinking_habit: drinkingHabit,
+      cleanliness_level: cleanlinessLevel,
+      noise_tolerance: noiseTolerance,
+      work_schedule: workSchedule,
+      selected_dietary_preferences: selectedDietaryPreferences,
+      selected_personality_traits: selectedPersonalityTraits,
+      selected_interests: selectedInterests,
+    };
+
+    await updatePreferences(completePreferences);
     toast({
       title: "Filters Applied",
-      description: "Client cards will refresh with your preferences.",
+      description: "Client cards will refresh with your comprehensive preferences.",
     });
     onOpenChange(false);
   };
@@ -297,11 +334,29 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
       return;
     }
 
+    // Combine all filter data including new demographic fields
+    const completePreferences = {
+      ...formData,
+      selected_genders: selectedGenders,
+      selected_nationalities: selectedNationalities,
+      selected_languages: selectedLanguages,
+      selected_relationship_status: selectedRelationshipStatus,
+      allows_children: allowsChildren,
+      smoking_habit: smokingHabit,
+      drinking_habit: drinkingHabit,
+      cleanliness_level: cleanlinessLevel,
+      noise_tolerance: noiseTolerance,
+      work_schedule: workSchedule,
+      selected_dietary_preferences: selectedDietaryPreferences,
+      selected_personality_traits: selectedPersonalityTraits,
+      selected_interests: selectedInterests,
+    };
+
     await saveFilter({
       name: filterName,
       category: 'client',
       mode: 'discovery',
-      filters: formData,
+      filters: completePreferences,
       listing_types: selectedListingTypes,
       client_types: selectedClientTypes,
       min_budget: formData.min_budget,
@@ -316,12 +371,26 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
       requires_employment_proof: formData.requires_employment_proof,
       requires_references: formData.requires_references,
       min_monthly_income: formData.min_monthly_income,
+      // New demographic fields
+      selected_genders: selectedGenders,
+      selected_nationalities: selectedNationalities,
+      selected_languages: selectedLanguages,
+      selected_relationship_status: selectedRelationshipStatus,
+      allows_children: allowsChildren,
+      smoking_habit: smokingHabit,
+      drinking_habit: drinkingHabit,
+      cleanliness_level: cleanlinessLevel,
+      noise_tolerance: noiseTolerance,
+      work_schedule: workSchedule,
+      selected_dietary_preferences: selectedDietaryPreferences,
+      selected_personality_traits: selectedPersonalityTraits,
+      selected_interests: selectedInterests,
     });
 
-    await updatePreferences(formData);
+    await updatePreferences(completePreferences);
     toast({
       title: "Filter Saved!",
-      description: `"${filterName}" saved successfully. Client cards will refresh.`,
+      description: `"${filterName}" saved successfully with comprehensive preferences.`,
     });
     setFilterName('');
     setShowSaveAs(false);
