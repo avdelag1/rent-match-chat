@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2, MoveVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { motion, Reorder } from 'framer-motion';
 import { cn } from '@/lib/utils';
