@@ -24,6 +24,7 @@ import OwnerClientSwipeDialog from '@/components/OwnerClientSwipeDialog'
 import { SupportDialog } from '@/components/SupportDialog'
 import { NotificationSystem } from '@/components/NotificationSystem'
 import { NotificationsDialog } from '@/components/NotificationsDialog'
+import { NotificationsDropdown } from '@/components/NotificationsDropdown'
 import { CategoryFilters } from '@/components/CategoryFilters'
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog'
 import { Button } from '@/components/ui/button'
@@ -239,7 +240,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           {/* Header with trigger - same gradient for both roles */}
           <header className="flex h-12 shrink-0 items-center gap-2 px-3 shadow-lg border-b sticky top-0 z-50 bg-gradient-to-r from-primary to-secondary">
             <TriggerComponent className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200 flex-shrink-0" />
-              
+
               {/* Brand Header with Profile Photo - only show for client */}
               {userRole === 'client' && (
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -250,7 +251,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
                     onPhotoUpdate={setProfilePhotoUrl}
                     className="flex-shrink-0"
                   />
-                  
+
                   <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-md flex-shrink-0 bg-white/20">
                     <Flame className="w-4 h-4 text-white" />
                   </div>
@@ -259,6 +260,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
                   </div>
                 </div>
               )}
+
+              {/* Notifications Dropdown - always visible */}
+              <div className="ml-auto">
+                <NotificationsDropdown />
+              </div>
             </header>
 
           <main className="flex-1 overflow-y-auto bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
