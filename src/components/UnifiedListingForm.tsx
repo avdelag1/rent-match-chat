@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, FileCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { CategorySelector, Category, Mode } from './CategorySelector';
 import { YachtListingForm, YachtFormData } from './YachtListingForm';
@@ -394,6 +395,33 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
                   Add Photos ({images.length}/10)
                 </Button>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Legal Documents Section */}
+          <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-400/30">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base">Legal Documents</CardTitle>
+                  {selectedCategory !== 'bicycle' && (
+                    <Badge variant="outline" className="bg-blue-500/20 border-blue-400 text-blue-300">
+                      Get Verified Badge
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                {selectedCategory === 'bicycle' 
+                  ? '📋 Optional: Upload purchase receipt to earn a blue verification checkmark'
+                  : '🛡️ Upload ownership documents to earn a blue verification star and build trust with clients'
+                }
+              </p>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground mb-3">
+                Note: You can upload documents now or after creating the listing.
+              </p>
             </CardContent>
           </Card>
 

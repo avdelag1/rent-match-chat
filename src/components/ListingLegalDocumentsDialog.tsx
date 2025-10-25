@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, File, Trash2, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
+import { Upload, File, Trash2, CheckCircle, Clock, XCircle, FileText, ShieldCheck } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useListingLegalDocuments } from "@/hooks/useListingLegalDocuments";
 
 interface LegalDocument {
   id: string;
@@ -24,9 +25,12 @@ interface LegalDocument {
   created_at: string;
 }
 
-interface LegalDocumentsDialogProps {
+interface ListingLegalDocumentsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  listingId?: string;
+  category: 'property' | 'yacht' | 'motorcycle' | 'bicycle';
+  onDocumentsUploaded?: (docs: LegalDocument[]) => void;
 }
 
 const documentTypes = [
@@ -56,30 +60,25 @@ const documentTypes = [
   { value: 'other', label: 'Other Legal Document', categories: ['property', 'yacht', 'motorcycle', 'bicycle'] }
 ];
 
-export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialogProps) {
+export function ListingLegalDocumentsDialog({ 
+  open, 
+  onOpenChange, 
+  listingId,
+  category,
+  onDocumentsUploaded 
+}: ListingLegalDocumentsDialogProps) {
   const [selectedDocumentType, setSelectedDocumentType] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  // Fetch user's legal documents
-  const { data: documents = [], isLoading, refetch } = useQuery({
-    queryKey: ['legal-documents'],
-    queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Not authenticated');
+  // Filter document types by category
+  const filteredDocumentTypes = documentTypes.filter(type => 
+    type.categories.includes(category)
+  );
 
-      const { data, error } = await supabase
-        .from('legal_documents' as any)
-        .select('*')
-        .eq('user_id', user.user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return ((data || []) as unknown) as LegalDocument[];
-    },
-    enabled: open
-  });
+  // Fetch documents for this listing
+  const { documents, hasVerifiedDocuments, hasPendingDocuments, isLoading } = useListingLegalDocuments(listingId);
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -98,11 +97,12 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
 
       if (uploadError) throw uploadError;
 
-      // Save document metadata
+      // Save document metadata with listing_id
       const { data, error: dbError } = await supabase
         .from('legal_documents' as any)
         .insert({
           user_id: user.user.id,
+          listing_id: listingId,
           file_name: file.name,
           file_path: filePath,
           file_size: file.size,
@@ -116,7 +116,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
       if (dbError) throw dbError;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Document Uploaded",
         description: "Your legal document has been uploaded successfully and is pending verification.",
@@ -125,7 +125,9 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['listing-legal-documents', listingId] });
+      queryClient.invalidateQueries({ queryKey: ['legal-documents'] });
+      onDocumentsUploaded?.([data as any]);
     },
     onError: (error) => {
       toast({
@@ -162,7 +164,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
         title: "Document Deleted",
         description: "The document has been removed successfully.",
       });
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['listing-legal-documents', listingId] });
     },
     onError: (error) => {
       toast({
@@ -243,17 +245,30 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
     }
   };
 
+  const getCategoryName = () => {
+    switch (category) {
+      case 'property': return 'Property';
+      case 'yacht': return 'Yacht';
+      case 'motorcycle': return 'Motorcycle';
+      case 'bicycle': return 'Bicycle';
+      default: return 'Listing';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 bg-white/10 backdrop-blur border border-white/20 text-white">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Legal Documents
+            <ShieldCheck className="w-5 h-5" />
+            Legal Documents for {getCategoryName()}
           </DialogTitle>
           <DialogDescription className="text-white/70">
-            Upload legal documents to verify your property ownership and build trust with potential tenants.
-            Supported formats: PDF, images (JPG, PNG, WEBP), Word documents. Maximum size: 20MB per file.
+            Upload ownership and legal documents to earn a verification badge. 
+            {category === 'bicycle' 
+              ? ' For bicycles, a purchase receipt is optional but earns you a verification checkmark.'
+              : ' Verified documents build trust and increase your listing visibility.'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -273,7 +288,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
                       <SelectValue placeholder="Select document type" />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-900 border-white/20 text-white">
-                      {documentTypes.map((type) => (
+                      {filteredDocumentTypes.map((type) => (
                         <SelectItem key={type.value} value={type.value} className="text-white hover:bg-white/10">
                           {type.label}
                         </SelectItem>
@@ -316,7 +331,15 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
           {/* Documents List */}
           <Card className="bg-white/5 border-white/20">
             <CardHeader>
-              <CardTitle className="text-white text-lg">Your Documents ({documents.length})</CardTitle>
+              <CardTitle className="text-white text-lg flex items-center gap-2">
+                Your Documents ({documents.length})
+                {hasVerifiedDocuments && (
+                  <Badge className="bg-blue-500/20 border-blue-400 text-blue-300 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3" />
+                    Verified
+                  </Badge>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -336,7 +359,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-white truncate">{doc.file_name}</p>
                           <div className="flex items-center gap-4 text-sm text-white/60">
-                            <span>{documentTypes.find(t => t.value === doc.document_type)?.label}</span>
+                            <span>{filteredDocumentTypes.find(t => t.value === doc.document_type)?.label}</span>
                             <span>{formatFileSize(doc.file_size)}</span>
                             <span>{new Date(doc.created_at).toLocaleDateString()}</span>
                           </div>
@@ -372,12 +395,13 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
                   <span className="text-blue-400 text-sm font-bold">i</span>
                 </div>
                 <div className="text-sm text-blue-200">
-                  <p className="font-medium mb-1">Document Verification Process</p>
+                  <p className="font-medium mb-1">Document Verification & Badge</p>
                   <ul className="space-y-1 text-blue-200/80">
                     <li>• Documents are reviewed within 24-48 hours</li>
-                    <li>• Verified documents increase tenant trust and booking rates</li>
-                    <li>• Keep documents current - update if they expire</li>
-                    <li>• All documents are stored securely and privately</li>
+                    <li>• Verified documents earn you a {category === 'bicycle' ? 'blue checkmark' : 'blue star badge'} on your listing</li>
+                    <li>• Verified listings get priority in search results</li>
+                    <li>• Clients are more likely to engage with verified listings</li>
+                    {category === 'bicycle' && <li>• For bicycles, documents are optional but recommended</li>}
                   </ul>
                 </div>
               </div>

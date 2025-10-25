@@ -6,7 +6,8 @@ import { Card } from '@/components/ui/card';
 import { 
   Flame, X, Star, MapPin, Bed, Bath, Square, Wifi, Car, 
   Camera, Eye, MessageCircle, ChevronLeft, ChevronRight,
-  Home, TreePine, Utensils, Dumbbell, Music, Palette, PawPrint
+  Home, TreePine, Utensils, Dumbbell, Music, Palette, PawPrint,
+  ShieldCheck, CheckCircle
 } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
@@ -216,9 +217,23 @@ export function EnhancedPropertyCard({
           <div className="flex justify-between items-end">
             {/* Left side - Title and Details */}
             <div className="flex-1 mr-4">
-              <h3 className="text-2xl font-bold text-foreground mb-1">
-                {listing.title}
-              </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-2xl font-bold text-foreground">
+                  {listing.title}
+                </h3>
+                {(listing as any).has_verified_documents && (
+                  <Badge className="bg-blue-500/20 border-blue-400 text-blue-300 flex items-center gap-1 px-2 py-0.5">
+                    {(listing as any).category === 'bicycle' ? (
+                      <CheckCircle className="w-3 h-3" />
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-3 h-3" />
+                        <span className="text-xs">Verified</span>
+                      </>
+                    )}
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center text-muted-foreground text-sm mb-2">
                 <MapPin className="w-4 h-4 mr-1" />
                 <span>{listing.neighborhood}, {listing.city}</span>

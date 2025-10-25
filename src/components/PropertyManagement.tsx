@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign, ShieldCheck, CheckCircle } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
@@ -272,9 +272,22 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
                     <Card key={listing.id} className="hover:shadow-lg transition-shadow bg-white/95 backdrop-blur-sm w-full">
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start gap-2">
-                          <CardTitle className="text-base sm:text-lg text-gray-900 truncate flex-1 min-w-0">
-                            {listing.title}
-                          </CardTitle>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <CardTitle className="text-base sm:text-lg text-gray-900 truncate">
+                              {listing.title}
+                            </CardTitle>
+                            {(listing as any).has_verified_documents && (
+                              (listing as any).category === 'bicycle' ? (
+                                <div title="Verified documents">
+                                  <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                </div>
+                              ) : (
+                                <div title="Verified documents">
+                                  <ShieldCheck className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                                </div>
+                              )
+                            )}
+                          </div>
                           <div className="flex-shrink-0 flex gap-2">
                             <Badge variant="outline" className="text-xs">
                               {listing.category === 'yacht' ? '⛵ Yacht' :
