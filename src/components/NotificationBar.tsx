@@ -42,7 +42,7 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [unreadNotifications.length, isExpanded]);
+  }, [hasUnread, isExpanded]);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {

@@ -14,8 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
-import { Upload, X, Plus } from 'lucide-react';
+import { Upload, X, Plus, Home, Bike, Ship, Bike as Motorcycle } from 'lucide-react';
 import { validateNoContactInfo } from '@/utils/contactInfoValidation';
+import { PropertyFields } from '@/components/listing-fields/PropertyFields';
+import { MotorcycleFields } from '@/components/listing-fields/MotorcycleFields';
+import { BicycleFields } from '@/components/listing-fields/BicycleFields';
+import { YachtFields } from '@/components/listing-fields/YachtFields';
 
 interface PropertyFormProps {
   isOpen: boolean;
@@ -80,10 +84,11 @@ const COMPREHENSIVE_AMENITIES = {
 
 const COMMON_AMENITIES = Object.values(COMPREHENSIVE_AMENITIES).flat();
 
-export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormProps) {
+export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory = 'property', initialMode = 'rent' }: PropertyFormProps) {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [currentCategory, setCurrentCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>(initialCategory);
   const queryClient = useQueryClient();
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<PropertyFormData>({
@@ -95,25 +100,37 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     }
   });
 
+  // Sync category with initialCategory
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentCategory(initialCategory);
+    }
+  }, [initialCategory, isOpen]);
+
   // Populate form when editing property
   useEffect(() => {
     if (editingProperty && isOpen) {
       // Store the ID separately
       setEditingId(editingProperty.id || null);
-      
+
+      // Set category from editing property
+      if (editingProperty.category) {
+        setCurrentCategory(editingProperty.category);
+      }
+
       // Set form values
       reset(editingProperty);
-      
+
       // Set amenities and images
       setSelectedAmenities(editingProperty.amenities || []);
       setImages(editingProperty.images || []);
-      
+
       // Set select values that need manual setting
       setValue('property_type', editingProperty.property_type);
-      setValue('listing_type', editingProperty.listing_type || 'rent');
+      setValue('listing_type', editingProperty.listing_type || initialMode);
       setValue('condition', editingProperty.condition);
       setValue('lease_terms', editingProperty.lease_terms);
-      
+
       // Set numeric fields with proper defaults for Select components
       if (editingProperty.beds !== undefined) {
         setValue('beds', editingProperty.beds);
@@ -127,17 +144,18 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     } else if (!editingProperty && isOpen) {
       // Reset for new property
       setEditingId(null);
+      setCurrentCategory(initialCategory);
       reset({
         furnished: false,
         pet_friendly: false,
         amenities: [],
         images: [],
-        listing_type: 'rent'
+        listing_type: initialMode
       });
       setSelectedAmenities([]);
       setImages([]);
     }
-  }, [editingProperty, isOpen, reset, setValue]);
+  }, [editingProperty, isOpen, reset, setValue, initialCategory, initialMode]);
 
   const propertyType = watch('property_type');
 
@@ -155,14 +173,14 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
       const propertyData: any = {
         title: data.title,
         property_type: data.property_type,
-        listing_type: data.listing_type || 'rent',
+        listing_type: data.listing_type || initialMode,
         price: Number(data.price),
         city: data.city,
         neighborhood: data.neighborhood || null,
         furnished: Boolean(data.furnished),
         pet_friendly: Boolean(data.pet_friendly),
-        category: 'property',
-        mode: data.listing_type || 'rent',
+        category: currentCategory, // Use dynamic category
+        mode: data.listing_type || initialMode,
         owner_id: user.user.id,
         amenities: selectedAmenities,
         images: images,
@@ -170,21 +188,104 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
         is_active: true
       };
 
-      // Add optional numeric fields only if they exist
-      if (data.beds !== undefined && data.beds !== null) {
-        propertyData.beds = Number(data.beds);
+      // Add category-specific fields from watch()
+      const formData = watch();
+
+      // Property-specific fields
+      if (currentCategory === 'property') {
+        if (formData.bedrooms !== undefined) propertyData.bedrooms = Number(formData.bedrooms);
+        if (formData.bathrooms !== undefined) propertyData.bathrooms = Number(formData.bathrooms);
+        if (formData.square_feet !== undefined) propertyData.square_feet = Number(formData.square_feet);
+        if (formData.floor_number !== undefined) propertyData.floor_number = Number(formData.floor_number);
+        if (formData.total_floors !== undefined) propertyData.total_floors = Number(formData.total_floors);
+        if (formData.is_furnished !== undefined) propertyData.is_furnished = Boolean(formData.is_furnished);
+        if (formData.has_balcony !== undefined) propertyData.has_balcony = Boolean(formData.has_balcony);
+        if (formData.has_parking !== undefined) propertyData.has_parking = Boolean(formData.has_parking);
+        if (formData.parking_spots !== undefined) propertyData.parking_spots = Number(formData.parking_spots);
+        if (formData.is_pet_friendly !== undefined) propertyData.is_pet_friendly = Boolean(formData.is_pet_friendly);
+        if (formData.has_elevator !== undefined) propertyData.has_elevator = Boolean(formData.has_elevator);
+        if (formData.has_security !== undefined) propertyData.has_security = Boolean(formData.has_security);
+        if (formData.property_subtype) propertyData.property_subtype = formData.property_subtype;
+        if (formData.view_type) propertyData.view_type = formData.view_type;
+        if (formData.orientation) propertyData.orientation = formData.orientation;
+        if (formData.year_built !== undefined) propertyData.year_built = Number(formData.year_built);
+        if (formData.last_renovated !== undefined) propertyData.last_renovated = Number(formData.last_renovated);
+
+        // Legacy fields for backward compatibility
+        if (data.beds !== undefined) propertyData.beds = Number(data.beds);
+        if (data.baths !== undefined) propertyData.baths = Number(data.baths);
+        if (data.square_footage !== undefined) propertyData.square_footage = Number(data.square_footage);
+        if (data.condition) propertyData.condition = data.condition;
+        if (data.lease_terms) propertyData.lease_terms = data.lease_terms;
       }
-      if (data.baths !== undefined && data.baths !== null) {
-        propertyData.baths = Number(data.baths);
+
+      // Motorcycle-specific fields
+      if (currentCategory === 'motorcycle') {
+        if (formData.vehicle_brand) propertyData.vehicle_brand = formData.vehicle_brand;
+        if (formData.vehicle_model) propertyData.vehicle_model = formData.vehicle_model;
+        if (formData.vehicle_year !== undefined) propertyData.vehicle_year = Number(formData.vehicle_year);
+        if (formData.vehicle_color) propertyData.vehicle_color = formData.vehicle_color;
+        if (formData.vehicle_condition) propertyData.vehicle_condition = formData.vehicle_condition;
+        if (formData.engine_size !== undefined) propertyData.engine_size = Number(formData.engine_size);
+        if (formData.motorcycle_type) propertyData.motorcycle_type = formData.motorcycle_type;
+        if (formData.transmission_type) propertyData.transmission_type = formData.transmission_type;
+        if (formData.mileage !== undefined) propertyData.mileage = Number(formData.mileage);
+        if (formData.fuel_type) propertyData.fuel_type = formData.fuel_type;
+        if (formData.has_abs !== undefined) propertyData.has_abs = Boolean(formData.has_abs);
+        if (formData.has_traction_control !== undefined) propertyData.has_traction_control = Boolean(formData.has_traction_control);
+        if (formData.has_heated_grips !== undefined) propertyData.has_heated_grips = Boolean(formData.has_heated_grips);
+        if (formData.has_luggage_rack !== undefined) propertyData.has_luggage_rack = Boolean(formData.has_luggage_rack);
+        if (formData.includes_helmet !== undefined) propertyData.includes_helmet = Boolean(formData.includes_helmet);
+        if (formData.includes_gear !== undefined) propertyData.includes_gear = Boolean(formData.includes_gear);
       }
-      if (data.square_footage !== undefined && data.square_footage !== null) {
-        propertyData.square_footage = Number(data.square_footage);
+
+      // Bicycle-specific fields
+      if (currentCategory === 'bicycle') {
+        if (formData.vehicle_brand) propertyData.vehicle_brand = formData.vehicle_brand;
+        if (formData.vehicle_model) propertyData.vehicle_model = formData.vehicle_model;
+        if (formData.vehicle_year !== undefined) propertyData.vehicle_year = Number(formData.vehicle_year);
+        if (formData.vehicle_color) propertyData.vehicle_color = formData.vehicle_color;
+        if (formData.vehicle_condition) propertyData.vehicle_condition = formData.vehicle_condition;
+        if (formData.bicycle_type) propertyData.bicycle_type = formData.bicycle_type;
+        if (formData.frame_size) propertyData.frame_size = formData.frame_size;
+        if (formData.frame_material) propertyData.frame_material = formData.frame_material;
+        if (formData.number_of_gears !== undefined) propertyData.number_of_gears = Number(formData.number_of_gears);
+        if (formData.is_electric_bike !== undefined) propertyData.is_electric_bike = Boolean(formData.is_electric_bike);
+        if (formData.battery_range !== undefined) propertyData.battery_range = Number(formData.battery_range);
+        if (formData.suspension_type) propertyData.suspension_type = formData.suspension_type;
+        if (formData.brake_type) propertyData.brake_type = formData.brake_type;
+        if (formData.wheel_size) propertyData.wheel_size = formData.wheel_size;
+        if (formData.includes_lock !== undefined) propertyData.includes_lock = Boolean(formData.includes_lock);
+        if (formData.includes_lights !== undefined) propertyData.includes_lights = Boolean(formData.includes_lights);
+        if (formData.includes_basket !== undefined) propertyData.includes_basket = Boolean(formData.includes_basket);
+        if (formData.includes_pump !== undefined) propertyData.includes_pump = Boolean(formData.includes_pump);
       }
-      if (data.condition) {
-        propertyData.condition = data.condition;
-      }
-      if (data.lease_terms) {
-        propertyData.lease_terms = data.lease_terms;
+
+      // Yacht-specific fields
+      if (currentCategory === 'yacht') {
+        if (formData.yacht_brand) propertyData.yacht_brand = formData.yacht_brand;
+        if (formData.vehicle_model) propertyData.vehicle_model = formData.vehicle_model;
+        if (formData.vehicle_year !== undefined) propertyData.vehicle_year = Number(formData.vehicle_year);
+        if (formData.yacht_type) propertyData.yacht_type = formData.yacht_type;
+        if (formData.hull_material) propertyData.hull_material = formData.hull_material;
+        if (formData.yacht_length !== undefined) propertyData.yacht_length = Number(formData.yacht_length);
+        if (formData.max_capacity !== undefined) propertyData.max_capacity = Number(formData.max_capacity);
+        if (formData.number_of_cabins !== undefined) propertyData.number_of_cabins = Number(formData.number_of_cabins);
+        if (formData.number_of_berths !== undefined) propertyData.number_of_berths = Number(formData.number_of_berths);
+        if (formData.number_of_heads !== undefined) propertyData.number_of_heads = Number(formData.number_of_heads);
+        if (formData.engine_hours !== undefined) propertyData.engine_hours = Number(formData.engine_hours);
+        if (formData.max_speed !== undefined) propertyData.max_speed = Number(formData.max_speed);
+        if (formData.cruising_speed !== undefined) propertyData.cruising_speed = Number(formData.cruising_speed);
+        if (formData.fuel_capacity !== undefined) propertyData.fuel_capacity = Number(formData.fuel_capacity);
+        if (formData.water_capacity !== undefined) propertyData.water_capacity = Number(formData.water_capacity);
+        if (formData.has_air_conditioning !== undefined) propertyData.has_air_conditioning = Boolean(formData.has_air_conditioning);
+        if (formData.has_generator !== undefined) propertyData.has_generator = Boolean(formData.has_generator);
+        if (formData.has_autopilot !== undefined) propertyData.has_autopilot = Boolean(formData.has_autopilot);
+        if (formData.has_gps !== undefined) propertyData.has_gps = Boolean(formData.has_gps);
+        if (formData.has_radar !== undefined) propertyData.has_radar = Boolean(formData.has_radar);
+        if (formData.includes_crew !== undefined) propertyData.includes_crew = Boolean(formData.includes_crew);
+        if (formData.includes_captain !== undefined) propertyData.includes_captain = Boolean(formData.includes_captain);
+        if (formData.includes_water_toys !== undefined) propertyData.includes_water_toys = Boolean(formData.includes_water_toys);
       }
 
       if (editingId) {
@@ -275,12 +376,18 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     );
   };
 
+  const getStorageBucket = () => {
+    // Use listing-images bucket for all categories (it's the general bucket)
+    return 'listing-images';
+  };
+
   const uploadImageToStorage = async (file: File, userId: string): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
+    const bucket = getStorageBucket();
+
     const { data, error } = await supabase.storage
-      .from('property-images')
+      .from(bucket)
       .upload(fileName, file);
 
     if (error) {
@@ -289,7 +396,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
     }
 
     const { data: { publicUrl } } = supabase.storage
-      .from('property-images')
+      .from(bucket)
       .getPublicUrl(fileName);
 
     return publicUrl;
@@ -371,26 +478,35 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
   const handleImageRemove = async (index: number) => {
     const imageUrl = images[index];
-    
+    const bucket = getStorageBucket();
+
     // If it's a Supabase storage URL, delete from storage
-    if (imageUrl.includes('property-images')) {
+    if (imageUrl.includes(bucket) || imageUrl.includes('property-images')) {
       try {
         const { data: user } = await supabase.auth.getUser();
         if (user.user) {
-          // Extract the file path from the URL
-          const urlParts = imageUrl.split('/property-images/');
-          if (urlParts.length > 1) {
-            const filePath = urlParts[1];
-            await supabase.storage
-              .from('property-images')
-              .remove([filePath]);
+          // Extract the file path from the URL - try both bucket names for backward compatibility
+          let filePath = '';
+          if (imageUrl.includes(`/${bucket}/`)) {
+            const urlParts = imageUrl.split(`/${bucket}/`);
+            if (urlParts.length > 1) filePath = urlParts[1];
+          } else if (imageUrl.includes('/property-images/')) {
+            const urlParts = imageUrl.split('/property-images/');
+            if (urlParts.length > 1) filePath = urlParts[1];
+          }
+
+          if (filePath) {
+            // Try to delete from current bucket first, then property-images for backward compatibility
+            await supabase.storage.from(bucket).remove([filePath]).catch(() =>
+              supabase.storage.from('property-images').remove([filePath])
+            );
           }
         }
       } catch (error) {
         console.error('Error deleting image from storage:', error);
       }
     }
-    
+
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -421,12 +537,22 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
 
   if (!isOpen) return null;
 
+  const getCategoryLabel = () => {
+    switch (currentCategory) {
+      case 'property': return 'Property';
+      case 'motorcycle': return 'Motorcycle';
+      case 'bicycle': return 'Bicycle';
+      case 'yacht': return 'Yacht';
+      default: return 'Listing';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle>
-            {editingId ? 'Edit Property' : 'List New Property'}
+            {editingId ? `Edit ${getCategoryLabel()}` : `List New ${getCategoryLabel()}`}
           </DialogTitle>
         </DialogHeader>
 
@@ -565,19 +691,24 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
             </CardContent>
           </Card>
 
-          {/* Property Details */}
+          {/* Price - Common for all categories */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Property Details</CardTitle>
+              <CardTitle className="text-lg">Pricing</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="price">Price (USD) *</Label>
+                  <Label htmlFor="price">
+                    Price (USD) * {currentCategory === 'property' && '(per month)'}
+                    {currentCategory === 'motorcycle' && '(per day)'}
+                    {currentCategory === 'bicycle' && '(per day)'}
+                    {currentCategory === 'yacht' && '(per day)'}
+                  </Label>
                   <Input
                     id="price"
                     type="number"
-                    {...register('price', { 
+                    {...register('price', {
                       required: 'Price is required',
                       valueAsNumber: true,
                       min: { value: 1, message: 'Price must be greater than 0' }
@@ -588,6 +719,51 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
                     <p className="text-sm text-red-500 mt-1">{errors.price.message}</p>
                   )}
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Category-Specific Details */}
+          {currentCategory === 'property' && (
+            <PropertyFields
+              register={register}
+              setValue={setValue}
+              watch={watch}
+            />
+          )}
+
+          {currentCategory === 'motorcycle' && (
+            <MotorcycleFields
+              register={register}
+              setValue={setValue}
+              watch={watch}
+            />
+          )}
+
+          {currentCategory === 'bicycle' && (
+            <BicycleFields
+              register={register}
+              setValue={setValue}
+              watch={watch}
+            />
+          )}
+
+          {currentCategory === 'yacht' && (
+            <YachtFields
+              register={register}
+              setValue={setValue}
+              watch={watch}
+            />
+          )}
+
+          {/* Legacy Property Details - Keep for backward compatibility but hide for non-property */}
+          {currentCategory === 'property' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Additional Property Details (Legacy)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
 
                 <div>
                   <Label htmlFor="beds">Bedrooms</Label>
@@ -696,8 +872,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
               </div>
             </CardContent>
           </Card>
+          )}
 
-          {/* Amenities */}
+          {/* Amenities - Property Only */}
+          {currentCategory === 'property' && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Amenities & Features</CardTitle>
@@ -722,6 +900,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty }: PropertyFormP
               ))}
             </CardContent>
           </Card>
+          )}
 
           {/* Images */}
           <Card>

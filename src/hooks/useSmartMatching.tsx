@@ -256,8 +256,8 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
   });
 }
 
-// Calculate match between owner preferences (from listing) and client profile
-function calculateClientMatch(listing: Listing, clientProfile: any): {
+// Calculate match between owner preferences and client profile
+function calculateClientMatch(ownerPrefs: any, clientProfile: any): {
   percentage: number;
   reasons: string[];
   incompatible: string[];
@@ -266,68 +266,230 @@ function calculateClientMatch(listing: Listing, clientProfile: any): {
   const matchedReasons = [];
   const incompatibleReasons = [];
 
-  // Budget compatibility (if client has income info)
-  if (clientProfile.budget_max && listing.price) {
+  // Budget compatibility
+  if (ownerPrefs.min_budget || ownerPrefs.max_budget) {
+    const budgetMax = clientProfile.budget_max ? Number(clientProfile.budget_max) : null;
+    const monthlyIncome = clientProfile.monthly_income ? Number(clientProfile.monthly_income) : null;
+    const clientBudget = budgetMax || monthlyIncome;
+
+    if (clientBudget) {
+      const budgetInRange = (!ownerPrefs.min_budget || clientBudget >= ownerPrefs.min_budget) &&
+                           (!ownerPrefs.max_budget || clientBudget <= ownerPrefs.max_budget);
+      criteria.push({
+        weight: 20,
+        matches: budgetInRange,
+        reason: `Budget $${clientBudget} in range`,
+        incompatibleReason: `Budget $${clientBudget} outside range`
+      });
+    }
+  }
+
+  // Gender matching
+  if (ownerPrefs.selected_genders?.length && !ownerPrefs.selected_genders.includes('Any Gender')) {
+    const genderMatch = clientProfile.gender && ownerPrefs.selected_genders.includes(clientProfile.gender);
     criteria.push({
-      weight: 25,
-      matches: clientProfile.budget_max >= listing.price,
-      reason: `Budget ${clientProfile.budget_max} covers rent ${listing.price}`,
-      incompatibleReason: `Budget ${clientProfile.budget_max} below rent ${listing.price}`
+      weight: 10,
+      matches: genderMatch,
+      reason: `Gender ${clientProfile.gender} matches preferences`,
+      incompatibleReason: `Gender ${clientProfile.gender} not in preferred list`
     });
   }
 
-  // Lifestyle compatibility
-  if (listing.lifestyle_compatible?.length && clientProfile.lifestyle_compatibility?.length) {
-    const matchingLifestyle = clientProfile.lifestyle_compatibility.filter((tag: string) => 
-      listing.lifestyle_compatible.includes(tag)
-    );
-    const lifestyleMatchRate = matchingLifestyle.length / listing.lifestyle_compatible.length;
-    
+  // Nationality matching
+  if (ownerPrefs.selected_nationalities?.length && !ownerPrefs.selected_nationalities.includes('Any Nationality')) {
+    const nationalityMatch = clientProfile.nationality && ownerPrefs.selected_nationalities.includes(clientProfile.nationality);
     criteria.push({
-      weight: 20,
-      matches: lifestyleMatchRate >= 0.3,
-      reason: `${matchingLifestyle.length} shared lifestyle interests`,
-      incompatibleReason: `Limited lifestyle compatibility`
+      weight: 8,
+      matches: nationalityMatch,
+      reason: `Nationality ${clientProfile.nationality} matches`,
+      incompatibleReason: `Nationality ${clientProfile.nationality} not preferred`
+    });
+  }
+
+  // Languages matching - client speaks at least one preferred language
+  if (ownerPrefs.selected_languages?.length && clientProfile.languages?.length) {
+    const sharedLanguages = clientProfile.languages.filter((lang: string) =>
+      ownerPrefs.selected_languages.includes(lang)
+    );
+    const hasLanguageMatch = sharedLanguages.length > 0;
+    criteria.push({
+      weight: 5,
+      matches: hasLanguageMatch,
+      reason: `Speaks ${sharedLanguages.join(', ')}`,
+      incompatibleReason: 'No shared languages'
+    });
+  }
+
+  // Relationship status matching
+  if (ownerPrefs.selected_relationship_status?.length && !ownerPrefs.selected_relationship_status.includes('Any Status')) {
+    const statusMatch = clientProfile.relationship_status &&
+                       ownerPrefs.selected_relationship_status.includes(clientProfile.relationship_status);
+    criteria.push({
+      weight: 10,
+      matches: statusMatch,
+      reason: `${clientProfile.relationship_status} matches preference`,
+      incompatibleReason: `${clientProfile.relationship_status} not preferred`
+    });
+  }
+
+  // Children compatibility
+  if (ownerPrefs.allows_children !== undefined && ownerPrefs.allows_children !== null) {
+    const childrenMatch = !clientProfile.has_children || ownerPrefs.allows_children;
+    criteria.push({
+      weight: 12,
+      matches: childrenMatch,
+      reason: ownerPrefs.allows_children ? 'Children welcome' : 'No children, no restrictions',
+      incompatibleReason: 'Has children but not allowed'
+    });
+  }
+
+  // Smoking habit matching
+  if (ownerPrefs.smoking_habit && ownerPrefs.smoking_habit !== 'Any') {
+    const smokingMatch = !clientProfile.smoking_habit ||
+                        clientProfile.smoking_habit === 'Non-Smoker' ||
+                        ownerPrefs.smoking_habit === clientProfile.smoking_habit;
+    criteria.push({
+      weight: 15,
+      matches: smokingMatch,
+      reason: `Smoking: ${clientProfile.smoking_habit || 'Non-Smoker'}`,
+      incompatibleReason: `Smoking habits incompatible`
+    });
+  }
+
+  // Drinking habit matching
+  if (ownerPrefs.drinking_habit && ownerPrefs.drinking_habit !== 'Any') {
+    const drinkingMatch = !clientProfile.drinking_habit ||
+                         clientProfile.drinking_habit === 'Non-Drinker' ||
+                         ownerPrefs.drinking_habit === clientProfile.drinking_habit;
+    criteria.push({
+      weight: 10,
+      matches: drinkingMatch,
+      reason: `Drinking: ${clientProfile.drinking_habit || 'Non-Drinker'}`,
+      incompatibleReason: `Drinking habits incompatible`
+    });
+  }
+
+  // Cleanliness level matching
+  if (ownerPrefs.cleanliness_level && ownerPrefs.cleanliness_level !== 'Any') {
+    const cleanlinessMatch = !clientProfile.cleanliness_level ||
+                            ownerPrefs.cleanliness_level === clientProfile.cleanliness_level;
+    criteria.push({
+      weight: 12,
+      matches: cleanlinessMatch,
+      reason: `Cleanliness: ${clientProfile.cleanliness_level || 'Standard'}`,
+      incompatibleReason: `Cleanliness standards don't match`
+    });
+  }
+
+  // Noise tolerance matching
+  if (ownerPrefs.noise_tolerance && ownerPrefs.noise_tolerance !== 'Any') {
+    const noiseMatch = !clientProfile.noise_tolerance ||
+                      ownerPrefs.noise_tolerance === clientProfile.noise_tolerance;
+    criteria.push({
+      weight: 8,
+      matches: noiseMatch,
+      reason: `Noise tolerance compatible`,
+      incompatibleReason: `Noise tolerance incompatible`
+    });
+  }
+
+  // Work schedule matching
+  if (ownerPrefs.work_schedule && ownerPrefs.work_schedule !== 'Any') {
+    const scheduleMatch = !clientProfile.work_schedule ||
+                         ownerPrefs.work_schedule === clientProfile.work_schedule;
+    criteria.push({
+      weight: 10,
+      matches: scheduleMatch,
+      reason: `Work schedule: ${clientProfile.work_schedule || 'Flexible'}`,
+      incompatibleReason: `Work schedules incompatible`
+    });
+  }
+
+  // Dietary preferences matching
+  if (ownerPrefs.selected_dietary_preferences?.length && clientProfile.dietary_preferences?.length) {
+    const sharedDiets = clientProfile.dietary_preferences.filter((diet: string) =>
+      ownerPrefs.selected_dietary_preferences.includes(diet)
+    );
+    const hasDietMatch = sharedDiets.length > 0;
+    criteria.push({
+      weight: 5,
+      matches: hasDietMatch,
+      reason: `Shared diets: ${sharedDiets.join(', ')}`,
+      incompatibleReason: 'No dietary compatibility'
+    });
+  }
+
+  // Personality traits matching
+  if (ownerPrefs.selected_personality_traits?.length && clientProfile.personality_traits?.length) {
+    const sharedTraits = clientProfile.personality_traits.filter((trait: string) =>
+      ownerPrefs.selected_personality_traits.includes(trait)
+    );
+    const matchRate = sharedTraits.length / ownerPrefs.selected_personality_traits.length;
+    criteria.push({
+      weight: 8,
+      matches: matchRate >= 0.3, // At least 30% trait overlap
+      reason: `${sharedTraits.length} shared personality traits`,
+      incompatibleReason: 'Personality traits don\'t align'
+    });
+  }
+
+  // Interests matching
+  if (ownerPrefs.selected_interests?.length && clientProfile.interest_categories?.length) {
+    const sharedInterests = clientProfile.interest_categories.filter((interest: string) =>
+      ownerPrefs.selected_interests.includes(interest)
+    );
+    const matchRate = sharedInterests.length / ownerPrefs.selected_interests.length;
+    criteria.push({
+      weight: 10,
+      matches: matchRate >= 0.2, // At least 20% interest overlap
+      reason: `${sharedInterests.length} shared interests`,
+      incompatibleReason: 'Few shared interests'
+    });
+  }
+
+  // Age range matching
+  if (ownerPrefs.min_age && ownerPrefs.max_age && clientProfile.age) {
+    const ageInRange = clientProfile.age >= ownerPrefs.min_age &&
+                      clientProfile.age <= ownerPrefs.max_age;
+    criteria.push({
+      weight: 10,
+      matches: ageInRange,
+      reason: `Age ${clientProfile.age} in range (${ownerPrefs.min_age}-${ownerPrefs.max_age})`,
+      incompatibleReason: `Age ${clientProfile.age} outside range`
     });
   }
 
   // Pet compatibility
-  if (listing.pet_friendly !== null && clientProfile.pet_ownership !== null) {
+  if (ownerPrefs.allows_pets !== undefined && ownerPrefs.allows_pets !== null) {
+    const petMatch = !clientProfile.has_pets || ownerPrefs.allows_pets;
     criteria.push({
-      weight: 15,
-      matches: !clientProfile.pet_ownership || listing.pet_friendly,
-      reason: listing.pet_friendly ? 'Pet-friendly property' : 'No pets, no restrictions',
-      incompatibleReason: 'Has pets but property not pet-friendly'
+      weight: 12,
+      matches: petMatch,
+      reason: ownerPrefs.allows_pets ? 'Pets allowed' : 'No pets, no issue',
+      incompatibleReason: 'Has pets but not allowed'
     });
   }
 
-  // Age appropriateness (if property has age preferences)
-  if (clientProfile.age) {
-    const ageAppropriate = clientProfile.age >= 18 && clientProfile.age <= 65;
+  // Lifestyle compatibility
+  if (ownerPrefs.compatible_lifestyle_tags?.length && clientProfile.lifestyle_tags?.length) {
+    const matchingLifestyle = clientProfile.lifestyle_tags.filter((tag: string) =>
+      ownerPrefs.compatible_lifestyle_tags.includes(tag)
+    );
+    const matchRate = matchingLifestyle.length / ownerPrefs.compatible_lifestyle_tags.length;
+    criteria.push({
+      weight: 15,
+      matches: matchRate >= 0.3,
+      reason: `${matchingLifestyle.length} shared lifestyle interests`,
+      incompatibleReason: 'Limited lifestyle compatibility'
+    });
+  }
+
+  // Verification status boost
+  if (clientProfile.verified || clientProfile.income_verification) {
     criteria.push({
       weight: 10,
-      matches: ageAppropriate,
-      reason: `Age ${clientProfile.age} appropriate for rental`,
-      incompatibleReason: `Age ${clientProfile.age} may not meet requirements`
-    });
-  }
-
-  // Verification status
-  if (clientProfile.income_verification || clientProfile.background_check_completed) {
-    criteria.push({
-      weight: 15,
       matches: true,
-      reason: 'Verified client profile',
-      incompatibleReason: ''
-    });
-  }
-
-  // Communication style match
-  if (clientProfile.communication_style) {
-    criteria.push({
-      weight: 15,
-      matches: true, // Assume all communication styles are acceptable
-      reason: `${clientProfile.communication_style} communication style`,
+      reason: 'Verified profile',
       incompatibleReason: ''
     });
   }
@@ -427,24 +589,9 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         console.log(`✅ Found ${profiles.length} active client profiles to display`);
 
-        // 🚨 EMERGENCY BYPASS: Force show all clients if debugging
-        const FORCE_SHOW_ALL = true; // Set to false once working
-        
         let filteredProfiles = profiles;
 
-        if (FORCE_SHOW_ALL) {
-          console.log('⚠️ EMERGENCY BYPASS ACTIVE: Showing ALL clients regardless of filters');
-          filteredProfiles = profiles.map(profile => ({
-            ...profile,
-            images: (profile.images && profile.images.length > 0) 
-              ? profile.images 
-              : ['/placeholder-avatar.svg'],
-            matchPercentage: 85,
-            matchReasons: ['Emergency bypass - all clients shown'],
-            incompatibleReasons: []
-          }));
-          console.log('🎯 EMERGENCY BYPASS: Returning', filteredProfiles.length, 'profiles');
-        } else if (ownerPrefs) {
+        if (ownerPrefs) {
           console.log('🔍 Applying owner filters...');
           filteredProfiles = profiles.filter(profile => {
             const reasons = [];
@@ -556,41 +703,30 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
         
         console.log(`🎯 FINAL: Returning ${filteredProfiles.length} client profiles to display`);
 
-        // Calculate match scores for filtered profiles
+        // DEBUG: Log first profile before transformation
+        if (filteredProfiles.length > 0) {
+          console.log('🔍 Sample profile BEFORE transformation:', {
+            full_name: filteredProfiles[0].full_name,
+            age: filteredProfiles[0].age,
+            images: filteredProfiles[0].images,
+            hasImages: !!filteredProfiles[0].images,
+            imagesLength: filteredProfiles[0].images?.length || 0
+          });
+        }
+
+        // Calculate match scores using comprehensive matching algorithm
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
-          let matchPercentage = 70; // Base score
-          const matchReasons = [];
-
-          if (ownerPrefs) {
-            // Bonus points for perfect matches
-            if (profile.age && ownerPrefs.min_age && ownerPrefs.max_age) {
-              const ageInRange = profile.age >= ownerPrefs.min_age && profile.age <= ownerPrefs.max_age;
-              if (ageInRange) {
-                matchPercentage += 10;
-                matchReasons.push(`Perfect age match (${profile.age})`);
-              }
-            }
-
-            if (ownerPrefs.compatible_lifestyle_tags?.length && profile.lifestyle_tags?.length) {
-              const matches = ownerPrefs.compatible_lifestyle_tags.filter(tag => 
-                profile.lifestyle_tags?.includes(tag)
-              );
-              matchPercentage += matches.length * 5;
-              matchReasons.push(`${matches.length} lifestyle matches`);
-            }
-
-            if (profile.verified) {
-              matchPercentage += 10;
-              matchReasons.push('Verified profile');
-            }
-          }
+          // Use the enhanced calculateClientMatch function
+          const match = ownerPrefs
+            ? calculateClientMatch(ownerPrefs, profile)
+            : { percentage: 70, reasons: ['No preferences set'], incompatible: [] };
 
           return {
             id: Math.floor(Math.random() * 1000000),
             user_id: profile.id,
             name: profile.full_name || 'Anonymous',
             age: profile.age || 0,
-            gender: '',
+            gender: profile.gender || '',
             interests: profile.interests || [],
             preferred_activities: profile.preferred_activities || [],
             location: profile.city ? { city: profile.city } : {},
@@ -599,9 +735,9 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
             preferred_listing_types: ['rent'],
             budget_min: profile.budget_min || 0,
             budget_max: profile.budget_max || 100000,
-            matchPercentage: Math.min(matchPercentage, 100),
-            matchReasons,
-            incompatibleReasons: [],
+            matchPercentage: match.percentage,
+            matchReasons: match.reasons,
+            incompatibleReasons: match.incompatible,
             city: profile.city || undefined,
             avatar_url: profile.avatar_url || undefined,
             verified: profile.verified || false
@@ -614,6 +750,19 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           .slice(0, 50);
 
         console.log('🎯 FINAL RESULT:', sortedClients.length, 'clients to show');
+
+        // DEBUG: Log first transformed client
+        if (sortedClients.length > 0) {
+          console.log('🔍 Sample client AFTER transformation:', {
+            name: sortedClients[0].name,
+            age: sortedClients[0].age,
+            profile_images: sortedClients[0].profile_images,
+            hasImages: !!sortedClients[0].profile_images,
+            imagesLength: sortedClients[0].profile_images?.length || 0,
+            firstImage: sortedClients[0].profile_images?.[0]
+          });
+        }
+
         return sortedClients;
       } catch (error) {
         console.error('❌ Error in smart client matching:', error);

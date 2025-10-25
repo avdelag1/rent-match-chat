@@ -194,15 +194,17 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
       </header>
 
       {/* Swipable Client Cards - Full Screen */}
-      <main className="pt-24 pb-4 px-2 sm:px-4 flex items-center justify-center min-h-screen max-w-2xl mx-auto">
-        <ClientSwipeContainer 
-          onClientTap={handleProfileTap}
-          onInsights={handleInsights}
-          onMessageClick={(clientId) => handleStartConversation(clientId)}
-          profiles={profiles}
-          isLoading={isLoading}
-          error={error}
-        />
+      <main className="pt-24 pb-20 px-2 sm:px-4 w-full max-w-2xl mx-auto">
+        <div className="w-full h-[700px] flex items-center justify-center">
+          <ClientSwipeContainer
+            onClientTap={handleProfileTap}
+            onInsights={handleInsights}
+            onMessageClick={(clientId) => handleStartConversation(clientId)}
+            profiles={profiles}
+            isLoading={isLoading}
+            error={error}
+          />
+        </div>
       </main>
 
       {/* Bottom Navigation */}

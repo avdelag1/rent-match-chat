@@ -19,6 +19,26 @@ export interface OwnerClientPreferences {
   min_monthly_income?: number;
   preferred_occupations?: string[];
   preferred_nationalities?: string[];
+
+  // New comprehensive demographic filters
+  selected_genders?: string[];
+  selected_nationalities?: string[];
+  selected_languages?: string[];
+  selected_relationship_status?: string[];
+  allows_children?: boolean | null;
+
+  // New lifestyle habit filters
+  smoking_habit?: string;
+  drinking_habit?: string;
+  cleanliness_level?: string;
+  noise_tolerance?: string;
+  work_schedule?: string;
+
+  // New cultural and personality filters
+  selected_dietary_preferences?: string[];
+  selected_personality_traits?: string[];
+  selected_interests?: string[];
+
   created_at?: string;
   updated_at?: string;
 }

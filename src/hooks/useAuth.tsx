@@ -30,34 +30,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { handleOAuthUserSetup: linkOAuthAccount, checkExistingAccount } = useAccountLinking();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let isInitialLoad = true;
+
+    // Check for existing session first to avoid race condition
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email || 'No session');
+      if (isInitialLoad) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    });
+
+    // Set up auth state listener for subsequent changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
+        isInitialLoad = false;
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
         // Handle OAuth users - setup role but DON'T redirect (Index.tsx handles redirects)
         if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            handleOAuthUserSetupOnly(session.user);
-          }, 100);
+          // Use Promise instead of setTimeout to avoid stale closure
+          handleOAuthUserSetupOnly(session.user).catch(err => {
+            console.error('OAuth setup failed:', err);
+          });
         }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email || 'No session');
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      // Don't redirect on initial load to avoid loops
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      isInitialLoad = false;
+      subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
