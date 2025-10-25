@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.reviews (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   reviewer_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   reviewed_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  property_id UUID REFERENCES public.properties(id) ON DELETE SET NULL,
+  listing_id UUID REFERENCES public.listings(id) ON DELETE SET NULL,
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
   review_text TEXT,
   review_type TEXT NOT NULL CHECK (review_type IN ('client_to_owner', 'owner_to_client', 'property')),
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.reviews (
 -- Create index for fast review lookups
 CREATE INDEX IF NOT EXISTS idx_reviews_reviewer ON public.reviews(reviewer_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_reviewed ON public.reviews(reviewed_id);
-CREATE INDEX IF NOT EXISTS idx_reviews_property ON public.reviews(property_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_listing ON public.reviews(listing_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_rating ON public.reviews(rating DESC);
 CREATE INDEX IF NOT EXISTS idx_reviews_created ON public.reviews(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_reviews_verified ON public.reviews(is_verified_stay) WHERE is_verified_stay = TRUE;

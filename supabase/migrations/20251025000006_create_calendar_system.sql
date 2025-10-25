@@ -4,7 +4,7 @@
 -- Create availability_slots table
 CREATE TABLE IF NOT EXISTS public.availability_slots (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  property_id UUID NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
+  listing_id UUID NOT NULL REFERENCES public.listings(id) ON DELETE CASCADE,
   owner_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
 
   -- Date and time
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS public.availability_slots (
   CHECK (end_date >= start_date)
 );
 
-CREATE INDEX IF NOT EXISTS idx_availability_property ON public.availability_slots(property_id, start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_availability_property ON public.availability_slots(listing_id, start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_availability_owner ON public.availability_slots(owner_id);
 CREATE INDEX IF NOT EXISTS idx_availability_dates ON public.availability_slots(start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_availability_available ON public.availability_slots(is_available) WHERE is_available = TRUE;
@@ -51,7 +51,7 @@ CREATE POLICY "Anyone can view available slots"
 -- Create viewing_requests table for scheduling property viewings
 CREATE TABLE IF NOT EXISTS public.viewing_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  property_id UUID NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
+  listing_id UUID NOT NULL REFERENCES public.listings(id) ON DELETE CASCADE,
   requester_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   owner_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
 
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS public.viewing_requests (
   completed_at TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS idx_viewing_property ON public.viewing_requests(property_id);
+CREATE INDEX IF NOT EXISTS idx_viewing_property ON public.viewing_requests(listing_id);
 CREATE INDEX IF NOT EXISTS idx_viewing_requester ON public.viewing_requests(requester_id);
 CREATE INDEX IF NOT EXISTS idx_viewing_owner ON public.viewing_requests(owner_id);
 CREATE INDEX IF NOT EXISTS idx_viewing_status ON public.viewing_requests(status);
@@ -101,8 +101,8 @@ CREATE POLICY "Clients can manage their viewing requests"
   USING (auth.uid() = requester_id)
   WITH CHECK (auth.uid() = requester_id);
 
--- Owners can view and respond to requests for their properties
-CREATE POLICY "Owners can manage viewing requests for their properties"
+-- Owners can view and respond to requests for their listings
+CREATE POLICY "Owners can manage viewing requests for their listings"
   ON public.viewing_requests
   FOR ALL
   USING (auth.uid() = owner_id)
@@ -110,7 +110,7 @@ CREATE POLICY "Owners can manage viewing requests for their properties"
 
 -- Function to check property availability for a date range
 CREATE OR REPLACE FUNCTION public.check_property_availability(
-  p_property_id UUID,
+  p_listing_id UUID,
   p_start_date DATE,
   p_end_date DATE
 )
@@ -123,7 +123,7 @@ BEGIN
   SELECT EXISTS (
     SELECT 1
     FROM public.availability_slots
-    WHERE property_id = p_property_id
+    WHERE listing_id = p_listing_id
       AND is_available = FALSE
       AND (
         (start_date <= p_start_date AND end_date >= p_start_date)
@@ -138,7 +138,7 @@ $$;
 
 -- Function to block dates
 CREATE OR REPLACE FUNCTION public.block_dates(
-  p_property_id UUID,
+  p_listing_id UUID,
   p_start_date DATE,
   p_end_date DATE,
   p_reason TEXT DEFAULT 'blocked',
@@ -154,8 +154,8 @@ DECLARE
 BEGIN
   -- Verify ownership
   SELECT owner_id INTO property_owner
-  FROM public.properties
-  WHERE id = p_property_id;
+  FROM public.listings
+  WHERE id = p_listing_id;
 
   IF property_owner != auth.uid() THEN
     RAISE EXCEPTION 'Unauthorized: You do not own this property';
@@ -163,7 +163,7 @@ BEGIN
 
   -- Insert blocked period
   INSERT INTO public.availability_slots (
-    property_id,
+    listing_id,
     owner_id,
     start_date,
     end_date,
@@ -172,7 +172,7 @@ BEGIN
     notes
   )
   VALUES (
-    p_property_id,
+    p_listing_id,
     auth.uid(),
     p_start_date,
     p_end_date,
@@ -188,7 +188,7 @@ $$;
 
 -- Function to request a viewing
 CREATE OR REPLACE FUNCTION public.request_viewing(
-  p_property_id UUID,
+  p_listing_id UUID,
   p_requested_date DATE,
   p_requested_time TIME DEFAULT NULL,
   p_message TEXT DEFAULT NULL,
@@ -205,8 +205,8 @@ DECLARE
 BEGIN
   -- Get property owner
   SELECT owner_id, title INTO property_owner, property_title
-  FROM public.properties
-  WHERE id = p_property_id;
+  FROM public.listings
+  WHERE id = p_listing_id;
 
   IF property_owner IS NULL THEN
     RAISE EXCEPTION 'Property not found';
@@ -214,7 +214,7 @@ BEGIN
 
   -- Create viewing request
   INSERT INTO public.viewing_requests (
-    property_id,
+    listing_id,
     requester_id,
     owner_id,
     requested_date,
@@ -223,7 +223,7 @@ BEGIN
     meeting_type
   )
   VALUES (
-    p_property_id,
+    p_listing_id,
     auth.uid(),
     property_owner,
     p_requested_date,
@@ -241,7 +241,7 @@ BEGIN
     p_message := 'Someone requested to view your property: ' || property_title,
     p_link_url := '/owner/viewing-requests/' || viewing_id::text,
     p_related_user_id := auth.uid(),
-    p_related_property_id := p_property_id
+    p_related_listing_id := p_listing_id
   );
 
   RETURN viewing_id;

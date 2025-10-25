@@ -1,43 +1,18 @@
 -- Migration: Enhance messaging system with attachments, read receipts, and typing indicators
 -- Improves messaging experience with file sharing and real-time presence
 
--- Check if messages table exists
-DO $$
-BEGIN
-  IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'messages') THEN
-
-    -- Add message enhancements
-    ALTER TABLE public.messages
-      ADD COLUMN IF NOT EXISTS has_attachment BOOLEAN DEFAULT FALSE,
-      ADD COLUMN IF NOT EXISTS attachment_url TEXT,
-      ADD COLUMN IF NOT EXISTS attachment_type TEXT CHECK (attachment_type IN ('image', 'pdf', 'document', 'other')),
-      ADD COLUMN IF NOT EXISTS attachment_name TEXT,
-      ADD COLUMN IF NOT EXISTS attachment_size INTEGER,
-      ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE,
-      ADD COLUMN IF NOT EXISTS read_at TIMESTAMPTZ,
-      ADD COLUMN IF NOT EXISTS is_delivered BOOLEAN DEFAULT FALSE,
-      ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ,
-      ADD COLUMN IF NOT EXISTS edited_at TIMESTAMPTZ,
-      ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE,
-      ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
-
-    -- Create indexes for messaging queries
-    CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON public.messages(conversation_id, created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_messages_sender ON public.messages(sender_id);
-    CREATE INDEX IF NOT EXISTS idx_messages_receiver ON public.messages(receiver_id);
-    CREATE INDEX IF NOT EXISTS idx_messages_unread ON public.messages(receiver_id, is_read) WHERE is_read = FALSE;
-    CREATE INDEX IF NOT EXISTS idx_messages_attachments ON public.messages(conversation_id) WHERE has_attachment = TRUE;
-
-    RAISE NOTICE 'Messages table enhanced successfully';
-  ELSE
-    RAISE NOTICE 'Messages table does not exist, skipping message enhancements';
-  END IF;
-END $$;
+-- Add enhancements to conversation_messages table (some fields already exist from core migration)
+ALTER TABLE public.conversation_messages
+  ADD COLUMN IF NOT EXISTS attachment_name TEXT,
+  ADD COLUMN IF NOT EXISTS attachment_size INTEGER,
+  ADD COLUMN IF NOT EXISTS edited_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
 
 -- Create typing indicators table
 CREATE TABLE IF NOT EXISTS public.typing_indicators (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  conversation_id UUID NOT NULL,
+  conversation_id UUID NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   is_typing BOOLEAN DEFAULT TRUE,
   started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -58,10 +33,9 @@ CREATE POLICY "Conversation participants can view typing indicators"
   FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM public.messages
-      WHERE messages.conversation_id = typing_indicators.conversation_id
-        AND (messages.sender_id = auth.uid() OR messages.receiver_id = auth.uid())
-      LIMIT 1
+      SELECT 1 FROM public.conversations
+      WHERE id = typing_indicators.conversation_id
+        AND (participant_1_id = auth.uid() OR participant_2_id = auth.uid())
     )
   );
 
@@ -101,7 +75,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_typing_user_conversation
 -- Create message attachments table for multiple attachments per message
 CREATE TABLE IF NOT EXISTS public.message_attachments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  message_id UUID NOT NULL,
+  message_id UUID NOT NULL REFERENCES public.conversation_messages(id) ON DELETE CASCADE,
   file_url TEXT NOT NULL,
   file_name TEXT NOT NULL,
   file_type TEXT NOT NULL,
@@ -123,9 +97,9 @@ CREATE POLICY "Users can view attachments in their conversations"
   FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM public.messages
-      WHERE messages.id = message_attachments.message_id
-        AND (messages.sender_id = auth.uid() OR messages.receiver_id = auth.uid())
+      SELECT 1 FROM public.conversation_messages
+      WHERE conversation_messages.id = message_attachments.message_id
+        AND (conversation_messages.sender_id = auth.uid() OR conversation_messages.receiver_id = auth.uid())
     )
   );
 
@@ -141,7 +115,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  UPDATE public.messages
+  UPDATE public.conversation_messages
   SET
     is_read = TRUE,
     read_at = NOW()
@@ -159,7 +133,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  UPDATE public.messages
+  UPDATE public.conversation_messages
   SET
     is_delivered = TRUE,
     delivered_at = NOW()
@@ -181,7 +155,7 @@ DECLARE
 BEGIN
   SELECT COUNT(*)
   INTO unread_count
-  FROM public.messages
+  FROM public.conversation_messages
   WHERE receiver_id = auth.uid() AND is_read = FALSE AND is_deleted = FALSE;
 
   RETURN unread_count;
@@ -227,16 +201,11 @@ BEGIN
 END;
 $$;
 
-DO $$
-BEGIN
-  IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'messages') THEN
-    DROP TRIGGER IF EXISTS trg_notify_new_message ON public.messages;
-    CREATE TRIGGER trg_notify_new_message
-      AFTER INSERT ON public.messages
-      FOR EACH ROW
-      EXECUTE FUNCTION public.notify_new_message();
-  END IF;
-END $$;
+DROP TRIGGER IF EXISTS trg_notify_new_message ON public.conversation_messages;
+CREATE TRIGGER trg_notify_new_message
+  AFTER INSERT ON public.conversation_messages
+  FOR EACH ROW
+  EXECUTE FUNCTION public.notify_new_message();
 
 -- Update response rate when messages are sent/read
 CREATE OR REPLACE FUNCTION public.update_response_metrics()
@@ -250,7 +219,7 @@ BEGIN
   -- Calculate average response time for the sender
   SELECT AVG(read_at - created_at)
   INTO avg_response_time
-  FROM public.messages
+  FROM public.conversation_messages
   WHERE sender_id = NEW.sender_id
     AND is_read = TRUE
     AND read_at IS NOT NULL;
@@ -259,7 +228,7 @@ BEGIN
   SELECT
     (COUNT(*) FILTER (WHERE is_read = TRUE)::NUMERIC / NULLIF(COUNT(*), 0)) * 100
   INTO response_rate_calc
-  FROM public.messages
+  FROM public.conversation_messages
   WHERE sender_id = NEW.sender_id;
 
   -- Update profile metrics
@@ -273,19 +242,14 @@ BEGIN
 END;
 $$;
 
-DO $$
-BEGIN
-  IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'messages') THEN
-    DROP TRIGGER IF EXISTS trg_update_response_metrics ON public.messages;
-    CREATE TRIGGER trg_update_response_metrics
-      AFTER UPDATE OF is_read ON public.messages
-      FOR EACH ROW
-      WHEN (NEW.is_read = TRUE AND OLD.is_read = FALSE)
-      EXECUTE FUNCTION public.update_response_metrics();
-  END IF;
-END $$;
+DROP TRIGGER IF EXISTS trg_update_response_metrics ON public.conversation_messages;
+CREATE TRIGGER trg_update_response_metrics
+  AFTER UPDATE OF is_read ON public.conversation_messages
+  FOR EACH ROW
+  WHEN (NEW.is_read = TRUE AND OLD.is_read = FALSE)
+  EXECUTE FUNCTION public.update_response_metrics();
 
 COMMENT ON TABLE public.typing_indicators IS 'Real-time typing indicators for conversations';
 COMMENT ON TABLE public.message_attachments IS 'File attachments for messages (documents, images, PDFs)';
-COMMENT ON COLUMN public.messages.is_read IS 'Message read status for read receipts';
-COMMENT ON COLUMN public.messages.is_delivered IS 'Message delivery status';
+COMMENT ON COLUMN public.conversation_messages.is_read IS 'Message read status for read receipts';
+COMMENT ON COLUMN public.conversation_messages.is_delivered IS 'Message delivery status';
