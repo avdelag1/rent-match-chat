@@ -75,14 +75,15 @@ export function LikedClients() {
             .select('role')
             .eq('user_id', profile.id)
             .maybeSingle();
-          
+
           return roleData?.role === 'client' ? profile : null;
         })
       );
 
       const filteredProfiles = clientProfiles.filter(p => p !== null);
 
-      return profiles.map(profile => {
+      // Return ONLY the filtered client profiles, not all profiles
+      return filteredProfiles.map(profile => {
         const like = likes.find(l => l.target_id === profile.id);
         return {
           id: profile.id,
