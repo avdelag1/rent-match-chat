@@ -5,6 +5,7 @@ import { Flame } from 'lucide-react'
 import AppSidebar from "@/components/AppSidebar"
 import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload"
 import { useAuth } from "@/hooks/useAuth"
+import { supabase } from '@/integrations/supabase/client'
 import { PropertyForm } from "@/components/PropertyForm"
 import { SubscriptionPackages } from "@/components/SubscriptionPackages"
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
@@ -25,6 +26,7 @@ import { SupportDialog } from '@/components/SupportDialog'
 import { NotificationSystem } from '@/components/NotificationSystem'
 import { NotificationsDialog } from '@/components/NotificationsDialog'
 import { NotificationsDropdown } from '@/components/NotificationsDropdown'
+import { OnboardingFlow } from '@/components/OnboardingFlow'
 import { CategoryFilters } from '@/components/CategoryFilters'
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog'
 import { Button } from '@/components/ui/button'
@@ -67,6 +69,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Notifications dialog
   const [showNotifications, setShowNotifications] = useState(false)
 
+  // Onboarding flow
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [onboardingChecked, setOnboardingChecked] = useState(false)
+
   // Category selection dialog
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
 
@@ -91,6 +97,37 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   if (profilesError) {
     console.error('DashboardLayout - Profiles error:', profilesError);
   }
+
+  // Check onboarding status and show flow if not completed
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!user?.id || onboardingChecked) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error checking onboarding status:', error);
+          return;
+        }
+
+        setOnboardingChecked(true);
+
+        // Show onboarding if not completed
+        if (!data?.onboarding_completed) {
+          setShowOnboarding(true);
+        }
+      } catch (error) {
+        console.error('Error in onboarding check:', error);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [user?.id, onboardingChecked]);
 
   // Auto-open property form when the URL hash matches any category
   useEffect(() => {
@@ -406,6 +443,17 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <NotificationsDialog
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
+      />
+
+      <OnboardingFlow
+        open={showOnboarding}
+        onComplete={() => {
+          setShowOnboarding(false);
+          toast({
+            title: 'Profile Complete!',
+            description: 'Welcome to TindeRent. Start exploring!',
+          });
+        }}
       />
 
       {userRole === 'client' && (
