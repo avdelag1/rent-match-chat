@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,19 +9,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, Bell, BellOff, Trash2, Edit, Plus, Search, AlertCircle } from 'lucide-react';
+import { Save, Bell, BellOff, Trash2, Edit, Plus, Search, AlertCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 
+interface SearchCriteria {
+  min_price: number | null;
+  max_price: number | null;
+  property_type: string | null;
+  category: 'property' | 'motorcycle' | 'bicycle' | 'yacht';
+  city: string | null;
+}
+
 interface SavedSearch {
   id: string;
   name: string;
   description: string | null;
-  search_criteria: any;
+  search_criteria: SearchCriteria;
   alerts_enabled: boolean;
   alert_frequency: 'instant' | 'daily' | 'weekly';
   match_count: number;
@@ -39,6 +49,12 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
   const [activeTab, setActiveTab] = useState('list');
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   // Form state for creating/editing
   const [searchName, setSearchName] = useState('');
@@ -46,37 +62,48 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [propertyType, setPropertyType] = useState('');
-  const [category, setCategory] = useState('property');
+  const [category, setCategory] = useState<'property' | 'motorcycle' | 'bicycle' | 'yacht'>('property');
   const [city, setCity] = useState('');
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [alertFrequency, setAlertFrequency] = useState<'instant' | 'daily' | 'weekly'>('instant');
+  const [priceError, setPriceError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open && user) {
-      fetchSavedSearches();
-    }
-  }, [open, user]);
+  const fetchSavedSearches = useCallback(async () => {
+    if (!user?.id) return;
 
-  const fetchSavedSearches = async () => {
+    setIsFetching(true);
+    setFetchError(null);
+
     try {
       const { data, error } = await supabase
         .from('saved_searches')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setSavedSearches(data || []);
     } catch (error: any) {
+      const errorMessage = error.message || 'Failed to load saved searches';
+      setFetchError(errorMessage);
       toast({
-        title: 'Error',
-        description: error.message,
+        title: 'Error Loading Searches',
+        description: errorMessage,
         variant: 'destructive',
       });
+    } finally {
+      setIsFetching(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (open && user) {
+      fetchSavedSearches();
+    }
+  }, [open, user, fetchSavedSearches]);
 
   const handleSaveSearch = async () => {
+    // Validate search name
     if (!searchName.trim()) {
       toast({
         title: 'Error',
@@ -86,11 +113,37 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
       return;
     }
 
+    // Validate price range
+    const minPriceNum = minPrice ? parseFloat(minPrice) : null;
+    const maxPriceNum = maxPrice ? parseFloat(maxPrice) : null;
+
+    if (minPriceNum !== null && maxPriceNum !== null && minPriceNum > maxPriceNum) {
+      setPriceError('Minimum price cannot be greater than maximum price');
+      toast({
+        title: 'Invalid Price Range',
+        description: 'Minimum price must be less than maximum price',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (minPriceNum !== null && minPriceNum < 0) {
+      setPriceError('Price cannot be negative');
+      return;
+    }
+
+    if (maxPriceNum !== null && maxPriceNum < 0) {
+      setPriceError('Price cannot be negative');
+      return;
+    }
+
+    setPriceError(null);
     setIsLoading(true);
+
     try {
-      const searchCriteria = {
-        min_price: minPrice ? parseFloat(minPrice) : null,
-        max_price: maxPrice ? parseFloat(maxPrice) : null,
+      const searchCriteria: SearchCriteria = {
+        min_price: minPriceNum,
+        max_price: maxPriceNum,
         property_type: propertyType || null,
         category: category,
         city: city || null,
@@ -158,20 +211,25 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
     }
   };
 
-  const handleDeleteSearch = async (searchId: string, searchName: string) => {
-    if (!confirm(`Are you sure you want to delete "${searchName}"?`)) return;
+  const handleDeleteClick = (searchId: string, searchName: string) => {
+    setDeleteTarget({ id: searchId, name: searchName });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
       const { error } = await supabase
         .from('saved_searches')
         .delete()
-        .eq('id', searchId);
+        .eq('id', deleteTarget.id);
 
       if (error) throw error;
 
       toast({
         title: 'Search Deleted',
-        description: `"${searchName}" has been removed.`,
+        description: `"${deleteTarget.name}" has been removed.`,
       });
 
       fetchSavedSearches();
@@ -181,6 +239,9 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
         description: error.message,
         variant: 'destructive',
       });
+    } finally {
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -205,7 +266,33 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
 
           <TabsContent value="list" className="mt-4">
             <ScrollArea className="h-[500px] pr-4">
-              {savedSearches.length === 0 ? (
+              {isFetching ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="bg-white/5 border-white/10">
+                      <CardHeader>
+                        <Skeleton className="h-6 w-3/4 bg-white/10" />
+                        <Skeleton className="h-4 w-1/2 bg-white/10" />
+                      </CardHeader>
+                      <CardContent>
+                        <Skeleton className="h-8 w-full bg-white/10" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : fetchError ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
+                  <p className="text-white/60 mb-4">{fetchError}</p>
+                  <Button
+                    onClick={fetchSavedSearches}
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              ) : savedSearches.length === 0 ? (
                 <div className="text-center py-12">
                   <Search className="w-16 h-16 mx-auto mb-4 text-white/30" />
                   <p className="text-white/60 mb-4">No saved searches yet</p>
@@ -252,7 +339,7 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => handleDeleteSearch(search.id, search.name)}
+                                onClick={() => handleDeleteClick(search.id, search.name)}
                                 className="text-white/70 hover:text-red-400"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -343,28 +430,44 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-white">Min Price</Label>
-                      <Input
-                        type="number"
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
-                        placeholder="$500"
-                        className="bg-white/5 border-white/20 text-white"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-white">Min Price</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={minPrice}
+                          onChange={(e) => {
+                            setMinPrice(e.target.value);
+                            setPriceError(null);
+                          }}
+                          placeholder="$500"
+                          className="bg-white/5 border-white/20 text-white"
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-white">Max Price</Label>
-                      <Input
-                        type="number"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                        placeholder="$2000"
-                        className="bg-white/5 border-white/20 text-white"
-                      />
+                      <div className="space-y-2">
+                        <Label className="text-white">Max Price</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={maxPrice}
+                          onChange={(e) => {
+                            setMaxPrice(e.target.value);
+                            setPriceError(null);
+                          }}
+                          placeholder="$2000"
+                          className="bg-white/5 border-white/20 text-white"
+                        />
+                      </div>
                     </div>
+                    {priceError && (
+                      <p className="text-sm text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {priceError}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -435,16 +538,49 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
               </Button>
               <Button
                 onClick={handleSaveSearch}
-                disabled={isLoading || !searchName.trim()}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                disabled={isLoading || !searchName.trim() || !!priceError}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:opacity-50"
               >
-                <Save className="w-4 h-4 mr-2" />
-                {isLoading ? 'Saving...' : 'Save Search'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Search
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-slate-900 border-white/10 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Saved Search?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60">
+              Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.
+              You will no longer receive alerts for this search.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
