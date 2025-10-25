@@ -1,4 +1,4 @@
-import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle, Filter, Bell, ChevronDown, ChevronUp } from "lucide-react"
+import { Home, Users, MessageSquare, Settings, User, LogOut, Building2, Flame, PlusCircle, Crown, FileText, HelpCircle, Filter, Bell, ChevronDown, ChevronUp, Bookmark } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -25,6 +25,12 @@ const clientMenuItems = [
     url: "#filters",
     icon: Filter,
     action: 'filters'
+  },
+  {
+    title: "Saved Searches",
+    url: "#saved-searches",
+    icon: Bookmark,
+    action: 'saved-searches'
   },
   {
     title: "Notifications",
@@ -215,6 +221,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
     } else if (item.action === 'notifications') {
       // Open notifications dialog
       if (onMenuItemClick) onMenuItemClick('notifications')
+    } else if (item.action === 'saved-searches') {
+      // Open saved searches dialog
+      if (onMenuItemClick) onMenuItemClick('saved-searches')
     } else {
       navigate(item.url)
       if (onMenuItemClick) onMenuItemClick('dashboard')

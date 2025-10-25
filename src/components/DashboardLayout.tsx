@@ -29,6 +29,7 @@ import { NotificationsDropdown } from '@/components/NotificationsDropdown'
 import { OnboardingFlow } from '@/components/OnboardingFlow'
 import { CategoryFilters } from '@/components/CategoryFilters'
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog'
+import { SavedSearchesDialog } from '@/components/SavedSearchesDialog'
 import { Button } from '@/components/ui/button'
 
 interface DashboardLayoutProps {
@@ -75,6 +76,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   // Category selection dialog
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
+
+  // Saved searches dialog
+  const [showSavedSearches, setShowSavedSearches] = useState(false)
 
   // Category and mode state for filters
   const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
@@ -226,6 +230,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         break
       case 'notifications':
         setShowNotifications(true)
+        break
+      case 'saved-searches':
+        setShowSavedSearches(true)
         break
       case 'settings':
         if (userRole === 'owner') {
@@ -457,14 +464,21 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {userRole === 'client' && (
-        <CategoryFilters
-          isOpen={showFilters}
-          onClose={() => setShowFilters(false)}
-          onApplyFilters={(filters) => {
-            console.log('Applied filters:', filters);
-            // TODO: Apply filters to listings
-          }}
-        />
+        <>
+          <CategoryFilters
+            isOpen={showFilters}
+            onClose={() => setShowFilters(false)}
+            onApplyFilters={(filters) => {
+              console.log('Applied filters:', filters);
+              // TODO: Apply filters to listings
+            }}
+          />
+
+          <SavedSearchesDialog
+            open={showSavedSearches}
+            onOpenChange={setShowSavedSearches}
+          />
+        </>
       )}
     </SidebarProvider>
   )
