@@ -130,9 +130,9 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
             >
               {/* Center button special styling */}
               {item.isCenter ? (
-                <div className="relative -top-4">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-4 shadow-lg shadow-orange-500/50 group-active:scale-95 transition-transform">
-                    <Icon className="h-6 w-6 text-white" />
+                <div className="relative -top-2">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-3 shadow-md shadow-orange-500/30 group-active:scale-95 transition-transform">
+                    <Icon className="h-5 w-5 text-white" />
                   </div>
                 </div>
               ) : (

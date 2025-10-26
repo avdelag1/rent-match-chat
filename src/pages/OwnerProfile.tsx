@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
-import { User, Mail, Calendar, MapPin, TrendingUp } from "lucide-react";
+import { User, Mail, Calendar, MapPin, TrendingUp, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const OwnerProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { data: stats, isLoading: statsLoading } = useOwnerStats();
 
   return (
@@ -75,12 +75,22 @@ const OwnerProfile = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    onClick={() => setShowEditDialog(true)}
-                    className="group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
-                  >
-                    <span className="group-hover:animate-pulse">Edit Profile</span>
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => setShowEditDialog(true)}
+                      className="flex-1 group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
+                    >
+                      <span className="group-hover:animate-pulse">Edit Profile</span>
+                    </Button>
+                    <Button
+                      onClick={signOut}
+                      variant="outline"
+                      className="gap-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transform transition-all duration-200 hover:scale-105 active:scale-95"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
