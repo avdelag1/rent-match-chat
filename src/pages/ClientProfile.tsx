@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useClientProfile } from "@/hooks/useClientProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const ClientProfile = () => {
@@ -12,6 +14,7 @@ const ClientProfile = () => {
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const { data: profile, isLoading } = useClientProfile();
+  const { signOut } = useAuth();
 
   // Auto-open dialog if no profile exists yet
   useEffect(() => {
@@ -125,12 +128,22 @@ const ClientProfile = () => {
                       </div>
                     </div>
 
-                    <Button 
-                      onClick={() => setShowEditDialog(true)}
-                      className="hidden sm:flex group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
-                    >
-                      <span className="group-hover:animate-pulse">Edit Profile</span>
-                    </Button>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => setShowEditDialog(true)}
+                        className="hidden sm:flex flex-1 group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
+                      >
+                        <span className="group-hover:animate-pulse">Edit Profile</span>
+                      </Button>
+                      <Button
+                        onClick={signOut}
+                        variant="outline"
+                        className="hidden sm:flex gap-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transform transition-all duration-200 hover:scale-105 active:scale-95"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -149,19 +162,28 @@ const ClientProfile = () => {
         </div>
       </motion.div>
 
-      {/* Sticky Mobile Edit Button */}
+      {/* Sticky Mobile Buttons */}
       <motion.div
-        className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-50"
+        className="sm:hidden fixed bottom-16 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-40"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.4 }}
       >
-        <Button 
-          onClick={() => setShowEditDialog(true)}
-          className="w-full h-14 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-lg shadow-lg transform transition-all duration-200 active:scale-95"
-        >
-          {profile ? '✏️ Edit Profile' : '➕ Create Profile'}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowEditDialog(true)}
+            className="flex-1 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold shadow-lg transform transition-all duration-200 active:scale-95"
+          >
+            {profile ? '✏️ Edit' : '➕ Create'}
+          </Button>
+          <Button
+            onClick={signOut}
+            variant="outline"
+            className="h-12 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-semibold shadow-lg transform transition-all duration-200 active:scale-95"
+          >
+            <LogOut className="w-5 h-5" />
+          </Button>
+        </div>
       </motion.div>
 
       <ClientProfileDialog 
