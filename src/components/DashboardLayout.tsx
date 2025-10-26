@@ -9,6 +9,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { FilterBottomSheet } from '@/components/FilterBottomSheet'
+import { SettingsBottomSheet } from '@/components/SettingsBottomSheet'
 
 // Dialogs and Forms
 import { PropertyForm } from "@/components/PropertyForm"
@@ -67,6 +68,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [onboardingChecked, setOnboardingChecked] = useState(false)
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
   const [showSavedSearches, setShowSavedSearches] = useState(false)
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false)
 
   // Category and mode state for filters
   const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
@@ -189,13 +191,26 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }
 
   const handleSettingsClick = () => {
-    if (userRole === 'owner') {
-      setShowOwnerSettings(true)
-    } else {
-      toast({
-        title: 'Settings',
-        description: 'Settings page coming soon! This will include your statistics and preferences.',
-      })
+    setShowSettingsMenu(true)
+  }
+
+  const handleMenuItemClick = (action: string) => {
+    switch (action) {
+      case 'saved-searches':
+        setShowSavedSearches(true)
+        break
+      case 'legal-documents':
+        setShowLegalDocuments(true)
+        break
+      case 'premium-packages':
+        setSubscriptionReason('Choose the perfect plan for your needs!')
+        setShowSubscriptionPackages(true)
+        break
+      case 'support':
+        setShowSupport(true)
+        break
+      default:
+        break
     }
   }
 
@@ -246,6 +261,14 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         onClose={() => setShowFilters(false)}
         onApply={handleApplyFilters}
         userRole={userRole}
+      />
+
+      {/* Settings/More Menu Bottom Sheet */}
+      <SettingsBottomSheet
+        isOpen={showSettingsMenu}
+        onClose={() => setShowSettingsMenu(false)}
+        userRole={userRole}
+        onMenuItemClick={handleMenuItemClick}
       />
 
       {/* All Dialogs/Modals */}
