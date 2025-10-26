@@ -19,16 +19,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface Notification {
   id: string;
-  notification_type: string;
-  title: string;
+  notification_type?: string;
+  type?: string;
+  title?: string;
   message: string;
-  link_url: string | null;
-  is_read: boolean;
+  link_url?: string | null;
+  is_read?: boolean;
+  read?: boolean;
   created_at: string;
-  related_user_id: string | null;
+  related_user_id?: string | null;
+  user_id?: string;
 }
 
-const NotificationIcon = ({ type }: { type: string }) => {
+const NotificationIcon = ({ type }: { type?: string }) => {
   const iconClass = 'w-4 h-4';
 
   switch (type) {
@@ -117,7 +120,7 @@ export function NotificationsDropdown() {
     if (!user) return;
 
     const { data, error } = await supabase
-      .from('notifications')
+      .from('notifications' as any)
       .select('*')
       .eq('user_id', user.id)
       .eq('is_archived', false)
@@ -125,8 +128,16 @@ export function NotificationsDropdown() {
       .limit(50);
 
     if (!error && data) {
-      setNotifications(data);
-      setUnreadCount(data.filter((n) => !n.is_read).length);
+      const notifications = (data as any[]).map(n => ({
+        ...n,
+        notification_type: n.notification_type || n.type || 'system',
+        is_read: n.is_read !== undefined ? n.is_read : n.read,
+        title: n.title || 'Notification',
+        link_url: n.link_url || null,
+        related_user_id: n.related_user_id || null,
+      })) as Notification[];
+      setNotifications(notifications);
+      setUnreadCount(notifications.filter((n) => !n.is_read).length);
     }
   };
 
@@ -134,7 +145,7 @@ export function NotificationsDropdown() {
     if (!user) return;
 
     const { count, error } = await supabase
-      .from('notifications')
+      .from('notifications' as any)
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('is_read', false)
@@ -148,12 +159,12 @@ export function NotificationsDropdown() {
   const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true, read_at: new Date().toISOString() })
+      .update({ read: true } as any)
       .eq('id', notificationId);
 
     if (!error) {
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true, read: true } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     }
@@ -164,12 +175,12 @@ export function NotificationsDropdown() {
 
     const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true, read_at: new Date().toISOString() })
+      .update({ read: true } as any)
       .eq('user_id', user.id)
-      .eq('is_read', false);
+      .eq('read', false);
 
     if (!error) {
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true, read: true })));
       setUnreadCount(0);
     }
   };
@@ -259,8 +270,8 @@ export function NotificationsDropdown() {
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
-                    <div className="flex-shrink-0 mt-1">
-                      <NotificationIcon type={notification.notification_type} />
+                     <div className="flex-shrink-0 mt-1">
+                      <NotificationIcon type={notification.notification_type || notification.type} />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -268,7 +279,7 @@ export function NotificationsDropdown() {
                         <p className={`text-sm font-medium line-clamp-1 ${
                           !notification.is_read ? 'text-foreground' : 'text-muted-foreground'
                         }`}>
-                          {notification.title}
+                          {notification.title || 'Notification'}
                         </p>
                         {!notification.is_read && (
                           <div className="flex-shrink-0 w-2 h-2 bg-primary rounded-full" />

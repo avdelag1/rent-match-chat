@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 
 interface OwnerDashboardProps {
   onClientInsights?: (profileId: string) => void;
@@ -158,18 +160,25 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 pb-20">
-      {/* Simple Header - Fixed at top */}
-      <header className="fixed top-0 left-0 right-0 z-10 bg-gradient-to-r from-orange-500 to-pink-500">
-        <div className="p-3 sm:p-4 flex justify-between items-center max-w-2xl mx-auto">
-          <Button
-            onClick={() => setShowFilters(true)}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20"
-          >
-            <SlidersHorizontal className="h-5 w-5" />
-          </Button>
+    <SidebarProvider>
+      <div className="min-h-screen w-full flex">
+        <AppSidebar userRole="owner" onMenuItemClick={handleMenuAction} />
+        
+        <div className="flex-1 min-h-screen w-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 pb-20">
+          {/* Simple Header - Fixed at top */}
+          <header className="fixed top-0 left-0 right-0 z-10 bg-gradient-to-r from-orange-500 to-pink-500">
+            <div className="p-3 sm:p-4 flex justify-between items-center max-w-2xl mx-auto">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="text-white hover:bg-white/20" />
+                <Button
+                  onClick={() => setShowFilters(true)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/20"
+                >
+                  <SlidersHorizontal className="h-5 w-5" />
+                </Button>
+              </div>
           <div className="text-center flex-1">
             <h1 className="text-white text-lg sm:text-xl font-bold">Find Clients</h1>
             {profiles.length > 0 && (
@@ -258,7 +267,9 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         onCategorySelect={handleCategorySelect}
       />
 
-    </div>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 

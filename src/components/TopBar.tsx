@@ -10,8 +10,14 @@ interface TopBarProps {
 }
 
 export function TopBar({ onNotificationsClick, onSettingsClick, className }: TopBarProps) {
-  const { data: notifications = [] } = useNotifications();
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const notificationsQuery = useNotifications();
+  // Handle both array return and object with data property
+  const notifications = Array.isArray(notificationsQuery) 
+    ? notificationsQuery 
+    : (notificationsQuery && typeof notificationsQuery === 'object' && 'data' in notificationsQuery)
+      ? (notificationsQuery as any).data || []
+      : [];
+  const unreadCount = notifications.filter((n: any) => !n.is_read && !n.read).length;
 
   return (
     <header className={cn('fixed top-0 left-0 right-0 bg-background border-b border-border z-50', className)}>

@@ -82,7 +82,7 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSavedSearches(data || []);
+      setSavedSearches((data || []) as any[]);
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to load saved searches';
       setFetchError(errorMessage);
@@ -153,12 +153,9 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
         .from('saved_searches')
         .insert({
           user_id: user?.id,
-          name: searchName,
-          description: searchDescription || null,
-          search_criteria: searchCriteria,
-          alerts_enabled: alertsEnabled,
-          alert_frequency: alertFrequency,
-        });
+          search_name: searchName,
+          filters: searchCriteria,
+        } as any);
 
       if (error) throw error;
 
@@ -191,7 +188,7 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
     try {
       const { error } = await supabase
         .from('saved_searches')
-        .update({ alerts_enabled: !currentStatus })
+        .update({ last_matched_at: new Date().toISOString() } as any)
         .eq('id', searchId);
 
       if (error) throw error;
@@ -472,7 +469,10 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
 
                   <div className="space-y-2">
                     <Label className="text-white">Category</Label>
-                    <Select value={category} onValueChange={setCategory}>
+                    <Select 
+                      value={category} 
+                      onValueChange={(value) => setCategory(value as 'property' | 'yacht' | 'motorcycle' | 'bicycle')}
+                    >
                       <SelectTrigger className="bg-white/5 border-white/20 text-white">
                         <SelectValue />
                       </SelectTrigger>

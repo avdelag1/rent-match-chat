@@ -191,25 +191,26 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       // Add category-specific fields from watch()
       const formData = watch();
 
-      // Property-specific fields
+      // Property-specific fields with type assertion
       if (currentCategory === 'property') {
-        if (formData.bedrooms !== undefined) propertyData.bedrooms = Number(formData.bedrooms);
-        if (formData.bathrooms !== undefined) propertyData.bathrooms = Number(formData.bathrooms);
-        if (formData.square_feet !== undefined) propertyData.square_feet = Number(formData.square_feet);
-        if (formData.floor_number !== undefined) propertyData.floor_number = Number(formData.floor_number);
-        if (formData.total_floors !== undefined) propertyData.total_floors = Number(formData.total_floors);
-        if (formData.is_furnished !== undefined) propertyData.is_furnished = Boolean(formData.is_furnished);
-        if (formData.has_balcony !== undefined) propertyData.has_balcony = Boolean(formData.has_balcony);
-        if (formData.has_parking !== undefined) propertyData.has_parking = Boolean(formData.has_parking);
-        if (formData.parking_spots !== undefined) propertyData.parking_spots = Number(formData.parking_spots);
-        if (formData.is_pet_friendly !== undefined) propertyData.is_pet_friendly = Boolean(formData.is_pet_friendly);
-        if (formData.has_elevator !== undefined) propertyData.has_elevator = Boolean(formData.has_elevator);
-        if (formData.has_security !== undefined) propertyData.has_security = Boolean(formData.has_security);
-        if (formData.property_subtype) propertyData.property_subtype = formData.property_subtype;
-        if (formData.view_type) propertyData.view_type = formData.view_type;
-        if (formData.orientation) propertyData.orientation = formData.orientation;
-        if (formData.year_built !== undefined) propertyData.year_built = Number(formData.year_built);
-        if (formData.last_renovated !== undefined) propertyData.last_renovated = Number(formData.last_renovated);
+        const formDataAny = formData as any;
+        if (formDataAny.bedrooms !== undefined) propertyData.bedrooms = Number(formDataAny.bedrooms);
+        if (formDataAny.bathrooms !== undefined) propertyData.bathrooms = Number(formDataAny.bathrooms);
+        if (formDataAny.square_feet !== undefined) propertyData.square_feet = Number(formDataAny.square_feet);
+        if (formDataAny.floor_number !== undefined) propertyData.floor_number = Number(formDataAny.floor_number);
+        if (formDataAny.total_floors !== undefined) propertyData.total_floors = Number(formDataAny.total_floors);
+        if (formDataAny.furnished !== undefined) propertyData.is_furnished = Boolean(formDataAny.furnished);
+        if (formDataAny.has_balcony !== undefined) propertyData.has_balcony = Boolean(formDataAny.has_balcony);
+        if (formDataAny.has_parking !== undefined) propertyData.has_parking = Boolean(formDataAny.has_parking);
+        if (formDataAny.parking_spots !== undefined) propertyData.parking_spots = Number(formDataAny.parking_spots);
+        if (formDataAny.pet_friendly !== undefined) propertyData.is_pet_friendly = Boolean(formDataAny.pet_friendly);
+        if (formDataAny.has_elevator !== undefined) propertyData.has_elevator = Boolean(formDataAny.has_elevator);
+        if (formDataAny.has_security !== undefined) propertyData.has_security = Boolean(formDataAny.has_security);
+        if (formDataAny.property_type) propertyData.property_subtype = formDataAny.property_type;
+        if (formDataAny.view_type) propertyData.view_type = formDataAny.view_type;
+        if (formDataAny.orientation) propertyData.orientation = formDataAny.orientation;
+        if (formDataAny.year_built !== undefined) propertyData.year_built = Number(formDataAny.year_built);
+        if (formDataAny.last_renovated !== undefined) propertyData.last_renovated = Number(formDataAny.last_renovated);
 
         // Legacy fields for backward compatibility
         if (data.beds !== undefined) propertyData.beds = Number(data.beds);
@@ -219,73 +220,76 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
         if (data.lease_terms) propertyData.lease_terms = data.lease_terms;
       }
 
-      // Motorcycle-specific fields
+      // Motorcycle-specific fields with type assertion
       if (currentCategory === 'motorcycle') {
-        if (formData.vehicle_brand) propertyData.vehicle_brand = formData.vehicle_brand;
-        if (formData.vehicle_model) propertyData.vehicle_model = formData.vehicle_model;
-        if (formData.vehicle_year !== undefined) propertyData.vehicle_year = Number(formData.vehicle_year);
-        if (formData.vehicle_color) propertyData.vehicle_color = formData.vehicle_color;
-        if (formData.vehicle_condition) propertyData.vehicle_condition = formData.vehicle_condition;
-        if (formData.engine_size !== undefined) propertyData.engine_size = Number(formData.engine_size);
-        if (formData.motorcycle_type) propertyData.motorcycle_type = formData.motorcycle_type;
-        if (formData.transmission_type) propertyData.transmission_type = formData.transmission_type;
-        if (formData.mileage !== undefined) propertyData.mileage = Number(formData.mileage);
-        if (formData.fuel_type) propertyData.fuel_type = formData.fuel_type;
-        if (formData.has_abs !== undefined) propertyData.has_abs = Boolean(formData.has_abs);
-        if (formData.has_traction_control !== undefined) propertyData.has_traction_control = Boolean(formData.has_traction_control);
-        if (formData.has_heated_grips !== undefined) propertyData.has_heated_grips = Boolean(formData.has_heated_grips);
-        if (formData.has_luggage_rack !== undefined) propertyData.has_luggage_rack = Boolean(formData.has_luggage_rack);
-        if (formData.includes_helmet !== undefined) propertyData.includes_helmet = Boolean(formData.includes_helmet);
-        if (formData.includes_gear !== undefined) propertyData.includes_gear = Boolean(formData.includes_gear);
+        const formDataAny = formData as any;
+        if (formDataAny.vehicle_brand) propertyData.vehicle_brand = formDataAny.vehicle_brand;
+        if (formDataAny.vehicle_model) propertyData.vehicle_model = formDataAny.vehicle_model;
+        if (formDataAny.vehicle_year !== undefined) propertyData.vehicle_year = Number(formDataAny.vehicle_year);
+        if (formDataAny.vehicle_color) propertyData.vehicle_color = formDataAny.vehicle_color;
+        if (formDataAny.vehicle_condition) propertyData.vehicle_condition = formDataAny.vehicle_condition;
+        if (formDataAny.engine_size !== undefined) propertyData.engine_size = Number(formDataAny.engine_size);
+        if (formDataAny.motorcycle_type) propertyData.motorcycle_type = formDataAny.motorcycle_type;
+        if (formDataAny.transmission_type) propertyData.transmission_type = formDataAny.transmission_type;
+        if (formDataAny.mileage !== undefined) propertyData.mileage = Number(formDataAny.mileage);
+        if (formDataAny.fuel_type) propertyData.fuel_type = formDataAny.fuel_type;
+        if (formDataAny.has_abs !== undefined) propertyData.has_abs = Boolean(formDataAny.has_abs);
+        if (formDataAny.has_traction_control !== undefined) propertyData.has_traction_control = Boolean(formDataAny.has_traction_control);
+        if (formDataAny.has_heated_grips !== undefined) propertyData.has_heated_grips = Boolean(formDataAny.has_heated_grips);
+        if (formDataAny.has_luggage_rack !== undefined) propertyData.has_luggage_rack = Boolean(formDataAny.has_luggage_rack);
+        if (formDataAny.includes_helmet !== undefined) propertyData.includes_helmet = Boolean(formDataAny.includes_helmet);
+        if (formDataAny.includes_gear !== undefined) propertyData.includes_gear = Boolean(formDataAny.includes_gear);
       }
 
-      // Bicycle-specific fields
+      // Bicycle-specific fields with type assertion
       if (currentCategory === 'bicycle') {
-        if (formData.vehicle_brand) propertyData.vehicle_brand = formData.vehicle_brand;
-        if (formData.vehicle_model) propertyData.vehicle_model = formData.vehicle_model;
-        if (formData.vehicle_year !== undefined) propertyData.vehicle_year = Number(formData.vehicle_year);
-        if (formData.vehicle_color) propertyData.vehicle_color = formData.vehicle_color;
-        if (formData.vehicle_condition) propertyData.vehicle_condition = formData.vehicle_condition;
-        if (formData.bicycle_type) propertyData.bicycle_type = formData.bicycle_type;
-        if (formData.frame_size) propertyData.frame_size = formData.frame_size;
-        if (formData.frame_material) propertyData.frame_material = formData.frame_material;
-        if (formData.number_of_gears !== undefined) propertyData.number_of_gears = Number(formData.number_of_gears);
-        if (formData.is_electric_bike !== undefined) propertyData.is_electric_bike = Boolean(formData.is_electric_bike);
-        if (formData.battery_range !== undefined) propertyData.battery_range = Number(formData.battery_range);
-        if (formData.suspension_type) propertyData.suspension_type = formData.suspension_type;
-        if (formData.brake_type) propertyData.brake_type = formData.brake_type;
-        if (formData.wheel_size) propertyData.wheel_size = formData.wheel_size;
-        if (formData.includes_lock !== undefined) propertyData.includes_lock = Boolean(formData.includes_lock);
-        if (formData.includes_lights !== undefined) propertyData.includes_lights = Boolean(formData.includes_lights);
-        if (formData.includes_basket !== undefined) propertyData.includes_basket = Boolean(formData.includes_basket);
-        if (formData.includes_pump !== undefined) propertyData.includes_pump = Boolean(formData.includes_pump);
+        const formDataAny = formData as any;
+        if (formDataAny.vehicle_brand) propertyData.vehicle_brand = formDataAny.vehicle_brand;
+        if (formDataAny.vehicle_model) propertyData.vehicle_model = formDataAny.vehicle_model;
+        if (formDataAny.vehicle_year !== undefined) propertyData.vehicle_year = Number(formDataAny.vehicle_year);
+        if (formDataAny.vehicle_color) propertyData.vehicle_color = formDataAny.vehicle_color;
+        if (formDataAny.vehicle_condition) propertyData.vehicle_condition = formDataAny.vehicle_condition;
+        if (formDataAny.bicycle_type) propertyData.bicycle_type = formDataAny.bicycle_type;
+        if (formDataAny.frame_size) propertyData.frame_size = formDataAny.frame_size;
+        if (formDataAny.frame_material) propertyData.frame_material = formDataAny.frame_material;
+        if (formDataAny.number_of_gears !== undefined) propertyData.number_of_gears = Number(formDataAny.number_of_gears);
+        if (formDataAny.is_electric_bike !== undefined) propertyData.is_electric_bike = Boolean(formDataAny.is_electric_bike);
+        if (formDataAny.battery_range !== undefined) propertyData.battery_range = Number(formDataAny.battery_range);
+        if (formDataAny.suspension_type) propertyData.suspension_type = formDataAny.suspension_type;
+        if (formDataAny.brake_type) propertyData.brake_type = formDataAny.brake_type;
+        if (formDataAny.wheel_size) propertyData.wheel_size = formDataAny.wheel_size;
+        if (formDataAny.includes_lock !== undefined) propertyData.includes_lock = Boolean(formDataAny.includes_lock);
+        if (formDataAny.includes_lights !== undefined) propertyData.includes_lights = Boolean(formDataAny.includes_lights);
+        if (formDataAny.includes_basket !== undefined) propertyData.includes_basket = Boolean(formDataAny.includes_basket);
+        if (formDataAny.includes_pump !== undefined) propertyData.includes_pump = Boolean(formDataAny.includes_pump);
       }
 
-      // Yacht-specific fields
+      // Yacht-specific fields with type assertion
       if (currentCategory === 'yacht') {
-        if (formData.yacht_brand) propertyData.yacht_brand = formData.yacht_brand;
-        if (formData.vehicle_model) propertyData.vehicle_model = formData.vehicle_model;
-        if (formData.vehicle_year !== undefined) propertyData.vehicle_year = Number(formData.vehicle_year);
-        if (formData.yacht_type) propertyData.yacht_type = formData.yacht_type;
-        if (formData.hull_material) propertyData.hull_material = formData.hull_material;
-        if (formData.yacht_length !== undefined) propertyData.yacht_length = Number(formData.yacht_length);
-        if (formData.max_capacity !== undefined) propertyData.max_capacity = Number(formData.max_capacity);
-        if (formData.number_of_cabins !== undefined) propertyData.number_of_cabins = Number(formData.number_of_cabins);
-        if (formData.number_of_berths !== undefined) propertyData.number_of_berths = Number(formData.number_of_berths);
-        if (formData.number_of_heads !== undefined) propertyData.number_of_heads = Number(formData.number_of_heads);
-        if (formData.engine_hours !== undefined) propertyData.engine_hours = Number(formData.engine_hours);
-        if (formData.max_speed !== undefined) propertyData.max_speed = Number(formData.max_speed);
-        if (formData.cruising_speed !== undefined) propertyData.cruising_speed = Number(formData.cruising_speed);
-        if (formData.fuel_capacity !== undefined) propertyData.fuel_capacity = Number(formData.fuel_capacity);
-        if (formData.water_capacity !== undefined) propertyData.water_capacity = Number(formData.water_capacity);
-        if (formData.has_air_conditioning !== undefined) propertyData.has_air_conditioning = Boolean(formData.has_air_conditioning);
-        if (formData.has_generator !== undefined) propertyData.has_generator = Boolean(formData.has_generator);
-        if (formData.has_autopilot !== undefined) propertyData.has_autopilot = Boolean(formData.has_autopilot);
-        if (formData.has_gps !== undefined) propertyData.has_gps = Boolean(formData.has_gps);
-        if (formData.has_radar !== undefined) propertyData.has_radar = Boolean(formData.has_radar);
-        if (formData.includes_crew !== undefined) propertyData.includes_crew = Boolean(formData.includes_crew);
-        if (formData.includes_captain !== undefined) propertyData.includes_captain = Boolean(formData.includes_captain);
-        if (formData.includes_water_toys !== undefined) propertyData.includes_water_toys = Boolean(formData.includes_water_toys);
+        const formDataAny = formData as any;
+        if (formDataAny.yacht_brand) propertyData.yacht_brand = formDataAny.yacht_brand;
+        if (formDataAny.vehicle_model) propertyData.vehicle_model = formDataAny.vehicle_model;
+        if (formDataAny.vehicle_year !== undefined) propertyData.vehicle_year = Number(formDataAny.vehicle_year);
+        if (formDataAny.yacht_type) propertyData.yacht_type = formDataAny.yacht_type;
+        if (formDataAny.hull_material) propertyData.hull_material = formDataAny.hull_material;
+        if (formDataAny.yacht_length !== undefined) propertyData.yacht_length = Number(formDataAny.yacht_length);
+        if (formDataAny.max_capacity !== undefined) propertyData.max_capacity = Number(formDataAny.max_capacity);
+        if (formDataAny.number_of_cabins !== undefined) propertyData.number_of_cabins = Number(formDataAny.number_of_cabins);
+        if (formDataAny.number_of_berths !== undefined) propertyData.number_of_berths = Number(formDataAny.number_of_berths);
+        if (formDataAny.number_of_heads !== undefined) propertyData.number_of_heads = Number(formDataAny.number_of_heads);
+        if (formDataAny.engine_hours !== undefined) propertyData.engine_hours = Number(formDataAny.engine_hours);
+        if (formDataAny.max_speed !== undefined) propertyData.max_speed = Number(formDataAny.max_speed);
+        if (formDataAny.cruising_speed !== undefined) propertyData.cruising_speed = Number(formDataAny.cruising_speed);
+        if (formDataAny.fuel_capacity !== undefined) propertyData.fuel_capacity = Number(formDataAny.fuel_capacity);
+        if (formDataAny.water_capacity !== undefined) propertyData.water_capacity = Number(formDataAny.water_capacity);
+        if (formDataAny.has_air_conditioning !== undefined) propertyData.has_air_conditioning = Boolean(formDataAny.has_air_conditioning);
+        if (formDataAny.has_generator !== undefined) propertyData.has_generator = Boolean(formDataAny.has_generator);
+        if (formDataAny.has_autopilot !== undefined) propertyData.has_autopilot = Boolean(formDataAny.has_autopilot);
+        if (formDataAny.has_gps !== undefined) propertyData.has_gps = Boolean(formDataAny.has_gps);
+        if (formDataAny.has_radar !== undefined) propertyData.has_radar = Boolean(formDataAny.has_radar);
+        if (formDataAny.includes_crew !== undefined) propertyData.includes_crew = Boolean(formDataAny.includes_crew);
+        if (formDataAny.includes_captain !== undefined) propertyData.includes_captain = Boolean(formDataAny.includes_captain);
+        if (formDataAny.includes_water_toys !== undefined) propertyData.includes_water_toys = Boolean(formDataAny.includes_water_toys);
       }
 
       if (editingId) {

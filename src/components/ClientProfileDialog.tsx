@@ -130,23 +130,23 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
     setActivities(data.preferred_activities ?? []);
     setProfileImages(data.profile_images ?? []);
 
-    // Load new demographic fields
-    setNationality(data.nationality ?? '');
-    setLanguages(data.languages ?? []);
-    setRelationshipStatus(data.relationship_status ?? '');
-    setHasChildren(data.has_children ?? false);
+    // Load new demographic fields with type safety
+    setNationality((data as any).nationality ?? '');
+    setLanguages((data as any).languages ?? []);
+    setRelationshipStatus((data as any).relationship_status ?? '');
+    setHasChildren((data as any).has_children ?? false);
 
     // Load lifestyle habit fields
-    setSmokingHabit(data.smoking_habit ?? 'Non-Smoker');
-    setDrinkingHabit(data.drinking_habit ?? 'Non-Drinker');
-    setCleanlinessLevel(data.cleanliness_level ?? 'Clean');
-    setNoiseTolerance(data.noise_tolerance ?? 'Moderate');
-    setWorkSchedule(data.work_schedule ?? '');
+    setSmokingHabit((data as any).smoking_habit ?? 'Non-Smoker');
+    setDrinkingHabit((data as any).drinking_habit ?? 'Non-Drinker');
+    setCleanlinessLevel((data as any).cleanliness_level ?? 'Clean');
+    setNoiseTolerance((data as any).noise_tolerance ?? 'Moderate');
+    setWorkSchedule((data as any).work_schedule ?? '');
 
     // Load cultural and personality fields
-    setDietaryPreferences(data.dietary_preferences ?? []);
-    setPersonalityTraits(data.personality_traits ?? []);
-    setInterestCategories(data.interest_categories ?? []);
+    setDietaryPreferences((data as any).dietary_preferences ?? []);
+    setPersonalityTraits((data as any).personality_traits ?? []);
+    setInterestCategories((data as any).interest_categories ?? []);
   }, [data]);
 
   const handleImageUpload = async (file: File): Promise<string> => {

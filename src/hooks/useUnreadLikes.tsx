@@ -17,11 +17,12 @@ export function useUnreadLikes() {
         .eq('id', user.id)
         .single();
 
-      if (!profile?.role) return { count: 0 };
+      const userRole = (profile as any)?.role;
+      if (!userRole) return { count: 0 };
 
       let query;
 
-      if (profile.role === 'owner') {
+      if (userRole === 'owner') {
         // Owners: Count likes on their listings
         // First get owner's listings
         const { data: listings } = await supabase
