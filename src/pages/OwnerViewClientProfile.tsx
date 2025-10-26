@@ -17,6 +17,20 @@ export default function OwnerViewClientProfile() {
   const { data: client, isLoading } = useQuery({
     queryKey: ['client-profile', clientId],
     queryFn: async () => {
+      // First check if this user is a client (not admin or owner)
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', clientId)
+        .maybeSingle();
+
+      if (roleError) throw roleError;
+
+      // Only allow viewing client profiles
+      if (!roleData || roleData.role !== 'client') {
+        throw new Error('Profile not found or not accessible');
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
