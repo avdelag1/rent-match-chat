@@ -102,11 +102,11 @@ export function ClientSwipeContainer({
     // Record the swipe for undo functionality
     recordSwipe(currentClient.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
 
-    // Move to next card after animation
+    // Move to next card after animation with proper delay for smooth rhythm
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
-    }, 150);
+    }, 300); // 300ms delay for smooth visual rhythm
   }, [currentIndex, clientProfiles, swipeMutation, recordSwipe]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
@@ -355,14 +355,24 @@ export function ClientSwipeContainer({
       {/* Cards Container with Fixed Height */}
       <div className="relative h-[650px] w-full mx-auto max-w-md">
         
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
+          {/* Next card - scales up smoothly when current card exits */}
           {nextClient && (
             <motion.div
               key={`next-${nextClient.user_id}`}
-              initial={{ scale: 0.95, opacity: 1 }}
-              animate={{ scale: 0.95, opacity: 1 }}
-              className="absolute inset-0"
-              style={{ willChange: 'transform', zIndex: 1 }}
+              initial={{ scale: 0.95, opacity: 0.7 }}
+              animate={{
+                scale: swipeDirection ? 1.0 : 0.95,
+                opacity: swipeDirection ? 1.0 : 0.7
+              }}
+              className="absolute inset-0 shadow-xl"
+              style={{ willChange: 'transform, opacity', zIndex: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 180,
+                damping: 15,
+                mass: 0.5
+              }}
             >
               <ClientProfileCard
                 profile={nextClient}
@@ -375,27 +385,37 @@ export function ClientSwipeContainer({
               />
             </motion.div>
           )}
+          {/* Current card - swipes out with rotation and fade */}
           {currentClient && (
             <motion.div
               key={currentClient.user_id}
-              initial={{ scale: 0.95, opacity: 1, y: 10 }}
+              initial={{ scale: 0.95, opacity: 0.7, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ 
-                x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
-                opacity: 1,
-                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
-                scale: 0.9,
-                transition: { 
+              exit={{
+                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                opacity: 0,
+                rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
+                scale: 0.85,
+                transition: {
                   type: "spring",
-                  stiffness: 400,
-                  damping: 30,
-                  mass: 0.4,
+                  stiffness: 180,
+                  damping: 15,
+                  mass: 0.5,
                   duration: 0.3
                 }
               }}
-              transition={{ type: "spring", stiffness: 600, damping: 40, mass: 0.5 }}
-              className="absolute inset-0"
-              style={{ willChange: 'transform', zIndex: 10 }}
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 20,
+                mass: 0.8
+              }}
+              className="absolute inset-0 shadow-2xl"
+              style={{
+                willChange: 'transform, opacity',
+                zIndex: 10,
+                filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))'
+              }}
             >
               <ClientProfileCard
                 profile={currentClient}
