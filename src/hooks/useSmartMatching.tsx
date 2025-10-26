@@ -200,15 +200,31 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
           .eq('is_active', true)
           .limit(50);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Error fetching listings:', error);
+          console.error('Error details:', JSON.stringify(error, null, 2));
+          throw error;
+        }
 
-        if (!preferences || !listings?.length) {
-          return (listings as Listing[])?.map(listing => ({
+        console.log(`📊 Fetched ${listings?.length || 0} active listings from database`);
+
+        if (!listings?.length) {
+          console.warn('⚠️ No active listings found');
+          console.log('💡 This may be because:');
+          console.log('   1. No listings have is_active=true');
+          console.log('   2. No listings have status=\'active\'');
+          console.log('   3. Database is empty or RLS is blocking access');
+          return [];
+        }
+
+        if (!preferences) {
+          console.log('📋 No client preferences set, returning all listings with default 50% match');
+          return (listings as Listing[]).map(listing => ({
             ...listing,
             matchPercentage: 50,
             matchReasons: ['No preferences set'],
             incompatibleReasons: []
-          })) || [];
+          }));
         }
 
         // Calculate match percentage for each listing
@@ -567,23 +583,30 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
 
         const clientUserIds = clientRoles.map(r => r.user_id);
 
-        // Get ALL profiles for these client users
+        // Get ALL profiles for these client users using profiles_public view
+        // Note: profiles_public filters by is_active=true and onboarding_completed=true
         const { data: profiles, error: profileError } = await supabase
-          .from('profiles')
+          .from('profiles_public')
           .select('*')
           .in('id', clientUserIds)
-          .eq('is_active', true)
           .neq('id', user.user.id)
           .limit(100);
 
         if (profileError) {
-          console.error('❌ Error fetching profiles:', profileError);
+          console.error('❌ Error fetching profiles from profiles_public:', profileError);
+          console.error('Error details:', JSON.stringify(profileError, null, 2));
+          console.log('🔍 Attempted query: profiles_public with user_ids:', clientUserIds.slice(0, 5));
           throw profileError;
         }
-        
+
         if (!profiles?.length) {
-          console.warn('⚠️ No active profiles found for client users');
-          console.log(`📊 Database check: ${clientRoles.length} client roles found but 0 active profiles`);
+          console.warn('⚠️ No active profiles found in profiles_public view');
+          console.log(`📊 Database check: ${clientRoles.length} client roles found but 0 profiles in profiles_public`);
+          console.log('💡 This may be because:');
+          console.log('   1. No client profiles have is_active=true');
+          console.log('   2. No client profiles have onboarding_completed=true');
+          console.log('   3. RLS policies are blocking access');
+          console.log('🔍 Client user IDs queried:', clientUserIds.slice(0, 10));
           return [];
         }
         
