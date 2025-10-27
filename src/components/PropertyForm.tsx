@@ -172,6 +172,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       // Clean and prepare data - ensure numeric fields are numbers
       const propertyData: any = {
         title: data.title,
+        description: (data as any).description || null,
         property_type: data.property_type,
         listing_type: data.listing_type || initialMode,
         price: Number(data.price),
@@ -536,6 +537,20 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       return;
     }
 
+    // Validate description for contact info
+    const description = (data as any).description;
+    if (description) {
+      const descriptionError = validateNoContactInfo(description);
+      if (descriptionError) {
+        toast({
+          title: "Invalid Description",
+          description: descriptionError,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
     createPropertyMutation.mutate(data);
   };
 
@@ -582,6 +597,20 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 {errors.title && (
                   <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
                 )}
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  placeholder="Describe your property, amenities, neighborhood, and what makes it special..."
+                  rows={5}
+                  className="resize-none"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Provide a detailed description to attract potential tenants. No contact information allowed.
+                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
