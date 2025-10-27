@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 interface YachtClientFiltersProps {
   onApply: (filters: any) => void;
@@ -22,8 +23,42 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
   const [durationPreference, setDurationPreference] = useState(initialFilters.duration_preference || 'any');
   const [amenities, setAmenities] = useState<string[]>(initialFilters.amenities || []);
 
+  // New filter options
+  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 1000000]);
+  const [yearRange, setYearRange] = useState([initialFilters.year_min || 1990, initialFilters.year_max || new Date().getFullYear()]);
+  const [guestCapacity, setGuestCapacity] = useState(initialFilters.guest_capacity_min || 1);
+  const [cabinCount, setCabinCount] = useState(initialFilters.cabin_count_min || 1);
+  const [condition, setCondition] = useState(initialFilters.condition || 'any');
+  const [fuelTypes, setFuelTypes] = useState<string[]>(initialFilters.fuel_types || []);
+  const [enginePowerRange, setEnginePowerRange] = useState([initialFilters.engine_power_min || 0, initialFilters.engine_power_max || 5000]);
+  const [speedRange, setSpeedRange] = useState([initialFilters.speed_min || 0, initialFilters.speed_max || 50]);
+  const [rangeNM, setRangeNM] = useState(initialFilters.range_nm_min || 0);
+  const [hullMaterial, setHullMaterial] = useState(initialFilters.hull_material || 'any');
+  const [waterActivities, setWaterActivities] = useState<string[]>(initialFilters.water_activities || []);
+  const [navigationEquipment, setNavigationEquipment] = useState<string[]>(initialFilters.navigation_equipment || []);
+  const [hasStabilizers, setHasStabilizers] = useState(initialFilters.has_stabilizers || false);
+
   const yachtTypeOptions = ['Sailboat', 'Motor Yacht', 'Catamaran', 'Luxury Cruiser', 'Sport Yacht', 'Mega Yacht'];
   const amenityOptions = ['Jacuzzi', 'Water Toys', 'Chef Service', 'Helipad', 'Cinema Room', 'Spa'];
+  const conditionOptions = [
+    { value: 'any', label: 'Any Condition' },
+    { value: 'new', label: 'Brand New' },
+    { value: 'like-new', label: 'Like New' },
+    { value: 'excellent', label: 'Excellent' },
+    { value: 'good', label: 'Good' },
+    { value: 'fair', label: 'Fair' }
+  ];
+  const fuelTypeOptions = ['Diesel', 'Gasoline', 'Hybrid', 'Electric', 'Sail-Only'];
+  const hullMaterialOptions = [
+    { value: 'any', label: 'Any Material' },
+    { value: 'fiberglass', label: 'Fiberglass' },
+    { value: 'aluminum', label: 'Aluminum' },
+    { value: 'steel', label: 'Steel' },
+    { value: 'wood', label: 'Wood' },
+    { value: 'carbon', label: 'Carbon Fiber' }
+  ];
+  const waterActivityOptions = ['Diving', 'Fishing', 'Watersports', 'Island Hopping', 'Cruising', 'Racing'];
+  const navigationEquipmentOptions = ['GPS', 'Radar', 'Autopilot', 'Chart Plotter', 'VHF Radio', 'AIS'];
 
   const handleApply = () => {
     onApply({
@@ -34,7 +69,24 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
       yacht_size_max: sizeRange[1],
       crew_requirements: crewRequirements,
       duration_preference: durationPreference,
-      amenities
+      amenities,
+      price_min: priceRange[0],
+      price_max: priceRange[1],
+      year_min: yearRange[0],
+      year_max: yearRange[1],
+      guest_capacity_min: guestCapacity,
+      cabin_count_min: cabinCount,
+      condition: condition,
+      fuel_types: fuelTypes,
+      engine_power_min: enginePowerRange[0],
+      engine_power_max: enginePowerRange[1],
+      speed_min: speedRange[0],
+      speed_max: speedRange[1],
+      range_nm_min: rangeNM,
+      hull_material: hullMaterial,
+      water_activities: waterActivities,
+      navigation_equipment: navigationEquipment,
+      has_stabilizers: hasStabilizers
     });
   };
 
@@ -45,6 +97,19 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
     setCrewRequirements('any');
     setDurationPreference('any');
     setAmenities([]);
+    setPriceRange([0, 1000000]);
+    setYearRange([1990, new Date().getFullYear()]);
+    setGuestCapacity(1);
+    setCabinCount(1);
+    setCondition('any');
+    setFuelTypes([]);
+    setEnginePowerRange([0, 5000]);
+    setSpeedRange([0, 50]);
+    setRangeNM(0);
+    setHullMaterial('any');
+    setWaterActivities([]);
+    setNavigationEquipment([]);
+    setHasStabilizers(false);
     onApply({});
   };
 
@@ -195,6 +260,301 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
             ))}
           </div>
           <p className="text-xs text-muted-foreground">Connect with high-end clients whose expectations match your yachts</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible defaultOpen className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Price Range</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>${(priceRange[0] / 1000).toFixed(0)}K</span>
+              <span>${(priceRange[1] / 1000).toFixed(0)}K</span>
+            </div>
+            <Slider
+              value={priceRange}
+              onValueChange={setPriceRange}
+              min={0}
+              max={5000000}
+              step={10000}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Charter rate or purchase price range</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Year Built</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{yearRange[0]}</span>
+              <span>{yearRange[1]}</span>
+            </div>
+            <Slider
+              value={yearRange}
+              onValueChange={setYearRange}
+              min={1970}
+              max={new Date().getFullYear()}
+              step={1}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by yacht age</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Guest Capacity</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <Label className="text-sm">Minimum Guests: {guestCapacity}</Label>
+            <Slider
+              value={[guestCapacity]}
+              onValueChange={(v) => setGuestCapacity(v[0])}
+              min={1}
+              max={50}
+              step={1}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Minimum passenger capacity</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Cabin Count</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <Label className="text-sm">Minimum Cabins: {cabinCount}</Label>
+            <Slider
+              value={[cabinCount]}
+              onValueChange={(v) => setCabinCount(v[0])}
+              min={1}
+              max={15}
+              step={1}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Number of sleeping cabins</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Condition</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={condition} onValueChange={setCondition}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {conditionOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Overall yacht condition</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Fuel Type</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="grid grid-cols-2 gap-2">
+            {fuelTypeOptions.map((fuel) => (
+              <div key={fuel} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={fuelTypes.includes(fuel)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setFuelTypes([...fuelTypes, fuel]);
+                    } else {
+                      setFuelTypes(fuelTypes.filter(f => f !== fuel));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{fuel}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Propulsion system type</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Engine Power (HP)</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{enginePowerRange[0]} HP</span>
+              <span>{enginePowerRange[1]} HP</span>
+            </div>
+            <Slider
+              value={enginePowerRange}
+              onValueChange={setEnginePowerRange}
+              min={0}
+              max={10000}
+              step={100}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Total engine horsepower range</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Speed (Knots)</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{speedRange[0]} kts</span>
+              <span>{speedRange[1]} kts</span>
+            </div>
+            <Slider
+              value={speedRange}
+              onValueChange={setSpeedRange}
+              min={0}
+              max={80}
+              step={5}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Maximum or cruising speed</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Range</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <Label className="text-sm">Minimum Range: {rangeNM} nautical miles</Label>
+            <Slider
+              value={[rangeNM]}
+              onValueChange={(v) => setRangeNM(v[0])}
+              min={0}
+              max={5000}
+              step={100}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Cruising range on full tanks</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Hull Material</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={hullMaterial} onValueChange={setHullMaterial}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {hullMaterialOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Hull construction material</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Water Activities</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="grid grid-cols-2 gap-2">
+            {waterActivityOptions.map((activity) => (
+              <div key={activity} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={waterActivities.includes(activity)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setWaterActivities([...waterActivities, activity]);
+                    } else {
+                      setWaterActivities(waterActivities.filter(a => a !== activity));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{activity}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Intended use and activities</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Navigation Equipment</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="grid grid-cols-2 gap-2">
+            {navigationEquipmentOptions.map((equipment) => (
+              <div key={equipment} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={navigationEquipment.includes(equipment)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setNavigationEquipment([...navigationEquipment, equipment]);
+                    } else {
+                      setNavigationEquipment(navigationEquipment.filter(e => e !== equipment));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{equipment}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Required navigation and safety equipment</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Additional Features</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <Label>Stabilizers</Label>
+            <Switch checked={hasStabilizers} onCheckedChange={setHasStabilizers} />
+          </div>
+          <p className="text-xs text-muted-foreground">Yacht has stabilization system for smooth sailing</p>
         </CollapsibleContent>
       </Collapsible>
 

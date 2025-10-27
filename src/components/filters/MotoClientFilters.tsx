@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 interface MotoClientFiltersProps {
   onApply: (filters: any) => void;
@@ -21,8 +22,53 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
   const [experienceLevel, setExperienceLevel] = useState(initialFilters.experience_level || 'any');
   const [usagePurpose, setUsagePurpose] = useState<string[]>(initialFilters.usage_purpose || []);
 
+  // New filter options
+  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 50000]);
+  const [yearRange, setYearRange] = useState([initialFilters.year_min || 2010, initialFilters.year_max || new Date().getFullYear()]);
+  const [mileageRange, setMileageRange] = useState([initialFilters.mileage_min || 0, initialFilters.mileage_max || 100000]);
+  const [transmission, setTransmission] = useState(initialFilters.transmission || 'any');
+  const [condition, setCondition] = useState(initialFilters.condition || 'any');
+  const [fuelTypes, setFuelTypes] = useState<string[]>(initialFilters.fuel_types || []);
+  const [cylinders, setCylinders] = useState(initialFilters.cylinders || 'any');
+  const [coolingSystem, setCoolingSystem] = useState(initialFilters.cooling_system || 'any');
+  const [hasABS, setHasABS] = useState(initialFilters.has_abs || false);
+  const [features, setFeatures] = useState<string[]>(initialFilters.features || []);
+  const [batteryCapacity, setBatteryCapacity] = useState(initialFilters.battery_capacity_min || 0);
+  const [isElectricOnly, setIsElectricOnly] = useState(initialFilters.is_electric_only || false);
+
   const motoTypeOptions = ['Sport Bike', 'Cruiser', 'Scooter', 'Off-Road', 'Touring', 'Street'];
   const usagePurposeOptions = ['Commuting', 'Touring', 'Racing', 'Off-Road', 'City Riding'];
+  const transmissionOptions = [
+    { value: 'any', label: 'Any Transmission' },
+    { value: 'manual', label: 'Manual' },
+    { value: 'automatic', label: 'Automatic' },
+    { value: 'semi-automatic', label: 'Semi-Automatic' },
+    { value: 'cvt', label: 'CVT' }
+  ];
+  const conditionOptions = [
+    { value: 'any', label: 'Any Condition' },
+    { value: 'new', label: 'Brand New' },
+    { value: 'like-new', label: 'Like New' },
+    { value: 'excellent', label: 'Excellent' },
+    { value: 'good', label: 'Good' },
+    { value: 'fair', label: 'Fair' }
+  ];
+  const fuelTypeOptions = ['Gasoline', 'Electric', 'Hybrid', 'Diesel'];
+  const cylinderOptions = [
+    { value: 'any', label: 'Any Configuration' },
+    { value: 'single', label: 'Single Cylinder' },
+    { value: 'twin', label: 'Twin (2)' },
+    { value: 'triple', label: 'Triple (3)' },
+    { value: 'four', label: 'Four (4)' },
+    { value: 'six', label: 'Six (6+)' }
+  ];
+  const coolingOptions = [
+    { value: 'any', label: 'Any Cooling' },
+    { value: 'air', label: 'Air-Cooled' },
+    { value: 'liquid', label: 'Liquid-Cooled' },
+    { value: 'oil', label: 'Oil-Cooled' }
+  ];
+  const featureOptions = ['GPS Navigation', 'Heated Grips', 'Cruise Control', 'Traction Control', 'Quick Shifter', 'Riding Modes'];
 
   const handleApply = () => {
     onApply({
@@ -32,7 +78,22 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
       engine_cc_min: engineRange[0],
       engine_cc_max: engineRange[1],
       experience_level: experienceLevel,
-      usage_purpose: usagePurpose
+      usage_purpose: usagePurpose,
+      price_min: priceRange[0],
+      price_max: priceRange[1],
+      year_min: yearRange[0],
+      year_max: yearRange[1],
+      mileage_min: mileageRange[0],
+      mileage_max: mileageRange[1],
+      transmission: transmission,
+      condition: condition,
+      fuel_types: fuelTypes,
+      cylinders: cylinders,
+      cooling_system: coolingSystem,
+      has_abs: hasABS,
+      features: features,
+      battery_capacity_min: batteryCapacity,
+      is_electric_only: isElectricOnly
     });
   };
 
@@ -42,6 +103,18 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
     setEngineRange([50, 1000]);
     setExperienceLevel('any');
     setUsagePurpose([]);
+    setPriceRange([0, 50000]);
+    setYearRange([2010, new Date().getFullYear()]);
+    setMileageRange([0, 100000]);
+    setTransmission('any');
+    setCondition('any');
+    setFuelTypes([]);
+    setCylinders('any');
+    setCoolingSystem('any');
+    setHasABS(false);
+    setFeatures([]);
+    setBatteryCapacity(0);
+    setIsElectricOnly(false);
     onApply({});
   };
 
@@ -170,6 +243,250 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
             ))}
           </div>
           <p className="text-xs text-muted-foreground">Connect with clients whose intended use aligns with your motos</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible defaultOpen className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Price Range</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>${priceRange[0].toLocaleString()}</span>
+              <span>${priceRange[1].toLocaleString()}</span>
+            </div>
+            <Slider
+              value={priceRange}
+              onValueChange={setPriceRange}
+              min={0}
+              max={100000}
+              step={1000}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Set budget range for motorcycle purchase or rental</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Year</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{yearRange[0]}</span>
+              <span>{yearRange[1]}</span>
+            </div>
+            <Slider
+              value={yearRange}
+              onValueChange={setYearRange}
+              min={1990}
+              max={new Date().getFullYear()}
+              step={1}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by manufacturing year</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Mileage</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{mileageRange[0].toLocaleString()} miles</span>
+              <span>{mileageRange[1].toLocaleString()} miles</span>
+            </div>
+            <Slider
+              value={mileageRange}
+              onValueChange={setMileageRange}
+              min={0}
+              max={150000}
+              step={1000}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by odometer reading</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Transmission</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={transmission} onValueChange={setTransmission}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {transmissionOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Filter by transmission type</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Condition</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={condition} onValueChange={setCondition}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {conditionOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Filter by motorcycle condition</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Fuel Type</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="grid grid-cols-2 gap-2">
+            {fuelTypeOptions.map((fuel) => (
+              <div key={fuel} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={fuelTypes.includes(fuel)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setFuelTypes([...fuelTypes, fuel]);
+                    } else {
+                      setFuelTypes(fuelTypes.filter(f => f !== fuel));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{fuel}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by power source</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Engine Configuration</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={cylinders} onValueChange={setCylinders}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {cylinderOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Filter by number of cylinders</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Cooling System</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={coolingSystem} onValueChange={setCoolingSystem}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {coolingOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Filter by engine cooling method</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Safety & Features</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <Label>ABS (Anti-lock Brakes)</Label>
+            <Switch checked={hasABS} onCheckedChange={setHasABS} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {featureOptions.map((feature) => (
+              <div key={feature} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={features.includes(feature)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setFeatures([...features, feature]);
+                    } else {
+                      setFeatures(features.filter(f => f !== feature));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{feature}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by safety and comfort features</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Electric Features</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <Label>Electric Only</Label>
+            <Switch checked={isElectricOnly} onCheckedChange={setIsElectricOnly} />
+          </div>
+          {(isElectricOnly || fuelTypes.includes('Electric')) && (
+            <div className="space-y-2">
+              <Label className="text-sm">Minimum Battery Capacity: {batteryCapacity} kWh</Label>
+              <Slider
+                value={[batteryCapacity]}
+                onValueChange={(v) => setBatteryCapacity(v[0])}
+                min={0}
+                max={30}
+                step={1}
+              />
+              <p className="text-xs text-muted-foreground">Required battery capacity for electric motorcycles</p>
+            </div>
+          )}
         </CollapsibleContent>
       </Collapsible>
 

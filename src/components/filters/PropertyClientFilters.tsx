@@ -25,8 +25,27 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [petFriendly, setPetFriendly] = useState(initialFilters.pet_friendly || false);
   const [furnished, setFurnished] = useState(initialFilters.furnished || false);
 
+  // New filter options
+  const [squareFeetRange, setSquareFeetRange] = useState([initialFilters.square_feet_min || 0, initialFilters.square_feet_max || 5000]);
+  const [yearBuiltRange, setYearBuiltRange] = useState([initialFilters.year_built_min || 1950, initialFilters.year_built_max || new Date().getFullYear()]);
+  const [floorLevel, setFloorLevel] = useState<string>(initialFilters.floor_level || 'any');
+  const [viewTypes, setViewTypes] = useState<string[]>(initialFilters.view_types || []);
+  const [orientations, setOrientations] = useState<string[]>(initialFilters.orientations || []);
+  const [hasElevator, setHasElevator] = useState(initialFilters.has_elevator || false);
+  const [parkingSpots, setParkingSpots] = useState(initialFilters.parking_spots_min || 0);
+
   const propertyTypeOptions = ['Apartment', 'House', 'Studio', 'Villa', 'Commercial', 'Land'];
   const amenityOptions = ['Pool', 'Parking', 'Gym', 'Security', 'Garden', 'Balcony'];
+  const viewTypeOptions = ['Ocean', 'City', 'Garden', 'Mountain', 'Street', 'Pool'];
+  const orientationOptions = ['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest'];
+  const floorLevelOptions = [
+    { value: 'any', label: 'Any Floor' },
+    { value: 'ground', label: 'Ground Floor' },
+    { value: 'low', label: 'Low (1-3)' },
+    { value: 'mid', label: 'Mid (4-7)' },
+    { value: 'high', label: 'High (8+)' },
+    { value: 'penthouse', label: 'Penthouse' }
+  ];
 
   const handleApply = () => {
     onApply({
@@ -39,7 +58,16 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       bathrooms_min: bathrooms,
       amenities,
       pet_friendly: petFriendly,
-      furnished
+      furnished,
+      square_feet_min: squareFeetRange[0],
+      square_feet_max: squareFeetRange[1],
+      year_built_min: yearBuiltRange[0],
+      year_built_max: yearBuiltRange[1],
+      floor_level: floorLevel,
+      view_types: viewTypes,
+      orientations: orientations,
+      has_elevator: hasElevator,
+      parking_spots_min: parkingSpots
     });
   };
 
@@ -52,6 +80,13 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     setAmenities([]);
     setPetFriendly(false);
     setFurnished(false);
+    setSquareFeetRange([0, 5000]);
+    setYearBuiltRange([1950, new Date().getFullYear()]);
+    setFloorLevel('any');
+    setViewTypes([]);
+    setOrientations([]);
+    setHasElevator(false);
+    setParkingSpots(0);
     onApply({});
   };
 
@@ -193,6 +228,154 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
             <Label>Furnished</Label>
             <Switch checked={furnished} onCheckedChange={setFurnished} />
           </div>
+          <div className="flex items-center justify-between">
+            <Label>Elevator</Label>
+            <Switch checked={hasElevator} onCheckedChange={setHasElevator} />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Property Size</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{squareFeetRange[0]} sq ft</span>
+              <span>{squareFeetRange[1]} sq ft</span>
+            </div>
+            <Slider
+              value={squareFeetRange}
+              onValueChange={setSquareFeetRange}
+              min={0}
+              max={10000}
+              step={100}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by square footage</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Year Built</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{yearBuiltRange[0]}</span>
+              <span>{yearBuiltRange[1]}</span>
+            </div>
+            <Slider
+              value={yearBuiltRange}
+              onValueChange={setYearBuiltRange}
+              min={1950}
+              max={new Date().getFullYear()}
+              step={5}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by construction or renovation year</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Floor Level</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={floorLevel} onValueChange={setFloorLevel}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {floorLevelOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Preferred floor range in building</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">View Type</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="grid grid-cols-2 gap-2">
+            {viewTypeOptions.map((view) => (
+              <div key={view} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={viewTypes.includes(view)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setViewTypes([...viewTypes, view]);
+                    } else {
+                      setViewTypes(viewTypes.filter(v => v !== view));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{view}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Desired view from property</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Orientation</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="grid grid-cols-2 gap-2">
+            {orientationOptions.map((orientation) => (
+              <div key={orientation} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={orientations.includes(orientation)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setOrientations([...orientations, orientation]);
+                    } else {
+                      setOrientations(orientations.filter(o => o !== orientation));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{orientation}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Building/unit orientation for natural light</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Parking</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <Label className="text-sm">Minimum Parking Spots: {parkingSpots}</Label>
+            <Slider
+              value={[parkingSpots]}
+              onValueChange={(v) => setParkingSpots(v[0])}
+              min={0}
+              max={5}
+              step={1}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Required number of parking spaces</p>
         </CollapsibleContent>
       </Collapsible>
 

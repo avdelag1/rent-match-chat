@@ -6,6 +6,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 
 interface BicycleClientFiltersProps {
   onApply: (filters: any) => void;
@@ -21,9 +23,42 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
   const [accessories, setAccessories] = useState<string[]>(initialFilters.accessories_needed || []);
   const [fitnessLevel, setFitnessLevel] = useState(initialFilters.fitness_level || 'any');
 
+  // New filter options
+  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 5000]);
+  const [condition, setCondition] = useState(initialFilters.condition || 'any');
+  const [wheelSizes, setWheelSizes] = useState<string[]>(initialFilters.wheel_sizes || []);
+  const [suspensionType, setSuspensionType] = useState(initialFilters.suspension_type || 'any');
+  const [material, setMaterial] = useState(initialFilters.material || 'any');
+  const [gearRange, setGearRange] = useState([initialFilters.gears_min || 1, initialFilters.gears_max || 30]);
+  const [batteryRange, setBatteryRange] = useState(initialFilters.battery_range_min || 0);
+  const [yearRange, setYearRange] = useState([initialFilters.year_min || 2010, initialFilters.year_max || new Date().getFullYear()]);
+  const [isElectricOnly, setIsElectricOnly] = useState(initialFilters.is_electric_only || false);
+
   const bicycleTypeOptions = ['Road Bike', 'Mountain Bike', 'Electric Bike', 'Hybrid', 'BMX', 'Folding'];
   const terrainOptions = ['Urban', 'Trail', 'Road', 'All-Terrain', 'Beach'];
   const accessoryOptions = ['Helmet', 'Lights', 'Basket', 'Lock', 'Water Bottle Holder'];
+  const wheelSizeOptions = ['20"', '24"', '26"', '27.5"', '29"', '700c', '650b'];
+  const conditionOptions = [
+    { value: 'any', label: 'Any Condition' },
+    { value: 'new', label: 'Brand New' },
+    { value: 'like-new', label: 'Like New' },
+    { value: 'excellent', label: 'Excellent' },
+    { value: 'good', label: 'Good' },
+    { value: 'fair', label: 'Fair' }
+  ];
+  const suspensionOptions = [
+    { value: 'any', label: 'Any Suspension' },
+    { value: 'rigid', label: 'Rigid (No Suspension)' },
+    { value: 'hardtail', label: 'Hardtail (Front Only)' },
+    { value: 'full', label: 'Full Suspension' }
+  ];
+  const materialOptions = [
+    { value: 'any', label: 'Any Material' },
+    { value: 'aluminum', label: 'Aluminum' },
+    { value: 'carbon', label: 'Carbon Fiber' },
+    { value: 'steel', label: 'Steel' },
+    { value: 'titanium', label: 'Titanium' }
+  ];
 
   const handleApply = () => {
     onApply({
@@ -33,7 +68,19 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
       frame_size: frameSize,
       terrain_preference: terrainPreference,
       accessories_needed: accessories,
-      fitness_level: fitnessLevel
+      fitness_level: fitnessLevel,
+      price_min: priceRange[0],
+      price_max: priceRange[1],
+      condition: condition,
+      wheel_sizes: wheelSizes,
+      suspension_type: suspensionType,
+      material: material,
+      gears_min: gearRange[0],
+      gears_max: gearRange[1],
+      battery_range_min: batteryRange,
+      year_min: yearRange[0],
+      year_max: yearRange[1],
+      is_electric_only: isElectricOnly
     });
   };
 
@@ -44,6 +91,15 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
     setTerrainPreference([]);
     setAccessories([]);
     setFitnessLevel('any');
+    setPriceRange([0, 5000]);
+    setCondition('any');
+    setWheelSizes([]);
+    setSuspensionType('any');
+    setMaterial('any');
+    setGearRange([1, 30]);
+    setBatteryRange(0);
+    setYearRange([2010, new Date().getFullYear()]);
+    setIsElectricOnly(false);
     onApply({});
   };
 
@@ -197,6 +253,197 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">Filter by rider's activity level for appropriate recommendations</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible defaultOpen className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Price Range</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>${priceRange[0]}</span>
+              <span>${priceRange[1]}</span>
+            </div>
+            <Slider
+              value={priceRange}
+              onValueChange={setPriceRange}
+              min={0}
+              max={10000}
+              step={50}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Set budget range for bicycle purchase or rental</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Condition</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={condition} onValueChange={setCondition}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {conditionOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Filter by bicycle condition and quality</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Wheel Size</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="grid grid-cols-3 gap-2">
+            {wheelSizeOptions.map((size) => (
+              <div key={size} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={wheelSizes.includes(size)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setWheelSizes([...wheelSizes, size]);
+                    } else {
+                      setWheelSizes(wheelSizes.filter(s => s !== size));
+                    }
+                  }}
+                />
+                <Label className="text-sm">{size}</Label>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Match clients by preferred wheel diameter</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Suspension Type</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={suspensionType} onValueChange={setSuspensionType}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {suspensionOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Filter by suspension configuration</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Frame Material</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <Select value={material} onValueChange={setMaterial}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {materialOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Filter by frame construction material</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Number of Gears</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{gearRange[0]} gears</span>
+              <span>{gearRange[1]} gears</span>
+            </div>
+            <Slider
+              value={gearRange}
+              onValueChange={setGearRange}
+              min={1}
+              max={30}
+              step={1}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by gear count range</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">Year/Age</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 pt-2">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{yearRange[0]}</span>
+              <span>{yearRange[1]}</span>
+            </div>
+            <Slider
+              value={yearRange}
+              onValueChange={setYearRange}
+              min={2010}
+              max={new Date().getFullYear()}
+              step={1}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Filter by manufacturing year</p>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible className="space-y-2">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+          <Label className="font-medium">E-Bike Features</Label>
+          <ChevronDown className="h-4 w-4" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <Label>E-Bikes Only</Label>
+            <Switch checked={isElectricOnly} onCheckedChange={setIsElectricOnly} />
+          </div>
+          {(isElectricOnly || bicycleTypes.includes('Electric Bike')) && (
+            <div className="space-y-2">
+              <Label className="text-sm">Minimum Battery Range: {batteryRange} miles</Label>
+              <Slider
+                value={[batteryRange]}
+                onValueChange={(v) => setBatteryRange(v[0])}
+                min={0}
+                max={150}
+                step={5}
+              />
+              <p className="text-xs text-muted-foreground">Required electric range per charge</p>
+            </div>
+          )}
         </CollapsibleContent>
       </Collapsible>
 
