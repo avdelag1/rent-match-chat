@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 
 interface FilterOptions {
   category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht';
-  listingType?: 'rent' | 'sale';
+  listingType?: 'rent' | 'sale' | 'both';
   propertyType?: string[];
   priceRange?: [number, number];
   bedrooms?: number[];
@@ -144,7 +144,7 @@ export function FilterBottomSheet({
           <RadioGroup
             value={filters.listingType}
             onValueChange={(value) =>
-              setFilters({ ...filters, listingType: value as 'rent' | 'sale' })
+              setFilters({ ...filters, listingType: value as 'rent' | 'sale' | 'both' })
             }
           >
             <div className="flex items-center space-x-2">
@@ -157,6 +157,12 @@ export function FilterBottomSheet({
               <RadioGroupItem value="sale" id="sale" />
               <Label htmlFor="sale" className="font-normal cursor-pointer">
                 For Sale
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="both" id="both" />
+              <Label htmlFor="both" className="font-normal cursor-pointer">
+                Both
               </Label>
             </div>
           </RadioGroup>
