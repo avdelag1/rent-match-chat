@@ -231,20 +231,19 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* Main Content - Scrollable area between top bar and bottom nav */}
-      <main className="flex-1 overflow-y-auto pt-14 pb-16">
-        <div className="w-full min-h-full relative">
-          {
-            React.Children.map(children, (child) => {
-              if (React.isValidElement(child)) {
-                return React.cloneElement(child as React.ReactElement, {
-                  onPropertyInsights: handlePropertyInsights,
-                  onClientInsights: handleClientInsights,
-                  onMessageClick: handleMessageClick,
-                } as any);
-              }
-              return child;
-            })
-          }
+      <main className="flex-1 overflow-y-auto pt-14 pb-16 min-h-screen">
+        <div className="w-full min-h-full relative">{
+          React.Children.map(children, (child) => {
+            if (React.isValidElement(child)) {
+              return React.cloneElement(child as React.ReactElement, {
+                onPropertyInsights: handlePropertyInsights,
+                onClientInsights: handleClientInsights,
+                onMessageClick: handleMessageClick,
+              } as any);
+            }
+            return child;
+          })
+        }
         </div>
       </main>
 
