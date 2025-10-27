@@ -412,7 +412,7 @@ export function CategoryFilters({
                     </CardHeader>
                     <CardContent>
                       <div className="flex gap-2 flex-wrap">
-                        {['Sport', 'Cruiser', 'Touring', 'Adventure', 'Naked', 'Scooter', 'Cafe Racer', 'Dirt Bike'].map((type) => (
+                        {['Sport', 'Cruiser', 'Touring', 'Adventure', 'Naked', 'Scooter', 'Electric Scooter', 'Cafe Racer', 'Dirt Bike'].map((type) => (
                           <Button
                             key={type}
                             variant={filters.motorcycleType === type ? 'default' : 'outline'}
