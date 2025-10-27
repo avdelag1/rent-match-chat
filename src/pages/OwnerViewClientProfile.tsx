@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, MessageCircle, MapPin, Briefcase, Heart } from 'lucide-react';
+import { ArrowLeft, MessageCircle, MapPin, Briefcase, Heart, Home, Bike, Ship } from 'lucide-react';
+import { Car } from 'lucide-react';
 import { ImageCarousel } from '@/components/ImageCarousel';
 import { toast } from 'sonner';
+import { ClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 
 export default function OwnerViewClientProfile() {
   const { clientId } = useParams();
@@ -40,6 +42,22 @@ export default function OwnerViewClientProfile() {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Fetch client's filter preferences
+  const { data: preferences } = useQuery({
+    queryKey: ['client-filter-preferences', clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('client_filter_preferences')
+        .select('*')
+        .eq('user_id', clientId)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data as ClientFilterPreferences | null;
+    },
+    enabled: !!clientId,
   });
 
   const handleConnect = () => {
@@ -191,6 +209,473 @@ export default function OwnerViewClientProfile() {
               )}
             </CardContent>
           </Card>
+
+          {/* CLIENT PREFERENCES - What they're looking for */}
+          {preferences && (
+            <>
+              {/* Property Preferences */}
+              {preferences.interested_in_properties && (
+                <Card className="mb-6">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Home className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-bold">Property Preferences</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Price Range */}
+                      {(preferences.min_price !== null || preferences.max_price !== null) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Price Range</h4>
+                          <p className="text-muted-foreground">
+                            ${preferences.min_price?.toLocaleString() || '0'} - ${preferences.max_price?.toLocaleString() || 'Unlimited'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Property Types */}
+                      {preferences.property_types && preferences.property_types.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Property Types</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.property_types.map((type, idx) => (
+                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bedrooms & Bathrooms */}
+                      {(preferences.min_bedrooms || preferences.max_bedrooms) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Rooms</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.min_bedrooms || 0} - {preferences.max_bedrooms || '∞'} bedrooms, {' '}
+                            {preferences.min_bathrooms || 0} - {preferences.max_bathrooms || '∞'} bathrooms
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Locations */}
+                      {preferences.location_zones && preferences.location_zones.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Preferred Locations</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.location_zones.map((zone, idx) => (
+                              <Badge key={idx} variant="outline">{zone}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Amenities */}
+                      <div>
+                        <h4 className="font-medium mb-2">Required Amenities</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {preferences.furnished_required && <Badge variant="secondary">Furnished</Badge>}
+                          {preferences.pet_friendly_required && <Badge variant="secondary">Pet Friendly</Badge>}
+                          {preferences.requires_gym && <Badge variant="secondary">Gym</Badge>}
+                          {preferences.requires_balcony && <Badge variant="secondary">Balcony</Badge>}
+                          {preferences.requires_elevator && <Badge variant="secondary">Elevator</Badge>}
+                          {preferences.requires_jacuzzi && <Badge variant="secondary">Jacuzzi</Badge>}
+                          {preferences.requires_coworking_space && <Badge variant="secondary">Coworking Space</Badge>}
+                          {preferences.requires_solar_panels && <Badge variant="secondary">Solar Panels</Badge>}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Motorcycle Preferences */}
+              {preferences.interested_in_motorcycles && (
+                <Card className="mb-6">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Car className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-bold">Motorcycle Preferences</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Motorcycle Types */}
+                      {preferences.moto_types && preferences.moto_types.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Types</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.moto_types.map((type, idx) => (
+                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Price Range */}
+                      {(preferences.moto_price_min !== null || preferences.moto_price_max !== null) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Price Range</h4>
+                          <p className="text-muted-foreground">
+                            ${preferences.moto_price_min?.toLocaleString() || '0'} - ${preferences.moto_price_max?.toLocaleString() || 'Unlimited'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Engine Size */}
+                      {(preferences.moto_engine_size_min || preferences.moto_engine_size_max) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Engine Size</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.moto_engine_size_min || 0}cc - {preferences.moto_engine_size_max || 2000}cc
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Year Range */}
+                      {(preferences.moto_year_min || preferences.moto_year_max) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Year</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.moto_year_min || 1990} - {preferences.moto_year_max || new Date().getFullYear()}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Transmission, Condition, Fuel Types */}
+                      {preferences.moto_transmission && preferences.moto_transmission.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Transmission</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.moto_transmission.map((trans, idx) => (
+                              <Badge key={idx} variant="outline">{trans}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {preferences.moto_condition && preferences.moto_condition.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Condition</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.moto_condition.map((cond, idx) => (
+                              <Badge key={idx} variant="outline">{cond}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {preferences.moto_fuel_types && preferences.moto_fuel_types.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Fuel Types</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.moto_fuel_types.map((fuel, idx) => (
+                              <Badge key={idx} variant="outline">{fuel}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Features */}
+                      {preferences.moto_features && preferences.moto_features.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Desired Features</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.moto_features.map((feat, idx) => (
+                              <Badge key={idx} variant="secondary">{feat}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Additional Requirements */}
+                      {(preferences.moto_has_abs || preferences.moto_is_electric) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Requirements</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.moto_has_abs && <Badge variant="secondary">Must have ABS</Badge>}
+                            {preferences.moto_is_electric && <Badge variant="secondary">Electric Only</Badge>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Bicycle Preferences */}
+              {preferences.interested_in_bicycles && (
+                <Card className="mb-6">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Bike className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-bold">Bicycle Preferences</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Bicycle Types */}
+                      {preferences.bicycle_types && preferences.bicycle_types.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Types</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.bicycle_types.map((type, idx) => (
+                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Price Range */}
+                      {(preferences.bicycle_price_min !== null || preferences.bicycle_price_max !== null) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Price Range</h4>
+                          <p className="text-muted-foreground">
+                            ${preferences.bicycle_price_min?.toLocaleString() || '0'} - ${preferences.bicycle_price_max?.toLocaleString() || 'Unlimited'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Wheel Size, Suspension, Material */}
+                      {preferences.bicycle_wheel_sizes && preferences.bicycle_wheel_sizes.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Wheel Sizes</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.bicycle_wheel_sizes.map((size, idx) => (
+                              <Badge key={idx} variant="outline">{size}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {preferences.bicycle_suspension_type && preferences.bicycle_suspension_type.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Suspension Type</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.bicycle_suspension_type.map((susp, idx) => (
+                              <Badge key={idx} variant="outline">{susp}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {preferences.bicycle_material && preferences.bicycle_material.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Frame Material</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.bicycle_material.map((mat, idx) => (
+                              <Badge key={idx} variant="outline">{mat}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Gears & Year */}
+                      {(preferences.bicycle_gears_min || preferences.bicycle_gears_max) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Gears</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.bicycle_gears_min || 1} - {preferences.bicycle_gears_max || 30} gears
+                          </p>
+                        </div>
+                      )}
+
+                      {preferences.bicycle_year_min && (
+                        <div>
+                          <h4 className="font-medium mb-2">Minimum Year</h4>
+                          <p className="text-muted-foreground">{preferences.bicycle_year_min}</p>
+                        </div>
+                      )}
+
+                      {/* Condition */}
+                      {preferences.bicycle_condition && preferences.bicycle_condition.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Condition</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.bicycle_condition.map((cond, idx) => (
+                              <Badge key={idx} variant="outline">{cond}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Electric Preferences */}
+                      {preferences.bicycle_is_electric && (
+                        <div>
+                          <h4 className="font-medium mb-2">Electric Preferences</h4>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary">Electric Only</Badge>
+                            {preferences.bicycle_battery_range_min && (
+                              <Badge variant="outline">Min {preferences.bicycle_battery_range_min} miles range</Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Yacht Preferences */}
+              {preferences.interested_in_yachts && (
+                <Card className="mb-6">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Ship className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-bold">Yacht Preferences</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Yacht Types */}
+                      {preferences.yacht_types && preferences.yacht_types.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Types</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.yacht_types.map((type, idx) => (
+                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Price Range */}
+                      {(preferences.yacht_price_min !== null || preferences.yacht_price_max !== null) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Price Range</h4>
+                          <p className="text-muted-foreground">
+                            ${preferences.yacht_price_min?.toLocaleString() || '0'} - ${preferences.yacht_price_max?.toLocaleString() || 'Unlimited'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Length */}
+                      {(preferences.yacht_length_min || preferences.yacht_length_max) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Length</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.yacht_length_min || 20} - {preferences.yacht_length_max || 300} feet
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Year */}
+                      {preferences.yacht_year_min && (
+                        <div>
+                          <h4 className="font-medium mb-2">Minimum Year</h4>
+                          <p className="text-muted-foreground">{preferences.yacht_year_min}</p>
+                        </div>
+                      )}
+
+                      {/* Guest Capacity & Cabins */}
+                      {(preferences.yacht_guest_capacity_min || preferences.yacht_guest_capacity_max) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Guest Capacity</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.yacht_guest_capacity_min || 1} - {preferences.yacht_guest_capacity_max || 50} guests
+                          </p>
+                        </div>
+                      )}
+
+                      {(preferences.yacht_cabin_count_min || preferences.yacht_cabin_count_max) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Cabins</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.yacht_cabin_count_min || 1} - {preferences.yacht_cabin_count_max || 15} cabins
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Condition & Fuel Types */}
+                      {preferences.yacht_condition && preferences.yacht_condition.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Condition</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.yacht_condition.map((cond, idx) => (
+                              <Badge key={idx} variant="outline">{cond}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {preferences.yacht_fuel_types && preferences.yacht_fuel_types.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Fuel Types</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.yacht_fuel_types.map((fuel, idx) => (
+                              <Badge key={idx} variant="outline">{fuel}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Engine Power & Performance */}
+                      {(preferences.yacht_engine_power_min || preferences.yacht_engine_power_max) && (
+                        <div>
+                          <h4 className="font-medium mb-2">Engine Power</h4>
+                          <p className="text-muted-foreground">
+                            {preferences.yacht_engine_power_min || 0} - {preferences.yacht_engine_power_max || 10000} HP
+                          </p>
+                        </div>
+                      )}
+
+                      {preferences.yacht_max_speed_min && (
+                        <div>
+                          <h4 className="font-medium mb-2">Minimum Speed</h4>
+                          <p className="text-muted-foreground">{preferences.yacht_max_speed_min} knots</p>
+                        </div>
+                      )}
+
+                      {preferences.yacht_range_nm_min && (
+                        <div>
+                          <h4 className="font-medium mb-2">Minimum Range</h4>
+                          <p className="text-muted-foreground">{preferences.yacht_range_nm_min} nautical miles</p>
+                        </div>
+                      )}
+
+                      {/* Hull Material */}
+                      {preferences.yacht_hull_material && preferences.yacht_hull_material.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Hull Material</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.yacht_hull_material.map((mat, idx) => (
+                              <Badge key={idx} variant="outline">{mat}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Water Activities */}
+                      {preferences.yacht_water_activities && preferences.yacht_water_activities.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Water Activities</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.yacht_water_activities.map((act, idx) => (
+                              <Badge key={idx} variant="secondary">{act}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Navigation Equipment */}
+                      {preferences.yacht_navigation_equipment && preferences.yacht_navigation_equipment.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Navigation Equipment</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences.yacht_navigation_equipment.map((nav, idx) => (
+                              <Badge key={idx} variant="secondary">{nav}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Stabilizers */}
+                      {preferences.yacht_has_stabilizers && (
+                        <div>
+                          <Badge variant="secondary">Must have stabilizers</Badge>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 sticky bottom-6">
