@@ -629,9 +629,7 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
 
             // Budget filter - only apply if meaningful values exist
             if ((ownerPrefs.min_budget && ownerPrefs.min_budget > 0) || (ownerPrefs.max_budget && ownerPrefs.max_budget < 999999)) {
-              const budgetMax = profile.budget_max ? Number(profile.budget_max) : null;
-              const monthlyIncome = profile.monthly_income ? Number(profile.monthly_income) : null;
-              const clientBudget = budgetMax || monthlyIncome;
+              const clientBudget = (profile as any).budget_max ? Number((profile as any).budget_max) : null;
               
               // Only filter if client has budget data
               if (clientBudget) {
@@ -648,19 +646,19 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
             }
 
             // Pet filter
-            if (ownerPrefs.allows_pets === false && profile.has_pets === true) {
+            if (ownerPrefs.allows_pets === false && (profile as any).has_pets === true) {
               console.log(`❌ ${profile.full_name}: Has pets but not allowed`);
               return false;
             }
 
             // Smoking filter
-            if (ownerPrefs.allows_smoking === false && profile.smoking === true) {
+            if (ownerPrefs.allows_smoking === false && (profile as any).smoking === true) {
               console.log(`❌ ${profile.full_name}: Smokes but not allowed`);
               return false;
             }
 
             // Party filter
-            if (ownerPrefs.allows_parties === false && profile.party_friendly === true) {
+            if (ownerPrefs.allows_parties === false && (profile as any).party_friendly === true) {
               console.log(`❌ ${profile.full_name}: Party-friendly but not allowed`);
               return false;
             }
@@ -749,15 +747,15 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
             user_id: profile.id,
             name: profile.full_name || 'Anonymous',
             age: profile.age || 0,
-            gender: profile.gender || '',
+            gender: (profile as any).gender || '',
             interests: profile.interests || [],
             preferred_activities: profile.preferred_activities || [],
             location: profile.city ? { city: profile.city } : {},
             lifestyle_tags: profile.lifestyle_tags || [],
             profile_images: profile.images || [],
             preferred_listing_types: ['rent'],
-            budget_min: profile.budget_min || 0,
-            budget_max: profile.budget_max || 100000,
+            budget_min: (profile as any).budget_min || 0,
+            budget_max: (profile as any).budget_max || 100000,
             matchPercentage: match.percentage,
             matchReasons: match.reasons,
             incompatibleReasons: match.incompatible,
