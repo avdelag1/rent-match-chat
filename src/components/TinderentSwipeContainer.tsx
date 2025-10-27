@@ -338,7 +338,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </AnimatePresence>
 
       {/* Full Screen Cards Container */}
-      <div className="relative h-[650px] w-full mx-auto max-w-md">
+      <div className="relative h-[700px] w-full mx-auto max-w-md">
         
         <AnimatePresence mode="popLayout">
           {/* Next card - scales up smoothly when current card exits */}
