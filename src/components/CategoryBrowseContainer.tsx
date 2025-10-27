@@ -15,7 +15,7 @@ export function CategoryBrowseContainer({
   // This component is simplified to just show the swipe interface
 
   return (
-    <div className="h-full">
+    <div className="w-full max-w-md mx-auto">
       {/* Swipe Container - All filters now in sidebar */}
       <TinderentSwipeContainer
         onListingTap={onListingTap}

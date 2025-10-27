@@ -284,9 +284,18 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
   const nextClient = clientProfiles[currentIndex + 1];
 
+  // CRITICAL DEBUG
+  console.log('🎴 RENDER CHECK:', {
+    currentIndex,
+    totalProfiles: clientProfiles.length,
+    hasCurrentClient: !!currentClient,
+    hasNextClient: !!nextClient,
+    currentClientName: currentClient?.name,
+    nextClientName: nextClient?.name
+  });
+
   return (
-    <div className="w-full flex flex-col relative z-0">
-      {/* Client Counter */}
+    <div className="w-full flex flex-col relative z-0 max-w-md mx-auto">{/* Client Counter */}
       <div className="text-center mb-2 z-20">
         <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
           <span className="text-white text-sm font-medium">
@@ -353,10 +362,9 @@ export function ClientSwipeContainer({
       </AnimatePresence>
 
       {/* Cards Container with Fixed Height */}
-      <div className="relative h-[650px] w-full mx-auto max-w-md">
+      <div className="relative h-[650px] w-full max-w-md mx-auto">
         
-        <AnimatePresence mode="popLayout">
-          {/* Next card - scales up smoothly when current card exits */}
+        <AnimatePresence mode="popLayout">{/* Next card - scales up smoothly when current card exits */}
           {nextClient && (
             <motion.div
               key={`next-${nextClient.user_id}`}
