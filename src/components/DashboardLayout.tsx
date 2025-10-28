@@ -98,7 +98,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('onboarding_completed')
+          .select('onboarding_completed, full_name, city, age')
           .eq('id', user.id)
           .single();
 
@@ -109,8 +109,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
         setOnboardingChecked(true);
 
-        // Show onboarding if not completed
-        if (!data?.onboarding_completed) {
+        // Show onboarding ONLY if:
+        // 1. onboarding_completed is explicitly false, AND
+        // 2. User has minimal profile data (likely a new user)
+        const hasMinimalData = !data?.full_name && !data?.city && !data?.age;
+        if (data?.onboarding_completed === false && hasMinimalData) {
           setShowOnboarding(true);
         }
       } catch (error) {
