@@ -73,6 +73,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Category and mode state for filters
   const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
   const [filterMode, setFilterMode] = useState<'sale' | 'rent' | 'both'>('rent');
+  const [appliedFilters, setAppliedFilters] = useState<any>(null);
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -216,8 +217,22 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   const handleApplyFilters = (filters: any) => {
     console.log('Applied filters:', filters);
-    // TODO: Apply filters to listings
-    // This should trigger a refetch of listings with the new filter parameters
+    setAppliedFilters(filters);
+
+    // Count active filters for user feedback
+    let activeFilterCount = 0;
+    if (filters.propertyType?.length) activeFilterCount += filters.propertyType.length;
+    if (filters.bedrooms?.length) activeFilterCount += filters.bedrooms.length;
+    if (filters.bathrooms?.length) activeFilterCount += filters.bathrooms.length;
+    if (filters.amenities?.length) activeFilterCount += filters.amenities.length;
+    if (filters.priceRange) activeFilterCount += 1;
+
+    toast({
+      title: '✨ Filters Applied',
+      description: activeFilterCount > 0
+        ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
+        : 'Showing all listings',
+    });
   }
 
   return (
@@ -239,6 +254,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
                 onPropertyInsights: handlePropertyInsights,
                 onClientInsights: handleClientInsights,
                 onMessageClick: handleMessageClick,
+                filters: appliedFilters,
               } as any);
             }
             return child;

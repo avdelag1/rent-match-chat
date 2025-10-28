@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { EnhancedPropertyCard } from './EnhancedPropertyCard';
 import { useListings, useSwipedListings } from '@/hooks/useListings';
-import { useSmartListingMatching } from '@/hooks/useSmartMatching';
+import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
@@ -24,26 +24,26 @@ interface TinderentSwipeContainerProps {
     city?: string;
     radius: number;
   } | null;
+  filters?: ListingFilters;
 }
 
-export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter }: TinderentSwipeContainerProps) {
+export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [appliedFilters, setAppliedFilters] = useState<any>({});
   const [emojiAnimation, setEmojiAnimation] = useState<{
     show: boolean;
     type: 'like' | 'dislike';
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
-  
-  // Get ALL listings - no swipe filtering
-  const { 
-    data: smartListings = [], 
-    isLoading: smartLoading, 
+
+  // Get listings with filters applied
+  const {
+    data: smartListings = [],
+    isLoading: smartLoading,
     error: smartError,
     isRefetching: smartRefetching,
     refetch: refetchSmart
-  } = useSmartListingMatching([]);
+  } = useSmartListingMatching([], filters);
   
   const { 
     data: regularListings = [], 
@@ -173,18 +173,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         description: 'Manage or upgrade your plan in Settings > Subscription.',
       });
     }
-  };
-
-  const handleApplyFilters = (filters: any) => {
-    setAppliedFilters(filters);
-    setCurrentIndex(0);
-    refetch(); // Force refetch with new filters
-    
-    const activeFiltersCount = Object.values(filters).flat().filter(Boolean).length;
-    toast({
-      title: '✨ Filters Applied',
-      description: `Found properties matching your ${activeFiltersCount} preferences.`,
-    });
   };
 
   const progress = listings.length > 0 ? ((currentIndex + 1) / listings.length) * 100 : 0;

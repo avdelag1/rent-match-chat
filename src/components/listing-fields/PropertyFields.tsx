@@ -16,12 +16,18 @@ const VIEW_TYPES = ['Ocean', 'City', 'Garden', 'Mountain', 'Street', 'Pool', 'No
 const ORIENTATIONS = ['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest'];
 
 export function PropertyFields({ register, setValue, watch }: PropertyFieldsProps) {
+  // Watch checkbox values
   const isFurnished = watch('is_furnished');
   const hasPetFriendly = watch('is_pet_friendly');
   const hasBalcony = watch('has_balcony');
   const hasParking = watch('has_parking');
   const hasElevator = watch('has_elevator');
   const hasSecurity = watch('has_security');
+
+  // Watch select field values
+  const propertySubtype = watch('property_subtype');
+  const viewType = watch('view_type');
+  const orientation = watch('orientation');
 
   return (
     <div className="space-y-6">
@@ -68,7 +74,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
             </div>
             <div className="space-y-2">
               <Label className="text-white">Property Subtype *</Label>
-              <Select onValueChange={(value) => setValue('property_subtype', value)}>
+              <Select value={propertySubtype} onValueChange={(value) => setValue('property_subtype', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -212,7 +218,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-white">View Type</Label>
-              <Select onValueChange={(value) => setValue('view_type', value)}>
+              <Select value={viewType} onValueChange={(value) => setValue('view_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select view" />
                 </SelectTrigger>
@@ -228,7 +234,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
 
             <div className="space-y-2">
               <Label className="text-white">Orientation</Label>
-              <Select onValueChange={(value) => setValue('orientation', value)}>
+              <Select value={orientation} onValueChange={(value) => setValue('orientation', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select orientation" />
                 </SelectTrigger>
