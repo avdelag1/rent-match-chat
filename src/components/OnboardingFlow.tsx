@@ -421,12 +421,28 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
     }
   };
 
+  const handleSkip = async () => {
+    // Mark onboarding as completed even if skipped
+    try {
+      await supabase
+        .from('profiles')
+        .update({
+          onboarding_completed: true,
+          onboarding_step: currentStep,
+        })
+        .eq('id', user?.id);
+
+      onComplete();
+    } catch (error) {
+      console.error('Error skipping onboarding:', error);
+      onComplete(); // Still close even if update fails
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleSkip(); }}>
       <DialogContent
         className="sm:max-w-2xl bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
@@ -452,15 +468,24 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between pt-4 border-t border-white/10">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className="text-white/70 hover:text-white hover:bg-white/10"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              onClick={handleBack}
+              disabled={currentStep === 0}
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleSkip}
+              className="text-white/50 hover:text-white hover:bg-white/10"
+            >
+              Skip for Now
+            </Button>
+          </div>
 
           {currentStep < steps.length - 1 ? (
             <Button
