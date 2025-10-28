@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
+import { toast } from '@/hooks/use-toast';
 
 interface MotoClientFiltersProps {
   onApply: (filters: any) => void;
@@ -16,6 +18,8 @@ interface MotoClientFiltersProps {
 }
 
 export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }: MotoClientFiltersProps) {
+  const savePreferencesMutation = useSaveClientFilterPreferences();
+  
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [motoTypes, setMotoTypes] = useState<string[]>(initialFilters.moto_types || []);
   const [engineRange, setEngineRange] = useState([initialFilters.engine_cc_min || 50, initialFilters.engine_cc_max || 1000]);
@@ -116,6 +120,41 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
     setBatteryCapacity(0);
     setIsElectricOnly(false);
     onApply({});
+  };
+
+  const handleSavePreferences = async () => {
+    try {
+      await savePreferencesMutation.mutateAsync({
+        interested_in_motorcycles: true,
+        moto_types: motoTypes.length > 0 ? motoTypes : null,
+        moto_engine_size_min: engineRange[0],
+        moto_engine_size_max: engineRange[1],
+        moto_year_min: yearRange[0],
+        moto_year_max: yearRange[1],
+        moto_price_min: priceRange[0],
+        moto_price_max: priceRange[1],
+        moto_mileage_max: mileageRange[1],
+        moto_transmission: transmission !== 'any' ? [transmission] : null,
+        moto_condition: condition !== 'any' ? [condition] : null,
+        moto_fuel_types: fuelTypes.length > 0 ? fuelTypes : null,
+        moto_cylinders: cylinders !== 'any' ? [cylinders] : null,
+        moto_cooling_system: coolingSystem !== 'any' ? [coolingSystem] : null,
+        moto_has_abs: hasABS || null,
+        moto_features: features.length > 0 ? features : null,
+        moto_is_electric: isElectricOnly || null,
+        moto_battery_capacity_min: batteryCapacity > 0 ? batteryCapacity : null,
+      });
+      toast({
+        title: 'Preferences saved!',
+        description: 'Your motorcycle filter preferences have been saved successfully.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -490,9 +529,20 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
         </CollapsibleContent>
       </Collapsible>
 
-      <div className="flex gap-2 pt-4">
-        <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-        <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+      <div className="flex flex-col gap-2 pt-4">
+        <div className="flex gap-2">
+          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
+          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+        </div>
+        <Button 
+          onClick={handleSavePreferences} 
+          variant="secondary" 
+          className="w-full"
+          disabled={savePreferencesMutation.isPending}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
+        </Button>
       </div>
     </div>
   );

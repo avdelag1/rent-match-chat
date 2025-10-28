@@ -32,6 +32,7 @@ interface PropertyFormProps {
 interface PropertyFormData {
   id?: string;
   title: string;
+  description?: string;
   property_type: string;
   listing_type: string;
   price: number;

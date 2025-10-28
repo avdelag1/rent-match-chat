@@ -5,9 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Save } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
+import { toast } from '@/hooks/use-toast';
 
 interface BicycleClientFiltersProps {
   onApply: (filters: any) => void;
@@ -16,6 +18,8 @@ interface BicycleClientFiltersProps {
 }
 
 export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount }: BicycleClientFiltersProps) {
+  const savePreferencesMutation = useSaveClientFilterPreferences();
+  
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [bicycleTypes, setBicycleTypes] = useState<string[]>(initialFilters.bicycle_types || []);
   const [frameSize, setFrameSize] = useState(initialFilters.frame_size || 'any');
@@ -101,6 +105,36 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
     setYearRange([2010, new Date().getFullYear()]);
     setIsElectricOnly(false);
     onApply({});
+  };
+
+  const handleSavePreferences = async () => {
+    try {
+      await savePreferencesMutation.mutateAsync({
+        interested_in_bicycles: true,
+        bicycle_types: bicycleTypes.length > 0 ? bicycleTypes : null,
+        bicycle_price_min: priceRange[0],
+        bicycle_price_max: priceRange[1],
+        bicycle_wheel_sizes: wheelSizes.length > 0 ? wheelSizes : null,
+        bicycle_suspension_type: suspensionType !== 'any' ? [suspensionType] : null,
+        bicycle_material: material !== 'any' ? [material] : null,
+        bicycle_gears_min: gearRange[0],
+        bicycle_gears_max: gearRange[1],
+        bicycle_year_min: yearRange[0],
+        bicycle_condition: condition !== 'any' ? [condition] : null,
+        bicycle_is_electric: isElectricOnly || null,
+        bicycle_battery_range_min: batteryRange > 0 ? batteryRange : null,
+      });
+      toast({
+        title: 'Preferences saved!',
+        description: 'Your bicycle filter preferences have been saved successfully.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -447,9 +481,20 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
         </CollapsibleContent>
       </Collapsible>
 
-      <div className="flex gap-2 pt-4">
-        <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-        <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+      <div className="flex flex-col gap-2 pt-4">
+        <div className="flex gap-2">
+          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
+          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+        </div>
+        <Button 
+          onClick={handleSavePreferences} 
+          variant="secondary" 
+          className="w-full"
+          disabled={savePreferencesMutation.isPending}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
+        </Button>
       </div>
     </div>
   );

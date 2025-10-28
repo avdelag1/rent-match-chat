@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
+import { toast } from '@/hooks/use-toast';
 
 interface YachtClientFiltersProps {
   onApply: (filters: any) => void;
@@ -16,6 +18,8 @@ interface YachtClientFiltersProps {
 }
 
 export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }: YachtClientFiltersProps) {
+  const savePreferencesMutation = useSaveClientFilterPreferences();
+  
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [yachtTypes, setYachtTypes] = useState<string[]>(initialFilters.yacht_types || []);
   const [sizeRange, setSizeRange] = useState([initialFilters.yacht_size_min || 20, initialFilters.yacht_size_max || 200]);
@@ -111,6 +115,42 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
     setNavigationEquipment([]);
     setHasStabilizers(false);
     onApply({});
+  };
+
+  const handleSavePreferences = async () => {
+    try {
+      await savePreferencesMutation.mutateAsync({
+        interested_in_yachts: true,
+        yacht_types: yachtTypes.length > 0 ? yachtTypes : null,
+        yacht_length_min: sizeRange[0],
+        yacht_length_max: sizeRange[1],
+        yacht_price_min: priceRange[0],
+        yacht_price_max: priceRange[1],
+        yacht_year_min: yearRange[0],
+        yacht_guest_capacity_min: guestCapacity,
+        yacht_cabin_count_min: cabinCount,
+        yacht_condition: condition !== 'any' ? [condition] : null,
+        yacht_fuel_types: fuelTypes.length > 0 ? fuelTypes : null,
+        yacht_engine_power_min: enginePowerRange[0],
+        yacht_engine_power_max: enginePowerRange[1],
+        yacht_max_speed_min: speedRange[0],
+        yacht_range_nm_min: rangeNM,
+        yacht_hull_material: hullMaterial !== 'any' ? [hullMaterial] : null,
+        yacht_water_activities: waterActivities.length > 0 ? waterActivities : null,
+        yacht_navigation_equipment: navigationEquipment.length > 0 ? navigationEquipment : null,
+        yacht_has_stabilizers: hasStabilizers,
+      });
+      toast({
+        title: 'Preferences saved!',
+        description: 'Your yacht filter preferences have been saved successfully.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -558,9 +598,20 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
         </CollapsibleContent>
       </Collapsible>
 
-      <div className="flex gap-2 pt-4">
-        <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-        <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+      <div className="flex flex-col gap-2 pt-4">
+        <div className="flex gap-2">
+          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
+          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+        </div>
+        <Button 
+          onClick={handleSavePreferences} 
+          variant="secondary" 
+          className="w-full"
+          disabled={savePreferencesMutation.isPending}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
+        </Button>
       </div>
     </div>
   );

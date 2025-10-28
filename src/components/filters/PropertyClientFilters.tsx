@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Save } from 'lucide-react';
+import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
+import { toast } from '@/hooks/use-toast';
 
 interface PropertyClientFiltersProps {
   onApply: (filters: any) => void;
@@ -16,6 +18,8 @@ interface PropertyClientFiltersProps {
 }
 
 export function PropertyClientFilters({ onApply, initialFilters = {}, activeCount }: PropertyClientFiltersProps) {
+  const savePreferencesMutation = useSaveClientFilterPreferences();
+  
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [propertyTypes, setPropertyTypes] = useState<string[]>(initialFilters.property_types || []);
   const [budgetRange, setBudgetRange] = useState([initialFilters.budget_min || 500, initialFilters.budget_max || 5000]);
@@ -88,6 +92,32 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     setHasElevator(false);
     setParkingSpots(0);
     onApply({});
+  };
+
+  const handleSavePreferences = async () => {
+    try {
+      await savePreferencesMutation.mutateAsync({
+        interested_in_properties: true,
+        min_price: budgetRange[0],
+        max_price: budgetRange[1],
+        min_bedrooms: bedrooms,
+        min_bathrooms: bathrooms,
+        property_types: propertyTypes.length > 0 ? propertyTypes : null,
+        amenities_required: amenities.length > 0 ? amenities : null,
+        pet_friendly_required: petFriendly,
+        furnished_required: furnished,
+      });
+      toast({
+        title: 'Preferences saved!',
+        description: 'Your property filter preferences have been saved successfully.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -379,9 +409,20 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
         </CollapsibleContent>
       </Collapsible>
 
-      <div className="flex gap-2 pt-4">
-        <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-        <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+      <div className="flex flex-col gap-2 pt-4">
+        <div className="flex gap-2">
+          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
+          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+        </div>
+        <Button 
+          onClick={handleSavePreferences} 
+          variant="secondary" 
+          className="w-full"
+          disabled={savePreferencesMutation.isPending}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
+        </Button>
       </div>
     </div>
   );
