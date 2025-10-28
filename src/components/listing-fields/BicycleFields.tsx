@@ -19,6 +19,16 @@ const BRAKE_TYPES = ['Disc', 'Rim', 'Hydraulic Disc', 'Mechanical Disc', 'V-Brak
 const WHEEL_SIZES = ['20"', '24"', '26"', '27.5"', '29"', '700c', '650b'];
 
 export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps) {
+  // Watch select field values
+  const bicycleType = watch('bicycle_type');
+  const frameSize = watch('frame_size');
+  const frameMaterial = watch('frame_material');
+  const wheelSize = watch('wheel_size');
+  const suspensionType = watch('suspension_type');
+  const brakeType = watch('brake_type');
+  const vehicleCondition = watch('vehicle_condition');
+
+  // Watch checkbox values
   const isElectricBike = watch('is_electric_bike');
   const includesLock = watch('includes_lock');
   const includesLights = watch('includes_lights');
@@ -74,7 +84,7 @@ export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps)
             </div>
             <div className="space-y-2">
               <Label className="text-white">Condition</Label>
-              <Select onValueChange={(value) => setValue('vehicle_condition', value)}>
+              <Select value={vehicleCondition} onValueChange={(value) => setValue('vehicle_condition', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -100,7 +110,7 @@ export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps)
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-white">Bicycle Type *</Label>
-              <Select onValueChange={(value) => setValue('bicycle_type', value)}>
+              <Select value={bicycleType} onValueChange={(value) => setValue('bicycle_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -116,7 +126,7 @@ export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps)
 
             <div className="space-y-2">
               <Label className="text-white">Frame Size</Label>
-              <Select onValueChange={(value) => setValue('frame_size', value)}>
+              <Select value={frameSize} onValueChange={(value) => setValue('frame_size', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select size" />
                 </SelectTrigger>
@@ -134,7 +144,7 @@ export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps)
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="text-white">Frame Material</Label>
-              <Select onValueChange={(value) => setValue('frame_material', value)}>
+              <Select value={frameMaterial} onValueChange={(value) => setValue('frame_material', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -162,7 +172,7 @@ export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps)
 
             <div className="space-y-2">
               <Label className="text-white">Wheel Size</Label>
-              <Select onValueChange={(value) => setValue('wheel_size', value)}>
+              <Select value={wheelSize} onValueChange={(value) => setValue('wheel_size', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -180,7 +190,7 @@ export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps)
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-white">Suspension Type</Label>
-              <Select onValueChange={(value) => setValue('suspension_type', value)}>
+              <Select value={suspensionType} onValueChange={(value) => setValue('suspension_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -196,7 +206,7 @@ export function BicycleFields({ register, setValue, watch }: BicycleFieldsProps)
 
             <div className="space-y-2">
               <Label className="text-white">Brake Type</Label>
-              <Select onValueChange={(value) => setValue('brake_type', value)}>
+              <Select value={brakeType} onValueChange={(value) => setValue('brake_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>

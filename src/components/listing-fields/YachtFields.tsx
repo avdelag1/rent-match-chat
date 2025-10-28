@@ -15,6 +15,11 @@ const YACHT_TYPES = ['Motor Yacht', 'Sailing Yacht', 'Catamaran', 'Trimaran', 'G
 const HULL_MATERIALS = ['Fiberglass', 'Wood', 'Aluminum', 'Steel', 'Carbon Fiber', 'Composite'];
 
 export function YachtFields({ register, setValue, watch }: YachtFieldsProps) {
+  // Watch select field values
+  const yachtType = watch('yacht_type');
+  const hullMaterial = watch('hull_material');
+
+  // Watch checkbox values
   const hasAirConditioning = watch('has_air_conditioning');
   const hasGenerator = watch('has_generator');
   const hasAutopilot = watch('has_autopilot');
@@ -65,7 +70,7 @@ export function YachtFields({ register, setValue, watch }: YachtFieldsProps) {
             </div>
             <div className="space-y-2">
               <Label className="text-white">Yacht Type *</Label>
-              <Select onValueChange={(value) => setValue('yacht_type', value)}>
+              <Select value={yachtType} onValueChange={(value) => setValue('yacht_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -80,7 +85,7 @@ export function YachtFields({ register, setValue, watch }: YachtFieldsProps) {
             </div>
             <div className="space-y-2">
               <Label className="text-white">Hull Material</Label>
-              <Select onValueChange={(value) => setValue('hull_material', value)}>
+              <Select value={hullMaterial} onValueChange={(value) => setValue('hull_material', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>

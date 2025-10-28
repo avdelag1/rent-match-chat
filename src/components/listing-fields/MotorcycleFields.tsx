@@ -17,6 +17,13 @@ const FUEL_TYPES = ['Gasoline', 'Electric', 'Hybrid'];
 const VEHICLE_CONDITIONS = ['New', 'Like New', 'Excellent', 'Good', 'Fair'];
 
 export function MotorcycleFields({ register, setValue, watch }: MotorcycleFieldsProps) {
+  // Watch all select field values
+  const motorcycleType = watch('motorcycle_type');
+  const vehicleCondition = watch('vehicle_condition');
+  const transmissionType = watch('transmission_type');
+  const fuelType = watch('fuel_type');
+
+  // Watch checkbox values
   const hasABS = watch('has_abs');
   const hasTractionControl = watch('has_traction_control');
   const hasHeatedGrips = watch('has_heated_grips');
@@ -73,7 +80,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
             </div>
             <div className="space-y-2">
               <Label className="text-white">Condition *</Label>
-              <Select onValueChange={(value) => setValue('vehicle_condition', value)}>
+              <Select value={vehicleCondition} onValueChange={(value) => setValue('vehicle_condition', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -109,7 +116,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
             </div>
             <div className="space-y-2">
               <Label className="text-white">Motorcycle Type *</Label>
-              <Select onValueChange={(value) => setValue('motorcycle_type', value)}>
+              <Select value={motorcycleType} onValueChange={(value) => setValue('motorcycle_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -127,7 +134,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="text-white">Transmission</Label>
-              <Select onValueChange={(value) => setValue('transmission_type', value)}>
+              <Select value={transmissionType} onValueChange={(value) => setValue('transmission_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -142,7 +149,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
             </div>
             <div className="space-y-2">
               <Label className="text-white">Fuel Type</Label>
-              <Select onValueChange={(value) => setValue('fuel_type', value)}>
+              <Select value={fuelType} onValueChange={(value) => setValue('fuel_type', value)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
