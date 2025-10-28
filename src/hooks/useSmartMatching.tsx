@@ -177,9 +177,20 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
   };
 }
 
-export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
+export interface ListingFilters {
+  category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht';
+  listingType?: 'rent' | 'sale' | 'both';
+  propertyType?: string[];
+  priceRange?: [number, number];
+  bedrooms?: number[];
+  bathrooms?: number[];
+  amenities?: string[];
+  distance?: number;
+}
+
+export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters?: ListingFilters) {
   return useQuery({
-    queryKey: ['smart-listings'], // Removed excludeSwipedIds from key
+    queryKey: ['smart-listings', filters], // Include filters in query key to refetch when they change
     queryFn: async () => {
       try {
         // Get current user's preferences
@@ -192,13 +203,49 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Get ALL active listings - no exclusions
-        const { data: listings, error } = await supabase
+        // Build query with filters
+        let query = supabase
           .from('listings')
           .select('*')
           .eq('status', 'active')
-          .eq('is_active', true)
-          .limit(50);
+          .eq('is_active', true);
+
+        // Apply filter-based query constraints
+        if (filters) {
+          // Category filter
+          if (filters.category) {
+            query = query.eq('category', filters.category);
+          }
+
+          // Listing type filter
+          if (filters.listingType && filters.listingType !== 'both') {
+            query = query.eq('listing_type', filters.listingType);
+          }
+
+          // Price range filter
+          if (filters.priceRange) {
+            query = query.gte('price', filters.priceRange[0]).lte('price', filters.priceRange[1]);
+          }
+
+          // Property type filter (for properties)
+          if (filters.propertyType && filters.propertyType.length > 0) {
+            query = query.in('property_type', filters.propertyType);
+          }
+
+          // Bedrooms filter
+          if (filters.bedrooms && filters.bedrooms.length > 0) {
+            const minBeds = Math.min(...filters.bedrooms);
+            query = query.gte('beds', minBeds);
+          }
+
+          // Bathrooms filter
+          if (filters.bathrooms && filters.bathrooms.length > 0) {
+            const minBaths = Math.min(...filters.bathrooms);
+            query = query.gte('baths', minBaths);
+          }
+        }
+
+        const { data: listings, error } = await query.limit(50);
 
         if (error) {
           console.error('❌ Error fetching listings:', error);
@@ -207,6 +254,9 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
         }
 
         console.log(`📊 Fetched ${listings?.length || 0} active listings from database`);
+        if (filters) {
+          console.log('🔍 Applied filters:', JSON.stringify(filters, null, 2));
+        }
 
         if (!listings?.length) {
           console.warn('⚠️ No active listings found');
@@ -217,9 +267,19 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
           return [];
         }
 
+        // Apply client-side filters for amenities (can't be done in SQL easily with JSONB)
+        let filteredListings = listings as Listing[];
+        if (filters?.amenities && filters.amenities.length > 0) {
+          filteredListings = filteredListings.filter(listing => {
+            const listingAmenities = listing.amenities || [];
+            return filters.amenities!.some(amenity => listingAmenities.includes(amenity));
+          });
+          console.log(`✅ After amenities filter: ${filteredListings.length} listings`);
+        }
+
         if (!preferences) {
           console.log('📋 No client preferences set, returning all listings with default 50% match');
-          return (listings as Listing[]).map(listing => ({
+          return filteredListings.map(listing => ({
             ...listing,
             matchPercentage: 50,
             matchReasons: ['No preferences set'],
@@ -228,7 +288,7 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
         }
 
         // Calculate match percentage for each listing
-        const matchedListings: MatchedListing[] = listings.map(listing => {
+        const matchedListings: MatchedListing[] = filteredListings.map(listing => {
           const match = calculateListingMatch(preferences, listing as Listing);
           return {
             ...listing as Listing,
@@ -248,9 +308,9 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = []) {
           sortedListings.slice(0, 3).map(l => `${l.title?.slice(0, 30)}... (${l.matchPercentage}%)`));
         
         // Fallback: if no matches found but we have listings, show them all with default score
-        if (sortedListings.length === 0 && listings.length > 0) {
-          console.log('No smart matches found, showing all', listings.length, 'listings');
-          return listings.map(listing => ({
+        if (sortedListings.length === 0 && filteredListings.length > 0) {
+          console.log('No smart matches found, showing all', filteredListings.length, 'listings');
+          return filteredListings.map(listing => ({
             ...listing as Listing,
             matchPercentage: 20,
             matchReasons: ['General listing'],

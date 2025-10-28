@@ -1,12 +1,14 @@
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { CategoryBrowseContainer } from '@/components/CategoryBrowseContainer';
+import { ListingFilters } from '@/hooks/useSmartMatching';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
+  filters?: ListingFilters;
 }
 
-const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
+const ClientDashboard = ({ onPropertyInsights, onMessageClick, filters }: ClientDashboardProps) => {
   return (
     <DashboardLayout userRole="client">
       <div className="w-full min-h-screen bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center p-4 py-8">
@@ -24,6 +26,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
             }
           }}
           onMessageClick={onMessageClick}
+          filters={filters}
         />
       </div>
     </DashboardLayout>
