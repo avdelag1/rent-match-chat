@@ -173,7 +173,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       // Clean and prepare data - ensure numeric fields are numbers
       const propertyData: any = {
         title: data.title,
-        description: (data as any).description || null,
+        // description field removed - using checkboxes only
         property_type: data.property_type,
         listing_type: data.listing_type || initialMode,
         price: Number(data.price),
