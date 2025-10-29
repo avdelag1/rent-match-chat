@@ -33,7 +33,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           timestamp: new Date().toISOString(),
           excludedCount: excludeSwipedIds.length
         });
-        
+
         // OPTIMIZED: Get client profiles with role in ONE query using JOIN
         const { data: clientProfiles, error } = await supabase
           .from('profiles_public')
@@ -61,26 +61,44 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           return [];
         }
 
+        // Fetch from client_profiles table to get latest photos
+        const userIds = clientProfiles.map(p => p.id);
+        const { data: detailedProfiles } = await supabase
+          .from('client_profiles')
+          .select('user_id, profile_images, name, age')
+          .in('user_id', userIds);
+
+        // Create a map for quick lookup
+        const detailedMap = new Map(
+          (detailedProfiles || []).map(p => [p.user_id, p])
+        );
+
         // Transform profiles to match interface (no bio field)
-        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile, index) => ({
-          id: index + 1,
-          user_id: profile.id,
-          name: profile.full_name || 'User',
-          age: profile.age || 25,
-          gender: '',
-          interests: profile.interests || [],
-          preferred_activities: profile.preferred_activities || [],
-          profile_images: profile.images || [],
-          location: profile.city ? { city: profile.city } : null,
-          city: profile.city || undefined,
-          avatar_url: profile.avatar_url || undefined,
-          verified: profile.verified || false
-        }));
-        
-        console.log('Transformed profiles:', transformedProfiles);
+        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile, index) => {
+          const detailedProfile = detailedMap.get(profile.id);
+
+          // Prefer data from client_profiles if available (newer source)
+          return {
+            id: index + 1,
+            user_id: profile.id,
+            name: detailedProfile?.name || profile.full_name || 'User',
+            age: detailedProfile?.age || profile.age || 25,
+            gender: '',
+            interests: profile.interests || [],
+            preferred_activities: profile.preferred_activities || [],
+            // PREFER profile_images from client_profiles (newer), fallback to profiles.images
+            profile_images: detailedProfile?.profile_images || profile.images || [],
+            location: profile.city ? { city: profile.city } : null,
+            city: profile.city || undefined,
+            avatar_url: profile.avatar_url || undefined,
+            verified: profile.verified || false
+          };
+        });
+
+        console.log('Transformed profiles with latest photos:', transformedProfiles);
         const filteredProfiles = transformedProfiles.filter(p => !excludeSwipedIds.includes(p.user_id));
         console.log('Final filtered profiles:', filteredProfiles);
-        
+
         return filteredProfiles;
 
       } catch (error) {
