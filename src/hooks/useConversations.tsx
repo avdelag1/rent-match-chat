@@ -29,61 +29,73 @@ interface Conversation {
 
 export function useConversations() {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Get conversations without requiring messages to exist
+      // OPTIMIZED: Single query with joins instead of N+1 queries
       const { data, error } = await supabase
         .from('conversations')
-        .select('*')
+        .select(`
+          *,
+          client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
+          owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
+          client_role:user_roles!conversations_client_id_fkey(role),
+          owner_role:user_roles!conversations_owner_id_fkey(role)
+        `)
         .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
         .order('last_message_at', { ascending: false, nullsFirst: false });
 
       if (error) throw error;
 
-      // Get other user profiles and last messages
-      const conversationsWithProfiles = await Promise.all(
-        (data || []).map(async (conversation) => {
-          const otherUserId = conversation.client_id === user.id 
-            ? conversation.owner_id 
-            : conversation.client_id;
+      // Get all conversation IDs for batch message query
+      const conversationIds = (data || []).map(c => c.id);
 
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('id, full_name, avatar_url')
-            .eq('id', otherUserId)
-            .maybeSingle();
+      // OPTIMIZED: Single query for all last messages instead of N queries
+      const { data: messagesData } = await supabase
+        .from('conversation_messages')
+        .select('conversation_id, message_text, created_at, sender_id')
+        .in('conversation_id', conversationIds)
+        .order('created_at', { ascending: false });
 
-          // Get role from user_roles table
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', otherUserId)
-            .maybeSingle();
+      // Create a map of conversation_id to last message
+      const lastMessagesMap = new Map();
+      messagesData?.forEach(msg => {
+        if (!lastMessagesMap.has(msg.conversation_id)) {
+          lastMessagesMap.set(msg.conversation_id, msg);
+        }
+      });
 
-          // Get last message
-          const { data: lastMessage } = await supabase
-            .from('conversation_messages')
-            .select('message_text, created_at, sender_id')
-            .eq('conversation_id', conversation.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+      // Transform data to include other_user and last_message
+      const conversationsWithProfiles = (data || []).map((conversation: any) => {
+        const isClient = conversation.client_id === user.id;
+        const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
+        const otherUserRole = isClient ? conversation.owner_role?.role : conversation.client_role?.role;
 
-          return {
-            ...conversation,
-            other_user: profile ? { ...profile, role: roleData?.role || 'client' } : undefined,
-            last_message: lastMessage
-          };
-        })
-      );
+        return {
+          id: conversation.id,
+          client_id: conversation.client_id,
+          owner_id: conversation.owner_id,
+          listing_id: conversation.listing_id,
+          last_message_at: conversation.last_message_at,
+          status: conversation.status,
+          created_at: conversation.created_at,
+          updated_at: conversation.updated_at,
+          other_user: otherUserProfile ? {
+            ...otherUserProfile,
+            role: otherUserRole || 'client'
+          } : undefined,
+          last_message: lastMessagesMap.get(conversation.id)
+        };
+      });
 
       return conversationsWithProfiles;
     },
     enabled: !!user?.id,
+    // Add staleTime for better caching
+    staleTime: 30000, // 30 seconds
   });
 }
 
@@ -153,11 +165,8 @@ export function useStartConversation() {
           .maybeSingle();
 
         if (!myRoleData) {
-          console.error('❌ [MESSAGING] Could not find your role in user_roles table');
           throw new Error('Your profile could not be found. Please try logging out and back in.');
         }
-
-        console.log('✅ [MESSAGING] Your role:', myRoleData.role);
 
         const { data: otherRoleData } = await supabase
           .from('user_roles')
@@ -166,11 +175,8 @@ export function useStartConversation() {
           .maybeSingle();
 
         if (!otherRoleData) {
-          console.error('❌ [MESSAGING] Could not find other user role:', otherUserId);
           throw new Error('The other user profile could not be found. They may not have completed their registration.');
         }
-
-        console.log('✅ [MESSAGING] Other user role:', otherRoleData.role);
 
         // Determine client and owner IDs based on roles
         const clientId = myRoleData.role === 'client' ? user.id : otherUserId;
@@ -190,11 +196,9 @@ export function useStartConversation() {
           .single();
 
         if (conversationError) {
-          console.error('❌ Conversation creation error:', conversationError);
           throw new Error(`Failed to create conversation: ${conversationError.message}`);
         }
         conversationId = newConversation.id;
-        console.log('✅ New conversation created:', newConversation);
 
         // Optionally create a match record for tracking purposes (but don't block conversation if it fails)
         try {
@@ -209,12 +213,9 @@ export function useStartConversation() {
               client_liked_at: new Date().toISOString(),
               owner_liked_at: new Date().toISOString()
             });
-          console.log('✅ Match record created');
         } catch (matchError) {
-          console.log('⚠️ Match creation failed, but conversation was created successfully:', matchError);
+          // Match creation failed, but conversation was created successfully
         }
-      } else {
-        console.log('✅ Using existing conversation:', conversationId);
       }
 
       // Send initial message
@@ -230,36 +231,26 @@ export function useStartConversation() {
         .single();
 
       if (messageError) {
-        console.error('❌ Message creation error:', messageError);
         throw new Error(`Failed to send message: ${messageError.message}`);
       }
-      console.log('✅ Message sent:', message);
 
       // Update conversation last_message_at
-      const { error: updateError } = await supabase
+      await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
-
-      if (updateError) {
-        console.error('⚠️ Failed to update conversation timestamp:', updateError);
-        // Don't throw error here as the message was sent successfully
-      }
 
       return { conversationId, message };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['conversations-started-count'] });
-      console.log('✅ Conversation created successfully:', data);
       toast({
         title: '💬 Conversation Started',
         description: 'Redirecting to chat...'
       });
     },
     onError: (error: Error) => {
-      console.error('❌ Failed to start conversation:', error);
-      
       if (error.message === 'QUOTA_EXCEEDED') {
         toast({
           title: 'Conversation Limit Reached',
@@ -342,8 +333,6 @@ export function useSendMessage() {
       return data;
     },
     onSuccess: (data, variables) => {
-      console.log('✅ Message sent successfully via hook:', data);
-      
       // Replace optimistic message with real message
       queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
         if (!oldData) return [data];
@@ -360,8 +349,6 @@ export function useSendMessage() {
       queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
     },
     onError: (error: Error, variables) => {
-      console.error('❌ Failed to send message via hook:', error);
-      
       // Remove optimistic message on error
       queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
         if (!oldData) return [];

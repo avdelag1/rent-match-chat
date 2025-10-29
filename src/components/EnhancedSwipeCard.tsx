@@ -1,16 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Flame, 
-  X, 
-  Star, 
-  MapPin, 
-  DollarSign, 
-  Bed, 
-  Bath, 
-  Wifi, 
+import {
+  Flame,
+  X,
+  Star,
+  MapPin,
+  DollarSign,
+  Bed,
+  Bath,
+  Wifi,
   Car,
   MessageCircle,
   TrendingUp,
@@ -46,19 +46,20 @@ interface EnhancedSwipeCardProps {
   style?: React.CSSProperties;
 }
 
-export function EnhancedSwipeCard({ 
-  listing, 
-  onSwipe, 
-  onTap, 
-  onSuperLike, 
-  onMessage, 
-  isTop, 
+// OPTIMIZED: Memoized component to prevent unnecessary re-renders
+export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
+  listing,
+  onSwipe,
+  onTap,
+  onSuperLike,
+  onMessage,
+  isTop,
   hasPremium,
-  style 
+  style
 }: EnhancedSwipeCardProps) {
   const [imageIndex, setImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 300], [-30, 30]);
   const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 1, 1, 1, 0]);
@@ -66,32 +67,33 @@ export function EnhancedSwipeCard({
   const images = listing.images && listing.images.length > 0 ? listing.images : [];
   const hasMultipleImages = images.length > 1;
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  // OPTIMIZED: Memoize callbacks to prevent re-creation
+  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const threshold = 150;
     const velocity = info.velocity.x;
-    
+
     if (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
-  };
+  }, [onSwipe]);
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev + 1) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev - 1 + images.length) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const formatPrice = (price?: number) => {
+  const formatPrice = useCallback((price?: number) => {
     if (!price) return 'Price not specified';
     return `$${price.toLocaleString()} MXN/month`;
-  };
+  }, []);
 
   return (
     <motion.div
@@ -122,6 +124,7 @@ export function EnhancedSwipeCard({
               src={images[imageIndex]}
               alt={listing.title}
               className="w-full h-full object-cover"
+              loading="lazy"
               initial={{ scale: 1.1, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3 }}
@@ -296,4 +299,4 @@ export function EnhancedSwipeCard({
       </Card>
     </motion.div>
   );
-}
+});

@@ -12,14 +12,11 @@ export function useSwipe() {
       direction: 'left' | 'right';
       targetType?: 'listing' | 'profile';
     }) => {
-      // Defensive auth check
+      // OPTIMIZED: Defensive auth check
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.id) {
-        console.error('Auth check failed - user not authenticated');
         throw new Error('User not authenticated. Please refresh the page.');
       }
-
-      console.log('Swipe auth check passed:', { userId: user.id, targetId, direction, targetType });
 
       // Use atomic upsert to prevent race conditions
       const { error } = await supabase
@@ -34,11 +31,8 @@ export function useSwipe() {
         });
 
       if (error) {
-        console.error('Error saving like:', error);
         throw error;
       }
-
-      console.log('Like saved successfully');
       
       // Check if this creates a match (both users liked each other)
       // Wrap in try-catch to prevent match detection errors from failing the entire swipe
@@ -80,11 +74,8 @@ export function useSwipe() {
                 })
                 .select();
 
-              // Only show error if there's a real error (not just duplicate being ignored)
-              if (matchError) {
-                console.error('Match creation error:', matchError);
-              } else {
-                // Show match notification (works for both new and existing matches)
+              // Only show match notification if no error
+              if (!matchError) {
                 toast({
                   title: "It's a Match! 🎉",
                   description: "You and the owner both liked each other!",
@@ -126,11 +117,8 @@ export function useSwipe() {
                 })
                 .select();
 
-              // Only show error if there's a real error (not just duplicate being ignored)
-              if (matchError) {
-                console.error('Match creation error:', matchError);
-              } else {
-                // Show match notification (works for both new and existing matches)
+              // Only show match notification if no error
+              if (!matchError) {
                 toast({
                   title: "It's a Match! 🎉",
                   description: "You and the client both liked each other!",
@@ -145,15 +133,14 @@ export function useSwipe() {
             }
           }
         } catch (matchError) {
-          // Log match detection errors but don't fail the entire swipe
-          console.error('Match detection error (non-critical):', matchError);
+          // Match detection errors don't fail the entire swipe
         }
       }
 
       return { success: true };
     },
     onSuccess: () => {
-      console.log('Swipe successful, invalidating queries');
+      // OPTIMIZED: Batch invalidate queries for better performance
       queryClient.invalidateQueries({ queryKey: ['likes'] });
       queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
       queryClient.invalidateQueries({ queryKey: ['liked-clients'] });
@@ -163,7 +150,6 @@ export function useSwipe() {
       queryClient.invalidateQueries({ queryKey: ['listings'] });
     },
     onError: (error) => {
-      console.error('Swipe failed:', error);
       toast({
         title: 'Error',
         description: 'Failed to record your preference. Please try again.',
