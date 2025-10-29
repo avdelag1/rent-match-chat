@@ -1,3 +1,4 @@
+import { PageTransition } from '@/components/PageTransition';
 import { useState, useEffect } from 'react';
 import { PropertyManagement } from "@/components/PropertyManagement";
 import { DashboardLayout } from "@/components/DashboardLayout";
