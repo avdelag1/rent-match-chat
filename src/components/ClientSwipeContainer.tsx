@@ -295,12 +295,11 @@ export function ClientSwipeContainer({
   });
 
   return (
-    <div className="w-full h-full flex flex-col justify-center relative z-0 max-w-md mx-auto px-4">
-      {/* Client Counter */}
-      <div className="text-center mb-3 z-20">
-        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+    <div className="w-full flex flex-col relative z-0 max-w-md mx-auto">{/* Client Counter */}
+      <div className="text-center mb-2 z-20">
+        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
           <span className="text-white text-sm font-medium">
-            {currentIndex + 1} of {clientProfiles.length}
+            Showing {currentIndex + 1} of {clientProfiles.length}
           </span>
         </div>
       </div>
@@ -362,8 +361,8 @@ export function ClientSwipeContainer({
         )}
       </AnimatePresence>
 
-      {/* Cards Container - Flexible Height */}
-      <div className="relative flex-1 w-full max-w-md mx-auto" style={{ maxHeight: 'calc(100vh - 240px)' }}>
+      {/* Cards Container with Fixed Height */}
+      <div className="relative h-[650px] w-full max-w-md mx-auto">
         
         <AnimatePresence mode="popLayout">
           {/* Current card - swipes out with rotation and fade */}
@@ -414,7 +413,7 @@ export function ClientSwipeContainer({
 
       {/* Simple 3-Button Tinder Action Layout */}
       <motion.div 
-        className="flex justify-center items-center gap-6 mt-4 mb-2"
+        className="flex justify-center items-center gap-6 mt-6 mb-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
