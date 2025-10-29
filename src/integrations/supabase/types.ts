@@ -669,44 +669,80 @@ export type Database = {
         Row: {
           age: number | null
           bio: string | null
+          cleanliness_level: string | null
           created_at: string | null
+          dietary_preferences: string[] | null
+          drinking_habit: string | null
           gender: string | null
+          has_children: boolean | null
           id: number
+          interest_categories: string[] | null
           interests: string[] | null
+          languages: string[] | null
           location: Json | null
           name: string | null
+          nationality: string | null
+          noise_tolerance: string | null
+          personality_traits: string[] | null
           preferred_activities: string[] | null
           profile_images: string[] | null
+          relationship_status: string | null
+          smoking_habit: string | null
           updated_at: string | null
           user_id: string | null
+          work_schedule: string | null
         }
         Insert: {
           age?: number | null
           bio?: string | null
+          cleanliness_level?: string | null
           created_at?: string | null
+          dietary_preferences?: string[] | null
+          drinking_habit?: string | null
           gender?: string | null
+          has_children?: boolean | null
           id?: never
+          interest_categories?: string[] | null
           interests?: string[] | null
+          languages?: string[] | null
           location?: Json | null
           name?: string | null
+          nationality?: string | null
+          noise_tolerance?: string | null
+          personality_traits?: string[] | null
           preferred_activities?: string[] | null
           profile_images?: string[] | null
+          relationship_status?: string | null
+          smoking_habit?: string | null
           updated_at?: string | null
           user_id?: string | null
+          work_schedule?: string | null
         }
         Update: {
           age?: number | null
           bio?: string | null
+          cleanliness_level?: string | null
           created_at?: string | null
+          dietary_preferences?: string[] | null
+          drinking_habit?: string | null
           gender?: string | null
+          has_children?: boolean | null
           id?: never
+          interest_categories?: string[] | null
           interests?: string[] | null
+          languages?: string[] | null
           location?: Json | null
           name?: string | null
+          nationality?: string | null
+          noise_tolerance?: string | null
+          personality_traits?: string[] | null
           preferred_activities?: string[] | null
           profile_images?: string[] | null
+          relationship_status?: string | null
+          smoking_habit?: string | null
           updated_at?: string | null
           user_id?: string | null
+          work_schedule?: string | null
         }
         Relationships: []
       }
