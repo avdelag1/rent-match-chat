@@ -153,8 +153,11 @@ export function useStartConversation() {
           .maybeSingle();
 
         if (!myRoleData) {
-          throw new Error('Your profile could not be found. Please try again.');
+          console.error('❌ [MESSAGING] Could not find your role in user_roles table');
+          throw new Error('Your profile could not be found. Please try logging out and back in.');
         }
+
+        console.log('✅ [MESSAGING] Your role:', myRoleData.role);
 
         const { data: otherRoleData } = await supabase
           .from('user_roles')
@@ -163,8 +166,11 @@ export function useStartConversation() {
           .maybeSingle();
 
         if (!otherRoleData) {
-          throw new Error('User profile not found. Please try again.');
+          console.error('❌ [MESSAGING] Could not find other user role:', otherUserId);
+          throw new Error('The other user profile could not be found. They may not have completed their registration.');
         }
+
+        console.log('✅ [MESSAGING] Other user role:', otherRoleData.role);
 
         // Determine client and owner IDs based on roles
         const clientId = myRoleData.role === 'client' ? user.id : otherUserId;

@@ -95,17 +95,22 @@ export function useSaveClientProfile() {
       // SYNC to profiles table - so owner sees updated photos!
       // Update the profiles.images field to match client_profiles.profile_images
       if (updates.profile_images) {
-        console.log('Syncing profile_images to profiles.images:', updates.profile_images);
-        const { error: syncError } = await supabase
+        console.log('🔄 [PHOTO SYNC] Starting sync to profiles table...');
+        console.log('🔄 [PHOTO SYNC] User ID:', uid);
+        console.log('🔄 [PHOTO SYNC] Images to sync:', updates.profile_images);
+
+        const { data: syncData, error: syncError } = await supabase
           .from('profiles')
           .update({ images: updates.profile_images })
-          .eq('id', uid);
+          .eq('id', uid)
+          .select();
 
         if (syncError) {
-          console.error('Error syncing to profiles table:', syncError);
+          console.error('❌ [PHOTO SYNC] Error syncing to profiles table:', syncError);
           // Don't throw - profile update succeeded, sync is secondary
         } else {
-          console.log('Successfully synced images to profiles table');
+          console.log('✅ [PHOTO SYNC] Successfully synced images to profiles table');
+          console.log('✅ [PHOTO SYNC] Updated profile:', syncData);
         }
       }
 
