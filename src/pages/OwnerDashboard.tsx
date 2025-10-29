@@ -1,3 +1,4 @@
+import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';

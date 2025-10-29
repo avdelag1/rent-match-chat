@@ -538,19 +538,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       return;
     }
 
-    // Validate description for contact info
-    const description = (data as any).description;
-    if (description) {
-      const descriptionError = validateNoContactInfo(description);
-      if (descriptionError) {
-        toast({
-          title: "Invalid Description",
-          description: descriptionError,
-          variant: "destructive"
-        });
-        return;
-      }
-    }
+    // Description field removed - using checkboxes only
 
     createPropertyMutation.mutate(data);
   };
@@ -601,18 +589,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  {...register('description')}
-                  placeholder="Describe your property, amenities, neighborhood, and what makes it special..."
-                  rows={5}
-                  className="resize-none"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Provide a detailed description to attract potential tenants. No contact information allowed.
-                </p>
-              </div>
+              {/* Description section removed - using checkboxes only */}
 
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Property-specific fields - only show for property category */}
