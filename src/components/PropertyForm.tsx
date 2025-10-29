@@ -588,7 +588,6 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 )}
               </div>
 
-              <div>
               {/* Description section removed - using checkboxes only */}
 
               <div className="grid md:grid-cols-2 gap-4">
