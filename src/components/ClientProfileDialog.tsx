@@ -605,19 +605,24 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {TRANSPORTATION_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
-                        activities.includes(tag)
-                          ? 'bg-orange-500/20 border-orange-400 text-white shadow-lg shadow-orange-500/20'
-                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                      }`}>
+                      <div
+                        key={tag}
+                        className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
+                          activities.includes(tag)
+                            ? 'bg-orange-500/20 border-orange-400 text-white shadow-lg shadow-orange-500/20'
+                            : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                        }`}
+                        onClick={() => toggleTag(tag, false)}
+                      >
                         <input
                           type="checkbox"
                           checked={activities.includes(tag)}
-                          onChange={() => toggleTag(tag, false)}
-                          className="w-5 h-5 rounded accent-orange-500"
+                          onChange={() => {}}
+                          className="w-5 h-5 rounded accent-orange-500 pointer-events-none"
+                          readOnly
                         />
                         <span className="text-xs sm:text-sm leading-tight">{tag}</span>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -629,19 +634,24 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {LIFESTYLE_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
-                        interests.includes(tag)
-                          ? 'bg-purple-500/20 border-purple-400 text-white shadow-lg shadow-purple-500/20'
-                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                      }`}>
+                      <div
+                        key={tag}
+                        className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
+                          interests.includes(tag)
+                            ? 'bg-purple-500/20 border-purple-400 text-white shadow-lg shadow-purple-500/20'
+                            : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                        }`}
+                        onClick={() => toggleTag(tag, true)}
+                      >
                         <input
                           type="checkbox"
                           checked={interests.includes(tag)}
-                          onChange={() => toggleTag(tag, true)}
-                          className="w-5 h-5 rounded accent-purple-500"
+                          onChange={() => {}}
+                          className="w-5 h-5 rounded accent-purple-500 pointer-events-none"
+                          readOnly
                         />
                         <span className="text-xs sm:text-sm leading-tight">{tag}</span>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -653,19 +663,24 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {FINANCIAL_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
-                        activities.includes(tag)
-                          ? 'bg-green-500/20 border-green-400 text-white shadow-lg shadow-green-500/20'
-                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                      }`}>
+                      <div
+                        key={tag}
+                        className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
+                          activities.includes(tag)
+                            ? 'bg-green-500/20 border-green-400 text-white shadow-lg shadow-green-500/20'
+                            : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                        }`}
+                        onClick={() => toggleTag(tag, false)}
+                      >
                         <input
                           type="checkbox"
                           checked={activities.includes(tag)}
-                          onChange={() => toggleTag(tag, false)}
-                          className="w-5 h-5 rounded accent-green-500"
+                          onChange={() => {}}
+                          className="w-5 h-5 rounded accent-green-500 pointer-events-none"
+                          readOnly
                         />
                         <span className="text-xs sm:text-sm leading-tight">{tag}</span>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 </div>
