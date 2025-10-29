@@ -33,10 +33,11 @@ interface ClientProfileCardProps {
   profile: ClientProfile;
   onSwipe: (direction: 'left' | 'right') => void;
   onTap: () => void;
-  onInsights: () => void;
+  onInsights?: () => void;
+  onSuperLike?: () => void;
   onMessage: () => void;
   isTop: boolean;
-  hasPremium: boolean;
+  hasPremium?: boolean;
 }
 
 export function ClientProfileCard({
@@ -44,9 +45,10 @@ export function ClientProfileCard({
   onSwipe,
   onTap,
   onInsights,
+  onSuperLike,
   onMessage,
   isTop,
-  hasPremium
+  hasPremium = false
 }: ClientProfileCardProps) {
   const [imageIndex, setImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
