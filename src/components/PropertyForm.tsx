@@ -615,78 +615,84 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                 <div>
-                   <Label htmlFor="property_type">Property Type</Label>
-                   <Select 
-                     onValueChange={(value) => setValue('property_type', value)}
-                     value={watch('property_type')}
-                   >
-                     <SelectTrigger>
-                       <SelectValue placeholder="Select property type" />
-                     </SelectTrigger>
-                     <SelectContent>
-                       {PROPERTY_TYPES.map(type => (
-                         <SelectItem key={type} value={type.toLowerCase()}>
-                           {type}
-                         </SelectItem>
-                       ))}
-                     </SelectContent>
-                   </Select>
-                 </div>
+                {/* Property-specific fields - only show for property category */}
+                {currentCategory === 'property' && (
+                  <>
+                    <div>
+                      <Label htmlFor="property_type">Property Type</Label>
+                      <Select
+                        onValueChange={(value) => setValue('property_type', value)}
+                        value={watch('property_type')}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select property type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROPERTY_TYPES.map(type => (
+                            <SelectItem key={type} value={type.toLowerCase()}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                 <div>
-                   <Label htmlFor="listing_type">Listing For</Label>
-                   <Select 
-                     onValueChange={(value) => setValue('listing_type', value)} 
-                     value={watch('listing_type') || 'rent'}
-                   >
-                     <SelectTrigger>
-                       <SelectValue placeholder="Select listing type" />
-                     </SelectTrigger>
-                     <SelectContent>
-                       <SelectItem value="rent">For Rent</SelectItem>
-                       <SelectItem value="buy">For Sale</SelectItem>
-                     </SelectContent>
-                   </Select>
-                 </div>
+                    <div>
+                      <Label htmlFor="condition">Property Condition</Label>
+                      <Select
+                        onValueChange={(value) => setValue('condition', value)}
+                        value={watch('condition')}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select condition" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROPERTY_CONDITIONS.map(cond => (
+                            <SelectItem key={cond} value={cond.toLowerCase()}>
+                              {cond}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                 <div>
-                   <Label htmlFor="condition">Property Condition</Label>
-                   <Select 
-                     onValueChange={(value) => setValue('condition', value)}
-                     value={watch('condition')}
-                   >
-                     <SelectTrigger>
-                       <SelectValue placeholder="Select condition" />
-                     </SelectTrigger>
-                     <SelectContent>
-                       {PROPERTY_CONDITIONS.map(cond => (
-                         <SelectItem key={cond} value={cond.toLowerCase()}>
-                           {cond}
-                         </SelectItem>
-                       ))}
-                     </SelectContent>
-                   </Select>
-                 </div>
+                    <div>
+                      <Label htmlFor="lease_terms">Lease Terms</Label>
+                      <Select
+                        onValueChange={(value) => setValue('lease_terms', value)}
+                        value={watch('lease_terms')}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select lease terms" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {LEASE_TERMS.map(term => (
+                            <SelectItem key={term} value={term.toLowerCase()}>
+                              {term}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
 
-                 <div>
-                   <Label htmlFor="lease_terms">Lease Terms</Label>
-                   <Select 
-                     onValueChange={(value) => setValue('lease_terms', value)}
-                     value={watch('lease_terms')}
-                   >
-                     <SelectTrigger>
-                       <SelectValue placeholder="Select lease terms" />
-                     </SelectTrigger>
-                     <SelectContent>
-                       {LEASE_TERMS.map(term => (
-                         <SelectItem key={term} value={term.toLowerCase()}>
-                           {term}
-                         </SelectItem>
-                       ))}
-                     </SelectContent>
-                   </Select>
-                 </div>
+                {/* Listing type - show for all categories */}
+                <div>
+                  <Label htmlFor="listing_type">Listing For</Label>
+                  <Select
+                    onValueChange={(value) => setValue('listing_type', value)}
+                    value={watch('listing_type') || 'rent'}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select listing type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rent">For Rent</SelectItem>
+                      <SelectItem value="buy">For Sale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
