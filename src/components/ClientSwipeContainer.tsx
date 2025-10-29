@@ -364,35 +364,7 @@ export function ClientSwipeContainer({
       {/* Cards Container with Fixed Height */}
       <div className="relative h-[650px] w-full max-w-md mx-auto">
         
-        <AnimatePresence mode="popLayout">{/* Next card - scales up smoothly when current card exits */}
-          {nextClient && (
-            <motion.div
-              key={`next-${nextClient.user_id}`}
-              initial={{ scale: 0.95, opacity: 0.7 }}
-              animate={{
-                scale: swipeDirection ? 1.0 : 0.95,
-                opacity: swipeDirection ? 1.0 : 0.7
-              }}
-              className="absolute inset-0 shadow-xl"
-              style={{ willChange: 'transform, opacity', zIndex: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 180,
-                damping: 15,
-                mass: 0.5
-              }}
-            >
-              <ClientProfileCard
-                profile={nextClient}
-                onSwipe={() => {}}
-                onTap={() => {}}
-                onInsights={() => {}}
-                onMessage={() => {}}
-                isTop={false}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
+        <AnimatePresence mode="popLayout">
           {/* Current card - swipes out with rotation and fade */}
           {currentClient && (
             <motion.div

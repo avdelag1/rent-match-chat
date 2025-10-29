@@ -119,14 +119,14 @@ export function ClientProfileCard({
   const cardStyle = {
     x,
     rotate: isTop ? rotate : 0,
-    scale: isTop ? 1 : 0.92,
-    zIndex: isTop ? 10 : 1,
+    scale: 1,
+    zIndex: 10,
     position: 'absolute' as const,
-    top: isTop ? 0 : 12,
-    left: isTop ? 0 : 8,
-    right: isTop ? 0 : 8,
-    opacity: isTop ? 1 : 0.8,
-    filter: isTop ? 'none' : 'blur(2px)',
+    top: 0,
+    left: 0,
+    right: 0,
+    opacity: 1,
+    filter: 'none',
     willChange: 'transform',
     transform: 'translateZ(0)'
   };
