@@ -12,6 +12,7 @@ import { useClientProfile, useSaveClientProfile } from '@/hooks/useClientProfile
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { Check } from 'lucide-react';
 
 // Predefined tag categories
 const PROPERTY_TAGS = [
@@ -385,8 +386,8 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                       variant={languages.includes(lang) ? 'default' : 'outline'}
                       className={`cursor-pointer transition-all ${
                         languages.includes(lang)
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
-                          : 'hover:border-blue-400'
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-transparent'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:border-blue-400 hover:bg-white/10'
                       }`}
                       onClick={() => toggleLanguage(lang)}
                     >
@@ -515,8 +516,8 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                       variant={dietaryPreferences.includes(diet) ? 'default' : 'outline'}
                       className={`cursor-pointer transition-all ${
                         dietaryPreferences.includes(diet)
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
-                          : 'hover:border-green-400'
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-transparent'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:border-green-400 hover:bg-white/10'
                       }`}
                       onClick={() => toggleDietaryPref(diet)}
                     >
@@ -535,8 +536,8 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                       variant={personalityTraits.includes(trait) ? 'default' : 'outline'}
                       className={`cursor-pointer transition-all ${
                         personalityTraits.includes(trait)
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
-                          : 'hover:border-purple-400'
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-transparent'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:border-purple-400 hover:bg-white/10'
                       }`}
                       onClick={() => togglePersonalityTrait(trait)}
                     >
@@ -555,8 +556,8 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                       variant={interestCategories.includes(interest) ? 'default' : 'outline'}
                       className={`cursor-pointer transition-all ${
                         interestCategories.includes(interest)
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600'
-                          : 'hover:border-orange-400'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-transparent'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:border-orange-400 hover:bg-white/10'
                       }`}
                       onClick={() => toggleInterestCategory(interest)}
                     >
@@ -581,19 +582,24 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {PROPERTY_TAGS.map(tag => (
-                      <label key={tag} className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
-                        interests.includes(tag) 
-                          ? 'bg-blue-500/20 border-blue-400 text-white shadow-lg shadow-blue-500/20' 
-                          : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                      }`}>
-                        <input
-                          type="checkbox"
-                          checked={interests.includes(tag)}
-                          onChange={() => toggleTag(tag, true)}
-                          className="w-5 h-5 rounded accent-blue-500"
-                        />
+                      <div
+                        key={tag}
+                        className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
+                          interests.includes(tag)
+                            ? 'bg-blue-500/20 border-blue-400 text-white shadow-lg shadow-blue-500/20'
+                            : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                        }`}
+                        onClick={() => toggleTag(tag, true)}
+                      >
+                        <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-all ${
+                          interests.includes(tag)
+                            ? 'bg-blue-500 border-blue-500'
+                            : 'border-white/40 bg-transparent'
+                        }`}>
+                          {interests.includes(tag) && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                        </div>
                         <span className="text-xs sm:text-sm leading-tight">{tag}</span>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -614,13 +620,13 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                         }`}
                         onClick={() => toggleTag(tag, false)}
                       >
-                        <input
-                          type="checkbox"
-                          checked={activities.includes(tag)}
-                          onChange={() => {}}
-                          className="w-5 h-5 rounded accent-orange-500 pointer-events-none"
-                          readOnly
-                        />
+                        <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-all ${
+                          activities.includes(tag)
+                            ? 'bg-orange-500 border-orange-500'
+                            : 'border-white/40 bg-transparent'
+                        }`}>
+                          {activities.includes(tag) && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                        </div>
                         <span className="text-xs sm:text-sm leading-tight">{tag}</span>
                       </div>
                     ))}
@@ -643,13 +649,13 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                         }`}
                         onClick={() => toggleTag(tag, true)}
                       >
-                        <input
-                          type="checkbox"
-                          checked={interests.includes(tag)}
-                          onChange={() => {}}
-                          className="w-5 h-5 rounded accent-purple-500 pointer-events-none"
-                          readOnly
-                        />
+                        <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-all ${
+                          interests.includes(tag)
+                            ? 'bg-purple-500 border-purple-500'
+                            : 'border-white/40 bg-transparent'
+                        }`}>
+                          {interests.includes(tag) && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                        </div>
                         <span className="text-xs sm:text-sm leading-tight">{tag}</span>
                       </div>
                     ))}
@@ -672,13 +678,13 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                         }`}
                         onClick={() => toggleTag(tag, false)}
                       >
-                        <input
-                          type="checkbox"
-                          checked={activities.includes(tag)}
-                          onChange={() => {}}
-                          className="w-5 h-5 rounded accent-green-500 pointer-events-none"
-                          readOnly
-                        />
+                        <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-all ${
+                          activities.includes(tag)
+                            ? 'bg-green-500 border-green-500'
+                            : 'border-white/40 bg-transparent'
+                        }`}>
+                          {activities.includes(tag) && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                        </div>
                         <span className="text-xs sm:text-sm leading-tight">{tag}</span>
                       </div>
                     ))}
