@@ -134,7 +134,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full mx-auto border-0 p-0 overflow-hidden bg-white rounded-2xl shadow-2xl max-h-[92vh]">
+      <DialogContent className="max-w-md w-full mx-auto border-0 p-0 overflow-hidden bg-white rounded-2xl shadow-2xl">
         <DialogTitle className="sr-only">
           {isLogin ? 'Sign In' : 'Sign Up'} as {role}
         </DialogTitle>
@@ -142,9 +142,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Tinderent
         </DialogDescription>
 
-        <div className="relative max-h-[92vh] overflow-y-auto">
+        <div className="relative">
           {/* Compact Header */}
-          <div className={`relative px-6 py-6 overflow-hidden ${
+          <div className={`relative px-6 py-4 overflow-hidden ${
             role === 'client'
               ? 'bg-gradient-to-br from-orange-400 to-red-500'
               : 'bg-gradient-to-br from-red-500 to-pink-600'
@@ -159,20 +159,20 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
             {/* Header Content */}
             <div className="text-center text-white relative z-10">
-              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
-                <Flame className="w-7 h-7 text-white" />
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-2 backdrop-blur-sm">
+                <Flame className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold mb-1">
+              <h1 className="text-xl font-bold mb-1">
                 {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back!' : 'Join Tinderent'}
               </h1>
-              <p className="text-white/90 text-sm capitalize font-medium">
+              <p className="text-white/90 text-xs capitalize font-medium">
                 {isForgotPassword ? 'Enter your email' : `${isLogin ? 'Sign in' : 'Sign up'} as ${role}`}
               </p>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="bg-white p-6 space-y-4">
+          <div className="bg-white p-5 space-y-3">
 
             {!isForgotPassword && (
               <>
@@ -182,9 +182,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     type="button"
                     onClick={() => handleOAuthSignIn('google')}
                     disabled={isLoading}
-                    className="w-full h-11 bg-white border-2 border-gray-200 text-gray-700 font-medium text-sm rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                    className="w-full h-9 bg-white border-2 border-gray-200 text-gray-700 font-medium text-sm rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    <FaGoogle className="w-5 h-5 text-red-500" />
+                    <FaGoogle className="w-4 h-4 text-red-500" />
                     <span>Google</span>
                   </Button>
 
@@ -192,24 +192,24 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     type="button"
                     onClick={() => handleOAuthSignIn('facebook')}
                     disabled={isLoading}
-                    className="w-full h-11 bg-[#1877F2] text-white font-medium text-sm rounded-xl hover:bg-[#166FE5] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                    className="w-full h-9 bg-[#1877F2] text-white font-medium text-sm rounded-xl hover:bg-[#166FE5] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    <FaFacebook className="w-5 h-5" />
+                    <FaFacebook className="w-4 h-4" />
                     <span>Facebook</span>
                   </Button>
                 </div>
 
                 {/* Divider */}
-                <div className="relative flex items-center py-2">
+                <div className="relative flex items-center py-1">
                   <div className="flex-grow border-t border-gray-200"></div>
-                  <span className="flex-shrink mx-4 text-gray-400 text-xs font-medium">or</span>
+                  <span className="flex-shrink mx-3 text-gray-400 text-xs font-medium">or</span>
                   <div className="flex-grow border-t border-gray-200"></div>
                 </div>
               </>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Name Field (Sign Up Only) */}
               {!isLogin && !isForgotPassword && (
                 <div>
@@ -224,7 +224,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className="pl-10 h-11 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
+                      className="pl-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
                       placeholder="Your name"
                     />
                   </div>
@@ -244,7 +244,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10 h-11 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
+                    className="pl-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -264,7 +264,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-10 pr-10 h-11 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
+                      className="pl-10 pr-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
                       placeholder="••••••••"
                     />
                     <button

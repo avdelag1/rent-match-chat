@@ -948,12 +948,12 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-24 border-dashed border-2 hover:bg-muted/50"
+                    className="h-24 border-dashed border-2 hover:bg-muted/50 text-foreground bg-background"
                     onClick={handleImageAdd}
                   >
                     <div className="flex flex-col items-center gap-1">
-                      <Plus className="w-4 h-4" />
-                      <span className="text-xs">Add Photo</span>
+                      <Plus className="w-4 h-4 text-foreground" />
+                      <span className="text-xs text-foreground font-medium">Add Photo</span>
                     </div>
                   </Button>
                 )}
