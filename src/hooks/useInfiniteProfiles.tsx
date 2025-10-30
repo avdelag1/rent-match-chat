@@ -7,7 +7,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-interface ClientProfile {
+export interface ClientProfile {
   user_id: string;
   full_name: string;
   avatar_url: string | null;
@@ -50,9 +50,9 @@ async function fetchClientProfiles(
   cursor: string | null,
   pageSize: number,
   excludeIds: string[],
-  filters: UseInfiniteProfilesOptions['filters']
+  filters?: UseInfiniteProfilesOptions['filters']
 ): Promise<ProfilesPage> {
-  let query = supabase
+  let query: any = supabase
     .from('client_profiles')
     .select(`
       user_id,
@@ -142,31 +142,38 @@ async function fetchClientProfiles(
 /**
  * Hook for infinite scrolling client profiles (owner view)
  */
-export function useInfiniteProfiles({
-  pageSize = 10,
-  excludeSwipedIds = [],
-  filters,
-  enabled = true
-}: UseInfiniteProfilesOptions = {}) {
+export function useInfiniteProfiles(options: UseInfiniteProfilesOptions = {}): any {
+  const {
+    pageSize = 10,
+    excludeSwipedIds = [],
+    filters,
+    enabled = true
+  } = options;
   const { user } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: ['infinite-profiles', pageSize, excludeSwipedIds, filters],
-    queryFn: ({ pageParam }) =>
-      fetchClientProfiles(pageParam, pageSize, excludeSwipedIds, filters),
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    initialPageParam: null as string | null,
+    queryKey: ['profiles-inf', pageSize],
+    queryFn: async (context: any) => {
+      const pageParam = context.pageParam ?? null;
+      return fetchClientProfiles(
+        pageParam,
+        pageSize,
+        excludeSwipedIds,
+        filters
+      );
+    },
+    getNextPageParam: (lastPage: any) => lastPage?.nextCursor ?? null,
+    initialPageParam: null,
     enabled: enabled && !!user?.id,
-    staleTime: 60000, // 1 minute
-    gcTime: 300000, // 5 minutes
-    refetchOnWindowFocus: false
+    staleTime: 60000,
+    gcTime: 300000
   });
 }
 
 /**
  * Get flattened array of all profiles from infinite query
  */
-export function flattenProfiles(pages: ProfilesPage[] | undefined): ClientProfile[] {
-  if (!pages) return [];
-  return pages.flatMap(page => page.data);
+export function flattenProfiles(pages: any): ClientProfile[] {
+  if (!pages || !pages.pages) return [];
+  return pages.pages.flatMap((page: any) => page.data || []);
 }

@@ -94,8 +94,6 @@ export function generateListingSchema(listing: Listing, ownerName?: string) {
       '@type': 'PostalAddress',
       streetAddress: listing.address || '',
       addressLocality: listing.city || '',
-      addressRegion: listing.state || '',
-      postalCode: listing.zip_code || '',
       addressCountry: 'MX'
     },
     ...(listing.latitude && listing.longitude && {
@@ -122,10 +120,10 @@ export function generateListingSchema(listing: Listing, ownerName?: string) {
     ...(listing.beds && {
       numberOfRooms: listing.beds
     }),
-    ...(listing.square_feet && {
+    ...(listing.square_footage && {
       floorSize: {
         '@type': 'QuantitativeValue',
-        value: listing.square_feet,
+        value: listing.square_footage,
         unitCode: 'FTK'
       }
     }),

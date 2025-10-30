@@ -69,7 +69,7 @@ export function InfiniteCardFeed({
   // Flatten data
   const items = mode === 'client'
     ? flattenListings(listingsQuery.data?.pages)
-    : flattenProfiles(profilesQuery.data?.pages);
+    : flattenProfiles(profilesQuery.data);
 
   // Swipe mutation
   const swipeMutation = useSwipeWithMatch();
@@ -250,85 +250,63 @@ export function InfiniteCardFeed({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-[600px] ${className}`}
+      className={`w-full h-screen overflow-y-auto snap-y snap-mandatory scroll-smooth ${className}`}
       role="feed"
       aria-label={mode === 'client' ? 'Property listings feed' : 'Tenant profiles feed'}
+      style={{ scrollBehavior: 'smooth' }}
     >
-      {/* Card Stack */}
-      <div className="relative w-full h-full">
-        <AnimatePresence mode="popLayout">
-          {visibleItems.map((item, stackIndex) => {
-            const actualIndex = currentIndex + stackIndex;
-            const isTop = stackIndex === 0;
-            const itemId = mode === 'client' ? (item as Listing).id : (item as any).user_id;
-
-            return (
-              <motion.div
-                key={itemId}
-                className="absolute inset-0"
-                initial={{ scale: 0.9, opacity: 0, y: 50 }}
-                animate={{
-                  scale: 1 - stackIndex * 0.05,
-                  opacity: 1 - stackIndex * 0.3,
-                  y: stackIndex * 10,
-                  zIndex: 100 - stackIndex
-                }}
-                exit={{ scale: 0.8, opacity: 0, x: -1000 }}
-                transition={{
-                  duration: 0.3,
-                  ease: [0.4, 0, 0.2, 1]
-                }}
-                style={{
-                  pointerEvents: isTop ? 'auto' : 'none'
-                }}
-                onMouseEnter={() => handleCardHover(item, actualIndex)}
-              >
-                {mode === 'client' ? (
-                  <EnhancedSwipeCard
-                    listing={item as Listing}
-                    onSwipe={(direction) => handleSwipe(direction, item)}
-                    onTap={() => handleCardTap(item)}
-                    onSuperLike={() => handleSuperLike(item)}
-                    onMessage={() => handleMessage(item)}
-                    isTop={isTop}
-                    hasPremium={false}
-                  />
-                ) : (
-                  <ClientProfileCard
-                    profile={item as any}
-                    onSwipe={(direction) => handleSwipe(direction, item)}
-                    onTap={() => handleCardTap(item)}
-                    onSuperLike={() => handleSuperLike(item)}
-                    onMessage={() => handleMessage(item)}
-                    isTop={isTop}
-                  />
-                )}
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
-      {/* Infinite scroll trigger */}
-      {hasNextPage && (
-        <div
-          ref={loadMoreRef}
-          className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
-        />
-      )}
+      {/* Vertical Scrolling Cards */}
+      {items.map((item, index) => {
+        const itemId = mode === 'client' ? (item as Listing).id : (item as any).user_id;
+        
+        return (
+          <div
+            key={itemId}
+            ref={index === items.length - 3 ? loadMoreRef : undefined}
+            className="h-screen snap-start snap-always flex items-center justify-center p-4"
+          >
+            <div className="relative w-full max-w-md h-[85vh]">
+              {mode === 'client' ? (
+                <EnhancedSwipeCard
+                  listing={item as Listing}
+                  onSwipe={(direction) => handleSwipe(direction, item)}
+                  onTap={() => handleCardTap(item)}
+                  onSuperLike={() => handleSuperLike(item)}
+                  onMessage={() => handleMessage(item)}
+                  isTop={true}
+                  hasPremium={false}
+                />
+              ) : (
+                <ClientProfileCard
+                  profile={item as any}
+                  onSwipe={(direction) => handleSwipe(direction, item)}
+                  onTap={() => handleCardTap(item)}
+                  onSuperLike={() => handleSuperLike(item)}
+                  onMessage={() => handleMessage(item)}
+                  isTop={true}
+                />
+              )}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Loading indicator for next page */}
       {isFetchingNextPage && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm flex items-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Loading more...
+        <div className="h-20 flex items-center justify-center">
+          <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading more...
+          </div>
         </div>
       )}
 
-      {/* Keyboard hints (optional, can be hidden) */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-xs opacity-50 pointer-events-none">
-        ← Swipe → or ← → keys • ↵ View details • ↑↓ Navigate
-      </div>
+      {/* End of feed message */}
+      {!hasNextPage && items.length > 0 && (
+        <div className="h-20 flex items-center justify-center">
+          <p className="text-muted-foreground text-sm">You've seen all available cards</p>
+        </div>
+      )}
     </div>
   );
 }

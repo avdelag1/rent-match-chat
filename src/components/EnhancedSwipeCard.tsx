@@ -98,21 +98,21 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
-      style={{ 
-        x, 
-        rotate, 
-        opacity: isTop ? opacity : 0.8,
-        scale: isTop ? 1 : 0.95,
-        ...style 
-      }}
-      drag={isTop ? "x" : false}
+      className="w-full h-full cursor-grab active:cursor-grabbing"
+      style={{ x, rotate }}
+      drag="x"
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.2}
-      onDragEnd={handleDragEnd}
+      dragElastic={0.7}
+      onDragStart={() => {
+        document.body.style.overflow = 'hidden';
+      }}
+      onDragEnd={(e, info) => {
+        document.body.style.overflow = '';
+        handleDragEnd(e, info);
+      }}
       whileTap={{ scale: 0.98 }}
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.8 }}
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
       <Card className="h-full swipe-card interactive-card glass-morphism border-white/20 overflow-hidden">
