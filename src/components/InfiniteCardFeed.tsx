@@ -224,8 +224,8 @@ export function InfiniteCardFeed({
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[600px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
+        <Loader2 className="w-12 h-12 animate-spin text-white" />
       </div>
     );
   }
@@ -233,9 +233,9 @@ export function InfiniteCardFeed({
   // Empty state
   if (!items || items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[600px] text-center p-8">
-        <h3 className="text-2xl font-bold mb-2">No More Cards</h3>
-        <p className="text-muted-foreground">
+      <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500">
+        <h3 className="text-2xl font-bold mb-2 text-white">No More Cards</h3>
+        <p className="text-white/90">
           {mode === 'client'
             ? "You've seen all available properties. Check back later for new listings!"
             : "You've seen all available profiles. Check back later for new tenants!"}
@@ -250,7 +250,7 @@ export function InfiniteCardFeed({
   return (
     <div
       ref={containerRef}
-      className={`w-full h-screen overflow-y-auto snap-y snap-mandatory scroll-smooth ${className}`}
+      className={`w-full h-full overflow-y-auto snap-y snap-mandatory scroll-smooth bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 ${className}`}
       role="feed"
       aria-label={mode === 'client' ? 'Property listings feed' : 'Tenant profiles feed'}
       style={{ scrollBehavior: 'smooth' }}
@@ -258,14 +258,14 @@ export function InfiniteCardFeed({
       {/* Vertical Scrolling Cards */}
       {items.map((item, index) => {
         const itemId = mode === 'client' ? (item as Listing).id : (item as any).user_id;
-        
+
         return (
           <div
             key={itemId}
             ref={index === items.length - 3 ? loadMoreRef : undefined}
-            className="h-screen snap-start snap-always flex items-center justify-center p-4"
+            className="h-full snap-start snap-always flex items-center justify-center px-3 py-2"
           >
-            <div className="relative w-full max-w-md h-[85vh]">
+            <div className="relative w-full max-w-md h-[95%]">
               {mode === 'client' ? (
                 <EnhancedSwipeCard
                   listing={item as Listing}
