@@ -22,8 +22,8 @@ const pageVariants = {
 };
 
 const pageTransition = {
-  type: 'tween' as const,
-  ease: [0.4, 0, 0.2, 1],
+  type: 'tween',
+  ease: 'anticipate',
   duration: 0.3,
 };
 
@@ -34,7 +34,7 @@ export function PageTransition({ children, className = '' }: PageTransitionProps
       animate="in"
       exit="out"
       variants={pageVariants}
-      transition={{ duration: 0.3 }}
+      transition={pageTransition}
       className={className}
     >
       {children}

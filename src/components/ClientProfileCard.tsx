@@ -33,11 +33,10 @@ interface ClientProfileCardProps {
   profile: ClientProfile;
   onSwipe: (direction: 'left' | 'right') => void;
   onTap: () => void;
-  onInsights?: () => void;
-  onSuperLike?: () => void;
+  onInsights: () => void;
   onMessage: () => void;
   isTop: boolean;
-  hasPremium?: boolean;
+  hasPremium: boolean;
 }
 
 export function ClientProfileCard({
@@ -45,10 +44,9 @@ export function ClientProfileCard({
   onSwipe,
   onTap,
   onInsights,
-  onSuperLike,
   onMessage,
   isTop,
-  hasPremium = false
+  hasPremium
 }: ClientProfileCardProps) {
   const [imageIndex, setImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -136,19 +134,13 @@ export function ClientProfileCard({
   return (
     <motion.div
       ref={cardRef}
-      className="w-full h-full cursor-grab active:cursor-grabbing"
-      style={{ x, rotate }}
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
+      style={cardStyle}
+      drag={isTop ? "x" : false}
+      dragConstraints={isTop ? { left: -400, right: 400 } : { left: 0, right: 0 }}
       dragElastic={0.7}
-      onDragStart={() => {
-        document.body.style.overflow = 'hidden';
-      }}
-      onDragEnd={(e, info) => {
-        document.body.style.overflow = '';
-        handleDragEnd(e, info);
-      }}
-      whileTap={{ scale: 0.98 }}
+      onDragEnd={handleDragEnd}
+      className={`transform-gpu ${isTop ? 'cursor-pointer' : 'pointer-events-none cursor-default'}`}
+      whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
     >
       <Card className="w-full h-full bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
