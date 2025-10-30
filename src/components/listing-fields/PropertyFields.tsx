@@ -32,55 +32,55 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
   return (
     <div className="space-y-6">
       {/* Size and Layout */}
-      <Card className="bg-card border-border">
+      <Card className="bg-white/5 border-white/20">
         <CardHeader>
-          <CardTitle className="text-foreground text-lg">Size & Layout</CardTitle>
+          <CardTitle className="text-white text-lg">Size & Layout</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-foreground">Bedrooms *</Label>
+              <Label className="text-white">Bedrooms *</Label>
               <Input
                 type="number"
                 min="0"
                 {...register('bedrooms', { required: true, valueAsNumber: true })}
                 placeholder="2"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">Bathrooms *</Label>
+              <Label className="text-white">Bathrooms *</Label>
               <Input
                 type="number"
                 min="0"
                 step="0.5"
                 {...register('bathrooms', { required: true, valueAsNumber: true })}
                 placeholder="2.5"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-foreground">Square Feet</Label>
+              <Label className="text-white">Square Feet</Label>
               <Input
                 type="number"
                 min="0"
                 {...register('square_feet', { valueAsNumber: true })}
                 placeholder="1200"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">Property Subtype *</Label>
+              <Label className="text-white">Property Subtype *</Label>
               <Select value={propertySubtype} onValueChange={(value) => setValue('property_subtype', value)}>
-                <SelectTrigger className="bg-background border-border text-foreground">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   {PROPERTY_SUBTYPES.map(type => (
-                    <SelectItem key={type} value={type.toLowerCase()} className="text-foreground">
+                    <SelectItem key={type} value={type.toLowerCase()} className="text-white">
                       {type}
                     </SelectItem>
                   ))}
@@ -91,23 +91,23 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-foreground">Floor Number</Label>
+              <Label className="text-white">Floor Number</Label>
               <Input
                 type="number"
                 min="0"
                 {...register('floor_number', { valueAsNumber: true })}
                 placeholder="5"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">Total Floors in Building</Label>
+              <Label className="text-white">Total Floors in Building</Label>
               <Input
                 type="number"
                 min="0"
                 {...register('total_floors', { valueAsNumber: true })}
                 placeholder="10"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
           </div>
@@ -115,9 +115,9 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
       </Card>
 
       {/* Features */}
-      <Card className="bg-card border-border">
+      <Card className="bg-white/5 border-white/20">
         <CardHeader>
-          <CardTitle className="text-foreground text-lg">Features</CardTitle>
+          <CardTitle className="text-white text-lg">Features</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -128,7 +128,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
                 onCheckedChange={(checked) => setValue('is_furnished', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="is_furnished" className="text-foreground cursor-pointer">
+              <Label htmlFor="is_furnished" className="text-white cursor-pointer">
                 Furnished
               </Label>
             </div>
@@ -140,7 +140,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
                 onCheckedChange={(checked) => setValue('has_balcony', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_balcony" className="text-foreground cursor-pointer">
+              <Label htmlFor="has_balcony" className="text-white cursor-pointer">
                 Has Balcony
               </Label>
             </div>
@@ -152,7 +152,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
                 onCheckedChange={(checked) => setValue('has_parking', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_parking" className="text-foreground cursor-pointer">
+              <Label htmlFor="has_parking" className="text-white cursor-pointer">
                 Parking Available
               </Label>
             </div>
@@ -164,7 +164,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
                 onCheckedChange={(checked) => setValue('is_pet_friendly', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="is_pet_friendly" className="text-foreground cursor-pointer">
+              <Label htmlFor="is_pet_friendly" className="text-white cursor-pointer">
                 Pet Friendly
               </Label>
             </div>
@@ -176,7 +176,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
                 onCheckedChange={(checked) => setValue('has_elevator', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_elevator" className="text-foreground cursor-pointer">
+              <Label htmlFor="has_elevator" className="text-white cursor-pointer">
                 Elevator
               </Label>
             </div>
@@ -188,7 +188,7 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
                 onCheckedChange={(checked) => setValue('has_security', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_security" className="text-foreground cursor-pointer">
+              <Label htmlFor="has_security" className="text-white cursor-pointer">
                 24/7 Security
               </Label>
             </div>
@@ -196,13 +196,13 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
 
           {hasParking && (
             <div className="space-y-2">
-              <Label className="text-foreground">Number of Parking Spots</Label>
+              <Label className="text-white">Number of Parking Spots</Label>
               <Input
                 type="number"
                 min="0"
                 {...register('parking_spots', { valueAsNumber: true })}
                 placeholder="1"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
           )}
@@ -210,21 +210,21 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
       </Card>
 
       {/* Views and Details */}
-      <Card className="bg-card border-border">
+      <Card className="bg-white/5 border-white/20">
         <CardHeader>
-          <CardTitle className="text-foreground text-lg">Views & Details</CardTitle>
+          <CardTitle className="text-white text-lg">Views & Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-foreground">View Type</Label>
+              <Label className="text-white">View Type</Label>
               <Select value={viewType} onValueChange={(value) => setValue('view_type', value)}>
-                <SelectTrigger className="bg-background border-border text-foreground">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select view" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   {VIEW_TYPES.map(view => (
-                    <SelectItem key={view} value={view.toLowerCase()} className="text-foreground">
+                    <SelectItem key={view} value={view.toLowerCase()} className="text-white">
                       {view}
                     </SelectItem>
                   ))}
@@ -233,14 +233,14 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
             </div>
 
             <div className="space-y-2">
-              <Label className="text-foreground">Orientation</Label>
+              <Label className="text-white">Orientation</Label>
               <Select value={orientation} onValueChange={(value) => setValue('orientation', value)}>
-                <SelectTrigger className="bg-background border-border text-foreground">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue placeholder="Select orientation" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   {ORIENTATIONS.map(orient => (
-                    <SelectItem key={orient} value={orient.toLowerCase()} className="text-foreground">
+                    <SelectItem key={orient} value={orient.toLowerCase()} className="text-white">
                       {orient}
                     </SelectItem>
                   ))}
@@ -251,25 +251,25 @@ export function PropertyFields({ register, setValue, watch }: PropertyFieldsProp
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-foreground">Year Built</Label>
+              <Label className="text-white">Year Built</Label>
               <Input
                 type="number"
                 min="1900"
                 max={new Date().getFullYear()}
                 {...register('year_built', { valueAsNumber: true })}
                 placeholder="2020"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">Last Renovated</Label>
+              <Label className="text-white">Last Renovated</Label>
               <Input
                 type="number"
                 min="1900"
                 max={new Date().getFullYear()}
                 {...register('last_renovated', { valueAsNumber: true })}
                 placeholder="2023"
-                className="bg-background border-border text-foreground"
+                className="bg-white/10 border-white/20 text-white"
               />
             </div>
           </div>

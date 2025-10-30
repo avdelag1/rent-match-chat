@@ -557,9 +557,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 bg-background text-foreground">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
-          <DialogTitle className="text-foreground">
+          <DialogTitle>
             {editingId ? `Edit ${getCategoryLabel()}` : `List New ${getCategoryLabel()}`}
           </DialogTitle>
         </DialogHeader>
@@ -948,12 +948,12 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-24 border-dashed border-2 hover:bg-muted/50 text-foreground"
+                    className="h-24 border-dashed border-2 hover:bg-muted/50"
                     onClick={handleImageAdd}
                   >
                     <div className="flex flex-col items-center gap-1">
-                      <Plus className="w-4 h-4 text-foreground" />
-                      <span className="text-xs text-foreground">Add Photo</span>
+                      <Plus className="w-4 h-4" />
+                      <span className="text-xs">Add Photo</span>
                     </div>
                   </Button>
                 )}

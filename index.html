@@ -3,23 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-
+    
     <!-- Cache Control for immediate updates -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-
+    
     <!-- DNS Prefetch for older browsers -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-
+    
     <!-- Preconnect to establish early connection -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
+    
     <!-- Non-blocking font loading using media trick -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+    <link 
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" 
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
@@ -31,7 +31,7 @@
     <meta name="description" content="Discover your ideal rental property or tenant with Tinderent. Swipe through verified listings, connect with perfect matches, and find your next home or tenant effortlessly.">
     <meta name="author" content="Tinderent" />
     <meta name="keywords" content="rental, property, tenant, apartment, house, real estate, matching, tinder for rentals">
-
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://tinderent.lovable.app/">
@@ -45,14 +45,14 @@
     <meta property="twitter:title" content="Tinderent - Find Your Perfect Rental Property or Tenant">
     <meta property="twitter:description" content="Discover your ideal rental property or tenant with Tinderent. Swipe through verified listings and connect with perfect matches.">
     <meta property="twitter:image" content="/placeholder.svg">
-
+    
     <!-- PWA Support -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ff6b35">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Tinderent">
-
+    
     <!-- Performance and Security -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
@@ -106,25 +106,19 @@
       </div>
     </div>
     <!-- Add cache-busting version to main script -->
-    <script type="module">
-      // Cache-busting: load main script with timestamp
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = `/src/main.tsx?v=${Date.now()}`;
-      document.head.appendChild(script);
-    </script>
-
+    <script type="module" src="/src/main.tsx?v=<?= Date.now() ?>"></script>
+    
     <!-- Enhanced Service Worker Registration with Update Detection -->
     <script>
       if ('serviceWorker' in navigator) {
         let refreshing = false;
-
+        
         // Listen for service worker messages
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data && event.data.type === 'SW_UPDATED' && !refreshing) {
             refreshing = true;
             console.log('New version available, reloading...');
-
+            
             // Show update notification
             const notification = document.createElement('div');
             notification.innerHTML = `
@@ -135,7 +129,7 @@
               </div>
             `;
             document.body.appendChild(notification);
-
+            
             // Auto-refresh after 3 seconds if user doesn't click
             setTimeout(() => {
               if (!refreshing) return;
@@ -143,18 +137,18 @@
             }, 3000);
           }
         });
-
+        
         // Register service worker
         window.addEventListener('load', async () => {
           try {
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('SW registered: ', registration);
-
+            
             // Check for updates every 30 seconds
             setInterval(() => {
               registration.update();
             }, 30000);
-
+            
             // Listen for new service worker
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
@@ -164,25 +158,22 @@
                 }
               });
             });
-
+            
           } catch (error) {
             console.log('SW registration failed: ', error);
           }
         });
       }
-
-      // Force cache clear on critical updates (check once per session)
-      const appVersion = '1.0.1'; // Increment this when you need to force cache clear
-      const lastClearVersion = localStorage.getItem('tinderent_last_clear');
-
-      if (lastClearVersion !== appVersion) {
+      
+      // Force cache clear on critical updates
+      if (localStorage.getItem('tinderent_last_clear') !== '<?= Date.now() %>') {
         console.log('Clearing caches for fresh content...');
         if ('caches' in window) {
           caches.keys().then(names => {
             names.forEach(name => caches.delete(name));
           });
         }
-        localStorage.setItem('tinderent_last_clear', appVersion);
+        localStorage.setItem('tinderent_last_clear', '<?= Date.now() ?>');
       }
     </script>
   </body>
