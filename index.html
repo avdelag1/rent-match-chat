@@ -106,7 +106,13 @@
       </div>
     </div>
     <!-- Add cache-busting version to main script -->
-    <script type="module" src="/src/main.tsx?v=<?= Date.now() ?>"></script>
+    <script type="module">
+      // Cache-busting: load main script with timestamp
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = `/src/main.tsx?v=${Date.now()}`;
+      document.head.appendChild(script);
+    </script>
     
     <!-- Enhanced Service Worker Registration with Update Detection -->
     <script>
@@ -166,14 +172,14 @@
       }
       
       // Force cache clear on critical updates
-      if (localStorage.getItem('tinderent_last_clear') !== '<?= Date.now() %>') {
+      if (localStorage.getItem('tinderent_last_clear') !== '1.0.2') {
         console.log('Clearing caches for fresh content...');
         if ('caches' in window) {
           caches.keys().then(names => {
             names.forEach(name => caches.delete(name));
           });
         }
-        localStorage.setItem('tinderent_last_clear', '<?= Date.now() ?>');
+        localStorage.setItem('tinderent_last_clear', '1.0.2');
       }
     </script>
   </body>
