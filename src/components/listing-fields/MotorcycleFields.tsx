@@ -34,59 +34,59 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
   return (
     <div className="space-y-6">
       {/* Basic Information */}
-      <Card className="bg-white/5 border-white/20">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Basic Information</CardTitle>
+          <CardTitle className="text-foreground text-lg">Basic Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-white">Brand *</Label>
+              <Label className="text-foreground">Brand *</Label>
               <Input
                 {...register('vehicle_brand', { required: true })}
                 placeholder="e.g., Harley-Davidson"
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-white">Model *</Label>
+              <Label className="text-foreground">Model *</Label>
               <Input
                 {...register('vehicle_model', { required: true })}
                 placeholder="e.g., Street 750"
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label className="text-white">Year *</Label>
+              <Label className="text-foreground">Year *</Label>
               <Input
                 type="number"
                 min="1900"
                 max={new Date().getFullYear() + 1}
                 {...register('vehicle_year', { required: true, valueAsNumber: true })}
                 placeholder="2023"
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-white">Color</Label>
+              <Label className="text-foreground">Color</Label>
               <Input
                 {...register('vehicle_color')}
                 placeholder="e.g., Black"
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-white">Condition *</Label>
+              <Label className="text-foreground">Condition *</Label>
               <Select value={vehicleCondition} onValueChange={(value) => setValue('vehicle_condition', value)}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   {VEHICLE_CONDITIONS.map(condition => (
-                    <SelectItem key={condition} value={condition.toLowerCase().replace(' ', '_')} className="text-white">
+                    <SelectItem key={condition} value={condition.toLowerCase().replace(' ', '_')} className="text-foreground">
                       {condition}
                     </SelectItem>
                   ))}
@@ -98,31 +98,31 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
       </Card>
 
       {/* Specifications */}
-      <Card className="bg-white/5 border-white/20">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Specifications</CardTitle>
+          <CardTitle className="text-foreground text-lg">Specifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-white">Engine Size (cc) *</Label>
+              <Label className="text-foreground">Engine Size (cc) *</Label>
               <Input
                 type="number"
                 min="50"
                 {...register('engine_size', { required: true, valueAsNumber: true })}
                 placeholder="750"
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-white">Motorcycle Type *</Label>
+              <Label className="text-foreground">Motorcycle Type *</Label>
               <Select value={motorcycleType} onValueChange={(value) => setValue('motorcycle_type', value)}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   {MOTORCYCLE_TYPES.map(type => (
-                    <SelectItem key={type} value={type.toLowerCase().replace(' ', '_')} className="text-white">
+                    <SelectItem key={type} value={type.toLowerCase().replace(' ', '_')} className="text-foreground">
                       {type}
                     </SelectItem>
                   ))}
@@ -133,14 +133,14 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label className="text-white">Transmission</Label>
+              <Label className="text-foreground">Transmission</Label>
               <Select value={transmissionType} onValueChange={(value) => setValue('transmission_type', value)}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   {TRANSMISSION_TYPES.map(trans => (
-                    <SelectItem key={trans} value={trans.toLowerCase().replace(' ', '_')} className="text-white">
+                    <SelectItem key={trans} value={trans.toLowerCase().replace(' ', '_')} className="text-foreground">
                       {trans}
                     </SelectItem>
                   ))}
@@ -148,14 +148,14 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-white">Fuel Type</Label>
+              <Label className="text-foreground">Fuel Type</Label>
               <Select value={fuelType} onValueChange={(value) => setValue('fuel_type', value)}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   {FUEL_TYPES.map(fuel => (
-                    <SelectItem key={fuel} value={fuel.toLowerCase()} className="text-white">
+                    <SelectItem key={fuel} value={fuel.toLowerCase()} className="text-foreground">
                       {fuel}
                     </SelectItem>
                   ))}
@@ -163,13 +163,13 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-white">Mileage (km)</Label>
+              <Label className="text-foreground">Mileage (km)</Label>
               <Input
                 type="number"
                 min="0"
                 {...register('mileage', { valueAsNumber: true })}
                 placeholder="5000"
-                className="bg-white/10 border-white/20 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
           </div>
@@ -177,9 +177,9 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
       </Card>
 
       {/* Safety & Features */}
-      <Card className="bg-white/5 border-white/20">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Safety & Features</CardTitle>
+          <CardTitle className="text-foreground text-lg">Safety & Features</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -190,7 +190,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
                 onCheckedChange={(checked) => setValue('has_abs', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_abs" className="text-white cursor-pointer">
+              <Label htmlFor="has_abs" className="text-foreground cursor-pointer">
                 ABS (Anti-lock Braking)
               </Label>
             </div>
@@ -202,7 +202,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
                 onCheckedChange={(checked) => setValue('has_traction_control', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_traction_control" className="text-white cursor-pointer">
+              <Label htmlFor="has_traction_control" className="text-foreground cursor-pointer">
                 Traction Control
               </Label>
             </div>
@@ -214,7 +214,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
                 onCheckedChange={(checked) => setValue('has_heated_grips', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_heated_grips" className="text-white cursor-pointer">
+              <Label htmlFor="has_heated_grips" className="text-foreground cursor-pointer">
                 Heated Grips
               </Label>
             </div>
@@ -226,7 +226,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
                 onCheckedChange={(checked) => setValue('has_luggage_rack', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="has_luggage_rack" className="text-white cursor-pointer">
+              <Label htmlFor="has_luggage_rack" className="text-foreground cursor-pointer">
                 Luggage Rack
               </Label>
             </div>
@@ -238,7 +238,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
                 onCheckedChange={(checked) => setValue('includes_helmet', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="includes_helmet" className="text-white cursor-pointer">
+              <Label htmlFor="includes_helmet" className="text-foreground cursor-pointer">
                 Includes Helmet
               </Label>
             </div>
@@ -250,7 +250,7 @@ export function MotorcycleFields({ register, setValue, watch }: MotorcycleFields
                 onCheckedChange={(checked) => setValue('includes_gear', checked)}
                 className="border-white/40"
               />
-              <Label htmlFor="includes_gear" className="text-white cursor-pointer">
+              <Label htmlFor="includes_gear" className="text-foreground cursor-pointer">
                 Includes Riding Gear
               </Label>
             </div>
