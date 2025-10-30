@@ -267,7 +267,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="relative w-full h-full flex flex-col items-center justify-center">
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
@@ -278,26 +278,26 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             exit={{ opacity: 0 }}
           >
             <motion.div
-              initial={{ 
-                scale: 0, 
-                opacity: 0, 
+              initial={{
+                scale: 0,
+                opacity: 0,
                 x: emojiAnimation.position === 'right' ? 80 : -80,
                 rotate: emojiAnimation.position === 'right' ? 15 : -15
               }}
-              animate={{ 
-                scale: 2.5, 
-                opacity: 1, 
+              animate={{
+                scale: 2.5,
+                opacity: 1,
                 x: emojiAnimation.position === 'right' ? 40 : -40,
                 rotate: 0
               }}
-              exit={{ 
+              exit={{
                 scale: emojiAnimation.type === 'like' ? 3.5 : 1.5,
-                opacity: 0, 
+                opacity: 0,
                 y: emojiAnimation.type === 'like' ? -250 : -100,
                 x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -300 : 300),
                 rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -75 : 75)
               }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 500,
                 damping: 30,
@@ -311,8 +311,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               <div className="relative">
                 {/* Glow effect */}
                 <div className={`absolute inset-0 blur-3xl opacity-50 ${
-                  emojiAnimation.type === 'like' 
-                    ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                  emojiAnimation.type === 'like'
+                    ? 'bg-gradient-to-r from-orange-400 to-red-500'
                     : 'bg-gradient-to-r from-gray-400 to-blue-300'
                 }`} />
                 {/* Emoji */}
@@ -325,8 +325,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         )}
       </AnimatePresence>
 
-      {/* Full Screen Cards Container */}
-      <div className="relative h-[700px] w-full mx-auto max-w-md">
+      {/* Full Screen Cards Container - Dynamic height based on viewport */}
+      <div className="relative w-full mx-auto max-w-md mb-24" style={{ height: 'min(700px, calc(100vh - 240px))' }}>
         
         <AnimatePresence mode="popLayout">
           {/* Next card - scales up smoothly when current card exits */}
@@ -405,9 +405,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
 
-      {/* Bottom Action Buttons - 3 Button Layout */}
-      <motion.div 
-        className="absolute bottom-8 left-0 right-0 flex justify-center gap-6 items-center z-20 px-4"
+      {/* Bottom Action Buttons - 3 Button Layout - Always visible at bottom */}
+      <motion.div
+        className="flex justify-center gap-6 items-center z-20 px-4 mt-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}

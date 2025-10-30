@@ -557,9 +557,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
-          <DialogTitle>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 bg-background text-foreground">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b border-border">
+          <DialogTitle className="text-foreground">
             {editingId ? `Edit ${getCategoryLabel()}` : `List New ${getCategoryLabel()}`}
           </DialogTitle>
         </DialogHeader>
@@ -568,13 +568,13 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
         <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-6">
           {/* Basic Information */}
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-lg">Basic Information</CardTitle>
+              <CardTitle className="text-lg text-foreground">Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="title">Property Title *</Label>
+                <Label className="text-foreground" htmlFor="title">Property Title *</Label>
                 <Input
                   id="title"
                   {...register('title', { required: 'Title is required' })}
@@ -595,7 +595,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 {currentCategory === 'property' && (
                   <>
                     <div>
-                      <Label htmlFor="property_type">Property Type</Label>
+                      <Label className="text-foreground" htmlFor="property_type">Property Type</Label>
                       <Select
                         onValueChange={(value) => setValue('property_type', value)}
                         value={watch('property_type')}
@@ -614,7 +614,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     </div>
 
                     <div>
-                      <Label htmlFor="condition">Property Condition</Label>
+                      <Label className="text-foreground" htmlFor="condition">Property Condition</Label>
                       <Select
                         onValueChange={(value) => setValue('condition', value)}
                         value={watch('condition')}
@@ -633,7 +633,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     </div>
 
                     <div>
-                      <Label htmlFor="lease_terms">Lease Terms</Label>
+                      <Label className="text-foreground" htmlFor="lease_terms">Lease Terms</Label>
                       <Select
                         onValueChange={(value) => setValue('lease_terms', value)}
                         value={watch('lease_terms')}
@@ -655,7 +655,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
                 {/* Listing type - show for all categories */}
                 <div>
-                  <Label htmlFor="listing_type">Listing For</Label>
+                  <Label className="text-foreground" htmlFor="listing_type">Listing For</Label>
                   <Select
                     onValueChange={(value) => setValue('listing_type', value)}
                     value={watch('listing_type') || 'rent'}
@@ -674,14 +674,14 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
           </Card>
 
           {/* Location */}
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-lg">Location</CardTitle>
+              <CardTitle className="text-lg text-foreground">Location</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="city">City *</Label>
+                  <Label className="text-foreground" htmlFor="city">City *</Label>
                   <Input
                     id="city"
                     {...register('city', { required: 'City is required' })}
@@ -693,7 +693,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 </div>
 
                 <div>
-                  <Label htmlFor="neighborhood">Neighborhood</Label>
+                  <Label className="text-foreground" htmlFor="neighborhood">Neighborhood</Label>
                   <Input
                     id="neighborhood"
                     {...register('neighborhood')}
@@ -708,14 +708,14 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
           </Card>
 
           {/* Price - Common for all categories */}
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-lg">Pricing</CardTitle>
+              <CardTitle className="text-lg text-foreground">Pricing</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="price">
+                  <Label className="text-foreground" htmlFor="price">
                     Price (USD) * {currentCategory === 'property' && '(per month)'}
                     {currentCategory === 'motorcycle' && '(per day)'}
                     {currentCategory === 'bicycle' && '(per day)'}
@@ -774,15 +774,15 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
           {/* Legacy Property Details - Keep for backward compatibility but hide for non-property */}
           {currentCategory === 'property' && (
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-lg">Additional Property Details (Legacy)</CardTitle>
+              <CardTitle className="text-lg text-foreground">Additional Property Details (Legacy)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
 
                 <div>
-                  <Label htmlFor="beds">Bedrooms</Label>
+                  <Label className="text-foreground" htmlFor="beds">Bedrooms</Label>
                   <Select 
                     onValueChange={(value) => {
                       const numValue = value === 'Studio' ? 0 : value === '10+' ? 10 : parseInt(value);
@@ -804,7 +804,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 </div>
 
                 <div>
-                  <Label htmlFor="baths">Bathrooms</Label>
+                  <Label className="text-foreground" htmlFor="baths">Bathrooms</Label>
                   <Select 
                     onValueChange={(value) => {
                       const numValue = value === '6+' ? 6 : parseFloat(value);
@@ -826,7 +826,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 </div>
 
                 <div>
-                  <Label htmlFor="square_footage">Square Footage</Label>
+                  <Label className="text-foreground" htmlFor="square_footage">Square Footage</Label>
                   <Select 
                     onValueChange={(value) => {
                       // Convert range to approximate midpoint number
@@ -875,7 +875,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     id="furnished"
                     {...register('furnished')}
                   />
-                  <Label htmlFor="furnished">Furnished</Label>
+                  <Label className="text-foreground" htmlFor="furnished">Furnished</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -883,7 +883,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     id="pet_friendly"
                     {...register('pet_friendly')}
                   />
-                  <Label htmlFor="pet_friendly">Pet Friendly</Label>
+                  <Label className="text-foreground" htmlFor="pet_friendly">Pet Friendly</Label>
                 </div>
               </div>
             </CardContent>
@@ -892,9 +892,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
           {/* Amenities - Property Only */}
           {currentCategory === 'property' && (
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-lg">Amenities & Features</CardTitle>
+              <CardTitle className="text-lg text-foreground">Amenities & Features</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {Object.entries(COMPREHENSIVE_AMENITIES).map(([category, items]) => (
@@ -908,7 +908,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                           checked={selectedAmenities.includes(amenity)}
                           onCheckedChange={() => handleAmenityToggle(amenity)}
                         />
-                        <Label htmlFor={amenity} className="text-sm cursor-pointer">{amenity}</Label>
+                        <Label className="text-foreground text-sm cursor-pointer" htmlFor={amenity}>{amenity}</Label>
                       </div>
                     ))}
                   </div>
@@ -919,9 +919,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
           )}
 
           {/* Images */}
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-lg">Photos</CardTitle>
+              <CardTitle className="text-lg text-foreground">Photos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
