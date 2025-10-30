@@ -16,7 +16,7 @@ const ClientSettings = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="p-4 md:p-8">
+      <div className="w-full h-full overflow-y-auto p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">Client Settings</h1>
@@ -51,7 +51,7 @@ const ClientSettings = () => {
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200">
                       <Home className="w-10 h-10 text-blue-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Properties</h3>
                       <p className="text-sm text-muted-foreground mb-4">
@@ -59,7 +59,7 @@ const ClientSettings = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200">
                       <Car className="w-10 h-10 text-orange-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Motorcycles</h3>
                       <p className="text-sm text-muted-foreground mb-4">
@@ -67,7 +67,7 @@ const ClientSettings = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border-2 border-green-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border-2 border-green-200">
                       <Bike className="w-10 h-10 text-green-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Bicycles</h3>
                       <p className="text-sm text-muted-foreground mb-4">
@@ -75,7 +75,7 @@ const ClientSettings = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg border-2 border-cyan-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg border-2 border-cyan-200">
                       <Ship className="w-10 h-10 text-cyan-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Yachts</h3>
                       <p className="text-sm text-muted-foreground mb-4">

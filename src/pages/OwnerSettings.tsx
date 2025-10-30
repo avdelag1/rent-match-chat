@@ -12,7 +12,7 @@ import { ThemeSelector } from "@/components/ThemeSelector";
 const OwnerSettings = () => {
   return (
     <DashboardLayout userRole="owner">
-      <div className="p-4 md:p-8">
+      <div className="w-full h-full overflow-y-auto p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">Owner Settings</h1>
@@ -32,7 +32,7 @@ const OwnerSettings = () => {
             </TabsList>
 
             <TabsContent value="profile">
-              <div className="p-6 text-center bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 mt-6">
+              <div className="w-full h-full overflow-y-auto p-6 text-center bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 mt-6">
                 <p className="text-gray-700">Profile settings will appear here</p>
               </div>
             </TabsContent>
