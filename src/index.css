@@ -93,7 +93,7 @@ body {
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 14 100% 57%;
-    --radius: 0.75rem;
+    --radius: 1.25rem;
     
     /* Ultra-Dynamic Gradients with More Color */
     --gradient-primary: linear-gradient(135deg, 
