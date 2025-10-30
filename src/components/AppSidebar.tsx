@@ -248,7 +248,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
             />
             
             <div>
-              <h2 className="text-foreground font-bold text-lg">TINDERENT</h2>
+              <h2 className="text-foreground font-bold text-lg">
+                TINDE<span className="text-red-500">R</span>ENT
+              </h2>
               <p className="text-muted-foreground text-xs font-medium">
                 {userRole === 'client' ? 'Client Portal' : 'Owner Portal'}
               </p>
