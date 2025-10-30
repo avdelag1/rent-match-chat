@@ -13,7 +13,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick, filters }: Client
   return (
     <DashboardLayout userRole="client">
       <PageTransition>
-        <div className="w-full min-h-screen bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center p-4 py-8">
+        <div className="w-full h-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center p-4">
           <CategoryBrowseContainer
             onListingTap={(listingId) => {
               console.log('Listing tapped:', listingId);

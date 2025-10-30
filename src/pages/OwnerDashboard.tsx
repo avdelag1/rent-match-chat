@@ -44,16 +44,18 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full min-h-screen bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center p-4 py-8">
-        <ClientSwipeContainer
-          onClientTap={handleProfileTap}
-          onInsights={handleInsights}
-          onMessageClick={handleStartConversation}
-          profiles={profiles}
-          isLoading={isLoading}
-          error={error}
-        />
-      </div>
+      <PageTransition>
+        <div className="w-full h-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center p-4">
+          <ClientSwipeContainer
+            onClientTap={handleProfileTap}
+            onInsights={handleInsights}
+            onMessageClick={handleStartConversation}
+            profiles={profiles}
+            isLoading={isLoading}
+            error={error}
+          />
+        </div>
+      </PageTransition>
     </DashboardLayout>
   );
 };
