@@ -248,9 +248,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         onSettingsClick={handleSettingsClick}
       />
 
-      {/* Main Content - Scrollable area between top bar and bottom nav */}
-      <main className="flex-1 overflow-y-auto pt-14 pb-16 min-h-screen">
-        <div className="w-full min-h-full relative">{
+      {/* Main Content - Full screen area for card feed */}
+      <main className="fixed inset-0 pt-14 pb-16">
+        <div className="w-full h-full">{
           React.Children.map(children, (child) => {
             if (React.isValidElement(child)) {
               return React.cloneElement(child as React.ReactElement, {

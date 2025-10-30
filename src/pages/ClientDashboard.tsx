@@ -34,14 +34,12 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick, filters }: Client
   return (
     <DashboardLayout userRole="client">
       <PageTransition>
-        <div className="w-full h-screen bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 overflow-hidden">
-          <InfiniteCardFeed
-            mode="client"
-            filters={filters}
-            onCardTap={handleCardTap}
-            onMessage={handleMessage}
-          />
-        </div>
+        <InfiniteCardFeed
+          mode="client"
+          filters={filters}
+          onCardTap={handleCardTap}
+          onMessage={handleMessage}
+        />
       </PageTransition>
     </DashboardLayout>
   );

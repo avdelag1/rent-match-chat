@@ -31,13 +31,11 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   return (
     <DashboardLayout userRole="owner">
       <PageTransition>
-        <div className="w-full h-screen bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 overflow-hidden">
-          <InfiniteCardFeed
-            mode="owner"
-            onCardTap={handleProfileTap}
-            onMessage={handleStartConversation}
-          />
-        </div>
+        <InfiniteCardFeed
+          mode="owner"
+          onCardTap={handleProfileTap}
+          onMessage={handleStartConversation}
+        />
       </PageTransition>
     </DashboardLayout>
   );
