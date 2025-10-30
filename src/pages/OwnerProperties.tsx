@@ -26,7 +26,7 @@ const OwnerProperties = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="p-8">
+      <div className="w-full h-full overflow-y-auto p-8">
         <div className="max-w-6xl mx-auto">
           {/* Show PropertyManagement component that displays actual properties */}
           <PropertyManagement initialCategory={initialCategory} />

@@ -409,6 +409,8 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
   };
 
   const handleImageAdd = async () => {
+    console.log('📸 handleImageAdd clicked!');
+
     if (images.length >= 30) {
       toast({
         title: "Maximum Photos Reached",
@@ -418,68 +420,103 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       return;
     }
 
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.multiple = true;
-    
-    input.onchange = async (e) => {
-      const files = Array.from((e.target as HTMLInputElement).files || []);
-      
-      if (files.length + images.length > 30) {
-        toast({
-          title: "Too Many Photos",
-          description: `You can only have 30 photos total. You can add ${30 - images.length} more.`,
-          variant: "destructive"
-        });
-        return;
-      }
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = true;
+      input.style.display = 'none';
 
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to upload images.",
-          variant: "destructive"
-        });
-        return;
-      }
+      console.log('📸 File input created, waiting for selection...');
 
-      for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit
-          toast({
-            title: "File Too Large",
-            description: `${file.name} is too large. Maximum size is 10MB.`,
-            variant: "destructive"
-          });
-          continue;
+      input.onchange = async (e) => {
+        console.log('📸 Files selected!');
+        const files = Array.from((e.target as HTMLInputElement).files || []);
+        console.log('📸 Number of files:', files.length);
+
+        if (files.length === 0) {
+          console.log('📸 No files selected');
+          return;
         }
 
-        try {
+        if (files.length + images.length > 30) {
           toast({
-            title: "Uploading...",
-            description: `Uploading ${file.name}`,
-          });
-
-          const imageUrl = await uploadImageToStorage(file, user.user.id);
-          setImages(prev => [...prev, imageUrl]);
-          
-          toast({
-            title: "Upload Successful",
-            description: `${file.name} uploaded successfully.`,
-          });
-        } catch (error: any) {
-          toast({
-            title: "Upload Failed",
-            description: `Failed to upload ${file.name}. Please try again.`,
+            title: "Too Many Photos",
+            description: `You can only have 30 photos total. You can add ${30 - images.length} more.`,
             variant: "destructive"
           });
-          console.error('Upload error:', error);
+          return;
         }
-      }
-    };
-    
-    input.click();
+
+        const { data: user } = await supabase.auth.getUser();
+        console.log('📸 User auth check:', user.user ? 'Authenticated' : 'Not authenticated');
+
+        if (!user.user) {
+          toast({
+            title: "Authentication Required",
+            description: "Please log in to upload images.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        for (const file of files) {
+          console.log('📸 Processing file:', file.name, 'Size:', file.size);
+
+          if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            toast({
+              title: "File Too Large",
+              description: `${file.name} is too large. Maximum size is 10MB.`,
+              variant: "destructive"
+            });
+            continue;
+          }
+
+          try {
+            console.log('📸 Starting upload for:', file.name);
+            toast({
+              title: "Uploading...",
+              description: `Uploading ${file.name}`,
+            });
+
+            const imageUrl = await uploadImageToStorage(file, user.user.id);
+            console.log('📸 Upload successful! URL:', imageUrl);
+
+            setImages(prev => [...prev, imageUrl]);
+
+            toast({
+              title: "✅ Upload Successful",
+              description: `${file.name} uploaded successfully.`,
+            });
+          } catch (error: any) {
+            console.error('📸 Upload error:', error);
+            toast({
+              title: "Upload Failed",
+              description: `Failed to upload ${file.name}: ${error.message || 'Unknown error'}`,
+              variant: "destructive"
+            });
+          }
+        }
+      };
+
+      // Append to body and click
+      document.body.appendChild(input);
+      input.click();
+
+      // Clean up after a delay
+      setTimeout(() => {
+        document.body.removeChild(input);
+      }, 1000);
+
+      console.log('📸 File dialog should be open now');
+    } catch (error) {
+      console.error('📸 Error creating file input:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open file picker. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleImageRemove = async (index: number) => {
