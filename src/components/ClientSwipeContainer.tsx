@@ -295,14 +295,7 @@ export function ClientSwipeContainer({
   });
 
   return (
-    <div className="w-full flex flex-col relative z-0 max-w-md mx-auto">{/* Client Counter */}
-      <div className="text-center mb-2 z-20">
-        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-          <span className="text-white text-sm font-medium">
-            Showing {currentIndex + 1} of {clientProfiles.length}
-          </span>
-        </div>
-      </div>
+    <div className="relative w-full h-full flex flex-col items-center justify-center z-0 max-w-md mx-auto">
 
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
@@ -361,8 +354,8 @@ export function ClientSwipeContainer({
         )}
       </AnimatePresence>
 
-      {/* Cards Container with Fixed Height */}
-      <div className="relative h-[650px] w-full max-w-md mx-auto">
+      {/* Cards Container with Dynamic Height */}
+      <div className="relative w-full max-w-md mx-auto mb-24" style={{ height: 'min(650px, calc(100vh - 240px))' }}>
         
         <AnimatePresence mode="popLayout">
           {/* Current card - swipes out with rotation and fade */}
