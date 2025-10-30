@@ -13,7 +13,6 @@ import { Loader2 } from 'lucide-react';
 import { useInfiniteListings, flattenListings } from '@/hooks/useInfiniteListings';
 import { useInfiniteProfiles, flattenProfiles } from '@/hooks/useInfiniteProfiles';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
-import { trackSwipe, trackSuperLike, trackDetailView, trackEventDebounced } from '@/utils/analytics';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { Database } from '@/integrations/supabase/types';
 
@@ -81,18 +80,9 @@ export function InfiniteCardFeed({
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Track impressions (debounced)
+  // Track impressions (removed analytics)
   useEffect(() => {
-    if (items.length > 0 && currentIndex < items.length) {
-      const item = items[currentIndex];
-      const itemId = mode === 'client' ? (item as Listing).id : (item as any).user_id;
-
-      trackEventDebounced('page_view', {
-        item_type: mode === 'client' ? 'listing' : 'profile',
-        item_id: itemId,
-        position: currentIndex
-      }, 2000);
-    }
+    // Analytics removed for deployment stability
   }, [currentIndex, items, mode]);
 
   /**
@@ -104,13 +94,6 @@ export function InfiniteCardFeed({
 
       // Add to swiped set immediately for optimistic UI
       setSwipedIds(prev => new Set(prev).add(itemId));
-
-      // Track analytics
-      trackSwipe(
-        direction,
-        mode === 'client' ? 'listing' : 'profile',
-        itemId
-      );
 
       // Move to next card
       setCurrentIndex(prev => prev + 1);
@@ -143,9 +126,6 @@ export function InfiniteCardFeed({
     async (item: any) => {
       const itemId = mode === 'client' ? item.id : item.user_id;
 
-      // Track analytics
-      trackSuperLike(mode === 'client' ? 'listing' : 'profile', itemId);
-
       // Perform super like (same as right swipe but with special flag)
       await handleSwipe('right', item);
     },
@@ -159,13 +139,6 @@ export function InfiniteCardFeed({
     (item: any) => {
       const itemId = mode === 'client' ? item.id : item.user_id;
       const itemTitle = mode === 'client' ? item.title : item.full_name;
-
-      // Track analytics
-      trackDetailView(
-        mode === 'client' ? 'listing' : 'profile',
-        itemId,
-        itemTitle
-      );
 
       // Call parent handler
       onCardTap?.(item);
