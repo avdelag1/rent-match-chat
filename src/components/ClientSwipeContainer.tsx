@@ -44,9 +44,9 @@ export function ClientSwipeContainer({
     type: 'like' | 'dislike';
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-  
+  const [isDraggingVertical, setIsDraggingVertical] = useState(false);
+  const [verticalDragOffset, setVerticalDragOffset] = useState(0);
+
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching();
   
@@ -157,20 +157,31 @@ export function ClientSwipeContainer({
     });
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientY);
+  const handleVerticalDrag = (event: any, info: any) => {
+    setIsDraggingVertical(true);
+    setVerticalDragOffset(info.offset.y);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    setTouchEnd(e.changedTouches[0].clientY);
-    const swipeDistance = touchStart - touchEnd;
-    const threshold = 50;
-    
-    if (Math.abs(swipeDistance) > threshold) {
-      if (swipeDistance > 0 && currentIndex < clientProfiles.length - 1) {
+  const handleVerticalDragEnd = (event: any, info: any) => {
+    setIsDraggingVertical(false);
+    setVerticalDragOffset(0);
+
+    const threshold = 100; // pixels to trigger swipe
+    const velocity = Math.abs(info.velocity.y);
+    const offset = info.offset.y;
+
+    // Swipe UP (negative offset) = Next card
+    if (offset < -threshold || (velocity > 500 && offset < -50)) {
+      if (currentIndex < clientProfiles.length - 1) {
         setCurrentIndex(prev => prev + 1);
-      } else if (swipeDistance < 0 && currentIndex > 0) {
+        triggerHaptic('light');
+      }
+    }
+    // Swipe DOWN (positive offset) = Previous card
+    else if (offset > threshold || (velocity > 500 && offset > 50)) {
+      if (currentIndex > 0) {
         setCurrentIndex(prev => prev - 1);
+        triggerHaptic('light');
       }
     }
   };
@@ -290,6 +301,56 @@ export function ClientSwipeContainer({
 
   const currentClient = clientProfiles[currentIndex];
   const nextClient = clientProfiles[currentIndex + 1];
+  const thirdClient = clientProfiles[currentIndex + 2];
+
+  // Calculate card positions based on vertical drag
+  const getCardStyle = (index: number) => {
+    const relativeIndex = index - currentIndex;
+
+    // Base positions for stacked cards
+    const baseScale = 1 - (relativeIndex * 0.05);
+    const baseY = relativeIndex * 20;
+    const baseOpacity = Math.max(0.3, 1 - (relativeIndex * 0.3));
+
+    // Apply drag offset to current card
+    if (relativeIndex === 0 && isDraggingVertical) {
+      return {
+        scale: 1,
+        y: verticalDragOffset,
+        opacity: Math.max(0.5, 1 - Math.abs(verticalDragOffset) / 400),
+        zIndex: 20
+      };
+    }
+
+    // Next card moves up when current is dragged up
+    if (relativeIndex === 1 && isDraggingVertical && verticalDragOffset < 0) {
+      const progress = Math.min(1, Math.abs(verticalDragOffset) / 200);
+      return {
+        scale: baseScale + (progress * 0.05),
+        y: baseY - (progress * 20),
+        opacity: baseOpacity + (progress * 0.3),
+        zIndex: 10 + relativeIndex
+      };
+    }
+
+    // Previous card moves down when current is dragged down
+    if (relativeIndex === -1 && isDraggingVertical && verticalDragOffset > 0) {
+      const progress = Math.min(1, verticalDragOffset / 200);
+      return {
+        scale: 1 - (progress * 0.05),
+        y: -(progress * 20),
+        opacity: Math.max(0.5, 1 - (progress * 0.3)),
+        zIndex: 30
+      };
+    }
+
+    return {
+      scale: baseScale,
+      y: baseY,
+      opacity: baseOpacity,
+      zIndex: 10 + relativeIndex
+    };
+  };
 
   // CRITICAL DEBUG
   console.log('🎴 RENDER CHECK:', {
@@ -302,11 +363,7 @@ export function ClientSwipeContainer({
   });
 
   return (
-    <div 
-      className="relative w-full h-full flex flex-col items-center justify-center z-0"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
 
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
@@ -365,16 +422,103 @@ export function ClientSwipeContainer({
         )}
       </AnimatePresence>
 
-      {/* Cards Container - Maximized */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ minHeight: 'min(85vh, 750px)' }}>
-        
+      {/* Cards Container - Instagram Style Stacking */}
+      <motion.div
+        className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20"
+        style={{ minHeight: 'min(85vh, 750px)' }}
+        drag="y"
+        dragConstraints={{ top: -300, bottom: 300 }}
+        dragElastic={0.2}
+        onDrag={handleVerticalDrag}
+        onDragEnd={handleVerticalDragEnd}
+      >
         <AnimatePresence mode="popLayout">
-          {/* Current card - swipes out with rotation and fade */}
+          {/* Third card (behind next) */}
+          {thirdClient && (
+            <motion.div
+              key={`third-${thirdClient.user_id}`}
+              initial={{ scale: 0.85, y: 40, opacity: 0.3 }}
+              animate={{ scale: 0.85, y: 40, opacity: 0.3 }}
+              className="absolute inset-0 shadow-lg pointer-events-none"
+              style={{ willChange: 'transform, opacity', zIndex: 1 }}
+            >
+              <ClientProfileCard
+                profile={thirdClient}
+                onSwipe={() => {}}
+                onTap={() => {}}
+                onInsights={() => {}}
+                onMessage={() => {}}
+                isTop={false}
+                hasPremium={hasPremiumMessaging}
+              />
+            </motion.div>
+          )}
+
+          {/* Next card - becomes current when swiping */}
+          {nextClient && (
+            <motion.div
+              key={`next-${nextClient.user_id}`}
+              initial={{ scale: 0.90, y: 20, opacity: 0.5 }}
+              animate={getCardStyle(currentIndex + 1)}
+              className="absolute inset-0 shadow-xl pointer-events-none"
+              style={{ willChange: 'transform, opacity' }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                mass: 0.8
+              }}
+            >
+              <ClientProfileCard
+                profile={nextClient}
+                onSwipe={() => {}}
+                onTap={() => {}}
+                onInsights={() => {}}
+                onMessage={() => {}}
+                isTop={false}
+                hasPremium={hasPremiumMessaging}
+              />
+            </motion.div>
+          )}
+
+          {/* Previous card - appears when swiping down */}
+          {currentIndex > 0 && clientProfiles[currentIndex - 1] && (
+            <motion.div
+              key={`prev-${clientProfiles[currentIndex - 1].user_id}`}
+              initial={{ scale: 1, y: 0, opacity: 0 }}
+              animate={getCardStyle(currentIndex - 1)}
+              className="absolute inset-0 shadow-2xl pointer-events-none"
+              style={{ willChange: 'transform, opacity' }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                mass: 0.8
+              }}
+            >
+              <ClientProfileCard
+                profile={clientProfiles[currentIndex - 1]}
+                onSwipe={() => {}}
+                onTap={() => {}}
+                onInsights={() => {}}
+                onMessage={() => {}}
+                isTop={false}
+                hasPremium={hasPremiumMessaging}
+              />
+            </motion.div>
+          )}
+
+          {/* Current card - Main interactive card */}
           {currentClient && (
             <motion.div
               key={currentClient.user_id}
               initial={{ scale: 0.95, opacity: 0.7, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+                y: 0,
+                ...getCardStyle(currentIndex)
+              }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
                 opacity: 0,
@@ -390,14 +534,13 @@ export function ClientSwipeContainer({
               }}
               transition={{
                 type: "spring",
-                stiffness: 200,
-                damping: 20,
+                stiffness: 300,
+                damping: 30,
                 mass: 0.8
               }}
               className="absolute inset-0 shadow-2xl"
               style={{
                 willChange: 'transform, opacity',
-                zIndex: 10,
                 filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))'
               }}
             >
@@ -413,7 +556,7 @@ export function ClientSwipeContainer({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Modern 3-Button Action Layout */}
       <motion.div 
