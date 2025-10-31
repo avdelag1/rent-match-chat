@@ -12,14 +12,23 @@ export function useSwipe() {
       direction: 'left' | 'right';
       targetType?: 'listing' | 'profile';
     }) => {
+      console.log('[useSwipe] Starting swipe mutation:', { targetId, direction, targetType });
+
       // OPTIMIZED: Defensive auth check
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('[useSwipe] Auth error:', authError);
+        throw new Error('Authentication error. Please refresh the page.');
+      }
       if (!user?.id) {
+        console.error('[useSwipe] No user found');
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
+      console.log('[useSwipe] User authenticated:', user.id);
+
       // Use atomic upsert to prevent race conditions
-      const { error } = await supabase
+      const { data: likeData, error } = await supabase
         .from('likes')
         .upsert({
           user_id: user.id,
@@ -27,12 +36,16 @@ export function useSwipe() {
           direction
         }, {
           onConflict: 'user_id,target_id,direction',
-          ignoreDuplicates: true
-        });
+          ignoreDuplicates: false
+        })
+        .select();
 
       if (error) {
+        console.error('[useSwipe] Database error:', error);
         throw error;
       }
+
+      console.log('[useSwipe] Like saved successfully:', likeData);
       
       // Check if this creates a match (both users liked each other)
       // Wrap in try-catch to prevent match detection errors from failing the entire swipe
@@ -149,10 +162,11 @@ export function useSwipe() {
       queryClient.invalidateQueries({ queryKey: ['matches'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('[useSwipe] Mutation error:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to record your preference. Please try again.',
+        title: 'Error Saving',
+        description: error?.message || 'Failed to save your preference. Please try again.',
         variant: 'destructive'
       });
     }
