@@ -44,6 +44,8 @@ export function ClientSwipeContainer({
     type: 'like' | 'dislike';
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
   
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching();
@@ -148,16 +150,29 @@ export function ClientSwipeContainer({
   };
 
   const handleStartConversation = (clientId: string) => {
-    console.log('💬 Starting conversation with client:', clientId);
-    
-    // Always navigate to messages with the client ID
     navigate(`/messages?startConversation=${clientId}`);
-    
-    // Show toast to confirm
     toast({
       title: 'Opening Chat',
       description: 'Starting conversation...',
     });
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setTouchEnd(e.changedTouches[0].clientY);
+    const swipeDistance = touchStart - touchEnd;
+    const threshold = 50;
+    
+    if (Math.abs(swipeDistance) > threshold) {
+      if (swipeDistance > 0 && currentIndex < clientProfiles.length - 1) {
+        setCurrentIndex(prev => prev + 1);
+      } else if (swipeDistance < 0 && currentIndex > 0) {
+        setCurrentIndex(prev => prev - 1);
+      }
+    }
   };
 
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
@@ -295,7 +310,11 @@ export function ClientSwipeContainer({
   });
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center z-0 max-w-md mx-auto">
+    <div 
+      className="relative w-full h-full flex flex-col items-center justify-center z-0"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
 
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
@@ -354,8 +373,8 @@ export function ClientSwipeContainer({
         )}
       </AnimatePresence>
 
-      {/* Cards Container with Dynamic Height */}
-      <div className="relative w-full max-w-md mx-auto mb-24" style={{ height: 'min(650px, calc(100vh - 240px))' }}>
+      {/* Cards Container - Maximized */}
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ minHeight: 'min(85vh, 750px)' }}>
         
         <AnimatePresence mode="popLayout">
           {/* Current card - swipes out with rotation and fade */}

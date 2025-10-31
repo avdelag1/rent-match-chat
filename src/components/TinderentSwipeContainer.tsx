@@ -35,6 +35,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     type: 'like' | 'dislike';
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Get listings with filters applied
   const {
@@ -135,12 +137,32 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   };
 
   const handleRefresh = async () => {
-    setCurrentIndex(0); // Reset to first listing
+    setCurrentIndex(0);
     await refetch();
     toast({
       title: 'Properties Updated',
       description: 'All listings reloaded.',
     });
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setTouchEnd(e.changedTouches[0].clientY);
+    const swipeDistance = touchStart - touchEnd;
+    const threshold = 50;
+    
+    if (Math.abs(swipeDistance) > threshold) {
+      if (swipeDistance > 0 && currentIndex < listings.length - 1) {
+        // Swipe UP = Next card
+        setCurrentIndex(prev => prev + 1);
+      } else if (swipeDistance < 0 && currentIndex > 0) {
+        // Swipe DOWN = Previous card
+        setCurrentIndex(prev => prev - 1);
+      }
+    }
   };
 
   const handleInsights = (listingId: string) => {
@@ -267,7 +289,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
+    <div 
+      className="relative w-full h-full flex flex-col items-center justify-center"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
@@ -325,8 +351,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         )}
       </AnimatePresence>
 
-      {/* Full Screen Cards Container - Dynamic height based on viewport */}
-      <div className="relative w-full mx-auto max-w-md mb-24" style={{ height: 'min(700px, calc(100vh - 240px))' }}>
+      {/* Full Screen Cards Container - Maximized */}
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ minHeight: 'min(85vh, 750px)' }}>
         
         <AnimatePresence mode="popLayout">
           {/* Next card - scales up smoothly when current card exits */}

@@ -36,14 +36,14 @@ const LandingPage = () => {
           <div className="flex flex-col items-center justify-center mb-8">
             <div className="relative mb-4 w-full flex justify-center px-4">
               <h1 className="font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg text-center animate-scale-in">
-                TINDE<span class="text-red-500">R</span>ENT
+                TINDE<span className="text-red-500">R</span>ENT
               </h1>
               {/* Enhanced layered shadow */}
               <div className="absolute inset-0 font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white/20 blur-sm transform translate-x-0.5 translate-y-0.5">
-                TINDE<span class="text-red-500">R</span>ENT
+                TINDE<span className="text-red-500">R</span>ENT
               </div>
               <div className="absolute inset-0 font-brand text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-orange-400/30 blur-md transform translate-x-1 translate-y-1">
-                TINDE<span class="text-red-500">R</span>ENT
+                TINDE<span className="text-red-500">R</span>ENT
               </div>
             </div>
             <div className="text-5xl animate-bounce filter drop-shadow-2xl">🔥</div>
