@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useCallback } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { 
-  Flame, X, Star, MapPin, Bed, Bath, Square, Wifi, Car, 
+import {
+  Flame, X, Star, MapPin, Bed, Bath, Square, Wifi, Car,
   Camera, Eye, MessageCircle, ChevronLeft, ChevronRight,
   Home, TreePine, Utensils, Dumbbell, Music, Palette, PawPrint,
   ShieldCheck, CheckCircle
@@ -41,51 +41,51 @@ const getAmenityIcon = (amenity: string) => {
   return iconMap[amenity.toLowerCase()] || Home;
 };
 
-export function EnhancedPropertyCard({ 
-  listing, 
-  onSwipe, 
-  onTap, 
-  onSuperLike, 
+const EnhancedPropertyCardComponent = ({
+  listing,
+  onSwipe,
+  onTap,
+  onSuperLike,
   onMessage,
   isTop = true,
-  hasPremium = false 
-}: EnhancedPropertyCardProps) {
+  hasPremium = false
+}: EnhancedPropertyCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const threshold = 60;
     const velocity = info.velocity.x;
     const absVelocity = Math.abs(velocity);
-    
+
     // Lower threshold if high velocity (flick gesture)
     const effectiveThreshold = absVelocity > 800 ? 40 : 60;
-    
+
     if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 600) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
-  };
+  }, [onSwipe]);
 
-  const nextImage = (e?: React.MouseEvent) => {
+  const nextImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === listing.images.length - 1 ? 0 : prev + 1
     );
-  };
+  }, [listing.images.length]);
 
-  const prevImage = (e?: React.MouseEvent) => {
+  const prevImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? listing.images.length - 1 : prev - 1
     );
-  };
+  }, [listing.images.length]);
 
-  const handleImageClick = (e: React.MouseEvent) => {
+  const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -99,7 +99,7 @@ export function EnhancedPropertyCard({
     } else {
       onTap?.();
     }
-  };
+  }, [prevImage, nextImage, onTap]);
 
   const getSwipeIndicator = () => {
     const xValue = x.get();
@@ -157,6 +157,13 @@ export function EnhancedPropertyCard({
                 className="w-full h-full object-cover cursor-pointer"
                 onClick={handleImageClick}
                 draggable={false}
+                loading="lazy"
+                decoding="async"
+                style={{
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden'
+                }}
               />
               
               {/* Left/Right Click Areas for Navigation */}
@@ -276,4 +283,7 @@ export function EnhancedPropertyCard({
       </Card>
     </motion.div>
   );
-}
+};
+
+// Export memoized component for performance
+export const EnhancedPropertyCard = memo(EnhancedPropertyCardComponent);

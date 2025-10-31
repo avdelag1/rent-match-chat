@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useCallback } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ interface ClientProfileCardProps {
   hasPremium: boolean;
 }
 
-export function ClientProfileCard({
+const ClientProfileCardComponent = ({
   profile,
   onSwipe,
   onTap,
@@ -47,10 +47,10 @@ export function ClientProfileCard({
   onMessage,
   isTop,
   hasPremium
-}: ClientProfileCardProps) {
+}: ClientProfileCardProps) => {
   const [imageIndex, setImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
 
@@ -68,21 +68,21 @@ export function ClientProfileCard({
     isTop
   });
 
-  const nextImage = (e: React.MouseEvent) => {
+  const nextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev + 1) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const prevImage = (e: React.MouseEvent) => {
+  const prevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev - 1 + images.length) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const handleImageClick = (e: React.MouseEvent) => {
+  const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -96,21 +96,21 @@ export function ClientProfileCard({
     } else {
       onTap();
     }
-  };
+  }, [prevImage, nextImage, onTap]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const threshold = 60;
     const velocity = info.velocity.x;
     const absVelocity = Math.abs(velocity);
-    
+
     // ✅ FIX #2: Lower threshold for more responsive swipes
     const effectiveThreshold = absVelocity > 600 ? 30 : 40;
-    
+
     if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 350) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
-  };
+  }, [onSwipe]);
 
   const getSwipeIndicator = () => {
     return null; // Only show emoji after swipe
@@ -157,6 +157,13 @@ export function ClientProfileCard({
             className="w-full h-full object-cover cursor-pointer"
             draggable={false}
             onClick={handleImageClick}
+            loading="lazy"
+            decoding="async"
+            style={{
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden'
+            }}
             onError={(e) => {
               e.currentTarget.src = '/placeholder-avatar.svg';
             }}
@@ -291,4 +298,7 @@ export function ClientProfileCard({
       </Card>
     </motion.div>
   );
-}
+};
+
+// Export memoized component for performance
+export const ClientProfileCard = memo(ClientProfileCardComponent);
