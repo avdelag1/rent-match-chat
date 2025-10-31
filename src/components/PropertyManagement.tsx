@@ -15,6 +15,7 @@ import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign, ShieldChec
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
+import { OwnerListingsStats } from '@/components/OwnerListingsStats';
 
 
 interface PropertyManagementProps {
@@ -190,6 +191,9 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
             <span className="text-sm sm:text-base">Add Listing</span>
           </Button>
         </div>
+
+        {/* Statistics Dashboard */}
+        <OwnerListingsStats listings={listings} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 bg-white/10 backdrop-blur-sm h-auto">
