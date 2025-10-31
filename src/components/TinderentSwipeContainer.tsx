@@ -37,6 +37,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   }>({ show: false, type: 'like', position: 'right' });
   const [isDraggingVertical, setIsDraggingVertical] = useState(false);
   const [verticalDragOffset, setVerticalDragOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Get listings with filters applied
   const {
@@ -152,26 +153,32 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   const handleVerticalDragEnd = (event: any, info: any) => {
     setIsDraggingVertical(false);
-    setVerticalDragOffset(0);
+    setIsTransitioning(true);
 
-    const threshold = 100; // pixels to trigger swipe
+    const threshold = 80; // Lower threshold for easier swiping
     const velocity = Math.abs(info.velocity.y);
     const offset = info.offset.y;
 
     // Swipe UP (negative offset) = Next card
-    if (offset < -threshold || (velocity > 500 && offset < -50)) {
+    if (offset < -threshold || (velocity > 400 && offset < -30)) {
       if (currentIndex < listings.length - 1) {
         setCurrentIndex(prev => prev + 1);
         triggerHaptic('light');
       }
     }
     // Swipe DOWN (positive offset) = Previous card
-    else if (offset > threshold || (velocity > 500 && offset > 50)) {
+    else if (offset > threshold || (velocity > 400 && offset > 30)) {
       if (currentIndex > 0) {
         setCurrentIndex(prev => prev - 1);
         triggerHaptic('light');
       }
     }
+
+    // Reset after transition
+    setTimeout(() => {
+      setVerticalDragOffset(0);
+      setIsTransitioning(false);
+    }, 300);
   };
 
   const handleInsights = (listingId: string) => {
@@ -406,13 +413,14 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         )}
       </AnimatePresence>
 
-      {/* Full Screen Cards Container - Instagram Style Stacking */}
+      {/* Full Screen Cards Container - Fixed size with snap scroll behavior */}
       <motion.div
         className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20"
-        style={{ minHeight: 'min(85vh, 750px)' }}
+        style={{ height: '700px' }}
         drag="y"
-        dragConstraints={{ top: -300, bottom: 300 }}
-        dragElastic={0.2}
+        dragConstraints={{ top: -200, bottom: 200 }}
+        dragElastic={0.15}
+        dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
         onDrag={handleVerticalDrag}
         onDragEnd={handleVerticalDragEnd}
       >
@@ -492,15 +500,15 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             </motion.div>
           )}
 
-          {/* Current card - Main interactive card */}
+          {/* Current card - Main interactive card with snap slide effect */}
           {currentListing && (
             <motion.div
               key={currentListing.id}
-              initial={{ scale: 0.95, opacity: 0.7, y: 10 }}
+              initial={{ scale: 0.98, opacity: 0, y: 20 }}
               animate={{
                 scale: 1,
                 opacity: 1,
-                y: 0,
+                y: isTransitioning ? 0 : (getCardStyle(currentIndex).y || 0),
                 ...getCardStyle(currentIndex)
               }}
               exit={{
@@ -518,9 +526,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 0.8
+                stiffness: isTransitioning ? 350 : 300,
+                damping: isTransitioning ? 35 : 30,
+                mass: 0.7
               }}
               className="absolute inset-0 shadow-2xl"
               style={{
