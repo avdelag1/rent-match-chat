@@ -179,21 +179,13 @@ export function ClientSwipeContainer({
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto">
-        <div className="w-full h-[600px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-xl">
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 750px)' }}>
+        <div className="w-full h-full bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden">
           <div className="p-6 space-y-4">
-            <Skeleton className="w-full h-64 rounded-lg" />
+            <Skeleton className="w-full h-[60vh] rounded-lg" />
             <Skeleton className="w-3/4 h-6" />
             <Skeleton className="w-1/2 h-4" />
-            <div className="flex space-x-2">
-              <Skeleton className="w-16 h-6 rounded-full" />
-              <Skeleton className="w-20 h-6 rounded-full" />
-            </div>
           </div>
-        </div>
-        <div className="text-center mt-4 text-muted-foreground">
-          <Sparkles className="w-5 h-5 mx-auto mb-2 animate-spin" />
-          Finding perfect clients...
         </div>
       </div>
     );

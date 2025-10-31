@@ -171,19 +171,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
           animate="visible"
         >
           
-          {/* Header */}
-          <motion.div variants={itemVariants} className="mb-6 sm:mb-8">
-            <div className="text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Browse Clients
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Explore verified client profiles and connect with potential matches
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Main Content */}
+          {/* Main Content - No Header, Just Cards */}
           <div className="w-full">
             
             {/* Swipe Section */}
