@@ -146,7 +146,7 @@ const EnhancedPropertyCardComponent = ({
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
     >
-      <Card className="relative w-full h-[700px] overflow-hidden bg-card border-none shadow-2xl rounded-3xl">
+      <Card className="relative w-full h-[700px] overflow-hidden bg-white border-none shadow-2xl rounded-3xl">
         {/* Full Screen Image - Fixed height for consistent card sizing */}
         <div className="relative h-[580px] overflow-hidden">
           {listing.images && listing.images.length > 0 ? (

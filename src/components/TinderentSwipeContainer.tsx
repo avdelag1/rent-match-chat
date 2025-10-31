@@ -35,9 +35,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     type: 'like' | 'dislike';
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
-  const [isDraggingVertical, setIsDraggingVertical] = useState(false);
-  const [verticalDragOffset, setVerticalDragOffset] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Get listings with filters applied
   const {
@@ -146,40 +143,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     });
   };
 
-  const handleVerticalDrag = (event: any, info: any) => {
-    setIsDraggingVertical(true);
-    setVerticalDragOffset(info.offset.y);
-  };
-
-  const handleVerticalDragEnd = (event: any, info: any) => {
-    setIsDraggingVertical(false);
-    setIsTransitioning(true);
-
-    const threshold = 80; // Lower threshold for easier swiping
-    const velocity = Math.abs(info.velocity.y);
-    const offset = info.offset.y;
-
-    // Swipe UP (negative offset) = Next card
-    if (offset < -threshold || (velocity > 400 && offset < -30)) {
-      if (currentIndex < listings.length - 1) {
-        setCurrentIndex(prev => prev + 1);
-        triggerHaptic('light');
-      }
-    }
-    // Swipe DOWN (positive offset) = Previous card
-    else if (offset > threshold || (velocity > 400 && offset > 30)) {
-      if (currentIndex > 0) {
-        setCurrentIndex(prev => prev - 1);
-        triggerHaptic('light');
-      }
-    }
-
-    // Reset after transition
-    setTimeout(() => {
-      setVerticalDragOffset(0);
-      setIsTransitioning(false);
-    }, 300);
-  };
 
   const handleInsights = (listingId: string) => {
     if (onInsights) {
@@ -302,57 +265,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   }
 
   const currentListing = listings[currentIndex];
-  const nextListing = listings[currentIndex + 1];
-  const thirdListing = listings[currentIndex + 2];
-
-  // Calculate card positions based on vertical drag
-  const getCardStyle = (index: number) => {
-    const relativeIndex = index - currentIndex;
-
-    // Base positions for stacked cards
-    const baseScale = 1 - (relativeIndex * 0.05);
-    const baseY = relativeIndex * 20;
-    const baseOpacity = Math.max(0.3, 1 - (relativeIndex * 0.3));
-
-    // Apply drag offset to current card
-    if (relativeIndex === 0 && isDraggingVertical) {
-      return {
-        scale: 1,
-        y: verticalDragOffset,
-        opacity: Math.max(0.5, 1 - Math.abs(verticalDragOffset) / 400),
-        zIndex: 20
-      };
-    }
-
-    // Next card moves up when current is dragged up
-    if (relativeIndex === 1 && isDraggingVertical && verticalDragOffset < 0) {
-      const progress = Math.min(1, Math.abs(verticalDragOffset) / 200);
-      return {
-        scale: baseScale + (progress * 0.05),
-        y: baseY - (progress * 20),
-        opacity: baseOpacity + (progress * 0.3),
-        zIndex: 10 + relativeIndex
-      };
-    }
-
-    // Previous card moves down when current is dragged down
-    if (relativeIndex === -1 && isDraggingVertical && verticalDragOffset > 0) {
-      const progress = Math.min(1, verticalDragOffset / 200);
-      return {
-        scale: 1 - (progress * 0.05),
-        y: -(progress * 20),
-        opacity: Math.max(0.5, 1 - (progress * 0.3)),
-        zIndex: 30
-      };
-    }
-
-    return {
-      scale: baseScale,
-      y: baseY,
-      opacity: baseOpacity,
-      zIndex: 10 + relativeIndex
-    };
-  };
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center">
@@ -413,103 +325,16 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         )}
       </AnimatePresence>
 
-      {/* Full Screen Cards Container - Fixed size with snap scroll behavior */}
-      <motion.div
-        className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20"
-        style={{ height: '700px' }}
-        drag="y"
-        dragConstraints={{ top: -200, bottom: 200 }}
-        dragElastic={0.15}
-        dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
-        onDrag={handleVerticalDrag}
-        onDragEnd={handleVerticalDragEnd}
-      >
-        <AnimatePresence mode="popLayout">
-          {/* Third card (behind next) */}
-          {thirdListing && (
-            <motion.div
-              key={`third-${thirdListing.id}`}
-              initial={{ scale: 0.85, y: 40, opacity: 0.3 }}
-              animate={{ scale: 0.85, y: 40, opacity: 0.3 }}
-              className="absolute inset-0 shadow-lg pointer-events-none"
-              style={{ willChange: 'transform, opacity', zIndex: 1 }}
-            >
-              <EnhancedPropertyCard
-                listing={thirdListing}
-                onSwipe={() => {}}
-                onTap={() => {}}
-                onSuperLike={() => {}}
-                onMessage={() => {}}
-                isTop={false}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
-
-          {/* Next card - becomes current when swiping */}
-          {nextListing && (
-            <motion.div
-              key={`next-${nextListing.id}`}
-              initial={{ scale: 0.90, y: 20, opacity: 0.5 }}
-              animate={getCardStyle(currentIndex + 1)}
-              className="absolute inset-0 shadow-xl pointer-events-none"
-              style={{ willChange: 'transform, opacity' }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 0.8
-              }}
-            >
-              <EnhancedPropertyCard
-                listing={nextListing}
-                onSwipe={() => {}}
-                onTap={() => {}}
-                onSuperLike={() => {}}
-                onMessage={() => {}}
-                isTop={false}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
-
-          {/* Previous card - appears when swiping down */}
-          {currentIndex > 0 && listings[currentIndex - 1] && (
-            <motion.div
-              key={`prev-${listings[currentIndex - 1].id}`}
-              initial={{ scale: 1, y: 0, opacity: 0 }}
-              animate={getCardStyle(currentIndex - 1)}
-              className="absolute inset-0 shadow-2xl pointer-events-none"
-              style={{ willChange: 'transform, opacity' }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 0.8
-              }}
-            >
-              <EnhancedPropertyCard
-                listing={listings[currentIndex - 1]}
-                onSwipe={() => {}}
-                onTap={() => {}}
-                onSuperLike={() => {}}
-                onMessage={() => {}}
-                isTop={false}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
-
-          {/* Current card - Main interactive card with snap slide effect */}
+      {/* Single Card Container - No infinite scrolling */}
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '700px' }}>
+        <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div
               key={currentListing.id}
-              initial={{ scale: 0.98, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{
                 scale: 1,
-                opacity: 1,
-                y: isTransitioning ? 0 : (getCardStyle(currentIndex).y || 0),
-                ...getCardStyle(currentIndex)
+                opacity: 1
               }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
@@ -526,14 +351,13 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               }}
               transition={{
                 type: "spring",
-                stiffness: isTransitioning ? 350 : 300,
-                damping: isTransitioning ? 35 : 30,
+                stiffness: 300,
+                damping: 30,
                 mass: 0.7
               }}
-              className="absolute inset-0 shadow-2xl"
+              className="w-full h-full"
               style={{
-                willChange: 'transform, opacity',
-                filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))'
+                willChange: 'transform, opacity'
               }}
             >
               <EnhancedPropertyCard
@@ -548,7 +372,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
 
       {/* Bottom Action Buttons - 3 Button Layout - Always visible at bottom */}
