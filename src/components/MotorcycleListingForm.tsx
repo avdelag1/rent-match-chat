@@ -32,6 +32,8 @@ export interface MotorcycleFormData {
   color?: string;
   license_required?: string;
   vehicle_type: string;
+  city?: string;
+  neighborhood?: string;
 }
 
 interface MotorcycleListingFormProps {
@@ -118,6 +120,15 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="city">Location / City *</Label>
+            <Input
+              id="city"
+              {...register('city', { required: true })}
+              placeholder="e.g. Tulum, Playa del Carmen"
+            />
           </div>
         </CardContent>
       </Card>

@@ -75,17 +75,81 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         throw new Error('Minimum 3 photos required');
       }
 
-      const listingData = {
-        ...formData,
+      // Map form data to database columns based on category
+      const listingData: any = {
+        owner_id: user.user.id,
         category: selectedCategory,
         mode: selectedMode,
-        owner_id: user.user.id,
+        status: 'active' as const,
+        is_active: true,
         images: images,
+        title: formData.title || '',
+        description: formData.description,
+        price: formData.price,
+        rental_rates: formData.rental_rates,
+        city: formData.city,
+        neighborhood: formData.neighborhood,
         latitude: location.lat,
         longitude: location.lng,
-        status: 'active' as const,
-        is_active: true
       };
+
+      // Add category-specific fields
+      if (selectedCategory === 'yacht') {
+        Object.assign(listingData, {
+          yacht_type: formData.yacht_type,
+          vehicle_brand: formData.brand,
+          vehicle_model: formData.model,
+          vehicle_condition: formData.condition,
+          length_m: formData.length_m,
+          year: formData.year,
+          hull_material: formData.hull_material,
+          engines: formData.engines,
+          fuel_type: formData.fuel_type,
+          berths: formData.berths,
+          max_passengers: formData.max_passengers,
+          crew_option: formData.crew_option,
+          engine_type: formData.engine_type,
+          equipment: formData.equipment,
+        });
+      } else if (selectedCategory === 'motorcycle') {
+        Object.assign(listingData, {
+          motorcycle_type: formData.motorcycle_type,
+          vehicle_brand: formData.brand,
+          vehicle_model: formData.model,
+          vehicle_condition: formData.condition,
+          year: formData.year,
+          mileage: formData.mileage,
+          engine_cc: formData.engine_cc,
+          fuel_type: formData.fuel_type,
+          transmission_type: formData.transmission,
+          has_abs: formData.has_abs,
+          has_traction_control: formData.has_traction_control,
+          has_heated_grips: formData.has_heated_grips,
+          has_luggage_rack: formData.has_luggage_rack,
+          includes_helmet: formData.includes_helmet,
+          includes_gear: formData.includes_gear,
+        });
+      } else if (selectedCategory === 'bicycle') {
+        Object.assign(listingData, {
+          bicycle_type: formData.bicycle_type || formData.vehicle_type,
+          vehicle_brand: formData.brand,
+          vehicle_model: formData.model,
+          vehicle_condition: formData.condition,
+          year: formData.year,
+          frame_size: formData.frame_size,
+          frame_material: formData.frame_material,
+          number_of_gears: formData.number_of_gears,
+          electric_assist: formData.electric_assist,
+          battery_range: formData.battery_range,
+          suspension_type: formData.suspension_type,
+          brake_type: formData.brake_type,
+          wheel_size: formData.wheel_size,
+          includes_lock: formData.includes_lock,
+          includes_lights: formData.includes_lights,
+          includes_basket: formData.includes_basket,
+          includes_pump: formData.includes_pump,
+        });
+      }
 
       if (editingId) {
         console.log('Updating listing with ID:', editingId);
@@ -295,19 +359,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   if (!isOpen) return null;
 
-  // Use PropertyForm for property category - pass all necessary props
-  if (selectedCategory === 'property') {
-    return (
-      <PropertyForm 
-        isOpen={isOpen} 
-        onClose={handleClose} 
-        editingProperty={editingProperty}
-        initialCategory={selectedCategory}
-        initialMode={selectedMode}
-      />
-    );
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
@@ -328,6 +379,22 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           />
 
           {/* Category-Specific Forms */}
+          {selectedCategory === 'property' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Property Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Use the dedicated property form for full features</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Properties require additional fields. Please use the property management section.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {selectedCategory === 'yacht' && (
             <YachtListingForm 
               onDataChange={(data) => setFormData({ ...formData, ...data })}
@@ -349,39 +416,41 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             />
           )}
 
-          {/* Location */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Location *</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    value={formData.city || ''}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="e.g., Tulum"
-                    required
-                  />
+          {/* Location - Only show for property category since others have it in their forms */}
+          {selectedCategory === 'property' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Location *</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                      id="city"
+                      value={formData.city || ''}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="e.g., Tulum"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="neighborhood">Neighborhood</Label>
+                    <Input
+                      id="neighborhood"
+                      value={formData.neighborhood || ''}
+                      onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                      placeholder="e.g., Aldea Zama"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="neighborhood">Neighborhood</Label>
-                  <Input
-                    id="neighborhood"
-                    value={formData.neighborhood || ''}
-                    onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                    placeholder="e.g., Aldea Zama"
-                  />
-                </div>
-              </div>
-              
-              <p className="text-sm text-muted-foreground">
-                🔒 Only city and neighborhood are visible. Exact address shared after messaging activation.
-              </p>
-            </CardContent>
-          </Card>
+                
+                <p className="text-sm text-muted-foreground">
+                  🔒 Only city and neighborhood are visible. Exact address shared after messaging activation.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Photos */}
           <Card>

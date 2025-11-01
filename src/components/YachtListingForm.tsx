@@ -34,6 +34,8 @@ export interface YachtFormData {
   max_passengers: number;
   condition: string;
   equipment: string[];
+  city?: string;
+  neighborhood?: string;
 }
 
 interface YachtListingFormProps {
@@ -132,6 +134,16 @@ export function YachtListingForm({ onDataChange, initialData }: YachtListingForm
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="city">Location / City *</Label>
+            <Input
+              id="city"
+              {...register('city', { required: true })}
+              onChange={(e) => onDataChange({ ...formData, city: e.target.value })}
+              placeholder="e.g. Miami, Monaco, Dubai"
+            />
           </div>
         </CardContent>
       </Card>
