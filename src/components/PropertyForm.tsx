@@ -196,8 +196,8 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       // Property-specific fields with type assertion
       if (currentCategory === 'property') {
         const formDataAny = formData as any;
-        if (formDataAny.bedrooms !== undefined) propertyData.bedrooms = Number(formDataAny.bedrooms);
-        if (formDataAny.bathrooms !== undefined) propertyData.bathrooms = Number(formDataAny.bathrooms);
+        if (formDataAny.bedrooms !== undefined) propertyData.beds = Number(formDataAny.bedrooms);
+        if (formDataAny.bathrooms !== undefined) propertyData.baths = Number(formDataAny.bathrooms);
         if (formDataAny.square_feet !== undefined) propertyData.square_feet = Number(formDataAny.square_feet);
         if (formDataAny.floor_number !== undefined) propertyData.floor_number = Number(formDataAny.floor_number);
         if (formDataAny.total_floors !== undefined) propertyData.total_floors = Number(formDataAny.total_floors);
