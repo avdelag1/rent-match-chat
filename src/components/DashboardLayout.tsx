@@ -12,7 +12,6 @@ import { FilterBottomSheet } from '@/components/FilterBottomSheet'
 import { SettingsBottomSheet } from '@/components/SettingsBottomSheet'
 
 // Dialogs and Forms
-import { PropertyForm } from "@/components/PropertyForm"
 import { SubscriptionPackages } from "@/components/SubscriptionPackages"
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
 import { LegalDocumentsDialog } from "@/components/LegalDocumentsDialog"
@@ -41,8 +40,6 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
-  const [showPropertyForm, setShowPropertyForm] = useState(false)
-  const [editingProperty, setEditingProperty] = useState<any>(null)
   const [showSubscriptionPackages, setShowSubscriptionPackages] = useState(false)
   const [showLikedProperties, setShowLikedProperties] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
@@ -70,9 +67,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
 
-  // Category and mode state for filters
-  const [filterCategory, setFilterCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
-  const [filterMode, setFilterMode] = useState<'sale' | 'rent' | 'both'>('rent');
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
 
   const navigate = useNavigate()
@@ -124,40 +118,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     checkOnboardingStatus();
   }, [user?.id, onboardingChecked]);
 
-  // Auto-open property form when the URL hash matches any category
-  useEffect(() => {
-    const hash = location.hash;
-    const categoryMap: Record<string, string> = {
-      '#add-property': 'property',
-      '#add-yacht': 'yacht',
-      '#add-motorcycle': 'motorcycle',
-      '#add-bicycle': 'bicycle',
-    };
-
-    if (hash && categoryMap[hash]) {
-      // Check if there's an editing property in sessionStorage
-      const storedEditingProperty = sessionStorage.getItem('editingProperty');
-      if (storedEditingProperty) {
-        try {
-          const property = JSON.parse(storedEditingProperty);
-          setEditingProperty(property);
-          sessionStorage.removeItem('editingProperty');
-        } catch (error) {
-          console.error('Error parsing stored editing property:', error);
-        }
-      } else {
-        setEditingProperty(null);
-      }
-
-      const category = categoryMap[hash] as 'property' | 'yacht' | 'motorcycle' | 'bicycle';
-      setFilterCategory(category);
-      setShowPropertyForm(true);
-    } else if (!hash) {
-      setShowPropertyForm(false);
-      setEditingProperty(null);
-    }
-  }, [location.hash])
-
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
 
@@ -200,6 +160,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   const handleMenuItemClick = (action: string) => {
     switch (action) {
+      case 'add-listing':
+        setShowCategoryDialog(true)
+        break
       case 'saved-searches':
         setShowSavedSearches(true)
         break
@@ -290,20 +253,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* All Dialogs/Modals */}
-      {userRole === 'owner' && showPropertyForm && (
-        <PropertyForm
-          isOpen={showPropertyForm}
-          onClose={() => {
-            setShowPropertyForm(false);
-            setEditingProperty(null);
-            window.history.replaceState(null, '', window.location.pathname);
-          }}
-          editingProperty={editingProperty}
-          initialCategory={filterCategory}
-          initialMode={filterMode}
-        />
-      )}
-
       <SubscriptionPackages
         isOpen={showSubscriptionPackages}
         onClose={() => setShowSubscriptionPackages(false)}
@@ -390,15 +339,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             open={showCategoryDialog}
             onOpenChange={setShowCategoryDialog}
             onCategorySelect={(category, mode) => {
-              const categoryHashMap = {
-                property: '#add-property',
-                yacht: '#add-yacht',
-                motorcycle: '#add-motorcycle',
-                bicycle: '#add-bicycle',
-              };
-              setFilterCategory(category);
-              setFilterMode(mode);
-              navigate(`/owner/properties${categoryHashMap[category]}`);
+              setShowCategoryDialog(false);
+              navigate('/owner/properties');
             }}
           />
         </>
