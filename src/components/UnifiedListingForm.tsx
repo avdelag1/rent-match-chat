@@ -15,7 +15,7 @@ import { CategorySelector, Category, Mode } from './CategorySelector';
 import { YachtListingForm, YachtFormData } from './YachtListingForm';
 import { MotorcycleListingForm, MotorcycleFormData } from './MotorcycleListingForm';
 import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
-import { PropertyForm } from './PropertyForm';
+import { PropertyListingForm } from './PropertyListingForm';
 
 interface UnifiedListingFormProps {
   isOpen: boolean;
@@ -148,6 +148,21 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           includes_lights: formData.includes_lights,
           includes_basket: formData.includes_basket,
           includes_pump: formData.includes_pump,
+        });
+      } else if (selectedCategory === 'property') {
+        Object.assign(listingData, {
+          address: formData.address,
+          property_type: formData.property_type,
+          beds: formData.beds,
+          baths: formData.baths,
+          square_footage: formData.square_footage,
+          furnished: formData.furnished,
+          pet_friendly: formData.pet_friendly,
+          amenities: formData.amenities,
+          services_included: formData.services_included,
+          house_rules: formData.house_rules,
+          rental_duration_type: formData.rental_duration_type,
+          listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
         });
       }
 
@@ -353,6 +368,60 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       });
       return;
     }
+
+    if (!formData.price) {
+      toast({
+        title: "Price Required",
+        description: "Please enter a price for your listing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.city) {
+      toast({
+        title: "City Required",
+        description: "Please enter a city for your listing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Category-specific validation
+    if (selectedCategory === 'property') {
+      if (!formData.property_type) {
+        toast({
+          title: "Property Type Required",
+          description: "Please select a property type.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!formData.beds || formData.beds < 0) {
+        toast({
+          title: "Bedrooms Required",
+          description: "Please enter the number of bedrooms.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!formData.baths || formData.baths < 0) {
+        toast({
+          title: "Bathrooms Required",
+          description: "Please enter the number of bathrooms.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!formData.rental_duration_type) {
+        toast({
+          title: "Rental Duration Required",
+          description: "Please select a rental duration.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
     
     createListingMutation.mutate();
   };
@@ -380,19 +449,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
           {/* Category-Specific Forms */}
           {selectedCategory === 'property' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Property Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Use the dedicated property form for full features</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Properties require additional fields. Please use the property management section.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <PropertyListingForm 
+              onDataChange={(data) => setFormData({ ...formData, ...data })}
+              initialData={formData}
+            />
           )}
 
           {selectedCategory === 'yacht' && (
@@ -416,46 +476,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             />
           )}
 
-          {/* Location - Only show for property category since others have it in their forms */}
-          {selectedCategory === 'property' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Location *</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      value={formData.city || ''}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      placeholder="e.g., Tulum"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="neighborhood">Neighborhood</Label>
-                    <Input
-                      id="neighborhood"
-                      value={formData.neighborhood || ''}
-                      onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                      placeholder="e.g., Aldea Zama"
-                    />
-                  </div>
-                </div>
-                
-                <p className="text-sm text-muted-foreground">
-                  🔒 Only city and neighborhood are visible. Exact address shared after messaging activation.
-                </p>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Photos */}
           <Card>
             <CardHeader>
-              <CardTitle>Photos * (min 3, max 10)</CardTitle>
+              <CardTitle>Photos * (min 3, max 30)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
