@@ -1,15 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Crown, Rocket, Star, MessageCircle, FileText, ArrowLeft } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useUserSubscription } from '@/hooks/useSubscription';
-import { formatPriceMXN } from '@/utils/subscriptionPricing';
-import { toast } from 'sonner';
+import { MessageActivationPackages } from "@/components/MessageActivationPackages";
 
 type PackageCategory = 'client_monthly' | 'owner_monthly' | 'client_pay_per_use' | 'owner_pay_per_use';
 
@@ -28,6 +17,15 @@ interface SubscriptionPackage {
 }
 
 export default function SubscriptionPackagesPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <MessageActivationPackages showAsPage />
+    </div>
+  );
+}
+
+/* Old code - replaced with simplified message activation packages
+export default function SubscriptionPackagesPageOld() {
   const { user } = useAuth();
   const { data: currentSubscription } = useUserSubscription();
   const navigate = useNavigate();
@@ -234,3 +232,4 @@ export default function SubscriptionPackagesPage() {
     </div>
   );
 }
+*/
