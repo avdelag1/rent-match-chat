@@ -340,7 +340,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             onOpenChange={setShowCategoryDialog}
             onCategorySelect={(category, mode) => {
               setShowCategoryDialog(false);
-              navigate('/owner/properties');
+              navigate(`/owner/properties?category=${category}&mode=${mode}`);
             }}
           />
         </>

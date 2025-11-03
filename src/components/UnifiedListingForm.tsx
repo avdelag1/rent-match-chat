@@ -53,7 +53,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       setSelectedCategory(editingProperty.category);
       setSelectedMode(editingProperty.mode || 'rent');
       setImages([]);
-      setFormData({});
+      setFormData({ mode: editingProperty.mode || 'rent' }); // Include mode in formData!
       setLocation({});
     } else {
       // Completely new listing - reset everything
@@ -61,7 +61,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       setSelectedCategory('property');
       setSelectedMode('rent');
       setImages([]);
-      setFormData({});
+      setFormData({ mode: 'rent' }); // Include default mode in formData!
       setLocation({});
     }
   }, [editingProperty, isOpen]);

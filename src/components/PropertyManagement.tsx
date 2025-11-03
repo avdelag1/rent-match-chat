@@ -20,18 +20,21 @@ import { OwnerListingsStats } from '@/components/OwnerListingsStats';
 
 interface PropertyManagementProps {
   initialCategory?: string | null;
+  initialMode?: string | null;
 }
 
-export function PropertyManagement({ initialCategory }: PropertyManagementProps) {
+export function PropertyManagement({ initialCategory, initialMode }: PropertyManagementProps) {
   const { user } = useAuth();
   const { data: listings = [], isLoading, error } = useOwnerListings();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(initialCategory || 'all');
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(!!initialCategory); // Auto-open if category provided
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [editingProperty, setEditingProperty] = useState<any>(null);
+  const [editingProperty, setEditingProperty] = useState<any>(
+    initialCategory ? { category: initialCategory, mode: initialMode || 'rent' } : null
+  );
   const queryClient = useQueryClient();
 
   const filteredListings = listings.filter(listing => {
