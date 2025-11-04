@@ -65,16 +65,6 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
             />
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-foreground">Description *</Label>
-            <Textarea
-              value={initialData.description || ''}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Describe your property..."
-              rows={4}
-              className="bg-background border-border text-foreground"
-            />
-          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

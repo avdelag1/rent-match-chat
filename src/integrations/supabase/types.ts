@@ -2685,6 +2685,48 @@ export type Database = {
           },
         ]
       }
+      owner_profiles: {
+        Row: {
+          business_description: string | null
+          business_location: string | null
+          business_name: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          profile_images: string[] | null
+          updated_at: string | null
+          user_id: string
+          verified_owner: boolean | null
+        }
+        Insert: {
+          business_description?: string | null
+          business_location?: string | null
+          business_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          profile_images?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          verified_owner?: boolean | null
+        }
+        Update: {
+          business_description?: string | null
+          business_location?: string | null
+          business_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          profile_images?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          verified_owner?: boolean | null
+        }
+        Relationships: []
+      }
       owner_properties: {
         Row: {
           amenities: string[] | null
