@@ -127,19 +127,6 @@ export function SimpleSwipeContainer() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      {/* Progress */}
-      <div className="mb-4">
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-orange-500 to-pink-500 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / listings.length) * 100}%` }}
-          />
-        </div>
-        <p className="text-center text-sm text-gray-600 mt-2">
-          {currentIndex + 1} of {listings.length}
-        </p>
-      </div>
-
       {/* Card */}
       <div className="relative mb-6">
         <AnimatePresence mode="wait">
@@ -186,14 +173,6 @@ export function SimpleSwipeContainer() {
         </Button>
       </div>
 
-      {/* Debug Info */}
-      <div className="mt-4 p-4 bg-gray-100 rounded-lg text-xs">
-        <p><strong>Debug:</strong></p>
-        <p>Current Index: {currentIndex}</p>
-        <p>Total Listings: {listings.length}</p>
-        <p>Current Listing ID: {currentListing?.id}</p>
-        <p>Mutation Status: {swipeMutation.isPending ? 'Saving...' : 'Ready'}</p>
-      </div>
     </div>
   );
 }
