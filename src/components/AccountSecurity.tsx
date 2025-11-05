@@ -3,18 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Lock, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Shield, Lock, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface AccountSecurityProps {
   userRole: 'client' | 'owner';
 }
 
 export function AccountSecurity({ userRole }: AccountSecurityProps) {
+  const navigate = useNavigate();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -85,6 +90,66 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       title: '2FA Enabled',
       description: 'Two-factor authentication is now active on your account.'
     });
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.toLowerCase() !== 'delete') {
+      toast({
+        title: 'Error',
+        description: 'Please type DELETE to confirm account deletion.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('No user found');
+      }
+
+      // Try to delete user account using Supabase Admin API
+      // Note: This requires proper RLS policies and admin function
+      const { error } = await supabase.rpc('delete_user_account', {
+        user_id: user.id
+      });
+
+      if (error) {
+        // If RPC doesn't exist or fails, inform user to contact support
+        console.error('Delete account error:', error);
+        
+        toast({
+          title: 'Deletion Failed',
+          description: 'Account deletion could not be completed automatically. Please contact support for assistance. You will be signed out.',
+          variant: 'destructive'
+        });
+        
+        // Sign out user but account data remains
+        await supabase.auth.signOut();
+        navigate('/');
+        return;
+      }
+
+      // Account successfully deleted
+      await supabase.auth.signOut();
+      
+      toast({
+        title: 'Account Deleted',
+        description: 'Your account has been successfully deleted.',
+      });
+
+      // Navigate to home page
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete account. Please contact support.',
+        variant: 'destructive'
+      });
+    }
   };
 
   const securityScore = () => {
@@ -225,6 +290,34 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         </CardContent>
       </Card>
 
+      {/* Danger Zone - Delete Account */}
+      <Card className="bg-card border-destructive">
+        <CardHeader>
+          <CardTitle className="text-destructive flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            Danger Zone
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h4 className="text-foreground font-medium">Delete Account</h4>
+              <p className="text-muted-foreground text-sm">
+                Permanently delete your account and all associated data
+              </p>
+            </div>
+            <Button 
+              onClick={() => setShowDeleteAccountDialog(true)} 
+              variant="destructive"
+              className="gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Account
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Password Change Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="bg-card border-border">
@@ -307,6 +400,62 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               Cancel
             </Button>
             <Button onClick={enableTwoFactor}>Enable 2FA</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+        <DialogContent className="bg-card border-destructive">
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Account
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+              <h4 className="text-foreground font-medium mb-2">⚠️ Warning</h4>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-sm">
+                <li>All your {userRole === 'client' ? 'saved properties and preferences' : 'listings and client connections'} will be deleted</li>
+                <li>Your messages and conversation history will be removed</li>
+                <li>Your subscription will be cancelled immediately</li>
+                <li>This action is irreversible</li>
+              </ul>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Type <span className="font-bold text-destructive">DELETE</span> to confirm:
+              </label>
+              <Input
+                type="text"
+                placeholder="Type DELETE to confirm"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteAccountDialog(false);
+                setDeleteConfirmText('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmText.toLowerCase() !== 'delete'}
+            >
+              Delete Account Permanently
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

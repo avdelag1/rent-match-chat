@@ -380,64 +380,74 @@ export function ClientSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Modern 3-Button Action Layout */}
-      <motion.div 
-        className="flex justify-center items-center gap-5 mt-6 mb-4"
+      {/* Bottom Action Buttons - 3 Button Layout - Always visible at bottom */}
+      <motion.div
+        className="flex justify-center gap-6 items-center z-20 px-4 mt-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        {/* Pass Button (X) - Modern Red */}
-        <motion.div 
-          whileHover={{ scale: 1.08, y: -2 }} 
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        {/* Dislike Button - Left */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
             variant="ghost"
-            className="relative w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-[0_8px_24px_rgba(239,68,68,0.35)] hover:shadow-[0_12px_32px_rgba(239,68,68,0.45)] transition-all duration-300 p-0 border-2 border-white/20"
+            className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
             onClick={() => handleSwipe('left')}
             disabled={swipeMutation.isPending || !currentClient}
             aria-label="Pass"
           >
-            <X className="w-7 h-7 stroke-[3]" />
+            <X className="w-8 h-8 stroke-[2.5]" />
           </Button>
         </motion.div>
 
-        {/* Return Button - Modern Blue/Purple */}
-        <motion.div 
-          whileHover={{ scale: 1.08, y: -2 }} 
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        {/* Undo Button - Center */}
+        <motion.div
+          whileHover={{ scale: canUndo ? 1.1 : 1 }}
+          whileTap={{ scale: canUndo ? 0.9 : 1 }}
         >
           <Button
             size="lg"
             variant="ghost"
-            className="relative w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-[0_8px_24px_rgba(59,130,246,0.35)] hover:shadow-[0_12px_32px_rgba(59,130,246,0.45)] transition-all duration-300 p-0 border-2 border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-            disabled={swipeMutation.isPending || !currentClient || currentIndex === 0}
-            aria-label="Go Back"
+            onClick={() => {
+              if (canUndo) {
+                undoLastSwipe();
+              }
+            }}
+            disabled={!canUndo || isUndoing}
+            className={`w-16 h-16 rounded-full transition-all duration-300 shadow-lg p-0 ${
+              canUndo 
+                ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl hover:shadow-yellow-500/20' 
+                : 'bg-gray-200 border-2 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
+            }`}
+            aria-label="Undo last swipe"
           >
-            <RotateCcw className="w-6 h-6 stroke-[2.5]" />
+            <motion.div
+              animate={{ rotate: isUndoing ? 360 : 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <RotateCcw className="w-7 h-7 stroke-[2.5]" />
+            </motion.div>
           </Button>
         </motion.div>
-
-        {/* Like Button (Heart) - Modern Orange/Pink Gradient */}
-        <motion.div 
-          whileHover={{ scale: 1.08, y: -2 }} 
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        
+        {/* Like Button - Right */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Button
             size="lg"
             variant="ghost"
-            className="relative w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 text-white shadow-[0_8px_24px_rgba(251,146,60,0.4)] hover:shadow-[0_12px_32px_rgba(251,146,60,0.5)] transition-all duration-300 p-0 border-2 border-white/20"
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
             onClick={() => handleSwipe('right')}
             disabled={swipeMutation.isPending || !currentClient}
             aria-label="Like"
           >
-            <Heart className="w-7 h-7 fill-white stroke-white stroke-[2]" />
+            <Heart className="w-10 h-10 fill-current" />
           </Button>
         </motion.div>
       </motion.div>
