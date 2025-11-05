@@ -110,20 +110,31 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         throw new Error('No user found');
       }
 
-      // Delete user account using Supabase Admin API
+      // Try to delete user account using Supabase Admin API
       // Note: This requires proper RLS policies and admin function
       const { error } = await supabase.rpc('delete_user_account', {
         user_id: user.id
       });
 
       if (error) {
-        // If RPC doesn't exist, just sign out for now
+        // If RPC doesn't exist or fails, inform user to contact support
         console.error('Delete account error:', error);
+        
+        toast({
+          title: 'Account Deletion Request',
+          description: 'Please contact support to complete account deletion. You will be signed out.',
+          variant: 'destructive'
+        });
+        
+        // Sign out user but account data remains
         await supabase.auth.signOut();
-      } else {
-        await supabase.auth.signOut();
+        navigate('/');
+        return;
       }
 
+      // Account successfully deleted
+      await supabase.auth.signOut();
+      
       toast({
         title: 'Account Deleted',
         description: 'Your account has been successfully deleted.',
