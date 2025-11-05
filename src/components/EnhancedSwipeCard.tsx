@@ -75,8 +75,11 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
     if (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
+    } else {
+      // Snap back to original position - reset is handled by framer-motion
+      x.set(0);
     }
-  }, [onSwipe]);
+  }, [onSwipe, x]);
 
   const nextImage = useCallback(() => {
     if (hasMultipleImages) {
@@ -277,21 +280,21 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
 
           {/* Swipe Indicators */}
           <motion.div
-            className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none"
+            className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none z-50"
             style={{ opacity: useTransform(x, [0, 150], [0, 1]) }}
           >
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
-              <Flame className="w-8 h-8 animate-pulse" />
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-4 rounded-3xl font-bold text-3xl border-4 border-white/60 shadow-2xl flex items-center gap-3 animate-pulse">
+              <Flame className="w-10 h-10 animate-bounce" />
               LIKE
             </div>
           </motion.div>
 
           <motion.div
-            className="absolute top-1/4 right-8 transform rotate-12 pointer-events-none"
+            className="absolute top-1/4 right-8 transform rotate-12 pointer-events-none z-50"
             style={{ opacity: useTransform(x, [-150, 0], [1, 0]) }}
           >
-            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
-              <X className="w-8 h-8" />
+            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-10 py-4 rounded-3xl font-bold text-3xl border-4 border-white/60 shadow-2xl flex items-center gap-3">
+              <X className="w-10 h-10 animate-pulse" />
               NOPE
             </div>
           </motion.div>

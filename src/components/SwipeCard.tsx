@@ -47,12 +47,13 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
     
-    const threshold = 100;
+    const threshold = 120;
     if (Math.abs(dragOffset.x) > threshold) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
+    } else {
+      // Snap back to original position
+      setDragOffset({ x: 0, y: 0 });
     }
-    
-    setDragOffset({ x: 0, y: 0 });
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -74,12 +75,13 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
     
-    const threshold = 100;
+    const threshold = 120;
     if (Math.abs(dragOffset.x) > threshold) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
+    } else {
+      // Snap back to original position
+      setDragOffset({ x: 0, y: 0 });
     }
-    
-    setDragOffset({ x: 0, y: 0 });
   };
 
   const handleInsightsClick = (e: React.MouseEvent) => {
@@ -102,14 +104,15 @@ export function SwipeCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
+      className={`absolute inset-0 cursor-grab active:cursor-grabbing overflow-hidden bg-card border shadow-lg ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{
         transform: isTop 
           ? `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)` 
           : 'scale(0.95)',
-        opacity
+        opacity,
+        transition: isDragging ? 'none' : 'all 0.3s ease-out'
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -160,18 +163,18 @@ export function SwipeCard({
           {isTop && (
             <>
               {dragOffset.x > 50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 to-emerald-500/30 backdrop-blur-sm flex items-center justify-center">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-2xl flex items-center gap-3 shadow-2xl border-4 border-white/40 transform rotate-[-15deg] scale-110">
-                    <Flame className="w-8 h-8 animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/40 to-emerald-500/40 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-4 rounded-3xl font-bold text-3xl flex items-center gap-4 shadow-2xl border-4 border-white/60 transform rotate-[-15deg] scale-110 animate-pulse">
+                    <Flame className="w-10 h-10 animate-bounce" />
                     LIKE
                   </div>
                 </div>
               )}
               {dragOffset.x < -50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-rose-500/30 backdrop-blur-sm flex items-center justify-center">
-                  <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-2xl shadow-2xl border-4 border-white/40 transform rotate-[15deg] scale-110 flex items-center gap-3">
-                    <X className="w-8 h-8" />
-                    PASS
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/40 to-rose-500/40 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+                  <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-10 py-4 rounded-3xl font-bold text-3xl shadow-2xl border-4 border-white/60 transform rotate-[15deg] scale-110 flex items-center gap-4">
+                    <X className="w-10 h-10 animate-pulse" />
+                    NOPE
                   </div>
                 </div>
               )}

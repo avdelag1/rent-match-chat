@@ -126,9 +126,9 @@ export function SimpleSwipeContainer() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto relative pb-24">
+    <div className="w-full max-w-md mx-auto relative h-[calc(100vh-250px)]">
       {/* Card */}
-      <div className="relative mb-6">
+      <div className="relative h-[calc(100vh-350px)]">
         <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div
@@ -140,6 +140,7 @@ export function SimpleSwipeContainer() {
                 opacity: 0,
                 transition: { duration: 0.2 }
               }}
+              className="h-full"
             >
               <SimpleListingCard
                 listing={currentListing}
@@ -151,25 +152,35 @@ export function SimpleSwipeContainer() {
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons - Fixed at bottom */}
-      <div className="fixed bottom-24 left-0 right-0 flex justify-center gap-6 px-4">
+      {/* Action Buttons - Fixed at bottom of container */}
+      <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center gap-4 py-6">
         <Button
           onClick={handlePass}
           size="lg"
           variant="outline"
-          className="w-16 h-16 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-50 shadow-lg"
+          className="w-16 h-16 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white shadow-xl transition-all"
           disabled={swipeMutation.isPending}
         >
-          <X className="w-8 h-8" />
+          <X className="w-7 h-7" />
+        </Button>
+
+        <Button
+          onClick={handleRefresh}
+          size="lg"
+          variant="outline"
+          className="w-14 h-14 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white shadow-xl transition-all"
+          disabled={swipeMutation.isPending}
+        >
+          <RotateCcw className="w-5 h-5" />
         </Button>
 
         <Button
           onClick={handleLike}
           size="lg"
-          className="w-20 h-20 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg"
+          className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-xl transition-all"
           disabled={swipeMutation.isPending}
         >
-          <Heart className="w-10 h-10 fill-current" />
+          <Heart className="w-7 h-7 fill-current" />
         </Button>
       </div>
 
