@@ -891,6 +891,7 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
+          free_messaging: boolean | null
           id: string
           last_message_at: string | null
           listing_id: string | null
@@ -902,6 +903,7 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string
+          free_messaging?: boolean | null
           id?: string
           last_message_at?: string | null
           listing_id?: string | null
@@ -913,6 +915,7 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string
+          free_messaging?: boolean | null
           id?: string
           last_message_at?: string | null
           listing_id?: string | null
@@ -1946,6 +1949,7 @@ export type Database = {
           client_liked_at: string | null
           conversation_started: boolean | null
           created_at: string
+          free_messaging: boolean | null
           id: string
           is_mutual: boolean | null
           listing_id: string | null
@@ -1960,6 +1964,7 @@ export type Database = {
           client_liked_at?: string | null
           conversation_started?: boolean | null
           created_at?: string
+          free_messaging?: boolean | null
           id?: string
           is_mutual?: boolean | null
           listing_id?: string | null
@@ -1974,6 +1979,7 @@ export type Database = {
           client_liked_at?: string | null
           conversation_started?: boolean | null
           created_at?: string
+          free_messaging?: boolean | null
           id?: string
           is_mutual?: boolean | null
           listing_id?: string | null

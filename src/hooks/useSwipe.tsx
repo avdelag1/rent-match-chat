@@ -47,6 +47,36 @@ export function useSwipe() {
 
       console.log('[useSwipe] Like saved successfully:', likeData);
       
+      // Send notification to the liked user
+      if (direction === 'right') {
+        try {
+          let recipientId: string | null = null;
+          
+          if (targetType === 'listing') {
+            const { data: listing } = await supabase
+              .from('listings')
+              .select('owner_id')
+              .eq('id', targetId)
+              .maybeSingle();
+            recipientId = listing?.owner_id || null;
+          } else {
+            recipientId = targetId;
+          }
+          
+          if (recipientId) {
+            await supabase.from('notifications').insert([{
+              user_id: recipientId,
+              type: 'like',
+              title: 'Someone liked you!',
+              message: 'You have a new like. Swipe to see if it\'s a match!',
+              data: { liker_id: user.id, target_id: targetId, target_type: targetType }
+            }] as any);
+          }
+        } catch (notifError) {
+          console.error('[useSwipe] Failed to send notification:', notifError);
+        }
+      }
+      
       // Check if this creates a match (both users liked each other)
       // Wrap in try-catch to prevent match detection errors from failing the entire swipe
       if (direction === 'right') {
@@ -80,7 +110,8 @@ export function useSwipe() {
                   client_liked_at: new Date().toISOString(),
                   owner_liked_at: ownerLike.created_at,
                   is_mutual: true,
-                  status: 'accepted'
+                  status: 'accepted',
+                  free_messaging: true
                 }, {
                   onConflict: 'client_id,owner_id,listing_id',
                   ignoreDuplicates: true
@@ -88,10 +119,23 @@ export function useSwipe() {
                 .select();
 
               // Only show match notification if no error
-              if (!matchError) {
+              if (!matchError && matchData?.[0]) {
+                // Create conversation for free messaging
+                await supabase.from('conversations').upsert({
+                  match_id: matchData[0].id,
+                  client_id: user.id,
+                  owner_id: listing.owner_id,
+                  listing_id: targetId,
+                  status: 'active',
+                  free_messaging: true
+                }, {
+                  onConflict: 'client_id,owner_id',
+                  ignoreDuplicates: true
+                });
+                
                 toast({
                   title: "It's a Match! 🎉",
-                  description: "You and the owner both liked each other!",
+                  description: "You can now message each other for free!",
                 });
               }
             } else {
@@ -123,7 +167,8 @@ export function useSwipe() {
                   client_liked_at: clientLike.created_at,
                   owner_liked_at: new Date().toISOString(),
                   is_mutual: true,
-                  status: 'accepted'
+                  status: 'accepted',
+                  free_messaging: true
                 }, {
                   onConflict: 'client_id,owner_id,listing_id',
                   ignoreDuplicates: true
@@ -131,10 +176,23 @@ export function useSwipe() {
                 .select();
 
               // Only show match notification if no error
-              if (!matchError) {
+              if (!matchError && matchData?.[0]) {
+                // Create conversation for free messaging
+                await supabase.from('conversations').upsert({
+                  match_id: matchData[0].id,
+                  client_id: targetId,
+                  owner_id: user.id,
+                  listing_id: null,
+                  status: 'active',
+                  free_messaging: true
+                }, {
+                  onConflict: 'client_id,owner_id',
+                  ignoreDuplicates: true
+                });
+                
                 toast({
                   title: "It's a Match! 🎉",
-                  description: "You and the client both liked each other!",
+                  description: "You can now message each other for free!",
                 });
               }
             } else {

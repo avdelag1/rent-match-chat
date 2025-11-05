@@ -126,7 +126,7 @@ export function SimpleSwipeContainer() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto relative pb-24">
       {/* Card */}
       <div className="relative mb-6">
         <AnimatePresence mode="wait">
@@ -151,13 +151,13 @@ export function SimpleSwipeContainer() {
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-center gap-6">
+      {/* Action Buttons - Fixed at bottom */}
+      <div className="fixed bottom-24 left-0 right-0 flex justify-center gap-6 px-4">
         <Button
           onClick={handlePass}
           size="lg"
           variant="outline"
-          className="w-16 h-16 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-50"
+          className="w-16 h-16 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-50 shadow-lg"
           disabled={swipeMutation.isPending}
         >
           <X className="w-8 h-8" />

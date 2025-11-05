@@ -102,7 +102,7 @@ export function SwipeCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
+      className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{

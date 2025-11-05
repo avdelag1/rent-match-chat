@@ -98,7 +98,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
+      className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
       style={{ 
         x, 
         rotate, 
