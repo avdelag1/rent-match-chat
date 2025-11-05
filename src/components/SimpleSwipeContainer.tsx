@@ -156,17 +156,18 @@ export function SimpleSwipeContainer() {
         <Button
           onClick={handlePass}
           size="lg"
-          variant="outline"
-          className="w-16 h-16 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-50 shadow-lg"
+          variant="ghost"
+          className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
           disabled={swipeMutation.isPending}
         >
-          <X className="w-8 h-8" />
+          <X className="w-8 h-8 stroke-[2.5]" />
         </Button>
 
         <Button
           onClick={handleLike}
           size="lg"
-          className="w-20 h-20 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg"
+          variant="ghost"
+          className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
           disabled={swipeMutation.isPending}
         >
           <Heart className="w-10 h-10 fill-current" />
