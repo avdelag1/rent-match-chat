@@ -121,8 +121,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         console.error('Delete account error:', error);
         
         toast({
-          title: 'Account Deletion Request',
-          description: 'Please contact support to complete account deletion. You will be signed out.',
+          title: 'Deletion Failed',
+          description: 'Account deletion could not be completed automatically. Please contact support for assistance. You will be signed out.',
           variant: 'destructive'
         });
         
