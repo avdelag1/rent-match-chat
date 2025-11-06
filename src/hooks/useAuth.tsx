@@ -318,15 +318,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Store the role in localStorage BEFORE OAuth redirect
       localStorage.setItem('pendingOAuthRole', role);
       
+      // Build OAuth options with provider-specific query params
+      const oauthOptions: any = {
+        redirectTo: `${window.location.origin}/`,
+        queryParams: {
+          prompt: 'consent',
+        } as Record<string, string>
+      };
+
+      // Add Google-specific parameters
+      if (provider === 'google') {
+        oauthOptions.queryParams.access_type = 'offline';
+      }
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        }
+        options: oauthOptions
       });
 
       if (error) {
