@@ -41,20 +41,6 @@ const getAmenityIcon = (amenity: string) => {
   return iconMap[amenity.toLowerCase()] || Home;
 };
 
-// Helper to render amenity icons - handles both string emoji and Lucide components
-const renderAmenityIcon = (amenity: string, className?: string) => {
-  const icon = getAmenityIcon(amenity);
-  
-  if (typeof icon === 'string') {
-    // It's an emoji string
-    return <span className={className}>{icon}</span>;
-  } else {
-    // It's a Lucide component
-    const IconComponent = icon;
-    return <IconComponent className={className} />;
-  }
-};
-
 const EnhancedPropertyCardComponent = ({
   listing,
   onSwipe,
