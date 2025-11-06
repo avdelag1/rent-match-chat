@@ -87,15 +87,18 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
     setIsChangingPassword(true);
     try {
-      // Re-authenticate with current password for security
-      // This verifies the user knows their current password before changing it
+      // Security note: We validate the current password for better UX security.
+      // The user's valid session already proves authentication, but asking for
+      // the current password provides defense-in-depth against session hijacking
+      // and ensures the user actively knows their current credentials.
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user?.email) {
         throw new Error('User email not found');
       }
 
-      // Verify current password by attempting to sign in
+      // Verify current password by attempting to sign in.
+      // Note: This creates a temporary auth check but doesn't invalidate the current session.
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
