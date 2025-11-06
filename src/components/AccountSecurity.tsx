@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Lock, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
+import { Shield, Lock, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle, Trash2, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useSecuritySettings } from '@/hooks/useSecuritySettings';
 
 interface AccountSecurityProps {
   userRole: 'client' | 'owner';
@@ -16,6 +17,7 @@ interface AccountSecurityProps {
 
 export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const navigate = useNavigate();
+  const { settings, loading, saving, updateSettings } = useSecuritySettings();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
@@ -24,12 +26,6 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
-  
-  // Security settings state
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [loginAlerts, setLoginAlerts] = useState(true);
-  const [sessionTimeout, setSessionTimeout] = useState(true);
-  const [deviceTracking, setDeviceTracking] = useState(true);
 
   const handlePasswordChange = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -71,25 +67,29 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
     setConfirmPassword('');
   };
 
-  const handleTwoFactorToggle = (enabled: boolean) => {
+  const handleTwoFactorToggle = async (enabled: boolean) => {
     if (enabled) {
       setShowTwoFactorDialog(true);
     } else {
-      setTwoFactorEnabled(false);
-      toast({
-        title: '2FA Disabled',
-        description: 'Two-factor authentication has been disabled.'
-      });
+      const success = await updateSettings({ two_factor_enabled: false });
+      if (success) {
+        toast({
+          title: '2FA Disabled',
+          description: 'Two-factor authentication has been disabled.'
+        });
+      }
     }
   };
 
-  const enableTwoFactor = () => {
-    setTwoFactorEnabled(true);
-    setShowTwoFactorDialog(false);
-    toast({
-      title: '2FA Enabled',
-      description: 'Two-factor authentication is now active on your account.'
-    });
+  const enableTwoFactor = async () => {
+    const success = await updateSettings({ two_factor_enabled: true });
+    if (success) {
+      setShowTwoFactorDialog(false);
+      toast({
+        title: '2FA Enabled',
+        description: 'Two-factor authentication is now active on your account.'
+      });
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -154,10 +154,10 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
   const securityScore = () => {
     let score = 50; // Base score
-    if (twoFactorEnabled) score += 25;
-    if (loginAlerts) score += 10;
-    if (sessionTimeout) score += 10;
-    if (deviceTracking) score += 5;
+    if (settings.two_factor_enabled) score += 25;
+    if (settings.login_alerts) score += 10;
+    if (settings.session_timeout) score += 10;
+    if (settings.device_tracking) score += 5;
     return score;
   };
 
@@ -169,6 +169,12 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
   return (
     <div className="space-y-6">
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <>
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">Account Security</h2>
         <p className="text-muted-foreground">Protect your account with advanced security features</p>
@@ -235,12 +241,13 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             <div>
               <h4 className="text-foreground font-medium">Add an extra layer of security</h4>
               <p className="text-muted-foreground text-sm">
-                {twoFactorEnabled ? 'Two-factor authentication is enabled' : 'Not enabled'}
+                {settings.two_factor_enabled ? 'Two-factor authentication is enabled' : 'Not enabled'}
               </p>
             </div>
             <Switch
-              checked={twoFactorEnabled}
+              checked={settings.two_factor_enabled}
               onCheckedChange={handleTwoFactorToggle}
+              disabled={saving}
             />
           </div>
         </CardContent>
@@ -261,8 +268,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               <p className="text-muted-foreground text-sm">Get notified of new sign-ins</p>
             </div>
             <Switch
-              checked={loginAlerts}
-              onCheckedChange={setLoginAlerts}
+              checked={settings.login_alerts}
+              onCheckedChange={(checked) => updateSettings({ login_alerts: checked })}
+              disabled={saving}
             />
           </div>
           
@@ -272,8 +280,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               <p className="text-muted-foreground text-sm">Auto logout after inactivity</p>
             </div>
             <Switch
-              checked={sessionTimeout}
-              onCheckedChange={setSessionTimeout}
+              checked={settings.session_timeout}
+              onCheckedChange={(checked) => updateSettings({ session_timeout: checked })}
+              disabled={saving}
             />
           </div>
           
@@ -283,8 +292,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               <p className="text-muted-foreground text-sm">Monitor unknown devices</p>
             </div>
             <Switch
-              checked={deviceTracking}
-              onCheckedChange={setDeviceTracking}
+              checked={settings.device_tracking}
+              onCheckedChange={(checked) => updateSettings({ device_tracking: checked })}
+              disabled={saving}
             />
           </div>
         </CardContent>
@@ -459,6 +469,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </>
+      )}
     </div>
   );
 }

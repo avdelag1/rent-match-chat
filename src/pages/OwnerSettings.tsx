@@ -8,8 +8,19 @@ import { TenantScreening } from "@/components/TenantScreening";
 import { LeaseManagement } from "@/components/LeaseManagement";
 import { RentalAnalytics } from "@/components/RentalAnalytics";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const OwnerSettings = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
   return (
     <DashboardLayout userRole="owner">
       <div className="w-full h-full overflow-y-auto p-4 md:p-8">
@@ -19,7 +30,7 @@ const OwnerSettings = () => {
             <p className="text-muted-foreground">Manage your account, properties, and business operations</p>
           </div>
 
-          <Tabs defaultValue="profile" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
               <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
               <TabsTrigger value="subscription" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Subscription</TabsTrigger>

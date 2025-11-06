@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, SlidersHorizontal, Heart, MessageCircle, User, Plus, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMatches } from '@/hooks/useUnreadMatches';
+import { prefetchOnHover } from '@/utils/routePrefetch';
 
 interface BottomNavigationProps {
   userRole: 'client' | 'owner';
@@ -105,6 +106,13 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
     }
   };
 
+  const handleMouseEnter = (item: NavItem) => {
+    // Prefetch route on hover for instant navigation
+    if (item.path?.includes('messages')) {
+      prefetchOnHover('messaging');
+    }
+  };
+
   const isActive = (item: NavItem) => {
     if (!item.path) return false;
     return location.pathname === item.path;
@@ -121,6 +129,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
             <button
               key={item.id}
               onClick={() => handleNavClick(item)}
+              onMouseEnter={() => handleMouseEnter(item)}
               className={cn(
                 'flex flex-col items-center justify-center flex-1 h-full relative group transition-all',
                 active && 'text-primary',
