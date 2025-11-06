@@ -305,7 +305,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
 
       {/* 3-Button Blurred Action Bar - Fixed at bottom with safe area inset */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed bottom-0 left-0 right-0 z-20 pb-[env(safe-area-inset-bottom,0px)]">
         <div className="backdrop-blur-lg bg-white/80 border-t border-gray-200/50 shadow-lg">
           <div className="flex justify-center items-center gap-8 py-4 px-4 max-w-xl mx-auto">
             {/* Dislike Button */}

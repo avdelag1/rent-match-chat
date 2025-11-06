@@ -177,10 +177,9 @@ export function SwipeCard({
           {/* Tap Flash Overlay */}
           {tapFlash && (
             <div
-              className={`absolute inset-0 pointer-events-none ${
+              className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${
                 tapFlash === 'left' ? 'bg-rose-500/30' : 'bg-emerald-500/30'
               }`}
-              style={{ animation: 'fadeOut 160ms ease-out forwards' }}
             />
           )}
           
