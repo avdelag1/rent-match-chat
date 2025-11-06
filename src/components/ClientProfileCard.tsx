@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Flame, X, MessageCircle, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Flame, X, MessageCircle, MapPin, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 
 // Tag categories for color coding
@@ -220,8 +220,23 @@ const ClientProfileCardComponent = ({
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
-        {/* Age Badge */}
-        <Badge className="absolute top-4 right-4 bg-black/50 text-white border-none px-3 py-1">
+        {/* Quick Actions - Message Icon in Top Right */}
+        <div className="absolute top-4 right-4 flex gap-2 z-20">
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMessage();
+            }}
+          >
+            <MessageCircle className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Age Badge - moved down to avoid overlap */}
+        <Badge className="absolute top-14 right-4 bg-black/50 text-white border-none px-3 py-1">
           {profile.age}
         </Badge>
         
