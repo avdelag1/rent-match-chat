@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Shield, Lock, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle, Tras
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useSecuritySettings } from '@/hooks/useSecuritySettings';
 
 interface AccountSecurityProps {
   userRole: 'client' | 'owner';
@@ -16,6 +17,7 @@ interface AccountSecurityProps {
 
 export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const navigate = useNavigate();
+  const { settings, updateSettings, isLoading } = useSecuritySettings();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
@@ -25,11 +27,21 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
   
-  // Security settings state
+  // Security settings state - sync with database
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [loginAlerts, setLoginAlerts] = useState(true);
   const [sessionTimeout, setSessionTimeout] = useState(true);
   const [deviceTracking, setDeviceTracking] = useState(true);
+
+  // Sync local state with database settings
+  useEffect(() => {
+    if (settings) {
+      setTwoFactorEnabled(settings.two_factor_enabled);
+      setLoginAlerts(settings.login_alerts);
+      setSessionTimeout(settings.session_timeout);
+      setDeviceTracking(settings.device_tracking);
+    }
+  }, [settings]);
 
   const handlePasswordChange = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -76,20 +88,14 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       setShowTwoFactorDialog(true);
     } else {
       setTwoFactorEnabled(false);
-      toast({
-        title: '2FA Disabled',
-        description: 'Two-factor authentication has been disabled.'
-      });
+      updateSettings({ two_factor_enabled: false });
     }
   };
 
   const enableTwoFactor = () => {
     setTwoFactorEnabled(true);
+    updateSettings({ two_factor_enabled: true });
     setShowTwoFactorDialog(false);
-    toast({
-      title: '2FA Enabled',
-      description: 'Two-factor authentication is now active on your account.'
-    });
   };
 
   const handleDeleteAccount = async () => {
@@ -262,7 +268,11 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
             <Switch
               checked={loginAlerts}
-              onCheckedChange={setLoginAlerts}
+              onCheckedChange={(checked) => {
+                setLoginAlerts(checked);
+                updateSettings({ login_alerts: checked });
+              }}
+              disabled={isLoading}
             />
           </div>
           
@@ -273,7 +283,11 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
             <Switch
               checked={sessionTimeout}
-              onCheckedChange={setSessionTimeout}
+              onCheckedChange={(checked) => {
+                setSessionTimeout(checked);
+                updateSettings({ session_timeout: checked });
+              }}
+              disabled={isLoading}
             />
           </div>
           
@@ -284,7 +298,11 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
             <Switch
               checked={deviceTracking}
-              onCheckedChange={setDeviceTracking}
+              onCheckedChange={(checked) => {
+                setDeviceTracking(checked);
+                updateSettings({ device_tracking: checked });
+              }}
+              disabled={isLoading}
             />
           </div>
         </CardContent>

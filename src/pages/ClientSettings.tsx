@@ -9,10 +9,21 @@ import { ThemeSelector } from "@/components/ThemeSelector";
 import { Button } from "@/components/ui/button";
 import { Heart, Home, Bike, Ship } from "lucide-react";
 import { Car } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const ClientSettings = () => {
   const [showPreferences, setShowPreferences] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState("profile");
+
+  // Support deep-linking to specific tabs via URL parameter
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["profile", "preferences", "subscription", "security", "search", "theme"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   return (
     <DashboardLayout userRole="client">
@@ -23,7 +34,7 @@ const ClientSettings = () => {
             <p className="text-muted-foreground">Manage your account preferences and search settings</p>
           </div>
 
-          <Tabs defaultValue="profile" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
               <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
               <TabsTrigger value="preferences" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Preferences</TabsTrigger>
