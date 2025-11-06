@@ -1,62 +1,52 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { UnifiedListingForm } from "@/components/UnifiedListingForm";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const OwnerNewListing = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [category, setCategory] = useState<'property' | 'yacht' | 'motorcycle' | 'bicycle'>('property');
-  const [mode, setMode] = useState<'rent' | 'sale' | 'both'>('rent');
+  const [isFormOpen, setIsFormOpen] = useState(true);
+  const [initialData, setInitialData] = useState<any>(null);
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     const modeParam = searchParams.get('mode');
     
-    if (categoryParam && ['property', 'yacht', 'motorcycle', 'bicycle'].includes(categoryParam)) {
-      setCategory(categoryParam as 'property' | 'yacht' | 'motorcycle' | 'bicycle');
-    }
+    const category = categoryParam && ['property', 'yacht', 'motorcycle', 'bicycle'].includes(categoryParam)
+      ? categoryParam
+      : 'property';
     
-    if (modeParam && ['rent', 'sale', 'both'].includes(modeParam)) {
-      setMode(modeParam as 'rent' | 'sale' | 'both');
-    }
+    const mode = modeParam && ['rent', 'sale', 'both'].includes(modeParam)
+      ? modeParam
+      : 'rent';
+    
+    setInitialData({ category, mode });
   }, [searchParams]);
 
-  const handleSuccess = () => {
-    // Navigate back to properties page after successful creation
+  const handleClose = () => {
+    setIsFormOpen(false);
+    // Navigate back to properties page
     navigate('/owner/properties');
   };
 
-  const handleCancel = () => {
-    navigate(-1);
-  };
+  if (!initialData) {
+    return (
+      <DashboardLayout userRole="owner">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <Button variant="ghost" onClick={handleCancel} className="mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Create New Listing</h1>
-            <p className="text-muted-foreground">
-              Fill in the details for your new {category} listing
-            </p>
-          </div>
-
-          {/* Unified Listing Form */}
-          <UnifiedListingForm
-            initialData={{ category, mode }}
-            onSuccess={handleSuccess}
-            onCancel={handleCancel}
-          />
-        </div>
-      </div>
+      <UnifiedListingForm
+        isOpen={isFormOpen}
+        onClose={handleClose}
+        editingProperty={initialData}
+      />
     </DashboardLayout>
   );
 };

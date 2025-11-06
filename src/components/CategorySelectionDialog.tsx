@@ -8,19 +8,26 @@ import { useNavigate } from "react-router-dom";
 interface CategorySelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCategorySelect: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => void;
+  onCategorySelect?: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => void;
+  navigateToNewPage?: boolean;
 }
 
 export function CategorySelectionDialog({ 
   open, 
   onOpenChange, 
-  onCategorySelect 
+  onCategorySelect,
+  navigateToNewPage = false
 }: CategorySelectionDialogProps) {
   const navigate = useNavigate();
 
   const handleSelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
-    // Navigate to the new listing page with category and mode as query params
-    navigate(`/owner/listings/new?category=${category}&mode=${mode}`);
+    if (navigateToNewPage) {
+      // Navigate to the new listing page with category and mode as query params
+      navigate(`/owner/listings/new?category=${category}&mode=${mode}`);
+    } else if (onCategorySelect) {
+      // Use callback for inline form (backward compatibility)
+      onCategorySelect(category, mode);
+    }
     onOpenChange(false);
   };
 
