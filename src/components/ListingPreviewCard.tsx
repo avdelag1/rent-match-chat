@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ImageCarousel } from '@/components/ImageCarousel';
+import { Listing } from '@/hooks/useListings';
 import { 
   MapPin, DollarSign, Home, Bed, Bath, Square, Calendar, 
   Check, X, Wifi, Car as CarIcon, Bike, Ship, Anchor,
@@ -8,7 +9,7 @@ import {
 } from 'lucide-react';
 
 interface ListingPreviewCardProps {
-  listing: any;
+  listing: Listing;
   showAllDetails?: boolean;
 }
 
