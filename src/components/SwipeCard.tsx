@@ -122,7 +122,7 @@ export function SwipeCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
+      className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{
@@ -141,8 +141,8 @@ export function SwipeCard({
       onClick={onTap}
     >
       <CardContent className="p-0 h-full relative">
-        {/* Image - Optimized height ratio */}
-        <div className="relative h-[55%] overflow-hidden">
+        {/* Image */}
+        <div className="relative h-3/5 overflow-hidden">
           <img
             src={primaryImage}
             alt={listing.title || 'Property'}
@@ -209,21 +209,21 @@ export function SwipeCard({
           )}
         </div>
 
-        {/* Content - More compact for preview visibility */}
-        <div className="p-3 h-[45%] flex flex-col justify-between bg-white overflow-y-auto">
+        {/* Content */}
+        <div className="p-4 h-2/5 flex flex-col justify-between bg-white">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-2">
+            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
               {listing.title || 'Beautiful Property'}
             </h3>
             
-            <div className="flex items-center gap-2 text-gray-600 mb-2">
+            <div className="flex items-center gap-2 text-gray-600 mb-3">
               <MapPin className="w-4 h-4" />
               <span className="text-sm">
                 {listing.neighborhood}, {listing.city}
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-2">
+            <div className="grid grid-cols-3 gap-4 mb-3">
               {listing.price && (
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">

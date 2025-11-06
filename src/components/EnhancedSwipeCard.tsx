@@ -99,7 +99,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
+      className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
       style={{ 
         x, 
         rotate, 
@@ -128,8 +128,8 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
     >
       <Card className="h-full swipe-card interactive-card glass-morphism border-white/20 overflow-hidden">
         <div className="relative h-full">
-          {/* Image Section - Optimized height */}
-          <div className="relative h-[55%] overflow-hidden">
+          {/* Image Section */}
+          <div className="relative h-2/3 overflow-hidden">
             <motion.img
               key={imageIndex}
               src={images[imageIndex]}
@@ -204,8 +204,8 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
             </div>
           </div>
 
-          {/* Content Section - More compact */}
-          <CardContent className="h-[45%] p-3 flex flex-col justify-between overflow-y-auto">
+          {/* Content Section */}
+          <CardContent className="h-1/3 p-4 flex flex-col justify-between">
             <div className="space-y-2">
               <div className="flex items-start justify-between">
                 <div>

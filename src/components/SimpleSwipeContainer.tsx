@@ -126,9 +126,9 @@ export function SimpleSwipeContainer() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto relative pb-32">
-      {/* Card Container - Reduced height for better preview visibility */}
-      <div className="relative mb-6 h-[550px]">
+    <div className="w-full max-w-md mx-auto relative pb-24">
+      {/* Card */}
+      <div className="relative mb-6">
         <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div
