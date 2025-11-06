@@ -24,11 +24,16 @@ export function CategorySelectionDialog({
     if (navigateToNewPage) {
       // Navigate to the new listing page with category and mode as query params
       navigate(`/owner/listings/new?category=${category}&mode=${mode}`);
-    } else if (onCategorySelect) {
+      onOpenChange(false);
+    } else {
       // Use callback for inline form (backward compatibility)
-      onCategorySelect(category, mode);
+      if (onCategorySelect) {
+        onCategorySelect(category, mode);
+      } else {
+        console.warn('CategorySelectionDialog: onCategorySelect callback is required when navigateToNewPage is false');
+      }
+      onOpenChange(false);
     }
-    onOpenChange(false);
   };
 
   return (
