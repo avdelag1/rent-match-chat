@@ -117,6 +117,11 @@ export function useSecuritySettings() {
   return {
     settings,
     isLoading,
+    isSaving: updateMutation.isPending,
+    // Backward compatibility aliases - TODO: Consider deprecating in future version
+    // These allow existing code using { loading } or { saving } to continue working
+    loading: isLoading,
+    saving: updateMutation.isPending,
     error,
     updateSettings: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
