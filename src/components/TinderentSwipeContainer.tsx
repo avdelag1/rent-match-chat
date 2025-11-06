@@ -392,7 +392,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             variant="ghost"
             className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
             onClick={() => handleButtonSwipe('left')}
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="Pass on this property"
           >
             <X className="w-8 h-8 stroke-[2.5]" />
@@ -408,8 +408,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             size="lg"
             variant="ghost"
             className="w-14 h-14 rounded-full bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:border-blue-600 transition-all duration-300 shadow-lg p-0"
-            onClick={() => handleInsights(currentListing.id)}
-            disabled={swipeMutation.isPending}
+            onClick={() => currentListing && handleInsights(currentListing.id)}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="View insights"
           >
             <Eye className="w-6 h-6 stroke-[2.5]" />
@@ -460,7 +460,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                 : 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600'
             }`}
             onClick={handleMessage}
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="Send message"
           >
             <MessageCircle className="w-6 h-6 stroke-[2.5]" />
@@ -477,7 +477,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             variant="ghost"
             className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
             onClick={() => handleButtonSwipe('right')}
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="Like this property"
           >
             <Flame className="w-11 h-11 fill-white stroke-white" />
