@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, PanInfo } from 'framer-motion';
-import { MapPin, Bed, Bath, Square, Heart, X, MessageCircle, Eye } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, X, MessageCircle } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { Button } from '@/components/ui/button';
 

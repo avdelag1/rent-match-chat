@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Flame, X, MessageCircle, MapPin, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Flame, X, MessageCircle, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 
 // Tag categories for color coding
