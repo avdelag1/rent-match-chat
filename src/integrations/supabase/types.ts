@@ -5770,6 +5770,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_security_settings: {
+        Row: {
+          created_at: string | null
+          device_tracking: boolean | null
+          id: string
+          login_alerts: boolean | null
+          session_timeout: boolean | null
+          two_factor_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_tracking?: boolean | null
+          id?: string
+          login_alerts?: boolean | null
+          session_timeout?: boolean | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_tracking?: boolean | null
+          id?: string
+          login_alerts?: boolean | null
+          session_timeout?: boolean | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_reports: {
         Row: {
           created_at: string | null
