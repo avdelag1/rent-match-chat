@@ -6,8 +6,10 @@ import { useListings } from '@/hooks/useListings';
 import { useSwipe } from '@/hooks/useSwipe';
 import { toast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export function SimpleSwipeContainer() {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
 
@@ -82,6 +84,14 @@ export function SimpleSwipeContainer() {
     });
   };
 
+  const handleMessage = () => {
+    navigate('/messages');
+    toast({
+      title: 'Opening Messages',
+      description: 'Navigate to messages to start a conversation',
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="w-full h-[600px] flex items-center justify-center">
@@ -145,6 +155,7 @@ export function SimpleSwipeContainer() {
                 listing={currentListing}
                 onLike={handleLike}
                 onPass={handlePass}
+                onMessage={handleMessage}
               />
             </motion.div>
           )}
