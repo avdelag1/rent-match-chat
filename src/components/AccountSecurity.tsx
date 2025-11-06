@@ -17,7 +17,20 @@ interface AccountSecurityProps {
 
 export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const navigate = useNavigate();
-  const { settings, updateSettings, isLoading } = useSecuritySettings();
+  // Destructure with fallback for both API versions
+  const { 
+    settings, 
+    updateSettings, 
+    isLoading, 
+    loading, 
+    isSaving, 
+    saving 
+  } = useSecuritySettings();
+  
+  // Use fallback logic for loading and saving states
+  const loadingState = isLoading ?? loading ?? false;
+  const savingState = isSaving ?? saving ?? false;
+  
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
@@ -26,6 +39,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   
   // Security settings state - sync with database
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -43,7 +57,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
     }
   }, [settings]);
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast({
         title: 'Error',
@@ -71,16 +85,42 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       return;
     }
 
-    // Simulate password change
-    toast({
-      title: 'Password Updated',
-      description: 'Your password has been successfully changed.'
-    });
-    
-    setShowPasswordDialog(false);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    setIsChangingPassword(true);
+    try {
+      // Update password using Supabase Auth
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Update last_password_change_at in security settings
+      await updateSettings({ 
+        // Note: This would require adding last_password_change_at to the schema
+        // For now we just update the password successfully
+      });
+
+      toast({
+        title: 'Password Updated',
+        description: 'Your password has been successfully changed.'
+      });
+      
+      setShowPasswordDialog(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error('Password change error:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update password. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleTwoFactorToggle = (enabled: boolean) => {
@@ -272,7 +312,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 setLoginAlerts(checked);
                 updateSettings({ login_alerts: checked });
               }}
-              disabled={isLoading}
+              disabled={loadingState || savingState}
             />
           </div>
           
@@ -287,7 +327,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 setSessionTimeout(checked);
                 updateSettings({ session_timeout: checked });
               }}
-              disabled={isLoading}
+              disabled={loadingState || savingState}
             />
           </div>
           
@@ -302,7 +342,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 setDeviceTracking(checked);
                 updateSettings({ device_tracking: checked });
               }}
-              disabled={isLoading}
+              disabled={loadingState || savingState}
             />
           </div>
         </CardContent>
@@ -385,10 +425,12 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isChangingPassword}>
               Cancel
             </Button>
-            <Button onClick={handlePasswordChange}>Update Password</Button>
+            <Button onClick={handlePasswordChange} disabled={isChangingPassword}>
+              {isChangingPassword ? 'Updating...' : 'Update Password'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
