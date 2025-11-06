@@ -58,6 +58,8 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
   style
 }: EnhancedSwipeCardProps) {
   const [imageIndex, setImageIndex] = useState(0);
+  const [tapFlash, setTapFlash] = useState<{ side: 'left' | 'right' } | null>(null);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -68,16 +70,38 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
   const hasMultipleImages = images.length > 1;
 
   // OPTIMIZED: Memoize callbacks to prevent re-creation with enhanced snap-back
+  const handleDragStart = useCallback(() => {
+    setDragStart({ x: 0, y: 0 });
+  }, []);
+
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const threshold = 150; // Increased threshold for better control
     const velocity = info.velocity.x;
+    const movementThreshold = 10; // Minimum movement to consider it a drag
 
-    if (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500) {
-      const direction = info.offset.x > 0 ? 'right' : 'left';
-      onSwipe(direction);
+    // Only swipe if movement is significant (not a tap)
+    if (Math.abs(info.offset.x) > movementThreshold || Math.abs(info.offset.y) > movementThreshold) {
+      if (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500) {
+        const direction = info.offset.x > 0 ? 'right' : 'left';
+        onSwipe(direction);
+      }
     }
+    setDragStart(null);
     // If threshold not met, motion will automatically snap back with spring animation
   }, [onSwipe]);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    if (!isTop) return;
+    
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const clickX = event.clientX - rect.left;
+    const side = clickX < rect.width / 2 ? 'left' : 'right';
+    
+    setTapFlash({ side });
+    setTimeout(() => setTapFlash(null), 160);
+  }, [isTop]);
 
   const nextImage = useCallback(() => {
     if (hasMultipleImages) {
@@ -110,7 +134,9 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onPointerDown={handlePointerDown}
       whileTap={{ scale: 0.98 }}
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ 
@@ -293,19 +319,13 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
             </div>
           </CardContent>
 
-          {/* Enhanced Swipe Indicators with emoji and glow */}
+          {/* Enhanced Swipe Indicators - Text-only badges */}
           <motion.div
             className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [0, 150], [0, 1]) }}
           >
-            <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-orange-400 to-red-500" />
-              {/* Badge with fire emoji */}
-              <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-4 rounded-3xl font-bold text-4xl border-4 border-white/60 shadow-2xl flex items-center gap-3">
-                <span className="text-6xl drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)] animate-pulse">🔥</span>
-                <span>LIKE</span>
-              </div>
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl">
+              LIKE
             </div>
           </motion.div>
 
@@ -313,16 +333,25 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
             className="absolute top-1/4 right-8 transform rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [-150, 0], [1, 0]) }}
           >
-            <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-gray-400 to-blue-300" />
-              {/* Badge with smoke emoji */}
-              <div className="relative bg-gradient-to-r from-red-500 to-rose-500 text-white px-10 py-4 rounded-3xl font-bold text-4xl border-4 border-white/60 shadow-2xl flex items-center gap-3">
-                <span className="text-6xl drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">💨</span>
-                <span>NOPE</span>
-              </div>
+            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl">
+              DISLIKE
             </div>
           </motion.div>
+
+          {/* Tap Flash Overlay */}
+          {tapFlash && (
+            <motion.div
+              className={`absolute inset-0 ${
+                tapFlash.side === 'left' 
+                  ? 'bg-gradient-to-r from-emerald-500/30 to-transparent' 
+                  : 'bg-gradient-to-l from-rose-500/30 to-transparent'
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.16 }}
+            />
+          )}
         </div>
       </Card>
     </motion.div>

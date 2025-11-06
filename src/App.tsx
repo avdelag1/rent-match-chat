@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
@@ -65,29 +66,30 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
-      <ErrorBoundary>
-        <AuthProvider>
-          <ThemeProvider>
-            <NotificationWrapper>
-              <AppLayout>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <Suspense fallback={
-                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
-                      <div className="space-y-4 text-center">
-                        <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
-                        <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
+  <GlobalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
+        <ErrorBoundary>
+          <AuthProvider>
+            <ThemeProvider>
+              <NotificationWrapper>
+                <AppLayout>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <Suspense fallback={
+                      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
+                        <div className="space-y-4 text-center">
+                          <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
+                          <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
+                        </div>
                       </div>
-                    </div>
-                  }>
+                    }>
                     <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
@@ -357,6 +359,7 @@ const App = () => (
       </ErrorBoundary>
     </BrowserRouter>
   </QueryClientProvider>
+  </GlobalErrorBoundary>
 );
 
 export default App;
