@@ -17,6 +17,9 @@ const DEFAULT_SETTINGS: SecuritySettings = {
   device_tracking: true,
 };
 
+// PostgreSQL error code for no rows found
+const PGRST_NO_ROWS_FOUND = 'PGRST116';
+
 export function useSecuritySettings() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<SecuritySettings>(DEFAULT_SETTINGS);
@@ -43,7 +46,7 @@ export function useSecuritySettings() {
         .single();
 
       if (error) {
-        if (error.code === 'PGRST116') {
+        if (error.code === PGRST_NO_ROWS_FOUND) {
           // No settings found, use defaults
           setSettings(DEFAULT_SETTINGS);
         } else {
@@ -55,12 +58,7 @@ export function useSecuritySettings() {
           });
         }
       } else if (data) {
-        setSettings({
-          two_factor_enabled: data.two_factor_enabled,
-          login_alerts: data.login_alerts,
-          session_timeout: data.session_timeout,
-          device_tracking: data.device_tracking,
-        });
+        setSettings(data);
       }
     } catch (error) {
       console.error('Error in fetchSettings:', error);
@@ -90,7 +88,7 @@ export function useSecuritySettings() {
         .eq('user_id', user.id);
 
       if (updateError) {
-        if (updateError.code === 'PGRST116') {
+        if (updateError.code === PGRST_NO_ROWS_FOUND) {
           // No row exists, insert instead
           const { error: insertError } = await supabase
             .from('user_security_settings')
