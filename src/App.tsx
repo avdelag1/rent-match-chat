@@ -35,6 +35,7 @@ const OwnerActivityFeed = lazy(() => import("./pages/OwnerActivityFeed"));
 const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
 const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })));
 const OwnerProperties = lazy(() => import("./pages/OwnerProperties"));
+const OwnerNewListing = lazy(() => import("./pages/OwnerNewListing"));
 const OwnerLikedClients = lazy(() => import("./pages/OwnerLikedClients"));
 const ClientContracts = lazy(() => import("./pages/ClientContracts"));
 const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
@@ -200,6 +201,15 @@ const App = () => (
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerProperties />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
+                      path="/owner/listings/new" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <OwnerNewListing />
                         </ProtectedRoute>
                       } 
                     />

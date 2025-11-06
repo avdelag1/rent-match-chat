@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Home, Anchor, Bike, CircleDot } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface CategorySelectionDialogProps {
   open: boolean;
@@ -15,8 +16,11 @@ export function CategorySelectionDialog({
   onOpenChange, 
   onCategorySelect 
 }: CategorySelectionDialogProps) {
+  const navigate = useNavigate();
+
   const handleSelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
-    onCategorySelect(category, mode);
+    // Navigate to the new listing page with category and mode as query params
+    navigate(`/owner/listings/new?category=${category}&mode=${mode}`);
     onOpenChange(false);
   };
 
