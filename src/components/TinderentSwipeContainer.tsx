@@ -8,7 +8,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Flame, X, RotateCcw, Sparkles } from 'lucide-react';
+import { Flame, X, RotateCcw, Sparkles, MessageCircle, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -375,9 +375,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
 
-      {/* Bottom Action Buttons - 3 Button Layout - Always visible at bottom */}
+      {/* Bottom Action Buttons - 5 Button Layout - Always visible at bottom */}
       <motion.div
-        className="flex justify-center gap-6 items-center z-20 px-4 mt-4"
+        className="flex justify-center gap-4 items-center z-20 px-4 mt-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -396,6 +396,23 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             aria-label="Pass on this property"
           >
             <X className="w-8 h-8 stroke-[2.5]" />
+          </Button>
+        </motion.div>
+
+        {/* Insights Button */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-14 h-14 rounded-full bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:border-blue-600 transition-all duration-300 shadow-lg p-0"
+            onClick={() => handleInsights(currentListing.id)}
+            disabled={swipeMutation.isPending}
+            aria-label="View insights"
+          >
+            <Eye className="w-6 h-6 stroke-[2.5]" />
           </Button>
         </motion.div>
 
@@ -426,6 +443,27 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             >
               <RotateCcw className="w-7 h-7 stroke-[2.5]" />
             </motion.div>
+          </Button>
+        </motion.div>
+
+        {/* Message Button */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            size="lg"
+            variant="ghost"
+            className={`w-14 h-14 rounded-full border-2 transition-all duration-300 shadow-lg p-0 ${
+              hasPremiumMessaging 
+                ? 'bg-green-500 border-green-600 text-white hover:bg-green-600' 
+                : 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600'
+            }`}
+            onClick={handleMessage}
+            disabled={swipeMutation.isPending}
+            aria-label="Send message"
+          >
+            <MessageCircle className="w-6 h-6 stroke-[2.5]" />
           </Button>
         </motion.div>
         

@@ -204,19 +204,6 @@ const EnhancedPropertyCardComponent = ({
 
           {/* Gradient Overlay for Text Readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-          {/* Message Button - Top Right */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full border-none z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMessage?.();
-            }}
-          >
-            <MessageCircle className="w-5 h-5" />
-          </Button>
         </div>
 
         {/* Bottom Content - Compact */}
