@@ -38,7 +38,13 @@ const getAmenityIcon = (amenity: string) => {
     'fireplace': '🔥',
     'balcony': '🌅'
   };
-  return iconMap[amenity.toLowerCase()] || Home;
+  const icon = iconMap[amenity.toLowerCase()] || Home;
+  
+  // Return object with type indicator for rendering
+  return {
+    value: icon,
+    isComponent: typeof icon !== 'string'
+  };
 };
 
 const EnhancedPropertyCardComponent = ({
@@ -52,6 +58,11 @@ const EnhancedPropertyCardComponent = ({
 }: EnhancedPropertyCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Guard for missing images
+  const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
+  const images = imageCount > 0 ? listing.images : ['/placeholder.svg'];
+  const hasMultipleImages = images.length > 1;
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
@@ -73,17 +84,21 @@ const EnhancedPropertyCardComponent = ({
 
   const nextImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === listing.images.length - 1 ? 0 : prev + 1
-    );
-  }, [listing.images.length]);
+    if (hasMultipleImages) {
+      setCurrentImageIndex((prev) =>
+        prev === images.length - 1 ? 0 : prev + 1
+      );
+    }
+  }, [hasMultipleImages, images.length]);
 
   const prevImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? listing.images.length - 1 : prev - 1
-    );
-  }, [listing.images.length]);
+    if (hasMultipleImages) {
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? images.length - 1 : prev - 1
+      );
+    }
+  }, [hasMultipleImages, images.length]);
 
   const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -149,10 +164,10 @@ const EnhancedPropertyCardComponent = ({
       <Card className="relative w-full h-[550px] overflow-hidden bg-white border-none shadow-2xl rounded-3xl">
         {/* Full Screen Image - Fixed height for consistent card sizing */}
         <div className="relative h-[430px] overflow-hidden">
-          {listing.images && listing.images.length > 0 ? (
+          {imageCount > 0 ? (
             <>
               <img
-                src={listing.images[currentImageIndex]}
+                src={images[currentImageIndex]}
                 alt={listing.title}
                 className="w-full h-full object-cover cursor-pointer"
                 onClick={handleImageClick}
@@ -183,9 +198,9 @@ const EnhancedPropertyCardComponent = ({
               </div>
 
               {/* Image Indicators */}
-              {listing.images.length > 1 && (
+              {hasMultipleImages && (
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                  {listing.images.map((_, index) => (
+                  {images.map((_, index) => (
                     <div
                       key={index}
                       className={`w-2 h-2 rounded-full transition-all ${

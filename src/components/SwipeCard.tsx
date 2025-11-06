@@ -28,18 +28,31 @@ export function SwipeCard({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [tapFlash, setTapFlash] = useState<'left' | 'right' | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const dragThreshold = useRef(0);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isTop) return;
     setIsDragging(true);
     setStartPos({ x: e.clientX, y: e.clientY });
+    dragThreshold.current = 0;
+    
+    // Add tap flash
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = e.clientX - rect.left;
+      const side = x < rect.width / 2 ? 'left' : 'right';
+      setTapFlash(side);
+      setTimeout(() => setTapFlash(null), 160);
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !isTop) return;
     const deltaX = e.clientX - startPos.x;
     const deltaY = e.clientY - startPos.y;
+    dragThreshold.current = Math.abs(deltaX) + Math.abs(deltaY);
     setDragOffset({ x: deltaX, y: deltaY });
   };
 
@@ -70,6 +83,16 @@ export function SwipeCard({
     const touch = e.touches[0];
     setIsDragging(true);
     setStartPos({ x: touch.clientX, y: touch.clientY });
+    dragThreshold.current = 0;
+    
+    // Add tap flash
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (rect) {
+      const x = touch.clientX - rect.left;
+      const side = x < rect.width / 2 ? 'left' : 'right';
+      setTapFlash(side);
+      setTimeout(() => setTapFlash(null), 160);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -77,6 +100,7 @@ export function SwipeCard({
     const touch = e.touches[0];
     const deltaX = touch.clientX - startPos.x;
     const deltaY = touch.clientY - startPos.y;
+    dragThreshold.current = Math.abs(deltaX) + Math.abs(deltaY);
     setDragOffset({ x: deltaX, y: deltaY });
   };
 
@@ -109,6 +133,16 @@ export function SwipeCard({
     ? listing.images[0] 
     : '/placeholder.svg';
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent click if user has dragged more than minimal threshold
+    if (dragThreshold.current > 10) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    onTap();
+  };
+
   return (
     <Card
       ref={cardRef}
@@ -128,7 +162,7 @@ export function SwipeCard({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      onClick={onTap}
+      onClick={handleCardClick}
     >
       <CardContent className="p-0 h-full relative">
         {/* Image */}
@@ -140,32 +174,30 @@ export function SwipeCard({
             draggable={false}
           />
           
-          {/* Swipe Indicators - Without backdrop blur to avoid interfering with card */}
+          {/* Tap Flash Overlay */}
+          {tapFlash && (
+            <div
+              className={`absolute inset-0 pointer-events-none ${
+                tapFlash === 'left' ? 'bg-rose-500/30' : 'bg-emerald-500/30'
+              }`}
+              style={{ animation: 'fadeOut 160ms ease-out forwards' }}
+            />
+          )}
+          
+          {/* Text-only Swipe Indicators */}
           {isTop && (
             <>
               {dragOffset.x > 50 && (
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/25 to-emerald-500/25 flex items-center justify-center">
-                  <div className="relative">
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-orange-400 to-red-500" />
-                    {/* Badge with fire emoji */}
-                    <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 text-white px-12 py-4 rounded-3xl font-bold text-4xl flex items-center gap-4 shadow-2xl border-4 border-white/60 transform rotate-[-15deg] scale-125 animate-pulse">
-                      <span className="text-6xl drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">🔥</span>
-                      <span>LIKE</span>
-                    </div>
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-3xl font-bold text-3xl border-4 border-white shadow-2xl transform rotate-[-15deg]">
+                    LIKE
                   </div>
                 </div>
               )}
               {dragOffset.x < -50 && (
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/25 to-rose-500/25 flex items-center justify-center">
-                  <div className="relative">
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-gray-400 to-blue-300" />
-                    {/* Badge with smoke emoji */}
-                    <div className="relative bg-gradient-to-r from-red-500 to-rose-500 text-white px-12 py-4 rounded-3xl font-bold text-4xl flex items-center gap-4 shadow-2xl border-4 border-white/60 transform rotate-[15deg] scale-125">
-                      <span className="text-6xl drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">💨</span>
-                      <span>PASS</span>
-                    </div>
+                  <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-3xl font-bold text-3xl border-4 border-white shadow-2xl transform rotate-[15deg]">
+                    DISLIKE
                   </div>
                 </div>
               )}

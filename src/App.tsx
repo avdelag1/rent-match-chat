@@ -10,6 +10,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import Index from "./pages/Index";
@@ -65,14 +66,15 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
-      <ErrorBoundary>
+  <GlobalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
+        <ErrorBoundary>
         <AuthProvider>
           <ThemeProvider>
             <NotificationWrapper>
@@ -357,6 +359,7 @@ const App = () => (
       </ErrorBoundary>
     </BrowserRouter>
   </QueryClientProvider>
+  </GlobalErrorBoundary>
 );
 
 export default App;
