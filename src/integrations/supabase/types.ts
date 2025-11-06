@@ -6650,6 +6650,10 @@ export type Database = {
         Returns: undefined
       }
       deactivate_expired_subscriptions: { Args: never; Returns: undefined }
+      delete_user_account: {
+        Args: { user_id_to_delete: string }
+        Returns: Json
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {

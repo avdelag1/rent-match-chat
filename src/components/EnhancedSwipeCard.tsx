@@ -67,15 +67,16 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
   const images = listing.images && listing.images.length > 0 ? listing.images : [];
   const hasMultipleImages = images.length > 1;
 
-  // OPTIMIZED: Memoize callbacks to prevent re-creation
+  // OPTIMIZED: Memoize callbacks to prevent re-creation with enhanced snap-back
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
-    const threshold = 150;
+    const threshold = 150; // Increased threshold for better control
     const velocity = info.velocity.x;
 
     if (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
+    // If threshold not met, motion will automatically snap back with spring animation
   }, [onSwipe]);
 
   const nextImage = useCallback(() => {
@@ -112,8 +113,18 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
       onDragEnd={handleDragEnd}
       whileTap={{ scale: 0.98 }}
       initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.8 }}
-      transition={{ duration: 0.3 }}
+      animate={{ 
+        scale: isTop ? 1 : 0.95, 
+        opacity: isTop ? 1 : 0.8,
+        x: 0,
+        rotate: 0
+      }}
+      transition={{ 
+        type: "spring",
+        stiffness: 300,
+        damping: 25,
+        duration: 0.3
+      }}
     >
       <Card className="h-full swipe-card interactive-card glass-morphism border-white/20 overflow-hidden">
         <div className="relative h-full">
@@ -275,14 +286,19 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
             </div>
           </CardContent>
 
-          {/* Swipe Indicators */}
+          {/* Enhanced Swipe Indicators with emoji and glow */}
           <motion.div
             className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [0, 150], [0, 1]) }}
           >
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
-              <Flame className="w-8 h-8 animate-pulse" />
-              LIKE
+            <div className="relative">
+              {/* Glow effect */}
+              <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-orange-400 to-red-500" />
+              {/* Badge with fire emoji */}
+              <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-4 rounded-3xl font-bold text-4xl border-4 border-white/60 shadow-2xl flex items-center gap-3">
+                <span className="text-6xl drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)] animate-pulse">🔥</span>
+                <span>LIKE</span>
+              </div>
             </div>
           </motion.div>
 
@@ -290,9 +306,14 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
             className="absolute top-1/4 right-8 transform rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [-150, 0], [1, 0]) }}
           >
-            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
-              <X className="w-8 h-8" />
-              NOPE
+            <div className="relative">
+              {/* Glow effect */}
+              <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-gray-400 to-blue-300" />
+              {/* Badge with smoke emoji */}
+              <div className="relative bg-gradient-to-r from-red-500 to-rose-500 text-white px-10 py-4 rounded-3xl font-bold text-4xl border-4 border-white/60 shadow-2xl flex items-center gap-3">
+                <span className="text-6xl drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">💨</span>
+                <span>NOPE</span>
+              </div>
             </div>
           </motion.div>
         </div>

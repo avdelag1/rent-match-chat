@@ -380,77 +380,81 @@ export function ClientSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Bottom Action Buttons - 3 Button Layout - Always visible at bottom */}
-      <motion.div
-        className="flex justify-center gap-6 items-center z-20 px-4 mt-4"
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        {/* Dislike Button - Left */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
-            onClick={() => handleSwipe('left')}
-            disabled={swipeMutation.isPending || !currentClient}
-            aria-label="Pass"
+      {/* Enhanced 3D Bottom Action Buttons - Fixed positioning with backdrop blur */}
+      <div className="fixed bottom-20 left-0 right-0 z-50">
+        <div className="max-w-md mx-auto bg-gradient-to-t from-black/10 via-transparent to-transparent backdrop-blur-md pb-4 pt-8">
+          <motion.div
+            className="flex justify-center gap-6 items-center px-4"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
           >
-            <X className="w-8 h-8 stroke-[2.5]" />
-          </Button>
-        </motion.div>
-
-        {/* Undo Button - Center */}
-        <motion.div
-          whileHover={{ scale: canUndo ? 1.1 : 1 }}
-          whileTap={{ scale: canUndo ? 0.9 : 1 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            onClick={() => {
-              if (canUndo) {
-                undoLastSwipe();
-              }
-            }}
-            disabled={!canUndo || isUndoing}
-            className={`w-16 h-16 rounded-full transition-all duration-300 shadow-lg p-0 ${
-              canUndo 
-                ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl hover:shadow-yellow-500/20' 
-                : 'bg-gray-200 border-2 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
-            }`}
-            aria-label="Undo last swipe"
-          >
+            {/* Dislike Button - 3D Enhanced */}
             <motion.div
-              animate={{ rotate: isUndoing ? 360 : 0 }}
-              transition={{ duration: 0.6 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              <RotateCcw className="w-7 h-7 stroke-[2.5]" />
+              <Button
+                size="lg"
+                variant="ghost"
+                className="relative w-16 h-16 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] transform-gpu"
+                onClick={() => handleSwipe('left')}
+                disabled={swipeMutation.isPending || !currentClient}
+                aria-label="Pass"
+              >
+                <X className="w-8 h-8 stroke-[3]" />
+              </Button>
             </motion.div>
-          </Button>
-        </motion.div>
-        
-        {/* Like Button - Right */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
-            onClick={() => handleSwipe('right')}
-            disabled={swipeMutation.isPending || !currentClient}
-            aria-label="Like"
-          >
-            <Heart className="w-10 h-10 fill-current" />
-          </Button>
-        </motion.div>
-      </motion.div>
+
+            {/* Undo Button - 3D Enhanced (Center) */}
+            <motion.div
+              whileHover={{ scale: canUndo ? 1.1 : 1 }}
+              whileTap={{ scale: canUndo ? 0.9 : 1 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                onClick={() => {
+                  if (canUndo) {
+                    undoLastSwipe();
+                  }
+                }}
+                disabled={!canUndo || isUndoing}
+                className={`relative w-14 h-14 rounded-full transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(0,0,0,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] transform-gpu ${
+                  canUndo 
+                    ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white border-4 border-yellow-300 hover:from-yellow-500 hover:to-amber-600 hover:border-yellow-400 hover:shadow-[0_12px_24px_rgba(251,191,36,0.5),0_4px_12px_rgba(251,191,36,0.3),0_0_20px_rgba(251,191,36,0.4)] hover:scale-110' 
+                    : 'bg-gray-300 border-4 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
+                }`}
+                aria-label="Undo last swipe"
+              >
+                <motion.div
+                  animate={{ rotate: isUndoing ? 360 : 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <RotateCcw className="w-7 h-7 stroke-[3]" />
+                </motion.div>
+              </Button>
+            </motion.div>
+            
+            {/* Like Button - 3D Enhanced (Largest) */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                className="relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 text-white border-4 border-orange-300 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 hover:border-orange-400 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(249,115,22,0.4),0_2px_8px_rgba(249,115,22,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),0_0_30px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_24px_rgba(249,115,22,0.5),0_4px_12px_rgba(249,115,22,0.4),0_0_40px_rgba(249,115,22,0.3)] transform-gpu animate-pulse-subtle"
+                onClick={() => handleSwipe('right')}
+                disabled={swipeMutation.isPending || !currentClient}
+                aria-label="Like"
+              >
+                <Heart className="w-10 h-10 fill-current drop-shadow-lg" />
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
 
       <MatchCelebration
         isOpen={matchCelebration.isOpen}

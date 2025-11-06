@@ -113,7 +113,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       // Try to delete user account using Supabase Admin API
       // Note: This requires proper RLS policies and admin function
       const { error } = await supabase.rpc('delete_user_account', {
-        user_id: user.id
+        user_id_to_delete: user.id
       });
 
       if (error) {
