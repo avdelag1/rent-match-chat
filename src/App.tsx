@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
@@ -65,15 +66,16 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
-      <ErrorBoundary>
-        <AuthProvider>
+  <GlobalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
+        <ErrorBoundary>
+          <AuthProvider>
           <ThemeProvider>
             <NotificationWrapper>
               <AppLayout>
@@ -353,10 +355,11 @@ const App = () => (
               </AppLayout>
             </NotificationWrapper>
           </ThemeProvider>
-        </AuthProvider>
-      </ErrorBoundary>
-    </BrowserRouter>
-  </QueryClientProvider>
+          </AuthProvider>
+        </ErrorBoundary>
+      </BrowserRouter>
+    </QueryClientProvider>
+  </GlobalErrorBoundary>
 );
 
 export default App;

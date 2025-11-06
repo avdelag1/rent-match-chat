@@ -41,6 +41,20 @@ const getAmenityIcon = (amenity: string) => {
   return iconMap[amenity.toLowerCase()] || Home;
 };
 
+// Helper to render amenity icons - handles both string emoji and Lucide components
+const renderAmenityIcon = (amenity: string, className?: string) => {
+  const icon = getAmenityIcon(amenity);
+  
+  if (typeof icon === 'string') {
+    // It's an emoji string
+    return <span className={className}>{icon}</span>;
+  } else {
+    // It's a Lucide component
+    const IconComponent = icon;
+    return <IconComponent className={className} />;
+  }
+};
+
 const EnhancedPropertyCardComponent = ({
   listing,
   onSwipe,
@@ -56,6 +70,10 @@ const EnhancedPropertyCardComponent = ({
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
+
+  // Guard for missing images
+  const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
+  const images = imageCount > 0 ? listing.images : ['/placeholder.svg'];
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const threshold = 60;
@@ -73,17 +91,21 @@ const EnhancedPropertyCardComponent = ({
 
   const nextImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === listing.images.length - 1 ? 0 : prev + 1
-    );
-  }, [listing.images.length]);
+    if (imageCount > 1) {
+      setCurrentImageIndex((prev) =>
+        prev === imageCount - 1 ? 0 : prev + 1
+      );
+    }
+  }, [imageCount]);
 
   const prevImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? listing.images.length - 1 : prev - 1
-    );
-  }, [listing.images.length]);
+    if (imageCount > 1) {
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? imageCount - 1 : prev - 1
+      );
+    }
+  }, [imageCount]);
 
   const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -149,10 +171,10 @@ const EnhancedPropertyCardComponent = ({
       <Card className="relative w-full h-[550px] overflow-hidden bg-white border-none shadow-2xl rounded-3xl">
         {/* Full Screen Image - Fixed height for consistent card sizing */}
         <div className="relative h-[430px] overflow-hidden">
-          {listing.images && listing.images.length > 0 ? (
+          {imageCount > 0 ? (
             <>
               <img
-                src={listing.images[currentImageIndex]}
+                src={images[Math.min(currentImageIndex, imageCount - 1)]}
                 alt={listing.title}
                 className="w-full h-full object-cover cursor-pointer"
                 onClick={handleImageClick}
@@ -163,6 +185,9 @@ const EnhancedPropertyCardComponent = ({
                   willChange: 'transform',
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden'
+                }}
+                onError={(e) => {
+                  e.currentTarget.src = '/placeholder.svg';
                 }}
               />
               
@@ -183,9 +208,9 @@ const EnhancedPropertyCardComponent = ({
               </div>
 
               {/* Image Indicators */}
-              {listing.images.length > 1 && (
+              {imageCount > 1 && (
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                  {listing.images.map((_, index) => (
+                  {images.map((_, index) => (
                     <div
                       key={index}
                       className={`w-2 h-2 rounded-full transition-all ${
