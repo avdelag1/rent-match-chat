@@ -3,7 +3,6 @@ import { motion, PanInfo } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Heart, X, MessageCircle, Eye } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 
 interface SimpleListingCardProps {
   listing: Listing;
@@ -13,7 +12,6 @@ interface SimpleListingCardProps {
 }
 
 export function SimpleListingCard({ listing, onLike, onPass, onMessage }: SimpleListingCardProps) {
-  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
 
@@ -99,11 +97,7 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage }: Simple
                 className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (onMessage) {
-                    onMessage();
-                  } else {
-                    navigate('/messages');
-                  }
+                  onMessage?.();
                 }}
               >
                 <MessageCircle className="w-4 h-4" />
