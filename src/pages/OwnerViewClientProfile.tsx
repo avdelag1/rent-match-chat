@@ -6,10 +6,8 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, MessageCircle, MapPin, Briefcase, Heart, Home, Bike, Ship } from 'lucide-react';
-import { Car } from 'lucide-react';
-import { ImageCarousel } from '@/components/ImageCarousel';
+import { ArrowLeft, MessageCircle, Heart, Home, Bike, Ship, Car } from 'lucide-react';
+import { ClientProfilePreview } from '@/components/ClientProfilePreview';
 import { toast } from 'sonner';
 import { ClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 
@@ -122,109 +120,8 @@ export default function OwnerViewClientProfile() {
 
         {/* Profile Content */}
         <div className="container mx-auto px-4 py-6 max-w-4xl">
-          {/* Images */}
-          {images.length > 0 && (
-            <Card className="mb-6">
-              <CardContent className="p-0">
-                <ImageCarousel images={images} alt={`${client.full_name}'s profile`} />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Profile Info */}
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4 mb-6">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={client.avatar_url || images[0]} />
-                  <AvatarFallback>{client.full_name?.[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-3xl font-bold">{client.full_name}</h1>
-                    {client.verified && (
-                      <Badge variant="default">Verified</Badge>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-3 text-muted-foreground">
-                    {client.age && <span>{client.age} years old</span>}
-                    {client.location && (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {client.location}
-                      </span>
-                    )}
-                    {client.occupation && (
-                      <span className="flex items-center gap-1">
-                        <Briefcase className="h-4 w-4" />
-                        {client.occupation}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bio */}
-              {client.bio && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-2">About</h3>
-                  <p className="text-muted-foreground">{client.bio}</p>
-                </div>
-              )}
-
-              {/* Budget */}
-              {(client.budget_min || client.budget_max) && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-2">Budget Range</h3>
-                  <p className="text-muted-foreground">
-                    ${client.budget_min?.toLocaleString() || '0'} - ${client.budget_max?.toLocaleString() || 'Unlimited'}
-                  </p>
-                </div>
-              )}
-
-              {/* Interests */}
-              {client.interests && client.interests.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3">Interests</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {client.interests.map((interest, idx) => (
-                      <Badge key={idx} variant="secondary">
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Lifestyle Tags */}
-              {client.lifestyle_tags && client.lifestyle_tags.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3">Lifestyle</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {client.lifestyle_tags.map((tag, idx) => (
-                      <Badge key={idx} variant="outline">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Preferred Activities */}
-              {client.preferred_activities && client.preferred_activities.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Preferred Activities</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {client.preferred_activities.map((activity, idx) => (
-                      <Badge key={idx} variant="outline">
-                        {activity}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Use the shared ClientProfilePreview component */}
+          <ClientProfilePreview mode="owner-view" clientId={clientId} />
 
           {/* CLIENT PREFERENCES - What they're looking for */}
           {preferences && (

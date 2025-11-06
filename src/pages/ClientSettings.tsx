@@ -4,10 +4,11 @@ import { PremiumSubscriptionManager } from "@/components/PremiumSubscriptionMana
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { PropertySearch } from "@/components/PropertySearch";
 import { ClientProfileSettings } from "@/components/ClientProfileSettings";
+import { ClientProfilePreview } from "@/components/ClientProfilePreview";
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { Button } from "@/components/ui/button";
-import { Heart, Home, Bike, Ship } from "lucide-react";
+import { Heart, Home, Bike, Ship, Eye } from "lucide-react";
 import { Car } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -45,8 +46,22 @@ const ClientSettings = () => {
             </TabsList>
 
             <TabsContent value="profile" className="mt-6">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
-                <ClientProfileSettings />
+              <div className="space-y-6">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                  <ClientProfileSettings />
+                </div>
+                
+                {/* Profile Preview Section */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Eye className="w-5 h-5 text-primary" />
+                    <h2 className="text-xl font-bold">Profile Preview</h2>
+                  </div>
+                  <p className="text-muted-foreground mb-4 text-sm">
+                    This is how property owners will see your profile when browsing potential clients.
+                  </p>
+                  <ClientProfilePreview mode="self" />
+                </div>
               </div>
             </TabsContent>
 
