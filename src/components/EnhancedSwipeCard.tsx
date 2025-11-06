@@ -74,6 +74,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
     setDragStart({ x: 0, y: 0 });
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const threshold = 150; // Increased threshold for better control
     const velocity = info.velocity.x;

@@ -197,7 +197,7 @@ export function SwipeCard({
               tapFlash.side === 'left' 
                 ? 'bg-gradient-to-r from-emerald-500/30 to-transparent' 
                 : 'bg-gradient-to-l from-rose-500/30 to-transparent'
-            } transition-opacity duration-160`} />
+            } animate-pulse`} style={{ animationDuration: '160ms', animationIterationCount: '1' }} />
           )}
         </div>
 

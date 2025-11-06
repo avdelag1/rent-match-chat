@@ -23,6 +23,13 @@ interface EnhancedPropertyCardProps {
   hasPremium?: boolean;
 }
 
+/**
+ * Maps amenity names to their corresponding icons.
+ * Returns either a Lucide icon component or an emoji string.
+ * Components should check the return type and render accordingly:
+ * - If string: render inside a span
+ * - If component: render as JSX element
+ */
 const getAmenityIcon = (amenity: string) => {
   const iconMap: { [key: string]: any } = {
     'wifi': Wifi,
