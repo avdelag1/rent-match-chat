@@ -384,7 +384,7 @@ export function ClientSwipeContainer({
       <div className="fixed bottom-20 left-0 right-0 z-50">
         <div className="max-w-md mx-auto bg-gradient-to-t from-black/10 via-transparent to-transparent backdrop-blur-md pb-4 pt-8">
           <motion.div
-            className="flex justify-center gap-2 sm:gap-3 md:gap-4 items-center px-4"
+            className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center px-4"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}

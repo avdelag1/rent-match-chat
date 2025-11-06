@@ -377,7 +377,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
       {/* Bottom Action Buttons - 5 Button Layout - Always visible at bottom */}
       <motion.div
-        className="flex justify-center gap-2 sm:gap-3 md:gap-4 items-center z-20 px-4 mt-4"
+        className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center z-20 px-4 mt-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
