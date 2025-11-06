@@ -102,16 +102,6 @@ export function SwipeCard({
     setDragOffset({ x: 0, y: 0 });
   };
 
-  const handleInsightsClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onInsights();
-  };
-
-  const handleMessageClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onMessage();
-  };
-
   const rotation = dragOffset.x * 0.1;
   const opacity = isTop ? Math.max(0.8, 1 - Math.abs(dragOffset.x) / 400) : 1;
 
@@ -122,7 +112,7 @@ export function SwipeCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
+      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{
@@ -150,32 +140,6 @@ export function SwipeCard({
             draggable={false}
           />
           
-          {/* Action Buttons Overlay - Floating without backdrop blur */}
-          {isTop && (
-            <div className="absolute top-4 right-4 flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white/90 border-white/30 hover:bg-white shadow-lg"
-                onClick={handleInsightsClick}
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className={`border-white/30 shadow-lg ${
-                  hasPremium 
-                    ? 'bg-green-500/90 hover:bg-green-600 text-white' 
-                    : 'bg-orange-500/90 hover:bg-orange-600 text-white'
-                }`}
-                onClick={handleMessageClick}
-              >
-                <MessageCircle className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-
           {/* Swipe Indicators - Without backdrop blur to avoid interfering with card */}
           {isTop && (
             <>

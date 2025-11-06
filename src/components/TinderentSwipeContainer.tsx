@@ -8,7 +8,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Flame, X, RotateCcw, Sparkles } from 'lucide-react';
+import { Flame, X, RotateCcw, Sparkles, MessageCircle, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -375,9 +375,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
 
-      {/* Bottom Action Buttons - 3 Button Layout - Always visible at bottom */}
+      {/* Bottom Action Buttons - 5 Button Layout - Always visible at bottom */}
       <motion.div
-        className="flex justify-center gap-6 items-center z-20 px-4 mt-4"
+        className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center z-20 px-4 mt-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -392,10 +392,27 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             variant="ghost"
             className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
             onClick={() => handleButtonSwipe('left')}
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="Pass on this property"
           >
             <X className="w-8 h-8 stroke-[2.5]" />
+          </Button>
+        </motion.div>
+
+        {/* Insights Button */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-14 h-14 rounded-full bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:border-blue-600 transition-all duration-300 shadow-lg p-0"
+            onClick={() => currentListing && handleInsights(currentListing.id)}
+            disabled={swipeMutation.isPending || !currentListing}
+            aria-label="View insights"
+          >
+            <Eye className="w-6 h-6 stroke-[2.5]" />
           </Button>
         </motion.div>
 
@@ -428,6 +445,27 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             </motion.div>
           </Button>
         </motion.div>
+
+        {/* Message Button */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            size="lg"
+            variant="ghost"
+            className={`w-14 h-14 rounded-full border-2 transition-all duration-300 shadow-lg p-0 ${
+              hasPremiumMessaging 
+                ? 'bg-green-500 border-green-600 text-white hover:bg-green-600' 
+                : 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600'
+            }`}
+            onClick={handleMessage}
+            disabled={swipeMutation.isPending || !currentListing}
+            aria-label="Send message"
+          >
+            <MessageCircle className="w-6 h-6 stroke-[2.5]" />
+          </Button>
+        </motion.div>
         
         {/* Like Button - Right */}
         <motion.div
@@ -439,7 +477,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             variant="ghost"
             className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
             onClick={() => handleButtonSwipe('right')}
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="Like this property"
           >
             <Flame className="w-11 h-11 fill-white stroke-white" />

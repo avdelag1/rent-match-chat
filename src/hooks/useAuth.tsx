@@ -313,25 +313,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithOAuth = async (provider: 'google' | 'facebook', role: 'client' | 'owner') => {
     try {
+      console.log(`[OAuth] Starting ${provider} OAuth for role: ${role}`);
+      
       // Store the role in localStorage BEFORE OAuth redirect
       localStorage.setItem('pendingOAuthRole', role);
+      
+      // Build OAuth options with provider-specific query params
+      const queryParams: Record<string, string> = {
+        prompt: 'consent',
+      };
+
+      // Add Google-specific parameters
+      if (provider === 'google') {
+        queryParams.access_type = 'offline';
+      }
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
+          queryParams
         }
       });
 
       if (error) {
-        console.error(`${provider} OAuth error:`, error);
+        console.error(`[OAuth] ${provider} OAuth error:`, error);
         localStorage.removeItem('pendingOAuthRole');
         throw error;
       }
 
+      console.log(`[OAuth] ${provider} OAuth initiated successfully`);
       return { error: null };
     } catch (error: any) {
-      console.error(`${provider} OAuth error:`, error);
+      console.error(`[OAuth] ${provider} OAuth error:`, error);
       localStorage.removeItem('pendingOAuthRole');
       let errorMessage = `Failed to sign in with ${provider}. Please try again.`;
       
@@ -339,6 +353,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         errorMessage = 'OAuth link expired. Please try signing in again.';
       } else if (error.message?.includes('access_denied')) {
         errorMessage = `Access denied. Please grant permission to continue with ${provider}.`;
+      } else if (error.message?.includes('Provider not enabled')) {
+        errorMessage = `${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not enabled. Please contact support or use email/password login.`;
       } else if (error.message) {
         errorMessage = error.message;
       }

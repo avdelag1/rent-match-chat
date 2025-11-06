@@ -4,7 +4,7 @@ import { AccountSecurity } from "@/components/AccountSecurity";
 const OwnerSecurity = () => {
   return (
     <DashboardLayout userRole="owner">
-      <div className="h-full overflow-y-auto">
+      <div className="w-full h-full overflow-y-auto">
         <div className="p-8">
           <div className="max-w-4xl mx-auto">
             <AccountSecurity userRole="owner" />

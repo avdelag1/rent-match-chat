@@ -219,22 +219,9 @@ const ClientProfileCardComponent = ({
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-        
-        {/* Message Button - Top Right - Always Clickable */}
-        <Button
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('💬 Message button clicked for:', profile.name);
-            onMessage();
-          }}
-          className="absolute top-4 right-4 w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 backdrop-blur-sm text-white hover:from-orange-600 hover:to-pink-600 border-2 border-white shadow-lg p-0 z-20 transition-all hover:scale-110"
-        >
-          <MessageCircle className="w-5 h-5" />
-        </Button>
 
         {/* Age Badge */}
-        <Badge className="absolute top-4 right-20 bg-black/50 text-white border-none px-3 py-1">
+        <Badge className="absolute top-4 right-4 bg-black/50 text-white border-none px-3 py-1">
           {profile.age}
         </Badge>
         
