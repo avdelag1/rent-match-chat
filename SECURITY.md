@@ -14,7 +14,7 @@
 
 **Severity**: Moderate (CVSS 5.3)
 
-**Description**: esbuild versions <=0.24.2 may allow any website to send requests to the development server and read the response.
+**Description**: esbuild versions up to and including 0.24.2 may allow any website to send requests to the development server and read the response.
 
 **Impact**: 
 - **Development only** - does not affect production builds
