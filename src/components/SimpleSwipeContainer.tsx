@@ -84,7 +84,7 @@ export function SimpleSwipeContainer() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-[700px] flex items-center justify-center">
+      <div className="w-full h-[600px] flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-bounce">🏠</div>
           <p className="text-gray-600">Loading properties...</p>
@@ -95,7 +95,7 @@ export function SimpleSwipeContainer() {
 
   if (!listings || listings.length === 0) {
     return (
-      <div className="w-full h-[700px] flex items-center justify-center">
+      <div className="w-full h-[600px] flex items-center justify-center">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-2xl font-bold mb-2">No Properties Found</h3>
@@ -111,7 +111,7 @@ export function SimpleSwipeContainer() {
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="w-full h-[700px] flex items-center justify-center">
+      <div className="w-full h-[600px] flex items-center justify-center">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">🎉</div>
           <h3 className="text-2xl font-bold mb-2">You've seen them all!</h3>
@@ -151,9 +151,9 @@ export function SimpleSwipeContainer() {
         </AnimatePresence>
       </div>
 
-      {/* Enhanced 3D Action Buttons - Fixed at bottom with backdrop blur */}
+      {/* Enhanced 3D Action Buttons - Fixed at bottom without backdrop blur */}
       <div className="fixed bottom-20 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto bg-gradient-to-t from-black/10 via-transparent to-transparent backdrop-blur-md pb-4 pt-8">
+        <div className="max-w-md mx-auto pb-4 pt-8">
           <div className="flex justify-center items-center gap-6 px-4">
             {/* Dislike Button - 3D Enhanced */}
             <Button

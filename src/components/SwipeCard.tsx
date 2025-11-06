@@ -150,13 +150,13 @@ export function SwipeCard({
             draggable={false}
           />
           
-          {/* Action Buttons Overlay */}
+          {/* Action Buttons Overlay - Floating without backdrop blur */}
           {isTop && (
             <div className="absolute top-4 right-4 flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-white/90 backdrop-blur-sm border-white/30 hover:bg-white"
+                className="bg-white/90 border-white/30 hover:bg-white shadow-lg"
                 onClick={handleInsightsClick}
               >
                 <Eye className="w-4 h-4" />
@@ -164,7 +164,7 @@ export function SwipeCard({
               <Button
                 size="sm"
                 variant="outline"
-                className={`backdrop-blur-sm border-white/30 ${
+                className={`border-white/30 shadow-lg ${
                   hasPremium 
                     ? 'bg-green-500/90 hover:bg-green-600 text-white' 
                     : 'bg-orange-500/90 hover:bg-orange-600 text-white'
@@ -176,11 +176,11 @@ export function SwipeCard({
             </div>
           )}
 
-          {/* Swipe Indicators */}
+          {/* Swipe Indicators - Without backdrop blur to avoid interfering with card */}
           {isTop && (
             <>
               {dragOffset.x > 50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 to-emerald-500/30 backdrop-blur-xl flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/25 to-emerald-500/25 flex items-center justify-center">
                   <div className="relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-orange-400 to-red-500" />
@@ -193,7 +193,7 @@ export function SwipeCard({
                 </div>
               )}
               {dragOffset.x < -50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-rose-500/30 backdrop-blur-xl flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/25 to-rose-500/25 flex items-center justify-center">
                   <div className="relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-gray-400 to-blue-300" />
@@ -210,23 +210,30 @@ export function SwipeCard({
         </div>
 
         {/* Content */}
-        <div className="p-4 h-2/5 flex flex-col justify-between bg-white">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+        <div className="p-4 h-2/5 flex flex-col justify-between bg-white overflow-hidden">
+          <div className="space-y-2">
+            <h3 className="text-lg font-bold text-gray-900 line-clamp-1">
               {listing.title || 'Beautiful Property'}
             </h3>
             
-            <div className="flex items-center gap-2 text-gray-600 mb-3">
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <MapPin className="w-4 h-4 flex-shrink-0" />
+              <span className="text-sm truncate">
                 {listing.neighborhood}, {listing.city}
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-3">
+            {/* Description Preview */}
+            {listing.description && (
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {listing.description}
+              </p>
+            )}
+
+            <div className="grid grid-cols-3 gap-2">
               {listing.price && (
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-xl font-bold text-green-600">
                     ${listing.price.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500">per month</div>

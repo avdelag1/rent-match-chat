@@ -145,18 +145,18 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
                 }}
             />
             
-            {/* Image Navigation */}
+            {/* Image Navigation - Floating without backdrop blur */}
             {hasMultipleImages && (
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-all shadow-lg"
                 >
                   ←
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-all shadow-lg"
                 >
                   →
                 </button>
@@ -183,12 +183,12 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
               </Badge>
             )}
 
-            {/* Quick Actions */}
+            {/* Quick Actions - Floating without backdrop blur */}
             <div className="absolute top-3 right-3 flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="w-8 h-8 p-0 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
                 onClick={onMessage}
               >
                 <MessageCircle className="w-4 h-4" />
@@ -196,7 +196,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="w-8 h-8 p-0 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
                 onClick={onTap}
               >
                 <Eye className="w-4 h-4" />
@@ -229,11 +229,18 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
               </div>
 
               <div className="flex items-center gap-1 text-white/70">
-                <MapPin className="w-3 h-3" />
-                <span className="text-sm">
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                <span className="text-sm truncate">
                   {listing.neighborhood || listing.city || listing.address || 'Location not specified'}
                 </span>
               </div>
+
+              {/* Description Preview */}
+              {listing.description && (
+                <p className="text-sm text-white/70 line-clamp-2">
+                  {listing.description}
+                </p>
+              )}
 
               <div className="flex items-center gap-4 text-white/80">
                 {listing.beds && (

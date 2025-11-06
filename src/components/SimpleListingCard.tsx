@@ -54,7 +54,7 @@ export function SimpleListingCard({ listing, onLike, onPass }: SimpleListingCard
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
       onDrag={handleDrag}
-      className="w-full h-[700px] bg-white rounded-3xl shadow-2xl overflow-hidden relative cursor-grab active:cursor-grabbing"
+      className="w-full max-w-md mx-auto h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden relative cursor-grab active:cursor-grabbing"
       whileTap={{ cursor: 'grabbing' }}
     >
       {/* Like/Pass Overlay */}
@@ -77,7 +77,7 @@ export function SimpleListingCard({ listing, onLike, onPass }: SimpleListingCard
       )}
 
       {/* Image */}
-      <div className="relative h-[500px] bg-gray-100">
+      <div className="relative h-[400px] bg-gray-100">
         {listing.images && listing.images.length > 0 ? (
           <>
             <img
@@ -125,40 +125,47 @@ export function SimpleListingCard({ listing, onLike, onPass }: SimpleListingCard
       </div>
 
       {/* Content */}
-      <div className="p-6 h-[200px] flex flex-col">
+      <div className="p-4 h-[200px] flex flex-col overflow-hidden">
         {/* Title and Price */}
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">{listing.title}</h2>
+        <div className="flex justify-between items-start mb-2 gap-2">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-bold text-gray-900 mb-1 line-clamp-1">{listing.title}</h2>
             <div className="flex items-center text-gray-600">
-              <MapPin className="w-4 h-4 mr-1" />
-              <span className="text-sm">{listing.neighborhood}, {listing.city}</span>
+              <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+              <span className="text-sm truncate">{listing.neighborhood}, {listing.city}</span>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-orange-600">${listing.price?.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">/month</div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-2xl font-bold text-orange-600">${listing.price?.toLocaleString()}</div>
+            <div className="text-xs text-gray-500">/month</div>
           </div>
         </div>
+
+        {/* Description Preview */}
+        {listing.description && (
+          <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+            {listing.description}
+          </p>
+        )}
 
         {/* Details */}
         <div className="flex gap-4 text-gray-700 mt-auto">
           {listing.beds && (
             <div className="flex items-center gap-1">
-              <Bed className="w-5 h-5" />
-              <span className="font-medium">{listing.beds}</span>
+              <Bed className="w-4 h-4" />
+              <span className="text-sm font-medium">{listing.beds}</span>
             </div>
           )}
           {listing.baths && (
             <div className="flex items-center gap-1">
-              <Bath className="w-5 h-5" />
-              <span className="font-medium">{listing.baths}</span>
+              <Bath className="w-4 h-4" />
+              <span className="text-sm font-medium">{listing.baths}</span>
             </div>
           )}
           {listing.square_footage && (
             <div className="flex items-center gap-1">
-              <Square className="w-5 h-5" />
-              <span className="font-medium">{listing.square_footage} ft²</span>
+              <Square className="w-4 h-4" />
+              <span className="text-sm font-medium">{listing.square_footage} ft²</span>
             </div>
           )}
         </div>
