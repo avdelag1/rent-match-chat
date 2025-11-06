@@ -87,6 +87,29 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
     setIsChangingPassword(true);
     try {
+      // Re-authenticate with current password for security
+      // This verifies the user knows their current password before changing it
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.email) {
+        throw new Error('User email not found');
+      }
+
+      // Verify current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast({
+          title: 'Error',
+          description: 'Current password is incorrect.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       // Update password using Supabase Auth
       const { error } = await supabase.auth.updateUser({
         password: newPassword
@@ -95,12 +118,6 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       if (error) {
         throw error;
       }
-
-      // Update last_password_change_at in security settings
-      await updateSettings({ 
-        // Note: This would require adding last_password_change_at to the schema
-        // For now we just update the password successfully
-      });
 
       toast({
         title: 'Password Updated',
