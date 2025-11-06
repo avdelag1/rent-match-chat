@@ -180,7 +180,7 @@ export function SwipeCard({
           {isTop && (
             <>
               {dragOffset.x > 50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/25 to-emerald-500/25 flex items-center justify-center">
                   <div className="relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-orange-400 to-red-500" />
@@ -193,7 +193,7 @@ export function SwipeCard({
                 </div>
               )}
               {dragOffset.x < -50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/25 to-rose-500/25 flex items-center justify-center">
                   <div className="relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-gray-400 to-blue-300" />

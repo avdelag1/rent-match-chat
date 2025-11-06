@@ -188,7 +188,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-700 hover:bg-white shadow-lg"
+                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
                 onClick={onMessage}
               >
                 <MessageCircle className="w-4 h-4" />
@@ -196,7 +196,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-700 hover:bg-white shadow-lg"
+                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
                 onClick={onTap}
               >
                 <Eye className="w-4 h-4" />
