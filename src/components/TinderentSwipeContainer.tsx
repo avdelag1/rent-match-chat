@@ -180,8 +180,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto">
-        <Card className="w-full h-[600px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto">
+        <Card className="w-full h-[450px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
           <div className="p-6 space-y-4">
             <Skeleton className="w-full h-64 rounded-lg" />
             <Skeleton className="w-3/4 h-6" />
@@ -202,7 +202,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (error) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
@@ -222,7 +222,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (listings.length === 0) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20 p-8">
           <div className="text-6xl mb-4">🏠</div>
           <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
@@ -244,7 +244,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
@@ -326,7 +326,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </AnimatePresence>
 
       {/* Single Card Container - No infinite scrolling */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '700px' }}>
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '550px' }}>
         <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div

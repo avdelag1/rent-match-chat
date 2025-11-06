@@ -160,7 +160,7 @@ export function ClientSwipeContainer({
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 750px)' }}>
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 600px)' }}>
         <div className="w-full h-full bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden">
           <div className="p-6 space-y-4">
             <Skeleton className="w-full h-[60vh] rounded-lg" />
@@ -175,7 +175,7 @@ export function ClientSwipeContainer({
   if (error) {
     console.error('ClientSwipeContainer error:', error);
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
@@ -195,7 +195,7 @@ export function ClientSwipeContainer({
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
@@ -249,7 +249,7 @@ export function ClientSwipeContainer({
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
@@ -332,7 +332,7 @@ export function ClientSwipeContainer({
       </AnimatePresence>
 
       {/* Single Card Container - No infinite scrolling */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '700px' }}>
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '550px' }}>
         <AnimatePresence mode="wait">
           {currentClient && (
             <motion.div
@@ -380,9 +380,9 @@ export function ClientSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Enhanced 3D Bottom Action Buttons - Fixed positioning with backdrop blur */}
+      {/* Enhanced 3D Bottom Action Buttons - Fixed positioning without backdrop blur */}
       <div className="fixed bottom-20 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto bg-gradient-to-t from-black/10 via-transparent to-transparent backdrop-blur-md pb-4 pt-8">
+        <div className="max-w-md mx-auto pb-4 pt-8">
           <motion.div
             className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center px-4"
             initial={{ y: 30, opacity: 0 }}
