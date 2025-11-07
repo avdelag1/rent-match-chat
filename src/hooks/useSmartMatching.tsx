@@ -248,22 +248,14 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
         const { data: listings, error } = await query.limit(50);
 
         if (error) {
-          console.error('❌ Error fetching listings:', error);
-          console.error('Error details:', JSON.stringify(error, null, 2));
+          // Only log non-RLS errors to avoid console spam
+          if (error.code !== '42501' && error.code !== 'PGRST301') {
+            console.error('[SmartMatching] Error fetching listings:', error.message);
+          }
           throw error;
         }
 
-        console.log(`📊 Fetched ${listings?.length || 0} active listings from database`);
-        if (filters) {
-          console.log('🔍 Applied filters:', JSON.stringify(filters, null, 2));
-        }
-
         if (!listings?.length) {
-          console.warn('⚠️ No active listings found');
-          console.log('💡 This may be because:');
-          console.log('   1. No listings have is_active=true');
-          console.log('   2. No listings have status=\'active\'');
-          console.log('   3. Database is empty or RLS is blocking access');
           return [];
         }
 
