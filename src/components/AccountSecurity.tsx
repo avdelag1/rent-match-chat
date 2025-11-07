@@ -49,11 +49,11 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
   // Sync local state with database settings
   useEffect(() => {
-    if (settings) {
-      setTwoFactorEnabled(settings.two_factor_enabled);
-      setLoginAlerts(settings.login_alerts);
-      setSessionTimeout(settings.session_timeout);
-      setDeviceTracking(settings.device_tracking);
+    if (settings && typeof settings === 'object' && 'two_factor_enabled' in settings) {
+      setTwoFactorEnabled(settings.two_factor_enabled ?? false);
+      setLoginAlerts(settings.login_alerts ?? true);
+      setSessionTimeout(settings.session_timeout ?? true);
+      setDeviceTracking(settings.device_tracking ?? true);
     }
   }, [settings]);
 

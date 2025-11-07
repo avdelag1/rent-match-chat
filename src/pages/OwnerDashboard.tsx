@@ -45,7 +45,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   return (
     <DashboardLayout userRole="owner">
       <PageTransition>
-        <div className="w-full h-full bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center p-4">
+        <div className="w-full h-full flex items-center justify-center">
           <ClientSwipeContainer
             onClientTap={handleProfileTap}
             onInsights={handleInsights}

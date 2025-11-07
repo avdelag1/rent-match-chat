@@ -64,12 +64,14 @@ export function PropertyManagement({ initialCategory, initialMode }: PropertyMan
   const handleAddProperty = () => {
     setEditingProperty(null);
     setShowCategoryDialog(true);
+    // Open form directly
+    setIsFormOpen(true);
   };
 
   const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
     setEditingProperty({ category, mode });
     setShowCategoryDialog(false);
-    setIsFormOpen(true);
+    // Form is already open from handleAddProperty
   };
 
   const handleEditProperty = (listing: any) => {

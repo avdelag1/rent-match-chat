@@ -8,8 +8,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
  * Authenticate user using email and password
  */
 export const authenticateUser = async (email: string, password: string) => {
-    const { user, error } = await supabase.auth.signIn({ email, password });
-    return { user, error };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    return { user: data?.user, error };
 };
 
 /**
