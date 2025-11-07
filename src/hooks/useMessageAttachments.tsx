@@ -40,24 +40,17 @@ export const useUploadAttachment = () => {
       file: File; 
       attachmentType: 'image' | 'document' | 'video';
     }) => {
-      if (!ATTACHMENTS_ENABLED) {
-        console.warn('File attachments feature is not yet available');
-        return null;
-      }
-      // Future implementation will go here
-      throw new Error('File attachments feature is pending database migration');
+      // Feature is disabled - return null gracefully
+      console.warn('File attachments feature is not yet available');
+      return null;
     },
     onSuccess: () => {
-      if (!ATTACHMENTS_ENABLED) return;
-      toast({
-        title: 'File Uploaded',
-        description: 'Your attachment has been uploaded successfully.',
-      });
+      // Don't show success toast when feature is disabled
     },
     onError: (error: Error) => {
       toast({
         title: 'Upload Failed',
-        description: 'File attachments feature is pending database migration.',
+        description: 'File attachments feature is not yet available.',
         variant: 'destructive',
       });
     },
@@ -69,24 +62,17 @@ export const useDeleteAttachment = () => {
 
   return useMutation({
     mutationFn: async (attachmentId: string) => {
-      if (!ATTACHMENTS_ENABLED) {
-        console.warn('File attachments feature is not yet available');
-        return null;
-      }
-      // Future implementation will go here
-      throw new Error('File attachments feature is pending database migration');
+      // Feature is disabled - return null gracefully
+      console.warn('File attachments feature is not yet available');
+      return null;
     },
     onSuccess: () => {
-      if (!ATTACHMENTS_ENABLED) return;
-      toast({
-        title: 'File Deleted',
-        description: 'The attachment has been removed successfully.',
-      });
+      // Don't show success toast when feature is disabled
     },
     onError: (error: Error) => {
       toast({
         title: 'Delete Failed',
-        description: 'File attachments feature is pending database migration.',
+        description: 'File attachments feature is not yet available.',
         variant: 'destructive',
       });
     },
@@ -94,10 +80,7 @@ export const useDeleteAttachment = () => {
 };
 
 export const getAttachmentUrl = async (filePath: string): Promise<string | null> => {
-  if (!ATTACHMENTS_ENABLED) {
-    console.warn('File attachments feature is not yet available');
-    return null;
-  }
-  // Future implementation will go here
-  throw new Error('File attachments feature is pending database migration');
+  // Feature is disabled - return null gracefully
+  console.warn('File attachments feature is not yet available');
+  return null;
 };
