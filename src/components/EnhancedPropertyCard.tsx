@@ -218,7 +218,13 @@ const EnhancedPropertyCardComponent = ({
         </div>
 
         {/* Bottom Content - Compact */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent">
+        <div 
+          className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTap?.();
+          }}
+        >
           <div className="flex justify-between items-end">
             {/* Left side - Title and Details */}
             <div className="flex-1 mr-4">

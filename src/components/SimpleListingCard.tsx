@@ -9,9 +9,10 @@ interface SimpleListingCardProps {
   onLike: () => void;
   onPass: () => void;
   onMessage?: () => void;
+  onTap?: () => void;
 }
 
-export function SimpleListingCard({ listing, onLike, onPass, onMessage }: SimpleListingCardProps) {
+export function SimpleListingCard({ listing, onLike, onPass, onMessage, onTap }: SimpleListingCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
 
@@ -50,6 +51,25 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage }: Simple
     }
   };
 
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const centerX = rect.width / 2;
+    const threshold = rect.width * 0.3; // 30% of width for center area
+
+    if (clickX < threshold) {
+      prevImage();
+    } else if (clickX > rect.width - threshold) {
+      nextImage();
+    } else {
+      // Tap on center area - open insights
+      if (onTap) {
+        onTap();
+      }
+    }
+  };
+
   return (
     <motion.div
       drag="x"
@@ -85,8 +105,9 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage }: Simple
             <img
               src={listing.images[currentImageIndex]}
               alt={listing.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer"
               draggable={false}
+              onClick={handleImageClick}
             />
 
             {/* Quick Actions - Message Icon in Top Right */}
@@ -142,7 +163,10 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage }: Simple
       </div>
 
       {/* Content */}
-      <div className="p-4 h-[200px] flex flex-col overflow-hidden">
+      <div 
+        className="p-4 h-[200px] flex flex-col overflow-hidden cursor-pointer"
+        onClick={() => onTap?.()}
+      >
         {/* Title and Price */}
         <div className="flex justify-between items-start mb-2 gap-2">
           <div className="flex-1 min-w-0">
