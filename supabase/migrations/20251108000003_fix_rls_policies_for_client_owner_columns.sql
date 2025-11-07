@@ -61,6 +61,7 @@ DROP POLICY IF EXISTS "Conversation participants can view typing indicators" ON 
 CREATE POLICY "Conversation participants can view typing indicators"
   ON public.typing_indicators
   FOR SELECT
+  TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM public.conversations
