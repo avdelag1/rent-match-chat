@@ -12,7 +12,7 @@ type PlanLimits = {
 // This tracks CONVERSATIONS STARTED per month, not individual messages
 // Once a conversation is started, users can send unlimited messages within it
 const PLAN_LIMITS: Record<string, PlanLimits> = {
-  'free': { messages_per_month: 5, unlimited_messages: false }, // 5 conversations can be started
+  'free': { messages_per_month: 3, unlimited_messages: false }, // 3 FREE conversations can be started
   'PREMIUM CLIENT': { messages_per_month: 10, unlimited_messages: false },
   'PREMIUM ++ CLIENT': { messages_per_month: 25, unlimited_messages: false },
   'UNLIMITED CLIENT': { messages_per_month: 0, unlimited_messages: true },
