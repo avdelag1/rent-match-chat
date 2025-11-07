@@ -8,7 +8,7 @@
 export const PG_ERROR_CODES = {
   DUPLICATE_KEY: '23505',
   FOREIGN_KEY_VIOLATION: '23503',
-  UNIQUE_VIOLATION: '23505',
+  UNIQUE_VIOLATION: '23505', // Same as DUPLICATE_KEY - different names for the same PostgreSQL error code
 } as const;
 
 export async function sleep(ms: number): Promise<void> {
@@ -20,7 +20,7 @@ export async function retryWithBackoff<T>(
   maxAttempts: number = 3,
   baseDelay: number = 300
 ): Promise<T> {
-  let lastError: Error;
+  let lastError: Error = new Error('No attempts made');
   
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -35,5 +35,5 @@ export async function retryWithBackoff<T>(
     }
   }
   
-  throw lastError!;
+  throw lastError;
 }
