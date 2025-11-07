@@ -55,14 +55,14 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage, onTap }:
     e.stopPropagation();
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const threshold = rect.width * 0.3; // 30% from each edge for navigation
+    const threshold = rect.width * 0.3; // 30% from each edge = 40% center area for insights
 
     if (clickX < threshold) {
       prevImage();
     } else if (clickX > rect.width - threshold) {
       nextImage();
     } else {
-      // Tap on center area (40%) - open insights
+      // Tap on center 40% area - open insights
       if (onTap) {
         onTap();
       }
