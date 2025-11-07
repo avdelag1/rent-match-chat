@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye } from 'lucide-react';
+import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -380,15 +380,33 @@ export function ClientSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Enhanced 3D Bottom Action Buttons - Fixed positioning without backdrop blur */}
+      {/* Enhanced 3 Button Action Bar - Return, Dislike, Like */}
       <div className="fixed bottom-20 left-0 right-0 z-50">
         <div className="max-w-md mx-auto pb-4 pt-8">
           <motion.div
-            className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center px-4"
+            className="flex justify-center gap-4 sm:gap-6 items-center px-4"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
+            {/* Return/Back Button - 3D Enhanced */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                className="relative w-16 h-16 rounded-full bg-white border-4 border-gray-500 text-gray-600 hover:bg-gradient-to-br hover:from-gray-500 hover:to-gray-600 hover:text-white hover:border-gray-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(107,114,128,0.3),0_2px_8px_rgba(107,114,128,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(107,114,128,0.4),0_4px_12px_rgba(107,114,128,0.3)] transform-gpu"
+                onClick={() => navigate(-1)}
+                disabled={false}
+                aria-label="Go back"
+                title="Return"
+              >
+                <ArrowLeft className="w-8 h-8 stroke-[3]" />
+              </Button>
+            </motion.div>
+
             {/* Dislike Button - 3D Enhanced */}
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -400,81 +418,14 @@ export function ClientSwipeContainer({
                 className="relative w-16 h-16 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] transform-gpu"
                 onClick={() => handleSwipe('left')}
                 disabled={swipeMutation.isPending || !currentClient}
-                aria-label="Pass"
+                aria-label="Dislike"
+                title="Dislike"
               >
                 <X className="w-8 h-8 stroke-[3]" />
               </Button>
             </motion.div>
 
-            {/* Insights Button */}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button
-                size="lg"
-                variant="ghost"
-                className="relative w-14 h-14 rounded-full bg-white border-4 border-blue-500 text-blue-500 hover:bg-gradient-to-br hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(59,130,246,0.3),0_2px_8px_rgba(59,130,246,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(59,130,246,0.4),0_4px_12px_rgba(59,130,246,0.3)] transform-gpu"
-                onClick={() => handleInsights(currentClient.user_id)}
-                disabled={swipeMutation.isPending || !currentClient}
-                aria-label="View insights"
-              >
-                <Eye className="w-6 h-6 stroke-[2.5]" />
-              </Button>
-            </motion.div>
-
-            {/* Undo Button - 3D Enhanced (Center) */}
-            <motion.div
-              whileHover={{ scale: canUndo ? 1.1 : 1 }}
-              whileTap={{ scale: canUndo ? 0.9 : 1 }}
-            >
-              <Button
-                size="lg"
-                variant="ghost"
-                onClick={() => {
-                  if (canUndo) {
-                    undoLastSwipe();
-                  }
-                }}
-                disabled={!canUndo || isUndoing}
-                className={`relative w-14 h-14 rounded-full transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(0,0,0,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] transform-gpu ${
-                  canUndo 
-                    ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white border-4 border-yellow-300 hover:from-yellow-500 hover:to-amber-600 hover:border-yellow-400 hover:shadow-[0_12px_24px_rgba(251,191,36,0.5),0_4px_12px_rgba(251,191,36,0.3),0_0_20px_rgba(251,191,36,0.4)] hover:scale-110' 
-                    : 'bg-gray-300 border-4 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
-                }`}
-                aria-label="Undo last swipe"
-              >
-                <motion.div
-                  animate={{ rotate: isUndoing ? 360 : 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <RotateCcw className="w-7 h-7 stroke-[3]" />
-                </motion.div>
-              </Button>
-            </motion.div>
-
-            {/* Message Button */}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button
-                size="lg"
-                variant="ghost"
-                className={`relative w-14 h-14 rounded-full border-4 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(0,0,0,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] transform-gpu ${
-                  hasPremiumMessaging 
-                    ? 'bg-gradient-to-br from-green-500 to-green-600 text-white border-green-300 hover:from-green-600 hover:to-green-700 hover:shadow-[0_12px_24px_rgba(34,197,94,0.4),0_4px_12px_rgba(34,197,94,0.3)]' 
-                    : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white border-orange-300 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_24px_rgba(249,115,22,0.4),0_4px_12px_rgba(249,115,22,0.3)]'
-                }`}
-                onClick={() => handleStartConversation(currentClient.user_id)}
-                disabled={swipeMutation.isPending || !currentClient}
-                aria-label="Send message"
-              >
-                <MessageCircle className="w-6 h-6 stroke-[2.5]" />
-              </Button>
-            </motion.div>
-            
-            {/* Like Button - 3D Enhanced (Largest) */}
+            {/* Like Button - 3D Enhanced (Largest, Center) */}
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -486,6 +437,7 @@ export function ClientSwipeContainer({
                 onClick={() => handleSwipe('right')}
                 disabled={swipeMutation.isPending || !currentClient}
                 aria-label="Like"
+                title="Like"
               >
                 <Heart className="w-10 h-10 fill-current drop-shadow-lg" />
               </Button>
