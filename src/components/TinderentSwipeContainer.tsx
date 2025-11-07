@@ -30,11 +30,6 @@ interface TinderentSwipeContainerProps {
 export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [emojiAnimation, setEmojiAnimation] = useState<{
-    show: boolean;
-    type: 'like' | 'dislike';
-    position: 'left' | 'right';
-  }>({ show: false, type: 'like', position: 'right' });
 
   // Get listings with filters applied
   const {
@@ -85,17 +80,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     
     // Trigger haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
-    
-    // Show emoji immediately for better UX
-    setEmojiAnimation({ 
-      show: true, 
-      type: direction === 'right' ? 'like' : 'dislike',
-      position: direction === 'right' ? 'right' : 'left'
-    });
-    
-    setTimeout(() => {
-      setEmojiAnimation({ show: false, type: 'like', position: 'right' });
-    }, 400);
     
     // Record swipe
     swipeMutation.mutate({
@@ -268,63 +252,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center">
-      {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
-      <AnimatePresence>
-        {emojiAnimation.show && (
-          <motion.div
-            className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{
-                scale: 0,
-                opacity: 0,
-                x: emojiAnimation.position === 'right' ? 80 : -80,
-                rotate: emojiAnimation.position === 'right' ? 15 : -15
-              }}
-              animate={{
-                scale: 2.5,
-                opacity: 1,
-                x: emojiAnimation.position === 'right' ? 40 : -40,
-                rotate: 0
-              }}
-              exit={{
-                scale: emojiAnimation.type === 'like' ? 3.5 : 1.5,
-                opacity: 0,
-                y: emojiAnimation.type === 'like' ? -250 : -100,
-                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -300 : 300),
-                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -75 : 75)
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
-                mass: 0.5
-              }}
-              style={{ willChange: 'transform, opacity' }}
-              className={`absolute ${
-                emojiAnimation.position === 'right' ? 'right-8' : 'left-8'
-              } top-1/3`}
-            >
-              <div className="relative">
-                {/* Glow effect */}
-                <div className={`absolute inset-0 blur-3xl opacity-50 ${
-                  emojiAnimation.type === 'like'
-                    ? 'bg-gradient-to-r from-orange-400 to-red-500'
-                    : 'bg-gradient-to-r from-gray-400 to-blue-300'
-                }`} />
-                {/* Emoji */}
-                <div className="relative text-[100px] drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">
-                  {emojiAnimation.type === 'like' ? '🔥' : '💨'}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Single Card Container - No infinite scrolling */}
       <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '550px' }}>
         <AnimatePresence mode="wait">
@@ -375,114 +302,81 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
 
-      {/* Bottom Action Buttons - 5 Button Layout - Always visible at bottom */}
+      {/* Bottom Action Bar - 3 Buttons with blur effect */}
       <motion.div
-        className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center z-20 px-4 mt-4"
-        initial={{ y: 30, opacity: 0 }}
+        className="fixed bottom-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-lg border-t border-gray-200/50 shadow-lg"
+        style={{
+          paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)'
+        }}
+        initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        {/* Dislike Button - Left */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
-            onClick={() => handleButtonSwipe('left')}
-            disabled={swipeMutation.isPending || !currentListing}
-            aria-label="Pass on this property"
+        <div className="flex justify-center items-center gap-6 py-4 px-4">
+          {/* Dislike Button */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
-            <X className="w-8 h-8 stroke-[2.5]" />
-          </Button>
-        </motion.div>
-
-        {/* Insights Button */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="w-14 h-14 rounded-full bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:border-blue-600 transition-all duration-300 shadow-lg p-0"
-            onClick={() => currentListing && handleInsights(currentListing.id)}
-            disabled={swipeMutation.isPending || !currentListing}
-            aria-label="View insights"
-          >
-            <Eye className="w-6 h-6 stroke-[2.5]" />
-          </Button>
-        </motion.div>
-
-        {/* Undo Button - Center */}
-        <motion.div
-          whileHover={{ scale: canUndo ? 1.1 : 1 }}
-          whileTap={{ scale: canUndo ? 0.9 : 1 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            onClick={() => {
-              if (canUndo) {
-                undoLastSwipe();
-              }
-            }}
-            disabled={!canUndo || isUndoing}
-            className={`w-16 h-16 rounded-full transition-all duration-300 shadow-lg p-0 ${
-              canUndo 
-                ? 'bg-white border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:shadow-xl hover:shadow-yellow-500/20' 
-                : 'bg-gray-200 border-2 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
-            }`}
-            aria-label="Undo last swipe"
-          >
-            <motion.div
-              animate={{ rotate: isUndoing ? 360 : 0 }}
-              transition={{ duration: 0.6 }}
+            <Button
+              size="lg"
+              variant="ghost"
+              className="w-16 h-16 rounded-full bg-white border-2 border-rose-500 text-rose-500 hover:bg-rose-50 hover:border-rose-600 transition-all duration-300 shadow-xl hover:shadow-rose-500/20 p-0"
+              onClick={() => handleButtonSwipe('left')}
+              disabled={swipeMutation.isPending || !currentListing}
+              aria-label="Dislike this property"
             >
-              <RotateCcw className="w-7 h-7 stroke-[2.5]" />
-            </motion.div>
-          </Button>
-        </motion.div>
+              <X className="w-8 h-8 stroke-[2.5]" />
+            </Button>
+          </motion.div>
 
-        {/* Message Button */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className={`w-14 h-14 rounded-full border-2 transition-all duration-300 shadow-lg p-0 ${
-              hasPremiumMessaging 
-                ? 'bg-green-500 border-green-600 text-white hover:bg-green-600' 
-                : 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600'
-            }`}
-            onClick={handleMessage}
-            disabled={swipeMutation.isPending || !currentListing}
-            aria-label="Send message"
+          {/* Return/Undo Button */}
+          <motion.div
+            whileHover={{ scale: canUndo ? 1.1 : 1 }}
+            whileTap={{ scale: canUndo ? 0.9 : 1 }}
           >
-            <MessageCircle className="w-6 h-6 stroke-[2.5]" />
-          </Button>
-        </motion.div>
-        
-        {/* Like Button - Right */}
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
-            onClick={() => handleButtonSwipe('right')}
-            disabled={swipeMutation.isPending || !currentListing}
-            aria-label="Like this property"
+            <Button
+              size="lg"
+              variant="ghost"
+              onClick={() => {
+                if (canUndo) {
+                  undoLastSwipe();
+                }
+              }}
+              disabled={!canUndo || isUndoing}
+              className={`w-14 h-14 rounded-full transition-all duration-300 shadow-lg p-0 ${
+                canUndo 
+                  ? 'bg-white border-2 border-gray-400 text-gray-600 hover:bg-gray-50 hover:shadow-xl' 
+                  : 'bg-gray-200 border-2 border-gray-300 text-gray-400 cursor-not-allowed opacity-60'
+              }`}
+              aria-label="Undo last swipe"
+            >
+              <motion.div
+                animate={{ rotate: isUndoing ? 360 : 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <RotateCcw className="w-6 h-6 stroke-[2.5]" />
+              </motion.div>
+            </Button>
+          </motion.div>
+
+          {/* Like Button */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
-            <Flame className="w-11 h-11 fill-white stroke-white" />
-          </Button>
-        </motion.div>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white transition-all duration-300 shadow-xl hover:shadow-emerald-500/30 p-0 border-0"
+              onClick={() => handleButtonSwipe('right')}
+              disabled={swipeMutation.isPending || !currentListing}
+              aria-label="Like this property"
+            >
+              <Flame className="w-8 h-8 fill-white stroke-white" />
+            </Button>
+          </motion.div>
+        </div>
       </motion.div>
     </div>
   );
