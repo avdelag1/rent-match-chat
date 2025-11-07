@@ -28,7 +28,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, className }: Top
             <Flame className="h-5 w-5 text-white" />
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-            TindeRent
+            TINDERENT
           </span>
         </div>
 
