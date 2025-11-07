@@ -437,7 +437,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <Button
             size="lg"
             variant="ghost"
-            onClick={() => canUndo && undoLastSwipe()}
+            onClick={() => {
+              if (canUndo) {
+                undoLastSwipe();
+              }
+            }}
             disabled={!canUndo || isUndoing}
             className={`w-16 h-16 rounded-full transition-all duration-300 shadow-lg p-0 ${
               canUndo 
