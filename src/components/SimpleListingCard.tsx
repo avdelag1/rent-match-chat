@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { motion, PanInfo } from 'framer-motion';
-import { MapPin, Bed, Bath, Square, Heart, X } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, X, MessageCircle } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
+import { Button } from '@/components/ui/button';
 
 interface SimpleListingCardProps {
   listing: Listing;
   onLike: () => void;
   onPass: () => void;
+  onMessage?: () => void;
+  onTap?: () => void;
 }
 
-export function SimpleListingCard({ listing, onLike, onPass }: SimpleListingCardProps) {
+export function SimpleListingCard({ listing, onLike, onPass, onMessage, onTap }: SimpleListingCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
 
@@ -48,6 +51,24 @@ export function SimpleListingCard({ listing, onLike, onPass }: SimpleListingCard
     }
   };
 
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const threshold = rect.width * 0.3; // 30% from each edge = 40% center area for insights
+
+    if (clickX < threshold) {
+      prevImage();
+    } else if (clickX > rect.width - threshold) {
+      nextImage();
+    } else {
+      // Tap on center 40% area - open insights
+      if (onTap) {
+        onTap();
+      }
+    }
+  };
+
   return (
     <motion.div
       drag="x"
@@ -83,9 +104,25 @@ export function SimpleListingCard({ listing, onLike, onPass }: SimpleListingCard
             <img
               src={listing.images[currentImageIndex]}
               alt={listing.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer"
               draggable={false}
+              onClick={handleImageClick}
             />
+
+            {/* Quick Actions - Message Icon in Top Right */}
+            <div className="absolute top-3 right-3 flex gap-2 z-20">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMessage?.();
+                }}
+              >
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+            </div>
 
             {/* Image Navigation */}
             {listing.images.length > 1 && (
@@ -125,7 +162,10 @@ export function SimpleListingCard({ listing, onLike, onPass }: SimpleListingCard
       </div>
 
       {/* Content */}
-      <div className="p-4 h-[200px] flex flex-col overflow-hidden">
+      <div 
+        className="p-4 h-[200px] flex flex-col overflow-hidden cursor-pointer"
+        onClick={() => onTap?.()}
+      >
         {/* Title and Price */}
         <div className="flex justify-between items-start mb-2 gap-2">
           <div className="flex-1 min-w-0">

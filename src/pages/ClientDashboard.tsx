@@ -1,34 +1,49 @@
+import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { CategoryBrowseContainer } from '@/components/CategoryBrowseContainer';
-import { ListingFilters } from '@/hooks/useSmartMatching';
+import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
+import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
+import { PageTransition } from '@/components/PageTransition';
+import { useListings } from '@/hooks/useListings';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
-  filters?: ListingFilters;
 }
 
-const ClientDashboard = ({ onPropertyInsights, onMessageClick, filters }: ClientDashboardProps) => {
+const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+  const { data: listings = [] } = useListings([]);
+
+  const handleListingTap = (listingId: string) => {
+    setSelectedListingId(listingId);
+    setInsightsOpen(true);
+    if (onPropertyInsights) {
+      onPropertyInsights(listingId);
+    }
+  };
+
+  const selectedListing = listings.find(l => l.id === selectedListingId) || null;
+
   return (
     <DashboardLayout userRole="client">
-      <div className="w-full min-h-screen bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center p-4 py-8">
-        <CategoryBrowseContainer
-          onListingTap={(listingId) => {
-            console.log('Listing tapped:', listingId);
-            if (onPropertyInsights) {
-              onPropertyInsights(listingId);
-            }
-          }}
-          onInsights={(listingId) => {
-            console.log('Insights requested:', listingId);
-            if (onPropertyInsights) {
-              onPropertyInsights(listingId);
-            }
-          }}
-          onMessageClick={onMessageClick}
-          filters={filters}
+      <PageTransition>
+        <div className="w-full min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl">
+            <TinderentSwipeContainer
+              onListingTap={handleListingTap}
+              onInsights={handleListingTap}
+              onMessageClick={onMessageClick}
+            />
+          </div>
+        </div>
+
+        <PropertyInsightsDialog
+          open={insightsOpen}
+          onOpenChange={setInsightsOpen}
+          listing={selectedListing}
         />
-      </div>
+      </PageTransition>
     </DashboardLayout>
   );
 };
