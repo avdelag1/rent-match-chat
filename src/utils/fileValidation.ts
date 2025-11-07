@@ -18,6 +18,7 @@ export const ALLOWED_MIME_TYPES = {
     'image/jpg',
     'image/png',
     'image/webp',
+    'image/gif',
   ],
   DOCUMENTS: [
     'application/pdf',
@@ -32,7 +33,7 @@ export const ALLOWED_MIME_TYPES = {
 
 // Allowed file extensions
 export const ALLOWED_EXTENSIONS = {
-  IMAGES: ['.jpg', '.jpeg', '.png', '.webp'],
+  IMAGES: ['.jpg', '.jpeg', '.png', '.webp', '.gif'],
   DOCUMENTS: ['.pdf', '.jpg', '.jpeg', '.png', '.webp', '.doc', '.docx'],
 } as const;
 
@@ -62,7 +63,7 @@ export function validateImageFile(file: File): FileValidationResult {
   if (!ALLOWED_MIME_TYPES.IMAGES.includes(file.type as any)) {
     return {
       isValid: false,
-      error: `Invalid file type. Only JPG, PNG, and WebP images are allowed.`,
+      error: `Invalid file type. Only JPG, PNG, WebP, and GIF images are allowed.`,
     };
   }
 

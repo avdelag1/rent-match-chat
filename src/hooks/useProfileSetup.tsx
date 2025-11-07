@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
+import { retryWithBackoff } from '@/utils/retryUtils';
 
 interface CreateProfileData {
   id: string;

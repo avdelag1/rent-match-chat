@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { PG_ERROR_CODES } from '@/utils/retryUtils';
 
 interface SwipeWithMatchOptions {
   onMatch?: (clientProfile: any, ownerProfile: any) => void;
