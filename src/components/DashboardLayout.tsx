@@ -151,7 +151,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }
 
   const handleListingsClick = () => {
-    setShowCategoryDialog(true)
+    navigate('/owner/properties');
   }
 
   const handleNotificationsClick = () => {
