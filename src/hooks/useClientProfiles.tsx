@@ -24,16 +24,10 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
     queryKey: ['client-profiles', user?.id, excludeSwipedIds],
     queryFn: async (): Promise<ClientProfile[]> => {
       if (!user) {
-        console.log('No authenticated user');
         return [];
       }
 
       try {
-        console.log('useClientProfiles: Fetching client profiles for owner:', user.id, {
-          timestamp: new Date().toISOString(),
-          excludedCount: excludeSwipedIds.length
-        });
-
         // OPTIMIZED: Get client profiles with role in ONE query using JOIN
         const { data: clientProfiles, error } = await supabase
           .from('profiles_public')
@@ -45,19 +39,10 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           .limit(100);
 
         if (error) {
-          console.error('useClientProfiles: Supabase error:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          });
           throw error; // Don't silently fail
         }
 
-        console.log('useClientProfiles: Successfully fetched', clientProfiles?.length || 0, 'client profiles');
-
         if (clientProfiles.length === 0) {
-          console.log('No client profiles found');
           return [];
         }
 
@@ -95,9 +80,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
           };
         });
 
-        console.log('Transformed profiles with latest photos:', transformedProfiles);
         const filteredProfiles = transformedProfiles.filter(p => !excludeSwipedIds.includes(p.user_id));
-        console.log('Final filtered profiles:', filteredProfiles);
 
         return filteredProfiles;
 
