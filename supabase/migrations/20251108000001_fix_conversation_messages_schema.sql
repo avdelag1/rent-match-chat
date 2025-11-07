@@ -61,6 +61,8 @@ END $$;
 -- Create a trigger to auto-populate receiver_id if not provided
 CREATE OR REPLACE FUNCTION auto_populate_receiver_id()
 RETURNS TRIGGER AS $$
+DECLARE
+  v_receiver_id UUID;
 BEGIN
   -- Only auto-populate if receiver_id is NULL
   IF NEW.receiver_id IS NULL THEN
@@ -69,9 +71,18 @@ BEGIN
       WHEN c.client_id = NEW.sender_id THEN c.owner_id
       WHEN c.owner_id = NEW.sender_id THEN c.client_id
       ELSE NULL
-    END INTO NEW.receiver_id
+    END INTO v_receiver_id
     FROM public.conversations c
     WHERE c.id = NEW.conversation_id;
+
+    -- If we couldn't find a receiver (conversation doesn't exist or sender not in conversation)
+    -- raise an error to prevent silent failures
+    IF v_receiver_id IS NULL THEN
+      RAISE EXCEPTION 'Cannot determine receiver_id: sender % is not a participant in conversation %', 
+        NEW.sender_id, NEW.conversation_id;
+    END IF;
+    
+    NEW.receiver_id := v_receiver_id;
   END IF;
   
   RETURN NEW;

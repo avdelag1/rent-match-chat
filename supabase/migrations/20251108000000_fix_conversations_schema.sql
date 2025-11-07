@@ -38,18 +38,35 @@ BEGIN
       client_id = CASE 
         WHEN ur1.role = 'client' THEN c.participant_1_id
         WHEN ur2.role = 'client' THEN c.participant_2_id
-        ELSE c.participant_1_id -- fallback
+        ELSE c.participant_1_id -- fallback to p1 if no client role found
       END,
       owner_id = CASE 
         WHEN ur1.role = 'owner' THEN c.participant_1_id
         WHEN ur2.role = 'owner' THEN c.participant_2_id
-        ELSE c.participant_2_id -- fallback
+        ELSE c.participant_2_id -- fallback to p2 if no owner role found
       END
     FROM public.user_roles ur1
-    LEFT JOIN public.user_roles ur2 ON ur2.user_id = c.participant_2_id
+    INNER JOIN public.user_roles ur2 ON ur2.user_id = c.participant_2_id
     WHERE ur1.user_id = c.participant_1_id
       AND c.client_id IS NULL 
-      AND c.owner_id IS NULL;
+      AND c.owner_id IS NULL
+      AND (ur1.role = 'client' OR ur1.role = 'owner')
+      AND (ur2.role = 'client' OR ur2.role = 'owner')
+      AND ur1.role != ur2.role; -- Ensure they have different roles
+
+    -- Handle edge case: both participants have same role (shouldn't happen but defensive)
+    -- In this case, assign based on position
+    UPDATE public.conversations c
+    SET 
+      client_id = participant_1_id,
+      owner_id = participant_2_id
+    WHERE (client_id IS NULL OR owner_id IS NULL)
+      AND EXISTS (
+        SELECT 1 FROM public.user_roles ur1 
+        INNER JOIN public.user_roles ur2 ON ur2.user_id = c.participant_2_id
+        WHERE ur1.user_id = c.participant_1_id
+          AND ur1.role = ur2.role
+      );
 
     -- For any remaining conversations without proper role mapping, make a best guess
     UPDATE public.conversations
@@ -63,10 +80,8 @@ BEGIN
       ALTER COLUMN client_id SET NOT NULL,
       ALTER COLUMN owner_id SET NOT NULL;
 
-    -- Drop the old participant columns (after ensuring data is migrated)
-    -- Uncomment these lines after verifying migration worked:
-    -- ALTER TABLE public.conversations DROP COLUMN IF EXISTS participant_1_id;
-    -- ALTER TABLE public.conversations DROP COLUMN IF EXISTS participant_2_id;
+    -- Note: The old participant_1_id and participant_2_id columns are kept for safety
+    -- Run migration 20251108000002_cleanup_old_participant_columns.sql after verification
 
     -- Update RLS policies to use new columns
     DROP POLICY IF EXISTS "Users can view their own conversations" ON public.conversations;

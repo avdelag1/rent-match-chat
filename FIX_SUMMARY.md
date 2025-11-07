@@ -74,6 +74,9 @@ This PR fixes critical issues preventing the app from functioning properly:
 ```
 supabase/migrations/20251108000000_fix_conversations_schema.sql
 supabase/migrations/20251108000001_fix_conversation_messages_schema.sql
+
+# Optional cleanup (run AFTER verifying everything works):
+supabase/migrations/20251108000002_cleanup_old_participant_columns.sql
 ```
 
 ### Frontend Code
@@ -158,8 +161,10 @@ The migrations are designed to be safe and idempotent:
 
 - ✅ Check for existing columns before altering
 - ✅ Preserve existing data during migration
-- ✅ Use transactions where appropriate
-- ✅ Don't drop old columns immediately (commented out for safety)
+- ✅ Handle edge cases (same-role participants)
+- ✅ Validate data before dropping old columns
+- ✅ Error handling in triggers to prevent silent failures
+- ✅ Old columns kept until cleanup migration is manually run
 - ✅ Graceful handling of edge cases
 
 ## Rollback Plan
@@ -186,11 +191,11 @@ If issues occur after deployment:
 
 ## Next Steps
 
-1. Apply migrations to database
+1. Apply migrations to database (in order: 000000, 000001)
 2. Deploy frontend code  
-3. Test all functionality
+3. Test all functionality thoroughly
 4. Monitor for any issues
-5. Consider cleanup migration to drop old participant columns (after confirming everything works)
+5. After 24-48 hours of successful operation, run cleanup migration (000002) to drop old columns
 
 ---
 
