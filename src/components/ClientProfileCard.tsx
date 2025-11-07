@@ -236,15 +236,15 @@ const ClientProfileCardComponent = ({
         </div>
 
         {/* Age Badge - moved down to avoid overlap */}
-        <Badge className="absolute top-14 right-4 bg-black/50 text-white border-none px-3 py-1">
+        <Badge className="absolute top-14 right-4 bg-black/60 backdrop-blur-sm text-white border-none px-3 py-1.5 text-base font-semibold shadow-lg">
           {profile.age}
         </Badge>
         
         {/* Location */}
         {profile.location && (
-          <div className="absolute top-4 left-4 flex items-center gap-1 bg-black/50 rounded-full px-3 py-1">
+          <div className="absolute top-4 left-4 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
             <MapPin className="w-4 h-4 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
-            <span className="text-white text-sm">
+            <span className="text-white text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {profile.location.city}
             </span>
           </div>
@@ -262,7 +262,7 @@ const ClientProfileCardComponent = ({
         <div className="space-y-2">
           {/* Name */}
           <div>
-            <h3 className="text-2xl font-bold text-foreground mb-2">{profile.name}</h3>
+            <h3 className="text-2xl font-bold text-foreground mb-2 drop-shadow-sm">{profile.name}</h3>
           </div>
           
           {/* Profile Tags with Defaults */}
@@ -289,7 +289,7 @@ const ClientProfileCardComponent = ({
                   }
                   
                   return (
-                    <Badge key={index} variant="outline" className={badgeClass}>
+                    <Badge key={index} variant="outline" className={`${badgeClass} font-medium`}>
                       {tag}
                     </Badge>
                   );
