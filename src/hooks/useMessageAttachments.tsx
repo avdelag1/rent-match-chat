@@ -61,7 +61,7 @@ export const useDeleteAttachment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (attachmentId: string) => {
+    mutationFn: async (_attachmentId: string) => {
       // Feature is disabled - return null gracefully
       console.warn('File attachments feature is not yet available');
       return null;
@@ -79,7 +79,7 @@ export const useDeleteAttachment = () => {
   });
 };
 
-export const getAttachmentUrl = async (filePath: string): Promise<string | null> => {
+export const getAttachmentUrl = async (_filePath: string): Promise<string | null> => {
   // Feature is disabled - return null gracefully
   console.warn('File attachments feature is not yet available');
   return null;
