@@ -16,6 +16,7 @@ import { YachtListingForm, YachtFormData } from './YachtListingForm';
 import { MotorcycleListingForm, MotorcycleFormData } from './MotorcycleListingForm';
 import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
 import { PropertyListingForm } from './PropertyListingForm';
+import { validateImageFile } from '@/utils/fileValidation';
 
 interface UnifiedListingFormProps {
   isOpen: boolean;
@@ -303,10 +304,12 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        if (file.size > 10 * 1024 * 1024) {
+        // Use centralized validation
+        const validation = validateImageFile(file);
+        if (!validation.isValid) {
           toast({
-            title: "File Too Large",
-            description: `${file.name} exceeds 10MB limit.`,
+            title: "Invalid File",
+            description: `${file.name}: ${validation.error}`,
             variant: "destructive"
           });
           continue;
