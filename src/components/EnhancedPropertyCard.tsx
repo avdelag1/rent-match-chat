@@ -229,7 +229,7 @@ const EnhancedPropertyCardComponent = ({
             {/* Left side - Title and Details */}
             <div className="flex-1 mr-4">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-2xl font-bold text-foreground">
+                <h3 className="text-2xl font-bold text-gray-900">
                   {listing.title}
                 </h3>
                 {(listing as any).has_verified_documents && (
@@ -245,12 +245,12 @@ const EnhancedPropertyCardComponent = ({
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center text-muted-foreground text-sm mb-2">
+              <div className="flex items-center text-gray-600 text-sm mb-2">
                 <MapPin className="w-4 h-4 mr-1" />
                 <span>{listing.neighborhood}, {listing.city}</span>
               </div>
               {/* Property details */}
-              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-4 text-sm text-gray-600">
                 {listing.beds && (
                   <div className="flex items-center">
                     <Bed className="w-4 h-4 mr-1" />
@@ -274,10 +274,10 @@ const EnhancedPropertyCardComponent = ({
             
             {/* Right side - Price */}
             <div className="text-right">
-              <div className="text-3xl font-bold text-primary">
+              <div className="text-3xl font-bold text-orange-600">
                 ${listing.price?.toLocaleString()}
               </div>
-              <div className="text-sm text-muted-foreground">/month</div>
+              <div className="text-sm text-gray-600">/month</div>
             </div>
           </div>
         </div>
