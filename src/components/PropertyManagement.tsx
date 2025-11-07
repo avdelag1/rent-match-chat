@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ interface PropertyManagementProps {
   initialMode?: string | null;
 }
 
-export function PropertyManagement({ initialCategory, initialMode }: PropertyManagementProps) {
+export const PropertyManagement = memo(({ initialCategory, initialMode }: PropertyManagementProps) => {
   const { user } = useAuth();
   const { data: listings = [], isLoading, error } = useOwnerListings();
   const [searchTerm, setSearchTerm] = useState('');
@@ -464,4 +464,4 @@ export function PropertyManagement({ initialCategory, initialMode }: PropertyMan
       </div>
     </div>
   );
-}
+});

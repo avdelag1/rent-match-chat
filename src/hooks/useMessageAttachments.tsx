@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+// Feature flag for attachments
+const ATTACHMENTS_ENABLED = false;
+
 export interface MessageAttachment {
   id: string;
   message_id: string;
@@ -37,15 +40,21 @@ export const useUploadAttachment = () => {
       file: File; 
       attachmentType: 'image' | 'document' | 'video';
     }) => {
+      if (!ATTACHMENTS_ENABLED) {
+        console.warn('File attachments feature is not yet available');
+        return null;
+      }
+      // Future implementation will go here
       throw new Error('File attachments feature is pending database migration');
     },
     onSuccess: () => {
+      if (!ATTACHMENTS_ENABLED) return;
       toast({
         title: 'File Uploaded',
         description: 'Your attachment has been uploaded successfully.',
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: 'Upload Failed',
         description: 'File attachments feature is pending database migration.',
@@ -60,15 +69,21 @@ export const useDeleteAttachment = () => {
 
   return useMutation({
     mutationFn: async (attachmentId: string) => {
+      if (!ATTACHMENTS_ENABLED) {
+        console.warn('File attachments feature is not yet available');
+        return null;
+      }
+      // Future implementation will go here
       throw new Error('File attachments feature is pending database migration');
     },
     onSuccess: () => {
+      if (!ATTACHMENTS_ENABLED) return;
       toast({
         title: 'File Deleted',
         description: 'The attachment has been removed successfully.',
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: 'Delete Failed',
         description: 'File attachments feature is pending database migration.',
@@ -78,6 +93,11 @@ export const useDeleteAttachment = () => {
   });
 };
 
-export const getAttachmentUrl = async (filePath: string): Promise<string> => {
+export const getAttachmentUrl = async (filePath: string): Promise<string | null> => {
+  if (!ATTACHMENTS_ENABLED) {
+    console.warn('File attachments feature is not yet available');
+    return null;
+  }
+  // Future implementation will go here
   throw new Error('File attachments feature is pending database migration');
 };

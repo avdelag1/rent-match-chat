@@ -74,8 +74,6 @@ export function useProfileSetup() {
       let lastProfileError = null;
       
       for (let attempt = 1; attempt <= 3; attempt++) {
-        console.log(`[ProfileSetup] Profile creation attempt ${attempt}/3 for user:`, user.id);
-        
         const profileData: CreateProfileData = {
           id: user.id,
           full_name: user.user_metadata?.name || user.user_metadata?.full_name || '',
@@ -98,7 +96,6 @@ export function useProfileSetup() {
 
         if (!error) {
           newProfile = data;
-          console.log('[ProfileSetup] Profile created successfully on attempt', attempt);
           break;
         }
 
@@ -137,8 +134,6 @@ export function useProfileSetup() {
       let lastRoleError = null;
       
       for (let attempt = 1; attempt <= 3; attempt++) {
-        console.log(`[ProfileSetup] Role creation attempt ${attempt}/3 for user:`, user.id);
-        
         const { error: roleError } = await supabase.rpc('upsert_user_role', {
           p_user_id: user.id,
           p_role: role
@@ -146,7 +141,6 @@ export function useProfileSetup() {
 
         if (!roleError) {
           roleCreated = true;
-          console.log('[ProfileSetup] Role created successfully on attempt', attempt);
           break;
         }
 
@@ -172,15 +166,12 @@ export function useProfileSetup() {
         });
         return null;
       }
-
-      console.log('[ProfileSetup] Profile and role created successfully');
       
       // Invalidate role cache now that role is fully created
       queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
       
       // Add small delay to ensure cache invalidation propagates
       await new Promise(resolve => setTimeout(resolve, 150));
-      console.log('[ProfileSetup] Setup complete');
       
       return newProfile;
 
