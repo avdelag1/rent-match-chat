@@ -42,10 +42,45 @@ BEGIN
 
     RAISE NOTICE 'Added message_type column';
   END IF;
+
+  -- Make receiver_id nullable since we can derive it from the conversation
+  -- In a 1-on-1 conversation, receiver is the other participant
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'conversation_messages' 
+    AND column_name = 'receiver_id' 
+    AND is_nullable = 'NO'
+  ) THEN
+    ALTER TABLE public.conversation_messages 
+      ALTER COLUMN receiver_id DROP NOT NULL;
+
+    RAISE NOTICE 'Made receiver_id nullable';
+  END IF;
 END $$;
 
--- Ensure receiver_id can be nullable (in group chats or broadcasts)
--- Actually for 1-on-1 it should stay NOT NULL, so let's keep it as is
+-- Create a trigger to auto-populate receiver_id if not provided
+CREATE OR REPLACE FUNCTION auto_populate_receiver_id()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Only auto-populate if receiver_id is NULL
+  IF NEW.receiver_id IS NULL THEN
+    -- Get the other participant from the conversation
+    SELECT CASE 
+      WHEN c.client_id = NEW.sender_id THEN c.owner_id
+      WHEN c.owner_id = NEW.sender_id THEN c.client_id
+      ELSE NULL
+    END INTO NEW.receiver_id
+    FROM public.conversations c
+    WHERE c.id = NEW.conversation_id;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Update RLS policies if needed (they should already be correct)
--- The existing policies check sender_id OR receiver_id which is correct
+-- Drop trigger if it exists and recreate
+DROP TRIGGER IF EXISTS trigger_auto_populate_receiver_id ON public.conversation_messages;
+CREATE TRIGGER trigger_auto_populate_receiver_id
+  BEFORE INSERT ON public.conversation_messages
+  FOR EACH ROW
+  EXECUTE FUNCTION auto_populate_receiver_id();
