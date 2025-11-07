@@ -1,12 +1,17 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Sparkles, Zap } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessageCircle, Sparkles, Zap, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { formatPriceMXN } from "@/utils/subscriptionPricing";
+import { useSubscriptionPackages } from "@/hooks/useSubscription";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 type MessagePackage = {
-  id: string;
+  id: number;
   name: string;
   activations: number;
   price: number;
@@ -14,60 +19,110 @@ type MessagePackage = {
   savings?: string;
   highlight?: boolean;
   icon: typeof MessageCircle;
+  duration_days?: number;
+  package_category: string;
 };
-
-const MESSAGE_PACKAGES: MessagePackage[] = [
-  {
-    id: "msg_10",
-    name: "Starter Pack",
-    activations: 10,
-    price: 199,
-    pricePerActivation: 19.9,
-    icon: MessageCircle,
-  },
-  {
-    id: "msg_25",
-    name: "Popular Choice",
-    activations: 25,
-    price: 449,
-    pricePerActivation: 17.96,
-    savings: "10% OFF",
-    highlight: true,
-    icon: Zap,
-  },
-  {
-    id: "msg_50",
-    name: "Best Value",
-    activations: 50,
-    price: 799,
-    pricePerActivation: 15.98,
-    savings: "20% OFF",
-    icon: Sparkles,
-  },
-  {
-    id: "msg_100",
-    name: "Ultimate Pack",
-    activations: 100,
-    price: 1399,
-    pricePerActivation: 13.99,
-    savings: "30% OFF",
-    icon: Sparkles,
-  },
-];
 
 interface MessageActivationPackagesProps {
   isOpen?: boolean;
   onClose?: () => void;
   showAsPage?: boolean;
+  userRole?: 'client' | 'owner';
 }
 
 export function MessageActivationPackages({ 
   isOpen = true, 
   onClose,
-  showAsPage = false 
+  showAsPage = false,
+  userRole
 }: MessageActivationPackagesProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Fetch user's role from profile if not provided
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id && !userRole,
+  });
+
+  const currentUserRole = userRole || userProfile?.role || 'client';
+
+  // Fetch pay-per-use packages from database
+  const { data: clientPackages, isLoading: isLoadingClient } = useQuery({
+    queryKey: ['activation-packages', 'client_pay_per_use'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('subscription_packages')
+        .select('*')
+        .eq('package_category', 'client_pay_per_use')
+        .eq('is_active', true)
+        .order('message_activations', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: ownerPackages, isLoading: isLoadingOwner } = useQuery({
+    queryKey: ['activation-packages', 'owner_pay_per_use'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('subscription_packages')
+        .select('*')
+        .eq('package_category', 'owner_pay_per_use')
+        .eq('is_active', true)
+        .order('message_activations', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Convert database packages to UI format
+  const convertPackages = (dbPackages: any[] | undefined): MessagePackage[] => {
+    if (!dbPackages) return [];
+    
+    return dbPackages.map((pkg, index) => {
+      const pricePerActivation = pkg.message_activations > 0 
+        ? pkg.price / pkg.message_activations 
+        : 0;
+      
+      // Highlight the middle option (usually best value)
+      const highlight = dbPackages.length === 3 && index === 1;
+      
+      // Calculate savings vs first package
+      let savings: string | undefined;
+      if (index > 0 && dbPackages[0]) {
+        const firstPricePerActivation = dbPackages[0].price / dbPackages[0].message_activations;
+        const savingsPercent = Math.round(((firstPricePerActivation - pricePerActivation) / firstPricePerActivation) * 100);
+        if (savingsPercent > 0) {
+          savings = `${savingsPercent}% OFF`;
+        }
+      }
+
+      return {
+        id: pkg.id,
+        name: pkg.name,
+        activations: pkg.message_activations,
+        price: pkg.price,
+        pricePerActivation,
+        savings,
+        highlight,
+        icon: highlight ? Zap : (index === 0 ? MessageCircle : Sparkles),
+        duration_days: pkg.duration_days,
+        package_category: pkg.package_category,
+      };
+    });
+  };
 
   const handlePurchase = (pkg: MessagePackage) => {
     // TODO: Integrate with actual payment system (PayPal/Stripe)
@@ -81,11 +136,84 @@ export function MessageActivationPackages({
       packageId: pkg.id,
       activations: pkg.activations,
       price: pkg.price,
+      package_category: pkg.package_category,
     }));
     
     // Placeholder: In production, redirect to payment gateway
     console.log('Payment integration needed:', pkg);
   };
+
+  const renderPackages = (packages: MessagePackage[], roleLabel: string) => (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {packages.map((pkg) => {
+        const Icon = pkg.icon;
+        return (
+          <Card 
+            key={pkg.id}
+            className={`relative transition-all hover:shadow-lg ${
+              pkg.highlight 
+                ? 'border-accent shadow-accent/20 ring-2 ring-accent/50' 
+                : 'hover:border-accent/50'
+            }`}
+          >
+            {pkg.savings && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">
+                {pkg.savings}
+              </div>
+            )}
+            
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-2 p-3 rounded-full bg-accent/10 w-fit">
+                <Icon className="w-6 h-6 text-accent" />
+              </div>
+              <CardTitle className="text-xl">{pkg.name}</CardTitle>
+              <CardDescription className="text-2xl font-bold text-foreground mt-2">
+                {formatPriceMXN(pkg.price)}
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-accent">{pkg.activations}</div>
+                <div className="text-sm text-muted-foreground">Message Activations</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {formatPriceMXN(pkg.pricePerActivation)} per activation
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-accent" />
+                  <span>Start {pkg.activations} new conversations</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-accent" />
+                  <span>Unlimited messages per conversation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-accent" />
+                  <span>{pkg.duration_days || 90}-day validity</span>
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter>
+              <Button 
+                onClick={() => handlePurchase(pkg)}
+                className="w-full"
+                variant={pkg.highlight ? "default" : "outline"}
+              >
+                Buy Now
+              </Button>
+            </CardFooter>
+          </Card>
+        );
+      })}
+    </div>
+  );
+
+  const clientPackagesUI = convertPackages(clientPackages);
+  const ownerPackagesUI = convertPackages(ownerPackages);
 
   const content = (
     <div className="space-y-6 p-6">
@@ -96,79 +224,49 @@ export function MessageActivationPackages({
         </p>
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-lg border border-accent/20">
           <Sparkles className="w-4 h-4 text-accent" />
-          <span className="text-sm font-medium">New users get 5 FREE activations!</span>
+          <span className="text-sm font-medium">New users get 3 FREE activations!</span>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {MESSAGE_PACKAGES.map((pkg) => {
-          const Icon = pkg.icon;
-          return (
-            <Card 
-              key={pkg.id}
-              className={`relative transition-all hover:shadow-lg ${
-                pkg.highlight 
-                  ? 'border-accent shadow-accent/20 ring-2 ring-accent/50' 
-                  : 'hover:border-accent/50'
-              }`}
-            >
-              {pkg.savings && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">
-                  {pkg.savings}
-                </div>
-              )}
-              
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-2 p-3 rounded-full bg-accent/10 w-fit">
-                  <Icon className="w-6 h-6 text-accent" />
-                </div>
-                <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                <CardDescription className="text-2xl font-bold text-foreground mt-2">
-                  {formatPriceMXN(pkg.price)}
-                </CardDescription>
-              </CardHeader>
+      {isLoadingClient || isLoadingOwner ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading packages...</p>
+        </div>
+      ) : (
+        <Tabs defaultValue={currentUserRole} className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+            <TabsTrigger value="client">
+              <Users className="w-4 h-4 mr-2" />
+              For Clients
+            </TabsTrigger>
+            <TabsTrigger value="owner">
+              <Users className="w-4 h-4 mr-2" />
+              For Owners
+            </TabsTrigger>
+          </TabsList>
 
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-accent">{pkg.activations}</div>
-                  <div className="text-sm text-muted-foreground">Message Activations</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {formatPriceMXN(pkg.pricePerActivation)} per activation
-                  </div>
-                </div>
+          <TabsContent value="client" className="mt-6">
+            <div className="mb-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Perfect for clients looking to connect with property owners
+              </p>
+            </div>
+            {renderPackages(clientPackagesUI, 'Client')}
+          </TabsContent>
 
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-accent" />
-                    <span>Start {pkg.activations} new conversations</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-accent" />
-                    <span>Unlimited messages per conversation</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-accent" />
-                    <span>90-day validity</span>
-                  </div>
-                </div>
-              </CardContent>
-
-              <CardFooter>
-                <Button 
-                  onClick={() => handlePurchase(pkg)}
-                  className="w-full"
-                  variant={pkg.highlight ? "default" : "outline"}
-                >
-                  Buy Now
-                </Button>
-              </CardFooter>
-            </Card>
-          );
-        })}
-      </div>
+          <TabsContent value="owner" className="mt-6">
+            <div className="mb-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Great deals for property owners to reach potential clients
+              </p>
+            </div>
+            {renderPackages(ownerPackagesUI, 'Owner')}
+          </TabsContent>
+        </Tabs>
+      )}
 
       <div className="text-center text-sm text-muted-foreground space-y-1">
-        <p>✓ Activations never expire within the 90-day period</p>
+        <p>✓ Activations never expire within the validity period</p>
         <p>✓ Once a conversation starts, message unlimited within it</p>
         <p>✓ Secure payment processing via PayPal</p>
       </div>
