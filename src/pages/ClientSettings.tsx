@@ -9,21 +9,32 @@ import { ThemeSelector } from "@/components/ThemeSelector";
 import { Button } from "@/components/ui/button";
 import { Heart, Home, Bike, Ship } from "lucide-react";
 import { Car } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const ClientSettings = () => {
   const [showPreferences, setShowPreferences] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState("profile");
+
+  // Support deep-linking to specific tabs via URL parameter
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["profile", "preferences", "subscription", "security", "search", "theme"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   return (
     <DashboardLayout userRole="client">
-      <div className="p-4 md:p-8">
+      <div className="w-full h-full overflow-y-auto p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">Client Settings</h1>
             <p className="text-muted-foreground">Manage your account preferences and search settings</p>
           </div>
 
-          <Tabs defaultValue="profile" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
               <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
               <TabsTrigger value="preferences" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Preferences</TabsTrigger>
@@ -51,7 +62,7 @@ const ClientSettings = () => {
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200">
                       <Home className="w-10 h-10 text-blue-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Properties</h3>
                       <p className="text-sm text-muted-foreground mb-4">
@@ -59,7 +70,7 @@ const ClientSettings = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200">
                       <Car className="w-10 h-10 text-orange-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Motorcycles</h3>
                       <p className="text-sm text-muted-foreground mb-4">
@@ -67,7 +78,7 @@ const ClientSettings = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border-2 border-green-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border-2 border-green-200">
                       <Bike className="w-10 h-10 text-green-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Bicycles</h3>
                       <p className="text-sm text-muted-foreground mb-4">
@@ -75,7 +86,7 @@ const ClientSettings = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg border-2 border-cyan-200">
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg border-2 border-cyan-200">
                       <Ship className="w-10 h-10 text-cyan-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Yachts</h3>
                       <p className="text-sm text-muted-foreground mb-4">

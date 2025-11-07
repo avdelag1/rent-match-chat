@@ -171,33 +171,13 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
           animate="visible"
         >
           
-          {/* Header */}
-          <motion.div variants={itemVariants} className="mb-6 sm:mb-8">
-            <div className="text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Browse Clients
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Explore verified client profiles and connect with potential matches
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Main Content */}
+          {/* Main Content - No Header, Just Cards */}
           <div className="w-full">
             
             {/* Swipe Section */}
             <motion.div variants={itemVariants} className="w-full">
               <Card className="overflow-hidden">
-                <CardHeader className="pb-4 px-3 sm:px-6">
-                  <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
-                    <Badge variant="outline" className="border-primary/50 text-primary text-xs">
-                      <Zap className="w-3 h-3 mr-1" />
-                      Smart Matching
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex justify-center pb-6 sm:pb-8 px-3 sm:px-6">
+                <CardContent className="flex justify-center pb-6 sm:pb-8 px-3 sm:px-6 pt-6">
                   <div className="w-full max-w-4xl">
                     <ClientSwipeContainer 
                       onClientTap={handleClientTap} 

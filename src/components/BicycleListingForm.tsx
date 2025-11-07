@@ -32,6 +32,9 @@ export interface BicycleFormData {
   electric_assist: boolean;
   battery_range?: number;
   condition: string;
+  city?: string;
+  neighborhood?: string;
+  bicycle_type?: string;
 }
 
 interface BicycleListingFormProps {
@@ -95,6 +98,37 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
             <p className="text-xs text-muted-foreground mt-1">
               No contact info allowed - share after messaging connection
             </p>
+          </div>
+
+          <div>
+            <Label htmlFor="bicycle_type">Bicycle Type *</Label>
+            <Select 
+              value={formData.bicycle_type}
+              onValueChange={(value) => {
+                setValue('bicycle_type', value);
+                onDataChange({ ...formData, bicycle_type: value });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {BICYCLE_TYPES.map(type => (
+                  <SelectItem key={type} value={type.toLowerCase()}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="city">Location / City *</Label>
+            <Input
+              id="city"
+              {...register('city', { required: true })}
+              placeholder="e.g. Tulum, Playa del Carmen"
+            />
           </div>
         </CardContent>
       </Card>

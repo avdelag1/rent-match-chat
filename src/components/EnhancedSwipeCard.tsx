@@ -1,16 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Flame, 
-  X, 
-  Star, 
-  MapPin, 
-  DollarSign, 
-  Bed, 
-  Bath, 
-  Wifi, 
+import {
+  Flame,
+  X,
+  Star,
+  MapPin,
+  DollarSign,
+  Bed,
+  Bath,
+  Wifi,
   Car,
   MessageCircle,
   TrendingUp,
@@ -46,19 +46,22 @@ interface EnhancedSwipeCardProps {
   style?: React.CSSProperties;
 }
 
-export function EnhancedSwipeCard({ 
-  listing, 
-  onSwipe, 
-  onTap, 
-  onSuperLike, 
-  onMessage, 
-  isTop, 
+// OPTIMIZED: Memoized component to prevent unnecessary re-renders
+export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
+  listing,
+  onSwipe,
+  onTap,
+  onSuperLike,
+  onMessage,
+  isTop,
   hasPremium,
-  style 
+  style
 }: EnhancedSwipeCardProps) {
   const [imageIndex, setImageIndex] = useState(0);
+  const [tapFlash, setTapFlash] = useState<'left' | 'right' | null>(null);
+  const [dragStartPos, setDragStartPos] = useState<{ x: number; y: number } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 300], [-30, 30]);
   const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 1, 1, 1, 0]);
@@ -66,37 +69,63 @@ export function EnhancedSwipeCard({
   const images = listing.images && listing.images.length > 0 ? listing.images : [];
   const hasMultipleImages = images.length > 1;
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
-    const threshold = 150;
+  // Handle tap flash overlay
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (!isTop) return;
+    
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const clickX = e.clientX - rect.left;
+    const side = clickX < rect.width / 2 ? 'left' : 'right';
+    
+    setTapFlash(side);
+    setDragStartPos({ x: e.clientX, y: e.clientY });
+    
+    setTimeout(() => setTapFlash(null), 160);
+  }, [isTop]);
+
+  // OPTIMIZED: Memoize callbacks to prevent re-creation with enhanced snap-back
+  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
+    const threshold = 150; // Increased threshold for better control
     const velocity = info.velocity.x;
     
-    if (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500) {
+    // Check if this was a tap (minimal movement)
+    const dragDistance = Math.sqrt(
+      Math.pow(info.offset.x, 2) + Math.pow(info.offset.y, 2)
+    );
+    
+    // Only trigger swipe if moved enough and not a tap
+    if (dragDistance > threshold && (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500)) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
-  };
+    
+    setDragStartPos(null);
+    // If threshold not met, motion will automatically snap back with spring animation
+  }, [onSwipe]);
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev + 1) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev - 1 + images.length) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const formatPrice = (price?: number) => {
+  const formatPrice = useCallback((price?: number) => {
     if (!price) return 'Price not specified';
     return `$${price.toLocaleString()} MXN/month`;
-  };
+  }, []);
 
   return (
     <motion.div
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
+      className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
       style={{ 
         x, 
         rotate, 
@@ -107,21 +136,48 @@ export function EnhancedSwipeCard({
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
+      onPointerDown={handlePointerDown}
       onDragEnd={handleDragEnd}
       whileTap={{ scale: 0.98 }}
       initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.8 }}
-      transition={{ duration: 0.3 }}
+      animate={{ 
+        scale: isTop ? 1 : 0.95, 
+        opacity: isTop ? 1 : 0.8,
+        x: 0,
+        rotate: 0
+      }}
+      transition={{ 
+        type: "spring",
+        stiffness: 300,
+        damping: 25,
+        duration: 0.3
+      }}
     >
       <Card className="h-full swipe-card interactive-card glass-morphism border-white/20 overflow-hidden">
         <div className="relative h-full">
           {/* Image Section */}
           <div className="relative h-2/3 overflow-hidden">
+            {/* Tap Flash Overlay */}
+            {tapFlash && (
+              <motion.div
+                className={`absolute inset-0 pointer-events-none z-10 ${
+                  tapFlash === 'right' 
+                    ? 'bg-emerald-500/30' 
+                    : 'bg-rose-500/30'
+                }`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.16 }}
+              />
+            )}
+            
             <motion.img
               key={imageIndex}
               src={images[imageIndex]}
               alt={listing.title}
               className="w-full h-full object-cover"
+              loading="lazy"
               initial={{ scale: 1.1, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3 }}
@@ -131,18 +187,18 @@ export function EnhancedSwipeCard({
                 }}
             />
             
-            {/* Image Navigation */}
+            {/* Image Navigation - Floating without backdrop blur */}
             {hasMultipleImages && (
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-all shadow-lg"
                 >
                   ←
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition-all"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-all shadow-lg"
                 >
                   →
                 </button>
@@ -169,12 +225,12 @@ export function EnhancedSwipeCard({
               </Badge>
             )}
 
-            {/* Quick Actions */}
+            {/* Quick Actions - Floating without backdrop blur */}
             <div className="absolute top-3 right-3 flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="w-8 h-8 p-0 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
                 onClick={onMessage}
               >
                 <MessageCircle className="w-4 h-4" />
@@ -182,7 +238,7 @@ export function EnhancedSwipeCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="w-8 h-8 p-0 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
                 onClick={onTap}
               >
                 <Eye className="w-4 h-4" />
@@ -215,11 +271,18 @@ export function EnhancedSwipeCard({
               </div>
 
               <div className="flex items-center gap-1 text-white/70">
-                <MapPin className="w-3 h-3" />
-                <span className="text-sm">
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                <span className="text-sm truncate">
                   {listing.neighborhood || listing.city || listing.address || 'Location not specified'}
                 </span>
               </div>
+
+              {/* Description Preview */}
+              {listing.description && (
+                <p className="text-sm text-white/70 line-clamp-2">
+                  {listing.description}
+                </p>
+              )}
 
               <div className="flex items-center gap-4 text-white/80">
                 {listing.beds && (
@@ -272,13 +335,12 @@ export function EnhancedSwipeCard({
             </div>
           </CardContent>
 
-          {/* Swipe Indicators */}
+          {/* Text-only Swipe Indicators - LIKE/DISLIKE badges */}
           <motion.div
             className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [0, 150], [0, 1]) }}
           >
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
-              <Flame className="w-8 h-8 animate-pulse" />
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl">
               LIKE
             </div>
           </motion.div>
@@ -287,13 +349,12 @@ export function EnhancedSwipeCard({
             className="absolute top-1/4 right-8 transform rotate-12 pointer-events-none"
             style={{ opacity: useTransform(x, [-150, 0], [1, 0]) }}
           >
-            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white/50 shadow-2xl flex items-center gap-2">
-              <X className="w-8 h-8" />
-              NOPE
+            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl">
+              DISLIKE
             </div>
           </motion.div>
         </div>
       </Card>
     </motion.div>
   );
-}
+});

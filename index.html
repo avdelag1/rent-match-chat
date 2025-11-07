@@ -58,7 +58,8 @@
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <link rel="icon" type="image/x-icon" href="https://storage.googleapis.com/gpt-engineer-file-uploads/qyGlrqJHe9g2hyHsAc6ZZroRlyF2/uploads/1758515219868-ChatGPT Image Sep 21, 2025, 11_01_12 PM.png">
   <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/qyGlrqJHe9g2hyHsAc6ZZroRlyF2/social-images/social-1758515231924-ChatGPT Image Sep 21, 2025, 11_01_12 PM.png">
-</head>
+    <script type="module" src="/src/main.tsx"></script>
+  </head>
 
   <body>
     <div id="root">
@@ -105,8 +106,6 @@
         <div class="spinner"></div>
       </div>
     </div>
-    <!-- Add cache-busting version to main script -->
-    <script type="module" src="/src/main.tsx?v=<?= Date.now() ?>"></script>
     
     <!-- Enhanced Service Worker Registration with Update Detection -->
     <script>
@@ -166,14 +165,14 @@
       }
       
       // Force cache clear on critical updates
-      if (localStorage.getItem('tinderent_last_clear') !== '<?= Date.now() %>') {
+      if (localStorage.getItem('tinderent_last_clear') !== '1.0.2') {
         console.log('Clearing caches for fresh content...');
         if ('caches' in window) {
           caches.keys().then(names => {
             names.forEach(name => caches.delete(name));
           });
         }
-        localStorage.setItem('tinderent_last_clear', '<?= Date.now() ?>');
+        localStorage.setItem('tinderent_last_clear', '1.0.2');
       }
     </script>
   </body>

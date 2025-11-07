@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useCallback } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ interface ClientProfileCardProps {
   hasPremium: boolean;
 }
 
-export function ClientProfileCard({
+const ClientProfileCardComponent = ({
   profile,
   onSwipe,
   onTap,
@@ -47,10 +47,10 @@ export function ClientProfileCard({
   onMessage,
   isTop,
   hasPremium
-}: ClientProfileCardProps) {
+}: ClientProfileCardProps) => {
   const [imageIndex, setImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
 
@@ -68,21 +68,21 @@ export function ClientProfileCard({
     isTop
   });
 
-  const nextImage = (e: React.MouseEvent) => {
+  const nextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev + 1) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const prevImage = (e: React.MouseEvent) => {
+  const prevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasMultipleImages) {
       setImageIndex((prev) => (prev - 1 + images.length) % images.length);
     }
-  };
+  }, [hasMultipleImages, images.length]);
 
-  const handleImageClick = (e: React.MouseEvent) => {
+  const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -96,21 +96,21 @@ export function ClientProfileCard({
     } else {
       onTap();
     }
-  };
+  }, [prevImage, nextImage, onTap]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const threshold = 60;
     const velocity = info.velocity.x;
     const absVelocity = Math.abs(velocity);
-    
+
     // ✅ FIX #2: Lower threshold for more responsive swipes
     const effectiveThreshold = absVelocity > 600 ? 30 : 40;
-    
+
     if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 350) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
-  };
+  }, [onSwipe]);
 
   const getSwipeIndicator = () => {
     return null; // Only show emoji after swipe
@@ -143,13 +143,13 @@ export function ClientProfileCard({
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
     >
-      <Card className="w-full h-full bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="relative w-full h-[550px] bg-white border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
 
       {/* Swipe Indicator */}
       {getSwipeIndicator()}
-      
-      {/* Main Image - Full Screen */}
-      <div className="relative h-[85%] overflow-hidden">
+
+      {/* Main Image - Fixed height for consistent card sizing */}
+      <div className="relative h-[430px] overflow-hidden">
         {images.length > 0 ? (
           <img
             src={images[imageIndex]}
@@ -157,6 +157,13 @@ export function ClientProfileCard({
             className="w-full h-full object-cover cursor-pointer"
             draggable={false}
             onClick={handleImageClick}
+            loading="lazy"
+            decoding="async"
+            style={{
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden'
+            }}
             onError={(e) => {
               e.currentTarget.src = '/placeholder-avatar.svg';
             }}
@@ -169,7 +176,7 @@ export function ClientProfileCard({
             <div className="absolute inset-0 bg-black/20" />
             <div className="text-center relative z-10">
               <div className="w-32 h-32 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border-4 border-white/50">
-                <span className="text-6xl font-bold text-white">
+                <span className="text-6xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                   {profile.name?.charAt(0).toUpperCase() || '?'}
                 </span>
               </div>
@@ -212,29 +219,31 @@ export function ClientProfileCard({
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-        
-        {/* Message Button - Top Right - Always Clickable */}
-        <Button
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('💬 Message button clicked for:', profile.name);
-            onMessage();
-          }}
-          className="absolute top-4 right-4 w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 backdrop-blur-sm text-white hover:from-orange-600 hover:to-pink-600 border-2 border-white shadow-lg p-0 z-20 transition-all hover:scale-110"
-        >
-          <MessageCircle className="w-5 h-5" />
-        </Button>
 
-        {/* Age Badge */}
-        <Badge className="absolute top-4 right-20 bg-black/50 text-white border-none px-3 py-1">
+        {/* Quick Actions - Message Icon in Top Right */}
+        <div className="absolute top-4 right-4 flex gap-2 z-20">
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMessage();
+            }}
+          >
+            <MessageCircle className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Age Badge - moved down to avoid overlap */}
+        <Badge className="absolute top-14 right-4 bg-black/50 text-white border-none px-3 py-1">
           {profile.age}
         </Badge>
         
         {/* Location */}
         {profile.location && (
           <div className="absolute top-4 left-4 flex items-center gap-1 bg-black/50 rounded-full px-3 py-1">
-            <MapPin className="w-4 h-4 text-white" />
+            <MapPin className="w-4 h-4 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
             <span className="text-white text-sm">
               {profile.location.city}
             </span>
@@ -243,7 +252,13 @@ export function ClientProfileCard({
       </div>
       
       {/* Bottom Content - Compact */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent">
+      <div 
+        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onTap();
+        }}
+      >
         <div className="space-y-2">
           {/* Name */}
           <div>
@@ -291,4 +306,7 @@ export function ClientProfileCard({
       </Card>
     </motion.div>
   );
-}
+};
+
+// Export memoized component for performance
+export const ClientProfileCard = memo(ClientProfileCardComponent);

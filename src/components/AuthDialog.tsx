@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Eye, EyeOff, Flame, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Flame, X, Mail, Lock, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,7 +33,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
     try {
       const validated = forgotPasswordSchema.parse({ email });
-      
+
       const { error } = await supabase.auth.resetPasswordForEmail(validated.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -44,7 +44,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         title: "Check your email",
         description: "We've sent you a password reset link.",
       });
-      
+
       setIsForgotPassword(false);
       setEmail('');
     } catch (error: any) {
@@ -68,11 +68,11 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (isForgotPassword) {
       return handleForgotPassword(e);
     }
-    
+
     setIsLoading(true);
 
     try {
@@ -121,14 +121,12 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     setIsLoading(true);
     try {
       const { error } = await signInWithOAuth(provider, role);
-      
+
       if (error) throw error;
-      
-      // Close dialog on successful OAuth initiation
+
       onClose();
     } catch (error: any) {
       console.error(`OAuth error for ${provider}:`, error);
-      // Error handling is done in signInWithOAuth
     } finally {
       setIsLoading(false);
     }
@@ -136,138 +134,118 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full mx-auto border-0 p-0 overflow-hidden max-h-[95vh] bg-transparent">
+      <DialogContent className="max-w-md w-full mx-auto border-0 p-0 overflow-hidden bg-white rounded-2xl shadow-2xl">
         <DialogTitle className="sr-only">
           {isLogin ? 'Sign In' : 'Sign Up'} as {role}
         </DialogTitle>
         <DialogDescription className="sr-only">
           {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Tinderent
         </DialogDescription>
-        <div className="max-h-[95vh] overflow-y-auto">
+
         <div className="relative">
-          {/* Header with role-specific gradient background and animated blobs */}
-          <div className={`relative rounded-t-3xl px-6 py-10 shadow-2xl overflow-hidden ${
-            role === 'client' 
-              ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-orange-600' 
-              : 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-600'
+          {/* Compact Header */}
+          <div className={`relative px-6 py-4 overflow-hidden ${
+            role === 'client'
+              ? 'bg-gradient-to-br from-orange-400 to-red-500'
+              : 'bg-gradient-to-br from-red-500 to-pink-600'
           }`}>
-            {/* Animated gradient blobs - role-specific */}
-            <div className="absolute inset-0 opacity-30">
-              {role === 'client' ? (
-                <>
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-amber-300 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-600 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-                  <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-yellow-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                </>
-              ) : (
-                <>
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-pink-400 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-700 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-                  <div className="absolute top-1/2 left-1/2 w-36 h-36 bg-orange-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                </>
-              )}
-            </div>
-            
-            {/* Back Button with modern circular design */}
-            <button 
+            {/* Close Button */}
+            <button
               onClick={onClose}
-              className={`absolute top-5 left-5 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center text-white border-2 border-white/20 transition-all duration-300 transform hover:scale-110 hover:rotate-12 active:scale-95 ${
-                role === 'client'
-                  ? 'bg-gradient-to-br from-yellow-500/80 to-orange-600/80 hover:shadow-lg hover:shadow-orange-500/50'
-                  : 'bg-gradient-to-br from-orange-600/80 to-red-700/80 hover:shadow-lg hover:shadow-orange-500/50'
-              }`}
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            {/* Header Content with animations */}
-            <div className="text-center text-white pt-4 relative z-10">
-              <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm transform transition-all duration-300 hover:scale-110 hover:rotate-3">
-                <Flame className="w-10 h-10 text-white drop-shadow-lg animate-pulse" />
+            {/* Header Content */}
+            <div className="text-center text-white relative z-10">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-2 backdrop-blur-sm">
+                <Flame className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-3xl font-bold mb-3 drop-shadow-sm animate-fade-in">
+              <h1 className="text-xl font-bold mb-1">
                 {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back!' : 'Join Tinderent'}
               </h1>
-              <p className="text-white/90 text-base capitalize font-medium animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                {isForgotPassword ? 'Enter your email to reset password' : `${isLogin ? 'Sign in' : 'Sign up'} as ${role}`}
+              <p className="text-white/90 text-xs capitalize font-medium">
+                {isForgotPassword ? 'Enter your email' : `${isLogin ? 'Sign in' : 'Sign up'} as ${role}`}
               </p>
             </div>
           </div>
 
-          {/* Main Content with glass morphism effect */}
-          <div className="bg-white rounded-b-3xl p-8 space-y-8 relative overflow-hidden backdrop-blur-sm">
-            
+          {/* Main Content */}
+          <div className="bg-white p-5 space-y-3">
+
             {!isForgotPassword && (
               <>
                 {/* OAuth Buttons */}
-                <div className="space-y-4 relative z-10">
+                <div className="space-y-2">
                   <Button
                     type="button"
                     onClick={() => handleOAuthSignIn('google')}
                     disabled={isLoading}
-                    className="w-full h-14 bg-white border-2 border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
+                    className="w-full h-9 bg-white border-2 border-gray-200 text-gray-700 font-medium text-sm rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    <FaGoogle className="w-6 h-6 text-red-500" />
-                    <span>Continue with Google</span>
+                    <FaGoogle className="w-4 h-4 text-red-500" />
+                    <span>Google</span>
                   </Button>
-                  
+
                   <Button
                     type="button"
                     onClick={() => handleOAuthSignIn('facebook')}
                     disabled={isLoading}
-                    className="w-full h-14 bg-[#1877F2] text-white font-semibold text-base rounded-2xl hover:bg-[#166FE5] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-4 shadow-sm disabled:opacity-50"
+                    className="w-full h-9 bg-[#1877F2] text-white font-medium text-sm rounded-xl hover:bg-[#166FE5] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    <FaFacebook className="w-6 h-6" />
-                    <span>Continue with Facebook</span>
+                    <FaFacebook className="w-4 h-4" />
+                    <span>Facebook</span>
                   </Button>
                 </div>
 
                 {/* Divider */}
-                <div className="relative flex items-center py-4">
-                  <div className="flex-grow border-t border-gray-300"></div>
-                  <span className="flex-shrink mx-6 text-gray-500 text-base font-medium bg-white px-2">
-                    or
-                  </span>
-                  <div className="flex-grow border-t border-gray-300"></div>
+                <div className="relative flex items-center py-1">
+                  <div className="flex-grow border-t border-gray-200"></div>
+                  <span className="flex-shrink mx-3 text-gray-400 text-xs font-medium">or</span>
+                  <div className="flex-grow border-t border-gray-200"></div>
                 </div>
               </>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Name Field (Sign Up Only) */}
               {!isLogin && !isForgotPassword && (
                 <div>
-                  <Label htmlFor="name" className="text-gray-700 font-semibold text-base">
+                  <Label htmlFor="name" className="text-gray-700 font-medium text-sm mb-1.5 block">
                     Full Name
                   </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="mt-2 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 font-medium transform focus:scale-[1.02]"
-                    placeholder="Enter your full name"
-                  />
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className="pl-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
+                      placeholder="Your name"
+                    />
+                  </div>
                 </div>
               )}
 
               {/* Email Field */}
               <div>
-                <Label htmlFor="email" className="text-gray-700 font-semibold text-base">
-                  Email Address
+                <Label htmlFor="email" className="text-gray-700 font-medium text-sm mb-1.5 block">
+                  Email
                 </Label>
-                <div className="mt-2 relative">
-                  <Mail className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 font-medium transform focus:scale-[1.02]"
-                    placeholder="Enter your email"
+                    className="pl-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
+                    placeholder="your@email.com"
                   />
                 </div>
               </div>
@@ -275,26 +253,26 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               {/* Password Field */}
               {!isForgotPassword && (
                 <div>
-                  <Label htmlFor="password" className="text-gray-700 font-semibold text-base">
+                  <Label htmlFor="password" className="text-gray-700 font-medium text-sm mb-1.5 block">
                     Password
                   </Label>
-                  <div className="mt-2 relative">
-                    <Lock className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-14 pr-14 h-14 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 text-base placeholder-gray-500 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-300 font-medium transform focus:scale-[1.02]"
-                      placeholder="Enter your password"
+                      className="pl-10 pr-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
+                      placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -302,20 +280,20 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Remember Me & Forgot Password */}
               {isLogin && !isForgotPassword && (
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                      className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-400"
                     />
-                    <span className="text-sm text-gray-600">Remember me</span>
+                    <span className="text-gray-600 text-xs">Remember me</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => setIsForgotPassword(true)}
-                    className="text-sm text-orange-600 hover:text-orange-700 font-semibold"
+                    className="text-xs text-orange-600 hover:text-orange-700 font-medium"
                   >
                     Forgot password?
                   </button>
@@ -323,28 +301,24 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               )}
 
               {/* Submit Button */}
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading}
-                className="w-full h-16 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-2xl border-0 shadow-xl hover:shadow-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 mt-8 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:from-orange-600 hover:to-red-600 transition-all mt-2 disabled:opacity-50"
               >
-                <div className="flex items-center justify-center gap-3">
-                  {isLoading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Please wait...
-                    </>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
-                    </span>
-                  )}
-                </div>
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Please wait...
+                  </>
+                ) : (
+                  <span>{isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}</span>
+                )}
               </Button>
             </form>
 
             {/* Toggle Sign In/Up */}
-            <div className="text-center pt-4">
+            <div className="text-center pt-2">
               {isForgotPassword ? (
                 <button
                   type="button"
@@ -352,13 +326,13 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     setIsForgotPassword(false);
                     setEmail('');
                   }}
-                  className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-sm underline"
+                  className="font-medium text-orange-600 hover:text-orange-700 transition-colors text-xs"
                 >
-                  Back to Sign In
+                  ← Back to Sign In
                 </button>
               ) : (
                 <>
-                  <span className="text-gray-600 text-sm">
+                  <span className="text-gray-600 text-xs">
                     {isLogin ? "Don't have an account? " : "Already have an account? "}
                   </span>
                   <button
@@ -369,7 +343,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                       setPassword('');
                       setName('');
                     }}
-                    className="font-bold text-orange-600 hover:text-orange-700 transition-colors text-sm underline"
+                    className="font-semibold text-orange-600 hover:text-orange-700 transition-colors text-xs"
                   >
                     {isLogin ? 'Sign Up' : 'Sign In'}
                   </button>
@@ -377,7 +351,6 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               )}
             </div>
           </div>
-        </div>
         </div>
       </DialogContent>
     </Dialog>

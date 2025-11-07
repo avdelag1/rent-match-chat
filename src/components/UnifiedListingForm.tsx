@@ -15,7 +15,8 @@ import { CategorySelector, Category, Mode } from './CategorySelector';
 import { YachtListingForm, YachtFormData } from './YachtListingForm';
 import { MotorcycleListingForm, MotorcycleFormData } from './MotorcycleListingForm';
 import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
-import { PropertyForm } from './PropertyForm';
+import { PropertyListingForm } from './PropertyListingForm';
+import { validateImageFile } from '@/utils/fileValidation';
 
 interface UnifiedListingFormProps {
   isOpen: boolean;
@@ -53,7 +54,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       setSelectedCategory(editingProperty.category);
       setSelectedMode(editingProperty.mode || 'rent');
       setImages([]);
-      setFormData({});
+      setFormData({ mode: editingProperty.mode || 'rent' }); // Include mode in formData!
       setLocation({});
     } else {
       // Completely new listing - reset everything
@@ -61,7 +62,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       setSelectedCategory('property');
       setSelectedMode('rent');
       setImages([]);
-      setFormData({});
+      setFormData({ mode: 'rent' }); // Include default mode in formData!
       setLocation({});
     }
   }, [editingProperty, isOpen]);
@@ -75,17 +76,96 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         throw new Error('Minimum 3 photos required');
       }
 
-      const listingData = {
-        ...formData,
+      // Map form data to database columns based on category
+      const listingData: any = {
+        owner_id: user.user.id,
         category: selectedCategory,
         mode: selectedMode,
-        owner_id: user.user.id,
+        status: 'active' as const,
+        is_active: true,
         images: images,
+        title: formData.title || '',
+        description: formData.description,
+        price: formData.price,
+        rental_rates: formData.rental_rates,
+        city: formData.city,
+        neighborhood: formData.neighborhood,
         latitude: location.lat,
         longitude: location.lng,
-        status: 'active' as const,
-        is_active: true
       };
+
+      // Add category-specific fields
+      if (selectedCategory === 'yacht') {
+        Object.assign(listingData, {
+          yacht_type: formData.yacht_type,
+          vehicle_brand: formData.brand,
+          vehicle_model: formData.model,
+          vehicle_condition: formData.condition,
+          length_m: formData.length_m,
+          year: formData.year,
+          hull_material: formData.hull_material,
+          engines: formData.engines,
+          fuel_type: formData.fuel_type,
+          berths: formData.berths,
+          max_passengers: formData.max_passengers,
+          crew_option: formData.crew_option,
+          engine_type: formData.engine_type,
+          equipment: formData.equipment,
+        });
+      } else if (selectedCategory === 'motorcycle') {
+        Object.assign(listingData, {
+          motorcycle_type: formData.motorcycle_type,
+          vehicle_brand: formData.brand,
+          vehicle_model: formData.model,
+          vehicle_condition: formData.condition,
+          year: formData.year,
+          mileage: formData.mileage,
+          engine_cc: formData.engine_cc,
+          fuel_type: formData.fuel_type,
+          transmission_type: formData.transmission,
+          has_abs: formData.has_abs,
+          has_traction_control: formData.has_traction_control,
+          has_heated_grips: formData.has_heated_grips,
+          has_luggage_rack: formData.has_luggage_rack,
+          includes_helmet: formData.includes_helmet,
+          includes_gear: formData.includes_gear,
+        });
+      } else if (selectedCategory === 'bicycle') {
+        Object.assign(listingData, {
+          bicycle_type: formData.bicycle_type || formData.vehicle_type,
+          vehicle_brand: formData.brand,
+          vehicle_model: formData.model,
+          vehicle_condition: formData.condition,
+          year: formData.year,
+          frame_size: formData.frame_size,
+          frame_material: formData.frame_material,
+          number_of_gears: formData.number_of_gears,
+          electric_assist: formData.electric_assist,
+          battery_range: formData.battery_range,
+          suspension_type: formData.suspension_type,
+          brake_type: formData.brake_type,
+          wheel_size: formData.wheel_size,
+          includes_lock: formData.includes_lock,
+          includes_lights: formData.includes_lights,
+          includes_basket: formData.includes_basket,
+          includes_pump: formData.includes_pump,
+        });
+      } else if (selectedCategory === 'property') {
+        Object.assign(listingData, {
+          address: formData.address,
+          property_type: formData.property_type,
+          beds: formData.beds,
+          baths: formData.baths,
+          square_footage: formData.square_footage,
+          furnished: formData.furnished,
+          pet_friendly: formData.pet_friendly,
+          amenities: formData.amenities,
+          services_included: formData.services_included,
+          house_rules: formData.house_rules,
+          rental_duration_type: formData.rental_duration_type,
+          listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
+        });
+      }
 
       if (editingId) {
         console.log('Updating listing with ID:', editingId);
@@ -163,25 +243,35 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const uploadImageToStorage = async (file: File, userId: string): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
+
     const { error } = await supabase.storage
-      .from('property-images')
+      .from('listing-images')
       .upload(fileName, file);
 
     if (error) throw error;
 
     const { data: { publicUrl } } = supabase.storage
-      .from('property-images')
+      .from('listing-images')
       .getPublicUrl(fileName);
 
     return publicUrl;
   };
 
   const handleImageAdd = async () => {
-    if (images.length >= 10) {
+    if (images.length >= 30) {
       toast({
         title: "Maximum Photos Reached",
-        description: "You can only upload up to 10 photos per listing.",
+        description: "You can only upload up to 30 photos per listing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to upload images.",
         variant: "destructive"
       });
       return;
@@ -191,27 +281,35 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     input.type = 'file';
     input.accept = 'image/*';
     input.multiple = true;
-    
+
     input.onchange = async (e) => {
       const files = Array.from((e.target as HTMLInputElement).files || []);
       
-      if (files.length + images.length > 10) {
+      if (files.length === 0) return;
+
+      if (files.length + images.length > 30) {
         toast({
           title: "Too Many Photos",
-          description: `You can only have 10 photos total. You can add ${10 - images.length} more.`,
+          description: `You can only have 30 photos total. You can add ${30 - images.length} more.`,
           variant: "destructive"
         });
         return;
       }
 
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return;
+      toast({
+        title: "Uploading Photos...",
+        description: `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}`,
+      });
 
-      for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // Use centralized validation
+        const validation = validateImageFile(file);
+        if (!validation.isValid) {
           toast({
-            title: "File Too Large",
-            description: `${file.name} is too large. Maximum size is 10MB.`,
+            title: "Invalid File",
+            description: `${file.name}: ${validation.error}`,
             variant: "destructive"
           });
           continue;
@@ -222,19 +320,19 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           setImages(prev => [...prev, imageUrl]);
           
           toast({
-            title: "Upload Successful",
-            description: `${file.name} uploaded successfully.`,
+            title: `✓ ${i + 1}/${files.length}`,
+            description: `${file.name} uploaded`,
           });
         } catch (error: any) {
           toast({
             title: "Upload Failed",
-            description: `Failed to upload ${file.name}.`,
+            description: `${file.name}: ${error.message}`,
             variant: "destructive"
           });
         }
       }
     };
-    
+
     input.click();
   };
 
@@ -273,24 +371,65 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       });
       return;
     }
+
+    if (!formData.price) {
+      toast({
+        title: "Price Required",
+        description: "Please enter a price for your listing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.city) {
+      toast({
+        title: "City Required",
+        description: "Please enter a city for your listing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Category-specific validation
+    if (selectedCategory === 'property') {
+      if (!formData.property_type) {
+        toast({
+          title: "Property Type Required",
+          description: "Please select a property type.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!formData.beds || formData.beds < 0) {
+        toast({
+          title: "Bedrooms Required",
+          description: "Please enter the number of bedrooms.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!formData.baths || formData.baths < 0) {
+        toast({
+          title: "Bathrooms Required",
+          description: "Please enter the number of bathrooms.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (!formData.rental_duration_type) {
+        toast({
+          title: "Rental Duration Required",
+          description: "Please select a rental duration.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
     
     createListingMutation.mutate();
   };
 
   if (!isOpen) return null;
-
-  // Use PropertyForm for property category - pass all necessary props
-  if (selectedCategory === 'property') {
-    return (
-      <PropertyForm 
-        isOpen={isOpen} 
-        onClose={handleClose} 
-        editingProperty={editingProperty}
-        initialCategory={selectedCategory}
-        initialMode={selectedMode}
-      />
-    );
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -312,6 +451,13 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           />
 
           {/* Category-Specific Forms */}
+          {selectedCategory === 'property' && (
+            <PropertyListingForm 
+              onDataChange={(data) => setFormData({ ...formData, ...data })}
+              initialData={formData}
+            />
+          )}
+
           {selectedCategory === 'yacht' && (
             <YachtListingForm 
               onDataChange={(data) => setFormData({ ...formData, ...data })}
@@ -333,44 +479,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             />
           )}
 
-          {/* Location */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Location *</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    value={formData.city || ''}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="e.g., Tulum"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="neighborhood">Neighborhood</Label>
-                  <Input
-                    id="neighborhood"
-                    value={formData.neighborhood || ''}
-                    onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                    placeholder="e.g., Aldea Zama"
-                  />
-                </div>
-              </div>
-              
-              <p className="text-sm text-muted-foreground">
-                🔒 Only city and neighborhood are visible. Exact address shared after messaging activation.
-              </p>
-            </CardContent>
-          </Card>
 
           {/* Photos */}
           <Card>
             <CardHeader>
-              <CardTitle>Photos * (min 3, max 10)</CardTitle>
+              <CardTitle>Photos * (min 3, max 30)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -389,10 +502,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
                 ))}
               </div>
               
-              {images.length < 10 && (
+              {images.length < 30 && (
                 <Button onClick={handleImageAdd} variant="outline" className="w-full">
                   <Upload className="mr-2 h-4 w-4" />
-                  Add Photos ({images.length}/10)
+                  Add Photos ({images.length}/30)
                 </Button>
               )}
             </CardContent>

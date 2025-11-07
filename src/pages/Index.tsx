@@ -110,8 +110,8 @@ const Index = () => {
     }
   }, [user, userRole, loading, profileLoading, isError, navigate]);
 
-  // Show loading state while checking authentication
-  if (loading || (user && profileLoading)) {
+  // Show loading state ONLY when user is authenticated AND we're fetching their role
+  if (user && profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
         <div className="space-y-4 text-center">
@@ -122,7 +122,7 @@ const Index = () => {
     );
   }
 
-  // Only show landing page if user is NOT authenticated
+  // Show landing page if user is NOT authenticated (or while checking auth on initial load)
   if (!user) {
     return (
       <div className="min-h-screen">
@@ -131,7 +131,7 @@ const Index = () => {
     );
   }
 
-  // Show loading state while navigating to dashboard
+  // Show loading state while navigating to dashboard (user is authenticated and has role)
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
       <div className="space-y-4 text-center">

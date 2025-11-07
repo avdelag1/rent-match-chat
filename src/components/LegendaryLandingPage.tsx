@@ -1,10 +1,10 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Users, Sparkles } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 
-export default function LegendaryLandingPage() {
+function LegendaryLandingPage() {
   const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' }>({
     isOpen: false,
     role: 'client'
@@ -389,3 +389,4 @@ export default function LegendaryLandingPage() {
     </motion.div>
   );
 }
+export default memo(LegendaryLandingPage);

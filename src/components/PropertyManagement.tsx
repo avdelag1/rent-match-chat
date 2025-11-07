@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,22 +15,26 @@ import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign, ShieldChec
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
+import { OwnerListingsStats } from '@/components/OwnerListingsStats';
 
 
 interface PropertyManagementProps {
   initialCategory?: string | null;
+  initialMode?: string | null;
 }
 
-export function PropertyManagement({ initialCategory }: PropertyManagementProps) {
+export const PropertyManagement = memo(({ initialCategory, initialMode }: PropertyManagementProps) => {
   const { user } = useAuth();
   const { data: listings = [], isLoading, error } = useOwnerListings();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(initialCategory || 'all');
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(!!initialCategory); // Auto-open if category provided
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [editingProperty, setEditingProperty] = useState<any>(null);
+  const [editingProperty, setEditingProperty] = useState<any>(
+    initialCategory ? { category: initialCategory, mode: initialMode || 'rent' } : null
+  );
   const queryClient = useQueryClient();
 
   const filteredListings = listings.filter(listing => {
@@ -60,12 +64,14 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
   const handleAddProperty = () => {
     setEditingProperty(null);
     setShowCategoryDialog(true);
+    // Open form directly
+    setIsFormOpen(true);
   };
 
   const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
     setEditingProperty({ category, mode });
     setShowCategoryDialog(false);
-    setIsFormOpen(true);
+    // Form is already open from handleAddProperty
   };
 
   const handleEditProperty = (listing: any) => {
@@ -190,6 +196,9 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
             <span className="text-sm sm:text-base">Add Listing</span>
           </Button>
         </div>
+
+        {/* Statistics Dashboard */}
+        <OwnerListingsStats listings={listings} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 bg-white/10 backdrop-blur-sm h-auto">
@@ -455,4 +464,4 @@ export function PropertyManagement({ initialCategory }: PropertyManagementProps)
       </div>
     </div>
   );
-}
+});

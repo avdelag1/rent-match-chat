@@ -28,10 +28,21 @@ export function SwipeCard({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [tapFlash, setTapFlash] = useState<'left' | 'right' | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isTop) return;
+    
+    // Tap flash
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (rect) {
+      const clickX = e.clientX - rect.left;
+      const side = clickX < rect.width / 2 ? 'left' : 'right';
+      setTapFlash(side);
+      setTimeout(() => setTapFlash(null), 160);
+    }
+    
     setIsDragging(true);
     setStartPos({ x: e.clientX, y: e.clientY });
   };
@@ -47,9 +58,22 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
     
-    const threshold = 100;
-    if (Math.abs(dragOffset.x) > threshold) {
+    const threshold = 150; // Increased threshold for better control
+    const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
+    
+    // Only swipe if dragged enough (prevent ghost taps)
+    if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
+    } else {
+      // Enhanced snap-back animation with spring physics
+      const card = cardRef.current;
+      if (card) {
+        card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+        setTimeout(() => {
+          card.style.transition = '';
+        }, 300);
+      }
     }
     
     setDragOffset({ x: 0, y: 0 });
@@ -58,6 +82,16 @@ export function SwipeCard({
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!isTop) return;
     const touch = e.touches[0];
+    
+    // Tap flash
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (rect) {
+      const clickX = touch.clientX - rect.left;
+      const side = clickX < rect.width / 2 ? 'left' : 'right';
+      setTapFlash(side);
+      setTimeout(() => setTapFlash(null), 160);
+    }
+    
     setIsDragging(true);
     setStartPos({ x: touch.clientX, y: touch.clientY });
   };
@@ -74,22 +108,25 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
     
-    const threshold = 100;
-    if (Math.abs(dragOffset.x) > threshold) {
+    const threshold = 150; // Increased threshold for better control
+    const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
+    
+    // Only swipe if dragged enough (prevent ghost taps)
+    if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
+    } else {
+      // Enhanced snap-back animation with spring physics
+      const card = cardRef.current;
+      if (card) {
+        card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+        setTimeout(() => {
+          card.style.transition = '';
+        }, 300);
+      }
     }
     
     setDragOffset({ x: 0, y: 0 });
-  };
-
-  const handleInsightsClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onInsights();
-  };
-
-  const handleMessageClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onMessage();
   };
 
   const rotation = dragOffset.x * 0.1;
@@ -121,6 +158,17 @@ export function SwipeCard({
       onClick={onTap}
     >
       <CardContent className="p-0 h-full relative">
+        {/* Tap Flash Overlay */}
+        {tapFlash && (
+          <div
+            className={`absolute inset-0 pointer-events-none z-10 transition-opacity duration-[160ms] ${
+              tapFlash === 'right' 
+                ? 'bg-emerald-500/30' 
+                : 'bg-rose-500/30'
+            }`}
+          />
+        )}
+        
         {/* Image */}
         <div className="relative h-3/5 overflow-hidden">
           <img
@@ -130,48 +178,20 @@ export function SwipeCard({
             draggable={false}
           />
           
-          {/* Action Buttons Overlay */}
-          {isTop && (
-            <div className="absolute top-4 right-4 flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="bg-white/90 backdrop-blur-sm border-white/30 hover:bg-white"
-                onClick={handleInsightsClick}
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className={`backdrop-blur-sm border-white/30 ${
-                  hasPremium 
-                    ? 'bg-green-500/90 hover:bg-green-600 text-white' 
-                    : 'bg-orange-500/90 hover:bg-orange-600 text-white'
-                }`}
-                onClick={handleMessageClick}
-              >
-                <MessageCircle className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-
-          {/* Swipe Indicators */}
+          {/* Text-only Swipe Indicators - LIKE/DISLIKE badges */}
           {isTop && (
             <>
               {dragOffset.x > 50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 to-emerald-500/30 backdrop-blur-sm flex items-center justify-center">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-2xl flex items-center gap-3 shadow-2xl border-4 border-white/40 transform rotate-[-15deg] scale-110">
-                    <Flame className="w-8 h-8 animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/25 to-emerald-500/25 flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl transform rotate-[-15deg]">
                     LIKE
                   </div>
                 </div>
               )}
               {dragOffset.x < -50 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-rose-500/30 backdrop-blur-sm flex items-center justify-center">
-                  <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-2xl shadow-2xl border-4 border-white/40 transform rotate-[15deg] scale-110 flex items-center gap-3">
-                    <X className="w-8 h-8" />
-                    PASS
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/25 to-rose-500/25 flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-10 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl transform rotate-[15deg]">
+                    DISLIKE
                   </div>
                 </div>
               )}
@@ -180,23 +200,30 @@ export function SwipeCard({
         </div>
 
         {/* Content */}
-        <div className="p-4 h-2/5 flex flex-col justify-between bg-white">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+        <div className="p-4 h-2/5 flex flex-col justify-between bg-white overflow-hidden">
+          <div className="space-y-2">
+            <h3 className="text-lg font-bold text-gray-900 line-clamp-1">
               {listing.title || 'Beautiful Property'}
             </h3>
             
-            <div className="flex items-center gap-2 text-gray-600 mb-3">
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <MapPin className="w-4 h-4 flex-shrink-0" />
+              <span className="text-sm truncate">
                 {listing.neighborhood}, {listing.city}
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-3">
+            {/* Description Preview */}
+            {listing.description && (
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {listing.description}
+              </p>
+            )}
+
+            <div className="grid grid-cols-3 gap-2">
               {listing.price && (
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-xl font-bold text-green-600">
                     ${listing.price.toLocaleString()}
                   </div>
                   <div className="text-xs text-gray-500">per month</div>

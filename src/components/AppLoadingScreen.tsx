@@ -30,7 +30,7 @@ export function AppLoadingScreen() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-3xl font-bold text-white tracking-wider drop-shadow-lg"
         >
-          TINDERENT
+          TINDE<span className="text-red-500">R</span>ENT
         </motion.h1>
 
         {/* Loading Animation */}

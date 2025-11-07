@@ -1,3 +1,4 @@
+import { PageTransition } from '@/components/PageTransition';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +38,7 @@ const ClientContracts = () => {
   if (contractsLoading || dealsLoading) {
     return (
       <DashboardLayout userRole="client">
-        <div className="p-8 flex items-center justify-center">
+        <div className="w-full h-full overflow-y-auto p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-gray-600">Loading contracts...</p>
@@ -49,7 +50,7 @@ const ClientContracts = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="p-8">
+      <div className="w-full h-full overflow-y-auto p-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-4">My Contracts</h1>
@@ -63,10 +64,10 @@ const ClientContracts = () => {
               <div className="grid gap-4">
                 {activeDeals.map((deal) => (
                   <Card key={deal.id} className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-6">
+                    <CardContent className="w-full h-full overflow-y-auto p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="p-2 bg-blue-100 rounded-lg">
+                          <div className="w-full h-full overflow-y-auto p-2 bg-blue-100 rounded-lg">
                             <FileText className="w-6 h-6 text-blue-600" />
                           </div>
                           <div>
@@ -104,7 +105,7 @@ const ClientContracts = () => {
             
             {!contracts || contracts.length === 0 ? (
               <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                <CardContent className="p-8 text-center">
+                <CardContent className="w-full h-full overflow-y-auto p-8 text-center">
                   <FileText className="w-12 h-12 text-white/50 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-white mb-2">No Contracts Yet</h3>
                   <p className="text-white/70">
@@ -116,10 +117,10 @@ const ClientContracts = () => {
               <div className="grid gap-4">
                 {contracts.map((contract) => (
                   <Card key={contract.id} className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-6">
+                    <CardContent className="w-full h-full overflow-y-auto p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="p-2 bg-blue-100 rounded-lg">
+                          <div className="w-full h-full overflow-y-auto p-2 bg-blue-100 rounded-lg">
                             <FileText className="w-6 h-6 text-blue-600" />
                           </div>
                           <div>

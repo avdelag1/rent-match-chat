@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal } from 'lucide-react';
+import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,7 +44,7 @@ export function ClientSwipeContainer({
     type: 'like' | 'dislike';
     position: 'left' | 'right';
   }>({ show: false, type: 'like', position: 'right' });
-  
+
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching();
   
@@ -148,37 +148,25 @@ export function ClientSwipeContainer({
   };
 
   const handleStartConversation = (clientId: string) => {
-    console.log('💬 Starting conversation with client:', clientId);
-    
-    // Always navigate to messages with the client ID
     navigate(`/messages?startConversation=${clientId}`);
-    
-    // Show toast to confirm
     toast({
       title: 'Opening Chat',
       description: 'Starting conversation...',
     });
   };
 
+
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto">
-        <div className="w-full h-[600px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-xl">
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 600px)' }}>
+        <div className="w-full h-full bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden">
           <div className="p-6 space-y-4">
-            <Skeleton className="w-full h-64 rounded-lg" />
+            <Skeleton className="w-full h-[60vh] rounded-lg" />
             <Skeleton className="w-3/4 h-6" />
             <Skeleton className="w-1/2 h-4" />
-            <div className="flex space-x-2">
-              <Skeleton className="w-16 h-6 rounded-full" />
-              <Skeleton className="w-20 h-6 rounded-full" />
-            </div>
           </div>
-        </div>
-        <div className="text-center mt-4 text-muted-foreground">
-          <Sparkles className="w-5 h-5 mx-auto mb-2 animate-spin" />
-          Finding perfect clients...
         </div>
       </div>
     );
@@ -187,7 +175,7 @@ export function ClientSwipeContainer({
   if (error) {
     console.error('ClientSwipeContainer error:', error);
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
@@ -207,7 +195,7 @@ export function ClientSwipeContainer({
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
@@ -261,7 +249,7 @@ export function ClientSwipeContainer({
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
@@ -282,27 +270,9 @@ export function ClientSwipeContainer({
   }
 
   const currentClient = clientProfiles[currentIndex];
-  const nextClient = clientProfiles[currentIndex + 1];
-
-  // CRITICAL DEBUG
-  console.log('🎴 RENDER CHECK:', {
-    currentIndex,
-    totalProfiles: clientProfiles.length,
-    hasCurrentClient: !!currentClient,
-    hasNextClient: !!nextClient,
-    currentClientName: currentClient?.name,
-    nextClientName: nextClient?.name
-  });
 
   return (
-    <div className="w-full flex flex-col relative z-0 max-w-md mx-auto">{/* Client Counter */}
-      <div className="text-center mb-2 z-20">
-        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-          <span className="text-white text-sm font-medium">
-            Showing {currentIndex + 1} of {clientProfiles.length}
-          </span>
-        </div>
-      </div>
+    <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
 
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
@@ -361,16 +331,17 @@ export function ClientSwipeContainer({
         )}
       </AnimatePresence>
 
-      {/* Cards Container with Fixed Height */}
-      <div className="relative h-[650px] w-full max-w-md mx-auto">
-        
-        <AnimatePresence mode="popLayout">
-          {/* Current card - swipes out with rotation and fade */}
+      {/* Single Card Container - No infinite scrolling */}
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '550px' }}>
+        <AnimatePresence mode="wait">
           {currentClient && (
             <motion.div
               key={currentClient.user_id}
-              initial={{ scale: 0.95, opacity: 0.7, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{
+                scale: 1,
+                opacity: 1
+              }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
                 opacity: 0,
@@ -386,15 +357,13 @@ export function ClientSwipeContainer({
               }}
               transition={{
                 type: "spring",
-                stiffness: 200,
-                damping: 20,
-                mass: 0.8
+                stiffness: 300,
+                damping: 30,
+                mass: 0.7
               }}
-              className="absolute inset-0 shadow-2xl"
+              className="w-full h-full"
               style={{
-                willChange: 'transform, opacity',
-                zIndex: 10,
-                filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))'
+                willChange: 'transform, opacity'
               }}
             >
               <ClientProfileCard
@@ -411,67 +380,119 @@ export function ClientSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Modern 3-Button Action Layout */}
-      <motion.div 
-        className="flex justify-center items-center gap-5 mt-6 mb-4"
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        {/* Pass Button (X) - Modern Red */}
-        <motion.div 
-          whileHover={{ scale: 1.08, y: -2 }} 
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="relative w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-[0_8px_24px_rgba(239,68,68,0.35)] hover:shadow-[0_12px_32px_rgba(239,68,68,0.45)] transition-all duration-300 p-0 border-2 border-white/20"
-            onClick={() => handleSwipe('left')}
-            disabled={swipeMutation.isPending || !currentClient}
-            aria-label="Pass"
+      {/* Enhanced 3D Bottom Action Buttons - Fixed positioning without backdrop blur */}
+      <div className="fixed bottom-20 left-0 right-0 z-50">
+        <div className="max-w-md mx-auto pb-4 pt-8">
+          <motion.div
+            className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center px-4"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
           >
-            <X className="w-7 h-7 stroke-[3]" />
-          </Button>
-        </motion.div>
+            {/* Dislike Button - 3D Enhanced */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                className="relative w-16 h-16 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] transform-gpu"
+                onClick={() => handleSwipe('left')}
+                disabled={swipeMutation.isPending || !currentClient}
+                aria-label="Pass"
+              >
+                <X className="w-8 h-8 stroke-[3]" />
+              </Button>
+            </motion.div>
 
-        {/* Return Button - Modern Blue/Purple */}
-        <motion.div 
-          whileHover={{ scale: 1.08, y: -2 }} 
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="relative w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-[0_8px_24px_rgba(59,130,246,0.35)] hover:shadow-[0_12px_32px_rgba(59,130,246,0.45)] transition-all duration-300 p-0 border-2 border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-            disabled={swipeMutation.isPending || !currentClient || currentIndex === 0}
-            aria-label="Go Back"
-          >
-            <RotateCcw className="w-6 h-6 stroke-[2.5]" />
-          </Button>
-        </motion.div>
+            {/* Insights Button */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                className="relative w-14 h-14 rounded-full bg-white border-4 border-blue-500 text-blue-500 hover:bg-gradient-to-br hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(59,130,246,0.3),0_2px_8px_rgba(59,130,246,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(59,130,246,0.4),0_4px_12px_rgba(59,130,246,0.3)] transform-gpu"
+                onClick={() => handleInsights(currentClient.user_id)}
+                disabled={swipeMutation.isPending || !currentClient}
+                aria-label="View insights"
+              >
+                <Eye className="w-6 h-6 stroke-[2.5]" />
+              </Button>
+            </motion.div>
 
-        {/* Like Button (Heart) - Modern Orange/Pink Gradient */}
-        <motion.div 
-          whileHover={{ scale: 1.08, y: -2 }} 
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          <Button
-            size="lg"
-            variant="ghost"
-            className="relative w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 text-white shadow-[0_8px_24px_rgba(251,146,60,0.4)] hover:shadow-[0_12px_32px_rgba(251,146,60,0.5)] transition-all duration-300 p-0 border-2 border-white/20"
-            onClick={() => handleSwipe('right')}
-            disabled={swipeMutation.isPending || !currentClient}
-            aria-label="Like"
-          >
-            <Heart className="w-7 h-7 fill-white stroke-white stroke-[2]" />
-          </Button>
-        </motion.div>
-      </motion.div>
+            {/* Undo Button - 3D Enhanced (Center) */}
+            <motion.div
+              whileHover={{ scale: canUndo ? 1.1 : 1 }}
+              whileTap={{ scale: canUndo ? 0.9 : 1 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                onClick={() => {
+                  if (canUndo) {
+                    undoLastSwipe();
+                  }
+                }}
+                disabled={!canUndo || isUndoing}
+                className={`relative w-14 h-14 rounded-full transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(0,0,0,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] transform-gpu ${
+                  canUndo 
+                    ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white border-4 border-yellow-300 hover:from-yellow-500 hover:to-amber-600 hover:border-yellow-400 hover:shadow-[0_12px_24px_rgba(251,191,36,0.5),0_4px_12px_rgba(251,191,36,0.3),0_0_20px_rgba(251,191,36,0.4)] hover:scale-110' 
+                    : 'bg-gray-300 border-4 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
+                }`}
+                aria-label="Undo last swipe"
+              >
+                <motion.div
+                  animate={{ rotate: isUndoing ? 360 : 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <RotateCcw className="w-7 h-7 stroke-[3]" />
+                </motion.div>
+              </Button>
+            </motion.div>
+
+            {/* Message Button */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                className={`relative w-14 h-14 rounded-full border-4 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(0,0,0,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] transform-gpu ${
+                  hasPremiumMessaging 
+                    ? 'bg-gradient-to-br from-green-500 to-green-600 text-white border-green-300 hover:from-green-600 hover:to-green-700 hover:shadow-[0_12px_24px_rgba(34,197,94,0.4),0_4px_12px_rgba(34,197,94,0.3)]' 
+                    : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white border-orange-300 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_24px_rgba(249,115,22,0.4),0_4px_12px_rgba(249,115,22,0.3)]'
+                }`}
+                onClick={() => handleStartConversation(currentClient.user_id)}
+                disabled={swipeMutation.isPending || !currentClient}
+                aria-label="Send message"
+              >
+                <MessageCircle className="w-6 h-6 stroke-[2.5]" />
+              </Button>
+            </motion.div>
+            
+            {/* Like Button - 3D Enhanced (Largest) */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                className="relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 text-white border-4 border-orange-300 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 hover:border-orange-400 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(249,115,22,0.4),0_2px_8px_rgba(249,115,22,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),0_0_30px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_24px_rgba(249,115,22,0.5),0_4px_12px_rgba(249,115,22,0.4),0_0_40px_rgba(249,115,22,0.3)] transform-gpu animate-pulse-subtle"
+                onClick={() => handleSwipe('right')}
+                disabled={swipeMutation.isPending || !currentClient}
+                aria-label="Like"
+              >
+                <Heart className="w-10 h-10 fill-current drop-shadow-lg" />
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
 
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
