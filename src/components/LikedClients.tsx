@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Users, Search, MapPin } from "lucide-react";
+import { Heart, MessageSquare, Users, Search, MapPin, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,7 +43,7 @@ export function LikedClients() {
   const startConversation = useStartConversation();
   const { canStartNewConversation } = useMessagingQuota();
 
-  const { data: likedClients = [], isLoading } = useQuery({
+  const { data: likedClients = [], isLoading, refetch } = useQuery({
     queryKey: ['liked-clients', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -105,6 +105,8 @@ export function LikedClients() {
       }) as LikedClient[];
     },
     enabled: !!user?.id,
+    staleTime: 0, // Always refetch to get latest profile updates
+    refetchInterval: 30000, // Refetch every 30 seconds for profile updates
   });
 
   const removeLikeMutation = useMutation({
@@ -159,7 +161,7 @@ export function LikedClients() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-background">
+    <div className="w-full min-h-screen overflow-y-auto bg-background">
       <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl pb-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -188,9 +190,21 @@ export function LikedClients() {
                 className="pl-9 sm:pl-10 h-10 sm:h-11"
               />
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
-              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-medium">{filteredClients.length} clients</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="font-medium">{filteredClients.length} clients</span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => refetch()}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
             </div>
           </div>
         </motion.div>
