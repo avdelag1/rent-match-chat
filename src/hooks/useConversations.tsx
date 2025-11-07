@@ -35,67 +35,95 @@ export function useConversations() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // OPTIMIZED: Single query with joins instead of N+1 queries
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
-          owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
-          client_role:user_roles!conversations_client_id_fkey(role),
-          owner_role:user_roles!conversations_owner_id_fkey(role)
-        `)
-        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-        .order('last_message_at', { ascending: false, nullsFirst: false });
+      try {
+        // OPTIMIZED: Single query with joins instead of N+1 queries
+        const { data, error } = await supabase
+          .from('conversations')
+          .select(`
+            *,
+            client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
+            owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
+            client_role:user_roles!conversations_client_id_fkey(role),
+            owner_role:user_roles!conversations_owner_id_fkey(role)
+          `)
+          .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
+          .order('last_message_at', { ascending: false, nullsFirst: false });
 
-      if (error) throw error;
-
-      // Get all conversation IDs for batch message query
-      const conversationIds = (data || []).map(c => c.id);
-
-      // OPTIMIZED: Single query for all last messages instead of N queries
-      const { data: messagesData } = await supabase
-        .from('conversation_messages')
-        .select('conversation_id, message_text, created_at, sender_id')
-        .in('conversation_id', conversationIds)
-        .order('created_at', { ascending: false });
-
-      // Create a map of conversation_id to last message
-      const lastMessagesMap = new Map();
-      messagesData?.forEach(msg => {
-        if (!lastMessagesMap.has(msg.conversation_id)) {
-          lastMessagesMap.set(msg.conversation_id, msg);
+        if (error) {
+          // Gracefully handle auth errors
+          if (error.code === '42501' || error.code === 'PGRST301') {
+            console.warn('[useConversations] Auth check failed, returning empty conversations');
+            return [];
+          }
+          throw error;
         }
-      });
 
-      // Transform data to include other_user and last_message
-      const conversationsWithProfiles = (data || []).map((conversation: any) => {
-        const isClient = conversation.client_id === user.id;
-        const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
-        const otherUserRole = isClient ? conversation.owner_role?.role : conversation.client_role?.role;
+        // Defensive null check
+        if (!data) return [];
 
-        return {
-          id: conversation.id,
-          client_id: conversation.client_id,
-          owner_id: conversation.owner_id,
-          listing_id: conversation.listing_id,
-          last_message_at: conversation.last_message_at,
-          status: conversation.status,
-          created_at: conversation.created_at,
-          updated_at: conversation.updated_at,
-          other_user: otherUserProfile ? {
-            ...otherUserProfile,
-            role: otherUserRole || 'client'
-          } : undefined,
-          last_message: lastMessagesMap.get(conversation.id)
-        };
-      });
+        // Get all conversation IDs for batch message query
+        const conversationIds = data.map(c => c.id);
 
-      return conversationsWithProfiles;
+        if (conversationIds.length === 0) return [];
+
+        // OPTIMIZED: Single query for all last messages instead of N queries
+        const { data: messagesData } = await supabase
+          .from('conversation_messages')
+          .select('conversation_id, message_text, created_at, sender_id')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
+
+        // Create a map of conversation_id to last message
+        const lastMessagesMap = new Map();
+        messagesData?.forEach(msg => {
+          if (!lastMessagesMap.has(msg.conversation_id)) {
+            lastMessagesMap.set(msg.conversation_id, msg);
+          }
+        });
+
+        // Transform data to include other_user and last_message
+        const conversationsWithProfiles = data.map((conversation: any) => {
+          const isClient = conversation.client_id === user.id;
+          const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
+          const otherUserRole = isClient ? conversation.owner_role?.role : conversation.client_role?.role;
+
+          return {
+            id: conversation.id,
+            client_id: conversation.client_id,
+            owner_id: conversation.owner_id,
+            listing_id: conversation.listing_id,
+            last_message_at: conversation.last_message_at,
+            status: conversation.status,
+            created_at: conversation.created_at,
+            updated_at: conversation.updated_at,
+            other_user: otherUserProfile ? {
+              ...otherUserProfile,
+              role: otherUserRole || 'client'
+            } : undefined,
+            last_message: lastMessagesMap.get(conversation.id)
+          };
+        });
+
+        return conversationsWithProfiles;
+      } catch (error: any) {
+        // Better error handling with user-friendly messages
+        console.error('[useConversations] Error fetching conversations:', error.message);
+        
+        // For temporary auth issues, return empty array to avoid blocking UI
+        if (error.message?.includes('JWT') || error.message?.includes('auth')) {
+          console.warn('[useConversations] Auth error detected, returning empty conversations');
+          return [];
+        }
+        
+        throw error;
+      }
     },
     enabled: !!user?.id,
     // Add staleTime for better caching
     staleTime: 30000, // 30 seconds
+    // Add retry logic for temporary failures
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
   });
 }
 

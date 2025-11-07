@@ -20,6 +20,7 @@ import { PropertyFields } from '@/components/listing-fields/PropertyFields';
 import { MotorcycleFields } from '@/components/listing-fields/MotorcycleFields';
 import { BicycleFields } from '@/components/listing-fields/BicycleFields';
 import { YachtFields } from '@/components/listing-fields/YachtFields';
+import { validateImageFile, formatFileSize } from '@/utils/fileValidation';
 
 interface PropertyFormProps {
   isOpen: boolean;
@@ -463,10 +464,12 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
         for (const file of files) {
           console.log('📸 Processing file:', file.name, 'Size:', file.size);
 
-          if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          // Use centralized validation
+          const validation = validateImageFile(file);
+          if (!validation.isValid) {
             toast({
-              title: "File Too Large",
-              description: `${file.name} is too large. Maximum size is 10MB.`,
+              title: "Invalid File",
+              description: `${file.name}: ${validation.error}`,
               variant: "destructive"
             });
             continue;
