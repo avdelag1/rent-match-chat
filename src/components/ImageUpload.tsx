@@ -170,7 +170,7 @@ export function ImageUpload({
                 Drop images here or click to upload
               </p>
               <p className="text-xs text-muted-foreground">
-                PNG, JPG, WebP up to {formatFileSize(FILE_SIZE_LIMITS.IMAGE_MAX_SIZE)} ({images.length}/{maxImages} images)
+                PNG, JPG, WebP, GIF up to {formatFileSize(FILE_SIZE_LIMITS.IMAGE_MAX_SIZE)} ({images.length}/{maxImages} images)
               </p>
             </div>
             <Button

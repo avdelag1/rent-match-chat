@@ -1,5 +1,5 @@
--- Critical RLS and Race Condition Fixes
--- This migration consolidates all profile RLS policies and adds constraints to prevent duplicate matches/likes
+-- Consolidate RLS Policies for Profiles Table
+-- This migration drops all conflicting policies and creates a clean set
 
 -- =============================================
 -- PART 1: DROP ALL CONFLICTING PROFILE POLICIES
@@ -25,39 +25,64 @@ DROP POLICY IF EXISTS "Admins can manage all user profiles" ON public.profiles;
 DROP POLICY IF EXISTS "Authenticated users can view public profiles" ON public.profiles;
 DROP POLICY IF EXISTS "Authenticated users can view active client profiles" ON public.profiles;
 DROP POLICY IF EXISTS "Clients can view owner profiles" ON public.profiles;
+DROP POLICY IF EXISTS "users_view_own_profile" ON public.profiles;
+DROP POLICY IF EXISTS "users_view_public_profiles" ON public.profiles;
+DROP POLICY IF EXISTS "users_update_own_profile" ON public.profiles;
+DROP POLICY IF EXISTS "users_insert_own_profile" ON public.profiles;
+DROP POLICY IF EXISTS "Limited profile visibility for matching" ON public.profiles;
 
 -- =============================================
--- PART 2: CREATE ONE CLEAN SET OF PROFILE POLICIES
+-- PART 2: CREATE 4 CLEAN, NON-CONFLICTING POLICIES
 -- =============================================
 
--- Users can view their OWN profile (full data)
-CREATE POLICY "users_view_own_profile" ON public.profiles
-  FOR SELECT 
+-- Policy 1: Users can select their own profile
+CREATE POLICY "users_select_own_profile"
+  ON public.profiles FOR SELECT
   USING (auth.uid() = id);
 
--- Users can view OTHER active profiles (limited public data)
--- This allows matching and discovery without exposing private information
-CREATE POLICY "users_view_public_profiles" ON public.profiles
-  FOR SELECT 
+-- Policy 2: Users can insert their own profile
+CREATE POLICY "users_insert_own_profile"
+  ON public.profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+-- Policy 3: Users can update their own profile
+CREATE POLICY "users_update_own_profile"
+  ON public.profiles FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- Policy 4: Users can select other active profiles for matching
+CREATE POLICY "users_select_active_profiles"
+  ON public.profiles FOR SELECT
   USING (
-    auth.uid() IS NOT NULL AND 
-    is_active = true AND 
+    auth.uid() IS NOT NULL AND
+    is_active = true AND
+    onboarding_completed = true AND
     auth.uid() != id
   );
 
--- Users can update ONLY their own profile
-CREATE POLICY "users_update_own_profile" ON public.profiles
-  FOR UPDATE 
-  USING (auth.uid() = id) 
-  WITH CHECK (auth.uid() = id);
+-- =============================================
+-- PART 3: RECREATE PROFILES_PUBLIC VIEW WITH SECURITY_INVOKER
+-- =============================================
 
--- Users can insert ONLY their own profile
-CREATE POLICY "users_insert_own_profile" ON public.profiles
-  FOR INSERT 
-  WITH CHECK (auth.uid() = id);
+-- Drop existing view if it exists
+DROP VIEW IF EXISTS public.profiles_public;
+
+-- Create view with security_invoker for proper RLS enforcement
+CREATE VIEW public.profiles_public
+WITH (security_invoker=true)
+AS SELECT 
+  id, full_name, age, bio, occupation, nationality, monthly_income, location,
+  interests, preferred_activities, lifestyle_tags, images, verified,
+  latitude, longitude, avatar_url, has_pets, smoking
+FROM public.profiles 
+WHERE is_active = true AND onboarding_completed = true;
+
+-- Grant access to authenticated users
+GRANT SELECT ON public.profiles_public TO authenticated;
 
 -- =============================================
--- PART 3: FIX LIKES TABLE - PREVENT DUPLICATES
+-- PART 4: FIX LIKES TABLE - PREVENT DUPLICATES
 -- =============================================
 
 -- Drop existing unique constraint if it exists
@@ -75,7 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_likes_direction ON public.likes(direction);
 CREATE INDEX IF NOT EXISTS idx_likes_created_at ON public.likes(created_at DESC);
 
 -- =============================================
--- PART 4: FIX MATCHES TABLE - PREVENT DUPLICATES
+-- PART 5: FIX MATCHES TABLE - PREVENT DUPLICATES
 -- =============================================
 
 -- Drop existing unique constraint if it exists
@@ -105,27 +130,3 @@ CREATE INDEX IF NOT EXISTS idx_matches_is_mutual ON public.matches(is_mutual) WH
 CREATE INDEX IF NOT EXISTS idx_matches_status ON public.matches(status);
 CREATE INDEX IF NOT EXISTS idx_matches_created_at ON public.matches(created_at DESC);
 
--- =============================================
--- PART 5: COMMENTS FOR DOCUMENTATION
--- =============================================
-
-COMMENT ON POLICY "users_view_own_profile" ON public.profiles IS 
-  'Users can view their own profile with full access to all fields including private data';
-
-COMMENT ON POLICY "users_view_public_profiles" ON public.profiles IS 
-  'Users can view other active profiles for matching and discovery. Private fields are filtered via profiles_public view';
-
-COMMENT ON POLICY "users_update_own_profile" ON public.profiles IS 
-  'Users can only update their own profile data';
-
-COMMENT ON POLICY "users_insert_own_profile" ON public.profiles IS 
-  'Users can only insert their own profile during signup';
-
-COMMENT ON INDEX idx_likes_unique_constraint IS 
-  'Prevents duplicate likes from the same user to the same target with the same direction';
-
-COMMENT ON INDEX idx_matches_unique_with_listing IS 
-  'Prevents duplicate matches between the same client, owner, and listing (when listing_id is not NULL)';
-
-COMMENT ON INDEX idx_matches_unique_without_listing IS 
-  'Prevents duplicate matches between the same client and owner for profile-to-profile matches (when listing_id is NULL)';
