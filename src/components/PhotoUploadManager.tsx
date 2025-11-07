@@ -197,7 +197,7 @@ export function PhotoUploadManager({
                     {currentPhotos.length === 0 ? 'Add Your Photos' : 'Add More Photos'}
                   </p>
                   <p className="text-xs sm:text-sm text-white/60">
-                    Tap to browse • JPG, PNG, WebP • Max {formatFileSize(FILE_SIZE_LIMITS.IMAGE_MAX_SIZE)}
+                    Tap to browse • JPG, PNG, WebP, GIF • Max {formatFileSize(FILE_SIZE_LIMITS.IMAGE_MAX_SIZE)}
                   </p>
                 </div>
                 <Button 
