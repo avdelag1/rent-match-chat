@@ -189,15 +189,6 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
       return;
     }
 
-    if (!allowedTypes.includes(file.type)) {
-      toast({
-        title: "Invalid File Type",
-        description: "Please upload PDF, image, or Word document files only.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     if (!selectedDocumentType) {
       toast({
         title: "Select Document Type",

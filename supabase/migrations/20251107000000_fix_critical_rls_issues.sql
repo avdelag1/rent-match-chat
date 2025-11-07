@@ -82,10 +82,20 @@ CREATE INDEX IF NOT EXISTS idx_likes_created_at ON public.likes(created_at DESC)
 ALTER TABLE public.matches DROP CONSTRAINT IF EXISTS matches_client_id_owner_id_listing_id_key;
 ALTER TABLE public.matches DROP CONSTRAINT IF EXISTS unique_match_combination;
 
--- Create unique index to prevent duplicate matches (enforce at DB level)
--- Handle NULL listing_id case by using COALESCE with a placeholder UUID
-CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_unique_constraint
-  ON public.matches(client_id, owner_id, COALESCE(listing_id, '00000000-0000-0000-0000-000000000000'::uuid));
+-- Drop existing indexes if they exist
+DROP INDEX IF EXISTS idx_matches_unique_constraint;
+DROP INDEX IF EXISTS idx_matches_unique_with_listing;
+DROP INDEX IF EXISTS idx_matches_unique_without_listing;
+
+-- Create unique index for matches WITH listing_id
+CREATE UNIQUE INDEX idx_matches_unique_with_listing
+  ON public.matches(client_id, owner_id, listing_id)
+  WHERE listing_id IS NOT NULL;
+
+-- Create unique index for matches WITHOUT listing_id (profile-to-profile matches)
+CREATE UNIQUE INDEX idx_matches_unique_without_listing
+  ON public.matches(client_id, owner_id)
+  WHERE listing_id IS NULL;
 
 -- Add indexes for performance
 CREATE INDEX IF NOT EXISTS idx_matches_client_id ON public.matches(client_id);
@@ -114,5 +124,8 @@ COMMENT ON POLICY "users_insert_own_profile" ON public.profiles IS
 COMMENT ON INDEX idx_likes_unique_constraint IS 
   'Prevents duplicate likes from the same user to the same target with the same direction';
 
-COMMENT ON INDEX idx_matches_unique_constraint IS 
-  'Prevents duplicate matches between the same client, owner, and listing combination';
+COMMENT ON INDEX idx_matches_unique_with_listing IS 
+  'Prevents duplicate matches between the same client, owner, and listing (when listing_id is not NULL)';
+
+COMMENT ON INDEX idx_matches_unique_without_listing IS 
+  'Prevents duplicate matches between the same client and owner for profile-to-profile matches (when listing_id is NULL)';
