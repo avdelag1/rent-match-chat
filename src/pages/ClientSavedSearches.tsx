@@ -4,7 +4,7 @@ import { SavedSearches } from "@/components/SavedSearches";
 const ClientSavedSearches = () => {
   return (
     <DashboardLayout userRole="client">
-      <div className="p-8">
+      <div className="w-full h-full overflow-y-auto p-8">
         <div className="max-w-4xl mx-auto">
           <SavedSearches userRole="client" />
         </div>

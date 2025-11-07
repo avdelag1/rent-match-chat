@@ -28,7 +28,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
   return (
     <DashboardLayout userRole="client">
       <PageTransition>
-        <div className="w-full min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="w-full h-full overflow-y-auto bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 flex items-center justify-center p-4">
           <div className="w-full max-w-2xl">
             <TinderentSwipeContainer
               onListingTap={handleListingTap}
