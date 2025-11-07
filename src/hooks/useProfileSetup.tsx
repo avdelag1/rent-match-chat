@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
+import { retryWithBackoff, sleep } from '@/utils/retryUtils';
 
 interface CreateProfileData {
   id: string;
@@ -22,64 +23,55 @@ export function useProfileSetup() {
     try {
       // Check if profile already exists with retry logic
       let existingProfile = null;
-      let retryCount = 0;
-      const maxRetries = 3;
 
-      while (retryCount < maxRetries) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', user.id)
-            .maybeSingle();
+      try {
+        existingProfile = await retryWithBackoff(
+          async () => {
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', user.id)
+              .maybeSingle();
 
-          if (error) {
-            console.warn(`[ProfileSetup] Profile check attempt ${retryCount + 1} failed:`, error);
-            retryCount++;
-            if (retryCount < maxRetries) {
-              await new Promise(resolve => setTimeout(resolve, retryCount * 500)); // Exponential backoff
-              continue;
-            }
-            throw error;
+            if (error) throw error;
+            return data;
+          },
+          3,
+          500,
+          (attempt, error) => {
+            console.warn(`[ProfileSetup] Profile check attempt ${attempt} failed:`, error);
           }
-
-          existingProfile = data;
-          break;
-        } catch (checkError) {
-          if (retryCount >= maxRetries - 1) throw checkError;
-          retryCount++;
-          await new Promise(resolve => setTimeout(resolve, retryCount * 500));
-        }
+        );
+      } catch (error) {
+        console.error('[ProfileSetup] Failed to check profile after retries:', error);
+        // Continue to create profile
       }
 
       if (existingProfile) {
         // Ensure role exists in user_roles table with retry
-        let roleCreated = false;
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          const { error: roleError } = await supabase.rpc('upsert_user_role', {
-            p_user_id: user.id,
-            p_role: role
-          });
-          
-          if (!roleError) {
-            roleCreated = true;
-            break;
-          }
-          
-          console.warn(`[ProfileSetup] Role upsert attempt ${attempt} failed:`, roleError);
-          if (attempt < 3) {
-            await new Promise(resolve => setTimeout(resolve, attempt * 300));
-          }
-        }
-        
-        if (!roleCreated) {
-          console.error('[ProfileSetup] Failed to ensure role after 3 attempts');
+        try {
+          await retryWithBackoff(
+            async () => {
+              const { error } = await supabase.rpc('upsert_user_role', {
+                p_user_id: user.id,
+                p_role: role
+              });
+              if (error) throw error;
+            },
+            3,
+            300,
+            (attempt, error) => {
+              console.warn(`[ProfileSetup] Role upsert attempt ${attempt} failed:`, error);
+            }
+          );
+        } catch (error) {
+          console.error('[ProfileSetup] Failed to ensure role after retries:', error);
         }
         
         // CRITICAL: Invalidate cache for existing profiles too!
         console.log('[ProfileSetup] Invalidating role cache for existing profile:', user.id);
         queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await sleep(100);
         console.log('[ProfileSetup] Cache invalidated for existing profile');
         
         return existingProfile;
@@ -96,37 +88,34 @@ export function useProfileSetup() {
 
       // Use upsert to handle race conditions with retry logic
       let newProfile = null;
-      let profileError = null;
       
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .upsert([{
-            ...profileData,
-            is_active: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }], {
-            onConflict: 'id'
-          })
-          .select()
-          .single();
+      try {
+        newProfile = await retryWithBackoff(
+          async () => {
+            const { data, error } = await supabase
+              .from('profiles')
+              .upsert([{
+                ...profileData,
+                is_active: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }], {
+                onConflict: 'id'
+              })
+              .select()
+              .single();
 
-        if (!error) {
-          newProfile = data;
-          break;
-        }
-
-        profileError = error;
-        console.warn(`[ProfileSetup] Profile creation attempt ${attempt} failed:`, error);
-        
-        if (attempt < 3) {
-          await new Promise(resolve => setTimeout(resolve, attempt * 500));
-        }
-      }
-
-      if (profileError && !newProfile) {
-        console.error('[ProfileSetup] Error creating profile after 3 attempts:', profileError);
+            if (error) throw error;
+            return data;
+          },
+          3,
+          500,
+          (attempt, error) => {
+            console.warn(`[ProfileSetup] Profile creation attempt ${attempt} failed:`, error);
+          }
+        );
+      } catch (profileError: any) {
+        console.error('[ProfileSetup] Error creating profile after retries:', profileError);
         toast({
           title: "Profile Creation Failed",
           description: "Failed to create user profile. Please try signing in again.",
@@ -136,35 +125,36 @@ export function useProfileSetup() {
       }
 
       // Add small delay to ensure profile is fully created
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await sleep(100);
 
       // Retry logic for role creation (up to 3 attempts)
       let roleCreated = false;
       let lastError = null;
       
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        const { error: roleError } = await supabase.rpc('upsert_user_role', {
-          p_user_id: user.id,
-          p_role: role
-        });
-
-        if (!roleError) {
-          roleCreated = true;
-          break;
-        }
-
-        lastError = roleError;
-        console.error(`Role creation attempt ${attempt} failed:`, {
-          message: roleError.message,
-          details: roleError.details,
-          hint: roleError.hint,
-          code: roleError.code
-        });
-
-        if (attempt < 3) {
-          // Wait before retrying (exponential backoff)
-          await new Promise(resolve => setTimeout(resolve, attempt * 200));
-        }
+      try {
+        await retryWithBackoff(
+          async () => {
+            const { error: roleError } = await supabase.rpc('upsert_user_role', {
+              p_user_id: user.id,
+              p_role: role
+            });
+            if (roleError) throw roleError;
+          },
+          3,
+          200,
+          (attempt, error) => {
+            lastError = error;
+            console.error(`Role creation attempt ${attempt} failed:`, {
+              message: error.message,
+              details: error.details,
+              hint: error.hint,
+              code: error.code
+            });
+          }
+        );
+        roleCreated = true;
+      } catch (error) {
+        lastError = error;
       }
 
       if (!roleCreated) {
@@ -184,7 +174,7 @@ export function useProfileSetup() {
       queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
       
       // Add small delay to ensure cache invalidation propagates
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await sleep(100);
       console.log('[ProfileSetup] Cache invalidated, profile setup complete');
       
       return newProfile;

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { PG_ERROR_CODES, sleep } from '@/utils/retryUtils';
 
 interface SwipeWithMatchOptions {
   onMatch?: (clientProfile: any, ownerProfile: any) => void;
@@ -132,7 +133,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
             if (matchError) {
               // Handle duplicate key violation from race condition
-              if (matchError.code === '23505') {
+              if (matchError.code === PG_ERROR_CODES.DUPLICATE_KEY) {
                 console.log('[useSwipeWithMatch] Match already exists (race condition), fetching');
                 const { data: fetchedMatch } = await supabase
                   .from('matches')
@@ -177,7 +178,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               conversationError = error;
               console.warn(`[useSwipeWithMatch] Conversation creation attempt ${attempt} failed:`, error);
               if (attempt < 3) {
-                await new Promise(resolve => setTimeout(resolve, attempt * 300));
+                await sleep(attempt * 300);
               }
             }
 

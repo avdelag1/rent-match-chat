@@ -45,7 +45,7 @@ export function PhotoUploadManager({
       
       for (const file of filesToUpload) {
         // Validate MIME type
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!allowedTypes.includes(file.type.toLowerCase())) {
           toast({
             title: "Invalid File Type",

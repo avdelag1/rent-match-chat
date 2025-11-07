@@ -29,7 +29,7 @@ export function ImageUpload({
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
       // Validate file type - only allow images
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
       if (!allowedTypes.includes(file.type.toLowerCase())) {
         throw new Error('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
       }

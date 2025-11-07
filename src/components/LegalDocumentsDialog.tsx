@@ -191,7 +191,6 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
-      'image/jpg',
       'image/png',
       'image/webp',
       'application/msword',

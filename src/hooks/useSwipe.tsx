@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { PG_ERROR_CODES, sleep } from '@/utils/retryUtils';
 
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -34,7 +35,7 @@ export function useSwipe() {
         retryCount++;
         console.warn(`[useSwipe] Conversation creation attempt ${retryCount} failed:`, error);
         if (retryCount < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, retryCount * 300));
+          await sleep(retryCount * 300);
         }
       }
     }
@@ -163,7 +164,7 @@ export function useSwipe() {
 
                 // Handle duplicate key violation gracefully
                 if (matchError) {
-                  if (matchError.code === '23505') {
+                  if (matchError.code === PG_ERROR_CODES.DUPLICATE_KEY) {
                     // Duplicate key - match was created by another request
                     console.log('[useSwipe] Match already exists (race condition), fetching existing match');
                     const { data: fetchedMatch } = await supabase
@@ -240,7 +241,7 @@ export function useSwipe() {
 
                 // Handle duplicate key violation gracefully
                 if (matchError) {
-                  if (matchError.code === '23505') {
+                  if (matchError.code === PG_ERROR_CODES.DUPLICATE_KEY) {
                     console.log('[useSwipe] Profile match already exists, fetching existing');
                     const { data: fetchedMatch } = await supabase
                       .from('matches')
