@@ -44,10 +44,24 @@ export function PhotoUploadManager({
       const newUrls: string[] = [];
       
       for (const file of filesToUpload) {
-        if (!file.type.startsWith('image/')) {
+        // Validate MIME type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowedTypes.includes(file.type.toLowerCase())) {
           toast({
-            title: "Invalid File",
-            description: `${file.name} is not an image file.`,
+            title: "Invalid File Type",
+            description: `${file.name} is not a supported image format. Please use JPEG, PNG, WebP, or GIF.`,
+            variant: "destructive"
+          });
+          continue;
+        }
+
+        // Validate file extension as additional security check
+        const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExt || !allowedExtensions.includes(fileExt)) {
+          toast({
+            title: "Invalid File Extension",
+            description: `${file.name} has an invalid extension. Only .jpg, .jpeg, .png, .webp, and .gif files are allowed.`,
             variant: "destructive"
           });
           continue;

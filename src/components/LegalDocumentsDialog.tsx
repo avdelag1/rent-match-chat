@@ -177,30 +177,43 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (20MB limit)
+    // Validate file size (20MB limit for legal documents)
     if (file.size > 20 * 1024 * 1024) {
       toast({
         title: "File Too Large",
-        description: "Please select a file smaller than 20MB.",
+        description: "Legal documents must be smaller than 20MB.",
         variant: "destructive"
       });
       return;
     }
 
-    // Validate file type
+    // Validate MIME type
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
+      'image/jpg',
       'image/png',
       'image/webp',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
       toast({
         title: "Invalid File Type",
-        description: "Please upload PDF, image, or Word document files only.",
+        description: "Please upload PDF, image (JPEG, PNG, WebP), or Word document files only.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file extension as additional security check
+    const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'doc', 'docx'];
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExt || !allowedExtensions.includes(fileExt)) {
+      toast({
+        title: "Invalid File Extension",
+        description: "Only .pdf, .jpg, .jpeg, .png, .webp, .doc, and .docx files are allowed.",
         variant: "destructive"
       });
       return;

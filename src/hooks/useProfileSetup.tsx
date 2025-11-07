@@ -20,22 +20,60 @@ export function useProfileSetup() {
     setIsCreatingProfile(true);
     
     try {
-      // Check if profile already exists
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle();
+      // Check if profile already exists with retry logic
+      let existingProfile = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount < maxRetries) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          if (error) {
+            console.warn(`[ProfileSetup] Profile check attempt ${retryCount + 1} failed:`, error);
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await new Promise(resolve => setTimeout(resolve, retryCount * 500)); // Exponential backoff
+              continue;
+            }
+            throw error;
+          }
+
+          existingProfile = data;
+          break;
+        } catch (checkError) {
+          if (retryCount >= maxRetries - 1) throw checkError;
+          retryCount++;
+          await new Promise(resolve => setTimeout(resolve, retryCount * 500));
+        }
+      }
 
       if (existingProfile) {
-      // Ensure role exists in user_roles table
-      const { error: roleError } = await supabase.rpc('upsert_user_role', {
-        p_user_id: user.id,
-        p_role: role
-      });
+        // Ensure role exists in user_roles table with retry
+        let roleCreated = false;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          const { error: roleError } = await supabase.rpc('upsert_user_role', {
+            p_user_id: user.id,
+            p_role: role
+          });
+          
+          if (!roleError) {
+            roleCreated = true;
+            break;
+          }
+          
+          console.warn(`[ProfileSetup] Role upsert attempt ${attempt} failed:`, roleError);
+          if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, attempt * 300));
+          }
+        }
         
-        if (roleError) {
-          console.error('Error upserting role:', roleError);
+        if (!roleCreated) {
+          console.error('[ProfileSetup] Failed to ensure role after 3 attempts');
         }
         
         // CRITICAL: Invalidate cache for existing profiles too!
@@ -54,24 +92,41 @@ export function useProfileSetup() {
         email: user.email || ''
       };
 
-      console.log('Creating new profile:', profileData);
+      console.log('[ProfileSetup] Creating new profile:', profileData);
 
-      // Use upsert to handle race conditions
-      const { data: newProfile, error } = await supabase
-        .from('profiles')
-        .upsert([{
-          ...profileData,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }], {
-          onConflict: 'id'
-        })
-        .select()
-        .single();
+      // Use upsert to handle race conditions with retry logic
+      let newProfile = null;
+      let profileError = null;
+      
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .upsert([{
+            ...profileData,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }], {
+            onConflict: 'id'
+          })
+          .select()
+          .single();
 
-      if (error) {
-        console.error('Error creating profile:', error);
+        if (!error) {
+          newProfile = data;
+          break;
+        }
+
+        profileError = error;
+        console.warn(`[ProfileSetup] Profile creation attempt ${attempt} failed:`, error);
+        
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 500));
+        }
+      }
+
+      if (profileError && !newProfile) {
+        console.error('[ProfileSetup] Error creating profile after 3 attempts:', profileError);
         toast({
           title: "Profile Creation Failed",
           description: "Failed to create user profile. Please try signing in again.",

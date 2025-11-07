@@ -28,18 +28,26 @@ export function ImageUpload({
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
-      // Validate file
-      if (!file.type.startsWith('image/')) {
-        throw new Error('Please upload an image file');
+      // Validate file type - only allow images
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedTypes.includes(file.type.toLowerCase())) {
+        throw new Error('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
       }
 
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      // Validate file extension as additional security
+      const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      if (!fileExt || !allowedExtensions.includes(fileExt)) {
+        throw new Error('Invalid file extension. Only .jpg, .jpeg, .png, .webp, and .gif files are allowed.');
+      }
+
+      // Standardized file size limit: 10MB
+      const maxSize = 10 * 1024 * 1024; // 10MB
       if (file.size > maxSize) {
-        throw new Error('Image must be less than 5MB');
+        throw new Error('Image must be less than 10MB');
       }
 
       // Generate unique filename
-      const fileExt = file.name.split('.').pop();
       const fileName = `${folder}/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
 
       // Upload to Supabase Storage
@@ -173,7 +181,7 @@ export function ImageUpload({
                 Drop images here or click to upload
               </p>
               <p className="text-xs text-muted-foreground">
-                PNG, JPG up to 5MB ({images.length}/{maxImages} images)
+                JPEG, PNG, WebP, or GIF up to 10MB ({images.length}/{maxImages} images)
               </p>
             </div>
             <Button

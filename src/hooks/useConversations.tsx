@@ -33,65 +33,94 @@ export function useConversations() {
   return useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id) {
+        console.warn('[useConversations] No authenticated user');
+        return [];
+      }
 
-      // OPTIMIZED: Single query with joins instead of N+1 queries
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
-          owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
-          client_role:user_roles!conversations_client_id_fkey(role),
-          owner_role:user_roles!conversations_owner_id_fkey(role)
-        `)
-        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-        .order('last_message_at', { ascending: false, nullsFirst: false });
+      try {
+        // OPTIMIZED: Single query with joins instead of N+1 queries
+        const { data, error } = await supabase
+          .from('conversations')
+          .select(`
+            *,
+            client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
+            owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
+            client_role:user_roles!conversations_client_id_fkey(role),
+            owner_role:user_roles!conversations_owner_id_fkey(role)
+          `)
+          .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
+          .order('last_message_at', { ascending: false, nullsFirst: false });
 
-      if (error) throw error;
-
-      // Get all conversation IDs for batch message query
-      const conversationIds = (data || []).map(c => c.id);
-
-      // OPTIMIZED: Single query for all last messages instead of N queries
-      const { data: messagesData } = await supabase
-        .from('conversation_messages')
-        .select('conversation_id, message_text, created_at, sender_id')
-        .in('conversation_id', conversationIds)
-        .order('created_at', { ascending: false });
-
-      // Create a map of conversation_id to last message
-      const lastMessagesMap = new Map();
-      messagesData?.forEach(msg => {
-        if (!lastMessagesMap.has(msg.conversation_id)) {
-          lastMessagesMap.set(msg.conversation_id, msg);
+        if (error) {
+          console.error('[useConversations] Error fetching conversations:', error);
+          // Gracefully handle RLS errors
+          if (error.code === 'PGRST116' || error.message?.includes('permission')) {
+            toast({
+              title: 'Unable to Load Conversations',
+              description: 'Please try refreshing the page.',
+              variant: 'destructive'
+            });
+          }
+          throw error;
         }
-      });
 
-      // Transform data to include other_user and last_message
-      const conversationsWithProfiles = (data || []).map((conversation: any) => {
-        const isClient = conversation.client_id === user.id;
-        const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
-        const otherUserRole = isClient ? conversation.owner_role?.role : conversation.client_role?.role;
+        // Get all conversation IDs for batch message query
+        const conversationIds = (data || []).map(c => c.id);
 
-        return {
-          id: conversation.id,
-          client_id: conversation.client_id,
-          owner_id: conversation.owner_id,
-          listing_id: conversation.listing_id,
-          last_message_at: conversation.last_message_at,
-          status: conversation.status,
-          created_at: conversation.created_at,
-          updated_at: conversation.updated_at,
-          other_user: otherUserProfile ? {
-            ...otherUserProfile,
-            role: otherUserRole || 'client'
-          } : undefined,
-          last_message: lastMessagesMap.get(conversation.id)
-        };
-      });
+        if (conversationIds.length === 0) {
+          return [];
+        }
 
-      return conversationsWithProfiles;
+        // OPTIMIZED: Single query for all last messages instead of N queries
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('conversation_messages')
+          .select('conversation_id, message_text, created_at, sender_id')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
+
+        if (messagesError) {
+          console.warn('[useConversations] Error fetching messages:', messagesError);
+          // Don't fail the whole query if messages fail
+        }
+
+        // Create a map of conversation_id to last message
+        const lastMessagesMap = new Map();
+        messagesData?.forEach(msg => {
+          if (!lastMessagesMap.has(msg.conversation_id)) {
+            lastMessagesMap.set(msg.conversation_id, msg);
+          }
+        });
+
+        // Transform data to include other_user and last_message
+        const conversationsWithProfiles = (data || []).map((conversation: any) => {
+          const isClient = conversation.client_id === user.id;
+          const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
+          const otherUserRole = isClient ? conversation.owner_role?.role : conversation.client_role?.role;
+
+          return {
+            id: conversation.id,
+            client_id: conversation.client_id,
+            owner_id: conversation.owner_id,
+            listing_id: conversation.listing_id,
+            last_message_at: conversation.last_message_at,
+            status: conversation.status,
+            created_at: conversation.created_at,
+            updated_at: conversation.updated_at,
+            other_user: otherUserProfile ? {
+              ...otherUserProfile,
+              role: otherUserRole || 'client'
+            } : undefined,
+            last_message: lastMessagesMap.get(conversation.id)
+          };
+        });
+
+        return conversationsWithProfiles;
+      } catch (error) {
+        console.error('[useConversations] Unexpected error:', error);
+        // Return empty array instead of throwing to prevent UI crashes
+        return [];
+      }
     },
     enabled: !!user?.id,
     // Add staleTime for better caching
@@ -103,21 +132,43 @@ export function useConversationMessages(conversationId: string) {
   return useQuery({
     queryKey: ['conversation-messages', conversationId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('conversation_messages')
-        .select(`
-          *,
-          sender:profiles!conversation_messages_sender_id_fkey (
-            id,
-            full_name,
-            avatar_url
-          )
-        `)
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+      if (!conversationId) {
+        console.warn('[useConversationMessages] No conversation ID provided');
+        return [];
+      }
 
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data, error } = await supabase
+          .from('conversation_messages')
+          .select(`
+            *,
+            sender:profiles!conversation_messages_sender_id_fkey (
+              id,
+              full_name,
+              avatar_url
+            )
+          `)
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: true });
+
+        if (error) {
+          console.error('[useConversationMessages] Error fetching messages:', error);
+          // Graceful degradation for permission errors
+          if (error.code === 'PGRST116' || error.message?.includes('permission')) {
+            toast({
+              title: 'Unable to Load Messages',
+              description: 'You may not have permission to view this conversation.',
+              variant: 'destructive'
+            });
+          }
+          throw error;
+        }
+        
+        return data || [];
+      } catch (error) {
+        console.error('[useConversationMessages] Unexpected error:', error);
+        return [];
+      }
     },
     enabled: !!conversationId,
   });

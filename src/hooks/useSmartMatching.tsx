@@ -620,14 +620,10 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
 
         if (profileError) {
           console.error('❌ Error fetching profiles:', profileError);
-          console.error('Error details:', JSON.stringify(profileError, null, 2));
-
-          // If RLS blocks profiles table, explain the issue
-          if (profileError.code === 'PGRST116' || profileError.message?.includes('permission')) {
-            console.error('🔒 RLS POLICY BLOCKING ACCESS to profiles table');
-            console.log('💡 You may need to adjust RLS policies to allow owners to view client profiles');
-          }
-          throw profileError;
+          
+          // Don't show RLS errors to users - they're confusing
+          // Just log for debugging and return empty array
+          return [];
         }
 
         if (!profiles?.length) {

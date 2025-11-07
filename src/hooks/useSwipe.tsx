@@ -6,6 +6,41 @@ import { toast } from '@/hooks/use-toast';
 export function useSwipe() {
   const queryClient = useQueryClient();
 
+  // Helper function to create conversation with retry logic
+  const createConversation = async (
+    matchId: string,
+    clientId: string,
+    ownerId: string,
+    listingId: string | null
+  ) => {
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries) {
+      try {
+        await supabase.from('conversations').upsert({
+          match_id: matchId,
+          client_id: clientId,
+          owner_id: ownerId,
+          listing_id: listingId,
+          status: 'active',
+          free_messaging: true
+        }, {
+          onConflict: 'client_id,owner_id',
+          ignoreDuplicates: true
+        });
+        return; // Success
+      } catch (error) {
+        retryCount++;
+        console.warn(`[useSwipe] Conversation creation attempt ${retryCount} failed:`, error);
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, retryCount * 300));
+        }
+      }
+    }
+    console.error('[useSwipe] Failed to create conversation after retries');
+  };
+
   return useMutation({
     mutationFn: async ({ targetId, direction, targetType = 'listing' }: {
       targetId: string;
@@ -100,43 +135,64 @@ export function useSwipe() {
                 .maybeSingle();
 
             if (ownerLike) {
-              // Create a match with proper conflict handling!
-              const { data: matchData, error: matchError } = await supabase
+              // Create a match with proper conflict handling using transaction-like approach
+              // First, check if match already exists to avoid duplicate key errors
+              const { data: existingMatch } = await supabase
                 .from('matches')
-                .upsert({
-                  client_id: user.id,
-                  owner_id: listing.owner_id,
-                  listing_id: targetId,
-                  client_liked_at: new Date().toISOString(),
-                  owner_liked_at: ownerLike.created_at,
-                  is_mutual: true,
-                  status: 'accepted',
-                  free_messaging: true
-                }, {
-                  onConflict: 'client_id,owner_id,listing_id',
-                  ignoreDuplicates: true
-                })
-                .select();
+                .select('id')
+                .eq('client_id', user.id)
+                .eq('owner_id', listing.owner_id)
+                .eq('listing_id', targetId)
+                .maybeSingle();
 
-              // Only show match notification if no error
-              if (!matchError && matchData?.[0]) {
-                // Create conversation for free messaging
-                await supabase.from('conversations').upsert({
-                  match_id: matchData[0].id,
-                  client_id: user.id,
-                  owner_id: listing.owner_id,
-                  listing_id: targetId,
-                  status: 'active',
-                  free_messaging: true
-                }, {
-                  onConflict: 'client_id,owner_id',
-                  ignoreDuplicates: true
-                });
-                
-                toast({
-                  title: "It's a Match! 🎉",
-                  description: "You can now message each other for free!",
-                });
+              if (!existingMatch) {
+                const { data: matchData, error: matchError } = await supabase
+                  .from('matches')
+                  .insert({
+                    client_id: user.id,
+                    owner_id: listing.owner_id,
+                    listing_id: targetId,
+                    client_liked_at: new Date().toISOString(),
+                    owner_liked_at: ownerLike.created_at,
+                    is_mutual: true,
+                    status: 'accepted',
+                    free_messaging: true
+                  })
+                  .select()
+                  .single();
+
+                // Handle duplicate key violation gracefully
+                if (matchError) {
+                  if (matchError.code === '23505') {
+                    // Duplicate key - match was created by another request
+                    console.log('[useSwipe] Match already exists (race condition), fetching existing match');
+                    const { data: fetchedMatch } = await supabase
+                      .from('matches')
+                      .select('id')
+                      .eq('client_id', user.id)
+                      .eq('owner_id', listing.owner_id)
+                      .eq('listing_id', targetId)
+                      .single();
+                    
+                    if (fetchedMatch) {
+                      // Use the existing match for conversation
+                      await createConversation(fetchedMatch.id, user.id, listing.owner_id, targetId);
+                    }
+                  } else {
+                    console.error('[useSwipe] Unexpected match creation error:', matchError);
+                  }
+                } else if (matchData) {
+                  // Successfully created new match
+                  await createConversation(matchData.id, user.id, listing.owner_id, targetId);
+                  
+                  toast({
+                    title: "It's a Match! 🎉",
+                    description: "You can now message each other for free!",
+                  });
+                }
+              } else {
+                // Match already exists, ensure conversation exists
+                await createConversation(existingMatch.id, user.id, listing.owner_id, targetId);
               }
             } else {
               // No mutual match yet, just show that we saved the like
@@ -157,43 +213,58 @@ export function useSwipe() {
               .maybeSingle();
 
             if (clientLike) {
-              // Create a match with proper conflict handling!
-              const { data: matchData, error: matchError } = await supabase
+              // Create a match with proper conflict handling
+              const { data: existingMatch } = await supabase
                 .from('matches')
-                .upsert({
-                  client_id: targetId,
-                  owner_id: user.id,
-                  listing_id: null,
-                  client_liked_at: clientLike.created_at,
-                  owner_liked_at: new Date().toISOString(),
-                  is_mutual: true,
-                  status: 'accepted',
-                  free_messaging: true
-                }, {
-                  onConflict: 'client_id,owner_id,listing_id',
-                  ignoreDuplicates: true
-                })
-                .select();
+                .select('id')
+                .eq('client_id', targetId)
+                .eq('owner_id', user.id)
+                .eq('listing_id', null)
+                .maybeSingle();
 
-              // Only show match notification if no error
-              if (!matchError && matchData?.[0]) {
-                // Create conversation for free messaging
-                await supabase.from('conversations').upsert({
-                  match_id: matchData[0].id,
-                  client_id: targetId,
-                  owner_id: user.id,
-                  listing_id: null,
-                  status: 'active',
-                  free_messaging: true
-                }, {
-                  onConflict: 'client_id,owner_id',
-                  ignoreDuplicates: true
-                });
-                
-                toast({
-                  title: "It's a Match! 🎉",
-                  description: "You can now message each other for free!",
-                });
+              if (!existingMatch) {
+                const { data: matchData, error: matchError } = await supabase
+                  .from('matches')
+                  .insert({
+                    client_id: targetId,
+                    owner_id: user.id,
+                    listing_id: null,
+                    client_liked_at: clientLike.created_at,
+                    owner_liked_at: new Date().toISOString(),
+                    is_mutual: true,
+                    status: 'accepted',
+                    free_messaging: true
+                  })
+                  .select()
+                  .single();
+
+                // Handle duplicate key violation gracefully
+                if (matchError) {
+                  if (matchError.code === '23505') {
+                    console.log('[useSwipe] Profile match already exists, fetching existing');
+                    const { data: fetchedMatch } = await supabase
+                      .from('matches')
+                      .select('id')
+                      .eq('client_id', targetId)
+                      .eq('owner_id', user.id)
+                      .maybeSingle();
+                    
+                    if (fetchedMatch) {
+                      await createConversation(fetchedMatch.id, targetId, user.id, null);
+                    }
+                  } else {
+                    console.error('[useSwipe] Unexpected profile match error:', matchError);
+                  }
+                } else if (matchData) {
+                  await createConversation(matchData.id, targetId, user.id, null);
+                  
+                  toast({
+                    title: "It's a Match! 🎉",
+                    description: "You can now message each other for free!",
+                  });
+                }
+              } else {
+                await createConversation(existingMatch.id, targetId, user.id, null);
               }
             } else {
               // No mutual match yet, just show that we saved the like

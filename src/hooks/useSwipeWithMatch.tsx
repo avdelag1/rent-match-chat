@@ -102,58 +102,87 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         }
 
         if (mutualLike) {
-          // It's a match! Create or update match record
-          const { data: matchData, error: matchError } = await supabase
+          // It's a match! Create or update match record with proper race condition handling
+          // First check if match already exists
+          const { data: existingMatch } = await supabase
             .from('matches')
-            .upsert({
-              client_id: matchClientId,
-              owner_id: matchOwnerId,
-              listing_id: matchListingId,
-              is_mutual: true,
-              client_liked_at: targetType === 'profile' ? mutualLike.created_at : like.created_at,
-              owner_liked_at: targetType === 'profile' ? like.created_at : mutualLike.created_at,
-              status: 'accepted'
-            }, {
-              onConflict: 'client_id,owner_id,listing_id',
-              ignoreDuplicates: true
-            })
-            .select();
+            .select('id, client_id, owner_id, listing_id')
+            .eq('client_id', matchClientId)
+            .eq('owner_id', matchOwnerId)
+            .eq('listing_id', matchListingId)
+            .maybeSingle();
 
-          let match = matchData?.[0];
+          let match = existingMatch;
 
-          // If no match returned (duplicate was ignored), fetch the existing one
-          if (!match && !matchError) {
-            const { data: existingMatch } = await supabase
+          if (!existingMatch) {
+            // Try to create new match
+            const { data: newMatch, error: matchError } = await supabase
               .from('matches')
+              .insert({
+                client_id: matchClientId,
+                owner_id: matchOwnerId,
+                listing_id: matchListingId,
+                is_mutual: true,
+                client_liked_at: targetType === 'profile' ? mutualLike.created_at : like.created_at,
+                owner_liked_at: targetType === 'profile' ? like.created_at : mutualLike.created_at,
+                status: 'accepted'
+              })
               .select()
-              .eq('client_id', matchClientId)
-              .eq('owner_id', matchOwnerId)
-              .eq('listing_id', matchListingId)
-              .maybeSingle();
-            
-            match = existingMatch;
+              .single();
+
+            if (matchError) {
+              // Handle duplicate key violation from race condition
+              if (matchError.code === '23505') {
+                console.log('[useSwipeWithMatch] Match already exists (race condition), fetching');
+                const { data: fetchedMatch } = await supabase
+                  .from('matches')
+                  .select('id, client_id, owner_id, listing_id')
+                  .eq('client_id', matchClientId)
+                  .eq('owner_id', matchOwnerId)
+                  .eq('listing_id', matchListingId)
+                  .maybeSingle();
+                
+                match = fetchedMatch || null;
+              } else {
+                console.error('Error creating match:', matchError);
+                toast.error("Match creation failed. Please try again.");
+              }
+            } else {
+              match = newMatch;
+            }
           }
 
-          if (matchError) {
-            console.error('Error creating match:', matchError);
-            toast.error("Match creation failed. Please try again.");
-          } else if (match) {
-            // Create conversation explicitly after match is created
-            const { error: conversationError } = await supabase
-              .from('conversations')
-              .upsert({
-                match_id: match.id,
-                client_id: match.client_id,
-                owner_id: match.owner_id,
-                listing_id: match.listing_id,
-                status: 'active'
-              }, {
-                onConflict: 'client_id,owner_id',
-                ignoreDuplicates: true
-              });
+          if (match) {
+            // Create conversation with retry logic
+            let conversationError = null;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+              const { error } = await supabase
+                .from('conversations')
+                .upsert({
+                  match_id: match.id,
+                  client_id: match.client_id,
+                  owner_id: match.owner_id,
+                  listing_id: match.listing_id,
+                  status: 'active'
+                }, {
+                  onConflict: 'client_id,owner_id',
+                  ignoreDuplicates: true
+                });
+
+              if (!error) {
+                conversationError = null;
+                break;
+              }
+
+              conversationError = error;
+              console.warn(`[useSwipeWithMatch] Conversation creation attempt ${attempt} failed:`, error);
+              if (attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, attempt * 300));
+              }
+            }
 
             if (conversationError) {
-              console.error('Error creating conversation:', conversationError);
+              console.error('Error creating conversation after retries:', conversationError);
             }
 
             // Get profiles for match celebration with error handling

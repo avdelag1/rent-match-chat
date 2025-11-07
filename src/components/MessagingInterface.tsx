@@ -124,6 +124,17 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
     e.preventDefault();
     if (!newMessage.trim()) return;
 
+    // Check if user is still authenticated
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to send messages",
+        variant: "destructive",
+      });
+      navigate('/');
+      return;
+    }
+
     // No quota check needed - messages are unlimited within existing conversations
     const messageText = newMessage.trim();
     setNewMessage('');
@@ -142,15 +153,27 @@ export function MessagingInterface({ conversationId, otherUser, onBack }: Messag
       
       console.log('✅ Message sent successfully');
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to send message:', error);
+      
+      // Handle specific error types
+      let errorMessage = "Please try again";
+      
+      if (error?.message?.includes('not authenticated') || error?.message?.includes('permission')) {
+        errorMessage = "You don't have permission to send this message. Please refresh the page.";
+      } else if (error?.message?.includes('network') || error?.code === 'PGRST301') {
+        errorMessage = "Network error. Please check your connection and try again.";
+      }
       
       toast({
         title: "Failed to Send",
-        description: "Please try again",
+        description: errorMessage,
         variant: "destructive",
         duration: 3000,
       });
+      
+      // Restore the message if send failed
+      setNewMessage(messageText);
     }
   };
 
