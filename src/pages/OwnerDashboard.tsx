@@ -32,15 +32,6 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     }
   };
 
-  const handleInsights = (profileId: string) => {
-    console.log('Insights requested:', profileId);
-    setSelectedProfileId(profileId);
-    setInsightsOpen(true);
-    if (onClientInsights) {
-      onClientInsights(profileId);
-    }
-  };
-
   const handleStartConversation = (clientId: string) => {
     console.log('💬 Opening chat with client:', clientId);
     navigate(`/messages?startConversation=${clientId}`);
@@ -58,7 +49,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         <div className="w-full h-full flex items-center justify-center">
           <ClientSwipeContainer
             onClientTap={handleProfileTap}
-            onInsights={handleInsights}
+            onInsights={handleProfileTap}
             onMessageClick={handleStartConversation}
             profiles={profiles}
             isLoading={isLoading}

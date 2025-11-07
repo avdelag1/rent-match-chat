@@ -23,11 +23,6 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
     }
   };
 
-  const handleInsights = (listingId: string) => {
-    setSelectedListingId(listingId);
-    setInsightsOpen(true);
-  };
-
   const selectedListing = listings.find(l => l.id === selectedListingId) || null;
 
   return (
@@ -37,7 +32,7 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
           <div className="w-full max-w-2xl">
             <TinderentSwipeContainer
               onListingTap={handleListingTap}
-              onInsights={handleInsights}
+              onInsights={handleListingTap}
               onMessageClick={onMessageClick}
             />
           </div>
