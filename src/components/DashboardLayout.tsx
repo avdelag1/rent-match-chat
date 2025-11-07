@@ -150,6 +150,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     setShowCategoryDialog(true)
   }
 
+  const handleListingsClick = () => {
+    setShowCategoryDialog(true)
+  }
+
   const handleNotificationsClick = () => {
     setShowNotifications(true)
   }
@@ -234,6 +238,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         userRole={userRole}
         onFilterClick={handleFilterClick}
         onAddListingClick={handleAddListingClick}
+        onListingsClick={handleListingsClick}
       />
 
       {/* Filter Bottom Sheet */}

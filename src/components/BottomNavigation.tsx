@@ -7,6 +7,7 @@ interface BottomNavigationProps {
   userRole: 'client' | 'owner';
   onFilterClick?: () => void;
   onAddListingClick?: () => void;
+  onListingsClick?: () => void;
 }
 
 interface NavItem {
@@ -19,7 +20,7 @@ interface NavItem {
   isCenter?: boolean;
 }
 
-export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }: BottomNavigationProps) {
+export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, onListingsClick }: BottomNavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { unreadCount } = useUnreadMatches();
@@ -78,7 +79,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
       id: 'listings',
       label: 'Listings',
       icon: List,
-      path: '/owner/properties',
+      onClick: onListingsClick,
     },
     {
       id: 'messages',
