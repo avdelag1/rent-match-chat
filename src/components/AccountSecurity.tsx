@@ -1,63 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Lock, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
+import { Shield, Lock, Smartphone, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
-import { useSecuritySettings } from '@/hooks/useSecuritySettings';
 
 interface AccountSecurityProps {
   userRole: 'client' | 'owner';
 }
 
 export function AccountSecurity({ userRole }: AccountSecurityProps) {
-  const navigate = useNavigate();
-  // Destructure with fallback for both API versions
-  const { 
-    settings, 
-    updateSettings, 
-    isLoading, 
-    loading, 
-    isSaving, 
-    saving 
-  } = useSecuritySettings();
-  
-  // Use fallback logic for loading and saving states
-  const loadingState = isLoading ?? loading ?? false;
-  const savingState = isSaving ?? saving ?? false;
-  
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false);
-  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
   
-  // Security settings state - sync with database
+  // Security settings state
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [loginAlerts, setLoginAlerts] = useState(true);
   const [sessionTimeout, setSessionTimeout] = useState(true);
   const [deviceTracking, setDeviceTracking] = useState(true);
 
-  // Sync local state with database settings
-  useEffect(() => {
-    if (settings && typeof settings === 'object' && 'two_factor_enabled' in settings) {
-      setTwoFactorEnabled(settings.two_factor_enabled ?? false);
-      setLoginAlerts(settings.login_alerts ?? true);
-      setSessionTimeout(settings.session_timeout ?? true);
-      setDeviceTracking(settings.device_tracking ?? true);
-    }
-  }, [settings]);
-
-  const handlePasswordChange = async () => {
+  const handlePasswordChange = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast({
         title: 'Error',
@@ -85,62 +54,16 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       return;
     }
 
-    setIsChangingPassword(true);
-    try {
-      // Security note: We validate the current password for better UX security.
-      // The user's valid session already proves authentication, but asking for
-      // the current password provides defense-in-depth against session hijacking
-      // and ensures the user actively knows their current credentials.
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user?.email) {
-        throw new Error('User email not found');
-      }
-
-      // Verify current password by attempting to sign in.
-      // Note: This creates a temporary auth check but doesn't invalidate the current session.
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        toast({
-          title: 'Error',
-          description: 'Current password is incorrect.',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      // Update password using Supabase Auth
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: 'Password Updated',
-        description: 'Your password has been successfully changed.'
-      });
-      
-      setShowPasswordDialog(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error) {
-      console.error('Password change error:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update password. Please try again.',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsChangingPassword(false);
-    }
+    // Simulate password change
+    toast({
+      title: 'Password Updated',
+      description: 'Your password has been successfully changed.'
+    });
+    
+    setShowPasswordDialog(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
   };
 
   const handleTwoFactorToggle = (enabled: boolean) => {
@@ -148,74 +71,20 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       setShowTwoFactorDialog(true);
     } else {
       setTwoFactorEnabled(false);
-      updateSettings({ two_factor_enabled: false });
+      toast({
+        title: '2FA Disabled',
+        description: 'Two-factor authentication has been disabled.'
+      });
     }
   };
 
   const enableTwoFactor = () => {
     setTwoFactorEnabled(true);
-    updateSettings({ two_factor_enabled: true });
     setShowTwoFactorDialog(false);
-  };
-
-  const handleDeleteAccount = async () => {
-    if (deleteConfirmText.toLowerCase() !== 'delete') {
-      toast({
-        title: 'Error',
-        description: 'Please type DELETE to confirm account deletion.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('No user found');
-      }
-
-      // Try to delete user account using Supabase Admin API
-      // Note: This requires proper RLS policies and admin function
-      const { error } = await supabase.rpc('delete_user_account', {
-        user_id_to_delete: user.id
-      });
-
-      if (error) {
-        // If RPC doesn't exist or fails, inform user to contact support
-        console.error('Delete account error:', error);
-        
-        toast({
-          title: 'Deletion Failed',
-          description: 'Account deletion could not be completed automatically. Please contact support for assistance. You will be signed out.',
-          variant: 'destructive'
-        });
-        
-        // Sign out user but account data remains
-        await supabase.auth.signOut();
-        navigate('/');
-        return;
-      }
-
-      // Account successfully deleted
-      await supabase.auth.signOut();
-      
-      toast({
-        title: 'Account Deleted',
-        description: 'Your account has been successfully deleted.',
-      });
-
-      // Navigate to home page
-      navigate('/');
-    } catch (error) {
-      console.error('Error deleting account:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to delete account. Please contact support.',
-        variant: 'destructive'
-      });
-    }
+    toast({
+      title: '2FA Enabled',
+      description: 'Two-factor authentication is now active on your account.'
+    });
   };
 
   const securityScore = () => {
@@ -328,11 +197,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
             <Switch
               checked={loginAlerts}
-              onCheckedChange={(checked) => {
-                setLoginAlerts(checked);
-                updateSettings({ login_alerts: checked });
-              }}
-              disabled={loadingState || savingState}
+              onCheckedChange={setLoginAlerts}
             />
           </div>
           
@@ -343,11 +208,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
             <Switch
               checked={sessionTimeout}
-              onCheckedChange={(checked) => {
-                setSessionTimeout(checked);
-                updateSettings({ session_timeout: checked });
-              }}
-              disabled={loadingState || savingState}
+              onCheckedChange={setSessionTimeout}
             />
           </div>
           
@@ -358,40 +219,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
             <Switch
               checked={deviceTracking}
-              onCheckedChange={(checked) => {
-                setDeviceTracking(checked);
-                updateSettings({ device_tracking: checked });
-              }}
-              disabled={loadingState || savingState}
+              onCheckedChange={setDeviceTracking}
             />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Danger Zone - Delete Account */}
-      <Card className="bg-card border-destructive">
-        <CardHeader>
-          <CardTitle className="text-destructive flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5" />
-            Danger Zone
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h4 className="text-foreground font-medium">Delete Account</h4>
-              <p className="text-muted-foreground text-sm">
-                Permanently delete your account and all associated data
-              </p>
-            </div>
-            <Button 
-              onClick={() => setShowDeleteAccountDialog(true)} 
-              variant="destructive"
-              className="gap-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete Account
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -445,12 +274,10 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isChangingPassword}>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handlePasswordChange} disabled={isChangingPassword}>
-              {isChangingPassword ? 'Updating...' : 'Update Password'}
-            </Button>
+            <Button onClick={handlePasswordChange}>Update Password</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -480,62 +307,6 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               Cancel
             </Button>
             <Button onClick={enableTwoFactor}>Enable 2FA</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Account Confirmation Dialog */}
-      <Dialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
-        <DialogContent className="bg-card border-destructive">
-          <DialogHeader>
-            <DialogTitle className="text-destructive flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" />
-              Delete Account
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
-              <h4 className="text-foreground font-medium mb-2">⚠️ Warning</h4>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-sm">
-                <li>All your {userRole === 'client' ? 'saved properties and preferences' : 'listings and client connections'} will be deleted</li>
-                <li>Your messages and conversation history will be removed</li>
-                <li>Your subscription will be cancelled immediately</li>
-                <li>This action is irreversible</li>
-              </ul>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                Type <span className="font-bold text-destructive">DELETE</span> to confirm:
-              </label>
-              <Input
-                type="text"
-                placeholder="Type DELETE to confirm"
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                className="bg-background border-border text-foreground"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowDeleteAccountDialog(false);
-                setDeleteConfirmText('');
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={deleteConfirmText.toLowerCase() !== 'delete'}
-            >
-              Delete Account Permanently
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

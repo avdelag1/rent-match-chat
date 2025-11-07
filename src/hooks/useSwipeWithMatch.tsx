@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { PG_ERROR_CODES } from '@/utils/retryUtils';
 
 interface SwipeWithMatchOptions {
   onMatch?: (clientProfile: any, ownerProfile: any) => void;
@@ -103,63 +102,40 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         }
 
         if (mutualLike) {
-          // It's a match! Create or update match record with retry logic
-          let matchCreated = false;
-          let match = null;
-          
-          for (let attempt = 1; attempt <= 3; attempt++) {
-            const { data: matchData, error: matchError } = await supabase
+          // It's a match! Create or update match record
+          const { data: matchData, error: matchError } = await supabase
+            .from('matches')
+            .upsert({
+              client_id: matchClientId,
+              owner_id: matchOwnerId,
+              listing_id: matchListingId,
+              is_mutual: true,
+              client_liked_at: targetType === 'profile' ? mutualLike.created_at : like.created_at,
+              owner_liked_at: targetType === 'profile' ? like.created_at : mutualLike.created_at,
+              status: 'accepted'
+            }, {
+              onConflict: 'client_id,owner_id,listing_id',
+              ignoreDuplicates: true
+            })
+            .select();
+
+          let match = matchData?.[0];
+
+          // If no match returned (duplicate was ignored), fetch the existing one
+          if (!match && !matchError) {
+            const { data: existingMatch } = await supabase
               .from('matches')
-              .upsert({
-                client_id: matchClientId,
-                owner_id: matchOwnerId,
-                listing_id: matchListingId,
-                is_mutual: true,
-                client_liked_at: targetType === 'profile' ? mutualLike.created_at : like.created_at,
-                owner_liked_at: targetType === 'profile' ? like.created_at : mutualLike.created_at,
-                status: 'accepted'
-              }, {
-                onConflict: 'client_id,owner_id,listing_id',
-                ignoreDuplicates: true
-              })
-              .select();
-
-            if (!matchError || matchError.code === '23505') {
-              // Success or duplicate key (which is fine)
-              matchCreated = true;
-              match = matchData?.[0];
-              
-              // If no match returned (duplicate was ignored), fetch the existing one
-              if (!match) {
-                const query = supabase
-                  .from('matches')
-                  .select()
-                  .eq('client_id', matchClientId)
-                  .eq('owner_id', matchOwnerId);
-                
-                if (matchListingId) {
-                  query.eq('listing_id', matchListingId);
-                } else {
-                  query.is('listing_id', null);
-                }
-                
-                const { data: existingMatch } = await query.maybeSingle();
-                match = existingMatch;
-              }
-              
-              break;
-            }
-
-            console.error(`[useSwipeWithMatch] Match creation attempt ${attempt}/3 failed:`, matchError);
+              .select()
+              .eq('client_id', matchClientId)
+              .eq('owner_id', matchOwnerId)
+              .eq('listing_id', matchListingId)
+              .maybeSingle();
             
-            if (attempt < 3) {
-              // Exponential backoff: 300ms, 600ms
-              await new Promise(resolve => setTimeout(resolve, attempt * 300));
-            }
+            match = existingMatch;
           }
 
-          if (!matchCreated) {
-            console.error('[useSwipeWithMatch] Failed to create match after 3 attempts');
+          if (matchError) {
+            console.error('Error creating match:', matchError);
             toast.error("Match creation failed. Please try again.");
           } else if (match) {
             // Create conversation explicitly after match is created
@@ -177,7 +153,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               });
 
             if (conversationError) {
-              console.error('[useSwipeWithMatch] Error creating conversation:', conversationError);
+              console.error('Error creating conversation:', conversationError);
             }
 
             // Get profiles for match celebration with error handling

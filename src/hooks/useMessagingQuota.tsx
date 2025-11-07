@@ -27,29 +27,6 @@ export function useMessagingQuota() {
   const { data: subscription } = useUserSubscription();
   const queryClient = useQueryClient();
   
-  // Check if user has any free messaging matches
-  const { data: freeMessagingMatches = [], isLoading: loadingMatches } = useQuery({
-    queryKey: ['free-messaging-matches', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('matches')
-        .select('*')
-        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-        .eq('free_messaging', true)
-        .eq('is_mutual', true);
-      
-      if (error) {
-        console.error('Error fetching free messaging matches:', error);
-        return [];
-      }
-      
-      return data || [];
-    },
-    enabled: !!user?.id,
-  });
-  
   // Get the current plan name
   const planName = subscription?.subscription_packages?.name || 'free';
   const limits = PLAN_LIMITS[planName] || PLAN_LIMITS['free'];
@@ -121,8 +98,6 @@ export function useMessagingQuota() {
     canSendMessage: true, // Always true - messages are unlimited within existing conversations
     isUnlimited,
     currentPlan: planName,
-    hasFreeMessagingMatches: freeMessagingMatches.length > 0,
-    freeMessagingMatchCount: freeMessagingMatches.length,
     decrementConversationCount,
     refreshQuota
   };

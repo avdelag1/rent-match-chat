@@ -152,11 +152,10 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
       });
 
       onComplete();
-    } catch (error: unknown) {
-      const err = error as Error;
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: err.message || 'An error occurred',
+        description: error.message,
         variant: 'destructive',
       });
     } finally {

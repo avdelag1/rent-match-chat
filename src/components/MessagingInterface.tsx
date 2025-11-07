@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -30,7 +30,7 @@ interface MessagingInterfaceProps {
   onBack: () => void;
 }
 
-export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: MessagingInterfaceProps) => {
+export function MessagingInterface({ conversationId, otherUser, onBack }: MessagingInterfaceProps) {
   const [newMessage, setNewMessage] = useState('');
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const { user } = useAuth();
@@ -296,4 +296,4 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
       />
     </Card>
   );
-});
+}

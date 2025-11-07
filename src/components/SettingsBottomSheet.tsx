@@ -10,8 +10,7 @@ import {
   Heart,
   Filter,
   Palette,
-  ChevronRight,
-  Shield
+  ChevronRight
 } from 'lucide-react';
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { Badge } from '@/components/ui/badge';
@@ -44,11 +43,6 @@ export function SettingsBottomSheet({
       title: 'Saved Searches',
       icon: Bookmark,
       action: 'saved-searches',
-    },
-    {
-      title: 'Security',
-      icon: Shield,
-      path: '/client/security',
     },
     {
       title: 'Contracts',
@@ -87,11 +81,6 @@ export function SettingsBottomSheet({
       title: 'Liked Clients',
       icon: Heart,
       path: '/owner/liked-clients',
-    },
-    {
-      title: 'Security',
-      icon: Shield,
-      path: '/owner/security',
     },
     {
       title: 'Contracts',

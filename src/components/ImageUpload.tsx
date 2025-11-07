@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { motion, Reorder } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
 
 interface ImageUploadProps {
   images: string[];
@@ -29,10 +28,14 @@ export function ImageUpload({
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
-      // Validate file using centralized validation
-      const validation = validateImageFile(file);
-      if (!validation.isValid) {
-        throw new Error(validation.error);
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Please upload an image file');
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new Error('Image must be less than 5MB');
       }
 
       // Generate unique filename
@@ -170,7 +173,7 @@ export function ImageUpload({
                 Drop images here or click to upload
               </p>
               <p className="text-xs text-muted-foreground">
-                PNG, JPG, WebP, GIF up to {formatFileSize(FILE_SIZE_LIMITS.IMAGE_MAX_SIZE)} ({images.length}/{maxImages} images)
+                PNG, JPG up to 5MB ({images.length}/{maxImages} images)
               </p>
             </div>
             <Button

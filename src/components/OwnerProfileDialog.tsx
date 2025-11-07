@@ -4,14 +4,64 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { PhotoUploadManager } from '@/components/PhotoUploadManager';
-import { useOwnerProfile, useSaveOwnerProfile } from '@/hooks/useOwnerProfile';
+import { useClientProfile, useSaveClientProfile } from '@/hooks/useClientProfile';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// Owner profile is for business information only
+// Demographic options (same as ClientProfileDialog)
+const NATIONALITY_OPTIONS = [
+  'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'France', 'Spain', 'Italy',
+  'Netherlands', 'Australia', 'Brazil', 'Argentina', 'Colombia', 'India', 'China', 'Japan',
+  'South Korea', 'Other',
+];
+
+const LANGUAGE_OPTIONS = [
+  'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Mandarin',
+  'Japanese', 'Korean', 'Arabic', 'Russian', 'Dutch',
+];
+
+const RELATIONSHIP_STATUS_OPTIONS = [
+  'Single', 'Couple', 'Family with Children', 'Group/Roommates',
+];
+
+const SMOKING_HABIT_OPTIONS = [
+  'Non-Smoker', 'Occasional Smoker', 'Regular Smoker', 'Vaper Only',
+];
+
+const DRINKING_HABIT_OPTIONS = [
+  'Non-Drinker', 'Social Drinker', 'Regular Drinker',
+];
+
+const CLEANLINESS_OPTIONS = [
+  'Very Clean', 'Clean', 'Average', 'Relaxed',
+];
+
+const NOISE_TOLERANCE_OPTIONS = [
+  'Very Quiet', 'Moderate', 'Flexible', 'Lively OK',
+];
+
+const WORK_SCHEDULE_OPTIONS = [
+  '9-5 Traditional', 'Night Shift', 'Remote Worker', 'Flexible Hours', 'Retired', 'Business Owner',
+];
+
+const DIETARY_OPTIONS = [
+  'Omnivore', 'Vegetarian', 'Vegan', 'Pescatarian', 'Gluten-Free', 'Halal', 'Kosher',
+];
+
+const PERSONALITY_OPTIONS = [
+  'Introvert', 'Extrovert', 'Ambivert', 'Early Bird', 'Night Owl', 'Highly Organized',
+  'Relaxed/Casual', 'Adventurous', 'Homebody',
+];
+
+const INTEREST_OPTIONS = [
+  'Sports & Fitness', 'Arts & Culture', 'Food & Cooking', 'Travel', 'Technology & Gaming',
+  'Nature & Outdoors', 'Reading & Writing', 'Music & Concerts', 'Photography',
+  'Yoga & Meditation', 'Entrepreneurship', 'Volunteering',
+];
 
 type Props = {
   open: boolean;
@@ -19,24 +69,56 @@ type Props = {
 };
 
 export function OwnerProfileDialog({ open, onOpenChange }: Props) {
-  const { data, isLoading } = useOwnerProfile();
-  const saveMutation = useSaveOwnerProfile();
+  const { data, isLoading } = useClientProfile();
+  const saveMutation = useSaveClientProfile();
 
-  const [businessName, setBusinessName] = useState<string>('');
-  const [businessDescription, setBusinessDescription] = useState<string>('');
-  const [businessLocation, setBusinessLocation] = useState<string>('');
-  const [contactEmail, setContactEmail] = useState<string>('');
-  const [contactPhone, setContactPhone] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [age, setAge] = useState<number | ''>('');
+  const [gender, setGender] = useState<string>('');
   const [profileImages, setProfileImages] = useState<string[]>([]);
+
+  // New demographic fields
+  const [nationality, setNationality] = useState<string>('');
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [relationshipStatus, setRelationshipStatus] = useState<string>('');
+  const [hasChildren, setHasChildren] = useState<boolean>(false);
+
+  // Lifestyle habit fields
+  const [smokingHabit, setSmokingHabit] = useState<string>('Non-Smoker');
+  const [drinkingHabit, setDrinkingHabit] = useState<string>('Non-Drinker');
+  const [cleanlinessLevel, setCleanlinessLevel] = useState<string>('Clean');
+  const [noiseTolerance, setNoiseTolerance] = useState<string>('Moderate');
+  const [workSchedule, setWorkSchedule] = useState<string>('');
+
+  // Cultural and personality fields
+  const [dietaryPreferences, setDietaryPreferences] = useState<string[]>([]);
+  const [personalityTraits, setPersonalityTraits] = useState<string[]>([]);
+  const [interestCategories, setInterestCategories] = useState<string[]>([]);
 
   useEffect(() => {
     if (!data) return;
-    setBusinessName(data.business_name ?? '');
-    setBusinessDescription(data.business_description ?? '');
-    setBusinessLocation(data.business_location ?? '');
-    setContactEmail(data.contact_email ?? '');
-    setContactPhone(data.contact_phone ?? '');
+    setName(data.name ?? '');
+    setAge(data.age ?? '');
+    setGender(data.gender ?? '');
     setProfileImages(data.profile_images ?? []);
+
+    // Load new demographic fields with type safety
+    setNationality((data as any).nationality ?? '');
+    setLanguages((data as any).languages ?? []);
+    setRelationshipStatus((data as any).relationship_status ?? '');
+    setHasChildren((data as any).has_children ?? false);
+
+    // Load lifestyle habit fields
+    setSmokingHabit((data as any).smoking_habit ?? 'Non-Smoker');
+    setDrinkingHabit((data as any).drinking_habit ?? 'Non-Drinker');
+    setCleanlinessLevel((data as any).cleanliness_level ?? 'Clean');
+    setNoiseTolerance((data as any).noise_tolerance ?? 'Moderate');
+    setWorkSchedule((data as any).work_schedule ?? '');
+
+    // Load cultural and personality fields
+    setDietaryPreferences((data as any).dietary_preferences ?? []);
+    setPersonalityTraits((data as any).personality_traits ?? []);
+    setInterestCategories((data as any).interest_categories ?? []);
   }, [data]);
 
   const handleImageUpload = async (file: File): Promise<string> => {
@@ -67,25 +149,77 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
 
   const handleSave = async () => {
     const payload = {
-      business_name: businessName || null,
-      business_description: businessDescription || null,
-      business_location: businessLocation || null,
-      contact_email: contactEmail || null,
-      contact_phone: contactPhone || null,
+      name: name || null,
+      age: age === '' ? null : Number(age),
+      gender: gender || null,
+      bio: null,
       profile_images: profileImages,
+
+      // New demographic fields
+      nationality: nationality || null,
+      languages: languages,
+      relationship_status: relationshipStatus || null,
+      has_children: hasChildren,
+
+      // Lifestyle habit fields
+      smoking_habit: smokingHabit,
+      drinking_habit: drinkingHabit,
+      cleanliness_level: cleanlinessLevel,
+      noise_tolerance: noiseTolerance,
+      work_schedule: workSchedule || null,
+
+      // Cultural and personality fields
+      dietary_preferences: dietaryPreferences,
+      personality_traits: personalityTraits,
+      interest_categories: interestCategories,
     };
 
     await saveMutation.mutateAsync(payload);
-    toast({ title: 'Owner Profile Saved', description: 'Your business information has been updated.' });
+    toast({ title: 'Profile saved', description: 'Your comprehensive profile has been updated.' });
     onOpenChange(false);
   };
 
+  const toggleLanguage = (lang: string) => {
+    if (languages.includes(lang)) {
+      setLanguages(languages.filter(l => l !== lang));
+    } else if (languages.length < 5) {
+      setLanguages([...languages, lang]);
+    }
+  };
+
+  const toggleDietaryPref = (pref: string) => {
+    if (dietaryPreferences.includes(pref)) {
+      setDietaryPreferences(dietaryPreferences.filter(p => p !== pref));
+    } else if (dietaryPreferences.length < 3) {
+      setDietaryPreferences([...dietaryPreferences, pref]);
+    }
+  };
+
+  const togglePersonalityTrait = (trait: string) => {
+    if (personalityTraits.includes(trait)) {
+      setPersonalityTraits(personalityTraits.filter(t => t !== trait));
+    } else if (personalityTraits.length < 5) {
+      setPersonalityTraits([...personalityTraits, trait]);
+    }
+  };
+
+  const toggleInterestCategory = (interest: string) => {
+    if (interestCategories.includes(interest)) {
+      setInterestCategories(interestCategories.filter(i => i !== interest));
+    } else if (interestCategories.length < 6) {
+      setInterestCategories([...interestCategories, interest]);
+    }
+  };
+
   const completionPercentage = Math.round(
-    ((businessName ? 30 : 0) +
-     (businessDescription ? 20 : 0) +
-     (businessLocation ? 20 : 0) +
-     (contactEmail ? 15 : 0) +
-     (profileImages.length > 0 ? 15 : 0))
+    ((name ? 20 : 0) +
+     (age ? 10 : 0) +
+     (gender ? 10 : 0) +
+     (profileImages.length > 0 ? 20 : 0) +
+     (nationality ? 10 : 0) +
+     (languages.length > 0 ? 10 : 0) +
+     (relationshipStatus ? 5 : 0) +
+     (interestCategories.length > 0 ? 15 : 0))
   );
 
   return (
@@ -108,8 +242,8 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-white text-lg sm:text-xl font-bold">📸 Business Photos</Label>
-                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add photos of your properties • Up to 10 photos</p>
+                  <Label className="text-white text-lg sm:text-xl font-bold">📸 Profile Photos</Label>
+                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add up to 10 photos • First photo is your main photo</p>
                 </div>
                 <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-400">
                   {profileImages.length}/10
@@ -124,88 +258,279 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
               />
             </div>
 
-            {/* Business Info Section */}
+            {/* Basic Info Section */}
             <div className="space-y-4">
-              <Label className="text-white text-lg sm:text-xl font-bold">🏢 Business Information</Label>
+              <Label className="text-white text-lg sm:text-xl font-bold">👤 Basic Information</Label>
 
               <div className="space-y-2">
-                <Label htmlFor="business_name" className="text-white/90 text-sm sm:text-base">Business Name</Label>
+                <Label htmlFor="name" className="text-white/90 text-sm sm:text-base">Full Name *</Label>
                 <Input
-                  id="business_name"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="Your property business name"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your full name"
                   className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  required
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="age" className="text-white/90 text-sm sm:text-base">Age</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value ? Number(e.target.value) : '')}
+                    placeholder="35"
+                    className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                    min="18"
+                    max="99"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Gender</Label>
+                  <Select value={gender ?? ''} onValueChange={setGender}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white">
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="non-binary">Non-binary</SelectItem>
+                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Demographics & Background Section */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">🌍 Demographics & Background</Label>
+
               <div className="space-y-2">
-                <Label htmlFor="business_description" className="text-white/90 text-sm sm:text-base">Business Description</Label>
-                <Textarea
-                  id="business_description"
-                  value={businessDescription}
-                  onChange={(e) => setBusinessDescription(e.target.value)}
-                  placeholder="Tell clients about your properties and services..."
-                  rows={4}
-                  className="text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
-                />
+                <Label className="text-white/90 text-sm sm:text-base">Nationality</Label>
+                <Select value={nationality} onValueChange={setNationality}>
+                  <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectValue placeholder="Select nationality" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-white/20 text-white">
+                    {NATIONALITY_OPTIONS.map(nat => (
+                      <SelectItem key={nat} value={nat}>{nat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="business_location" className="text-white/90 text-sm sm:text-base">Business Location</Label>
-                <Input
-                  id="business_location"
-                  value={businessLocation}
-                  onChange={(e) => setBusinessLocation(e.target.value)}
-                  placeholder="City, Country"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
-                />
+                <Label className="text-white/90 text-sm sm:text-base">Languages ({languages.length}/5)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {LANGUAGE_OPTIONS.map(lang => (
+                    <Badge
+                      key={lang}
+                      variant={languages.includes(lang) ? 'default' : 'outline'}
+                      className={`cursor-pointer transition-all ${
+                        languages.includes(lang)
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
+                          : 'hover:border-blue-400'
+                      }`}
+                      onClick={() => toggleLanguage(lang)}
+                    >
+                      {lang}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Relationship Status</Label>
+                  <Select value={relationshipStatus} onValueChange={setRelationshipStatus}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white">
+                      {RELATIONSHIP_STATUS_OPTIONS.map(status => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Has Children</Label>
+                  <div className="flex items-center h-12 px-4 bg-white/5 border border-white/20 rounded-md">
+                    <Switch
+                      checked={hasChildren}
+                      onCheckedChange={setHasChildren}
+                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-orange-500 data-[state=checked]:to-red-500"
+                    />
+                    <span className="ml-3 text-white">{hasChildren ? 'Yes' : 'No'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Lifestyle Habits Section */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">🏠 Lifestyle Habits</Label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Smoking Habit</Label>
+                  <Select value={smokingHabit} onValueChange={setSmokingHabit}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white">
+                      {SMOKING_HABIT_OPTIONS.map(habit => (
+                        <SelectItem key={habit} value={habit}>{habit}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Drinking Habit</Label>
+                  <Select value={drinkingHabit} onValueChange={setDrinkingHabit}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white">
+                      {DRINKING_HABIT_OPTIONS.map(habit => (
+                        <SelectItem key={habit} value={habit}>{habit}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Cleanliness Level</Label>
+                  <Select value={cleanlinessLevel} onValueChange={setCleanlinessLevel}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white">
+                      {CLEANLINESS_OPTIONS.map(level => (
+                        <SelectItem key={level} value={level}>{level}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Noise Tolerance</Label>
+                  <Select value={noiseTolerance} onValueChange={setNoiseTolerance}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white">
+                      {NOISE_TOLERANCE_OPTIONS.map(level => (
+                        <SelectItem key={level} value={level}>{level}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact_email" className="text-white/90 text-sm sm:text-base">Contact Email</Label>
-                <Input
-                  id="contact_email"
-                  type="email"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  placeholder="business@example.com"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
-                />
+                <Label className="text-white/90 text-sm sm:text-base">Work Schedule</Label>
+                <Select value={workSchedule} onValueChange={setWorkSchedule}>
+                  <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectValue placeholder="Select work schedule" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-white/20 text-white">
+                    {WORK_SCHEDULE_OPTIONS.map(schedule => (
+                      <SelectItem key={schedule} value={schedule}>{schedule}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Cultural & Personality Section */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">✨ Cultural & Personality</Label>
+
+              <div className="space-y-2">
+                <Label className="text-white/90 text-sm sm:text-base">Dietary Preferences ({dietaryPreferences.length}/3)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {DIETARY_OPTIONS.map(diet => (
+                    <Badge
+                      key={diet}
+                      variant={dietaryPreferences.includes(diet) ? 'default' : 'outline'}
+                      className={`cursor-pointer transition-all ${
+                        dietaryPreferences.includes(diet)
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
+                          : 'hover:border-green-400'
+                      }`}
+                      onClick={() => toggleDietaryPref(diet)}
+                    >
+                      {diet}
+                    </Badge>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact_phone" className="text-white/90 text-sm sm:text-base">Contact Phone</Label>
-                <Input
-                  id="contact_phone"
-                  type="tel"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="+1 (555) 000-0000"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
-                />
+                <Label className="text-white/90 text-sm sm:text-base">Personality Traits ({personalityTraits.length}/5)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {PERSONALITY_OPTIONS.map(trait => (
+                    <Badge
+                      key={trait}
+                      variant={personalityTraits.includes(trait) ? 'default' : 'outline'}
+                      className={`cursor-pointer transition-all ${
+                        personalityTraits.includes(trait)
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                          : 'hover:border-purple-400'
+                      }`}
+                      onClick={() => togglePersonalityTrait(trait)}
+                    >
+                      {trait}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/90 text-sm sm:text-base">Interest Categories ({interestCategories.length}/6)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {INTEREST_OPTIONS.map(interest => (
+                    <Badge
+                      key={interest}
+                      variant={interestCategories.includes(interest) ? 'default' : 'outline'}
+                      className={`cursor-pointer transition-all ${
+                        interestCategories.includes(interest)
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600'
+                          : 'hover:border-orange-400'
+                      }`}
+                      onClick={() => toggleInterestCategory(interest)}
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </ScrollArea>
 
-        <DialogFooter className="px-4 sm:px-6 py-4 border-t border-white/10 shrink-0 bg-slate-900/50">
-          <div className="flex flex-col sm:flex-row gap-3 w-full">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1 border-white/20 text-white hover:bg-white/10"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
-              className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold shadow-lg"
-            >
-              {saveMutation.isPending ? 'Saving...' : 'Save Profile'}
-            </Button>
-          </div>
+        <DialogFooter className="px-4 sm:px-6 py-4 border-t border-white/10 flex-row gap-3 shrink-0">
+          <Button
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="flex-1 h-12 text-white/70 hover:text-white hover:bg-white/10"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saveMutation.isPending || isLoading || !name.trim()}
+            className="flex-1 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-base"
+          >
+            {saveMutation.isPending ? 'Saving...' : 'Save Profile'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

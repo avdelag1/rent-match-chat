@@ -1,4 +1,3 @@
-import { PageTransition } from '@/components/PageTransition';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,29 +33,14 @@ export default function OwnerViewClientProfile() {
         throw new Error('Profile not found or not accessible');
       }
 
-      // Fetch from profiles table
-      const { data: profileData, error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', clientId)
         .single();
 
       if (error) throw error;
-
-      // TRY to get updated photos from client_profiles table (newer source)
-      const { data: clientProfile } = await supabase
-        .from('client_profiles')
-        .select('profile_images, name, age, bio')
-        .eq('user_id', clientId)
-        .maybeSingle();
-
-      // Merge: Use profile_images from client_profiles if available (newer), otherwise use profiles.images
-      if (clientProfile?.profile_images && clientProfile.profile_images.length > 0) {
-        console.log('Using updated photos from client_profiles:', clientProfile.profile_images);
-        profileData.images = clientProfile.profile_images;
-      }
-
-      return profileData;
+      return data;
     },
   });
 

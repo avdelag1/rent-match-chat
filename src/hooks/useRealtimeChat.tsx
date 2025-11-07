@@ -80,6 +80,8 @@ export function useRealtimeChat(conversationId: string) {
   useEffect(() => {
     if (!conversationId || !user?.id) return;
 
+    console.log('🚀 Setting up comprehensive real-time chat for:', conversationId);
+
     // Messages subscription
     const messagesChannel = supabase
       .channel(`messages-${conversationId}`, {
@@ -98,6 +100,8 @@ export function useRealtimeChat(conversationId: string) {
           filter: `conversation_id=eq.${conversationId}`
         },
         async (payload) => {
+          console.log('📨 New message received:', payload);
+          
           const newMessage = payload.new;
           
           // Get sender details
@@ -146,16 +150,20 @@ export function useRealtimeChat(conversationId: string) {
         }
       )
       .on('presence', { event: 'sync' }, () => {
+        console.log('👥 Presence sync');
         const newState = messagesChannel.presenceState();
+        console.log('Current presence state:', newState);
         setIsConnected(true);
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        // User joined
+        console.log('👋 User joined:', key, newPresences);
       })
       .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        // User left
+        console.log('👋 User left:', key, leftPresences);
       })
       .subscribe(async (status) => {
+        console.log('📡 Messages subscription status:', status);
+        
         if (status === 'SUBSCRIBED') {
           // Track presence
           await messagesChannel.track({
@@ -173,7 +181,8 @@ export function useRealtimeChat(conversationId: string) {
       .channel(`typing-${conversationId}`)
       .on('presence', { event: 'sync' }, () => {
         const newState = typingChannel.presenceState();
-
+        console.log('⌨️ Typing state sync:', newState);
+        
         const currentTyping: TypingUser[] = [];
         Object.values(newState).forEach((presences: any) => {
           presences.forEach((presence: any) => {
@@ -186,18 +195,19 @@ export function useRealtimeChat(conversationId: string) {
             }
           });
         });
-
+        
         setTypingUsers(currentTyping);
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
-        // New typing presence
+        console.log('⌨️ New typing presence:', newPresences);
       })
       .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        // Left typing presence
+        console.log('⌨️ Left typing presence:', leftPresences);
       })
       .subscribe();
 
     return () => {
+      console.log('🔌 Cleaning up real-time subscriptions');
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(typingChannel);
       stopTyping();

@@ -83,37 +83,38 @@ export function PWAInstallPrompt() {
     <AnimatePresence>
       {showPrompt && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ type: "spring", damping: 20, stiffness: 200 }}
-          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-auto max-w-[300px]"
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="fixed top-4 left-4 z-50 w-auto max-w-[280px]"
         >
-          <Card className="bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
+          <Card className="bg-gradient-primary text-white shadow-2xl border-0">
             <CardContent className="p-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
-                  <span className="text-white text-sm font-bold">📱</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <img 
+                  src="/favicon.ico" 
+                  alt="Tinderent" 
+                  className="w-7 h-7 flex-shrink-0 rounded-lg"
+                />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-700 leading-tight">
-                    Get the app
+                  <p className="text-xs font-semibold leading-tight">
+                    Download app 👉
                   </p>
-                  <p className="text-[10px] text-gray-500">Install for quick access</p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-1.5 flex-shrink-0">
                   <Button
                     onClick={handleInstall}
                     size="sm"
-                    className="h-7 px-3 text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 font-medium shadow-sm"
+                    className="h-8 px-3 text-xs bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                   >
-                    Add
+                    Install
                   </Button>
                   <Button
                     onClick={handleDismiss}
                     size="sm"
                     variant="ghost"
-                    className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                    className="h-8 w-8 p-0 text-white hover:bg-white/20"
                   >
                     <X className="w-3.5 h-3.5" />
                   </Button>

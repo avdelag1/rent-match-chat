@@ -1,4 +1,3 @@
-import { PageTransition } from '@/components/PageTransition';
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Input } from '@/components/ui/input';

@@ -7,7 +7,7 @@ export function validateNoContactInfo(text: string): string | null {
 
   // Phone number patterns
   const phonePatterns = [
-    /\+?[\d\s\-().]{7,}/,  // International/formatted numbers
+    /\+?[\d\s\-\(\)\.]{7,}/,  // International/formatted numbers
     /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/,  // US format
     /\d{10,}/,  // 10+ consecutive digits
   ];

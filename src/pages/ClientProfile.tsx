@@ -1,4 +1,3 @@
-import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ClientProfileDialog } from "@/components/ClientProfileDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
@@ -24,6 +23,14 @@ const ClientProfile = () => {
     }
   }, [profile, isLoading]);
 
+  // Debug profile data
+  useEffect(() => {
+    console.log('Profile data in ClientProfile:', profile);
+    if (profile?.profile_images) {
+      console.log('Profile images:', profile.profile_images);
+    }
+  }, [profile]);
+
   const handlePhotoClick = (index: number) => {
     setSelectedPhotoIndex(index);
     setShowPhotoPreview(true);
@@ -31,8 +38,8 @@ const ClientProfile = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <motion.div
-        className="w-full h-full overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8"
+      <motion.div 
+        className="p-4 sm:p-8 pb-24 sm:pb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}

@@ -194,11 +194,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
 
   const handleMenuClick = (item: any) => {
     if (item.action === 'add-listing') {
-      // Close sidebar first on mobile, then open category dialog
-      setOpenMobile(false)
-      setTimeout(() => {
-        if (onMenuItemClick) onMenuItemClick('add-listing')
-      }, 150)
+      // Trigger category selection dialog in OwnerDashboard
+      if (onMenuItemClick) onMenuItemClick('add-listing')
     } else if (item.action === 'add-property') {
       // Use URL hash so DashboardLayout can auto-open the form
       if (location.hash !== '#add-property') {
@@ -251,9 +248,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
             />
             
             <div>
-              <h2 className="text-foreground font-bold text-lg">
-                TINDE<span className="text-red-500">R</span>ENT
-              </h2>
+              <h2 className="text-foreground font-bold text-lg">TINDERENT</h2>
               <p className="text-muted-foreground text-xs font-medium">
                 {userRole === 'client' ? 'Client Portal' : 'Owner Portal'}
               </p>

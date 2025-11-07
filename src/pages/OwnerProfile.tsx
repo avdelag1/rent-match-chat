@@ -1,4 +1,3 @@
-import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
 import { useState } from "react";
@@ -16,8 +15,8 @@ const OwnerProfile = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <motion.div
-        className="w-full h-full overflow-y-auto p-8"
+      <motion.div 
+        className="p-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}

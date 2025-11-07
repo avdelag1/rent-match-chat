@@ -669,80 +669,44 @@ export type Database = {
         Row: {
           age: number | null
           bio: string | null
-          cleanliness_level: string | null
           created_at: string | null
-          dietary_preferences: string[] | null
-          drinking_habit: string | null
           gender: string | null
-          has_children: boolean | null
           id: number
-          interest_categories: string[] | null
           interests: string[] | null
-          languages: string[] | null
           location: Json | null
           name: string | null
-          nationality: string | null
-          noise_tolerance: string | null
-          personality_traits: string[] | null
           preferred_activities: string[] | null
           profile_images: string[] | null
-          relationship_status: string | null
-          smoking_habit: string | null
           updated_at: string | null
           user_id: string | null
-          work_schedule: string | null
         }
         Insert: {
           age?: number | null
           bio?: string | null
-          cleanliness_level?: string | null
           created_at?: string | null
-          dietary_preferences?: string[] | null
-          drinking_habit?: string | null
           gender?: string | null
-          has_children?: boolean | null
           id?: never
-          interest_categories?: string[] | null
           interests?: string[] | null
-          languages?: string[] | null
           location?: Json | null
           name?: string | null
-          nationality?: string | null
-          noise_tolerance?: string | null
-          personality_traits?: string[] | null
           preferred_activities?: string[] | null
           profile_images?: string[] | null
-          relationship_status?: string | null
-          smoking_habit?: string | null
           updated_at?: string | null
           user_id?: string | null
-          work_schedule?: string | null
         }
         Update: {
           age?: number | null
           bio?: string | null
-          cleanliness_level?: string | null
           created_at?: string | null
-          dietary_preferences?: string[] | null
-          drinking_habit?: string | null
           gender?: string | null
-          has_children?: boolean | null
           id?: never
-          interest_categories?: string[] | null
           interests?: string[] | null
-          languages?: string[] | null
           location?: Json | null
           name?: string | null
-          nationality?: string | null
-          noise_tolerance?: string | null
-          personality_traits?: string[] | null
           preferred_activities?: string[] | null
           profile_images?: string[] | null
-          relationship_status?: string | null
-          smoking_habit?: string | null
           updated_at?: string | null
           user_id?: string | null
-          work_schedule?: string | null
         }
         Relationships: []
       }
@@ -891,7 +855,6 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
-          free_messaging: boolean | null
           id: string
           last_message_at: string | null
           listing_id: string | null
@@ -903,7 +866,6 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string
-          free_messaging?: boolean | null
           id?: string
           last_message_at?: string | null
           listing_id?: string | null
@@ -915,7 +877,6 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string
-          free_messaging?: boolean | null
           id?: string
           last_message_at?: string | null
           listing_id?: string | null
@@ -1467,7 +1428,6 @@ export type Database = {
           battery_range: number | null
           beds: number | null
           berths: number | null
-          bicycle_type: string | null
           brake_type: string | null
           brand: string | null
           category: string | null
@@ -1478,7 +1438,6 @@ export type Database = {
           contacts: number | null
           coworking_space: boolean | null
           created_at: string | null
-          crew_option: string | null
           deposit_amount: number | null
           description: string | null
           description_full: string | null
@@ -1488,7 +1447,6 @@ export type Database = {
           electric_assist: boolean | null
           elevator: boolean | null
           engine_cc: number | null
-          engine_type: string | null
           engines: string | null
           equipment: Json | null
           featured_image_url: string | null
@@ -1500,10 +1458,6 @@ export type Database = {
           furnished: boolean | null
           gear_type: string | null
           gym: boolean | null
-          has_abs: boolean | null
-          has_heated_grips: boolean | null
-          has_luggage_rack: boolean | null
-          has_traction_control: boolean | null
           has_verified_documents: boolean | null
           heating: boolean | null
           hoa_fees: number | null
@@ -1513,12 +1467,6 @@ export type Database = {
           ideal_tenant_description: string | null
           images: string[] | null
           included_utilities: string[] | null
-          includes_basket: boolean | null
-          includes_gear: boolean | null
-          includes_helmet: boolean | null
-          includes_lights: boolean | null
-          includes_lock: boolean | null
-          includes_pump: boolean | null
           internet_speed: string | null
           is_active: boolean | null
           is_featured: boolean | null
@@ -1545,12 +1493,10 @@ export type Database = {
           min_rental_term_months: number | null
           mode: string | null
           model: string | null
-          motorcycle_type: string | null
           move_in_date: string | null
           nearby_attractions: string[] | null
           neighborhood: string | null
           neighborhood_description: string | null
-          number_of_gears: number | null
           open_house_dates: string[] | null
           owner_id: string
           parking_spaces: number | null
@@ -1571,23 +1517,17 @@ export type Database = {
           square_footage: number | null
           status: Database["public"]["Enums"]["listing_status"] | null
           subletting_allowed: boolean | null
-          suspension_type: string | null
           title: string | null
           transmission: string | null
-          transmission_type: string | null
           transportation_access: string[] | null
           tulum_location: string | null
           unit_type: string | null
-          vehicle_brand: string | null
-          vehicle_condition: string | null
-          vehicle_model: string | null
           vehicle_type: string | null
           video_url: string | null
           view_count: number | null
           views: number | null
           washer_dryer: boolean | null
           wheel_size: number | null
-          yacht_type: string | null
           year: number | null
           year_built: number | null
         }
@@ -1602,7 +1542,6 @@ export type Database = {
           battery_range?: number | null
           beds?: number | null
           berths?: number | null
-          bicycle_type?: string | null
           brake_type?: string | null
           brand?: string | null
           category?: string | null
@@ -1613,7 +1552,6 @@ export type Database = {
           contacts?: number | null
           coworking_space?: boolean | null
           created_at?: string | null
-          crew_option?: string | null
           deposit_amount?: number | null
           description?: string | null
           description_full?: string | null
@@ -1623,7 +1561,6 @@ export type Database = {
           electric_assist?: boolean | null
           elevator?: boolean | null
           engine_cc?: number | null
-          engine_type?: string | null
           engines?: string | null
           equipment?: Json | null
           featured_image_url?: string | null
@@ -1635,10 +1572,6 @@ export type Database = {
           furnished?: boolean | null
           gear_type?: string | null
           gym?: boolean | null
-          has_abs?: boolean | null
-          has_heated_grips?: boolean | null
-          has_luggage_rack?: boolean | null
-          has_traction_control?: boolean | null
           has_verified_documents?: boolean | null
           heating?: boolean | null
           hoa_fees?: number | null
@@ -1648,12 +1581,6 @@ export type Database = {
           ideal_tenant_description?: string | null
           images?: string[] | null
           included_utilities?: string[] | null
-          includes_basket?: boolean | null
-          includes_gear?: boolean | null
-          includes_helmet?: boolean | null
-          includes_lights?: boolean | null
-          includes_lock?: boolean | null
-          includes_pump?: boolean | null
           internet_speed?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
@@ -1680,12 +1607,10 @@ export type Database = {
           min_rental_term_months?: number | null
           mode?: string | null
           model?: string | null
-          motorcycle_type?: string | null
           move_in_date?: string | null
           nearby_attractions?: string[] | null
           neighborhood?: string | null
           neighborhood_description?: string | null
-          number_of_gears?: number | null
           open_house_dates?: string[] | null
           owner_id: string
           parking_spaces?: number | null
@@ -1706,23 +1631,17 @@ export type Database = {
           square_footage?: number | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           subletting_allowed?: boolean | null
-          suspension_type?: string | null
           title?: string | null
           transmission?: string | null
-          transmission_type?: string | null
           transportation_access?: string[] | null
           tulum_location?: string | null
           unit_type?: string | null
-          vehicle_brand?: string | null
-          vehicle_condition?: string | null
-          vehicle_model?: string | null
           vehicle_type?: string | null
           video_url?: string | null
           view_count?: number | null
           views?: number | null
           washer_dryer?: boolean | null
           wheel_size?: number | null
-          yacht_type?: string | null
           year?: number | null
           year_built?: number | null
         }
@@ -1737,7 +1656,6 @@ export type Database = {
           battery_range?: number | null
           beds?: number | null
           berths?: number | null
-          bicycle_type?: string | null
           brake_type?: string | null
           brand?: string | null
           category?: string | null
@@ -1748,7 +1666,6 @@ export type Database = {
           contacts?: number | null
           coworking_space?: boolean | null
           created_at?: string | null
-          crew_option?: string | null
           deposit_amount?: number | null
           description?: string | null
           description_full?: string | null
@@ -1758,7 +1675,6 @@ export type Database = {
           electric_assist?: boolean | null
           elevator?: boolean | null
           engine_cc?: number | null
-          engine_type?: string | null
           engines?: string | null
           equipment?: Json | null
           featured_image_url?: string | null
@@ -1770,10 +1686,6 @@ export type Database = {
           furnished?: boolean | null
           gear_type?: string | null
           gym?: boolean | null
-          has_abs?: boolean | null
-          has_heated_grips?: boolean | null
-          has_luggage_rack?: boolean | null
-          has_traction_control?: boolean | null
           has_verified_documents?: boolean | null
           heating?: boolean | null
           hoa_fees?: number | null
@@ -1783,12 +1695,6 @@ export type Database = {
           ideal_tenant_description?: string | null
           images?: string[] | null
           included_utilities?: string[] | null
-          includes_basket?: boolean | null
-          includes_gear?: boolean | null
-          includes_helmet?: boolean | null
-          includes_lights?: boolean | null
-          includes_lock?: boolean | null
-          includes_pump?: boolean | null
           internet_speed?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
@@ -1815,12 +1721,10 @@ export type Database = {
           min_rental_term_months?: number | null
           mode?: string | null
           model?: string | null
-          motorcycle_type?: string | null
           move_in_date?: string | null
           nearby_attractions?: string[] | null
           neighborhood?: string | null
           neighborhood_description?: string | null
-          number_of_gears?: number | null
           open_house_dates?: string[] | null
           owner_id?: string
           parking_spaces?: number | null
@@ -1841,23 +1745,17 @@ export type Database = {
           square_footage?: number | null
           status?: Database["public"]["Enums"]["listing_status"] | null
           subletting_allowed?: boolean | null
-          suspension_type?: string | null
           title?: string | null
           transmission?: string | null
-          transmission_type?: string | null
           transportation_access?: string[] | null
           tulum_location?: string | null
           unit_type?: string | null
-          vehicle_brand?: string | null
-          vehicle_condition?: string | null
-          vehicle_model?: string | null
           vehicle_type?: string | null
           video_url?: string | null
           view_count?: number | null
           views?: number | null
           washer_dryer?: boolean | null
           wheel_size?: number | null
-          yacht_type?: string | null
           year?: number | null
           year_built?: number | null
         }
@@ -1949,7 +1847,6 @@ export type Database = {
           client_liked_at: string | null
           conversation_started: boolean | null
           created_at: string
-          free_messaging: boolean | null
           id: string
           is_mutual: boolean | null
           listing_id: string | null
@@ -1964,7 +1861,6 @@ export type Database = {
           client_liked_at?: string | null
           conversation_started?: boolean | null
           created_at?: string
-          free_messaging?: boolean | null
           id?: string
           is_mutual?: boolean | null
           listing_id?: string | null
@@ -1979,7 +1875,6 @@ export type Database = {
           client_liked_at?: string | null
           conversation_started?: boolean | null
           created_at?: string
-          free_messaging?: boolean | null
           id?: string
           is_mutual?: boolean | null
           listing_id?: string | null
@@ -2690,48 +2585,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      owner_profiles: {
-        Row: {
-          business_description: string | null
-          business_location: string | null
-          business_name: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string | null
-          id: string
-          profile_images: string[] | null
-          updated_at: string | null
-          user_id: string
-          verified_owner: boolean | null
-        }
-        Insert: {
-          business_description?: string | null
-          business_location?: string | null
-          business_name?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
-          id?: string
-          profile_images?: string[] | null
-          updated_at?: string | null
-          user_id: string
-          verified_owner?: boolean | null
-        }
-        Update: {
-          business_description?: string | null
-          business_location?: string | null
-          business_name?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
-          id?: string
-          profile_images?: string[] | null
-          updated_at?: string | null
-          user_id?: string
-          verified_owner?: boolean | null
-        }
-        Relationships: []
       }
       owner_properties: {
         Row: {
@@ -6650,10 +6503,6 @@ export type Database = {
         Returns: undefined
       }
       deactivate_expired_subscriptions: { Args: never; Returns: undefined }
-      delete_user_account: {
-        Args: { user_id_to_delete: string }
-        Returns: Json
-      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {

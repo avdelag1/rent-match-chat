@@ -248,14 +248,22 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
         const { data: listings, error } = await query.limit(50);
 
         if (error) {
-          // Only log non-RLS errors to avoid console spam
-          if (error.code !== '42501' && error.code !== 'PGRST301') {
-            console.error('[SmartMatching] Error fetching listings:', error.message);
-          }
+          console.error('❌ Error fetching listings:', error);
+          console.error('Error details:', JSON.stringify(error, null, 2));
           throw error;
         }
 
+        console.log(`📊 Fetched ${listings?.length || 0} active listings from database`);
+        if (filters) {
+          console.log('🔍 Applied filters:', JSON.stringify(filters, null, 2));
+        }
+
         if (!listings?.length) {
+          console.warn('⚠️ No active listings found');
+          console.log('💡 This may be because:');
+          console.log('   1. No listings have is_active=true');
+          console.log('   2. No listings have status=\'active\'');
+          console.log('   3. Database is empty or RLS is blocking access');
           return [];
         }
 
@@ -266,9 +274,11 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
             const listingAmenities = listing.amenities || [];
             return filters.amenities!.some(amenity => listingAmenities.includes(amenity));
           });
+          console.log(`✅ After amenities filter: ${filteredListings.length} listings`);
         }
 
         if (!preferences) {
+          console.log('📋 No client preferences set, returning all listings with default 50% match');
           return filteredListings.map(listing => ({
             ...listing,
             matchPercentage: 50,
@@ -293,9 +303,13 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
           .filter(listing => listing.matchPercentage >= 0)
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
           .slice(0, 50); // Limit final results
+
+        console.log(`Smart matching: ${sortedListings.length} listings. Top matches:`, 
+          sortedListings.slice(0, 3).map(l => `${l.title?.slice(0, 30)}... (${l.matchPercentage}%)`));
         
         // Fallback: if no matches found but we have listings, show them all with default score
         if (sortedListings.length === 0 && filteredListings.length > 0) {
+          console.log('No smart matches found, showing all', filteredListings.length, 'listings');
           return filteredListings.map(listing => ({
             ...listing as Listing,
             matchPercentage: 20,
@@ -584,10 +598,19 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
     queryKey: ['smart-clients', category],
     queryFn: async () => {
       try {
+        console.log('🚀 useSmartClientMatching: Starting fetch...');
+        
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) {
+          console.log('❌ No authenticated user');
           return [];
         }
+        
+        console.log('✅ Authenticated user:', user.user.id);
+
+        // 🚨 TEMPORARY FIX: Query ALL profiles directly to show users
+        // Bypassing user_roles check and complex filtering
+        console.log('🔧 USING SIMPLIFIED QUERY - Fetching ALL profiles directly');
 
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
@@ -596,12 +619,28 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           .limit(100);
 
         if (profileError) {
+          console.error('❌ Error fetching profiles:', profileError);
+          console.error('Error details:', JSON.stringify(profileError, null, 2));
+
+          // If RLS blocks profiles table, explain the issue
+          if (profileError.code === 'PGRST116' || profileError.message?.includes('permission')) {
+            console.error('🔒 RLS POLICY BLOCKING ACCESS to profiles table');
+            console.log('💡 You may need to adjust RLS policies to allow owners to view client profiles');
+          }
           throw profileError;
         }
 
         if (!profiles?.length) {
+          console.warn('⚠️ No profiles found in database AT ALL');
+          console.log('💡 This means:');
+          console.log('   1. The profiles table is empty, OR');
+          console.log('   2. RLS policies are blocking all access');
+          console.log('   3. All profiles belong to the current user');
           return [];
         }
+
+        console.log(`✅ SUCCESS! Found ${profiles.length} profiles in database`);
+        console.log('📋 Profile names:', profiles.map(p => p.full_name || 'Unnamed').slice(0, 10).join(', '));
 
         // 🚨 SKIP ALL FILTERING - Just show all profiles with placeholders
         const filteredProfiles = profiles.map(profile => ({
@@ -610,6 +649,19 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
             ? profile.images
             : ['/placeholder-avatar.svg']
         }));
+        
+        console.log(`🎯 FINAL: Returning ${filteredProfiles.length} client profiles to display`);
+
+        // DEBUG: Log first profile before transformation
+        if (filteredProfiles.length > 0) {
+          console.log('🔍 Sample profile BEFORE transformation:', {
+            full_name: filteredProfiles[0].full_name,
+            age: filteredProfiles[0].age,
+            images: filteredProfiles[0].images,
+            hasImages: !!filteredProfiles[0].images,
+            imagesLength: filteredProfiles[0].images?.length || 0
+          });
+        }
 
         // Calculate match scores - SIMPLIFIED: Give everyone 70% match for now
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
@@ -644,8 +696,23 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           .sort((a, b) => b.matchPercentage - a.matchPercentage)
           .slice(0, 50);
 
+        console.log('🎯 FINAL RESULT:', sortedClients.length, 'clients to show');
+
+        // DEBUG: Log first transformed client
+        if (sortedClients.length > 0) {
+          console.log('🔍 Sample client AFTER transformation:', {
+            name: sortedClients[0].name,
+            age: sortedClients[0].age,
+            profile_images: sortedClients[0].profile_images,
+            hasImages: !!sortedClients[0].profile_images,
+            imagesLength: sortedClients[0].profile_images?.length || 0,
+            firstImage: sortedClients[0].profile_images?.[0]
+          });
+        }
+
         return sortedClients;
       } catch (error) {
+        console.error('❌ Error in smart client matching:', error);
         return [];
       }
     },

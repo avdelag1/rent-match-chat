@@ -76,14 +76,6 @@ export function MessageAttachments({
   const handleDownload = async (attachment: any) => {
     try {
       const url = await getAttachmentUrl(attachment.file_path);
-      if (!url) {
-        toast({
-          title: 'Feature Not Available',
-          description: 'File attachments feature is not yet available.',
-          variant: 'destructive',
-        });
-        return;
-      }
       const a = document.createElement('a');
       a.href = url;
       a.download = attachment.file_name;

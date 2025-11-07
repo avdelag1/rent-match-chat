@@ -1,5 +1,5 @@
 // Dynamic cache versioning - automatically updated on each build
-const CACHE_VERSION = `tinderent-v${Date.now()}`;
+const CACHE_VERSION = 'tinderent-v__BUILD_TIME__';
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;

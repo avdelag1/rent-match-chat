@@ -1,4 +1,3 @@
-import { PageTransition } from '@/components/PageTransition';
 import { useState, useEffect } from 'react';
 import { PropertyManagement } from "@/components/PropertyManagement";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -8,15 +7,12 @@ const OwnerProperties = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const [initialCategory, setInitialCategory] = useState<string | null>(null);
-  const [initialMode, setInitialMode] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for category and mode in search params
+    // Check for category in search params
     const category = searchParams.get('category');
-    const mode = searchParams.get('mode');
     if (category) {
       setInitialCategory(category);
-      setInitialMode(mode);
     }
     
     // Check for hash-based navigation (e.g., #add-yacht)
@@ -29,10 +25,10 @@ const OwnerProperties = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto p-8">
+      <div className="p-8">
         <div className="max-w-6xl mx-auto">
           {/* Show PropertyManagement component that displays actual properties */}
-          <PropertyManagement initialCategory={initialCategory} initialMode={initialMode} />
+          <PropertyManagement initialCategory={initialCategory} />
         </div>
       </div>
     </DashboardLayout>

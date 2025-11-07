@@ -101,6 +101,17 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationF
         animate="visible"
       >
         <div className="max-w-7xl mx-auto">{/* removed empty div */}
+          {/* Header - Compact for mobile */}
+          <motion.div variants={itemVariants} className="mb-4 sm:mb-6">
+            <div className="text-center sm:text-left">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
+                Find Your Dream Home
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Swipe through properties that match your preferences
+              </p>
+            </div>
+          </motion.div>
 
 
           {/* Main Content - Mobile First */}
@@ -118,7 +129,21 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationF
             {/* Keep rest of sidebar - Full width on mobile, sidebar on desktop */}
             <motion.div variants={itemVariants} className="lg:flex-[1]">
               <Card className="overflow-hidden shadow-lg">
-                <CardContent className="flex justify-center pb-4 sm:pb-8 px-2 sm:px-6 pt-6">
+                <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="border-primary/50 text-primary text-xs">
+                      <Zap className="w-3 h-3 mr-1" />
+                      Smart Matching
+                    </Badge>
+                    {hasPremium && (
+                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none text-xs">
+                        <Crown className="w-3 h-3 mr-1" />
+                        Premium
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="flex justify-center pb-4 sm:pb-8 px-2 sm:px-6">
                   <SwipeContainer 
                     onListingTap={handleListingTap} 
                     onInsights={handleInsights}

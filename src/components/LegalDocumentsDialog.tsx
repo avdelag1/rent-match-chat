@@ -11,7 +11,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, File, Trash2, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { validateDocumentFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
 
 interface LegalDocument {
   id: string;
@@ -178,12 +177,30 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Use centralized validation
-    const validation = validateDocumentFile(file);
-    if (!validation.isValid) {
+    // Validate file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
       toast({
-        title: "Invalid File",
-        description: validation.error,
+        title: "File Too Large",
+        description: "Please select a file smaller than 20MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload PDF, image, or Word document files only.",
         variant: "destructive"
       });
       return;
@@ -207,6 +224,14 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
     );
   }, [selectedDocumentType, uploadMutation]);
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'verified':
@@ -228,7 +253,7 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
           </DialogTitle>
           <DialogDescription className="text-white/70">
             Upload legal documents to verify your property ownership and build trust with potential tenants.
-            Supported formats: PDF, images (JPG, PNG, WebP), Word documents. Maximum size: {formatFileSize(FILE_SIZE_LIMITS.DOCUMENT_MAX_SIZE)} per file.
+            Supported formats: PDF, images (JPG, PNG, WEBP), Word documents. Maximum size: 20MB per file.
           </DialogDescription>
         </DialogHeader>
 

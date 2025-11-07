@@ -20,7 +20,6 @@ import { PropertyFields } from '@/components/listing-fields/PropertyFields';
 import { MotorcycleFields } from '@/components/listing-fields/MotorcycleFields';
 import { BicycleFields } from '@/components/listing-fields/BicycleFields';
 import { YachtFields } from '@/components/listing-fields/YachtFields';
-import { validateImageFile, formatFileSize } from '@/utils/fileValidation';
 
 interface PropertyFormProps {
   isOpen: boolean;
@@ -174,7 +173,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       // Clean and prepare data - ensure numeric fields are numbers
       const propertyData: any = {
         title: data.title,
-        // description field removed - using checkboxes only
+        description: (data as any).description || null,
         property_type: data.property_type,
         listing_type: data.listing_type || initialMode,
         price: Number(data.price),
@@ -197,8 +196,8 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       // Property-specific fields with type assertion
       if (currentCategory === 'property') {
         const formDataAny = formData as any;
-        if (formDataAny.bedrooms !== undefined) propertyData.beds = Number(formDataAny.bedrooms);
-        if (formDataAny.bathrooms !== undefined) propertyData.baths = Number(formDataAny.bathrooms);
+        if (formDataAny.bedrooms !== undefined) propertyData.bedrooms = Number(formDataAny.bedrooms);
+        if (formDataAny.bathrooms !== undefined) propertyData.bathrooms = Number(formDataAny.bathrooms);
         if (formDataAny.square_feet !== undefined) propertyData.square_feet = Number(formDataAny.square_feet);
         if (formDataAny.floor_number !== undefined) propertyData.floor_number = Number(formDataAny.floor_number);
         if (formDataAny.total_floors !== undefined) propertyData.total_floors = Number(formDataAny.total_floors);
@@ -297,6 +296,8 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
       if (editingId) {
         // Update existing property
+        console.log('Updating property with ID:', editingId);
+        
         if (!editingId) {
           throw new Error('Property ID is missing. Cannot update.');
         }
@@ -417,92 +418,68 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       return;
     }
 
-    try {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.multiple = true;
-      input.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    
+    input.onchange = async (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || []);
+      
+      if (files.length + images.length > 30) {
+        toast({
+          title: "Too Many Photos",
+          description: `You can only have 30 photos total. You can add ${30 - images.length} more.`,
+          variant: "destructive"
+        });
+        return;
+      }
 
-      input.onchange = async (e) => {
-        const files = Array.from((e.target as HTMLInputElement).files || []);
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to upload images.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-        if (files.length === 0) {
-          return;
-        }
-
-        if (files.length + images.length > 30) {
+      for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
           toast({
-            title: "Too Many Photos",
-            description: `You can only have 30 photos total. You can add ${30 - images.length} more.`,
+            title: "File Too Large",
+            description: `${file.name} is too large. Maximum size is 10MB.`,
             variant: "destructive"
           });
-          return;
+          continue;
         }
 
-        const { data: user } = await supabase.auth.getUser();
-
-        if (!user.user) {
+        try {
           toast({
-            title: "Authentication Required",
-            description: "Please log in to upload images.",
+            title: "Uploading...",
+            description: `Uploading ${file.name}`,
+          });
+
+          const imageUrl = await uploadImageToStorage(file, user.user.id);
+          setImages(prev => [...prev, imageUrl]);
+          
+          toast({
+            title: "Upload Successful",
+            description: `${file.name} uploaded successfully.`,
+          });
+        } catch (error: any) {
+          toast({
+            title: "Upload Failed",
+            description: `Failed to upload ${file.name}. Please try again.`,
             variant: "destructive"
           });
-          return;
+          console.error('Upload error:', error);
         }
-
-        for (const file of files) {
-          // Use centralized validation
-          const validation = validateImageFile(file);
-          if (!validation.isValid) {
-            toast({
-              title: "Invalid File",
-              description: `${file.name}: ${validation.error}`,
-              variant: "destructive"
-            });
-            continue;
-          }
-
-          try {
-            toast({
-              title: "Uploading...",
-              description: `Uploading ${file.name}`,
-            });
-
-            const imageUrl = await uploadImageToStorage(file, user.user.id);
-
-            setImages(prev => [...prev, imageUrl]);
-
-            toast({
-              title: "✅ Upload Successful",
-              description: `${file.name} uploaded successfully.`,
-            });
-          } catch (error: unknown) {
-            const err = error as Error;
-            toast({
-              title: "Upload Failed",
-              description: `Failed to upload ${file.name}: ${err.message || 'Unknown error'}`,
-              variant: "destructive"
-            });
-          }
-        }
-      };
-
-      // Append to body and click
-      document.body.appendChild(input);
-      input.click();
-
-      // Clean up after a delay
-      setTimeout(() => {
-        document.body.removeChild(input);
-      }, 1000);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to open file picker. Please try again.",
-        variant: "destructive"
-      });
-    }
+      }
+    };
+    
+    input.click();
   };
 
   const handleImageRemove = async (index: number) => {
@@ -561,7 +538,19 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       return;
     }
 
-    // Description field removed - using checkboxes only
+    // Validate description for contact info
+    const description = (data as any).description;
+    if (description) {
+      const descriptionError = validateNoContactInfo(description);
+      if (descriptionError) {
+        toast({
+          title: "Invalid Description",
+          description: descriptionError,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
 
     createPropertyMutation.mutate(data);
   };
@@ -580,9 +569,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 bg-background text-foreground">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b border-border">
-          <DialogTitle className="text-foreground">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
+          <DialogTitle>
             {editingId ? `Edit ${getCategoryLabel()}` : `List New ${getCategoryLabel()}`}
           </DialogTitle>
         </DialogHeader>
@@ -591,13 +580,13 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
         <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-6">
           {/* Basic Information */}
-          <Card className="bg-card border-border">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg text-foreground">Basic Information</CardTitle>
+              <CardTitle className="text-lg">Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-foreground" htmlFor="title">Property Title *</Label>
+                <Label htmlFor="title">Property Title *</Label>
                 <Input
                   id="title"
                   {...register('title', { required: 'Title is required' })}
@@ -611,14 +600,26 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 )}
               </div>
 
-              {/* Description section removed - using checkboxes only */}
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  placeholder="Describe your property, amenities, neighborhood, and what makes it special..."
+                  rows={5}
+                  className="resize-none"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Provide a detailed description to attract potential tenants. No contact information allowed.
+                </p>
+              </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Property-specific fields - only show for property category */}
                 {currentCategory === 'property' && (
                   <>
                     <div>
-                      <Label className="text-foreground" htmlFor="property_type">Property Type</Label>
+                      <Label htmlFor="property_type">Property Type</Label>
                       <Select
                         onValueChange={(value) => setValue('property_type', value)}
                         value={watch('property_type')}
@@ -637,7 +638,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     </div>
 
                     <div>
-                      <Label className="text-foreground" htmlFor="condition">Property Condition</Label>
+                      <Label htmlFor="condition">Property Condition</Label>
                       <Select
                         onValueChange={(value) => setValue('condition', value)}
                         value={watch('condition')}
@@ -656,7 +657,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     </div>
 
                     <div>
-                      <Label className="text-foreground" htmlFor="lease_terms">Lease Terms</Label>
+                      <Label htmlFor="lease_terms">Lease Terms</Label>
                       <Select
                         onValueChange={(value) => setValue('lease_terms', value)}
                         value={watch('lease_terms')}
@@ -678,7 +679,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
                 {/* Listing type - show for all categories */}
                 <div>
-                  <Label className="text-foreground" htmlFor="listing_type">Listing For</Label>
+                  <Label htmlFor="listing_type">Listing For</Label>
                   <Select
                     onValueChange={(value) => setValue('listing_type', value)}
                     value={watch('listing_type') || 'rent'}
@@ -697,14 +698,14 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
           </Card>
 
           {/* Location */}
-          <Card className="bg-card border-border">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg text-foreground">Location</CardTitle>
+              <CardTitle className="text-lg">Location</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-foreground" htmlFor="city">City *</Label>
+                  <Label htmlFor="city">City *</Label>
                   <Input
                     id="city"
                     {...register('city', { required: 'City is required' })}
@@ -716,7 +717,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 </div>
 
                 <div>
-                  <Label className="text-foreground" htmlFor="neighborhood">Neighborhood</Label>
+                  <Label htmlFor="neighborhood">Neighborhood</Label>
                   <Input
                     id="neighborhood"
                     {...register('neighborhood')}
@@ -731,14 +732,14 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
           </Card>
 
           {/* Price - Common for all categories */}
-          <Card className="bg-card border-border">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg text-foreground">Pricing</CardTitle>
+              <CardTitle className="text-lg">Pricing</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-foreground" htmlFor="price">
+                  <Label htmlFor="price">
                     Price (USD) * {currentCategory === 'property' && '(per month)'}
                     {currentCategory === 'motorcycle' && '(per day)'}
                     {currentCategory === 'bicycle' && '(per day)'}
@@ -797,15 +798,15 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
           {/* Legacy Property Details - Keep for backward compatibility but hide for non-property */}
           {currentCategory === 'property' && (
-          <Card className="bg-card border-border">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg text-foreground">Additional Property Details (Legacy)</CardTitle>
+              <CardTitle className="text-lg">Additional Property Details (Legacy)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
 
                 <div>
-                  <Label className="text-foreground" htmlFor="beds">Bedrooms</Label>
+                  <Label htmlFor="beds">Bedrooms</Label>
                   <Select 
                     onValueChange={(value) => {
                       const numValue = value === 'Studio' ? 0 : value === '10+' ? 10 : parseInt(value);
@@ -827,7 +828,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 </div>
 
                 <div>
-                  <Label className="text-foreground" htmlFor="baths">Bathrooms</Label>
+                  <Label htmlFor="baths">Bathrooms</Label>
                   <Select 
                     onValueChange={(value) => {
                       const numValue = value === '6+' ? 6 : parseFloat(value);
@@ -849,7 +850,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                 </div>
 
                 <div>
-                  <Label className="text-foreground" htmlFor="square_footage">Square Footage</Label>
+                  <Label htmlFor="square_footage">Square Footage</Label>
                   <Select 
                     onValueChange={(value) => {
                       // Convert range to approximate midpoint number
@@ -898,7 +899,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     id="furnished"
                     {...register('furnished')}
                   />
-                  <Label className="text-foreground" htmlFor="furnished">Furnished</Label>
+                  <Label htmlFor="furnished">Furnished</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -906,7 +907,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                     id="pet_friendly"
                     {...register('pet_friendly')}
                   />
-                  <Label className="text-foreground" htmlFor="pet_friendly">Pet Friendly</Label>
+                  <Label htmlFor="pet_friendly">Pet Friendly</Label>
                 </div>
               </div>
             </CardContent>
@@ -915,9 +916,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
           {/* Amenities - Property Only */}
           {currentCategory === 'property' && (
-          <Card className="bg-card border-border">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg text-foreground">Amenities & Features</CardTitle>
+              <CardTitle className="text-lg">Amenities & Features</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {Object.entries(COMPREHENSIVE_AMENITIES).map(([category, items]) => (
@@ -931,7 +932,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                           checked={selectedAmenities.includes(amenity)}
                           onCheckedChange={() => handleAmenityToggle(amenity)}
                         />
-                        <Label className="text-foreground text-sm cursor-pointer" htmlFor={amenity}>{amenity}</Label>
+                        <Label htmlFor={amenity} className="text-sm cursor-pointer">{amenity}</Label>
                       </div>
                     ))}
                   </div>
@@ -942,9 +943,9 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
           )}
 
           {/* Images */}
-          <Card className="bg-card border-border">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-lg text-foreground">Photos</CardTitle>
+              <CardTitle className="text-lg">Photos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -971,12 +972,12 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-24 border-dashed border-2 hover:bg-muted/50 text-foreground bg-background"
+                    className="h-24 border-dashed border-2 hover:bg-muted/50"
                     onClick={handleImageAdd}
                   >
                     <div className="flex flex-col items-center gap-1">
-                      <Plus className="w-4 h-4 text-foreground" />
-                      <span className="text-xs text-foreground font-medium">Add Photo</span>
+                      <Plus className="w-4 h-4" />
+                      <span className="text-xs">Add Photo</span>
                     </div>
                   </Button>
                 )}

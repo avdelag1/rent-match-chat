@@ -193,7 +193,7 @@ export function useSignContract() {
       const isClient = contract.client_id === user.id;
 
       let newStatus: string;
-      const updateData: any = {};
+      let updateData: any = {};
 
       if (isOwner) {
         newStatus = 'signed_by_owner';

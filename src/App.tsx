@@ -11,12 +11,10 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
-import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
-import TestSwipe from "./pages/TestSwipe";
 
 // Lazy load all dashboard and authenticated pages for better performance
 const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
@@ -66,16 +64,15 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <GlobalErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true
-        }}
-      >
-        <ErrorBoundary>
-          <AuthProvider>
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
+      <ErrorBoundary>
+        <AuthProvider>
           <ThemeProvider>
             <NotificationWrapper>
               <AppLayout>
@@ -343,10 +340,7 @@ const App = () => (
 
                     <Route path="/payment/success" element={<PaymentSuccess />} />
                     <Route path="/payment/cancel" element={<PaymentCancel />} />
-
-                    {/* TEST PAGE - No auth required */}
-                    <Route path="/test-swipe" element={<TestSwipe />} />
-
+                    
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                     </Routes>
@@ -355,11 +349,10 @@ const App = () => (
               </AppLayout>
             </NotificationWrapper>
           </ThemeProvider>
-          </AuthProvider>
-        </ErrorBoundary>
-      </BrowserRouter>
-    </QueryClientProvider>
-  </GlobalErrorBoundary>
+        </AuthProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
+  </QueryClientProvider>
 );
 
 export default App;

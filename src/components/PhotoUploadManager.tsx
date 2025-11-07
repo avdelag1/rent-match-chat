@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, Image, Star } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
 
 interface PhotoUploadManagerProps {
   maxPhotos: number; // 30 for properties, 10 for clients
@@ -45,12 +44,19 @@ export function PhotoUploadManager({
       const newUrls: string[] = [];
       
       for (const file of filesToUpload) {
-        // Use centralized validation
-        const validation = validateImageFile(file);
-        if (!validation.isValid) {
+        if (!file.type.startsWith('image/')) {
           toast({
             title: "Invalid File",
-            description: `${file.name}: ${validation.error}`,
+            description: `${file.name} is not an image file.`,
+            variant: "destructive"
+          });
+          continue;
+        }
+
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          toast({
+            title: "File Too Large",
+            description: `${file.name} is larger than 10MB.`,
             variant: "destructive"
           });
           continue;
@@ -197,7 +203,7 @@ export function PhotoUploadManager({
                     {currentPhotos.length === 0 ? 'Add Your Photos' : 'Add More Photos'}
                   </p>
                   <p className="text-xs sm:text-sm text-white/60">
-                    Tap to browse • JPG, PNG, WebP, GIF • Max {formatFileSize(FILE_SIZE_LIMITS.IMAGE_MAX_SIZE)}
+                    Tap to browse • JPG, PNG, WebP • Max 10MB
                   </p>
                 </div>
                 <Button 
