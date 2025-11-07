@@ -8,7 +8,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Flame, X, RotateCcw, Sparkles } from 'lucide-react';
+import { Flame, X, RotateCcw, Sparkles, MessageCircle, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -135,13 +135,14 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   };
 
   const handleRefresh = async () => {
-    setCurrentIndex(0); // Reset to first listing
+    setCurrentIndex(0);
     await refetch();
     toast({
       title: 'Properties Updated',
       description: 'All listings reloaded.',
     });
   };
+
 
   const handleInsights = (listingId: string) => {
     if (onInsights) {
@@ -179,8 +180,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto">
-        <Card className="w-full h-[600px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto">
+        <Card className="w-full h-[450px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
           <div className="p-6 space-y-4">
             <Skeleton className="w-full h-64 rounded-lg" />
             <Skeleton className="w-3/4 h-6" />
@@ -201,7 +202,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (error) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
@@ -221,7 +222,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (listings.length === 0) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20 p-8">
           <div className="text-6xl mb-4">🏠</div>
           <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
@@ -243,7 +244,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
@@ -264,10 +265,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   }
 
   const currentListing = listings[currentIndex];
-  const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="relative w-full h-full flex flex-col items-center justify-center">
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
@@ -278,26 +278,26 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             exit={{ opacity: 0 }}
           >
             <motion.div
-              initial={{ 
-                scale: 0, 
-                opacity: 0, 
+              initial={{
+                scale: 0,
+                opacity: 0,
                 x: emojiAnimation.position === 'right' ? 80 : -80,
                 rotate: emojiAnimation.position === 'right' ? 15 : -15
               }}
-              animate={{ 
-                scale: 2.5, 
-                opacity: 1, 
+              animate={{
+                scale: 2.5,
+                opacity: 1,
                 x: emojiAnimation.position === 'right' ? 40 : -40,
                 rotate: 0
               }}
-              exit={{ 
+              exit={{
                 scale: emojiAnimation.type === 'like' ? 3.5 : 1.5,
-                opacity: 0, 
+                opacity: 0,
                 y: emojiAnimation.type === 'like' ? -250 : -100,
                 x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -300 : 300),
                 rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -75 : 75)
               }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 500,
                 damping: 30,
@@ -311,8 +311,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               <div className="relative">
                 {/* Glow effect */}
                 <div className={`absolute inset-0 blur-3xl opacity-50 ${
-                  emojiAnimation.type === 'like' 
-                    ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                  emojiAnimation.type === 'like'
+                    ? 'bg-gradient-to-r from-orange-400 to-red-500'
                     : 'bg-gradient-to-r from-gray-400 to-blue-300'
                 }`} />
                 {/* Emoji */}
@@ -325,45 +325,17 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         )}
       </AnimatePresence>
 
-      {/* Full Screen Cards Container */}
-      <div className="relative h-[700px] w-full mx-auto max-w-md">
-        
-        <AnimatePresence mode="popLayout">
-          {/* Next card - scales up smoothly when current card exits */}
-          {nextListing && (
-            <motion.div
-              key={`next-${nextListing.id}`}
-              initial={{ scale: 0.95, opacity: 0.7 }}
-              animate={{
-                scale: swipeDirection ? 1.0 : 0.95,
-                opacity: swipeDirection ? 1.0 : 0.7
-              }}
-              className="absolute inset-0 shadow-xl"
-              style={{ willChange: 'transform, opacity', zIndex: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 180,
-                damping: 15,
-                mass: 0.5
-              }}
-            >
-              <EnhancedPropertyCard
-                listing={nextListing}
-                onSwipe={() => {}}
-                onTap={() => {}}
-                onSuperLike={() => {}}
-                onMessage={() => {}}
-                isTop={false}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
-          {/* Current card - swipes out with rotation and fade */}
+      {/* Single Card Container - No infinite scrolling */}
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '550px' }}>
+        <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div
               key={currentListing.id}
-              initial={{ scale: 0.95, opacity: 0.7, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{
+                scale: 1,
+                opacity: 1
+              }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
                 opacity: 0,
@@ -379,15 +351,13 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               }}
               transition={{
                 type: "spring",
-                stiffness: 200,
-                damping: 20,
-                mass: 0.8
+                stiffness: 300,
+                damping: 30,
+                mass: 0.7
               }}
-              className="absolute inset-0 shadow-2xl"
+              className="w-full h-full"
               style={{
-                willChange: 'transform, opacity',
-                zIndex: 10,
-                filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))'
+                willChange: 'transform, opacity'
               }}
             >
               <EnhancedPropertyCard
@@ -405,9 +375,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
 
-      {/* Bottom Action Buttons - 3 Button Layout */}
-      <motion.div 
-        className="absolute bottom-8 left-0 right-0 flex justify-center gap-6 items-center z-20 px-4"
+      {/* Bottom Action Buttons - 5 Button Layout - Always visible at bottom */}
+      <motion.div
+        className="flex justify-center gap-3 sm:gap-4 md:gap-6 items-center z-20 px-4 mt-4"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -422,10 +392,27 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             variant="ghost"
             className="w-16 h-16 rounded-full bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 transition-all duration-300 shadow-xl hover:shadow-red-500/20 p-0"
             onClick={() => handleButtonSwipe('left')}
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="Pass on this property"
           >
             <X className="w-8 h-8 stroke-[2.5]" />
+          </Button>
+        </motion.div>
+
+        {/* Insights Button */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-14 h-14 rounded-full bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:border-blue-600 transition-all duration-300 shadow-lg p-0"
+            onClick={() => currentListing && handleInsights(currentListing.id)}
+            disabled={swipeMutation.isPending || !currentListing}
+            aria-label="View insights"
+          >
+            <Eye className="w-6 h-6 stroke-[2.5]" />
           </Button>
         </motion.div>
 
@@ -437,7 +424,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
           <Button
             size="lg"
             variant="ghost"
-            onClick={() => canUndo && undoLastSwipe()}
+            onClick={() => {
+              if (canUndo) {
+                undoLastSwipe();
+              }
+            }}
             disabled={!canUndo || isUndoing}
             className={`w-16 h-16 rounded-full transition-all duration-300 shadow-lg p-0 ${
               canUndo 
@@ -454,6 +445,27 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             </motion.div>
           </Button>
         </motion.div>
+
+        {/* Message Button */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            size="lg"
+            variant="ghost"
+            className={`w-14 h-14 rounded-full border-2 transition-all duration-300 shadow-lg p-0 ${
+              hasPremiumMessaging 
+                ? 'bg-green-500 border-green-600 text-white hover:bg-green-600' 
+                : 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600'
+            }`}
+            onClick={handleMessage}
+            disabled={swipeMutation.isPending || !currentListing}
+            aria-label="Send message"
+          >
+            <MessageCircle className="w-6 h-6 stroke-[2.5]" />
+          </Button>
+        </motion.div>
         
         {/* Like Button - Right */}
         <motion.div
@@ -465,7 +477,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             variant="ghost"
             className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white transition-all duration-300 shadow-xl hover:shadow-orange-500/30 p-0 border-0"
             onClick={() => handleButtonSwipe('right')}
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || !currentListing}
             aria-label="Like this property"
           >
             <Flame className="w-11 h-11 fill-white stroke-white" />
