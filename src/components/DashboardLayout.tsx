@@ -216,8 +216,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* Main Content - Full screen area for card feed */}
-      <main className="fixed inset-0 pt-14 pb-16">
-        <div className="w-full h-full">{
+      <main className="fixed inset-0 pt-14 pb-16 overflow-y-auto">
+        <div className="w-full min-h-full">{
           React.Children.map(children, (child) => {
             if (React.isValidElement(child)) {
               return React.cloneElement(child as React.ReactElement, {
