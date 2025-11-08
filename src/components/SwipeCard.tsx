@@ -57,10 +57,10 @@ export function SwipeCard({
   const handleMouseUp = () => {
     if (!isDragging || !isTop) return;
     setIsDragging(false);
-    
+
     const threshold = 150; // Increased threshold for better control
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
-    
+
     // Only swipe if dragged enough (prevent ghost taps)
     if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
@@ -72,10 +72,11 @@ export function SwipeCard({
         card.style.transform = 'translate(0px, 0px) rotate(0deg)';
         setTimeout(() => {
           card.style.transition = '';
+          card.style.transform = ''; // Clear inline transform to let React state control
         }, 300);
       }
     }
-    
+
     setDragOffset({ x: 0, y: 0 });
   };
 
@@ -107,10 +108,10 @@ export function SwipeCard({
   const handleTouchEnd = () => {
     if (!isDragging || !isTop) return;
     setIsDragging(false);
-    
+
     const threshold = 150; // Increased threshold for better control
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
-    
+
     // Only swipe if dragged enough (prevent ghost taps)
     if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
@@ -122,10 +123,11 @@ export function SwipeCard({
         card.style.transform = 'translate(0px, 0px) rotate(0deg)';
         setTimeout(() => {
           card.style.transition = '';
+          card.style.transform = ''; // Clear inline transform to let React state control
         }, 300);
       }
     }
-    
+
     setDragOffset({ x: 0, y: 0 });
   };
 
