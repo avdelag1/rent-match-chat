@@ -18,7 +18,11 @@ export type ClientProfileLite = {
 type ClientProfileUpdate = Omit<ClientProfileLite, 'id' | 'user_id'>;
 
 async function fetchOwnProfile() {
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth, error: authError } = await supabase.auth.getUser();
+  if (authError) {
+    console.error('Error fetching authenticated user:', authError);
+    throw authError;
+  }
   const uid = auth.user?.id;
   if (!uid) return null;
 
@@ -51,15 +55,24 @@ export function useSaveClientProfile() {
 
   return useMutation({
     mutationFn: async (updates: ClientProfileUpdate) => {
-      const { data: auth } = await supabase.auth.getUser();
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Error fetching authenticated user:', authError);
+        throw authError;
+      }
       const uid = auth.user?.id;
       if (!uid) throw new Error('Not authenticated');
 
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('client_profiles')
         .select('id')
         .eq('user_id', uid)
         .maybeSingle();
+      
+      if (existingError && existingError.code !== 'PGRST116') {
+        console.error('Error checking existing profile:', existingError);
+        throw existingError;
+      }
 
       let profileData: ClientProfileLite;
 

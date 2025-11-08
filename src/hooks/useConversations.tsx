@@ -170,10 +170,15 @@ export function useStartConversation() {
       if (!user?.id) throw new Error('Not authenticated');
 
       // Check if conversation already exists (check both directions)
-      const { data: existingConversations } = await supabase
+      const { data: existingConversations, error: existingError } = await supabase
         .from('conversations')
         .select('id')
         .or(`and(client_id.eq.${user.id},owner_id.eq.${otherUserId}),and(client_id.eq.${otherUserId},owner_id.eq.${user.id})`);
+
+      if (existingError) {
+        console.error('Error checking existing conversations:', existingError);
+        throw new Error('Failed to check existing conversations');
+      }
 
       const existingConversation = existingConversations?.[0];
 
@@ -186,21 +191,31 @@ export function useStartConversation() {
 
       if (!conversationId) {
         // Get both users' roles directly from user_roles table
-        const { data: myRoleData } = await supabase
+        const { data: myRoleData, error: myRoleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .maybeSingle();
 
+        if (myRoleError) {
+          console.error('Error fetching user role:', myRoleError);
+          throw new Error('Failed to fetch your user role');
+        }
+
         if (!myRoleData) {
           throw new Error('Your profile could not be found. Please try logging out and back in.');
         }
 
-        const { data: otherRoleData } = await supabase
+        const { data: otherRoleData, error: otherRoleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', otherUserId)
           .maybeSingle();
+
+        if (otherRoleError) {
+          console.error('Error fetching other user role:', otherRoleError);
+          throw new Error('Failed to fetch other user role');
+        }
 
         if (!otherRoleData) {
           throw new Error('The other user profile could not be found. They may not have completed their registration.');

@@ -8,7 +8,11 @@ export function useMessaging() {
   return useQuery({
     queryKey: ['user-messaging-access'],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error fetching user for messaging access:', error);
+        return { hasAccess: false, reason: 'error', error: error.message };
+      }
       if (!user.user) return { hasAccess: false, reason: 'not_authenticated' };
 
       // Allow messaging for all authenticated users
