@@ -226,22 +226,22 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
             )}
 
             {/* Quick Actions - Floating without backdrop blur */}
-            <div className="absolute top-3 right-3 flex gap-2">
+            <div className="absolute top-3 right-3 flex gap-2 z-20">
               <Button
                 size="sm"
-                variant="outline"
-                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
+                variant="ghost"
+                className="w-10 h-10 p-0 bg-white/95 hover:bg-white border-0 rounded-full text-gray-700 hover:text-gray-900 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] hover:scale-110 transition-all duration-200"
                 onClick={onMessage}
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-5 h-5" />
               </Button>
               <Button
                 size="sm"
-                variant="outline"
-                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
+                variant="ghost"
+                className="w-10 h-10 p-0 bg-white/95 hover:bg-white border-0 rounded-full text-gray-700 hover:text-gray-900 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] hover:scale-110 transition-all duration-200"
                 onClick={onTap}
               >
-                <Eye className="w-4 h-4" />
+                <Eye className="w-5 h-5" />
               </Button>
             </div>
           </div>

@@ -94,7 +94,7 @@ const ClientLikedProperties = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="w-full h-full overflow-y-auto p-8 bg-white min-h-screen">
+      <div className="w-full min-h-screen p-4 sm:p-8 bg-white pb-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">

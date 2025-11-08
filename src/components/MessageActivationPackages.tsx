@@ -46,10 +46,10 @@ export function MessageActivationPackages({
     queryFn: async () => {
       if (!user?.id) return null;
       const { data, error } = await supabase
-        .from('profiles')
+        .from('user_roles')
         .select('role')
-        .eq('id', user.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },

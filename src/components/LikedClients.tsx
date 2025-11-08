@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Users, Search, MapPin, RefreshCw } from "lucide-react";
+import { Heart, MessageSquare, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -35,13 +36,25 @@ interface LikedClient {
 export function LikedClients() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const [userRole, setUserRole] = useState<'client' | 'owner'>('owner');
+  const categoryFromUrl = searchParams.get('category') || 'all';
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl);
   const queryClient = useQueryClient();
   const startConversation = useStartConversation();
   const { canStartNewConversation } = useMessagingQuota();
+
+  // Category configuration
+  const categories = [
+    { id: 'all', label: 'All', icon: Users },
+    { id: 'property', label: 'Property', icon: Home },
+    { id: 'moto', label: 'Moto', icon: Car },
+    { id: 'bicycle', label: 'Bicycle', icon: Bike },
+    { id: 'yacht', label: 'Yacht', icon: Ship }
+  ];
 
   const { data: likedClients = [], isLoading, refetch } = useQuery({
     queryKey: ['liked-clients', user?.id],
@@ -149,11 +162,33 @@ export function LikedClients() {
     }
   };
 
-  const filteredClients = likedClients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (client.bio && client.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (client.occupation && client.occupation.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Filter by search term and category
+  const filteredClients = likedClients.filter(client => {
+    // Search filter
+    const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (client.bio && client.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (client.occupation && client.occupation.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    if (!matchesSearch) return false;
+
+    // Category filter
+    if (selectedCategory === 'all') return true;
+
+    // Check if client's interests include the selected category
+    if (client.interests && Array.isArray(client.interests)) {
+      return client.interests.some(interest =>
+        interest.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
+    }
+
+    return false;
+  });
+
+  // Handle category change
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSearchParams({ category });
+  };
 
 
   const handleRemoveLike = (clientId: string) => {
@@ -161,8 +196,8 @@ export function LikedClients() {
   };
 
   return (
-    <div className="w-full min-h-screen overflow-y-auto bg-background">
-      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl pb-24">
+    <div className="w-full min-h-screen bg-background">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl pb-24 sm:pb-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -207,6 +242,23 @@ export function LikedClients() {
               </Button>
             </div>
           </div>
+
+          {/* Category Tabs */}
+          <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full mb-6">
+            <TabsList className="grid w-full grid-cols-5 h-auto">
+              {categories.map(({ id, label, icon: Icon }) => (
+                <TabsTrigger
+                  key={id}
+                  value={id}
+                  className="flex items-center gap-1 sm:gap-2 px-2 py-2 text-xs sm:text-sm"
+                >
+                  <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{label}</span>
+                  <span className="sm:hidden">{label.substring(0, 4)}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </motion.div>
 
         {isLoading ? (
