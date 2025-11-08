@@ -73,10 +73,17 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage, onTap }:
     <motion.div
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.2}
       onDragEnd={handleDragEnd}
       onDrag={handleDrag}
       className="w-full max-w-md mx-auto h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden relative cursor-grab active:cursor-grabbing"
       whileTap={{ cursor: 'grabbing' }}
+      animate={{ x: 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 25
+      }}
     >
       {/* Like/Pass Overlay */}
       {dragDirection && (
