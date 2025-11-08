@@ -96,7 +96,7 @@ export function LikedClients() {
       const filteredProfiles = clientProfiles.filter(p => p !== null);
 
       // Return ONLY the filtered client profiles, not all profiles
-      return filteredProfiles.map(profile => {
+      const likedClientsList = filteredProfiles.map(profile => {
         const like = likes.find(l => l.target_id === profile.id);
         return {
           id: profile.id,
@@ -116,6 +116,13 @@ export function LikedClients() {
           verified: profile.verified
         };
       }) as LikedClient[];
+
+      // Deduplicate by client ID and keep the most recent like
+      const deduplicatedClients = Array.from(
+        new Map(likedClientsList.map(client => [client.id, client])).values()
+      ).sort((a, b) => new Date(b.liked_at).getTime() - new Date(a.liked_at).getTime());
+
+      return deduplicatedClients;
     },
     enabled: !!user?.id,
     staleTime: 0, // Always refetch to get latest profile updates
