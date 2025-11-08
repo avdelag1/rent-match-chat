@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 
   -- Related entities
   related_user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-  related_property_id UUID REFERENCES public.properties(id) ON DELETE SET NULL,
+  related_property_id UUID REFERENCES public.listings(id) ON DELETE SET NULL,
   related_message_id UUID,
   related_match_id UUID,
 
