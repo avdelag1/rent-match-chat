@@ -52,7 +52,11 @@ export function useUserSubscription() {
   return useQuery<UserSubscriptionLite>({
     queryKey: ['user-subscription'],
     queryFn: async (): Promise<UserSubscriptionLite> => {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: user, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Error fetching authenticated user:', authError);
+        throw authError;
+      }
       if (!user.user) return null;
 
       // Limit columns and break inference to avoid TS2589
