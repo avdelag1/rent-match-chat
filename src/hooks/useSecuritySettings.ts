@@ -83,11 +83,16 @@ export function useSecuritySettings() {
 
       try {
         // First try to update
-        const { data: existingSettings } = await supabase
+        const { data: existingSettings, error: existingError } = await supabase
           .from('user_security_settings' as any)
           .select('id')
           .eq('user_id', user.id)
           .maybeSingle();
+
+        if (existingError && existingError.code !== 'PGRST116') {
+          console.error('Error checking existing security settings:', existingError);
+          throw existingError;
+        }
 
         if (existingSettings) {
           // Update existing settings

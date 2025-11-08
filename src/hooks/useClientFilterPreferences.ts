@@ -93,7 +93,11 @@ export type ClientFilterPreferences = {
 type ClientFilterPreferencesUpdate = Omit<ClientFilterPreferences, 'id' | 'user_id'>;
 
 async function fetchOwnFilterPreferences() {
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth, error: authError } = await supabase.auth.getUser();
+  if (authError) {
+    console.error('Error fetching authenticated user:', authError);
+    throw authError;
+  }
   const uid = auth.user?.id;
   if (!uid) return null;
 
@@ -117,16 +121,25 @@ export function useClientFilterPreferences() {
 
   const mutation = useMutation({
     mutationFn: async (updates: ClientFilterPreferencesUpdate) => {
-      const { data: auth } = await supabase.auth.getUser();
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Error fetching authenticated user:', authError);
+        throw authError;
+      }
       const uid = auth.user?.id;
       if (!uid) throw new Error('Not authenticated');
 
       // Get existing row
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('client_filter_preferences')
         .select('id')
         .eq('user_id', uid)
         .maybeSingle();
+
+      if (existingError && existingError.code !== 'PGRST116') {
+        console.error('Error checking existing filter preferences:', existingError);
+        throw existingError;
+      }
 
       if (existing?.id) {
         const { data, error } = await supabase

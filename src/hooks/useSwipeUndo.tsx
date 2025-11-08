@@ -50,7 +50,11 @@ export function useSwipeUndo() {
     mutationFn: async () => {
       if (!lastSwipe) throw new Error('No swipe to undo');
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Error fetching authenticated user:', authError);
+        throw authError;
+      }
       if (!user) throw new Error('User not authenticated');
 
       // Remove the last swipe from the database
