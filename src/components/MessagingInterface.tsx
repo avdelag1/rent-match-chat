@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
+import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { useAuth } from '@/hooks/useAuth';
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
@@ -29,6 +30,9 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Enable realtime chat for live message updates
+  const { startTyping, stopTyping, typingUsers, isConnected } = useRealtimeChat(conversationId);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -40,6 +44,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
 
     const messageText = newMessage.trim();
     setNewMessage('');
+    stopTyping(); // Stop typing indicator when message is sent
 
     try {
       await sendMessage.mutateAsync({
@@ -117,6 +122,18 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
             );
           })
         )}
+        {/* Typing indicator */}
+        {typingUsers.length > 0 && (
+          <div className="flex justify-start">
+            <div className="bg-muted p-3 rounded-lg">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -125,7 +142,14 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         <div className="flex gap-2 items-end">
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              if (e.target.value.trim()) {
+                startTyping(); // Trigger typing indicator
+              } else {
+                stopTyping();
+              }
+            }}
             placeholder="Type a message..."
             className="flex-1 text-sm min-h-[44px]"
             disabled={sendMessage.isPending}

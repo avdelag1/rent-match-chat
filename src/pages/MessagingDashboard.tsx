@@ -33,6 +33,47 @@ export function MessagingDashboard() {
 
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
+  // Realtime subscription for new conversations
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const conversationsChannel = supabase
+      .channel(`conversations-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversations',
+          filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
+        },
+        (payload) => {
+          console.log('New conversation created:', payload);
+          // Refetch conversations to get the new one with proper joins
+          refetch();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations',
+          filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
+        },
+        (payload) => {
+          console.log('Conversation updated:', payload);
+          // Refetch to get updated last_message_at
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(conversationsChannel);
+    };
+  }, [user?.id, refetch]);
+
   // Handle auto-start conversation from URL parameter
   useEffect(() => {
     const startConversationUserId = searchParams.get('startConversation');
