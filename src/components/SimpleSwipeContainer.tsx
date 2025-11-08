@@ -4,6 +4,7 @@ import { Heart, X, RotateCcw } from 'lucide-react';
 import { SimpleListingCard } from './SimpleListingCard';
 import { useListings } from '@/hooks/useListings';
 import { useSwipe } from '@/hooks/useSwipe';
+import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +16,7 @@ export function SimpleSwipeContainer() {
 
   const { data: listings = [], isLoading, refetch } = useListings([]);
   const swipeMutation = useSwipe();
+  const startConversation = useStartConversation();
 
   const currentListing = listings[currentIndex];
 
@@ -84,12 +86,41 @@ export function SimpleSwipeContainer() {
     });
   };
 
-  const handleMessage = () => {
-    navigate('/messages');
-    toast({
-      title: 'Opening Messages',
-      description: 'Navigate to messages to start a conversation',
-    });
+  const handleMessage = async () => {
+    if (!currentListing?.owner_id) {
+      toast({
+        title: 'Error',
+        description: 'Owner information not available',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: 'Starting conversation...',
+        description: 'Creating chat with property owner',
+      });
+
+      const result = await startConversation.mutateAsync({
+        otherUserId: currentListing.owner_id,
+        listingId: currentListing.id,
+        initialMessage: `Hi! I'm interested in your property: ${currentListing.title}. Could you tell me more about it?`,
+        canStartNewConversation: true // Always allow
+      });
+
+      if (result?.conversationId) {
+        // Navigate to messages page with the conversation
+        navigate(`/messages?startConversation=${currentListing.owner_id}`);
+      }
+    } catch (error) {
+      console.error('Failed to start conversation:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not start conversation. Please try again.',
+        variant: 'destructive'
+      });
+    }
   };
 
   if (isLoading) {
