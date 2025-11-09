@@ -260,39 +260,64 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   }
   
-  /* Optimized animations for 60fps performance */
+  /* GPU-Accelerated Animations - 60fps Performance */
   @keyframes fast-fade-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(10px) translateZ(0);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) translateZ(0);
     }
   }
   
   @keyframes quick-scale {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
+    0% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(1.02) translateZ(0); }
+    100% { transform: scale(1) translateZ(0); }
   }
   
   @keyframes smooth-slide {
     from {
       opacity: 0;
-      transform: translateX(-15px);
+      transform: translateX(-15px) translateZ(0);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateX(0) translateZ(0);
     }
   }
 
   @keyframes minimal-bounce {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.98); }
-    100% { transform: scale(1); }
+    0% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(0.98) translateZ(0); }
+    100% { transform: scale(1) translateZ(0); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  @keyframes particle-burst {
+    0% {
+      transform: scale(0) translateZ(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2) translateZ(0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+    }
   }
 
   .gradient-text {

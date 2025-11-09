@@ -1,18 +1,21 @@
-import { SimpleSwipeContainer } from '@/components/SimpleSwipeContainer';
+import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 
 export default function TestSwipe() {
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            TEST PAGE - Simple Swipe
+    <div className="w-full min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl h-screen">
+        <div className="text-center mb-4 pt-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+            Tinder-Style Swipe Test
           </h1>
-          <p className="text-gray-600">Swipe right to save, left to pass</p>
-          <p className="text-sm text-gray-500 mt-2">Direct test page (no auth required)</p>
+          <p className="text-muted-foreground">Swipe right to like, left to pass, up for priority</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">Full-screen immersive experience</p>
         </div>
 
-        <SimpleSwipeContainer />
+        <TinderentSwipeContainer 
+          onListingTap={(id) => console.log('Tapped listing:', id)}
+          onInsights={(id) => console.log('View insights:', id)}
+        />
       </div>
     </div>
   );

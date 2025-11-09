@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { EnhancedPropertyCard } from './EnhancedPropertyCard';
-import { useListings, useSwipedListings } from '@/hooks/useListings';
+import { TinderSwipeCard } from './TinderSwipeCard';
+import { SwipeActionButtons } from './SwipeActionButtons';
+import { SwipeInsightsModal } from './SwipeInsightsModal';
+import { useListings } from '@/hooks/useListings';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
@@ -9,7 +11,7 @@ import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Flame, X, RotateCcw, Sparkles, MessageCircle, Eye } from 'lucide-react';
+import { RotateCcw, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -30,8 +32,9 @@ interface TinderentSwipeContainerProps {
 
 export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [insightsModalOpen, setInsightsModalOpen] = useState(false);
 
   // Get listings with filters applied
   const {
@@ -65,7 +68,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
   const startConversation = useStartConversation();
 
-  const handleSwipe = useCallback((direction: 'left' | 'right') => {
+  const handleSwipe = useCallback((direction: 'left' | 'right' | 'up') => {
     const currentListing = listings[currentIndex];
     if (!currentListing) {
       console.log('No current listing found for swipe');
@@ -82,7 +85,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     setSwipeDirection(direction);
     
     // Trigger haptic feedback
-    triggerHaptic(direction === 'right' ? 'success' : 'light');
+    triggerHaptic(
+      direction === 'right' ? 'success' : 
+      direction === 'up' ? 'heavy' : 
+      'warning'
+    );
     
     // Record swipe
     swipeMutation.mutate({
@@ -92,7 +99,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     });
 
     // Record the swipe for undo functionality
-    recordSwipe(currentListing.id, 'listing', direction === 'right' ? 'like' : 'pass');
+    recordSwipe(
+      currentListing.id, 
+      'listing', 
+      direction === 'right' || direction === 'up' ? 'like' : 'pass'
+    );
 
     // Move to next card after animation with proper delay for smooth rhythm
     setTimeout(() => {
@@ -101,21 +112,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     }, 300); // 300ms delay for smooth visual rhythm
   }, [currentIndex, listings, swipeMutation, recordSwipe]);
 
-  const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
-    swipeMutation.mutate({
-      targetId,
-      direction: 'right',
-      targetType: targetType as 'listing' | 'profile'
-    });
-    
-    toast({
-      title: "Super Liked! ⭐",
-      description: "This property will know you're really interested!",
-      duration: 3000,
-    });
-    
-    setCurrentIndex(prev => prev + 1);
-  }, [swipeMutation]);
+  const handleSuperLike = useCallback(() => {
+    handleSwipe('up');
+  }, [handleSwipe]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
     handleSwipe(direction);
@@ -131,15 +130,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   };
 
 
-  const handleInsights = (listingId: string) => {
-    if (onInsights) {
-      onInsights(listingId);
-    } else {
-      toast({
-        title: '🔍 Property Deep Dive',
-        description: 'Opening detailed insights...',
-      });
-    }
+  const handleInsights = () => {
+    setInsightsModalOpen(true);
+    triggerHaptic('light');
   };
 
   const handleMessage = async () => {
@@ -305,132 +298,65 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center">
-      {/* Single Card Container - No infinite scrolling */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
+      {/* Card Container - Full screen swipe experience */}
+      <div className="relative w-full h-[calc(100vh-180px)] max-w-lg mx-auto">
         <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div
               key={currentListing.id}
               initial={{ scale: 0.95, opacity: 0 }}
-              animate={{
-                scale: 1,
-                opacity: 1
-              }}
+              animate={{ scale: 1, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                y: swipeDirection === 'up' ? -800 : 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
-                scale: 0.85,
+                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
+                scale: swipeDirection === 'up' ? 0.8 : 0.85,
                 transition: {
                   type: "spring",
-                  stiffness: 180,
-                  damping: 15,
-                  mass: 0.5,
-                  duration: 0.3
+                  stiffness: 200,
+                  damping: 20,
+                  mass: 0.8,
+                  duration: 0.35
                 }
               }}
               transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 30,
-                mass: 0.7
+                mass: 1
               }}
               className="w-full h-full"
-              style={{
-                willChange: 'transform, opacity'
-              }}
+              style={{ willChange: 'transform, opacity' }}
             >
-              <EnhancedPropertyCard
+              <TinderSwipeCard
                 listing={currentListing}
                 onSwipe={handleSwipe}
                 onTap={() => onListingTap(currentListing.id)}
-                onSuperLike={() => handleSuperLike(currentListing.id, 'listing')}
-                onMessage={handleMessage}
                 isTop={true}
-                hasPremium={hasPremiumMessaging}
               />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
+      {/* Action Buttons - New component */}
+      <SwipeActionButtons
+        onUndo={() => undoLastSwipe()}
+        onPass={() => handleButtonSwipe('left')}
+        onInfo={handleInsights}
+        onLike={() => handleButtonSwipe('right')}
+        onSuperLike={handleSuperLike}
+        canUndo={canUndo}
+        disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
+      />
 
-      {/* Bottom Action Bar - 3 Buttons - Floating with NO background */}
-      <motion.div
-        className="fixed bottom-0 left-0 right-0 z-20 pointer-events-none"
-        style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)'
-        }}
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="flex justify-center items-center gap-6 py-4 px-4 pointer-events-none">
-          {/* Dislike Button */}
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Button
-              size="lg"
-              variant="ghost"
-              className="pointer-events-auto w-16 h-16 rounded-full bg-white border-4 border-rose-500 text-rose-500 hover:bg-gradient-to-br hover:from-rose-500 hover:to-rose-600 hover:text-white hover:border-rose-600 transition-all duration-300 shadow-[0_8px_16px_rgba(239,68,68,0.3)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4)] p-0"
-              onClick={() => handleButtonSwipe('left')}
-              disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
-              aria-label="Dislike this property"
-            >
-              <X className="w-8 h-8 stroke-[2.5]" />
-            </Button>
-          </motion.div>
-
-          {/* Return/Undo Button */}
-          <motion.div
-            whileHover={{ scale: canUndo ? 1.1 : 1 }}
-            whileTap={{ scale: canUndo ? 0.9 : 1 }}
-          >
-            <Button
-              size="lg"
-              variant="ghost"
-              onClick={() => {
-                if (canUndo) {
-                  undoLastSwipe();
-                }
-              }}
-              disabled={!canUndo || isUndoing || isCreatingConversation}
-              className={`pointer-events-auto w-14 h-14 rounded-full transition-all duration-300 shadow-[0_8px_16px_rgba(107,114,128,0.3)] p-0 ${
-                canUndo 
-                  ? 'bg-white border-4 border-gray-400 text-gray-600 hover:bg-gray-50 hover:shadow-[0_12px_24px_rgba(107,114,128,0.4)]' 
-                  : 'bg-gray-200 border-4 border-gray-300 text-gray-400 cursor-not-allowed opacity-60'
-              }`}
-              aria-label="Undo last swipe"
-            >
-              <motion.div
-                animate={{ rotate: isUndoing ? 360 : 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <RotateCcw className="w-6 h-6 stroke-[2.5]" />
-              </motion.div>
-            </Button>
-          </motion.div>
-
-          {/* Like Button */}
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Button
-              size="lg"
-              variant="ghost"
-              className="pointer-events-auto w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white transition-all duration-300 shadow-[0_8px_16px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_24px_rgba(16,185,129,0.5)] border-0 p-0"
-              onClick={() => handleButtonSwipe('right')}
-              disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
-              aria-label="Like this property"
-            >
-              <Flame className="w-8 h-8 fill-white stroke-white" />
-            </Button>
-          </motion.div>
-        </div>
-      </motion.div>
+      {/* Insights Modal */}
+      <SwipeInsightsModal
+        open={insightsModalOpen}
+        onOpenChange={setInsightsModalOpen}
+        listing={currentListing}
+      />
     </div>
   );
 }
