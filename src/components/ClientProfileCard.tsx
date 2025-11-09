@@ -164,7 +164,7 @@ const ClientProfileCardComponent = ({
       {getSwipeIndicator()}
 
       {/* Main Image - Responsive height for consistent card sizing */}
-      <div className="relative h-[60%] overflow-hidden">
+      <div className="relative h-[70%] overflow-hidden">
         {/* Tap Flash Overlay */}
         {tapFlash && (
           <motion.div
@@ -263,21 +263,6 @@ const ClientProfileCardComponent = ({
             <MessageCircle className="w-6 h-6 stroke-[2.5]" />
           </Button>
         </div>
-
-        {/* Age Badge - moved down to avoid overlap */}
-        <Badge className="absolute top-14 right-4 bg-black/60 backdrop-blur-sm text-white border-none px-3 py-1.5 text-base font-semibold shadow-lg">
-          {profile.age}
-        </Badge>
-        
-        {/* Location */}
-        {profile.location && (
-          <div className="absolute top-4 left-4 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
-            <MapPin className="w-4 h-4 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
-            <span className="text-white text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              {profile.location.city}
-            </span>
-          </div>
-        )}
       </div>
       
       {/* Bottom Content - Compact */}
