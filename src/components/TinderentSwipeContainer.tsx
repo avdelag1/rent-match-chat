@@ -144,7 +144,10 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   const handleMessage = async () => {
     const currentListing = listings[currentIndex];
+    console.log('[TinderentSwipe] Message button clicked for listing:', currentListing?.id);
+    
     if (!currentListing?.owner_id || isCreatingConversation) {
+      console.log('[TinderentSwipe] Cannot start conversation - no owner or already creating');
       toast({
         title: 'Cannot Start Conversation',
         description: 'Owner information not available.',
@@ -153,6 +156,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     }
 
     if (needsUpgrade) {
+      console.log('[TinderentSwipe] User needs upgrade for messaging');
       navigate('/client/settings#subscription');
       toast({
         title: 'Subscription Required',
@@ -162,16 +166,18 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     }
 
     if (!hasPremiumMessaging) {
+      console.log('[TinderentSwipe] User does not have premium messaging');
       navigate('/client/settings#subscription');
       return;
     }
 
     setIsCreatingConversation(true);
+    console.log('[TinderentSwipe] Creating conversation with owner:', currentListing.owner_id);
     
     try {
       toast({
-        title: 'Starting conversation...',
-        description: 'Please wait',
+        title: '⏳ Creating conversation...',
+        description: 'Please wait'
       });
 
       const result = await startConversation.mutateAsync({
@@ -181,14 +187,26 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         canStartNewConversation: true,
       });
 
+      console.log('[TinderentSwipe] Conversation created:', result);
+
       if (result?.conversationId) {
+        toast({
+          title: '✅ Conversation created!',
+          description: 'Opening chat...'
+        });
+        
+        // Wait 500ms before navigating to ensure DB is updated
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log('[TinderentSwipe] Navigating to conversation:', result.conversationId);
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      console.error('[TinderentSwipe] Error starting conversation:', error);
       toast({
-        title: 'Error',
-        description: 'Could not start conversation. Please try again.',
+        title: '❌ Error',
+        description: error instanceof Error ? error.message : 'Could not start conversation',
+        variant: 'destructive'
       });
     } finally {
       setIsCreatingConversation(false);

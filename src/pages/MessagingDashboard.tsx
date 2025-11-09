@@ -91,41 +91,50 @@ export function MessagingDashboard() {
 
   const handleDirectOpenConversation = async (conversationId: string) => {
     setIsStartingConversation(true);
+    console.log('[MessagingDashboard] Opening conversation:', conversationId);
     
     try {
       // Try to find conversation in current list
-      const conversation = conversations.find(c => c.id === conversationId);
+      let conversation = conversations.find(c => c.id === conversationId);
       
       // If not found, wait for it to appear (handles realtime timing)
       if (!conversation) {
+        console.log('[MessagingDashboard] Conversation not in cache, waiting...');
         toast({
-          title: 'Loading conversation',
-          description: 'Please wait...',
+          title: 'Loading conversation...',
+          description: 'Please wait while we fetch your conversation.',
         });
-        const loaded = await ensureConversationInCache(conversationId);
-        if (loaded) {
+        
+        // Try up to 10 times (10 seconds total)
+        for (let attempt = 1; attempt <= 10; attempt++) {
+          console.log(`[MessagingDashboard] Attempt ${attempt}/10 to find conversation`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refetch();
+          conversation = conversations.find(c => c.id === conversationId);
+          if (conversation) break;
+        }
+        
+        if (conversation) {
+          console.log('[MessagingDashboard] Conversation found!', conversation);
           setSelectedConversationId(conversationId);
           setSearchParams({});
           toast({
-            title: 'Conversation opened',
+            title: '✅ Conversation opened',
             description: 'You can now send messages!',
           });
         } else {
-          throw new Error('Conversation not found');
+          throw new Error('Conversation not found after 10 seconds');
         }
       } else {
+        console.log('[MessagingDashboard] Conversation already in cache');
         setSelectedConversationId(conversationId);
         setSearchParams({});
-        toast({
-          title: 'Conversation opened',
-          description: 'You can now send messages!',
-        });
       }
     } catch (error) {
-      console.error('Error opening conversation:', error);
+      console.error('[MessagingDashboard] Error opening conversation:', error);
       toast({
-        title: 'Could not open conversation',
-        description: 'Please try again from your conversations list.',
+        title: '❌ Could not open conversation',
+        description: 'The conversation may not exist. Try refreshing the page.',
         variant: 'destructive',
       });
       setSearchParams({});

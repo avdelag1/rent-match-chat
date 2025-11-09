@@ -150,24 +150,36 @@ export function ClientSwipeContainer({
   const handleConnect = async (clientId: string) => {
     if (isCreatingConversation) return;
     
+    console.log('[ClientSwipe] Message button clicked for client:', clientId);
     setIsCreatingConversation(true);
     
     try {
-      sonnerToast.loading('Starting conversation...', { id: 'start-conv' });
+      sonnerToast.loading('⏳ Creating conversation...', { id: 'start-conv' });
       
+      console.log('[ClientSwipe] Starting conversation with client:', clientId);
       const result = await startConversation.mutateAsync({
         otherUserId: clientId,
         initialMessage: "Hi! I'd like to connect with you.",
         canStartNewConversation: true,
       });
 
+      console.log('[ClientSwipe] Conversation created:', result);
+
       if (result?.conversationId) {
-        sonnerToast.success('Opening chat...', { id: 'start-conv' });
+        sonnerToast.success('✅ Conversation created! Opening chat...', { id: 'start-conv' });
+        
+        // Wait 500ms before navigating to ensure DB is updated
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log('[ClientSwipe] Navigating to conversation:', result.conversationId);
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
-      sonnerToast.error('Could not start conversation', { id: 'start-conv' });
+      console.error('[ClientSwipe] Error starting conversation:', error);
+      sonnerToast.error('❌ Could not start conversation', { 
+        id: 'start-conv',
+        description: error instanceof Error ? error.message : 'Please try again'
+      });
     } finally {
       setIsCreatingConversation(false);
     }
