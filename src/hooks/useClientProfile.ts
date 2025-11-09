@@ -105,25 +105,53 @@ export function useSaveClientProfile() {
         profileData = data as ClientProfileLite;
       }
 
-      // SYNC to profiles table - so owner sees updated photos!
-      // Update the profiles.images field to match client_profiles.profile_images
-      if (updates.profile_images) {
-        console.log('🔄 [PHOTO SYNC] Starting sync to profiles table...');
-        console.log('🔄 [PHOTO SYNC] User ID:', uid);
-        console.log('🔄 [PHOTO SYNC] Images to sync:', updates.profile_images);
+      // SYNC to profiles table - so owner sees updated data!
+      console.log('🔄 [PROFILE SYNC] Starting full profile sync to profiles table...');
+      console.log('🔄 [PROFILE SYNC] User ID:', uid);
 
+      const syncPayload: any = {};
+
+      // Sync images
+      if (updates.profile_images !== undefined) {
+        syncPayload.images = updates.profile_images;
+        console.log('🔄 [PROFILE SYNC] Images:', updates.profile_images?.length || 0);
+      }
+
+      // Sync name → full_name
+      if (updates.name !== undefined) {
+        syncPayload.full_name = updates.name;
+        console.log('🔄 [PROFILE SYNC] Name:', updates.name);
+      }
+
+      // Sync age
+      if (updates.age !== undefined) {
+        syncPayload.age = updates.age;
+        console.log('🔄 [PROFILE SYNC] Age:', updates.age);
+      }
+
+      // Sync interests
+      if (updates.interests !== undefined) {
+        syncPayload.interests = updates.interests;
+      }
+
+      // Sync preferred activities
+      if (updates.preferred_activities !== undefined) {
+        syncPayload.preferred_activities = updates.preferred_activities;
+      }
+
+      // Only update if we have fields to sync
+      if (Object.keys(syncPayload).length > 0) {
         const { data: syncData, error: syncError } = await supabase
           .from('profiles')
-          .update({ images: updates.profile_images })
+          .update(syncPayload)
           .eq('id', uid)
           .select();
 
         if (syncError) {
-          console.error('❌ [PHOTO SYNC] Error syncing to profiles table:', syncError);
-          // Don't throw - profile update succeeded, sync is secondary
+          console.error('❌ [PROFILE SYNC] Error:', syncError);
         } else {
-          console.log('✅ [PHOTO SYNC] Successfully synced images to profiles table');
-          console.log('✅ [PHOTO SYNC] Updated profile:', syncData);
+          console.log('✅ [PROFILE SYNC] Successfully synced to profiles table');
+          console.log('✅ [PROFILE SYNC] Updated fields:', Object.keys(syncPayload));
         }
       }
 
