@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
 import { SwipeActionButtons } from './SwipeActionButtons';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
+import { SwipeTopBar } from './owner/SwipeTopBar';
 import { MatchCelebration } from './MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -210,50 +211,79 @@ export function ClientTinderSwipeContainer({
     );
   }
 
+  const nextProfile = profiles[currentIndex + 1];
+
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Card Stack */}
-      <div className="absolute inset-0 flex items-center justify-center px-4 pb-32">
-        <div className="relative w-full max-w-md h-[600px]">
-          <AnimatePresence mode="wait">
-            {currentProfile && (
-              <motion.div
-                key={currentProfile.user_id}
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{
-                  x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
-                  y: swipeDirection === 'up' ? -600 : 0,
-                  opacity: 0,
-                  rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
-                  scale: swipeDirection === 'up' ? 0.8 : 0.85,
-                  transition: {
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 30,
-                    duration: 0.3,
-                  },
-                }}
-                transition={{
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-background">
+      {/* Top Bar - Fixed */}
+      <SwipeTopBar
+        currentIndex={currentIndex}
+        totalCount={profiles.length}
+        onBack={() => navigate(-1)}
+        onFilters={() => {
+          // Navigate to filters page or open filter dialog
+          toast.info('Filters coming soon!');
+        }}
+      />
+
+      {/* Full-Screen Card Stack */}
+      <div className="absolute inset-0 w-full h-full">
+        {/* Next Card (Behind) - Peek Effect */}
+        {nextProfile && (
+          <motion.div
+            className="absolute inset-0 w-full h-full"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 0.95, opacity: 0 }}
+          >
+            <ClientTinderSwipeCard
+              profile={nextProfile}
+              onSwipe={() => {}}
+              isTop={false}
+              showNextCard={true}
+            />
+          </motion.div>
+        )}
+
+        {/* Top Card (Active) */}
+        <AnimatePresence mode="wait">
+          {currentProfile && (
+            <motion.div
+              key={currentProfile.user_id}
+              initial={{ scale: 1, opacity: 1 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{
+                x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
+                y: swipeDirection === 'up' ? -1000 : 0,
+                opacity: 0,
+                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
+                scale: swipeDirection === 'up' ? 0.8 : 0.85,
+                transition: {
                   type: 'spring',
                   stiffness: 300,
                   damping: 30,
-                }}
-                className="w-full h-full"
-              >
-                <ClientTinderSwipeCard
-                  profile={currentProfile}
-                  onSwipe={handleSwipe}
-                  onTap={() => onClientTap?.(currentProfile.user_id)}
-                  isTop={true}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                  duration: 0.3,
+                },
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 30,
+              }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <ClientTinderSwipeCard
+                profile={currentProfile}
+                onSwipe={handleSwipe}
+                onTap={() => onClientTap?.(currentProfile.user_id)}
+                onInsights={handleInsights}
+                isTop={true}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Fixed at Bottom */}
       <SwipeActionButtons
         onUndo={handleUndo}
         onPass={() => handleButtonSwipe('left')}
@@ -263,7 +293,14 @@ export function ClientTinderSwipeContainer({
         canUndo={canUndo}
       />
 
-      {/* Insights Modal - Removed for client profiles */}
+      {/* Insights Modal */}
+      {currentProfile && (
+        <SwipeInsightsModal
+          open={insightsOpen}
+          onOpenChange={setInsightsOpen}
+          profile={currentProfile}
+        />
+      )}
 
       {/* Match Celebration */}
       <MatchCelebration

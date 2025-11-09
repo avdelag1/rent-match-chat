@@ -1,23 +1,35 @@
-import { useState } from 'react';
-import { motion, useMotionValue, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 
 interface ClientTinderSwipeCardProps {
   profile: MatchedClientProfile;
   onSwipe: (direction: 'left' | 'right' | 'up') => void;
   onTap?: () => void;
+  onInsights?: () => void;
   isTop?: boolean;
+  showNextCard?: boolean;
 }
 
-export function ClientTinderSwipeCard({ profile, onSwipe, onTap, isTop = false }: ClientTinderSwipeCardProps) {
+export function ClientTinderSwipeCard({
+  profile,
+  onSwipe,
+  onTap,
+  onInsights,
+  isTop = false,
+  showNextCard = false
+}: ClientTinderSwipeCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
-  
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotate = useMotionValue(0);
+
+  // Enhanced rotation based on drag distance (15 degrees max)
+  const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
 
   const images = profile.profile_images && profile.profile_images.length > 0 
     ? profile.profile_images 
@@ -42,26 +54,38 @@ export function ClientTinderSwipeCard({ profile, onSwipe, onTap, isTop = false }
 
   const handleDragEnd = (event: any, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 150;
-    const swipeThresholdY = 120;
-    const velocityThreshold = 500;
 
-    // Super like (up)
-    if (offset.y < -swipeThresholdY || velocity.y < -velocityThreshold) {
+    // Threshold: 40% of screen width for horizontal, 30% of screen height for vertical
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const swipeThresholdX = screenWidth * 0.4;
+    const swipeThresholdY = screenHeight * 0.3;
+    const velocityThreshold = 0.5; // px/ms
+
+    // Priority (up swipe) - Check first
+    if (offset.y < -swipeThresholdY || velocity.y < -velocityThreshold * 1000) {
       onSwipe('up');
       return;
     }
 
-    // Horizontal swipes
+    // Horizontal swipes - Right (accept) or Left (reject)
     const absOffsetX = Math.abs(offset.x);
     const absVelocityX = Math.abs(velocity.x);
 
-    if (absOffsetX > swipeThresholdX || absVelocityX > velocityThreshold) {
+    if (absOffsetX > swipeThresholdX || absVelocityX > velocityThreshold * 1000) {
       const direction = offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
       return;
     }
   };
+
+  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
+  const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+
+  // Calculate overlay opacity based on drag distance
+  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.4], [0, 1]);
+  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.4, 0], [1, 0]);
+  const upOverlayOpacity = useTransform(y, [-screenHeight * 0.3, 0], [1, 0]);
 
   const cardStyle = {
     x,
@@ -76,39 +100,40 @@ export function ClientTinderSwipeCard({ profile, onSwipe, onTap, isTop = false }
       dragElastic={0.1}
       onDragEnd={handleDragEnd}
       style={cardStyle}
-      animate={{ scale: isTop ? 1 : 0.95 }}
+      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing"
     >
-      {/* Swipe Overlays */}
+      {/* Enhanced Swipe Overlays */}
+      {/* Right Swipe - GREEN ACCEPT */}
       <motion.div
-        className="absolute inset-0 z-20 flex items-start justify-start p-8 pointer-events-none"
-        style={{
-          opacity: x.get() > 0 ? Math.min(x.get() / 150, 1) : 0,
-        }}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-green-500/20"
+        style={{ opacity: rightOverlayOpacity }}
       >
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl border-4 border-white rotate-[-15deg]">
-          <div className="text-4xl font-black tracking-wider">LIKE</div>
+        <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white px-10 py-4 rounded-3xl shadow-2xl border-4 border-white transform rotate-[-15deg]">
+          <div className="text-5xl font-black tracking-wider flex items-center gap-3">
+            ✓ ACCEPT
+          </div>
         </div>
       </motion.div>
 
+      {/* Left Swipe - RED PASS */}
       <motion.div
-        className="absolute inset-0 z-20 flex items-start justify-end p-8 pointer-events-none"
-        style={{
-          opacity: x.get() < 0 ? Math.min(Math.abs(x.get()) / 150, 1) : 0,
-        }}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-red-500/20"
+        style={{ opacity: leftOverlayOpacity }}
       >
-        <div className="bg-gradient-to-br from-red-500 to-rose-600 text-white px-8 py-4 rounded-2xl shadow-2xl border-4 border-white rotate-[15deg]">
-          <div className="text-4xl font-black tracking-wider">PASS</div>
+        <div className="bg-gradient-to-br from-red-500 to-rose-600 text-white px-10 py-4 rounded-3xl shadow-2xl border-4 border-white transform rotate-[15deg]">
+          <div className="text-5xl font-black tracking-wider flex items-center gap-3">
+            ✕ PASS
+          </div>
         </div>
       </motion.div>
 
+      {/* Up Swipe - BLUE PRIORITY */}
       <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
-        style={{
-          opacity: y.get() < 0 ? Math.min(Math.abs(y.get()) / 120, 1) : 0,
-        }}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-blue-500/20"
+        style={{ opacity: upOverlayOpacity }}
       >
-        <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white px-12 py-6 rounded-2xl shadow-2xl border-4 border-white">
+        <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white px-12 py-6 rounded-3xl shadow-2xl border-4 border-white">
           <div className="text-5xl font-black tracking-wider flex items-center gap-3">
             <span className="text-6xl">★</span>
             PRIORITY
@@ -151,8 +176,23 @@ export function ClientTinderSwipeCard({ profile, onSwipe, onTap, isTop = false }
             </div>
           )}
 
+          {/* Insights Button - Top Right */}
+          {onInsights && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onInsights();
+              }}
+              className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
+            >
+              <BarChart3 className="w-5 h-5" />
+            </Button>
+          )}
+
           {/* Match Badge */}
-          <div className="absolute top-6 right-4 z-10">
+          <div className="absolute top-16 right-4 z-10">
             <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-none shadow-lg text-lg px-4 py-1">
               {profile.matchPercentage}% Match
             </Badge>
@@ -160,7 +200,7 @@ export function ClientTinderSwipeCard({ profile, onSwipe, onTap, isTop = false }
 
           {/* Verified Badge */}
           {profile.verified && (
-            <div className="absolute top-20 right-4 z-10">
+            <div className="absolute top-28 right-4 z-10">
               <div className="bg-blue-500 text-white rounded-full p-2 shadow-lg">
                 <CheckCircle className="w-5 h-5" />
               </div>
