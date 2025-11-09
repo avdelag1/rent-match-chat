@@ -143,13 +143,13 @@ const ClientProfileCardComponent = ({
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
     >
-      <Card className="relative w-full h-[550px] bg-white border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="relative w-full h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px] bg-white border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
 
       {/* Swipe Indicator */}
       {getSwipeIndicator()}
 
-      {/* Main Image - Fixed height for consistent card sizing */}
-      <div className="relative h-[430px] overflow-hidden">
+      {/* Main Image - Responsive height for consistent card sizing */}
+      <div className="relative h-[60%] overflow-hidden">
         {images.length > 0 ? (
           <img
             src={images[imageIndex]}

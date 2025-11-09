@@ -332,7 +332,7 @@ export function ClientSwipeContainer({
       </AnimatePresence>
 
       {/* Single Card Container - No infinite scrolling */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '550px' }}>
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
         <AnimatePresence mode="wait">
           {currentClient && (
             <motion.div

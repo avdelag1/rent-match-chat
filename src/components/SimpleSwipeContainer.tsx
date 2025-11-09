@@ -193,9 +193,9 @@ export function SimpleSwipeContainer() {
         </AnimatePresence>
       </div>
 
-      {/* Enhanced 3D Action Buttons - Fixed at bottom without backdrop blur */}
-      <div className="fixed bottom-20 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto flex justify-center items-center gap-6 px-4">
+      {/* Enhanced 3D Action Buttons - Fixed at bottom, truly floating */}
+      <div className="fixed bottom-20 left-0 right-0 z-50 pointer-events-none">
+        <div className="max-w-md mx-auto flex justify-center items-center gap-6 px-4 pointer-events-auto">
           {/* Dislike Button - 3D Enhanced */}
           <Button
             onClick={handlePass}
