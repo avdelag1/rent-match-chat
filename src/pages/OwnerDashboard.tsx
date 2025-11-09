@@ -20,7 +20,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const navigate = useNavigate();
   const startConversation = useStartConversation();
 
-  // Debug logging
+  // Debug logging - Force rebuild
   console.log('🏠 OwnerDashboard: profiles count:', profiles.length);
   console.log('🏠 OwnerDashboard: isLoading:', isLoading);
   console.log('🏠 OwnerDashboard: error:', error);
