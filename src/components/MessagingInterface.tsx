@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Send } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
 import { useRealtimeChat } from '@/hooks/useRealtimeChat';
+import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { useAuth } from '@/hooks/useAuth';
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
@@ -32,6 +33,9 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
 
   // Enable realtime chat for live message updates
   const { startTyping, stopTyping, typingUsers, isConnected } = useRealtimeChat(conversationId);
+
+  // Mark messages as read when viewing this conversation
+  useMarkMessagesAsRead(conversationId, true);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -89,6 +93,15 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
           </Badge>
         </div>
       </div>
+
+      {/* Connection Status */}
+      {!isConnected && (
+        <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-950 border-b border-yellow-200 dark:border-yellow-800 text-center">
+          <p className="text-xs text-yellow-800 dark:text-yellow-200">
+            🔄 Connecting to chat...
+          </p>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">

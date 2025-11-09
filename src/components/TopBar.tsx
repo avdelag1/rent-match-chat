@@ -1,7 +1,7 @@
-import { Bell, Settings, Flame } from 'lucide-react';
+import { Bell, Settings, Flame, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 
 interface TopBarProps {
   onNotificationsClick?: () => void;
@@ -10,14 +10,7 @@ interface TopBarProps {
 }
 
 export function TopBar({ onNotificationsClick, onSettingsClick, className }: TopBarProps) {
-  const notificationsQuery = useNotifications();
-  // Handle both array return and object with data property
-  const notifications = Array.isArray(notificationsQuery) 
-    ? notificationsQuery 
-    : (notificationsQuery && typeof notificationsQuery === 'object' && 'data' in notificationsQuery)
-      ? (notificationsQuery as any).data || []
-      : [];
-  const unreadCount = notifications.filter((n: any) => !n.is_read && !n.read).length;
+  const { unreadCount } = useUnreadMessageCount();
 
   return (
     <header className={cn('fixed top-0 left-0 right-0 bg-background border-b border-border z-50', className)}>
@@ -34,14 +27,14 @@ export function TopBar({ onNotificationsClick, onSettingsClick, className }: Top
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Notifications */}
+          {/* Messages with unread count */}
           <Button
             variant="ghost"
             size="icon"
             className="relative h-9 w-9"
             onClick={onNotificationsClick}
           >
-            <Bell className="h-5 w-5" />
+            <MessageCircle className="h-5 w-5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1">
                 {unreadCount > 99 ? '99+' : unreadCount}

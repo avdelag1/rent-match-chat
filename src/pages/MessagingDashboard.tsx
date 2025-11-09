@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, Search, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
+import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +27,9 @@ export function MessagingDashboard() {
   const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
+
+  // Mark messages as read when viewing conversation
+  useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
 
   const filteredConversations = conversations.filter(conv =>
     conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
