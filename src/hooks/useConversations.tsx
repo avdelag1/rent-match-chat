@@ -206,40 +206,38 @@ export function useStartConversation() {
       }
 
       if (!conversationId) {
-        // Get both users' roles directly from user_roles table
-        const { data: myRoleData, error: myRoleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // Determine roles by checking if users have listings (owners have listings, clients don't)
+        let myRole = 'client';
+        let otherRole = 'client';
+        
+        try {
+          // Check if current user has listings (owner) or not (client)
+          const myListingsCheck = await (supabase as any)
+            .from('listings')
+            .select('id', { count: 'exact' })
+            .eq('user_id', user.id)
+            .limit(1);
+          
+          myRole = (myListingsCheck.data && myListingsCheck.data.length > 0) ? 'owner' : 'client';
 
-        if (myRoleError) {
-          console.error('Error fetching user role:', myRoleError);
-          throw new Error('Failed to fetch your user role');
-        }
-
-        if (!myRoleData) {
-          throw new Error('Your profile could not be found. Please try logging out and back in.');
-        }
-
-        const { data: otherRoleData, error: otherRoleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', otherUserId)
-          .maybeSingle();
-
-        if (otherRoleError) {
-          console.error('Error fetching other user role:', otherRoleError);
-          throw new Error('Failed to fetch other user role');
-        }
-
-        if (!otherRoleData) {
-          throw new Error('The other user profile could not be found. They may not have completed their registration.');
+          // Check if other user has listings
+          const otherListingsCheck = await (supabase as any)
+            .from('listings')
+            .select('id', { count: 'exact' })
+            .eq('user_id', otherUserId)
+            .limit(1);
+          
+          otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
+        } catch (roleCheckError) {
+          console.warn('Could not determine roles from listings, defaulting to client-owner');
+          // If we can't determine roles, assume the initiator is client and other is owner
+          myRole = 'client';
+          otherRole = 'owner';
         }
 
         // Determine client and owner IDs based on roles
-        const clientId = myRoleData.role === 'client' ? user.id : otherUserId;
-        const ownerId = myRoleData.role === 'owner' ? user.id : otherUserId;
+        const clientId = myRole === 'client' ? user.id : otherUserId;
+        const ownerId = myRole === 'owner' ? user.id : otherUserId;
 
         // Create conversation without requiring a match first (match_id is now nullable)
         const { data: newConversation, error: conversationError } = await supabase

@@ -177,15 +177,15 @@ export function SimpleSwipeContainer() {
         </AnimatePresence>
       </div>
 
-      {/* Enhanced 3D Action Buttons - Fixed at bottom, truly floating */}
+      {/* Enhanced 3D Action Buttons - Fixed at bottom, truly floating with NO background */}
       <div className="fixed bottom-20 left-0 right-0 z-50 pointer-events-none">
-        <div className="max-w-md mx-auto flex justify-center items-center gap-6 px-4 pointer-events-auto [&>*]:pointer-events-auto">
+        <div className="max-w-md mx-auto flex justify-center items-center gap-6 px-4">
           {/* Dislike Button - 3D Enhanced */}
           <Button
             onClick={handlePass}
             size="lg"
             variant="ghost"
-            className="relative w-14 h-14 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] hover:scale-110 active:scale-95 transform-gpu"
+            className="pointer-events-auto relative w-14 h-14 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] hover:scale-110 active:scale-95 transform-gpu"
             disabled={swipeMutation.isPending || isCreatingConversation}
           >
             <X className="w-5 h-5 stroke-[3]" />
@@ -196,7 +196,7 @@ export function SimpleSwipeContainer() {
             onClick={handleMessage}
             size="lg"
             variant="ghost"
-            className="relative w-14 h-14 rounded-full bg-white border-4 border-blue-500 text-blue-500 hover:bg-gradient-to-br hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(59,130,246,0.3),0_2px_8px_rgba(59,130,246,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(59,130,246,0.4),0_4px_12px_rgba(59,130,246,0.3)] hover:scale-110 active:scale-95 transform-gpu"
+            className="pointer-events-auto relative w-14 h-14 rounded-full bg-white border-4 border-blue-500 text-blue-500 hover:bg-gradient-to-br hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(59,130,246,0.3),0_2px_8px_rgba(59,130,246,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(59,130,246,0.4),0_4px_12px_rgba(59,130,246,0.3)] hover:scale-110 active:scale-95 transform-gpu"
             disabled={swipeMutation.isPending || isCreatingConversation}
           >
             <MessageCircle className="w-5 h-5 stroke-[3]" />
@@ -207,7 +207,7 @@ export function SimpleSwipeContainer() {
             onClick={handleLike}
             size="lg"
             variant="ghost"
-            className="relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 text-white border-4 border-orange-300 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 hover:border-orange-400 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(249,115,22,0.4),0_2px_8px_rgba(249,115,22,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),0_0_30px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_24px_rgba(249,115,22,0.5),0_4px_12px_rgba(249,115,22,0.4),0_0_40px_rgba(249,115,22,0.3)] hover:scale-110 active:scale-95 transform-gpu animate-pulse-subtle"
+            className="pointer-events-auto relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 text-white border-4 border-orange-300 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 hover:border-orange-400 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(249,115,22,0.4),0_2px_8px_rgba(249,115,22,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),0_0_30px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_24px_rgba(249,115,22,0.5),0_4px_12px_rgba(249,115,22,0.4),0_0_40px_rgba(249,115,22,0.3)] hover:scale-110 active:scale-95 transform-gpu animate-pulse-subtle"
             disabled={swipeMutation.isPending || isCreatingConversation}
           >
             <Heart className="w-10 h-10 fill-current drop-shadow-lg" />

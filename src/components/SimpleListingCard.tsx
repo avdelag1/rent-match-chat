@@ -116,18 +116,18 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage, onTap }:
               onClick={handleImageClick}
             />
 
-            {/* Quick Actions - Message Icon in Top Right */}
+            {/* Quick Actions - Message Icon in Top Right - PROMINENT */}
             <div className="absolute top-3 right-3 flex gap-2 z-20">
               <Button
                 size="sm"
                 variant="outline"
-                className="w-8 h-8 p-0 bg-white/90 border-white/30 text-gray-800 hover:bg-white shadow-lg"
+                className="w-12 h-12 p-0 bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-white text-white hover:from-blue-600 hover:to-blue-700 shadow-[0_4px_12px_rgba(59,130,246,0.4),0_2px_6px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.5),0_3px_8px_rgba(59,130,246,0.4)] hover:scale-110 active:scale-95 transition-all duration-200 transform-gpu backdrop-blur-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   onMessage?.();
                 }}
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-6 h-6 stroke-[2.5]" />
               </Button>
             </div>
 
