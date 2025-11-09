@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, SlidersHorizontal, Heart, MessageCircle, User, Plus, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUnreadMatches } from '@/hooks/useUnreadMatches';
+import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 
 interface BottomNavigationProps {
   userRole: 'client' | 'owner';
@@ -23,7 +23,7 @@ interface NavItem {
 export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, onListingsClick }: BottomNavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { unreadCount } = useUnreadMatches();
+  const { unreadCount } = useUnreadMessageCount();
 
   // Client/Renter Navigation Items
   const clientNavItems: NavItem[] = [
