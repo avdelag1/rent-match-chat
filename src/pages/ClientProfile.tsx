@@ -155,29 +155,27 @@ const ClientProfile = () => {
             </Card>
           </motion.div>
 
-          {/* Account Status */}
+          {/* Quick Actions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.4 }}
           >
-            <Card className="dynamic-card interactive-card bg-card border-border">
+            <Card className="dynamic-card interactive-card bg-card border-border mt-6">
               <CardHeader>
-                <CardTitle className="text-card-foreground">Account Status</CardTitle>
+                <CardTitle className="text-card-foreground">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-card-foreground font-medium">Subscription Plan</p>
-                    <p className="text-muted-foreground">Free Plan - Limited features</p>
-                  </div>
+                <div className="space-y-3">
                   <Button 
-                    variant="outline" 
-                    className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground transform transition-all duration-200 hover:scale-105 active:scale-95"
-                    onClick={() => navigate('/subscription-packages')}
+                    className="w-full group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
+                    onClick={() => navigate('/client/settings?tab=subscription')}
                   >
-                    <span className="group-hover:animate-pulse">View Premium</span>
+                    <span className="group-hover:animate-pulse">View Subscription Options</span>
                   </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Manage premium packages and messaging activations in Settings
+                  </p>
                 </div>
               </CardContent>
             </Card>
