@@ -8,11 +8,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { User, Mail, Calendar, MapPin, TrendingUp, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const OwnerProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { user, signOut } = useAuth();
   const { data: stats, isLoading: statsLoading } = useOwnerStats();
+  const navigate = useNavigate();
 
   return (
     <DashboardLayout userRole="owner">
@@ -163,6 +165,7 @@ const OwnerProfile = () => {
                     <Button 
                       variant="outline" 
                       className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground transform transition-all duration-200 hover:scale-105 active:scale-95"
+                      onClick={() => navigate('/subscription-packages')}
                     >
                       <span className="group-hover:animate-pulse">Upgrade Plan</span>
                     </Button>

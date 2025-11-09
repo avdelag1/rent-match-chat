@@ -9,6 +9,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const ClientProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -16,6 +17,7 @@ const ClientProfile = () => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const { data: profile, isLoading } = useClientProfile();
   const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   // Auto-open dialog if no profile exists yet
   useEffect(() => {
@@ -149,6 +151,34 @@ const ClientProfile = () => {
                     </Button>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Account Status */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+          >
+            <Card className="dynamic-card interactive-card bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-card-foreground">Account Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-card-foreground font-medium">Subscription Plan</p>
+                    <p className="text-muted-foreground">Free Plan - Limited features</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground transform transition-all duration-200 hover:scale-105 active:scale-95"
+                    onClick={() => navigate('/subscription-packages')}
+                  >
+                    <span className="group-hover:animate-pulse">View Premium</span>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
