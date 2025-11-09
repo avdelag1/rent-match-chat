@@ -249,20 +249,6 @@ const ClientProfileCardComponent = ({
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-        {/* Quick Actions - Message Icon in Top Right */}
-        <div className="absolute top-4 right-4 z-30">
-          <Button
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMessage();
-            }}
-            className="w-12 h-12 p-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-white text-white hover:from-blue-600 hover:to-blue-700 shadow-[0_4px_12px_rgba(59,130,246,0.5)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.6)] hover:scale-110 active:scale-95 transition-all duration-200"
-          >
-            <MessageCircle className="w-6 h-6 stroke-[2.5]" />
-          </Button>
-        </div>
       </div>
       
       {/* Bottom Content - Compact */}

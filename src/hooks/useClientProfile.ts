@@ -152,6 +152,9 @@ export function useSaveClientProfile() {
         } else {
           console.log('✅ [PROFILE SYNC] Successfully synced to profiles table');
           console.log('✅ [PROFILE SYNC] Updated fields:', Object.keys(syncPayload));
+          
+          // Invalidate profiles_public cache immediately after sync
+          qc.invalidateQueries({ queryKey: ['profiles_public'] });
         }
       }
 
