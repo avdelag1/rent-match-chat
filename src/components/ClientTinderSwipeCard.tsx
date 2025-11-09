@@ -36,6 +36,7 @@ export function ClientTinderSwipeCard({
     : [profile.avatar_url || '/placeholder-avatar.svg'];
 
   const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
@@ -94,11 +95,11 @@ export function ClientTinderSwipeCard({
       animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 400,
-        damping: 40,
-        mass: 0.8
+        stiffness: 450,
+        damping: 38,
+        mass: 0.7
       }}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing"
+      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
     >
       {/* Enhanced Swipe Overlays with Emojis */}
       {/* Right Swipe - GREEN LIKE with Emoji */}
@@ -140,11 +141,12 @@ export function ClientTinderSwipeCard({
       </motion.div>
 
       {/* Card Content */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card">
+      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl" style={{ willChange: 'transform' }}>
         {/* Main Image with Tap Zones */}
         <div 
-          className="relative w-full h-full cursor-pointer"
+          className="relative w-full h-full cursor-pointer select-none"
           onClick={handleImageClick}
+          style={{ touchAction: 'manipulation' }}
         >
           <img
             src={images[currentImageIndex]}
@@ -206,13 +208,14 @@ export function ClientTinderSwipeCard({
           )}
         </div>
 
-        {/* Bottom Sheet */}
+        {/* Bottom Sheet with Enhanced Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-card/95 backdrop-blur-md"
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-card/98 backdrop-blur-2xl border-t border-border/50 shadow-2xl"
           animate={{
             height: isBottomSheetExpanded ? '85%' : '30%',
           }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+          style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
           <div className="flex justify-center pt-3 pb-2">

@@ -30,7 +30,7 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
   const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
   const images = imageCount > 0 ? listing.images : ['/placeholder.svg'];
 
-  // Photo navigation via tap zones
+  // Photo navigation via tap zones - NO VISUAL INDICATORS
   const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isTop) return;
     e.stopPropagation();
@@ -89,25 +89,26 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
       style={cardStyle}
       drag={isTop ? true : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.15}
+      dragElastic={0.2}
       onDragEnd={handleDragEnd}
-      className="w-full h-full cursor-grab active:cursor-grabbing"
+      className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
       animate={{ x: 0, y: 0, rotate: 0 }}
       transition={{
         type: "spring",
-        stiffness: 400,
-        damping: 35,
-        mass: 0.8
+        stiffness: 450,
+        damping: 38,
+        mass: 0.7
       }}
     >
-      <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card border-none shadow-card rounded-3xl">
+      <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} y={y} />
 
         {/* Main Image - 9:16 Aspect Ratio */}
         <div 
-          className="relative h-full overflow-hidden cursor-pointer"
+          className="relative h-full overflow-hidden cursor-pointer select-none"
           onClick={handleImageClick}
+          style={{ touchAction: 'manipulation' }}
         >
           {/* Story-Style Dots at Top */}
           {imageCount > 1 && (
@@ -166,17 +167,18 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
           )}
         </div>
 
-        {/* Bottom Sheet - Collapsible */}
+        {/* Bottom Sheet - Collapsible with Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-card rounded-t-[24px] shadow-lg"
+          className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
             height: isBottomSheetExpanded ? '85%' : '30%'
           }}
           transition={{
             type: "spring",
-            stiffness: 300,
-            damping: 30
+            stiffness: 350,
+            damping: 32
           }}
+          style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
           <div className="flex justify-center py-3">

@@ -9,20 +9,26 @@ interface PageTransitionProps {
 const pageVariants = {
   initial: {
     opacity: 0,
-    x: 20,
+    y: 20,
+    scale: 0.98,
   },
   in: {
     opacity: 1,
-    x: 0,
+    y: 0,
+    scale: 1,
   },
   out: {
     opacity: 0,
-    x: -20,
+    y: -20,
+    scale: 0.98,
   },
 };
 
 const pageTransition = {
-  duration: 0.3,
+  type: "spring" as const,
+  stiffness: 400,
+  damping: 40,
+  mass: 0.8,
 };
 
 export function PageTransition({ children, className = '' }: PageTransitionProps) {

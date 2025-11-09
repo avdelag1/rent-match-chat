@@ -13,14 +13,14 @@ export function TopBar({ onNotificationsClick, onSettingsClick, className }: Top
   const { unreadCount: notificationCount } = useUnreadNotifications();
 
   return (
-    <header className={cn('fixed top-0 left-0 right-0 bg-background border-b border-border z-50', className)}>
+    <header className={cn('fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-b border-border/50 z-50 shadow-lg', className)}>
       <div className="flex items-center justify-between h-14 px-4 max-w-screen-xl mx-auto">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-2">
+        {/* Logo with Modern Animation */}
+        <div className="flex items-center gap-2 select-none">
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-2 shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-200 hover:scale-105">
             <Flame className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent animate-gradient-text">
             TINDERENT
           </span>
         </div>
