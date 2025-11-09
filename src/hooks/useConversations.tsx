@@ -41,10 +41,8 @@ export function useConversations() {
           .from('conversations')
           .select(`
             *,
-            client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
-            owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
-            client_role:user_roles!conversations_client_id_fkey(role),
-            owner_role:user_roles!conversations_owner_id_fkey(role)
+            client_profile:profiles!conversations_client_id_fkey(id, user_id, full_name, avatar_url),
+            owner_profile:profiles!conversations_owner_id_fkey(id, user_id, full_name, avatar_url)
           `)
           .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
           .order('last_message_at', { ascending: false, nullsFirst: false });
@@ -85,7 +83,8 @@ export function useConversations() {
         const conversationsWithProfiles = data.map((conversation: any) => {
           const isClient = conversation.client_id === user.id;
           const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
-          const otherUserRole = isClient ? conversation.owner_role?.role : conversation.client_role?.role;
+          // Determine role based on which side of the conversation the other user is
+          const otherUserRole = isClient ? 'owner' : 'client';
 
           return {
             id: conversation.id,

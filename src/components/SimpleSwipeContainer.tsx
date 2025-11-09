@@ -179,7 +179,7 @@ export function SimpleSwipeContainer() {
 
       {/* Enhanced 3D Action Buttons - Fixed at bottom, truly floating */}
       <div className="fixed bottom-20 left-0 right-0 z-50 pointer-events-none">
-        <div className="max-w-md mx-auto flex justify-center items-center gap-6 px-4 pointer-events-auto">
+        <div className="max-w-md mx-auto flex justify-center items-center gap-6 px-4 pointer-events-auto [&>*]:pointer-events-auto">
           {/* Dislike Button - 3D Enhanced */}
           <Button
             onClick={handlePass}
