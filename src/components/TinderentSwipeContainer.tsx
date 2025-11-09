@@ -6,6 +6,7 @@ import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatchin
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
+import { useStartConversation } from '@/hooks/useConversations';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Flame, X, RotateCcw, Sparkles, MessageCircle, Eye } from 'lucide-react';
@@ -30,6 +31,7 @@ interface TinderentSwipeContainerProps {
 export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
   // Get listings with filters applied
   const {
@@ -61,6 +63,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
+  const startConversation = useStartConversation();
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
@@ -139,24 +142,56 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     }
   };
 
-  const handleMessage = () => {
-    if (needsUpgrade) {
-      // Route users to Settings > Subscription instead of showing inline upgrade UI
-      navigate('/client/settings#subscription');
+  const handleMessage = async () => {
+    const currentListing = listings[currentIndex];
+    if (!currentListing?.owner_id || isCreatingConversation) {
       toast({
-        title: 'Subscription Required',
-        description: 'Manage or upgrade your plan in Settings > Subscription.',
+        title: 'Cannot Start Conversation',
+        description: 'Owner information not available.',
       });
       return;
     }
 
-    if (hasPremiumMessaging) {
-      navigate('/messages');
-    } else {
+    if (needsUpgrade) {
+      navigate('/client/settings#subscription');
       toast({
         title: 'Subscription Required',
-        description: 'Manage or upgrade your plan in Settings > Subscription.',
+        description: 'Upgrade to message property owners.',
       });
+      return;
+    }
+
+    if (!hasPremiumMessaging) {
+      navigate('/client/settings#subscription');
+      return;
+    }
+
+    setIsCreatingConversation(true);
+    
+    try {
+      toast({
+        title: 'Starting conversation...',
+        description: 'Please wait',
+      });
+
+      const result = await startConversation.mutateAsync({
+        otherUserId: currentListing.owner_id,
+        listingId: currentListing.id,
+        initialMessage: `Hi! I'm interested in your property: ${currentListing.title}`,
+        canStartNewConversation: true,
+      });
+
+      if (result?.conversationId) {
+        navigate(`/messages?conversationId=${result.conversationId}`);
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not start conversation. Please try again.',
+      });
+    } finally {
+      setIsCreatingConversation(false);
     }
   };
 
@@ -302,9 +337,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       </div>
 
 
-      {/* Bottom Action Bar - 3 Buttons with blur effect */}
+      {/* Bottom Action Bar - 3 Buttons - Floating with NO background */}
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-lg border-t border-gray-200/50 shadow-lg"
+        className="fixed bottom-0 left-0 right-0 z-20 pointer-events-none"
         style={{
           paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)'
         }}
@@ -312,7 +347,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="flex justify-center items-center gap-6 py-4 px-4">
+        <div className="flex justify-center items-center gap-6 py-4 px-4 pointer-events-none">
           {/* Dislike Button */}
           <motion.div
             whileHover={{ scale: 1.1 }}
@@ -321,9 +356,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             <Button
               size="lg"
               variant="ghost"
-              className="w-16 h-16 rounded-full bg-white border-2 border-rose-500 text-rose-500 hover:bg-rose-50 hover:border-rose-600 transition-all duration-300 shadow-xl hover:shadow-rose-500/20 p-0"
+              className="pointer-events-auto w-16 h-16 rounded-full bg-white border-4 border-rose-500 text-rose-500 hover:bg-gradient-to-br hover:from-rose-500 hover:to-rose-600 hover:text-white hover:border-rose-600 transition-all duration-300 shadow-[0_8px_16px_rgba(239,68,68,0.3)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4)] p-0"
               onClick={() => handleButtonSwipe('left')}
-              disabled={swipeMutation.isPending || !currentListing}
+              disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
               aria-label="Dislike this property"
             >
               <X className="w-8 h-8 stroke-[2.5]" />
@@ -343,11 +378,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                   undoLastSwipe();
                 }
               }}
-              disabled={!canUndo || isUndoing}
-              className={`w-14 h-14 rounded-full transition-all duration-300 shadow-lg p-0 ${
+              disabled={!canUndo || isUndoing || isCreatingConversation}
+              className={`pointer-events-auto w-14 h-14 rounded-full transition-all duration-300 shadow-[0_8px_16px_rgba(107,114,128,0.3)] p-0 ${
                 canUndo 
-                  ? 'bg-white border-2 border-gray-400 text-gray-600 hover:bg-gray-50 hover:shadow-xl' 
-                  : 'bg-gray-200 border-2 border-gray-300 text-gray-400 cursor-not-allowed opacity-60'
+                  ? 'bg-white border-4 border-gray-400 text-gray-600 hover:bg-gray-50 hover:shadow-[0_12px_24px_rgba(107,114,128,0.4)]' 
+                  : 'bg-gray-200 border-4 border-gray-300 text-gray-400 cursor-not-allowed opacity-60'
               }`}
               aria-label="Undo last swipe"
             >
@@ -368,9 +403,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
             <Button
               size="lg"
               variant="ghost"
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white transition-all duration-300 shadow-xl hover:shadow-emerald-500/30 p-0 border-0"
+              className="pointer-events-auto w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white transition-all duration-300 shadow-[0_8px_16px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_24px_rgba(16,185,129,0.5)] border-0 p-0"
               onClick={() => handleButtonSwipe('right')}
-              disabled={swipeMutation.isPending || !currentListing}
+              disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
               aria-label="Like this property"
             >
               <Flame className="w-8 h-8 fill-white stroke-white" />

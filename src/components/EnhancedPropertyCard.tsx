@@ -62,18 +62,19 @@ const EnhancedPropertyCardComponent = ({
   const images = imageCount > 0 ? listing.images : ['/placeholder.svg'];
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
-    const threshold = 60;
+    const threshold = 100;
     const velocity = info.velocity.x;
     const absVelocity = Math.abs(velocity);
 
-    // Lower threshold if high velocity (flick gesture)
-    const effectiveThreshold = absVelocity > 800 ? 40 : 60;
-
-    if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 600) {
+    // If swipe is strong enough, complete the swipe
+    if (Math.abs(info.offset.x) > threshold || absVelocity > 600) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
+    } else {
+      // Spring back to center with smooth animation
+      x.set(0);
     }
-  }, [onSwipe]);
+  }, [onSwipe, x]);
 
   const nextImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -152,7 +153,8 @@ const EnhancedPropertyCardComponent = ({
       onDragEnd={handleDragEnd}
       className="cursor-pointer transform-gpu w-full"
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
+      animate={{ x: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25, mass: 0.5 }}
     >
       <Card className="relative w-full h-[550px] overflow-hidden bg-white border-none shadow-2xl rounded-3xl">
         {/* Full Screen Image - Fixed height for consistent card sizing */}
@@ -176,6 +178,22 @@ const EnhancedPropertyCardComponent = ({
                   e.currentTarget.src = '/placeholder.svg';
                 }}
               />
+              
+              {/* Quick Action - Message Icon in Top Right */}
+              {onMessage && (
+                <div className="absolute top-4 right-4 z-30">
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMessage();
+                    }}
+                    className="w-12 h-12 p-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-white text-white hover:from-blue-600 hover:to-blue-700 shadow-[0_4px_12px_rgba(59,130,246,0.5)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.6)] hover:scale-110 active:scale-95 transition-all duration-200"
+                  >
+                    <MessageCircle className="w-6 h-6 stroke-[2.5]" />
+                  </Button>
+                </div>
+              )}
               
               {/* Left/Right Click Areas for Navigation */}
               <div className="absolute inset-0 flex">
