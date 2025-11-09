@@ -19,17 +19,24 @@ export function useUnreadMessageCount() {
 
       if (!conversations?.length) return 0;
 
-      const conversationIds = conversations.map(c => c.id);
+      // Count conversations with at least one unread message
+      let conversationsWithUnreadCount = 0;
+      
+      for (const conv of conversations) {
+        const { count } = await supabase
+          .from('conversation_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('conversation_id', conv.id)
+          .neq('sender_id', user.id)
+          .eq('is_read', false)
+          .limit(1);
+        
+        if (count && count > 0) {
+          conversationsWithUnreadCount++;
+        }
+      }
 
-      // Count unread messages (messages not sent by current user)
-      const { count } = await supabase
-        .from('conversation_messages')
-        .select('id', { count: 'exact', head: true })
-        .in('conversation_id', conversationIds)
-        .neq('sender_id', user.id)
-        .eq('is_read', false);
-
-      return count || 0;
+      return conversationsWithUnreadCount;
     },
     enabled: !!user?.id,
     refetchInterval: 30000, // Refetch every 30 seconds as backup
