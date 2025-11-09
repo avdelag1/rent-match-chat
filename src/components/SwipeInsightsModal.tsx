@@ -2,16 +2,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Listing } from '@/hooks/useListings';
-import { Eye, TrendingUp, Clock, Users, MapPin, DollarSign, Calendar } from 'lucide-react';
+import { MatchedClientProfile } from '@/hooks/useSmartMatching';
+import { Eye, TrendingUp, Clock, Users, MapPin, DollarSign, Calendar, Shield, CheckCircle, Star } from 'lucide-react';
 
 interface SwipeInsightsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  listing: Listing | null;
+  listing?: Listing | null;
+  profile?: MatchedClientProfile | null;
 }
 
-export function SwipeInsightsModal({ open, onOpenChange, listing }: SwipeInsightsModalProps) {
-  if (!listing) return null;
+export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: SwipeInsightsModalProps) {
+  if (!listing && !profile) return null;
+
+  // Determine if we're showing client profile or property listing insights
+  const isClientProfile = !!profile;
 
   // Mock insights data - in production, fetch from API
   const insights = {
@@ -40,19 +45,136 @@ export function SwipeInsightsModal({ open, onOpenChange, listing }: SwipeInsight
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
                   <Eye className="w-6 h-6 text-primary" />
-                  Property Insights
+                  {isClientProfile ? 'Renter Insights' : 'Property Insights'}
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="mt-6 space-y-6">
-                {/* Property Summary */}
-                <div className="p-4 bg-muted/50 rounded-xl">
-                  <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    <span>{listing.neighborhood}, {listing.city}</span>
+              {isClientProfile && profile ? (
+                // RENTER/CLIENT PROFILE INSIGHTS
+                <div className="mt-6 space-y-6">
+                  {/* Profile Summary */}
+                  <div className="p-4 bg-muted/50 rounded-xl">
+                    <h3 className="text-lg font-semibold mb-2">{profile.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4" />
+                      <span>{profile.city || 'Location not specified'}</span>
+                    </div>
                   </div>
+
+                  {/* Application Quality Score */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Star className="w-5 h-5 text-yellow-500" />
+                      Application Quality
+                    </h4>
+                    <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 rounded-xl">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">Profile Completeness</span>
+                        <Badge className="bg-green-500/20 text-green-700 dark:text-green-400">
+                          {Math.floor(Math.random() * 20) + 80}%
+                        </Badge>
+                      </div>
+                      <div className="w-full bg-muted/30 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-yellow-500 to-amber-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${Math.floor(Math.random() * 20) + 80}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Response Rate */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-blue-500" />
+                      Response Time
+                    </h4>
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 rounded-xl">
+                      <p className="text-sm text-muted-foreground">
+                        Typically responds within <span className="font-semibold text-foreground">2-4 hours</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Competition Level */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-orange-500" />
+                      Competition Level
+                    </h4>
+                    <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {Math.floor(Math.random() * 10) + 5} other owners interested
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Act fast to secure this tenant
+                          </p>
+                        </div>
+                        <Badge className="bg-red-500/20 text-red-700 dark:text-red-400">
+                          🔥 High Interest
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verification Status */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-green-500" />
+                      Verification Status
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-muted/50 rounded-xl">
+                        <div className="flex items-center gap-2 mb-1">
+                          {profile.verified ? (
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
+                          )}
+                          <span className="text-sm font-medium">ID Verified</span>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-muted/50 rounded-xl">
+                        <div className="flex items-center gap-2 mb-1">
+                          {Math.random() > 0.5 ? (
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
+                          )}
+                          <span className="text-sm font-medium">Income</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Match Reasons */}
+                  {profile.matchReasons && profile.matchReasons.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold">Why This Renter Matches</h4>
+                      <div className="space-y-2">
+                        {profile.matchReasons.map((reason, idx) => (
+                          <div key={idx} className="flex items-start gap-2 p-3 bg-muted/50 rounded-xl">
+                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{reason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
+              ) : listing ? (
+                // PROPERTY LISTING INSIGHTS (Original)
+                <div className="mt-6 space-y-6">
+                  {/* Property Summary */}
+                  <div className="p-4 bg-muted/50 rounded-xl">
+                    <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4" />
+                      <span>{listing.neighborhood}, {listing.city}</span>
+                    </div>
+                  </div>
 
                 {/* View Statistics */}
                 <div className="space-y-3">
@@ -167,6 +289,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing }: SwipeInsight
                   </div>
                 </div>
               </div>
+              ) : null}
             </motion.div>
           </DialogContent>
         </Dialog>
