@@ -11,7 +11,7 @@ import { triggerHaptic } from '@/utils/haptics';
 
 interface TinderSwipeCardProps {
   listing: Listing | MatchedListing;
-  onSwipe: (direction: 'left' | 'right' | 'up') => void;
+  onSwipe: (direction: 'left' | 'right') => void;
   onTap?: () => void;
   isTop?: boolean;
 }
@@ -21,10 +21,10 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Motion values for drag
+  // Motion values for drag - enhanced for smoother feel
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotate = useTransform(x, [-300, 0, 300], [-15, 0, 15]);
+  const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
 
   // Guard for missing images
   const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
@@ -52,21 +52,13 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
     }
   }, [isTop, imageCount, isBottomSheetExpanded]);
 
-  // Advanced drag handling with spring physics
+  // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 150; // 40% of typical screen width
-    const swipeThresholdY = 120; // 30% of typical screen height
-    const velocityThreshold = 500;
+    const swipeThresholdX = 140;
+    const velocityThreshold = 600;
 
-    // Check for super like (swipe up)
-    if (offset.y < -swipeThresholdY || velocity.y < -velocityThreshold) {
-      triggerHaptic('heavy');
-      onSwipe('up');
-      return;
-    }
-
-    // Check for regular swipes (left/right)
+    // Check for swipes (left/right only)
     if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
       const direction = offset.x > 0 ? 'right' : 'left';
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
@@ -97,15 +89,15 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
       style={cardStyle}
       drag={isTop ? true : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.1}
+      dragElastic={0.15}
       onDragEnd={handleDragEnd}
       className="w-full h-full cursor-grab active:cursor-grabbing"
       animate={{ x: 0, y: 0, rotate: 0 }}
       transition={{
         type: "spring",
-        stiffness: 300,
-        damping: 30,
-        mass: 1
+        stiffness: 400,
+        damping: 35,
+        mass: 0.8
       }}
     >
       <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card border-none shadow-card rounded-3xl">

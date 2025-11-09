@@ -10,7 +10,7 @@ export function useSwipe() {
   return useMutation({
     mutationFn: async ({ targetId, direction, targetType = 'listing' }: {
       targetId: string;
-      direction: 'left' | 'right' | 'up';
+      direction: 'left' | 'right';
       targetType?: 'listing' | 'profile';
     }) => {
       console.log('[useSwipe] Starting swipe mutation:', { targetId, direction, targetType });
@@ -28,18 +28,13 @@ export function useSwipe() {
 
       console.log('[useSwipe] User authenticated:', user.id);
 
-      // Map 'up' to 'right' with super_like flag for database
-      const dbDirection = direction === 'up' ? 'right' : direction;
-      const isSuperLike = direction === 'up';
-
       // Use atomic upsert to prevent race conditions
       const { data: likeData, error } = await supabase
         .from('likes')
         .upsert({
           user_id: user.id,
           target_id: targetId,
-          direction: dbDirection,
-          is_super_like: isSuperLike
+          direction: direction
         }, {
           onConflict: 'user_id,target_id,direction',
           ignoreDuplicates: false
@@ -53,8 +48,8 @@ export function useSwipe() {
 
       console.log('[useSwipe] Like saved successfully:', likeData);
       
-      // Send notification to the liked user (for right swipes and super likes)
-      if (direction === 'right' || direction === 'up') {
+      // Send notification to the liked user (for right swipes)
+      if (direction === 'right') {
         try {
           let recipientId: string | null = null;
           
@@ -70,17 +65,12 @@ export function useSwipe() {
           }
           
           if (recipientId) {
-            const notificationTitle = isSuperLike ? '⭐ Someone super liked you!' : 'Someone liked you!';
-            const notificationMessage = isSuperLike 
-              ? 'You received a priority like! This person is really interested.' 
-              : 'You have a new like. Swipe to see if it\'s a match!';
-            
             await supabase.from('notifications').insert([{
               user_id: recipientId,
-              type: isSuperLike ? 'super_like' : 'like',
-              title: notificationTitle,
-              message: notificationMessage,
-              data: { liker_id: user.id, target_id: targetId, target_type: targetType, is_super_like: isSuperLike }
+              type: 'like',
+              title: '💚 Someone liked you!',
+              message: 'You have a new like. Swipe to see if it\'s a match!',
+              data: { liker_id: user.id, target_id: targetId, target_type: targetType }
             }] as any);
           }
         } catch (notifError) {
@@ -90,7 +80,7 @@ export function useSwipe() {
       
       // Check if this creates a match (both users liked each other)
       // Wrap in try-catch to prevent match detection errors from failing the entire swipe
-      if (direction === 'right' || direction === 'up') {
+      if (direction === 'right') {
         try {
           if (targetType === 'listing') {
             // Get the listing owner

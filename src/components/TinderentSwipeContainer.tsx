@@ -32,7 +32,7 @@ interface TinderentSwipeContainerProps {
 
 export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
 
@@ -68,7 +68,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
   const startConversation = useStartConversation();
 
-  const handleSwipe = useCallback((direction: 'left' | 'right' | 'up') => {
+  const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
     if (!currentListing) {
       console.log('No current listing found for swipe');
@@ -85,11 +85,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     setSwipeDirection(direction);
     
     // Trigger haptic feedback
-    triggerHaptic(
-      direction === 'right' ? 'success' : 
-      direction === 'up' ? 'heavy' : 
-      'warning'
-    );
+    triggerHaptic(direction === 'right' ? 'success' : 'warning');
     
     // Record swipe
     swipeMutation.mutate({
@@ -102,19 +98,15 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     recordSwipe(
       currentListing.id, 
       'listing', 
-      direction === 'right' || direction === 'up' ? 'like' : 'pass'
+      direction === 'right' ? 'like' : 'pass'
     );
 
     // Move to next card after animation with proper delay for smooth rhythm
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
-    }, 300); // 300ms delay for smooth visual rhythm
+    }, 300);
   }, [currentIndex, listings, swipeMutation, recordSwipe]);
-
-  const handleSuperLike = useCallback(() => {
-    handleSwipe('up');
-  }, [handleSwipe]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
     handleSwipe(direction);
@@ -308,16 +300,16 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               animate={{ scale: 1, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
-                y: swipeDirection === 'up' ? -800 : 0,
+                y: 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
-                scale: swipeDirection === 'up' ? 0.8 : 0.85,
+                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                scale: 0.85,
                 transition: {
                   type: "spring",
-                  stiffness: 200,
-                  damping: 20,
+                  stiffness: 300,
+                  damping: 25,
                   mass: 0.8,
-                  duration: 0.35
+                  duration: 0.3
                 }
               }}
               transition={{
@@ -346,7 +338,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         onPass={() => handleButtonSwipe('left')}
         onInfo={handleInsights}
         onLike={() => handleButtonSwipe('right')}
-        onSuperLike={handleSuperLike}
         canUndo={canUndo}
         disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
       />

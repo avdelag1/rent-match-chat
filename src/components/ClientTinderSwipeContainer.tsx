@@ -36,7 +36,7 @@ export function ClientTinderSwipeContainer({
 }: ClientTinderSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
 
   // Match celebration state
@@ -59,20 +59,19 @@ export function ClientTinderSwipeContainer({
 
   const currentProfile = profiles[currentIndex];
 
-  const handleSwipe = useCallback((direction: 'left' | 'right' | 'up') => {
+  const handleSwipe = useCallback((direction: 'left' | 'right') => {
     if (!currentProfile) return;
 
     setSwipeDirection(direction);
     
     // Haptic feedback
     if (direction === 'right') triggerHaptic('success');
-    else if (direction === 'up') triggerHaptic('heavy');
     else triggerHaptic('light');
 
     // Record swipe
     swipeMutation.mutate({
       targetId: currentProfile.user_id,
-      direction: direction === 'left' ? 'left' : 'right',
+      direction,
       targetType: 'profile',
     });
 
@@ -87,13 +86,6 @@ export function ClientTinderSwipeContainer({
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
     }, 300);
-
-    // Show toast for super like
-    if (direction === 'up') {
-      toast.success('⭐ Priority Interest Sent!', {
-        description: 'Your priority match request has been sent.',
-      });
-    }
   }, [currentProfile, swipeMutation, recordSwipe]);
 
   const handleUndo = useCallback(async () => {
@@ -105,10 +97,6 @@ export function ClientTinderSwipeContainer({
 
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     handleSwipe(direction);
-  }, [handleSwipe]);
-
-  const handleSuperLike = useCallback(() => {
-    handleSwipe('up');
   }, [handleSwipe]);
 
   const handleRefresh = async () => {
@@ -253,14 +241,14 @@ export function ClientTinderSwipeContainer({
               animate={{ scale: 1, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
-                y: swipeDirection === 'up' ? -1000 : 0,
+                y: 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
-                scale: swipeDirection === 'up' ? 0.8 : 0.85,
+                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                scale: 0.85,
                 transition: {
                   type: 'spring',
-                  stiffness: 300,
-                  damping: 30,
+                  stiffness: 400,
+                  damping: 35,
                   duration: 0.3,
                 },
               }}
@@ -289,7 +277,6 @@ export function ClientTinderSwipeContainer({
         onPass={() => handleButtonSwipe('left')}
         onInfo={handleInsights}
         onLike={() => handleButtonSwipe('right')}
-        onSuperLike={handleSuperLike}
         canUndo={canUndo}
       />
 

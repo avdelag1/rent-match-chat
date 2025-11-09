@@ -2,29 +2,21 @@ import { useCallback } from 'react';
 import { PanInfo } from 'framer-motion';
 
 interface UseSwipeGesturesOptions {
-  onSwipe: (direction: 'left' | 'right' | 'up') => void;
+  onSwipe: (direction: 'left' | 'right') => void;
   swipeThresholdX?: number;
-  swipeThresholdY?: number;
   velocityThreshold?: number;
 }
 
 export function useSwipeGestures({
   onSwipe,
-  swipeThresholdX = 150,
-  swipeThresholdY = 120,
-  velocityThreshold = 500
+  swipeThresholdX = 140,
+  velocityThreshold = 600
 }: UseSwipeGesturesOptions) {
   
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
     
-    // Priority: Check super like first (swipe up)
-    if (offset.y < -swipeThresholdY || velocity.y < -velocityThreshold) {
-      onSwipe('up');
-      return;
-    }
-    
-    // Check horizontal swipes
+    // Check horizontal swipes only
     const absOffsetX = Math.abs(offset.x);
     const absVelocityX = Math.abs(velocity.x);
     
@@ -35,7 +27,7 @@ export function useSwipeGestures({
     }
     
     // If no threshold met, card will snap back (handled by spring physics)
-  }, [onSwipe, swipeThresholdX, swipeThresholdY, velocityThreshold]);
+  }, [onSwipe, swipeThresholdX, velocityThreshold]);
   
   return { handleDragEnd };
 }

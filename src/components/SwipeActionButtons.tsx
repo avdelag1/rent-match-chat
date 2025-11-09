@@ -8,7 +8,6 @@ interface SwipeActionButtonsProps {
   onPass: () => void;
   onInfo: () => void;
   onLike: () => void;
-  onSuperLike: () => void;
   canUndo: boolean;
   disabled?: boolean;
 }
@@ -18,7 +17,6 @@ export function SwipeActionButtons({
   onPass,
   onInfo,
   onLike,
-  onSuperLike,
   canUndo,
   disabled = false
 }: SwipeActionButtonsProps) {
@@ -133,47 +131,6 @@ export function SwipeActionButtons({
             </Button>
           </motion.div>
 
-          {/* 5. Priority Button (Blue/Purple gradient) - with glow */}
-          <motion.div
-            whileHover={{ scale: !disabled ? 1.1 : 1 }}
-            whileTap={{ 
-              scale: !disabled ? 0.95 : 1,
-              transition: { 
-                type: "spring",
-                stiffness: 400,
-                damping: 10
-              }
-            }}
-          >
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => handleAction(onSuperLike, 'heavy')}
-              disabled={disabled}
-              className="
-                relative h-[72px] w-[72px] rounded-full border-2 p-0
-                bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500
-                border-blue-400 text-white
-                shadow-xl hover:shadow-[0_0_30px_rgba(59,130,246,0.6)]
-                transition-all duration-200
-              "
-            >
-              <Star className="h-8 w-8 fill-white" />
-              {/* Glow effect */}
-              <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 opacity-0"
-                animate={{
-                  opacity: [0, 0.3, 0],
-                  scale: [1, 1.2, 1]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-            </Button>
-          </motion.div>
         </div>
     </div>
   );

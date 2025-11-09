@@ -7,7 +7,7 @@ import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 
 interface ClientTinderSwipeCardProps {
   profile: MatchedClientProfile;
-  onSwipe: (direction: 'left' | 'right' | 'up') => void;
+  onSwipe: (direction: 'left' | 'right') => void;
   onTap?: () => void;
   onInsights?: () => void;
   isTop?: boolean;
@@ -28,8 +28,8 @@ export function ClientTinderSwipeCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Enhanced rotation based on drag distance (15 degrees max)
-  const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
+  // Enhanced rotation based on drag distance (20 degrees max for better visual)
+  const rotate = useTransform(x, [-300, 0, 300], [-20, 0, 20]);
 
   const images = profile.profile_images && profile.profile_images.length > 0 
     ? profile.profile_images 
@@ -55,24 +55,16 @@ export function ClientTinderSwipeCard({
   const handleDragEnd = (event: any, info: PanInfo) => {
     const { offset, velocity } = info;
 
-    // Threshold: 40% of screen width for horizontal, 30% of screen height for vertical
+    // Threshold: 35% of screen width, velocity-based swipes
     const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    const swipeThresholdX = screenWidth * 0.4;
-    const swipeThresholdY = screenHeight * 0.3;
-    const velocityThreshold = 0.5; // px/ms
-
-    // Priority (up swipe) - Check first
-    if (offset.y < -swipeThresholdY || velocity.y < -velocityThreshold * 1000) {
-      onSwipe('up');
-      return;
-    }
+    const swipeThresholdX = screenWidth * 0.35;
+    const velocityThreshold = 600; // px/s
 
     // Horizontal swipes - Right (accept) or Left (reject)
     const absOffsetX = Math.abs(offset.x);
     const absVelocityX = Math.abs(velocity.x);
 
-    if (absOffsetX > swipeThresholdX || absVelocityX > velocityThreshold * 1000) {
+    if (absOffsetX > swipeThresholdX || absVelocityX > velocityThreshold) {
       const direction = offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
       return;
@@ -83,9 +75,8 @@ export function ClientTinderSwipeCard({
   const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
 
   // Calculate overlay opacity based on drag distance
-  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.4], [0, 1]);
-  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.4, 0], [1, 0]);
-  const upOverlayOpacity = useTransform(y, [-screenHeight * 0.3, 0], [1, 0]);
+  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);
+  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.35, 0], [1, 0]);
 
   const cardStyle = {
     x,
@@ -97,48 +88,55 @@ export function ClientTinderSwipeCard({
     <motion.div
       drag={isTop}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.1}
+      dragElastic={0.2}
       onDragEnd={handleDragEnd}
       style={cardStyle}
       animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 400,
+        damping: 40,
+        mass: 0.8
+      }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing"
     >
-      {/* Enhanced Swipe Overlays */}
-      {/* Right Swipe - GREEN ACCEPT */}
+      {/* Enhanced Swipe Overlays with Emojis */}
+      {/* Right Swipe - GREEN LIKE with Emoji */}
       <motion.div
         className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-green-500/20"
         style={{ opacity: rightOverlayOpacity }}
       >
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white px-10 py-4 rounded-3xl shadow-2xl border-4 border-white transform rotate-[-15deg]">
-          <div className="text-5xl font-black tracking-wider flex items-center gap-3">
-            ✓ ACCEPT
-          </div>
-        </div>
+        <motion.div 
+          className="flex flex-col items-center gap-3"
+          style={{ 
+            scale: useTransform(rightOverlayOpacity, [0, 1], [0.7, 1]),
+            rotate: -15
+          }}
+        >
+          <div className="text-9xl">💚</div>
+          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(34,197,94,0.9)] tracking-wider">
+            LIKE
+          </span>
+        </motion.div>
       </motion.div>
 
-      {/* Left Swipe - RED PASS */}
+      {/* Left Swipe - RED PASS with Emoji */}
       <motion.div
         className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-red-500/20"
         style={{ opacity: leftOverlayOpacity }}
       >
-        <div className="bg-gradient-to-br from-red-500 to-rose-600 text-white px-10 py-4 rounded-3xl shadow-2xl border-4 border-white transform rotate-[15deg]">
-          <div className="text-5xl font-black tracking-wider flex items-center gap-3">
-            ✕ PASS
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Up Swipe - BLUE PRIORITY */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-blue-500/20"
-        style={{ opacity: upOverlayOpacity }}
-      >
-        <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white px-12 py-6 rounded-3xl shadow-2xl border-4 border-white">
-          <div className="text-5xl font-black tracking-wider flex items-center gap-3">
-            <span className="text-6xl">★</span>
-            PRIORITY
-          </div>
-        </div>
+        <motion.div 
+          className="flex flex-col items-center gap-3"
+          style={{ 
+            scale: useTransform(leftOverlayOpacity, [0, 1], [0.7, 1]),
+            rotate: 15
+          }}
+        >
+          <div className="text-9xl">❌</div>
+          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(239,68,68,0.9)] tracking-wider">
+            PASS
+          </span>
+        </motion.div>
       </motion.div>
 
       {/* Card Content */}
