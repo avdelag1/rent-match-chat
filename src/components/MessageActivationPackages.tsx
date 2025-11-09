@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageCircle, Sparkles, Zap, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MessageCircle, Sparkles, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { formatPriceMXN } from "@/utils/subscriptionPricing";
@@ -58,28 +58,16 @@ export function MessageActivationPackages({
 
   const currentUserRole = userRole || userProfile?.role || 'client';
 
-  // Fetch pay-per-use packages from database
-  const { data: clientPackages, isLoading: isLoadingClient } = useQuery({
-    queryKey: ['activation-packages', 'client_pay_per_use'],
+  // Fetch ONLY packages for current user role
+  const packageCategory = currentUserRole === 'owner' ? 'owner_pay_per_use' : 'client_pay_per_use';
+  
+  const { data: packages, isLoading } = useQuery({
+    queryKey: ['activation-packages', packageCategory],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('subscription_packages')
         .select('*')
-        .eq('package_category', 'client_pay_per_use')
-        .eq('is_active', true)
-        .order('message_activations', { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: ownerPackages, isLoading: isLoadingOwner } = useQuery({
-    queryKey: ['activation-packages', 'owner_pay_per_use'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('subscription_packages')
-        .select('*')
-        .eq('package_category', 'owner_pay_per_use')
+        .eq('package_category', packageCategory)
         .eq('is_active', true)
         .order('message_activations', { ascending: true });
       if (error) throw error;
@@ -212,15 +200,19 @@ export function MessageActivationPackages({
     </div>
   );
 
-  const clientPackagesUI = convertPackages(clientPackages);
-  const ownerPackagesUI = convertPackages(ownerPackages);
+  const packagesUI = convertPackages(packages);
+  
+  const roleLabel = currentUserRole === 'owner' ? 'Owner' : 'Client';
+  const roleDescription = currentUserRole === 'owner' 
+    ? 'Start conversations with potential clients. Each activation lets you reach out to a new client.'
+    : 'Connect with property owners. Each activation lets you start a conversation about a listing.';
 
   const content = (
     <div className="space-y-6 p-6">
       <div className="text-center space-y-2">
         <h2 className="text-3xl font-bold gradient-text">Message Activation Packages</h2>
         <p className="text-muted-foreground">
-          Start conversations with property owners or clients. Each activation lets you begin a new conversation.
+          {roleDescription}
         </p>
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-lg border border-accent/20">
           <Sparkles className="w-4 h-4 text-accent" />
@@ -228,41 +220,19 @@ export function MessageActivationPackages({
         </div>
       </div>
 
-      {isLoadingClient || isLoadingOwner ? (
+      {isLoading ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">Loading packages...</p>
         </div>
       ) : (
-        <Tabs defaultValue={currentUserRole} className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-            <TabsTrigger value="client">
-              <Users className="w-4 h-4 mr-2" />
-              For Clients
-            </TabsTrigger>
-            <TabsTrigger value="owner">
-              <Users className="w-4 h-4 mr-2" />
-              For Owners
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="client" className="mt-6">
-            <div className="mb-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                Perfect for clients looking to connect with property owners
-              </p>
-            </div>
-            {renderPackages(clientPackagesUI, 'Client')}
-          </TabsContent>
-
-          <TabsContent value="owner" className="mt-6">
-            <div className="mb-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                Great deals for property owners to reach potential clients
-              </p>
-            </div>
-            {renderPackages(ownerPackagesUI, 'Owner')}
-          </TabsContent>
-        </Tabs>
+        <div className="space-y-4">
+          <div className="text-center">
+            <Badge variant="outline" className="text-lg px-4 py-2">
+              {roleLabel} Packages
+            </Badge>
+          </div>
+          {renderPackages(packagesUI, roleLabel)}
+        </div>
       )}
 
       <div className="text-center text-sm text-muted-foreground space-y-1">
