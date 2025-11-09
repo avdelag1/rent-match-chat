@@ -31,12 +31,8 @@ export function SwipeActionButtons({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 pb-safe">
-      <div className="relative">
-        {/* Frosted Glass Background */}
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-t border-border/50" />
-        
-        {/* Button Container */}
-        <div className="relative flex items-center justify-center gap-4 px-6 py-6">
+      {/* Floating Button Container - No Background */}
+      <div className="flex items-center justify-center gap-4 px-6 py-6">
           {/* 1. Undo Button (Yellow/Gold) */}
           <motion.div
             whileHover={{ scale: canUndo && !disabled ? 1.05 : 1 }}
@@ -179,7 +175,6 @@ export function SwipeActionButtons({
             </Button>
           </motion.div>
         </div>
-      </div>
     </div>
   );
 }

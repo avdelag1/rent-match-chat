@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
+import { ClientTinderSwipeContainer } from '@/components/ClientTinderSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNavigate } from 'react-router-dom';
@@ -60,8 +60,8 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   return (
     <DashboardLayout userRole="owner">
       <PageTransition>
-        <div className="w-full h-full flex items-center justify-center">
-          <ClientSwipeContainer
+        <div className="w-full h-full">
+          <ClientTinderSwipeContainer
             onClientTap={handleProfileTap}
             onInsights={handleProfileTap}
             onMessageClick={handleStartConversation}
