@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X, RotateCcw } from 'lucide-react';
+import { Heart, X, RotateCcw, MessageCircle } from 'lucide-react';
 import { SimpleListingCard } from './SimpleListingCard';
 import { useListings } from '@/hooks/useListings';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useStartConversation } from '@/hooks/useConversations';
-import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ export function SimpleSwipeContainer() {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
   const { data: listings = [], isLoading, refetch } = useListings([]);
   const swipeMutation = useSwipe();
@@ -36,8 +37,7 @@ export function SimpleSwipeContainer() {
 
       console.log('✅ Successfully saved listing!');
 
-      toast({
-        title: '❤️ Liked!',
+      sonnerToast.success('❤️ Liked!', {
         description: 'Property saved to your favorites',
       });
 
@@ -48,11 +48,7 @@ export function SimpleSwipeContainer() {
       }, 300);
     } catch (error) {
       console.error('❌ Error saving listing:', error);
-      toast({
-        title: 'Error',
-        description: 'Could not save listing. Please try again.',
-        variant: 'destructive'
-      });
+      sonnerToast.error('Error: Could not save listing. Please try again.');
       setDirection(null);
     }
   };
@@ -80,46 +76,34 @@ export function SimpleSwipeContainer() {
   const handleRefresh = () => {
     setCurrentIndex(0);
     refetch();
-    toast({
-      title: 'Refreshed',
-      description: 'Listings reloaded',
-    });
+    sonnerToast.success('Refreshed: Listings reloaded');
   };
 
   const handleMessage = async () => {
-    if (!currentListing?.owner_id) {
-      toast({
-        title: 'Error',
-        description: 'Owner information not available',
-        variant: 'destructive'
-      });
-      return;
-    }
-
+    if (!currentListing?.owner_id || isCreatingConversation) return;
+    
+    setIsCreatingConversation(true);
+    
     try {
-      toast({
-        title: 'Starting conversation...',
-        description: 'Creating chat with property owner',
-      });
-
+      sonnerToast.loading('Starting conversation...', { id: 'start-conv' });
+      
       const result = await startConversation.mutateAsync({
         otherUserId: currentListing.owner_id,
         listingId: currentListing.id,
-        initialMessage: `Hi! I'm interested in your property: ${currentListing.title}. Could you tell me more about it?`,
-        canStartNewConversation: true // Always allow
+        initialMessage: `Hi! I'm interested in your listing: ${currentListing.title}`,
+        canStartNewConversation: true,
       });
 
       if (result?.conversationId) {
-        // Navigate to messages page with the conversation
-        navigate(`/messages?startConversation=${currentListing.owner_id}`);
+        sonnerToast.success('Opening chat...', { id: 'start-conv' });
+        // Navigate with conversation ID for immediate opening
+        navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Failed to start conversation:', error);
-      toast({
-        title: 'Error',
-        description: 'Could not start conversation. Please try again.',
-        variant: 'destructive'
-      });
+      console.error('Error starting conversation:', error);
+      sonnerToast.error('Could not start conversation', { id: 'start-conv' });
+    } finally {
+      setIsCreatingConversation(false);
     }
   };
 
@@ -201,21 +185,21 @@ export function SimpleSwipeContainer() {
             onClick={handlePass}
             size="lg"
             variant="ghost"
-            className="relative w-16 h-16 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] hover:scale-110 active:scale-95 transform-gpu"
-            disabled={swipeMutation.isPending}
+            className="relative w-14 h-14 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] hover:scale-110 active:scale-95 transform-gpu"
+            disabled={swipeMutation.isPending || isCreatingConversation}
           >
-            <X className="w-8 h-8 stroke-[3]" />
+            <X className="w-5 h-5 stroke-[3]" />
           </Button>
 
-          {/* Return/Undo Button - 3D Enhanced (Center) */}
+          {/* Message Button - 3D Enhanced */}
           <Button
-            onClick={handleRefresh}
+            onClick={handleMessage}
             size="lg"
             variant="ghost"
-            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white border-4 border-yellow-300 hover:from-yellow-500 hover:to-amber-600 hover:border-yellow-400 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(251,191,36,0.3),0_2px_8px_rgba(251,191,36,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(251,191,36,0.5),0_4px_12px_rgba(251,191,36,0.3),0_0_20px_rgba(251,191,36,0.4)] hover:scale-110 active:scale-95 active:rotate-180 transform-gpu"
-            disabled={swipeMutation.isPending}
+            className="relative w-14 h-14 rounded-full bg-white border-4 border-blue-500 text-blue-500 hover:bg-gradient-to-br hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-blue-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(59,130,246,0.3),0_2px_8px_rgba(59,130,246,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(59,130,246,0.4),0_4px_12px_rgba(59,130,246,0.3)] hover:scale-110 active:scale-95 transform-gpu"
+            disabled={swipeMutation.isPending || isCreatingConversation}
           >
-            <RotateCcw className="w-7 h-7 stroke-[3]" />
+            <MessageCircle className="w-5 h-5 stroke-[3]" />
           </Button>
 
           {/* Like Button - 3D Enhanced (Largest) */}
@@ -224,7 +208,7 @@ export function SimpleSwipeContainer() {
             size="lg"
             variant="ghost"
             className="relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 text-white border-4 border-orange-300 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 hover:border-orange-400 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(249,115,22,0.4),0_2px_8px_rgba(249,115,22,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),0_0_30px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_24px_rgba(249,115,22,0.5),0_4px_12px_rgba(249,115,22,0.4),0_0_40px_rgba(249,115,22,0.3)] hover:scale-110 active:scale-95 transform-gpu animate-pulse-subtle"
-            disabled={swipeMutation.isPending}
+            disabled={swipeMutation.isPending || isCreatingConversation}
           >
             <Heart className="w-10 h-10 fill-current drop-shadow-lg" />
           </Button>

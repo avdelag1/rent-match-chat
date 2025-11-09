@@ -5,13 +5,14 @@ import { MatchCelebration } from './MatchCelebration';
 import { MatchPercentageBadge } from './MatchPercentageBadge';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
-import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
 import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
+import { useStartConversation } from '@/hooks/useConversations';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ClientSwipeContainerProps {
@@ -33,6 +34,7 @@ export function ClientSwipeContainer({
 }: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
@@ -70,6 +72,7 @@ export function ClientSwipeContainer({
   });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
+  const startConversation = useStartConversation();
 
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
@@ -117,8 +120,7 @@ export function ClientSwipeContainer({
     });
     setCurrentIndex(prev => prev + 1);
     
-    toast({
-      title: '⭐ Super Like Sent!',
+    sonnerToast.success('⭐ Super Like Sent!', {
       description: 'Your super like has been sent to this client.',
     });
   }, [swipeMutation]);
@@ -130,8 +132,7 @@ export function ClientSwipeContainer({
   const handleRefresh = async () => {
     setCurrentIndex(0);
     await refetch();
-    toast({
-      title: 'Profiles Updated',
+    sonnerToast.success('Profiles Updated', {
       description: 'Latest client profiles loaded.',
     });
   };
@@ -140,19 +141,36 @@ export function ClientSwipeContainer({
     if (onInsights) {
       onInsights(clientId);
     } else {
-      toast({
-        title: 'Client Insights',
+      sonnerToast.success('Client Insights', {
         description: 'Viewing detailed insights for this client.',
       });
     }
   };
 
-  const handleStartConversation = (clientId: string) => {
-    navigate(`/messages?startConversation=${clientId}`);
-    toast({
-      title: 'Opening Chat',
-      description: 'Starting conversation...',
-    });
+  const handleConnect = async (clientId: string) => {
+    if (isCreatingConversation) return;
+    
+    setIsCreatingConversation(true);
+    
+    try {
+      sonnerToast.loading('Starting conversation...', { id: 'start-conv' });
+      
+      const result = await startConversation.mutateAsync({
+        otherUserId: clientId,
+        initialMessage: "Hi! I'd like to connect with you.",
+        canStartNewConversation: true,
+      });
+
+      if (result?.conversationId) {
+        sonnerToast.success('Opening chat...', { id: 'start-conv' });
+        navigate(`/messages?conversationId=${result.conversationId}`);
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      sonnerToast.error('Could not start conversation', { id: 'start-conv' });
+    } finally {
+      setIsCreatingConversation(false);
+    }
   };
 
 
@@ -371,7 +389,7 @@ export function ClientSwipeContainer({
                 onSwipe={handleSwipe}
                 onTap={() => onClientTap(currentClient.user_id)}
                 onInsights={() => handleInsights(currentClient.user_id)}
-                onMessage={() => handleStartConversation(currentClient.user_id)}
+                onMessage={() => handleConnect(currentClient.user_id)}
                 isTop={true}
                 hasPremium={hasPremiumMessaging}
               />
@@ -454,7 +472,7 @@ export function ClientSwipeContainer({
           avatar: matchCelebration.clientProfile?.images?.[0],
           role: 'client'
         }}
-        onMessage={() => currentClient?.user_id && handleStartConversation(currentClient.user_id)}
+        onMessage={() => currentClient?.user_id && handleConnect(currentClient.user_id)}
       />
     </div>
   );

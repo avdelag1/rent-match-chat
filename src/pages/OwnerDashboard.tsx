@@ -6,6 +6,7 @@ import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { useStartConversation } from '@/hooks/useConversations';
 
 interface OwnerDashboardProps {
   onClientInsights?: (profileId: string) => void;
@@ -17,6 +18,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const { data: profiles = [], refetch, isLoading, error } = useSmartClientMatching();
   const navigate = useNavigate();
+  const startConversation = useStartConversation();
 
   // Debug logging
   console.log('🏠 OwnerDashboard: profiles count:', profiles.length);
@@ -32,13 +34,25 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
     }
   };
 
-  const handleStartConversation = (clientId: string) => {
-    console.log('💬 Opening chat with client:', clientId);
-    navigate(`/messages?startConversation=${clientId}`);
-    toast({
-      title: 'Opening Chat',
-      description: 'Loading conversation...',
-    });
+  const handleStartConversation = async (clientId: string) => {
+    try {
+      toast({
+        title: 'Starting conversation...',
+        description: 'Please wait...',
+      });
+      
+      const result = await startConversation.mutateAsync({
+        otherUserId: clientId,
+        initialMessage: "Hi! I'd like to connect with you.",
+        canStartNewConversation: true,
+      });
+
+      if (result?.conversationId) {
+        navigate(`/messages?conversationId=${result.conversationId}`);
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+    }
   };
 
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId) || null;

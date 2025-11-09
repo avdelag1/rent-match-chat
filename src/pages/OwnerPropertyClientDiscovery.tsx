@@ -11,12 +11,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Search, Filter, MessageCircle, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
+import { useStartConversation } from '@/hooks/useConversations';
+import { toast as sonnerToast } from 'sonner';
 
 export default function OwnerPropertyClientDiscovery() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const { data: clients = [], refetch } = useSmartClientMatching('property');
+  const startConversation = useStartConversation();
 
   const filteredClients = (clients || []).filter(client =>
     client.name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -32,8 +36,30 @@ export default function OwnerPropertyClientDiscovery() {
     refetch();
   };
 
-  const handleConnect = (clientId: string) => {
-    navigate(`/messages?startConversation=${clientId}`);
+  const handleConnect = async (clientId: string) => {
+    if (isCreatingConversation) return;
+    
+    setIsCreatingConversation(true);
+    
+    try {
+      sonnerToast.loading('Starting conversation...', { id: 'start-conv' });
+      
+      const result = await startConversation.mutateAsync({
+        otherUserId: clientId,
+        initialMessage: "Hi! I'd like to connect with you.",
+        canStartNewConversation: true,
+      });
+
+      if (result?.conversationId) {
+        sonnerToast.success('Opening chat...', { id: 'start-conv' });
+        navigate(`/messages?conversationId=${result.conversationId}`);
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      sonnerToast.error('Could not start conversation', { id: 'start-conv' });
+    } finally {
+      setIsCreatingConversation(false);
+    }
   };
 
   return (

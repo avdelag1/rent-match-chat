@@ -23,7 +23,7 @@ export function MessagingDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   
-  const { data: conversations = [], isLoading, refetch } = useConversations();
+  const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
 
@@ -74,13 +74,65 @@ export function MessagingDashboard() {
     };
   }, [user?.id, refetch]);
 
-  // Handle auto-start conversation from URL parameter
+  // Handle direct conversation opening or auto-start from URL parameters
   useEffect(() => {
+    const conversationId = searchParams.get('conversationId');
     const startConversationUserId = searchParams.get('startConversation');
-    if (startConversationUserId && !isStartingConversation) {
+    
+    // Direct conversation ID - open immediately
+    if (conversationId && !isStartingConversation) {
+      handleDirectOpenConversation(conversationId);
+    }
+    // User ID - start new conversation
+    else if (startConversationUserId && !isStartingConversation) {
       handleAutoStartConversation(startConversationUserId);
     }
   }, [searchParams]);
+
+  const handleDirectOpenConversation = async (conversationId: string) => {
+    setIsStartingConversation(true);
+    
+    try {
+      // Try to find conversation in current list
+      const conversation = conversations.find(c => c.id === conversationId);
+      
+      // If not found, wait for it to appear (handles realtime timing)
+      if (!conversation) {
+        toast({
+          title: 'Loading conversation',
+          description: 'Please wait...',
+        });
+        const loaded = await ensureConversationInCache(conversationId);
+        if (loaded) {
+          setSelectedConversationId(conversationId);
+          setSearchParams({});
+          toast({
+            title: 'Conversation opened',
+            description: 'You can now send messages!',
+          });
+        } else {
+          throw new Error('Conversation not found');
+        }
+      } else {
+        setSelectedConversationId(conversationId);
+        setSearchParams({});
+        toast({
+          title: 'Conversation opened',
+          description: 'You can now send messages!',
+        });
+      }
+    } catch (error) {
+      console.error('Error opening conversation:', error);
+      toast({
+        title: 'Could not open conversation',
+        description: 'Please try again from your conversations list.',
+        variant: 'destructive',
+      });
+      setSearchParams({});
+    } finally {
+      setIsStartingConversation(false);
+    }
+  };
 
   const handleAutoStartConversation = async (userId: string) => {
     setIsStartingConversation(true);

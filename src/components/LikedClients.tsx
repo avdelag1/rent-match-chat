@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike } from "lucide-react";
+import { Heart, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -40,6 +40,7 @@ export function LikedClients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [userRole, setUserRole] = useState<'client' | 'owner'>('owner');
   const categoryFromUrl = searchParams.get('category') || 'all';
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl);
@@ -149,23 +150,28 @@ export function LikedClients() {
   });
 
   const handleMessage = async (client: LikedClient) => {
-    console.log('💬 Starting conversation with liked client:', client.name);
+    if (isCreatingConversation) return;
     
-    // Always allow messaging - bypass quota
+    setIsCreatingConversation(true);
+    
     try {
+      toast.loading('Starting conversation...', { id: 'start-conv' });
+      
       const result = await startConversation.mutateAsync({
         otherUserId: client.user_id,
         initialMessage: `Hi ${client.name}! I'm interested in discussing potential rental opportunities with you.`,
-        canStartNewConversation: true // Always allow
+        canStartNewConversation: true,
       });
-      
+
       if (result?.conversationId) {
-        toast.success("Conversation started!");
-        navigate(`/messages?startConversation=${client.user_id}`);
+        toast.success('Opening chat...', { id: 'start-conv' });
+        navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Failed to start conversation:', error);
-      toast.error("Failed to start conversation. Please try again.");
+      console.error('Error starting conversation:', error);
+      toast.error('Could not start conversation', { id: 'start-conv' });
+    } finally {
+      setIsCreatingConversation(false);
     }
   };
 
@@ -329,9 +335,9 @@ export function LikedClients() {
                       size="sm"
                       onClick={() => handleMessage(client)}
                       className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
-                      disabled={startConversation.isPending}
+                      disabled={isCreatingConversation}
                     >
-                      <MessageSquare className="w-4 h-4" />
+                      <MessageCircle className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"

@@ -30,7 +30,7 @@ interface Conversation {
 export function useConversations() {
   const { user } = useAuth();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -125,6 +125,23 @@ export function useConversations() {
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
   });
+
+  // Helper to ensure a conversation is loaded in cache after creation
+  const ensureConversationInCache = async (conversationId: string, maxAttempts = 10): Promise<Conversation | null> => {
+    for (let i = 0; i < maxAttempts; i++) {
+      await query.refetch();
+      const conversations = query.data || [];
+      const conv = conversations.find((c: Conversation) => c.id === conversationId);
+      if (conv) return conv;
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    return null;
+  };
+
+  return {
+    ...query,
+    ensureConversationInCache
+  };
 }
 
 export function useConversationMessages(conversationId: string) {
