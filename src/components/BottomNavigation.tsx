@@ -69,17 +69,17 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       path: '/owner/dashboard',
     },
     {
+      id: 'liked',
+      label: 'Liked',
+      icon: Heart,
+      path: '/owner/liked-clients',
+    },
+    {
       id: 'listings',
       label: 'Listings',
       icon: List,
       path: '/owner/properties',
       isCenter: true,
-    },
-    {
-      id: 'add',
-      label: 'Add',
-      icon: Plus,
-      onClick: onAddListingClick,
     },
     {
       id: 'messages',
