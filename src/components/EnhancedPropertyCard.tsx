@@ -1,5 +1,5 @@
 import { useState, useRef, memo, useCallback } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, useAnimationControls } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -56,25 +56,25 @@ const EnhancedPropertyCardComponent = ({
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
+  const controls = useAnimationControls();
 
   // Guard for missing images
   const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
   const images = imageCount > 0 ? listing.images : ['/placeholder.svg'];
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
-    const threshold = 100;
-    const velocity = info.velocity.x;
-    const absVelocity = Math.abs(velocity);
+    const threshold = 120;
+    const velocity = Math.abs(info.velocity.x);
 
-    // If swipe is strong enough, complete the swipe
-    if (Math.abs(info.offset.x) > threshold || absVelocity > 600) {
+    // If swipe is strong enough, complete it
+    if (Math.abs(info.offset.x) > threshold || velocity > 700) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     } else {
-      // Spring back to center with smooth animation
-      x.set(0);
+      // Spring back to center with animation
+      controls.start({ x: 0, rotate: 0 });
     }
-  }, [onSwipe, x]);
+  }, [onSwipe, controls]);
 
   const nextImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();

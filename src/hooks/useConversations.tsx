@@ -41,8 +41,8 @@ export function useConversations() {
           .from('conversations')
           .select(`
             *,
-            client_profile:profiles!conversations_client_id_fkey(id, user_id, full_name, avatar_url),
-            owner_profile:profiles!conversations_owner_id_fkey(id, user_id, full_name, avatar_url)
+            client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
+            owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url)
           `)
           .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
           .order('last_message_at', { ascending: false, nullsFirst: false });
@@ -96,7 +96,9 @@ export function useConversations() {
             created_at: conversation.created_at,
             updated_at: conversation.updated_at,
             other_user: otherUserProfile ? {
-              ...otherUserProfile,
+              id: otherUserProfile.id,
+              full_name: otherUserProfile.full_name,
+              avatar_url: otherUserProfile.avatar_url,
               role: otherUserRole || 'client'
             } : undefined,
             last_message: lastMessagesMap.get(conversation.id)

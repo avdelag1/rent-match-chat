@@ -74,16 +74,6 @@ export function SettingsBottomSheet({
 
   const ownerMenuItems: MenuItem[] = [
     {
-      title: 'Filter Clients',
-      icon: Filter,
-      children: [
-        { title: 'Property Clients', icon: Users, path: '/owner/clients/property' },
-        { title: 'Moto Clients', icon: Users, path: '/owner/clients/moto' },
-        { title: 'Bicycle Clients', icon: Users, path: '/owner/clients/bicycle' },
-        { title: 'Yacht Clients', icon: Users, path: '/owner/clients/yacht' },
-      ],
-    },
-    {
       title: 'Liked Clients',
       icon: Heart,
       path: '/owner/liked-clients',
