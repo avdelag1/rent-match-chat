@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
+import { ReportDialog } from '@/components/ReportDialog';
+import { ShareDialog } from '@/components/ShareDialog';
 
 interface ClientTinderSwipeCardProps {
   profile: MatchedClientProfile;
@@ -24,6 +26,8 @@ export function ClientTinderSwipeCard({
 }: ClientTinderSwipeCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -176,20 +180,55 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Insights Button - Top Right */}
-          {onInsights && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                onInsights();
-              }}
-              className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
-            >
-              <BarChart3 className="w-5 h-5" />
-            </Button>
-          )}
+          {/* Action Buttons - Top Left & Right */}
+          <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
+            {/* Left Side Buttons */}
+            <div className="flex items-center gap-2">
+              {/* Report Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReportDialogOpen(true);
+                }}
+                className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-sm"
+                title="Report User"
+              >
+                <Flag className="w-5 h-5" />
+              </Button>
+
+              {/* Share Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShareDialogOpen(true);
+                }}
+                className="w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600 text-white shadow-lg backdrop-blur-sm"
+                title="Share Profile"
+              >
+                <Share2 className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Right Side Button */}
+            {onInsights && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onInsights();
+                }}
+                className="w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
+                title="View Insights"
+              >
+                <BarChart3 className="w-5 h-5" />
+              </Button>
+            )}
+          </div>
 
           {/* Match Badge */}
           <div className="absolute top-16 right-4 z-10">
@@ -347,6 +386,24 @@ export function ClientTinderSwipeCard({
           )}
         </motion.div>
       </div>
+
+      {/* Report Dialog */}
+      <ReportDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        reportedUserId={profile.user_id}
+        reportedUserName={profile.name}
+        category="user_profile"
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        profileId={profile.user_id}
+        title={`${profile.name}'s Profile`}
+        description={`Check out ${profile.name} on Tinderent - ${profile.matchPercentage}% match!`}
+      />
     </motion.div>
   );
 }
