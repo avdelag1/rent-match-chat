@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2 } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, DollarSign, CheckCircle, ChevronDown, Flag, Share2, Home } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { ReportDialog } from '@/components/ReportDialog';
 import { ShareDialog } from '@/components/ShareDialog';
+import { SwipeOverlays } from './SwipeOverlays';
+import { triggerHaptic } from '@/utils/haptics';
 
 interface ClientTinderSwipeCardProps {
   profile: MatchedClientProfile;
@@ -21,158 +24,115 @@ export function ClientTinderSwipeCard({
   onSwipe,
   onTap,
   onInsights,
-  isTop = false,
+  isTop = true,
   showNextCard = false
 }: ClientTinderSwipeCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Enhanced rotation based on drag distance (20 degrees max for better visual)
-  const rotate = useTransform(x, [-300, 0, 300], [-20, 0, 20]);
+  // Enhanced rotation based on drag distance
+  const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
 
-  const images = profile.profile_images && profile.profile_images.length > 0 
-    ? profile.profile_images 
-    : [profile.avatar_url || '/placeholder-avatar.svg'];
+  const imageCount = Array.isArray(profile.profile_images) ? profile.profile_images.length : 0;
+  const images = imageCount > 0 ? profile.profile_images : [profile.avatar_url || '/placeholder-avatar.svg'];
 
-  const handleImageClick = (e: React.MouseEvent) => {
+  // Photo navigation via tap zones - NO VISUAL INDICATORS
+  const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isTop) return;
     e.stopPropagation();
+
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    if (clickX < width * 0.3) {
-      // Left 30% - Previous image
-      setCurrentImageIndex(prev => Math.max(0, prev - 1));
-    } else if (clickX > width * 0.7) {
-      // Right 30% - Next image
-      setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1));
+    // Left 30% = previous, Center 40% = expand details, Right 30% = next
+    if (clickX < width * 0.3 && imageCount > 1) {
+      setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
+      triggerHaptic('light');
+    } else if (clickX > width * 0.7 && imageCount > 1) {
+      setCurrentImageIndex(prev => prev === imageCount - 1 ? 0 : prev + 1);
+      triggerHaptic('light');
     } else {
-      // Center 40% - Expand details
       setIsBottomSheetExpanded(!isBottomSheetExpanded);
+      triggerHaptic('medium');
     }
-  };
+  }, [isTop, imageCount, isBottomSheetExpanded]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  // Enhanced drag handling with better physics
+  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
+    const swipeThresholdX = 140;
+    const velocityThreshold = 600;
 
-    // Threshold: 35% of screen width, velocity-based swipes
-    const screenWidth = window.innerWidth;
-    const swipeThresholdX = screenWidth * 0.35;
-    const velocityThreshold = 600; // px/s
-
-    // Horizontal swipes - Right (accept) or Left (reject)
-    const absOffsetX = Math.abs(offset.x);
-    const absVelocityX = Math.abs(velocity.x);
-
-    if (absOffsetX > swipeThresholdX || absVelocityX > velocityThreshold) {
+    // Check for swipes (left/right only)
+    if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
       const direction = offset.x > 0 ? 'right' : 'left';
+      triggerHaptic(direction === 'right' ? 'success' : 'warning');
       onSwipe(direction);
       return;
     }
-  };
 
-  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
-  const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-
-  // Calculate overlay opacity based on drag distance
-  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);
-  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.35, 0], [1, 0]);
+    // Snap back with spring physics
+    triggerHaptic('light');
+  }, [onSwipe]);
 
   const cardStyle = {
     x,
     y,
-    rotate,
+    rotate: isTop ? rotate : 0,
+    scale: isTop ? 1 : 0.95,
+    zIndex: isTop ? 10 : 1,
+    position: 'absolute' as const,
+    top: isTop ? 0 : 12,
+    left: 0,
+    right: 0,
+    willChange: 'transform'
   };
 
   return (
     <motion.div
-      drag={isTop}
+      ref={cardRef}
+      style={cardStyle}
+      drag={isTop ? true : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       dragElastic={0.2}
       onDragEnd={handleDragEnd}
-      style={cardStyle}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
+      className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
+      animate={{ x: 0, y: 0, rotate: 0 }}
       transition={{
         type: "spring",
         stiffness: 450,
         damping: 38,
         mass: 0.7
       }}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
     >
-      {/* Enhanced Swipe Overlays with Emojis */}
-      {/* Right Swipe - GREEN LIKE with Emoji */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-green-500/20"
-        style={{ opacity: rightOverlayOpacity }}
-      >
-        <motion.div 
-          className="flex flex-col items-center gap-3"
-          style={{ 
-            scale: useTransform(rightOverlayOpacity, [0, 1], [0.7, 1]),
-            rotate: -15
-          }}
-        >
-          <div className="text-9xl">💚</div>
-          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(34,197,94,0.9)] tracking-wider">
-            LIKE
-          </span>
-        </motion.div>
-      </motion.div>
+      <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
+        {/* Swipe Overlays */}
+        <SwipeOverlays x={x} y={y} />
 
-      {/* Left Swipe - RED PASS with Emoji */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-red-500/20"
-        style={{ opacity: leftOverlayOpacity }}
-      >
-        <motion.div 
-          className="flex flex-col items-center gap-3"
-          style={{ 
-            scale: useTransform(leftOverlayOpacity, [0, 1], [0.7, 1]),
-            rotate: 15
-          }}
-        >
-          <div className="text-9xl">❌</div>
-          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(239,68,68,0.9)] tracking-wider">
-            PASS
-          </span>
-        </motion.div>
-      </motion.div>
-
-      {/* Card Content */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl" style={{ willChange: 'transform' }}>
-        {/* Main Image with Tap Zones */}
-        <div 
-          className="relative w-full h-full cursor-pointer select-none"
+        {/* Main Image - 9:16 Aspect Ratio */}
+        <div
+          className="relative h-full overflow-hidden cursor-pointer select-none"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >
-          <img
-            src={images[currentImageIndex]}
-            alt={profile.name}
-            className="w-full h-full object-cover"
-            style={{ aspectRatio: '9/16' }}
-          />
-          
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
-
-          {/* Story-style Dots */}
-          {images.length > 1 && (
-            <div className="absolute top-4 left-0 right-0 flex gap-2 px-4 z-10">
-              {images.map((_, idx) => (
+          {/* Story-Style Dots at Top */}
+          {imageCount > 1 && (
+            <div className="absolute top-4 left-0 right-0 z-20 flex justify-center gap-1 px-4">
+              {images.map((_, index) => (
                 <div
-                  key={idx}
-                  className="flex-1 h-1 rounded-full bg-white/30 overflow-hidden"
+                  key={index}
+                  className="flex-1 h-1 rounded-full bg-white/30 backdrop-blur-sm overflow-hidden"
                 >
                   <div
                     className={`h-full bg-white transition-all duration-200 ${
-                      idx === currentImageIndex ? 'w-full' : idx < currentImageIndex ? 'w-full' : 'w-0'
+                      index === currentImageIndex ? 'w-full' : 'w-0'
                     }`}
                   />
                 </div>
@@ -180,138 +140,115 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Left & Right */}
-          <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
-            {/* Left Side Buttons */}
-            <div className="flex items-center gap-2">
-              {/* Report Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setReportDialogOpen(true);
-                }}
-                className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-sm"
-                title="Report User"
-              >
-                <Flag className="w-5 h-5" />
-              </Button>
+          {/* Image with Gradient Overlay */}
+          <img
+            src={images[Math.min(currentImageIndex, imageCount - 1)]}
+            alt={profile.name}
+            className="w-full h-full object-cover"
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+            style={{
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'translateZ(0)'
+            }}
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder-avatar.svg';
+            }}
+          />
 
-              {/* Share Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShareDialogOpen(true);
-                }}
-                className="w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600 text-white shadow-lg backdrop-blur-sm"
-                title="Share Profile"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-            </div>
+          {/* Gradient Overlay - from transparent to rgba(0,0,0,0.4) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
-            {/* Right Side Button */}
-            {onInsights && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onInsights();
-                }}
-                className="w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
-                title="View Insights"
-              >
-                <BarChart3 className="w-5 h-5" />
-              </Button>
-            )}
-          </div>
-
-          {/* Match Badge */}
-          <div className="absolute top-16 right-4 z-10">
-            <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-none shadow-lg text-lg px-4 py-1">
+          {/* Match Percentage Badge */}
+          <div className="absolute top-20 right-4 z-20">
+            <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-none shadow-lg px-3 py-1.5 text-sm font-semibold">
               {profile.matchPercentage}% Match
             </Badge>
           </div>
 
           {/* Verified Badge */}
           {profile.verified && (
-            <div className="absolute top-28 right-4 z-10">
-              <div className="bg-blue-500 text-white rounded-full p-2 shadow-lg">
-                <CheckCircle className="w-5 h-5" />
-              </div>
+            <div className="absolute top-36 right-4 z-20">
+              <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Verified</span>
+              </Badge>
             </div>
           )}
         </div>
 
-        {/* Bottom Sheet with Enhanced Glassmorphism */}
+        {/* Bottom Sheet - Collapsible with Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-card/98 backdrop-blur-2xl border-t border-border/50 shadow-2xl"
+          className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
-            height: isBottomSheetExpanded ? '85%' : '30%',
+            height: isBottomSheetExpanded ? '85%' : '30%'
           }}
-          transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+          transition={{
+            type: "spring",
+            stiffness: 350,
+            damping: 32
+          }}
           style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
-          <div className="flex justify-center pt-3 pb-2">
+          <div className="flex justify-center py-3">
             <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
           </div>
 
-          {/* Collapsed Content */}
-          <div className="px-6 py-4">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          {/* Collapsed State Content */}
+          <div className="px-6 pb-6">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-foreground mb-1">
                   {profile.name}
-                  {profile.age && <span className="text-xl text-muted-foreground">{profile.age}</span>}
+                  {profile.age && <span className="text-lg text-muted-foreground ml-2">{profile.age}</span>}
                 </h2>
                 {profile.city && (
-                  <div className="flex items-center gap-1 text-foreground/80 mt-1">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-sm">{profile.city}</span>
+                  <div className="flex items-center text-muted-foreground text-sm mb-2">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    <span>{profile.city}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="flex items-center gap-4 text-sm text-foreground/70 mb-4">
+            {/* Key Stats */}
+            <div className="flex items-center gap-4 text-muted-foreground text-sm mb-4">
               {profile.budget_max && (
                 <div className="flex items-center gap-1">
-                  <DollarSign className="w-4 h-4" />
-                  <span>Up to ${profile.budget_max.toLocaleString()}</span>
+                  <DollarSign className="w-5 h-5" />
+                  <span className="font-medium">Up to ${profile.budget_max.toLocaleString()}</span>
                 </div>
               )}
               {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{profile.preferred_listing_types[0]}</span>
+                  <Home className="w-5 h-5" />
+                  <span className="font-medium capitalize">{profile.preferred_listing_types[0]}</span>
                 </div>
               )}
             </div>
 
-            {/* Expanded Content */}
+            {/* Expanded State Content */}
             {isBottomSheetExpanded && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="space-y-6 overflow-y-auto max-h-[calc(85vh-200px)] pb-32"
+                className="mt-6 overflow-y-auto max-h-[calc(85vh-200px)]"
               >
                 {/* Interests */}
                 {profile.interests && profile.interests.length > 0 && (
-                  <div>
+                  <div className="mb-6">
                     <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Heart className="w-5 h-5" />
                       Interests
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.interests.map((interest, idx) => (
-                        <Badge key={idx} variant="secondary">
+                        <Badge key={idx} variant="secondary" className="text-xs">
                           {interest}
                         </Badge>
                       ))}
@@ -321,14 +258,14 @@ export function ClientTinderSwipeCard({
 
                 {/* Preferred Activities */}
                 {profile.preferred_activities && profile.preferred_activities.length > 0 && (
-                  <div>
+                  <div className="mb-6">
                     <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Users className="w-5 h-5" />
                       Activities
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.preferred_activities.map((activity, idx) => (
-                        <Badge key={idx} variant="outline">
+                        <Badge key={idx} variant="outline" className="text-xs">
                           {activity}
                         </Badge>
                       ))}
@@ -338,14 +275,14 @@ export function ClientTinderSwipeCard({
 
                 {/* Lifestyle Tags */}
                 {profile.lifestyle_tags && profile.lifestyle_tags.length > 0 && (
-                  <div>
+                  <div className="mb-6">
                     <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Briefcase className="w-5 h-5" />
                       Lifestyle
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.lifestyle_tags.map((tag, idx) => (
-                        <Badge key={idx} className="bg-primary/10 text-primary border-primary/20">
+                        <Badge key={idx} className="bg-primary/10 text-primary border-primary/20 text-xs">
                           {tag}
                         </Badge>
                       ))}
@@ -355,7 +292,7 @@ export function ClientTinderSwipeCard({
 
                 {/* Match Reasons */}
                 {profile.matchReasons && profile.matchReasons.length > 0 && (
-                  <div>
+                  <div className="mb-6">
                     <h3 className="text-lg font-semibold text-foreground mb-3">
                       Why you match
                     </h3>
@@ -369,23 +306,72 @@ export function ClientTinderSwipeCard({
                     </ul>
                   </div>
                 )}
+
+                {/* Action Buttons at Bottom */}
+                <div className="border-t border-border/30 pt-4 mt-6 flex gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setReportDialogOpen(true);
+                      triggerHaptic('light');
+                    }}
+                    className="flex-1 flex items-center gap-2"
+                  >
+                    <Flag className="w-4 h-4" />
+                    Report
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShareDialogOpen(true);
+                      triggerHaptic('light');
+                    }}
+                    className="flex-1 flex items-center gap-2"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </Button>
+
+                  {onInsights && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => {
+                        onInsights();
+                        triggerHaptic('light');
+                      }}
+                      className="flex-1"
+                    >
+                      Insights
+                    </Button>
+                  )}
+                </div>
               </motion.div>
             )}
-          </div>
 
-          {/* Expand/Collapse Button */}
-          {!isBottomSheetExpanded && (
-            <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-              <button
-                onClick={() => setIsBottomSheetExpanded(true)}
-                className="text-sm text-primary font-medium"
-              >
-                Tap to see more
-              </button>
-            </div>
-          )}
+            {/* Expand/Collapse Indicator */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-4 text-muted-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsBottomSheetExpanded(!isBottomSheetExpanded);
+                triggerHaptic('light');
+              }}
+            >
+              <ChevronDown
+                className={`w-5 h-5 transition-transform duration-200 ${
+                  isBottomSheetExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </Button>
+          </div>
         </motion.div>
-      </div>
+      </Card>
 
       {/* Report Dialog */}
       <ReportDialog
@@ -402,7 +388,7 @@ export function ClientTinderSwipeCard({
         onOpenChange={setShareDialogOpen}
         profileId={profile.user_id}
         title={`${profile.name}'s Profile`}
-        description={`Check out ${profile.name} on Tinderent - ${profile.matchPercentage}% match!`}
+        description={`Check out ${profile.name} on Rent Match - ${profile.matchPercentage}% match!`}
       />
     </motion.div>
   );
