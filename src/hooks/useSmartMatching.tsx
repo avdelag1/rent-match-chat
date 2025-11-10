@@ -622,9 +622,8 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Show all non-admin profiles with placeholders
+        // Map profiles with placeholder images - already filtered for clients only at DB level
         const filteredProfiles = profiles
-          .filter(profile => !profile.user_roles || profile.user_roles.role !== 'admin')
           .map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0)
