@@ -318,7 +318,7 @@ export function useSmartListingMatching(
       }
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
     retry: 3,
     retryDelay: 1000,
@@ -670,7 +670,7 @@ export function useSmartClientMatching(
     },
     enabled: true,
     staleTime: 30 * 1000, // 30 seconds - shorter to reflect filter changes faster
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     retry: 3,
     retryDelay: 1000,
   });
