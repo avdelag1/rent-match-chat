@@ -280,6 +280,15 @@ const App = () => (
                     />
 
                     <Route 
+                      path="/owner/filters-explore" 
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <OwnerFiltersExplore />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    <Route 
                       path="/owner/saved-searches" 
                       element={
                         <ProtectedRoute requiredRole="owner">
