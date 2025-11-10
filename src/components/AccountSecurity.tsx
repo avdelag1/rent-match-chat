@@ -218,8 +218,20 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         description: 'Your account has been successfully deleted.',
       });
 
-      // Navigate to home page
-      navigate('/');
+          // Navigate to home page
+          navigate('/');
+        } else {
+          // Function returned an error
+          toast({
+            title: 'Deletion Failed',
+            description: data.error || 'Account deletion could not be completed.',
+            variant: 'destructive'
+          });
+        }
+      } else {
+        // Unexpected response format
+        throw new Error('Unexpected response from delete function');
+      }
     } catch (error) {
       console.error('Error deleting account:', error);
       toast({
