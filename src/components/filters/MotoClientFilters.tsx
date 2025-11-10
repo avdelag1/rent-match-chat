@@ -10,6 +10,7 @@ import { ChevronDown, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
+import { ClientDemographicFilters } from './ClientDemographicFilters';
 
 interface MotoClientFiltersProps {
   onApply: (filters: any) => void;
@@ -39,6 +40,14 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
   const [features, setFeatures] = useState<string[]>(initialFilters.features || []);
   const [batteryCapacity, setBatteryCapacity] = useState(initialFilters.battery_capacity_min || 0);
   const [isElectricOnly, setIsElectricOnly] = useState(initialFilters.is_electric_only || false);
+
+  // Client demographic filters
+  const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
+  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
+  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
+  const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
+  const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
+  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
   const motoTypeOptions = ['Sport Bike', 'Cruiser', 'Scooter', 'Off-Road', 'Touring', 'Street'];
   const usagePurposeOptions = ['Commuting', 'Touring', 'Racing', 'Off-Road', 'City Riding'];

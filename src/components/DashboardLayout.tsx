@@ -213,6 +213,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
+        onFiltersClick={() => navigate('/owner/filters-explore')}
+        showFilters={userRole === 'owner'}
       />
 
       {/* Main Content - Full screen area for card feed with proper scrolling */}

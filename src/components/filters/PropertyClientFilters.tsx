@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, Save } from 'lucide-react';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
+import { ClientDemographicFilters } from './ClientDemographicFilters';
 
 interface PropertyClientFiltersProps {
   onApply: (filters: any) => void;
@@ -37,6 +38,14 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [orientations, setOrientations] = useState<string[]>(initialFilters.orientations || []);
   const [hasElevator, setHasElevator] = useState(initialFilters.has_elevator || false);
   const [parkingSpots, setParkingSpots] = useState(initialFilters.parking_spots_min || 0);
+
+  // Client demographic filters
+  const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
+  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
+  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
+  const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
+  const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
+  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
   const propertyTypeOptions = ['Apartment', 'House', 'Studio', 'Villa', 'Commercial', 'Land'];
   const amenityOptions = ['Pool', 'Parking', 'Gym', 'Security', 'Garden', 'Balcony'];
@@ -71,7 +80,15 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       view_types: viewTypes,
       orientations: orientations,
       has_elevator: hasElevator,
-      parking_spots_min: parkingSpots
+      parking_spots_min: parkingSpots,
+      // Client demographic filters
+      gender_preference: genderPreference,
+      nationalities,
+      languages,
+      relationship_status: relationshipStatus,
+      has_pets_filter: hasPetsFilter,
+      age_min: ageRange[0],
+      age_max: ageRange[1]
     });
   };
 
@@ -91,6 +108,13 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     setOrientations([]);
     setHasElevator(false);
     setParkingSpots(0);
+    // Clear client demographic filters
+    setGenderPreference('any');
+    setNationalities([]);
+    setLanguages([]);
+    setRelationshipStatus([]);
+    setHasPetsFilter('any');
+    setAgeRange([18, 65]);
     onApply({});
   };
 
@@ -148,6 +172,21 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
           <p className="text-sm text-muted-foreground">Filter clients based on whether they're seeking to rent, purchase, or both</p>
         </CollapsibleContent>
       </Collapsible>
+
+      <ClientDemographicFilters
+        genderPreference={genderPreference}
+        setGenderPreference={setGenderPreference}
+        ageRange={ageRange}
+        setAgeRange={setAgeRange}
+        relationshipStatus={relationshipStatus}
+        setRelationshipStatus={setRelationshipStatus}
+        hasPetsFilter={hasPetsFilter}
+        setHasPetsFilter={setHasPetsFilter}
+        nationalities={nationalities}
+        setNationalities={setNationalities}
+        languages={languages}
+        setLanguages={setLanguages}
+      />
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
