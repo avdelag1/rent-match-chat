@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -79,6 +79,9 @@ export function ClientTinderSwipeCard({
       onSwipe(direction);
       return;
     }
+    
+    triggerHaptic('light');
+  }, [onSwipe]);
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
@@ -122,12 +125,9 @@ export function ClientTinderSwipeCard({
         mass: 0.6
       }}
     >
-      <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
+      <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} y={y} />
-
-      {/* Card Content */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Main Image with Tap Zones */}
         <div 
           className="relative w-full h-full cursor-pointer select-none"
@@ -158,12 +158,12 @@ export function ClientTinderSwipeCard({
             <div className="absolute top-4 left-0 right-0 flex gap-2 px-4 z-10">
               {images.map((_, idx) => (
                 <div
-                  key={index}
+                  key={idx}
                   className="flex-1 h-1 rounded-full bg-white/30 backdrop-blur-sm overflow-hidden"
                 >
                   <div
                     className={`h-full bg-white transition-all duration-200 ${
-                      index === currentImageIndex ? 'w-full' : 'w-0'
+                      idx === currentImageIndex ? 'w-full' : 'w-0'
                     }`}
                   />
                 </div>
@@ -171,27 +171,52 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Image with Gradient Overlay */}
-          <img
-            src={images[Math.min(currentImageIndex, imageCount - 1)]}
-            alt={profile.name}
-            className="w-full h-full object-cover"
-            draggable={false}
-            loading="lazy"
-            decoding="async"
-            style={{
-              willChange: 'transform',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              transform: 'translateZ(0)'
-            }}
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder-avatar.svg';
-            }}
-          />
+          {/* Action Buttons - Top Right */}
+          <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+            {/* Report Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setReportDialogOpen(true);
+              }}
+              className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-sm"
+              title="Report User"
+            >
+              <Flag className="w-5 h-5" />
+            </Button>
 
-          {/* Gradient Overlay - from transparent to rgba(0,0,0,0.4) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+            {/* Share Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShareDialogOpen(true);
+              }}
+              className="w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600 text-white shadow-lg backdrop-blur-sm"
+              title="Share Profile"
+            >
+              <Share2 className="w-5 h-5" />
+            </Button>
+
+            {/* Insights Button */}
+            {onInsights && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onInsights();
+                }}
+                className="w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
+                title="View Insights"
+              >
+                <BarChart3 className="w-5 h-5" />
+              </Button>
+            )}
+          </div>
 
           {/* Match Percentage Badge */}
           <div className="absolute top-20 right-4 z-20">

@@ -170,7 +170,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
     try {
       // Get current user and session
-      const { data: { user, session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user } } = await supabase.auth.getUser();
 
       if (!user || !session) {
         throw new Error('No user session found');
@@ -218,20 +219,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         description: 'Your account has been successfully deleted.',
       });
 
-          // Navigate to home page
-          navigate('/');
-        } else {
-          // Function returned an error
-          toast({
-            title: 'Deletion Failed',
-            description: data.error || 'Account deletion could not be completed.',
-            variant: 'destructive'
-          });
-        }
-      } else {
-        // Unexpected response format
-        throw new Error('Unexpected response from delete function');
-      }
+      // Navigate to home page
+      navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);
       toast({
