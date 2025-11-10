@@ -10,6 +10,7 @@ import { ChevronDown, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
+import { ClientDemographicFilters } from './ClientDemographicFilters';
 
 interface YachtClientFiltersProps {
   onApply: (filters: any) => void;
@@ -41,6 +42,14 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
   const [waterActivities, setWaterActivities] = useState<string[]>(initialFilters.water_activities || []);
   const [navigationEquipment, setNavigationEquipment] = useState<string[]>(initialFilters.navigation_equipment || []);
   const [hasStabilizers, setHasStabilizers] = useState(initialFilters.has_stabilizers || false);
+
+  // Client demographic filters
+  const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
+  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
+  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
+  const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
+  const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
+  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
   const yachtTypeOptions = ['Sailboat', 'Motor Yacht', 'Catamaran', 'Luxury Cruiser', 'Sport Yacht', 'Mega Yacht'];
   const amenityOptions = ['Jacuzzi', 'Water Toys', 'Chef Service', 'Helipad', 'Cinema Room', 'Spa'];
@@ -90,7 +99,15 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
       hull_material: hullMaterial,
       water_activities: waterActivities,
       navigation_equipment: navigationEquipment,
-      has_stabilizers: hasStabilizers
+      has_stabilizers: hasStabilizers,
+      // Client demographic filters
+      gender_preference: genderPreference,
+      nationalities,
+      languages,
+      relationship_status: relationshipStatus,
+      has_pets_filter: hasPetsFilter,
+      age_min: ageRange[0],
+      age_max: ageRange[1]
     });
   };
 
@@ -114,6 +131,13 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
     setWaterActivities([]);
     setNavigationEquipment([]);
     setHasStabilizers(false);
+    // Clear client demographic filters
+    setGenderPreference('any');
+    setNationalities([]);
+    setLanguages([]);
+    setRelationshipStatus([]);
+    setHasPetsFilter('any');
+    setAgeRange([18, 65]);
     onApply({});
   };
 
@@ -181,6 +205,21 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
           <p className="text-sm text-muted-foreground">Filter clients interested in chartering, purchasing, or both yachts</p>
         </CollapsibleContent>
       </Collapsible>
+
+      <ClientDemographicFilters
+        genderPreference={genderPreference}
+        setGenderPreference={setGenderPreference}
+        ageRange={ageRange}
+        setAgeRange={setAgeRange}
+        relationshipStatus={relationshipStatus}
+        setRelationshipStatus={setRelationshipStatus}
+        hasPetsFilter={hasPetsFilter}
+        setHasPetsFilter={setHasPetsFilter}
+        nationalities={nationalities}
+        setNationalities={setNationalities}
+        languages={languages}
+        setLanguages={setLanguages}
+      />
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">

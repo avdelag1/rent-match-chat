@@ -106,7 +106,15 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
       has_abs: hasABS,
       features: features,
       battery_capacity_min: batteryCapacity,
-      is_electric_only: isElectricOnly
+      is_electric_only: isElectricOnly,
+      // Client demographic filters
+      gender_preference: genderPreference,
+      nationalities,
+      languages,
+      relationship_status: relationshipStatus,
+      has_pets_filter: hasPetsFilter,
+      age_min: ageRange[0],
+      age_max: ageRange[1]
     });
   };
 
@@ -128,6 +136,13 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
     setFeatures([]);
     setBatteryCapacity(0);
     setIsElectricOnly(false);
+    // Clear client demographic filters
+    setGenderPreference('any');
+    setNationalities([]);
+    setLanguages([]);
+    setRelationshipStatus([]);
+    setHasPetsFilter('any');
+    setAgeRange([18, 65]);
     onApply({});
   };
 
@@ -194,6 +209,21 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
           <p className="text-sm text-muted-foreground">Filter clients interested in renting, buying, or both motorcycles</p>
         </CollapsibleContent>
       </Collapsible>
+
+      <ClientDemographicFilters
+        genderPreference={genderPreference}
+        setGenderPreference={setGenderPreference}
+        ageRange={ageRange}
+        setAgeRange={setAgeRange}
+        relationshipStatus={relationshipStatus}
+        setRelationshipStatus={setRelationshipStatus}
+        hasPetsFilter={hasPetsFilter}
+        setHasPetsFilter={setHasPetsFilter}
+        nationalities={nationalities}
+        setNationalities={setNationalities}
+        languages={languages}
+        setLanguages={setLanguages}
+      />
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
