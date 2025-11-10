@@ -387,7 +387,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
   };
 
   const uploadImageToStorage = async (file: File, userId: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
+    const fileExt = file.name.split('.').pop() || 'jpg';
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const bucket = getStorageBucket();
 

@@ -86,7 +86,7 @@ export function ListingLegalDocumentsDialog({
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'pdf';
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.user.id}/${fileName}`;
 

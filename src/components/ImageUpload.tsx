@@ -36,7 +36,7 @@ export function ImageUpload({
       }
 
       // Generate unique filename
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${folder}/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
 
       // Upload to Supabase Storage
