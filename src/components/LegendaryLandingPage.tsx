@@ -81,9 +81,9 @@ function LegendaryLandingPage() {
       }}
       transition={{ duration: 0.3 }}
     >
-      {/* Animated Fire Sparks - Reduced for performance */}
+      {/* Animated Fire Sparks */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {Array.from({ length: 12 }).map((_, i) => (
           <motion.div
             key={i}
             className="absolute"
@@ -130,8 +130,8 @@ function LegendaryLandingPage() {
           />
         ))}
         
-        {/* Additional floating particles - Reduced for performance */}
-        {Array.from({ length: 4 }).map((_, i) => (
+        {/* Additional floating particles */}
+        {Array.from({ length: 8 }).map((_, i) => (
           <motion.div
             key={`particle-${i}`}
             className="absolute rounded-full"

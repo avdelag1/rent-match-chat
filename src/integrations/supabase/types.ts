@@ -3117,33 +3117,6 @@ export type Database = {
         }
         Relationships: []
       }
-      profile_views: {
-        Row: {
-          action: string
-          created_at: string
-          id: string
-          user_id: string
-          view_type: string
-          viewed_profile_id: string
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          id?: string
-          user_id: string
-          view_type: string
-          viewed_profile_id: string
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-          view_type?: string
-          viewed_profile_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           about_me: string | null
@@ -6746,6 +6719,10 @@ export type Database = {
         Args: { user_id_to_delete: string }
         Returns: Json
       }
+      delete_user_account_data: {
+        Args: { user_id_to_delete: string }
+        Returns: Json
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -7135,39 +7112,22 @@ export type Database = {
         Returns: undefined
       }
       longtransactionsenabled: { Args: never; Returns: boolean }
-      manage_property_availability:
-        | {
-            Args: {
-              p_blocked_reason?: string
-              p_end_date: string
-              p_is_available: boolean
-              p_property_id: string
-              p_start_date: string
-            }
-            Returns: {
-              blocked_reason: string
-              end_date: string
-              is_available: boolean
-              property_id: string
-              start_date: string
-            }[]
-          }
-        | {
-            Args: {
-              p_blocked_reason?: string
-              p_end_date: string
-              p_is_available: boolean
-              p_property_id: number
-              p_start_date: string
-            }
-            Returns: {
-              blocked_reason: string
-              end_date: string
-              is_available: boolean
-              property_id: number
-              start_date: string
-            }[]
-          }
+      manage_property_availability: {
+        Args: {
+          p_blocked_reason?: string
+          p_end_date: string
+          p_is_available: boolean
+          p_property_id: number
+          p_start_date: string
+        }
+        Returns: {
+          blocked_reason: string
+          end_date: string
+          is_available: boolean
+          property_id: number
+          start_date: string
+        }[]
+      }
       manage_user_ban: {
         Args: { p_admin_id: string; p_is_banned: boolean; p_user_id: string }
         Returns: {
