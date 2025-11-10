@@ -125,7 +125,7 @@ export function ClientTinderSwipeCard({
         mass: 0.6
       }}
     >
-      <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} y={y} />
         {/* Main Image with Tap Zones */}

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
 import { SwipeActionButtons } from './SwipeActionButtons';
@@ -9,6 +9,7 @@ import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
+import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'sonner';
@@ -36,6 +37,8 @@ export function ClientTinderSwipeContainer({
 }: ClientTinderSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [page, setPage] = useState(0);
+  const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
 
@@ -46,16 +49,36 @@ export function ClientTinderSwipeContainer({
     ownerProfile?: any;
   }>({ isOpen: false });
 
-  // Use external profiles if provided, otherwise fetch internally
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching();
+  // Fetch profiles with pagination
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching(undefined, page, 10);
   
-  const profiles = externalProfiles || internalProfiles;
+  const profiles = externalProfiles || allProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
   const error = externalError !== undefined ? externalError : internalError;
 
   const swipeMutation = useSwipe();
   const { recordSwipe, undoLastSwipe, canUndo } = useSwipeUndo();
   const startConversation = useStartConversation();
+  const recordProfileView = useRecordProfileView();
+
+  // Add newly fetched profiles to the stack
+  useEffect(() => {
+    if (!externalProfiles && internalProfiles.length > 0) {
+      setAllProfiles(prev => {
+        const existingIds = new Set(prev.map(p => p.user_id));
+        const newProfiles = internalProfiles.filter(p => !existingIds.has(p.user_id));
+        return [...prev, ...newProfiles];
+      });
+    }
+  }, [internalProfiles, externalProfiles]);
+
+  // Preload next batch when user is 3 cards away from end
+  useEffect(() => {
+    const remainingCards = profiles.length - currentIndex;
+    if (remainingCards <= 3 && !isLoading && !externalProfiles) {
+      setPage(prev => prev + 1);
+    }
+  }, [currentIndex, profiles.length, isLoading, externalProfiles]);
 
   const currentProfile = profiles[currentIndex];
 
@@ -81,6 +104,13 @@ export function ClientTinderSwipeContainer({
       direction === 'left' ? 'pass' : 'like'
     );
 
+    // Record profile view for smart recycling
+    recordProfileView.mutate({
+      profileId: currentProfile.user_id,
+      viewType: 'profile',
+      action: direction === 'left' ? 'pass' : 'like'
+    });
+
     // Move to next card
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
@@ -101,6 +131,8 @@ export function ClientTinderSwipeContainer({
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
+    setPage(0);
+    setAllProfiles([]);
     await refetch();
     toast.success('Refreshed', { description: 'Latest profiles loaded' });
   };
