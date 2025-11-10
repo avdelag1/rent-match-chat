@@ -139,7 +139,6 @@ export function OwnerClientTinderCard({
             rotate: -15
           }}
         >
-          <div className="text-9xl">💚</div>
           <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(34,197,94,0.9)] tracking-wider">
             LIKE
           </span>
@@ -158,7 +157,6 @@ export function OwnerClientTinderCard({
             rotate: 15
           }}
         >
-          <div className="text-9xl">❌</div>
           <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(239,68,68,0.9)] tracking-wider">
             PASS
           </span>
@@ -166,7 +164,7 @@ export function OwnerClientTinderCard({
       </motion.div>
 
       {/* Card Content */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <div className="relative w-full h-full max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Main Image with Tap Zones */}
         <div 
           className="relative w-full h-full cursor-pointer select-none"

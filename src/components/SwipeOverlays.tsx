@@ -24,23 +24,9 @@ export function SwipeOverlays({ x, y }: SwipeOverlaysProps) {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 via-emerald-500/20 to-green-600/30 backdrop-blur-sm" />
         <motion.div 
-          className="relative transform -rotate-12 flex flex-col items-center gap-4"
+          className="relative transform -rotate-12"
           style={{ scale: likeScale }}
         >
-          <motion.div 
-            className="text-9xl"
-            animate={{ 
-              scale: [1, 1.1, 1],
-              rotate: [0, -5, 5, 0]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 1.5,
-              ease: "easeInOut"
-            }}
-          >
-            💚
-          </motion.div>
           <span className="text-7xl font-black text-white drop-shadow-[0_6px_30px_rgba(34,197,94,1)] tracking-wider modern-text-shadow">
             LIKE
           </span>
@@ -54,23 +40,9 @@ export function SwipeOverlays({ x, y }: SwipeOverlaysProps) {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 via-rose-500/20 to-red-600/30 backdrop-blur-sm" />
         <motion.div 
-          className="relative transform rotate-12 flex flex-col items-center gap-4"
+          className="relative transform rotate-12"
           style={{ scale: passScale }}
         >
-          <motion.div 
-            className="text-9xl"
-            animate={{ 
-              scale: [1, 1.1, 1],
-              rotate: [0, 5, -5, 0]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 1.5,
-              ease: "easeInOut"
-            }}
-          >
-            ❌
-          </motion.div>
           <span className="text-7xl font-black text-white drop-shadow-[0_6px_30px_rgba(239,68,68,1)] tracking-wider modern-text-shadow">
             PASS
           </span>

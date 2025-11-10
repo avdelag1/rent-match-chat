@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeActionButtons } from './SwipeActionButtons';
@@ -9,6 +9,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
+import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RotateCcw, Sparkles } from 'lucide-react';
@@ -32,18 +33,20 @@ interface TinderentSwipeContainerProps {
 
 export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [page, setPage] = useState(0);
+  const [allListings, setAllListings] = useState<any[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
 
-  // Get listings with filters applied
+  // Get listings with filters applied and pagination
   const {
     data: smartListings = [],
     isLoading: smartLoading,
     error: smartError,
     isRefetching: smartRefetching,
     refetch: refetchSmart
-  } = useSmartListingMatching([], filters);
+  } = useSmartListingMatching([], filters, page, 10);
   
   const { 
     data: regularListings = [], 
@@ -51,13 +54,15 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     refetch: refetchRegular
   } = useListings([]);
 
-  // Use smart listings if available, otherwise fallback to regular
-  const listings = smartListings.length > 0 ? smartListings : regularListings;
+  // Use accumulated listings
+  const listings = allListings.length > 0 ? allListings : (smartListings.length > 0 ? smartListings : regularListings);
   const isLoading = smartLoading || regularLoading;
   const error = smartError;
   const isRefetching = smartRefetching;
   const refetch = useCallback(() => {
-    setCurrentIndex(0); // Reset to first listing on refresh
+    setCurrentIndex(0);
+    setPage(0);
+    setAllListings([]);
     refetchSmart();
     refetchRegular();
   }, [refetchSmart, refetchRegular]);
@@ -67,6 +72,26 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const navigate = useNavigate();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
   const startConversation = useStartConversation();
+  const recordProfileView = useRecordProfileView();
+
+  // Add newly fetched listings to the stack
+  useEffect(() => {
+    if (smartListings.length > 0) {
+      setAllListings(prev => {
+        const existingIds = new Set(prev.map(l => l.id));
+        const newListings = smartListings.filter(l => !existingIds.has(l.id));
+        return [...prev, ...newListings];
+      });
+    }
+  }, [smartListings]);
+
+  // Preload next batch when user is 3 cards away from end
+  useEffect(() => {
+    const remainingCards = listings.length - currentIndex;
+    if (remainingCards <= 3 && !isLoading) {
+      setPage(prev => prev + 1);
+    }
+  }, [currentIndex, listings.length, isLoading]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
@@ -100,6 +125,13 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       'listing', 
       direction === 'right' ? 'like' : 'pass'
     );
+
+    // Record listing view for smart recycling
+    recordProfileView.mutate({
+      profileId: currentListing.id,
+      viewType: 'listing',
+      action: direction === 'right' ? 'like' : 'pass'
+    });
 
     // Move to next card after animation with proper delay for smooth rhythm
     setTimeout(() => {
