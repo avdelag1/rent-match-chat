@@ -65,7 +65,7 @@ export function ClientTinderSwipeCard({
   }, [isTop, imageCount, isBottomSheetExpanded]);
 
   // Enhanced drag handling with better physics
-  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     const swipeThresholdX = 140;
     const velocityThreshold = 600;
