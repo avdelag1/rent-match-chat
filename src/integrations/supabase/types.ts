@@ -6719,6 +6719,10 @@ export type Database = {
         Args: { user_id_to_delete: string }
         Returns: Json
       }
+      delete_user_account_data: {
+        Args: { user_id_to_delete: string }
+        Returns: Json
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
