@@ -13,7 +13,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, role: 'client' | 'owner', name?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string, role: 'client' | 'owner') => Promise<{ error: any }>;
-  signInWithOAuth: (provider: 'google' | 'facebook', role: 'client' | 'owner') => Promise<{ error: any }>;
+  signInWithOAuth: (provider: 'google', role: 'client' | 'owner') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -311,22 +311,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signInWithOAuth = async (provider: 'google' | 'facebook', role: 'client' | 'owner') => {
+  const signInWithOAuth = async (provider: 'google', role: 'client' | 'owner') => {
     try {
       console.log(`[OAuth] Starting ${provider} OAuth for role: ${role}`);
       
       // Store the role in localStorage BEFORE OAuth redirect
       localStorage.setItem('pendingOAuthRole', role);
       
-      // Build OAuth options with provider-specific query params
+      // Build OAuth options with Google-specific query params
       const queryParams: Record<string, string> = {
         prompt: 'consent',
+        access_type: 'offline',
       };
-
-      // Add Google-specific parameters
-      if (provider === 'google') {
-        queryParams.access_type = 'offline';
-      }
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,

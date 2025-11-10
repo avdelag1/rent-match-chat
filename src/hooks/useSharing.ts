@@ -51,7 +51,7 @@ export function useCreateShare() {
 
       // Track the share in database
       const { data, error } = await supabase
-        .from('content_shares')
+        .from('content_shares' as any)
         .insert({
           sharer_id: user.id,
           shared_listing_id: params.sharedListingId || null,
@@ -65,17 +65,11 @@ export function useCreateShare() {
         .single();
 
       if (error) throw error;
-      return { ...data, shareUrl };
+      return { shareUrl };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['content-shares'] });
-
-      // Don't show toast for link_copied as the share dialog will handle it
-      if (data.share_method !== 'link_copied') {
-        toast.success('Shared successfully!', {
-          description: 'Your recommendation has been shared.',
-        });
-      }
+      // Silently track share success
     },
     onError: (error: Error) => {
       console.error('Error tracking share:', error);
@@ -87,7 +81,7 @@ export function useCreateShare() {
 export function useIncrementShareClicks() {
   return useMutation({
     mutationFn: async (shareId: string) => {
-      const { error } = await supabase.rpc('increment_share_clicks', {
+      const { error } = await supabase.rpc('increment_share_clicks' as any, {
         p_share_id: shareId,
       });
       if (error) throw error;

@@ -113,7 +113,7 @@ export function ReportDialog({
           <div className="space-y-4">
             <Label className="text-base font-semibold">What's the problem?</Label>
 
-            <RadioGroup value={selectedReportType} onValueChange={setSelectedReportType}>
+            <RadioGroup value={selectedReportType} onValueChange={(value) => setSelectedReportType(value as ReportType | '')}>
               <div className="space-y-3">
                 {relevantReportTypes.map((type) => (
                   <motion.div

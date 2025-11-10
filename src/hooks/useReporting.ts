@@ -48,7 +48,7 @@ export function useCreateReport() {
       }
 
       // Check if user has already reported this entity
-      const { data: existingReport } = await supabase.rpc('has_user_already_reported', {
+      const { data: existingReport } = await supabase.rpc('has_user_already_reported' as any, {
         p_reporter_id: user.id,
         p_reported_user_id: params.reportedUserId || null,
         p_reported_listing_id: params.reportedListingId || null,
@@ -60,7 +60,7 @@ export function useCreateReport() {
 
       // Create the report
       const { data, error } = await supabase
-        .from('user_reports')
+        .from('user_reports' as any)
         .insert({
           reporter_id: user.id,
           reported_user_id: params.reportedUserId || null,
@@ -98,7 +98,7 @@ export function useCheckExistingReport() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
-      const { data, error } = await supabase.rpc('has_user_already_reported', {
+      const { data, error } = await supabase.rpc('has_user_already_reported' as any, {
         p_reporter_id: user.id,
         p_reported_user_id: params.reportedUserId || null,
         p_reported_listing_id: params.reportedListingId || null,
