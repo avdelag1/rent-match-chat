@@ -22,25 +22,55 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+  has_role_column BOOLEAN;
 BEGIN
-  RETURN QUERY
-  SELECT
-    p.id as user_id,
-    p.email,
-    p.role::text as profile_role,
-    ur.role as user_roles_role,
-    CASE
-      WHEN ur.role IS NULL THEN 'MISSING_USER_ROLE'
-      WHEN p.role::text != ur.role THEN 'ROLE_MISMATCH'
-      ELSE 'OK'
-    END as issue_type,
-    p.created_at
-  FROM public.profiles p
-  LEFT JOIN public.user_roles ur ON ur.user_id = p.id
-  WHERE
-    -- Either no role in user_roles OR roles don't match
-    ur.role IS NULL OR p.role::text != ur.role
-  ORDER BY p.created_at DESC;
+  -- Check if profiles.role column exists
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+    AND table_name = 'profiles'
+    AND column_name = 'role'
+  ) INTO has_role_column;
+
+  IF has_role_column THEN
+    -- If profiles has role column, compare both tables
+    RETURN QUERY
+    SELECT
+      p.id as user_id,
+      p.email,
+      p.role::text as profile_role,
+      ur.role as user_roles_role,
+      CASE
+        WHEN ur.role IS NULL THEN 'MISSING_USER_ROLE'
+        WHEN p.role::text != ur.role THEN 'ROLE_MISMATCH'
+        ELSE 'OK'
+      END as issue_type,
+      p.created_at
+    FROM public.profiles p
+    LEFT JOIN public.user_roles ur ON ur.user_id = p.id
+    WHERE
+      -- Either no role in user_roles OR roles don't match
+      ur.role IS NULL OR p.role::text != ur.role
+    ORDER BY p.created_at DESC;
+  ELSE
+    -- If profiles doesn't have role column, just check if user_roles exists
+    RETURN QUERY
+    SELECT
+      p.id as user_id,
+      p.email,
+      'N/A'::TEXT as profile_role,
+      ur.role as user_roles_role,
+      CASE
+        WHEN ur.role IS NULL THEN 'MISSING_USER_ROLE'
+        ELSE 'OK'
+      END as issue_type,
+      p.created_at
+    FROM public.profiles p
+    LEFT JOIN public.user_roles ur ON ur.user_id = p.id
+    WHERE ur.role IS NULL
+    ORDER BY p.created_at DESC;
+  END IF;
 END;
 $$;
 
@@ -136,10 +166,23 @@ AS $$
 DECLARE
   v_old_profile_role TEXT;
   v_old_user_roles_role TEXT;
+  v_has_role_column BOOLEAN;
 BEGIN
+  -- Check if profiles.role column exists
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+    AND table_name = 'profiles'
+    AND column_name = 'role'
+  ) INTO v_has_role_column;
+
   -- Get current roles
-  SELECT role::text INTO v_old_profile_role
-  FROM public.profiles WHERE id = p_user_id;
+  IF v_has_role_column THEN
+    SELECT role::text INTO v_old_profile_role
+    FROM public.profiles WHERE id = p_user_id;
+  ELSE
+    v_old_profile_role := 'N/A (column does not exist)';
+  END IF;
 
   SELECT role INTO v_old_user_roles_role
   FROM public.user_roles WHERE user_id = p_user_id;
@@ -156,11 +199,15 @@ BEGIN
     COALESCE(v_old_user_roles_role, 'NULL'),
     p_correct_role;
 
-  -- Update profiles table
-  UPDATE public.profiles
-  SET role = p_correct_role::user_role,
-      updated_at = NOW()
-  WHERE id = p_user_id;
+  -- Update profiles table (only if role column exists)
+  IF v_has_role_column THEN
+    UPDATE public.profiles
+    SET role = p_correct_role::user_role,
+        updated_at = NOW()
+    WHERE id = p_user_id;
+  ELSE
+    RAISE NOTICE 'Skipping profiles table update - role column does not exist';
+  END IF;
 
   -- Update user_roles table (will be synced by trigger, but do it explicitly for safety)
   UPDATE public.user_roles
