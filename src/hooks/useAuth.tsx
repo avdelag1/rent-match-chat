@@ -242,24 +242,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         console.log('[Auth] User role from DB:', roleData?.role);
 
-        // STRICT ROLE VALIDATION - Block login if role mismatch
+        // FLEXIBLE ROLE HANDLING - Allow login and use correct role from DB
         if (roleData && roleData.role !== role) {
-          console.error('[Auth] ROLE MISMATCH - Blocking login. DB has:', roleData.role, 'but selected:', role);
+          console.log('[Auth] Role mismatch detected. DB has:', roleData.role, 'selected:', role, '- Using DB role');
           
-          // Sign out the user immediately
-          await supabase.auth.signOut();
+          // Use the role from database, not the selected one
+          const correctRole = roleData.role as 'client' | 'owner';
           
-          const errorMessage = roleData.role === 'client' 
-            ? 'These credentials are for a client account. Please use the client login page.'
-            : 'These credentials are for an owner account. Please use the owner login page.';
+          // Ensure profile exists with correct role
+          await createProfileIfMissing(data.user, correctRole);
           
           toast({
-            title: "Wrong Login Page",
-            description: errorMessage,
-            variant: "destructive",
+            title: "Logged in successfully!",
+            description: `Welcome back! Redirecting to your ${correctRole} dashboard.`,
           });
           
-          return { error: new Error(errorMessage) };
+          return { error: null };
         }
 
         // If no role exists, create it (new user)
