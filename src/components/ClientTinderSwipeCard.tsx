@@ -52,11 +52,11 @@ export function ClientTinderSwipeCard({
     const width = rect.width;
 
     // Left 30% = previous, Center 40% = expand details, Right 30% = next
-    if (clickX < width * 0.3 && imageCount > 1) {
-      setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
+    if (clickX < width * 0.3 && images.length > 1) {
+      setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
       triggerHaptic('light');
-    } else if (clickX > width * 0.7 && imageCount > 1) {
-      setCurrentImageIndex(prev => prev === imageCount - 1 ? 0 : prev + 1);
+    } else if (clickX > width * 0.7 && images.length > 1) {
+      setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
       triggerHaptic('light');
     } else {
       setIsBottomSheetExpanded(!isBottomSheetExpanded);
