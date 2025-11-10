@@ -197,9 +197,32 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         }
       );
 
+      // Handle non-OK responses before parsing JSON
+      if (!response.ok) {
+        let errorMessage = 'Account deletion could not be completed. Please try again or contact support.';
+        
+        try {
+          const errorResult = await response.json();
+          if (errorResult.error) {
+            errorMessage = errorResult.error;
+          }
+        } catch {
+          // If JSON parsing fails, use the default error message
+          errorMessage = `Server error (${response.status}): ${response.statusText}`;
+        }
+
+        console.error('Delete account error:', errorMessage);
+        toast({
+          title: 'Deletion Failed',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+        return;
+      }
+
       const result = await response.json();
 
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         console.error('Delete account error:', result.error);
 
         toast({
