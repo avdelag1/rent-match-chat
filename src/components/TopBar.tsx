@@ -1,4 +1,4 @@
-import { Bell, Settings, Flame } from 'lucide-react';
+import { Bell, Settings, Flame, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -6,10 +6,12 @@ import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 interface TopBarProps {
   onNotificationsClick?: () => void;
   onSettingsClick?: () => void;
+  onFiltersClick?: () => void;
   className?: string;
+  showFilters?: boolean;
 }
 
-export function TopBar({ onNotificationsClick, onSettingsClick, className }: TopBarProps) {
+export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
 
   return (
@@ -41,6 +43,18 @@ export function TopBar({ onNotificationsClick, onSettingsClick, className }: Top
               </span>
             )}
           </Button>
+
+          {/* Filters (Owner only) */}
+          {showFilters && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={onFiltersClick}
+            >
+              <Filter className="h-5 w-5" />
+            </Button>
+          )}
 
           {/* Settings */}
           <Button

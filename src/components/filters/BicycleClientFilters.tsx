@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
+import { ClientDemographicFilters } from './ClientDemographicFilters';
 
 interface BicycleClientFiltersProps {
   onApply: (filters: any) => void;
@@ -37,6 +38,14 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
   const [batteryRange, setBatteryRange] = useState(initialFilters.battery_range_min || 0);
   const [yearRange, setYearRange] = useState([initialFilters.year_min || 2010, initialFilters.year_max || new Date().getFullYear()]);
   const [isElectricOnly, setIsElectricOnly] = useState(initialFilters.is_electric_only || false);
+
+  // Client demographic filters
+  const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
+  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
+  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
+  const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
+  const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
+  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
   const bicycleTypeOptions = ['Road Bike', 'Mountain Bike', 'Electric Bike', 'Hybrid', 'BMX', 'Folding'];
   const terrainOptions = ['Urban', 'Trail', 'Road', 'All-Terrain', 'Beach'];
@@ -84,7 +93,15 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
       battery_range_min: batteryRange,
       year_min: yearRange[0],
       year_max: yearRange[1],
-      is_electric_only: isElectricOnly
+      is_electric_only: isElectricOnly,
+      // Client demographic filters
+      gender_preference: genderPreference,
+      nationalities,
+      languages,
+      relationship_status: relationshipStatus,
+      has_pets_filter: hasPetsFilter,
+      age_min: ageRange[0],
+      age_max: ageRange[1]
     });
   };
 
@@ -104,6 +121,13 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
     setBatteryRange(0);
     setYearRange([2010, new Date().getFullYear()]);
     setIsElectricOnly(false);
+    // Clear client demographic filters
+    setGenderPreference('any');
+    setNationalities([]);
+    setLanguages([]);
+    setRelationshipStatus([]);
+    setHasPetsFilter('any');
+    setAgeRange([18, 65]);
     onApply({});
   };
 
@@ -165,6 +189,21 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
           <p className="text-sm text-muted-foreground">Filter clients looking to rent, purchase, or both bicycles</p>
         </CollapsibleContent>
       </Collapsible>
+
+      <ClientDemographicFilters
+        genderPreference={genderPreference}
+        setGenderPreference={setGenderPreference}
+        ageRange={ageRange}
+        setAgeRange={setAgeRange}
+        relationshipStatus={relationshipStatus}
+        setRelationshipStatus={setRelationshipStatus}
+        hasPetsFilter={hasPetsFilter}
+        setHasPetsFilter={setHasPetsFilter}
+        nationalities={nationalities}
+        setNationalities={setNationalities}
+        languages={languages}
+        setLanguages={setLanguages}
+      />
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
