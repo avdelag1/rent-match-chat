@@ -100,15 +100,9 @@ export function OwnerClientTinderCard({
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
-  // Calculate overlay opacity based on drag distance - memoized
-  const rightOverlayOpacity = useMemo(() => 
-    useTransform(x, [0, screenWidth * 0.35], [0, 1]),
-    [x, screenWidth]
-  );
-  const leftOverlayOpacity = useMemo(() =>
-    useTransform(x, [-screenWidth * 0.35, 0], [1, 0]),
-    [x, screenWidth]
-  );
+  // Calculate overlay opacity based on drag distance
+  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);
+  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.35, 0], [1, 0]);
 
   const cardStyle = {
     x,
