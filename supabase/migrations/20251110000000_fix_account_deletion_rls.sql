@@ -53,6 +53,18 @@ BEGIN
   -- Delete activation usage log
   DELETE FROM activation_usage_log WHERE user_id = user_id_to_delete;
   
+  -- Delete best deal notifications
+  DELETE FROM best_deal_notifications WHERE user_id = user_id_to_delete;
+  
+  -- Delete legal documents
+  DELETE FROM legal_documents WHERE user_id = user_id_to_delete;
+  
+  -- Delete legal document quota
+  DELETE FROM legal_document_quota WHERE user_id = user_id_to_delete;
+  
+  -- Delete availability slots (for owner's listings)
+  DELETE FROM availability_slots WHERE owner_id = v_profile_id;
+  
   -- Delete typing indicators
   DELETE FROM typing_indicators WHERE user_id = user_id_to_delete;
   
