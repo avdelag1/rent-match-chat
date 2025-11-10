@@ -264,6 +264,11 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      {!isLogin && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Must be 8+ characters with uppercase, lowercase, and number
+                        </p>
+                      )}
                     </div>
                   )}
 
