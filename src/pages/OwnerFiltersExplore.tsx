@@ -32,7 +32,7 @@ export default function OwnerFiltersExplore() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/owner/dashboard')}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>

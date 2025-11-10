@@ -25,7 +25,7 @@ export function useMonthlySubscriptionBenefits() {
 
       const { data, error } = await supabase
         .from('conversation_messages')
-        .select('id', { count: 'exact', head: 0 })
+        .select('id', { count: 'exact', head: true })
         .eq('sender_id', user.id)
         .gte('created_at', monthStart)
         .lte('created_at', monthEnd);
