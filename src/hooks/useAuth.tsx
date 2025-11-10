@@ -284,6 +284,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log('[Auth] Found role in profiles:', profileData.role, '- Syncing to user_roles');
           const actualRole = profileData.role as 'client' | 'owner';
 
+          // Log and notify if user clicked wrong button
+          if (actualRole !== role) {
+            console.log('[Auth] ⚠️ User clicked wrong role button. Actual:', actualRole, 'Selected:', role);
+            toast({
+              title: "Wrong Login Button",
+              description: `You're a ${actualRole}, but clicked "Sign in as ${role}". Please use the correct button next time.`,
+              variant: "default"
+            });
+          }
+
           const { error: insertError } = await supabase
             .from('user_roles')
             .insert({
