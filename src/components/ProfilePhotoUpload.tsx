@@ -60,7 +60,7 @@ export function ProfilePhotoUpload({
     
     try {
       // Create unique filename
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${user.id}/avatar.${fileExt}`;
 
       // Upload to Supabase Storage
