@@ -169,38 +169,50 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
     }
 
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('No user found');
+      // Get current user and session
+      const { data: { user, session } } = await supabase.auth.getSession();
+
+      if (!user || !session) {
+        throw new Error('No user session found');
       }
 
-      // Try to delete user account using Supabase Admin API
-      // Note: This requires proper RLS policies and admin function
-      const { error } = await supabase.rpc('delete_user_account', {
-        user_id_to_delete: user.id
-      });
+      // Get the Supabase URL to construct the edge function URL
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) {
+        throw new Error('Supabase URL not configured');
+      }
 
-      if (error) {
-        // If RPC doesn't exist or fails, inform user to contact support
-        console.error('Delete account error:', error);
-        
+      // Call the delete-user edge function with the auth token
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/delete-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error('Delete account error:', result.error);
+
         toast({
           title: 'Deletion Failed',
-          description: 'Account deletion could not be completed automatically. Please contact support for assistance. You will be signed out.',
+          description: result.error || 'Account deletion could not be completed. Please try again or contact support.',
           variant: 'destructive'
         });
-        
-        // Sign out user but account data remains
-        await supabase.auth.signOut();
-        navigate('/');
         return;
       }
 
       // Account successfully deleted
       await supabase.auth.signOut();
-      
+
       toast({
         title: 'Account Deleted',
         description: 'Your account has been successfully deleted.',
@@ -212,7 +224,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       console.error('Error deleting account:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete account. Please contact support.',
+        description: error instanceof Error ? error.message : 'Failed to delete account. Please contact support.',
         variant: 'destructive'
       });
     }

@@ -3,9 +3,12 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { ReportDialog } from '@/components/ReportDialog';
 import { ShareDialog } from '@/components/ShareDialog';
+import { SwipeOverlays } from './SwipeOverlays';
+import { triggerHaptic } from '@/utils/haptics';
 
 interface ClientTinderSwipeCardProps {
   profile: MatchedClientProfile;
@@ -21,19 +24,20 @@ export function ClientTinderSwipeCard({
   onSwipe,
   onTap,
   onInsights,
-  isTop = false,
+  isTop = true,
   showNextCard = false
 }: ClientTinderSwipeCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Enhanced rotation based on drag distance (20 degrees max for better visual)
-  const rotate = useTransform(x, [-300, 0, 300], [-20, 0, 20]);
+  // Enhanced rotation based on drag distance
+  const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
 
   const images = useMemo(() => 
     profile.profile_images && profile.profile_images.length > 0 
@@ -44,40 +48,37 @@ export function ClientTinderSwipeCard({
 
   const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    if (clickX < width * 0.3) {
-      // Left 30% - Previous image
-      setCurrentImageIndex(prev => Math.max(0, prev - 1));
-    } else if (clickX > width * 0.7) {
-      // Right 30% - Next image
-      setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1));
+    // Left 30% = previous, Center 40% = expand details, Right 30% = next
+    if (clickX < width * 0.3 && images.length > 1) {
+      setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
+      triggerHaptic('light');
+    } else if (clickX > width * 0.7 && images.length > 1) {
+      setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
+      triggerHaptic('light');
     } else {
-      // Center 40% - Expand details
       setIsBottomSheetExpanded(!isBottomSheetExpanded);
+      triggerHaptic('medium');
     }
   }, [images.length, isBottomSheetExpanded]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  // Enhanced drag handling with better physics
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
+    const swipeThresholdX = 140;
+    const velocityThreshold = 600;
 
-    // Threshold: 35% of screen width, velocity-based swipes
-    const screenWidth = window.innerWidth;
-    const swipeThresholdX = screenWidth * 0.35;
-    const velocityThreshold = 600; // px/s
-
-    // Horizontal swipes - Right (accept) or Left (reject)
-    const absOffsetX = Math.abs(offset.x);
-    const absVelocityX = Math.abs(velocity.x);
-
-    if (absOffsetX > swipeThresholdX || absVelocityX > velocityThreshold) {
+    // Check for swipes (left/right only)
+    if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
       const direction = offset.x > 0 ? 'right' : 'left';
+      triggerHaptic(direction === 'right' ? 'success' : 'warning');
       onSwipe(direction);
       return;
     }
-  };
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
@@ -94,63 +95,36 @@ export function ClientTinderSwipeCard({
   const cardStyle = {
     x,
     y,
-    rotate,
+    rotate: isTop ? rotate : 0,
+    scale: isTop ? 1 : 0.95,
+    zIndex: isTop ? 10 : 1,
+    position: 'absolute' as const,
+    top: isTop ? 0 : 12,
+    left: 0,
+    right: 0,
+    willChange: 'transform'
   };
 
   return (
     <motion.div
-      drag={isTop}
+      ref={cardRef}
+      style={cardStyle}
+      drag={isTop ? true : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       dragElastic={0.2}
       onDragEnd={handleDragEnd}
-      style={cardStyle}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
+      className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
+      animate={{ x: 0, y: 0, rotate: 0 }}
       transition={{
         type: "spring",
         stiffness: 500,
         damping: 35,
         mass: 0.6
       }}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
     >
-      {/* Enhanced Swipe Overlays with Emojis */}
-      {/* Right Swipe - GREEN LIKE with Emoji */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-green-500/20"
-        style={{ opacity: rightOverlayOpacity }}
-      >
-        <motion.div 
-          className="flex flex-col items-center gap-3"
-          style={{ 
-            scale: useTransform(rightOverlayOpacity, [0, 1], [0.7, 1]),
-            rotate: -15
-          }}
-        >
-          <div className="text-9xl">💚</div>
-          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(34,197,94,0.9)] tracking-wider">
-            LIKE
-          </span>
-        </motion.div>
-      </motion.div>
-
-      {/* Left Swipe - RED PASS with Emoji */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-red-500/20"
-        style={{ opacity: leftOverlayOpacity }}
-      >
-        <motion.div 
-          className="flex flex-col items-center gap-3"
-          style={{ 
-            scale: useTransform(leftOverlayOpacity, [0, 1], [0.7, 1]),
-            rotate: 15
-          }}
-        >
-          <div className="text-9xl">❌</div>
-          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(239,68,68,0.9)] tracking-wider">
-            PASS
-          </span>
-        </motion.div>
-      </motion.div>
+      <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
+        {/* Swipe Overlays */}
+        <SwipeOverlays x={x} y={y} />
 
       {/* Card Content */}
       <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
@@ -184,12 +158,12 @@ export function ClientTinderSwipeCard({
             <div className="absolute top-4 left-0 right-0 flex gap-2 px-4 z-10">
               {images.map((_, idx) => (
                 <div
-                  key={idx}
-                  className="flex-1 h-1 rounded-full bg-white/30 overflow-hidden"
+                  key={index}
+                  className="flex-1 h-1 rounded-full bg-white/30 backdrop-blur-sm overflow-hidden"
                 >
                   <div
                     className={`h-full bg-white transition-all duration-200 ${
-                      idx === currentImageIndex ? 'w-full' : idx < currentImageIndex ? 'w-full' : 'w-0'
+                      index === currentImageIndex ? 'w-full' : 'w-0'
                     }`}
                   />
                 </div>
@@ -197,69 +171,42 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Left & Right */}
-          <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
-            {/* Left Side Buttons */}
-            <div className="flex items-center gap-2">
-              {/* Report Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setReportDialogOpen(true);
-                }}
-                className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-sm"
-                title="Report User"
-              >
-                <Flag className="w-5 h-5" />
-              </Button>
+          {/* Image with Gradient Overlay */}
+          <img
+            src={images[Math.min(currentImageIndex, imageCount - 1)]}
+            alt={profile.name}
+            className="w-full h-full object-cover"
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+            style={{
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'translateZ(0)'
+            }}
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder-avatar.svg';
+            }}
+          />
 
-              {/* Share Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShareDialogOpen(true);
-                }}
-                className="w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600 text-white shadow-lg backdrop-blur-sm"
-                title="Share Profile"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-            </div>
+          {/* Gradient Overlay - from transparent to rgba(0,0,0,0.4) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
-            {/* Right Side Button */}
-            {onInsights && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onInsights();
-                }}
-                className="w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
-                title="View Insights"
-              >
-                <BarChart3 className="w-5 h-5" />
-              </Button>
-            )}
-          </div>
-
-          {/* Match Badge */}
-          <div className="absolute top-16 right-4 z-10">
-            <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-none shadow-lg text-lg px-4 py-1">
+          {/* Match Percentage Badge */}
+          <div className="absolute top-20 right-4 z-20">
+            <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-none shadow-lg px-3 py-1.5 text-sm font-semibold">
               {profile.matchPercentage}% Match
             </Badge>
           </div>
 
           {/* Verified Badge */}
           {profile.verified && (
-            <div className="absolute top-28 right-4 z-10">
-              <div className="bg-blue-500 text-white rounded-full p-2 shadow-lg">
-                <CheckCircle className="w-5 h-5" />
-              </div>
+            <div className="absolute top-36 right-4 z-20">
+              <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Verified</span>
+              </Badge>
             </div>
           )}
         </div>
@@ -268,13 +215,17 @@ export function ClientTinderSwipeCard({
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
-            height: isBottomSheetExpanded ? '85%' : '30%',
+            height: isBottomSheetExpanded ? '85%' : '30%'
           }}
-          transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+          transition={{
+            type: "spring",
+            stiffness: 350,
+            damping: 32
+          }}
           style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
-          <div className="flex justify-center pt-3 pb-2">
+          <div className="flex justify-center py-3">
             <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
           </div>
 
@@ -314,7 +265,7 @@ export function ClientTinderSwipeCard({
               )}
             </div>
 
-            {/* Expanded Content */}
+            {/* Expanded State Content */}
             {isBottomSheetExpanded && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -330,7 +281,7 @@ export function ClientTinderSwipeCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.interests.map((interest, idx) => (
-                        <Badge key={idx} variant="secondary">
+                        <Badge key={idx} variant="secondary" className="text-xs">
                           {interest}
                         </Badge>
                       ))}
@@ -346,7 +297,7 @@ export function ClientTinderSwipeCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.preferred_activities.map((activity, idx) => (
-                        <Badge key={idx} variant="outline">
+                        <Badge key={idx} variant="outline" className="text-xs">
                           {activity}
                         </Badge>
                       ))}
@@ -390,7 +341,7 @@ export function ClientTinderSwipeCard({
             </Button>
           </div>
         </motion.div>
-      </div>
+      </Card>
 
       {/* Report Dialog */}
       <ReportDialog
@@ -407,7 +358,7 @@ export function ClientTinderSwipeCard({
         onOpenChange={setShareDialogOpen}
         profileId={profile.user_id}
         title={`${profile.name}'s Profile`}
-        description={`Check out ${profile.name} on Tinderent - ${profile.matchPercentage}% match!`}
+        description={`Check out ${profile.name} on Rent Match - ${profile.matchPercentage}% match!`}
       />
     </motion.div>
   );
