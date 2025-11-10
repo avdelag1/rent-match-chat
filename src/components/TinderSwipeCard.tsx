@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,9 +26,12 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
   const y = useMotionValue(0);
   const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
 
-  // Guard for missing images
-  const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
-  const images = imageCount > 0 ? listing.images : ['/placeholder.svg'];
+  // Guard for missing images - memoized
+  const images = useMemo(() => {
+    const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
+    return imageCount > 0 ? listing.images : ['/placeholder.svg'];
+  }, [listing.images]);
+  const imageCount = images.length;
 
   // Photo navigation via tap zones - NO VISUAL INDICATORS
   const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -95,9 +98,9 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
       animate={{ x: 0, y: 0, rotate: 0 }}
       transition={{
         type: "spring",
-        stiffness: 450,
-        damping: 38,
-        mass: 0.7
+        stiffness: 500,
+        damping: 35,
+        mass: 0.6
       }}
     >
       <Card className="relative w-full h-[calc(100vh-200px)] max-h-[700px] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
@@ -134,7 +137,7 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
             alt={listing.title}
             className="w-full h-full object-cover"
             draggable={false}
-            loading="lazy"
+            loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
             style={{
               willChange: 'transform',

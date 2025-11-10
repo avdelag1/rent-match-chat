@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { ClientProfileCard } from './ClientProfileCard';
+import { OwnerClientTinderCard } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
 import { MatchPercentageBadge } from './MatchPercentageBadge';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -396,7 +396,7 @@ export function ClientSwipeContainer({
                 willChange: 'transform, opacity'
               }}
             >
-              <ClientProfileCard
+              <OwnerClientTinderCard
                 profile={currentClient}
                 onSwipe={handleSwipe}
                 onTap={() => onClientTap(currentClient.user_id)}
