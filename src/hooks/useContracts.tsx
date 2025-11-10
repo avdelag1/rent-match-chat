@@ -90,7 +90,7 @@ export function useCreateContract() {
       if (!user?.id) throw new Error('User not authenticated');
 
       // Upload contract file
-      const fileExt = contractData.file.name.split('.').pop();
+      const fileExt = contractData.file.name.split('.').pop() || 'pdf';
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `contracts/${user.id}/${fileName}`;
 
