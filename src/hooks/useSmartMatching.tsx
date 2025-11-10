@@ -589,7 +589,7 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           return [];
         }
 
-        // CRITICAL: Exclude admin users from client discovery
+        // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select(`
@@ -597,7 +597,7 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
             user_roles!inner(role)
           `)
           .neq('id', user.user.id)
-          .neq('user_roles.role', 'admin')
+          .eq('user_roles.role', 'client')
           .limit(100);
 
         if (profileError) {

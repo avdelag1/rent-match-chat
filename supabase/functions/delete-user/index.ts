@@ -28,7 +28,7 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
       return new Response(
         JSON.stringify({ error: 'Missing Supabase configuration' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -98,11 +98,12 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return new Response(
       JSON.stringify({
         success: false,
         error: 'Internal server error',
-        details: error.message,
+        details: errorMessage,
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
