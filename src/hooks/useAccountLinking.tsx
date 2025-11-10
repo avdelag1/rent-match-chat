@@ -61,16 +61,28 @@ export function useAccountLinking() {
       const roleConflict = existingProfile.role !== requestedRole;
       
       if (roleConflict) {
-        // Show user the conflict and let them choose
+        // SECURITY: Show user the conflict but NEVER change their existing role
+        console.warn('[AccountLinking] ⚠️ Role conflict detected:', {
+          existingRole: existingProfile.role,
+          requestedRole: requestedRole,
+          email: existingProfile.email
+        });
         toast({
           title: "Account Found",
           description: `You already have an account as a ${existingProfile.role}. You'll be signed in with your existing role.`,
         });
+        // DO NOT modify role - use existing one
       } else {
-        // Upsert role if no conflict
+        // No conflict - ensure role exists in user_roles (idempotent)
+        // FIXED: Use 'user_id' as onConflict, not 'user_id,role' to prevent multiple roles per user
         await supabase
           .from('user_roles')
-          .upsert([{ id: crypto.randomUUID(), user_id: existingProfile.id, role: requestedRole }], { onConflict: 'user_id,role' });
+          .upsert([{
+            user_id: existingProfile.id,
+            role: requestedRole
+          }], {
+            onConflict: 'user_id'  // ✅ Only one role per user
+          });
       }
 
       // Update the OAuth user's metadata to match existing account
@@ -183,9 +195,15 @@ export function useAccountLinking() {
       }
 
       // Create role in user_roles table
+      // Use upsert with user_id conflict to ensure only one role per user
       const { error: roleError } = await supabase
         .from('user_roles')
-        .insert([{ id: crypto.randomUUID(), user_id: oauthUser.id, role }]);
+        .upsert([{
+          user_id: oauthUser.id,
+          role
+        }], {
+          onConflict: 'user_id'
+        });
 
       if (roleError) {
         console.error('Error creating role:', roleError);
