@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2 } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
@@ -35,11 +35,14 @@ export function ClientTinderSwipeCard({
   // Enhanced rotation based on drag distance (20 degrees max for better visual)
   const rotate = useTransform(x, [-300, 0, 300], [-20, 0, 20]);
 
-  const images = profile.profile_images && profile.profile_images.length > 0 
-    ? profile.profile_images 
-    : [profile.avatar_url || '/placeholder-avatar.svg'];
+  const images = useMemo(() => 
+    profile.profile_images && profile.profile_images.length > 0 
+      ? profile.profile_images 
+      : [profile.avatar_url || '/placeholder-avatar.svg'],
+    [profile.profile_images, profile.avatar_url]
+  );
 
-  const handleImageClick = (e: React.MouseEvent) => {
+  const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -55,7 +58,7 @@ export function ClientTinderSwipeCard({
       // Center 40% - Expand details
       setIsBottomSheetExpanded(!isBottomSheetExpanded);
     }
-  };
+  }, [images.length, isBottomSheetExpanded]);
 
   const handleDragEnd = (event: any, info: PanInfo) => {
     const { offset, velocity } = info;
@@ -77,11 +80,16 @@ export function ClientTinderSwipeCard({
   };
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
-  const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
 
-  // Calculate overlay opacity based on drag distance
-  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);
-  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.35, 0], [1, 0]);
+  // Calculate overlay opacity based on drag distance - memoized
+  const rightOverlayOpacity = useMemo(() => 
+    useTransform(x, [0, screenWidth * 0.35], [0, 1]),
+    [x, screenWidth]
+  );
+  const leftOverlayOpacity = useMemo(() =>
+    useTransform(x, [-screenWidth * 0.35, 0], [1, 0]),
+    [x, screenWidth]
+  );
 
   const cardStyle = {
     x,
@@ -99,9 +107,9 @@ export function ClientTinderSwipeCard({
       animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 450,
-        damping: 38,
-        mass: 0.7
+        stiffness: 500,
+        damping: 35,
+        mass: 0.6
       }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
     >
@@ -145,7 +153,7 @@ export function ClientTinderSwipeCard({
       </motion.div>
 
       {/* Card Content */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl" style={{ willChange: 'transform' }}>
+      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Main Image with Tap Zones */}
         <div 
           className="relative w-full h-full cursor-pointer select-none"
@@ -156,7 +164,16 @@ export function ClientTinderSwipeCard({
             src={images[currentImageIndex]}
             alt={profile.name}
             className="w-full h-full object-cover"
-            style={{ aspectRatio: '9/16' }}
+            loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
+            decoding="async"
+            draggable={false}
+            style={{ 
+              aspectRatio: '9/16',
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'translateZ(0)'
+            }}
           />
           
           {/* Gradient Overlay */}
@@ -247,9 +264,9 @@ export function ClientTinderSwipeCard({
           )}
         </div>
 
-        {/* Bottom Sheet with Enhanced Glassmorphism */}
+        {/* Bottom Sheet - Clean Style Matching Property Cards */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-b from-transparent to-card/98 backdrop-blur-2xl border-t border-border/50 shadow-2xl"
+          className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
             height: isBottomSheetExpanded ? '85%' : '30%',
           }}
@@ -262,34 +279,37 @@ export function ClientTinderSwipeCard({
           </div>
 
           {/* Collapsed Content */}
-          <div className="px-6 py-4">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="px-6 pb-6">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-foreground mb-1">
                   {profile.name}
-                  {profile.age && <span className="text-xl text-muted-foreground">{profile.age}</span>}
+                  {profile.age && <span className="text-xl text-muted-foreground ml-2">{profile.age}</span>}
                 </h2>
                 {profile.city && (
-                  <div className="flex items-center gap-1 text-foreground/80 mt-1">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-sm">{profile.city}</span>
+                  <div className="flex items-center text-muted-foreground text-sm mb-2">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    <span>{profile.city}</span>
                   </div>
                 )}
               </div>
+              
+              {profile.budget_max && (
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-primary">
+                    ${profile.budget_max.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">budget</div>
+                </div>
+              )}
             </div>
 
             {/* Quick Stats */}
-            <div className="flex items-center gap-4 text-sm text-foreground/70 mb-4">
-              {profile.budget_max && (
-                <div className="flex items-center gap-1">
-                  <DollarSign className="w-4 h-4" />
-                  <span>Up to ${profile.budget_max.toLocaleString()}</span>
-                </div>
-              )}
+            <div className="flex items-center gap-4 text-muted-foreground">
               {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{profile.preferred_listing_types[0]}</span>
+                  <Home className="w-5 h-5" />
+                  <span className="font-medium">{profile.preferred_listing_types[0]}</span>
                 </div>
               )}
             </div>
@@ -300,13 +320,12 @@ export function ClientTinderSwipeCard({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="space-y-6 overflow-y-auto max-h-[calc(85vh-200px)] pb-32"
+                className="mt-6 overflow-y-auto max-h-[calc(85vh-200px)]"
               >
                 {/* Interests */}
                 {profile.interests && profile.interests.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                      <Heart className="w-5 h-5" />
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">
                       Interests
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -321,10 +340,9 @@ export function ClientTinderSwipeCard({
 
                 {/* Preferred Activities */}
                 {profile.preferred_activities && profile.preferred_activities.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                      <Users className="w-5 h-5" />
-                      Activities
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">
+                      Preferred Activities
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.preferred_activities.map((activity, idx) => (
@@ -336,54 +354,41 @@ export function ClientTinderSwipeCard({
                   </div>
                 )}
 
-                {/* Lifestyle Tags */}
+                {/* Lifestyle */}
                 {profile.lifestyle_tags && profile.lifestyle_tags.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                      <Briefcase className="w-5 h-5" />
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">
                       Lifestyle
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.lifestyle_tags.map((tag, idx) => (
-                        <Badge key={idx} className="bg-primary/10 text-primary border-primary/20">
+                        <Badge key={idx} variant="outline">
                           {tag}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
-
-                {/* Match Reasons */}
-                {profile.matchReasons && profile.matchReasons.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-3">
-                      Why you match
-                    </h3>
-                    <ul className="space-y-2">
-                      {profile.matchReasons.map((reason, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>{reason}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </motion.div>
             )}
-          </div>
 
-          {/* Expand/Collapse Button */}
-          {!isBottomSheetExpanded && (
-            <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-              <button
-                onClick={() => setIsBottomSheetExpanded(true)}
-                className="text-sm text-primary font-medium"
-              >
-                Tap to see more
-              </button>
-            </div>
-          )}
+            {/* Expand/Collapse Indicator */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full mt-4 text-muted-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsBottomSheetExpanded(!isBottomSheetExpanded);
+              }}
+            >
+              <ChevronDown
+                className={`w-5 h-5 transition-transform duration-200 ${
+                  isBottomSheetExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </Button>
+          </div>
         </motion.div>
       </div>
 
