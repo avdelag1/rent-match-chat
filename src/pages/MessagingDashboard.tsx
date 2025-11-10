@@ -76,7 +76,7 @@ export function MessagingDashboard() {
     return () => {
       supabase.removeChannel(conversationsChannel);
     };
-  }, [user?.id, refetch]);
+  }, [user?.id]);
 
   // Handle direct conversation opening or auto-start from URL parameters
   useEffect(() => {
