@@ -7,7 +7,7 @@ import { Eye, EyeOff, Flame, X, Mail, Lock, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import { loginSchema, signupSchema, forgotPasswordSchema } from '@/schemas/auth';
 
 interface AuthDialogProps {
@@ -117,7 +117,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     }
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+  const handleOAuthSignIn = async (provider: 'google') => {
     setIsLoading(true);
     try {
       const { error } = await signInWithOAuth(provider, role);
@@ -186,16 +186,6 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                   >
                     <FaGoogle className="w-4 h-4 text-red-500" />
                     <span>Google</span>
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('facebook')}
-                    disabled={isLoading}
-                    className="w-full h-9 bg-[#1877F2] text-white font-medium text-sm rounded-xl hover:bg-[#166FE5] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <FaFacebook className="w-4 h-4" />
-                    <span>Facebook</span>
                   </Button>
                 </div>
 
