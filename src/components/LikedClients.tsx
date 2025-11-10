@@ -126,7 +126,7 @@ export function LikedClients() {
       return deduplicatedClients;
     },
     enabled: !!user?.id,
-    staleTime: 0, // Always refetch to get latest profile updates
+    staleTime: 60000, // Cache for 1 minute to prevent constant refetches
     refetchInterval: 30000, // Refetch every 30 seconds for profile updates
   });
 

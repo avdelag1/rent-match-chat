@@ -16,9 +16,9 @@ const Index = () => {
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
+
       console.log('[Index] Fetching role for user:', user.id);
-      
+
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -29,7 +29,7 @@ const Index = () => {
         console.error('[Index] Role fetch error:', error);
         throw error; // Let React Query handle retries
       }
-      
+
       console.log('[Index] Role fetched successfully:', data?.role);
       return data?.role;
     },
@@ -37,7 +37,6 @@ const Index = () => {
     retry: 2, // Reduce from 3 to 2
     retryDelay: 500, // Reduce from 800ms to 500ms for faster retries
     staleTime: 5000, // Cache role data for 5s to prevent immediate refetch
-    refetchOnMount: true, // Always refetch on mount
     refetchOnWindowFocus: false, // Don't refetch on focus
   });
 
@@ -48,10 +47,10 @@ const Index = () => {
         console.log('[Index] Query taking too long, forcing refetch...');
         refetch();
       }, 5000); // Increase from 3s to 5s for new users
-      
+
       return () => clearTimeout(timeout);
     }
-  }, [user, profileLoading, refetch]);
+  }, [user, profileLoading]);
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
