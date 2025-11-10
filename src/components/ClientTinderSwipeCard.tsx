@@ -171,8 +171,8 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Right */}
-          <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+          {/* Action Buttons - Top Left */}
+          <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
             {/* Report Button */}
             <Button
               variant="ghost"
@@ -200,34 +200,11 @@ export function ClientTinderSwipeCard({
             >
               <Share2 className="w-5 h-5" />
             </Button>
-
-            {/* Insights Button */}
-            {onInsights && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onInsights();
-                }}
-                className="w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
-                title="View Insights"
-              >
-                <BarChart3 className="w-5 h-5" />
-              </Button>
-            )}
-          </div>
-
-          {/* Match Percentage Badge */}
-          <div className="absolute top-20 right-4 z-20">
-            <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-none shadow-lg px-3 py-1.5 text-sm font-semibold">
-              {profile.matchPercentage}% Match
-            </Badge>
           </div>
 
           {/* Verified Badge */}
           {profile.verified && (
-            <div className="absolute top-36 right-4 z-20">
+            <div className="absolute top-4 right-4 z-20">
               <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">Verified</span>

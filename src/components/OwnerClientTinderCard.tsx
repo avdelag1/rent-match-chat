@@ -210,68 +210,40 @@ export function OwnerClientTinderCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Left & Right */}
-          <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
-            {/* Left Side Buttons */}
-            <div className="flex items-center gap-2">
-              {/* Report Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setReportDialogOpen(true);
-                }}
-                className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-sm"
-                title="Report User"
-              >
-                <Flag className="w-5 h-5" />
-              </Button>
+          {/* Action Buttons - Top Left */}
+          <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+            {/* Report Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setReportDialogOpen(true);
+              }}
+              className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-sm"
+              title="Report User"
+            >
+              <Flag className="w-5 h-5" />
+            </Button>
 
-              {/* Share Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShareDialogOpen(true);
-                }}
-                className="w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600 text-white shadow-lg backdrop-blur-sm"
-                title="Share Profile"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-            </div>
-
-            {/* Right Side Button */}
-            {onInsights && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onInsights();
-                }}
-                className="w-10 h-10 rounded-full bg-blue-500/90 hover:bg-blue-600 text-white shadow-lg backdrop-blur-sm"
-                title="View Insights"
-              >
-                <BarChart3 className="w-5 h-5" />
-              </Button>
-            )}
+            {/* Share Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShareDialogOpen(true);
+              }}
+              className="w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600 text-white shadow-lg backdrop-blur-sm"
+              title="Share Profile"
+            >
+              <Share2 className="w-5 h-5" />
+            </Button>
           </div>
-
-          {/* Match Badge */}
-          {profile.matchPercentage && (
-            <div className="absolute top-16 right-4 z-10">
-              <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-none shadow-lg text-lg px-4 py-1">
-                {profile.matchPercentage}% Match
-              </Badge>
-            </div>
-          )}
 
           {/* Verified Badge */}
           {profile.verified && (
-            <div className="absolute top-28 right-4 z-10">
+            <div className="absolute top-4 right-4 z-10">
               <div className="bg-blue-500 text-white rounded-full p-2 shadow-lg">
                 <CheckCircle className="w-5 h-5" />
               </div>
