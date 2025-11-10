@@ -18,7 +18,11 @@ export type ClientProfileLite = {
 type ClientProfileUpdate = Omit<ClientProfileLite, 'id' | 'user_id'>;
 
 async function fetchOwnProfile() {
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth, error: authError } = await supabase.auth.getUser();
+  if (authError) {
+    console.error('Error fetching authenticated user:', authError);
+    throw authError;
+  }
   const uid = auth.user?.id;
   if (!uid) return null;
 
@@ -51,15 +55,24 @@ export function useSaveClientProfile() {
 
   return useMutation({
     mutationFn: async (updates: ClientProfileUpdate) => {
-      const { data: auth } = await supabase.auth.getUser();
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Error fetching authenticated user:', authError);
+        throw authError;
+      }
       const uid = auth.user?.id;
       if (!uid) throw new Error('Not authenticated');
 
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('client_profiles')
         .select('id')
         .eq('user_id', uid)
         .maybeSingle();
+      
+      if (existingError && existingError.code !== 'PGRST116') {
+        console.error('Error checking existing profile:', existingError);
+        throw existingError;
+      }
 
       let profileData: ClientProfileLite;
 
@@ -92,25 +105,56 @@ export function useSaveClientProfile() {
         profileData = data as ClientProfileLite;
       }
 
-      // SYNC to profiles table - so owner sees updated photos!
-      // Update the profiles.images field to match client_profiles.profile_images
-      if (updates.profile_images) {
-        console.log('🔄 [PHOTO SYNC] Starting sync to profiles table...');
-        console.log('🔄 [PHOTO SYNC] User ID:', uid);
-        console.log('🔄 [PHOTO SYNC] Images to sync:', updates.profile_images);
+      // SYNC to profiles table - so owner sees updated data!
+      console.log('🔄 [PROFILE SYNC] Starting full profile sync to profiles table...');
+      console.log('🔄 [PROFILE SYNC] User ID:', uid);
 
+      const syncPayload: any = {};
+
+      // Sync images
+      if (updates.profile_images !== undefined) {
+        syncPayload.images = updates.profile_images;
+        console.log('🔄 [PROFILE SYNC] Images:', updates.profile_images?.length || 0);
+      }
+
+      // Sync name → full_name
+      if (updates.name !== undefined) {
+        syncPayload.full_name = updates.name;
+        console.log('🔄 [PROFILE SYNC] Name:', updates.name);
+      }
+
+      // Sync age
+      if (updates.age !== undefined) {
+        syncPayload.age = updates.age;
+        console.log('🔄 [PROFILE SYNC] Age:', updates.age);
+      }
+
+      // Sync interests
+      if (updates.interests !== undefined) {
+        syncPayload.interests = updates.interests;
+      }
+
+      // Sync preferred activities
+      if (updates.preferred_activities !== undefined) {
+        syncPayload.preferred_activities = updates.preferred_activities;
+      }
+
+      // Only update if we have fields to sync
+      if (Object.keys(syncPayload).length > 0) {
         const { data: syncData, error: syncError } = await supabase
           .from('profiles')
-          .update({ images: updates.profile_images })
+          .update(syncPayload)
           .eq('id', uid)
           .select();
 
         if (syncError) {
-          console.error('❌ [PHOTO SYNC] Error syncing to profiles table:', syncError);
-          // Don't throw - profile update succeeded, sync is secondary
+          console.error('❌ [PROFILE SYNC] Error:', syncError);
         } else {
-          console.log('✅ [PHOTO SYNC] Successfully synced images to profiles table');
-          console.log('✅ [PHOTO SYNC] Updated profile:', syncData);
+          console.log('✅ [PROFILE SYNC] Successfully synced to profiles table');
+          console.log('✅ [PROFILE SYNC] Updated fields:', Object.keys(syncPayload));
+          
+          // Invalidate profiles_public cache immediately after sync
+          qc.invalidateQueries({ queryKey: ['profiles_public'] });
         }
       }
 

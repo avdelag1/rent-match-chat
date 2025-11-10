@@ -30,73 +30,135 @@ interface Conversation {
 export function useConversations() {
   const { user } = useAuth();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id) {
+        console.log('[useConversations] No user ID, returning empty array');
+        return [];
+      }
 
-      // OPTIMIZED: Single query with joins instead of N+1 queries
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
-          owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
-          client_role:user_roles!conversations_client_id_fkey(role),
-          owner_role:user_roles!conversations_owner_id_fkey(role)
-        `)
-        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-        .order('last_message_at', { ascending: false, nullsFirst: false });
+      console.log('[useConversations] Fetching conversations for user:', user.id);
 
-      if (error) throw error;
+      try {
+        // OPTIMIZED: Single query with joins instead of N+1 queries
+        const { data, error } = await supabase
+          .from('conversations')
+          .select(`
+            *,
+            client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
+            owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url)
+          `)
+          .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
+          .order('last_message_at', { ascending: false, nullsFirst: false });
 
-      // Get all conversation IDs for batch message query
-      const conversationIds = (data || []).map(c => c.id);
-
-      // OPTIMIZED: Single query for all last messages instead of N queries
-      const { data: messagesData } = await supabase
-        .from('conversation_messages')
-        .select('conversation_id, message_text, created_at, sender_id')
-        .in('conversation_id', conversationIds)
-        .order('created_at', { ascending: false });
-
-      // Create a map of conversation_id to last message
-      const lastMessagesMap = new Map();
-      messagesData?.forEach(msg => {
-        if (!lastMessagesMap.has(msg.conversation_id)) {
-          lastMessagesMap.set(msg.conversation_id, msg);
+        if (error) {
+          console.error('[useConversations] Error loading conversations:', error);
+          // Gracefully handle auth errors
+          if (error.code === '42501' || error.code === 'PGRST301') {
+            console.warn('[useConversations] Auth check failed, returning empty conversations');
+            return [];
+          }
+          throw error;
         }
-      });
 
-      // Transform data to include other_user and last_message
-      const conversationsWithProfiles = (data || []).map((conversation: any) => {
-        const isClient = conversation.client_id === user.id;
-        const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
-        const otherUserRole = isClient ? conversation.owner_role?.role : conversation.client_role?.role;
+        console.log('[useConversations] Raw conversations data:', data?.length || 0, 'conversations');
 
-        return {
-          id: conversation.id,
-          client_id: conversation.client_id,
-          owner_id: conversation.owner_id,
-          listing_id: conversation.listing_id,
-          last_message_at: conversation.last_message_at,
-          status: conversation.status,
-          created_at: conversation.created_at,
-          updated_at: conversation.updated_at,
-          other_user: otherUserProfile ? {
-            ...otherUserProfile,
-            role: otherUserRole || 'client'
-          } : undefined,
-          last_message: lastMessagesMap.get(conversation.id)
-        };
-      });
+        // Defensive null check
+        if (!data) return [];
 
-      return conversationsWithProfiles;
+        // Get all conversation IDs for batch message query
+        const conversationIds = data.map(c => c.id);
+
+        if (conversationIds.length === 0) return [];
+
+        // OPTIMIZED: Single query for all last messages instead of N queries
+        const { data: messagesData } = await supabase
+          .from('conversation_messages')
+          .select('conversation_id, message_text, created_at, sender_id')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
+
+        // Create a map of conversation_id to last message
+        const lastMessagesMap = new Map();
+        messagesData?.forEach(msg => {
+          if (!lastMessagesMap.has(msg.conversation_id)) {
+            lastMessagesMap.set(msg.conversation_id, msg);
+          }
+        });
+
+        // Transform data to include other_user and last_message
+        const conversationsWithProfiles = data.map((conversation: any) => {
+          const isClient = conversation.client_id === user.id;
+          const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
+          // Determine role based on which side of the conversation the other user is
+          const otherUserRole = isClient ? 'owner' : 'client';
+
+          console.log('[useConversations] Processing conversation:', {
+            id: conversation.id,
+            isClient,
+            otherUserProfile: otherUserProfile?.full_name,
+            otherUserRole
+          });
+
+          return {
+            id: conversation.id,
+            client_id: conversation.client_id,
+            owner_id: conversation.owner_id,
+            listing_id: conversation.listing_id,
+            last_message_at: conversation.last_message_at,
+            status: conversation.status,
+            created_at: conversation.created_at,
+            updated_at: conversation.updated_at,
+            other_user: otherUserProfile ? {
+              id: otherUserProfile.id,
+              full_name: otherUserProfile.full_name,
+              avatar_url: otherUserProfile.avatar_url,
+              role: otherUserRole || 'client'
+            } : undefined,
+            last_message: lastMessagesMap.get(conversation.id)
+          };
+        });
+
+        console.log('[useConversations] Processed conversations:', conversationsWithProfiles.length);
+        return conversationsWithProfiles;
+      } catch (error: any) {
+        // Better error handling with user-friendly messages
+        console.error('[useConversations] Error fetching conversations:', error.message);
+        
+        // For temporary auth issues, return empty array to avoid blocking UI
+        if (error.message?.includes('JWT') || error.message?.includes('auth')) {
+          console.warn('[useConversations] Auth error detected, returning empty conversations');
+          return [];
+        }
+        
+        throw error;
+      }
     },
     enabled: !!user?.id,
     // Add staleTime for better caching
     staleTime: 30000, // 30 seconds
+    // Add retry logic for temporary failures
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
   });
+
+  // Helper to ensure a conversation is loaded in cache after creation
+  const ensureConversationInCache = async (conversationId: string, maxAttempts = 10): Promise<Conversation | null> => {
+    for (let i = 0; i < maxAttempts; i++) {
+      await query.refetch();
+      const conversations = query.data || [];
+      const conv = conversations.find((c: Conversation) => c.id === conversationId);
+      if (conv) return conv;
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    return null;
+  };
+
+  return {
+    ...query,
+    ensureConversationInCache
+  };
 }
 
 export function useConversationMessages(conversationId: string) {
@@ -142,10 +204,15 @@ export function useStartConversation() {
       if (!user?.id) throw new Error('Not authenticated');
 
       // Check if conversation already exists (check both directions)
-      const { data: existingConversations } = await supabase
+      const { data: existingConversations, error: existingError } = await supabase
         .from('conversations')
         .select('id')
         .or(`and(client_id.eq.${user.id},owner_id.eq.${otherUserId}),and(client_id.eq.${otherUserId},owner_id.eq.${user.id})`);
+
+      if (existingError) {
+        console.error('Error checking existing conversations:', existingError);
+        throw new Error('Failed to check existing conversations');
+      }
 
       const existingConversation = existingConversations?.[0];
 
@@ -157,30 +224,38 @@ export function useStartConversation() {
       }
 
       if (!conversationId) {
-        // Get both users' roles directly from user_roles table
-        const { data: myRoleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // Determine roles by checking if users have listings (owners have listings, clients don't)
+        let myRole = 'client';
+        let otherRole = 'client';
+        
+        try {
+          // Check if current user has listings (owner) or not (client)
+          const myListingsCheck = await (supabase as any)
+            .from('listings')
+            .select('id', { count: 'exact' })
+            .eq('user_id', user.id)
+            .limit(1);
+          
+          myRole = (myListingsCheck.data && myListingsCheck.data.length > 0) ? 'owner' : 'client';
 
-        if (!myRoleData) {
-          throw new Error('Your profile could not be found. Please try logging out and back in.');
-        }
-
-        const { data: otherRoleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', otherUserId)
-          .maybeSingle();
-
-        if (!otherRoleData) {
-          throw new Error('The other user profile could not be found. They may not have completed their registration.');
+          // Check if other user has listings
+          const otherListingsCheck = await (supabase as any)
+            .from('listings')
+            .select('id', { count: 'exact' })
+            .eq('user_id', otherUserId)
+            .limit(1);
+          
+          otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
+        } catch (roleCheckError) {
+          console.warn('Could not determine roles from listings, defaulting to client-owner');
+          // If we can't determine roles, assume the initiator is client and other is owner
+          myRole = 'client';
+          otherRole = 'owner';
         }
 
         // Determine client and owner IDs based on roles
-        const clientId = myRoleData.role === 'client' ? user.id : otherUserId;
-        const ownerId = myRoleData.role === 'owner' ? user.id : otherUserId;
+        const clientId = myRole === 'client' ? user.id : otherUserId;
+        const ownerId = myRole === 'owner' ? user.id : otherUserId;
 
         // Create conversation without requiring a match first (match_id is now nullable)
         const { data: newConversation, error: conversationError } = await supabase
@@ -242,12 +317,18 @@ export function useStartConversation() {
 
       return { conversationId, message };
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      queryClient.invalidateQueries({ queryKey: ['conversations-started-count'] });
+    onSuccess: async (data) => {
+      console.log('[useStartConversation] Conversation created successfully:', data.conversationId);
+      
+      // Immediately refetch conversations
+      await queryClient.refetchQueries({ queryKey: ['conversations'] });
+      await queryClient.invalidateQueries({ queryKey: ['conversations-started-count'] });
+      
+      console.log('[useStartConversation] Queries refetched');
+      
       toast({
         title: '💬 Conversation Started',
-        description: 'Redirecting to chat...'
+        description: 'Redirecting to chat...',
       });
     },
     onError: (error: Error) => {

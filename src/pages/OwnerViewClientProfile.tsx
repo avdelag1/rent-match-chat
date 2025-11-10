@@ -10,10 +10,14 @@ import { ArrowLeft, MessageCircle, Heart, Home, Bike, Ship, Car } from 'lucide-r
 import { ClientProfilePreview } from '@/components/ClientProfilePreview';
 import { toast } from 'sonner';
 import { ClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
+import { useStartConversation } from '@/hooks/useConversations';
+import { useState as useReactState } from 'react';
 
 export default function OwnerViewClientProfile() {
   const { clientId } = useParams();
   const navigate = useNavigate();
+  const [isCreatingConversation, setIsCreatingConversation] = useReactState(false);
+  const startConversation = useStartConversation();
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client-profile', clientId],
@@ -74,9 +78,30 @@ export default function OwnerViewClientProfile() {
     enabled: !!clientId,
   });
 
-  const handleConnect = () => {
-    navigate(`/messages?startConversation=${clientId}`);
-    toast.success('Starting conversation...');
+  const handleConnect = async () => {
+    if (!clientId || isCreatingConversation) return;
+    
+    setIsCreatingConversation(true);
+    
+    try {
+      toast.loading('Starting conversation...', { id: 'start-conv' });
+      
+      const result = await startConversation.mutateAsync({
+        otherUserId: clientId,
+        initialMessage: "Hi! I'd like to connect with you.",
+        canStartNewConversation: true,
+      });
+
+      if (result?.conversationId) {
+        toast.success('Opening chat...', { id: 'start-conv' });
+        navigate(`/messages?conversationId=${result.conversationId}`);
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast.error('Could not start conversation', { id: 'start-conv' });
+    } finally {
+      setIsCreatingConversation(false);
+    }
   };
 
   if (isLoading) {

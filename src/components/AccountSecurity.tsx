@@ -17,7 +17,20 @@ interface AccountSecurityProps {
 
 export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const navigate = useNavigate();
-  const { settings, updateSettings, isLoading } = useSecuritySettings();
+  // Destructure with fallback for both API versions
+  const { 
+    settings, 
+    updateSettings, 
+    isLoading, 
+    loading, 
+    isSaving, 
+    saving 
+  } = useSecuritySettings();
+  
+  // Use fallback logic for loading and saving states
+  const loadingState = isLoading ?? loading ?? false;
+  const savingState = isSaving ?? saving ?? false;
+  
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
@@ -26,6 +39,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   
   // Security settings state - sync with database
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -35,15 +49,15 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
   // Sync local state with database settings
   useEffect(() => {
-    if (settings) {
-      setTwoFactorEnabled(settings.two_factor_enabled);
-      setLoginAlerts(settings.login_alerts);
-      setSessionTimeout(settings.session_timeout);
-      setDeviceTracking(settings.device_tracking);
+    if (settings && typeof settings === 'object' && 'two_factor_enabled' in settings) {
+      setTwoFactorEnabled(settings.two_factor_enabled ?? false);
+      setLoginAlerts(settings.login_alerts ?? true);
+      setSessionTimeout(settings.session_timeout ?? true);
+      setDeviceTracking(settings.device_tracking ?? true);
     }
   }, [settings]);
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast({
         title: 'Error',
@@ -71,16 +85,62 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       return;
     }
 
-    // Simulate password change
-    toast({
-      title: 'Password Updated',
-      description: 'Your password has been successfully changed.'
-    });
-    
-    setShowPasswordDialog(false);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    setIsChangingPassword(true);
+    try {
+      // Security note: We validate the current password for better UX security.
+      // The user's valid session already proves authentication, but asking for
+      // the current password provides defense-in-depth against session hijacking
+      // and ensures the user actively knows their current credentials.
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.email) {
+        throw new Error('User email not found');
+      }
+
+      // Verify current password by attempting to sign in.
+      // Note: This creates a temporary auth check but doesn't invalidate the current session.
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast({
+          title: 'Error',
+          description: 'Current password is incorrect.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      // Update password using Supabase Auth
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: 'Password Updated',
+        description: 'Your password has been successfully changed.'
+      });
+      
+      setShowPasswordDialog(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error('Password change error:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update password. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleTwoFactorToggle = (enabled: boolean) => {
@@ -109,50 +169,74 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
     }
 
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('No user found');
+      // Get current user and session
+      const { data: { user, session } } = await supabase.auth.getSession();
+
+      if (!user || !session) {
+        throw new Error('No user session found');
       }
 
-      // Try to delete user account using Supabase Admin API
-      // Note: This requires proper RLS policies and admin function
-      const { error } = await supabase.rpc('delete_user_account', {
-        user_id_to_delete: user.id
-      });
+      // Get the Supabase URL to construct the edge function URL
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) {
+        throw new Error('Supabase URL not configured');
+      }
 
-      if (error) {
-        // If RPC doesn't exist or fails, inform user to contact support
-        console.error('Delete account error:', error);
-        
+      // Call the delete-user edge function with the auth token
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/delete-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error('Delete account error:', result.error);
+
         toast({
           title: 'Deletion Failed',
-          description: 'Account deletion could not be completed automatically. Please contact support for assistance. You will be signed out.',
+          description: result.error || 'Account deletion could not be completed. Please try again or contact support.',
           variant: 'destructive'
         });
-        
-        // Sign out user but account data remains
-        await supabase.auth.signOut();
-        navigate('/');
         return;
       }
 
       // Account successfully deleted
       await supabase.auth.signOut();
-      
+
       toast({
         title: 'Account Deleted',
         description: 'Your account has been successfully deleted.',
       });
 
-      // Navigate to home page
-      navigate('/');
+          // Navigate to home page
+          navigate('/');
+        } else {
+          // Function returned an error
+          toast({
+            title: 'Deletion Failed',
+            description: data.error || 'Account deletion could not be completed.',
+            variant: 'destructive'
+          });
+        }
+      } else {
+        // Unexpected response format
+        throw new Error('Unexpected response from delete function');
+      }
     } catch (error) {
       console.error('Error deleting account:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete account. Please contact support.',
+        description: error instanceof Error ? error.message : 'Failed to delete account. Please contact support.',
         variant: 'destructive'
       });
     }
@@ -272,7 +356,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 setLoginAlerts(checked);
                 updateSettings({ login_alerts: checked });
               }}
-              disabled={isLoading}
+              disabled={loadingState || savingState}
             />
           </div>
           
@@ -287,7 +371,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 setSessionTimeout(checked);
                 updateSettings({ session_timeout: checked });
               }}
-              disabled={isLoading}
+              disabled={loadingState || savingState}
             />
           </div>
           
@@ -302,7 +386,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 setDeviceTracking(checked);
                 updateSettings({ device_tracking: checked });
               }}
-              disabled={isLoading}
+              disabled={loadingState || savingState}
             />
           </div>
         </CardContent>
@@ -385,10 +469,12 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isChangingPassword}>
               Cancel
             </Button>
-            <Button onClick={handlePasswordChange}>Update Password</Button>
+            <Button onClick={handlePasswordChange} disabled={isChangingPassword}>
+              {isChangingPassword ? 'Updating...' : 'Update Password'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

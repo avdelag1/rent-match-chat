@@ -86,13 +86,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "admin_actions_log_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "admin_actions_log_target_user_id_fkey"
             columns: ["target_user_id"]
             isOneToOne: false
@@ -139,15 +132,7 @@ export type Database = {
           target_id?: string | null
           target_table?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "admin_activity_logs_admin_user_id_fkey"
-            columns: ["admin_user_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       admin_dashboard_settings: {
         Row: {
@@ -180,15 +165,7 @@ export type Database = {
           theme?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "admin_dashboard_settings_admin_user_id_fkey"
-            columns: ["admin_user_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       admin_sessions: {
         Row: {
@@ -215,46 +192,44 @@ export type Database = {
           secret_code?: string
           used_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "admin_sessions_admin_user_id_fkey"
-            columns: ["admin_user_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       admin_users: {
         Row: {
-          created_at: string
+          created_at: string | null
           email: string
           full_name: string | null
           id: string
-          is_active: boolean
-          last_login: string | null
+          is_active: boolean | null
+          last_login_at: string | null
+          permissions: Json | null
           role: string
-          updated_at: string
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           email: string
           full_name?: string | null
           id?: string
-          is_active?: boolean
-          last_login?: string | null
+          is_active?: boolean | null
+          last_login_at?: string | null
+          permissions?: Json | null
           role?: string
-          updated_at?: string
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           email?: string
           full_name?: string | null
           id?: string
-          is_active?: boolean
-          last_login?: string | null
+          is_active?: boolean | null
+          last_login_at?: string | null
+          permissions?: Json | null
           role?: string
-          updated_at?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -366,18 +341,21 @@ export type Database = {
       channel_participants: {
         Row: {
           channel_id: string | null
+          id: string
           joined_at: string | null
           role: string | null
           user_id: string | null
         }
         Insert: {
           channel_id?: string | null
+          id?: string
           joined_at?: string | null
           role?: string | null
           user_id?: string | null
         }
         Update: {
           channel_id?: string | null
+          id?: string
           joined_at?: string | null
           role?: string | null
           user_id?: string | null
@@ -816,6 +794,7 @@ export type Database = {
           is_read: boolean | null
           message_text: string
           message_type: string | null
+          receiver_id: string | null
           sender_id: string
         }
         Insert: {
@@ -825,6 +804,7 @@ export type Database = {
           is_read?: boolean | null
           message_text: string
           message_type?: string | null
+          receiver_id?: string | null
           sender_id: string
         }
         Update: {
@@ -834,6 +814,7 @@ export type Database = {
           is_read?: boolean | null
           message_text?: string
           message_type?: string | null
+          receiver_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -893,7 +874,9 @@ export type Database = {
           created_at: string
           free_messaging: boolean | null
           id: string
+          last_message: string | null
           last_message_at: string | null
+          last_message_sender_id: string | null
           listing_id: string | null
           match_id: string | null
           owner_id: string
@@ -905,7 +888,9 @@ export type Database = {
           created_at?: string
           free_messaging?: boolean | null
           id?: string
+          last_message?: string | null
           last_message_at?: string | null
+          last_message_sender_id?: string | null
           listing_id?: string | null
           match_id?: string | null
           owner_id: string
@@ -917,7 +902,9 @@ export type Database = {
           created_at?: string
           free_messaging?: boolean | null
           id?: string
+          last_message?: string | null
           last_message_at?: string | null
+          last_message_sender_id?: string | null
           listing_id?: string | null
           match_id?: string | null
           owner_id?: string
@@ -935,6 +922,20 @@ export type Database = {
           {
             foreignKeyName: "conversations_client_id_fkey"
             columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_last_message_sender_id_fkey"
+            columns: ["last_message_sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_last_message_sender_id_fkey"
+            columns: ["last_message_sender_id"]
             isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
@@ -2131,29 +2132,29 @@ export type Database = {
       }
       messages: {
         Row: {
-          content: string | null
           created_at: string | null
           id: string
           is_read: boolean | null
           listing_id: string | null
+          message_text: string | null
           receiver_id: string | null
           sender_id: string | null
         }
         Insert: {
-          content?: string | null
           created_at?: string | null
           id: string
           is_read?: boolean | null
           listing_id?: string | null
+          message_text?: string | null
           receiver_id?: string | null
           sender_id?: string | null
         }
         Update: {
-          content?: string | null
           created_at?: string | null
           id?: string
           is_read?: boolean | null
           listing_id?: string | null
+          message_text?: string | null
           receiver_id?: string | null
           sender_id?: string | null
         }
@@ -4276,6 +4277,81 @@ export type Database = {
           },
         ]
       }
+      push_outbox: {
+        Row: {
+          attempt_count: number | null
+          conversation_message_id: string
+          created_at: string | null
+          id: string
+          last_error: string | null
+          max_attempts: number | null
+          next_retry_at: string | null
+          payload: Json
+          processed: boolean
+          processed_at: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          conversation_message_id: string
+          created_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number | null
+          next_retry_at?: string | null
+          payload: Json
+          processed?: boolean
+          processed_at?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          conversation_message_id?: string
+          created_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number | null
+          next_retry_at?: string | null
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+        }
+        Relationships: []
+      }
+      push_outbox_dlq: {
+        Row: {
+          attempt_count: number | null
+          conversation_message_id: string | null
+          failed_at: string | null
+          id: string
+          last_error: string | null
+          metadata: Json | null
+          moved_by: string | null
+          original_id: string | null
+          payload: Json | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          conversation_message_id?: string | null
+          failed_at?: string | null
+          id?: string
+          last_error?: string | null
+          metadata?: Json | null
+          moved_by?: string | null
+          original_id?: string | null
+          payload?: Json | null
+        }
+        Update: {
+          attempt_count?: number | null
+          conversation_message_id?: string | null
+          failed_at?: string | null
+          id?: string
+          last_error?: string | null
+          metadata?: Json | null
+          moved_by?: string | null
+          original_id?: string | null
+          payload?: Json | null
+        }
+        Relationships: []
+      }
       quantum_encryption_keys: {
         Row: {
           created_at: string | null
@@ -5247,13 +5323,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_complaints_assigned_admin_id_fkey"
-            columns: ["assigned_admin_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_complaints_complainant_id_fkey"
             columns: ["complainant_id"]
             isOneToOne: false
@@ -5547,13 +5616,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_package_overrides_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_package_overrides_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -5833,13 +5895,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_restrictions_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_restrictions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -6045,13 +6100,6 @@ export type Database = {
           warning_type?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "user_warnings_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "user_warnings_user_id_fkey"
             columns: ["user_id"]
@@ -6382,6 +6430,23 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_push_outbox_failures: {
+        Row: {
+          attempt_count: number | null
+          conversation_message_id: string | null
+          dlq_failed_at: string | null
+          dlq_last_error: string | null
+          id: string | null
+          in_dlq: boolean | null
+          last_error: string | null
+          max_attempts: number | null
+          next_retry_at: string | null
+          payload: Json | null
+          processed: boolean | null
+          processed_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _postgis_deprecate: {
@@ -6651,6 +6716,10 @@ export type Database = {
       }
       deactivate_expired_subscriptions: { Args: never; Returns: undefined }
       delete_user_account: {
+        Args: { user_id_to_delete: string }
+        Returns: Json
+      }
+      delete_user_account_data: {
         Args: { user_id_to_delete: string }
         Returns: Json
       }
@@ -7006,6 +7075,10 @@ export type Database = {
         | { Args: { p_action: string; p_user_id: string }; Returns: undefined }
         | { Args: never; Returns: undefined }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
+      is_conversation_participant: {
+        Args: { c_id: string; u_id: string }
+        Returns: boolean
+      }
       is_current_user_active: { Args: never; Returns: boolean }
       is_profile_owner: { Args: { profile_user_id: string }; Returns: boolean }
       is_user_blocked: {

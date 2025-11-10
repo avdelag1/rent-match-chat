@@ -20,6 +20,7 @@ import { PropertyFields } from '@/components/listing-fields/PropertyFields';
 import { MotorcycleFields } from '@/components/listing-fields/MotorcycleFields';
 import { BicycleFields } from '@/components/listing-fields/BicycleFields';
 import { YachtFields } from '@/components/listing-fields/YachtFields';
+import { validateImageFile, formatFileSize } from '@/utils/fileValidation';
 
 interface PropertyFormProps {
   isOpen: boolean;
@@ -296,8 +297,6 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
 
       if (editingId) {
         // Update existing property
-        console.log('Updating property with ID:', editingId);
-        
         if (!editingId) {
           throw new Error('Property ID is missing. Cannot update.');
         }
@@ -409,8 +408,6 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
   };
 
   const handleImageAdd = async () => {
-    console.log('📸 handleImageAdd clicked!');
-
     if (images.length >= 30) {
       toast({
         title: "Maximum Photos Reached",
@@ -427,15 +424,10 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       input.multiple = true;
       input.style.display = 'none';
 
-      console.log('📸 File input created, waiting for selection...');
-
       input.onchange = async (e) => {
-        console.log('📸 Files selected!');
         const files = Array.from((e.target as HTMLInputElement).files || []);
-        console.log('📸 Number of files:', files.length);
 
         if (files.length === 0) {
-          console.log('📸 No files selected');
           return;
         }
 
@@ -449,7 +441,6 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
         }
 
         const { data: user } = await supabase.auth.getUser();
-        console.log('📸 User auth check:', user.user ? 'Authenticated' : 'Not authenticated');
 
         if (!user.user) {
           toast({
@@ -461,26 +452,24 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
         }
 
         for (const file of files) {
-          console.log('📸 Processing file:', file.name, 'Size:', file.size);
-
-          if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          // Use centralized validation
+          const validation = validateImageFile(file);
+          if (!validation.isValid) {
             toast({
-              title: "File Too Large",
-              description: `${file.name} is too large. Maximum size is 10MB.`,
+              title: "Invalid File",
+              description: `${file.name}: ${validation.error}`,
               variant: "destructive"
             });
             continue;
           }
 
           try {
-            console.log('📸 Starting upload for:', file.name);
             toast({
               title: "Uploading...",
               description: `Uploading ${file.name}`,
             });
 
             const imageUrl = await uploadImageToStorage(file, user.user.id);
-            console.log('📸 Upload successful! URL:', imageUrl);
 
             setImages(prev => [...prev, imageUrl]);
 
@@ -488,11 +477,11 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
               title: "✅ Upload Successful",
               description: `${file.name} uploaded successfully.`,
             });
-          } catch (error: any) {
-            console.error('📸 Upload error:', error);
+          } catch (error: unknown) {
+            const err = error as Error;
             toast({
               title: "Upload Failed",
-              description: `Failed to upload ${file.name}: ${error.message || 'Unknown error'}`,
+              description: `Failed to upload ${file.name}: ${err.message || 'Unknown error'}`,
               variant: "destructive"
             });
           }
@@ -507,10 +496,7 @@ export function PropertyForm({ isOpen, onClose, editingProperty, initialCategory
       setTimeout(() => {
         document.body.removeChild(input);
       }, 1000);
-
-      console.log('📸 File dialog should be open now');
     } catch (error) {
-      console.error('📸 Error creating file input:', error);
       toast({
         title: "Error",
         description: "Failed to open file picker. Please try again.",

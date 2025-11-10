@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,19 +23,27 @@ interface PropertyManagementProps {
   initialMode?: string | null;
 }
 
-export function PropertyManagement({ initialCategory, initialMode }: PropertyManagementProps) {
+export const PropertyManagement = memo(({ initialCategory, initialMode }: PropertyManagementProps) => {
   const { user } = useAuth();
   const { data: listings = [], isLoading, error } = useOwnerListings();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(initialCategory || 'all');
   const [viewingProperty, setViewingProperty] = useState<any>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(!!initialCategory); // Auto-open if category provided
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [editingProperty, setEditingProperty] = useState<any>(
-    initialCategory ? { category: initialCategory, mode: initialMode || 'rent' } : null
-  );
+  const [editingProperty, setEditingProperty] = useState<any>(null);
   const queryClient = useQueryClient();
+
+  // Auto-open form when category is provided via URL params
+  useEffect(() => {
+    if (initialCategory && initialMode) {
+      console.log('Auto-opening form for category:', initialCategory, 'mode:', initialMode);
+      setEditingProperty({ category: initialCategory, mode: initialMode });
+      setIsFormOpen(true);
+      setActiveTab(initialCategory);
+    }
+  }, [initialCategory, initialMode]);
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,12 +72,14 @@ export function PropertyManagement({ initialCategory, initialMode }: PropertyMan
   const handleAddProperty = () => {
     setEditingProperty(null);
     setShowCategoryDialog(true);
+    // Open form directly
+    setIsFormOpen(true);
   };
 
   const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
     setEditingProperty({ category, mode });
     setShowCategoryDialog(false);
-    setIsFormOpen(true);
+    // Form is already open from handleAddProperty
   };
 
   const handleEditProperty = (listing: any) => {
@@ -462,4 +472,4 @@ export function PropertyManagement({ initialCategory, initialMode }: PropertyMan
       </div>
     </div>
   );
-}
+});

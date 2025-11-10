@@ -1,17 +1,18 @@
 import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { ClientProfileCard } from './ClientProfileCard';
+import { OwnerClientTinderCard } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
 import { MatchPercentageBadge } from './MatchPercentageBadge';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
-import { useNavigate } from 'react-router-dom';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal } from 'lucide-react';
+import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
+import { useStartConversation } from '@/hooks/useConversations';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ClientSwipeContainerProps {
@@ -33,6 +34,7 @@ export function ClientSwipeContainer({
 }: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
@@ -70,6 +72,7 @@ export function ClientSwipeContainer({
   });
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
+  const startConversation = useStartConversation();
 
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
@@ -117,8 +120,7 @@ export function ClientSwipeContainer({
     });
     setCurrentIndex(prev => prev + 1);
     
-    toast({
-      title: '⭐ Super Like Sent!',
+    sonnerToast.success('⭐ Super Like Sent!', {
       description: 'Your super like has been sent to this client.',
     });
   }, [swipeMutation]);
@@ -130,8 +132,7 @@ export function ClientSwipeContainer({
   const handleRefresh = async () => {
     setCurrentIndex(0);
     await refetch();
-    toast({
-      title: 'Profiles Updated',
+    sonnerToast.success('Profiles Updated', {
       description: 'Latest client profiles loaded.',
     });
   };
@@ -140,19 +141,48 @@ export function ClientSwipeContainer({
     if (onInsights) {
       onInsights(clientId);
     } else {
-      toast({
-        title: 'Client Insights',
+      sonnerToast.success('Client Insights', {
         description: 'Viewing detailed insights for this client.',
       });
     }
   };
 
-  const handleStartConversation = (clientId: string) => {
-    navigate(`/messages?startConversation=${clientId}`);
-    toast({
-      title: 'Opening Chat',
-      description: 'Starting conversation...',
-    });
+  const handleConnect = async (clientId: string) => {
+    if (isCreatingConversation) return;
+    
+    console.log('[ClientSwipe] Message button clicked for client:', clientId);
+    setIsCreatingConversation(true);
+    
+    try {
+      sonnerToast.loading('⏳ Creating conversation...', { id: 'start-conv' });
+      
+      console.log('[ClientSwipe] Starting conversation with client:', clientId);
+      const result = await startConversation.mutateAsync({
+        otherUserId: clientId,
+        initialMessage: "Hi! I'd like to connect with you.",
+        canStartNewConversation: true,
+      });
+
+      console.log('[ClientSwipe] Conversation created:', result);
+
+      if (result?.conversationId) {
+        sonnerToast.success('✅ Conversation created! Opening chat...', { id: 'start-conv' });
+        
+        // Wait 500ms before navigating to ensure DB is updated
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log('[ClientSwipe] Navigating to conversation:', result.conversationId);
+        navigate(`/messages?conversationId=${result.conversationId}`);
+      }
+    } catch (error) {
+      console.error('[ClientSwipe] Error starting conversation:', error);
+      sonnerToast.error('❌ Could not start conversation', { 
+        id: 'start-conv',
+        description: error instanceof Error ? error.message : 'Please try again'
+      });
+    } finally {
+      setIsCreatingConversation(false);
+    }
   };
 
 
@@ -160,7 +190,7 @@ export function ClientSwipeContainer({
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 750px)' }}>
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 600px)' }}>
         <div className="w-full h-full bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden">
           <div className="p-6 space-y-4">
             <Skeleton className="w-full h-[60vh] rounded-lg" />
@@ -175,7 +205,7 @@ export function ClientSwipeContainer({
   if (error) {
     console.error('ClientSwipeContainer error:', error);
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
@@ -195,7 +225,7 @@ export function ClientSwipeContainer({
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
@@ -249,7 +279,7 @@ export function ClientSwipeContainer({
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[700px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
@@ -332,7 +362,7 @@ export function ClientSwipeContainer({
       </AnimatePresence>
 
       {/* Single Card Container - No infinite scrolling */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20" style={{ height: '700px' }}>
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
         <AnimatePresence mode="wait">
           {currentClient && (
             <motion.div
@@ -366,12 +396,12 @@ export function ClientSwipeContainer({
                 willChange: 'transform, opacity'
               }}
             >
-              <ClientProfileCard
+              <OwnerClientTinderCard
                 profile={currentClient}
                 onSwipe={handleSwipe}
                 onTap={() => onClientTap(currentClient.user_id)}
                 onInsights={() => handleInsights(currentClient.user_id)}
-                onMessage={() => handleStartConversation(currentClient.user_id)}
+                onMessage={() => handleConnect(currentClient.user_id)}
                 isTop={true}
                 hasPremium={hasPremiumMessaging}
               />
@@ -380,15 +410,33 @@ export function ClientSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Enhanced 3D Bottom Action Buttons - Fixed positioning with backdrop blur */}
+      {/* Enhanced 3 Button Action Bar - Return, Dislike, Like */}
       <div className="fixed bottom-20 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto bg-gradient-to-t from-black/10 via-transparent to-transparent backdrop-blur-md pb-4 pt-8">
+        <div className="max-w-md mx-auto pb-4 pt-8">
           <motion.div
-            className="flex justify-center gap-6 items-center px-4"
+            className="flex justify-center gap-4 sm:gap-6 items-center px-4"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
+            {/* Return/Back Button - 3D Enhanced */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                size="lg"
+                variant="ghost"
+                className="relative w-16 h-16 rounded-full bg-white border-4 border-gray-500 text-gray-600 hover:bg-gradient-to-br hover:from-gray-500 hover:to-gray-600 hover:text-white hover:border-gray-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(107,114,128,0.3),0_2px_8px_rgba(107,114,128,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(107,114,128,0.4),0_4px_12px_rgba(107,114,128,0.3)] transform-gpu"
+                onClick={() => navigate(-1)}
+                disabled={false}
+                aria-label="Go back"
+                title="Return"
+              >
+                <ArrowLeft className="w-8 h-8 stroke-[3]" />
+              </Button>
+            </motion.div>
+
             {/* Dislike Button - 3D Enhanced */}
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -400,43 +448,14 @@ export function ClientSwipeContainer({
                 className="relative w-16 h-16 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] transform-gpu"
                 onClick={() => handleSwipe('left')}
                 disabled={swipeMutation.isPending || !currentClient}
-                aria-label="Pass"
+                aria-label="Dislike"
+                title="Dislike"
               >
                 <X className="w-8 h-8 stroke-[3]" />
               </Button>
             </motion.div>
 
-            {/* Undo Button - 3D Enhanced (Center) */}
-            <motion.div
-              whileHover={{ scale: canUndo ? 1.1 : 1 }}
-              whileTap={{ scale: canUndo ? 0.9 : 1 }}
-            >
-              <Button
-                size="lg"
-                variant="ghost"
-                onClick={() => {
-                  if (canUndo) {
-                    undoLastSwipe();
-                  }
-                }}
-                disabled={!canUndo || isUndoing}
-                className={`relative w-14 h-14 rounded-full transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(0,0,0,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] transform-gpu ${
-                  canUndo 
-                    ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white border-4 border-yellow-300 hover:from-yellow-500 hover:to-amber-600 hover:border-yellow-400 hover:shadow-[0_12px_24px_rgba(251,191,36,0.5),0_4px_12px_rgba(251,191,36,0.3),0_0_20px_rgba(251,191,36,0.4)] hover:scale-110' 
-                    : 'bg-gray-300 border-4 border-gray-400 text-gray-500 cursor-not-allowed opacity-60'
-                }`}
-                aria-label="Undo last swipe"
-              >
-                <motion.div
-                  animate={{ rotate: isUndoing ? 360 : 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <RotateCcw className="w-7 h-7 stroke-[3]" />
-                </motion.div>
-              </Button>
-            </motion.div>
-            
-            {/* Like Button - 3D Enhanced (Largest) */}
+            {/* Like Button - 3D Enhanced (Largest, Center) */}
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -448,6 +467,7 @@ export function ClientSwipeContainer({
                 onClick={() => handleSwipe('right')}
                 disabled={swipeMutation.isPending || !currentClient}
                 aria-label="Like"
+                title="Like"
               >
                 <Heart className="w-10 h-10 fill-current drop-shadow-lg" />
               </Button>
@@ -464,7 +484,7 @@ export function ClientSwipeContainer({
           avatar: matchCelebration.clientProfile?.images?.[0],
           role: 'client'
         }}
-        onMessage={() => currentClient?.user_id && handleStartConversation(currentClient.user_id)}
+        onMessage={() => currentClient?.user_id && handleConnect(currentClient.user_id)}
       />
     </div>
   );

@@ -11,14 +11,15 @@ type PlanLimits = {
 
 // This tracks CONVERSATIONS STARTED per month, not individual messages
 // Once a conversation is started, users can send unlimited messages within it
+// ALL PLANS NOW HAVE UNLIMITED MESSAGING
 const PLAN_LIMITS: Record<string, PlanLimits> = {
-  'free': { messages_per_month: 5, unlimited_messages: false }, // 5 conversations can be started
-  'PREMIUM CLIENT': { messages_per_month: 10, unlimited_messages: false },
-  'PREMIUM ++ CLIENT': { messages_per_month: 25, unlimited_messages: false },
+  'free': { messages_per_month: 0, unlimited_messages: true }, // UNLIMITED - Free messaging for all
+  'PREMIUM CLIENT': { messages_per_month: 0, unlimited_messages: true },
+  'PREMIUM ++ CLIENT': { messages_per_month: 0, unlimited_messages: true },
   'UNLIMITED CLIENT': { messages_per_month: 0, unlimited_messages: true },
-  'PREMIUM + OWNER': { messages_per_month: 10, unlimited_messages: false },
-  'PREMIUM ++ OWNER': { messages_per_month: 25, unlimited_messages: false },
-  'PREMIUM MAX OWNER': { messages_per_month: 50, unlimited_messages: false },
+  'PREMIUM + OWNER': { messages_per_month: 0, unlimited_messages: true },
+  'PREMIUM ++ OWNER': { messages_per_month: 0, unlimited_messages: true },
+  'PREMIUM MAX OWNER': { messages_per_month: 0, unlimited_messages: true },
   'UNLIMITED OWNER': { messages_per_month: 0, unlimited_messages: true },
 };
 

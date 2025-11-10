@@ -1,10 +1,15 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Bed, Bath, Square, Calendar, DollarSign } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { ImageCarousel } from './ImageCarousel';
+import { useNavigate } from 'react-router-dom';
+import { useStartConversation } from '@/hooks/useConversations';
+import { toast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 interface PropertyInsightsDialogProps {
   open: boolean;
@@ -13,17 +18,61 @@ interface PropertyInsightsDialogProps {
 }
 
 export function PropertyInsightsDialog({ open, onOpenChange, listing }: PropertyInsightsDialogProps) {
+  const navigate = useNavigate();
+  const startConversation = useStartConversation();
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+
   if (!listing) return null;
+
+  const handleMessage = async () => {
+    if (!listing.owner_id) {
+      toast({
+        title: 'Error',
+        description: 'Property owner information not available',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsCreatingConversation(true);
+    try {
+      toast({
+        title: 'Starting conversation',
+        description: 'Creating a new conversation...',
+      });
+
+      const result = await startConversation.mutateAsync({
+        otherUserId: listing.owner_id,
+        listingId: listing.id,
+        initialMessage: `Hi! I'm interested in your property: ${listing.title}. Could you tell me more about it?`,
+        canStartNewConversation: true,
+      });
+
+      if (result?.conversationId) {
+        navigate(`/messages?conversationId=${result.conversationId}`);
+        onOpenChange(false); // Close dialog
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast({
+        title: 'Could not start conversation',
+        description: error instanceof Error ? error.message : 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreatingConversation(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0">
-        <DialogHeader className="px-6 py-4 border-b">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle>Property Insights</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6">
-          <div className="space-y-6 py-4">
+        <ScrollArea className="flex-1 h-full">
+          <div className="space-y-6 py-4 px-6 pb-8">
             {/* Property Images Carousel */}
             {listing.images && listing.images.length > 0 && (
               <ImageCarousel images={listing.images} alt="Property" />
@@ -109,6 +158,17 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
             </div>
           </div>
         </ScrollArea>
+        
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <Button
+            onClick={handleMessage}
+            disabled={isCreatingConversation}
+            className="w-full"
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            {isCreatingConversation ? 'Starting conversation...' : 'Contact Owner'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

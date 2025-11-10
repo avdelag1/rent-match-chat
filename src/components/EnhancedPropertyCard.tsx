@@ -1,5 +1,5 @@
 import { useState, useRef, memo, useCallback } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, useAnimationControls } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -56,34 +56,43 @@ const EnhancedPropertyCardComponent = ({
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
+  const controls = useAnimationControls();
+
+  // Guard for missing images
+  const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
+  const images = imageCount > 0 ? listing.images : ['/placeholder.svg'];
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
-    const threshold = 60;
-    const velocity = info.velocity.x;
-    const absVelocity = Math.abs(velocity);
+    const threshold = 120;
+    const velocity = Math.abs(info.velocity.x);
 
-    // Lower threshold if high velocity (flick gesture)
-    const effectiveThreshold = absVelocity > 800 ? 40 : 60;
-
-    if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 600) {
+    // If swipe is strong enough, complete it
+    if (Math.abs(info.offset.x) > threshold || velocity > 700) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
+    } else {
+      // Spring back to center with animation
+      controls.start({ x: 0, rotate: 0 });
     }
-  }, [onSwipe]);
+  }, [onSwipe, controls]);
 
   const nextImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === listing.images.length - 1 ? 0 : prev + 1
-    );
-  }, [listing.images.length]);
+    if (imageCount > 1) {
+      setCurrentImageIndex((prev) =>
+        prev === imageCount - 1 ? 0 : prev + 1
+      );
+    }
+  }, [imageCount]);
 
   const prevImage = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? listing.images.length - 1 : prev - 1
-    );
-  }, [listing.images.length]);
+    if (imageCount > 1) {
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? imageCount - 1 : prev - 1
+      );
+    }
+  }, [imageCount]);
 
   const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -144,15 +153,16 @@ const EnhancedPropertyCardComponent = ({
       onDragEnd={handleDragEnd}
       className="cursor-pointer transform-gpu w-full"
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
+      animate={{ x: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25, mass: 0.5 }}
     >
-      <Card className="relative w-full h-[700px] overflow-hidden bg-white border-none shadow-2xl rounded-3xl">
+      <Card className="relative w-full h-[550px] overflow-hidden bg-white border-none shadow-2xl rounded-3xl">
         {/* Full Screen Image - Fixed height for consistent card sizing */}
-        <div className="relative h-[580px] overflow-hidden">
-          {listing.images && listing.images.length > 0 ? (
+        <div className="relative h-[430px] overflow-hidden">
+          {imageCount > 0 ? (
             <>
               <img
-                src={listing.images[currentImageIndex]}
+                src={images[Math.min(currentImageIndex, imageCount - 1)]}
                 alt={listing.title}
                 className="w-full h-full object-cover cursor-pointer"
                 onClick={handleImageClick}
@@ -164,7 +174,26 @@ const EnhancedPropertyCardComponent = ({
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden'
                 }}
+                onError={(e) => {
+                  e.currentTarget.src = '/placeholder.svg';
+                }}
               />
+              
+              {/* Quick Action - Message Icon in Top Right */}
+              {onMessage && (
+                <div className="absolute top-4 right-4 z-30">
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMessage();
+                    }}
+                    className="w-12 h-12 p-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-white text-white hover:from-blue-600 hover:to-blue-700 shadow-[0_4px_12px_rgba(59,130,246,0.5)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.6)] hover:scale-110 active:scale-95 transition-all duration-200"
+                  >
+                    <MessageCircle className="w-6 h-6 stroke-[2.5]" />
+                  </Button>
+                </div>
+              )}
               
               {/* Left/Right Click Areas for Navigation */}
               <div className="absolute inset-0 flex">
@@ -183,9 +212,9 @@ const EnhancedPropertyCardComponent = ({
               </div>
 
               {/* Image Indicators */}
-              {listing.images.length > 1 && (
+              {imageCount > 1 && (
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                  {listing.images.map((_, index) => (
+                  {images.map((_, index) => (
                     <div
                       key={index}
                       className={`w-2 h-2 rounded-full transition-all ${
@@ -204,28 +233,21 @@ const EnhancedPropertyCardComponent = ({
 
           {/* Gradient Overlay for Text Readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-          {/* Message Button - Top Right */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full border-none z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMessage?.();
-            }}
-          >
-            <MessageCircle className="w-5 h-5" />
-          </Button>
         </div>
 
         {/* Bottom Content - Compact */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent">
+        <div 
+          className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTap?.();
+          }}
+        >
           <div className="flex justify-between items-end">
             {/* Left side - Title and Details */}
             <div className="flex-1 mr-4">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-2xl font-bold text-foreground">
+                <h3 className="text-2xl font-bold text-gray-900">
                   {listing.title}
                 </h3>
                 {(listing as any).has_verified_documents && (
@@ -241,12 +263,12 @@ const EnhancedPropertyCardComponent = ({
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center text-muted-foreground text-sm mb-2">
+              <div className="flex items-center text-gray-600 text-sm mb-2">
                 <MapPin className="w-4 h-4 mr-1" />
                 <span>{listing.neighborhood}, {listing.city}</span>
               </div>
               {/* Property details */}
-              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-4 text-sm text-gray-600">
                 {listing.beds && (
                   <div className="flex items-center">
                     <Bed className="w-4 h-4 mr-1" />
@@ -270,10 +292,10 @@ const EnhancedPropertyCardComponent = ({
             
             {/* Right side - Price */}
             <div className="text-right">
-              <div className="text-3xl font-bold text-primary">
+              <div className="text-3xl font-bold text-orange-600">
                 ${listing.price?.toLocaleString()}
               </div>
-              <div className="text-sm text-muted-foreground">/month</div>
+              <div className="text-sm text-gray-600">/month</div>
             </div>
           </div>
         </div>

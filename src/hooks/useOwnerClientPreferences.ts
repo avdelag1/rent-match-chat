@@ -49,7 +49,11 @@ export function useOwnerClientPreferences() {
   const { data: preferences, isLoading, error } = useQuery({
     queryKey: ['owner-client-preferences'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Error fetching authenticated user:', authError);
+        throw authError;
+      }
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -65,7 +69,11 @@ export function useOwnerClientPreferences() {
 
   const updatePreferences = useMutation({
     mutationFn: async (prefs: Partial<OwnerClientPreferences>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Error fetching authenticated user:', authError);
+        throw authError;
+      }
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase

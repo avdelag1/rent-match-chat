@@ -1,10 +1,15 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, User, Calendar, Flame, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, User, Calendar, Flame, Star, MessageCircle } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 import { ImageCarousel } from './ImageCarousel';
+import { useNavigate } from 'react-router-dom';
+import { useStartConversation } from '@/hooks/useConversations';
+import { toast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 // Tag categories for organized display
 const PROPERTY_TAGS = [
@@ -41,17 +46,51 @@ interface ClientInsightsDialogProps {
 }
 
 export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsightsDialogProps) {
+  const navigate = useNavigate();
+  const startConversation = useStartConversation();
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+
   if (!profile) return null;
+
+  const handleMessage = async () => {
+    setIsCreatingConversation(true);
+    try {
+      toast({
+        title: 'Starting conversation',
+        description: 'Creating a new conversation...',
+      });
+
+      const result = await startConversation.mutateAsync({
+        otherUserId: profile.user_id,
+        initialMessage: `Hi! I'd like to connect with you.`,
+        canStartNewConversation: true,
+      });
+
+      if (result?.conversationId) {
+        navigate(`/messages?conversationId=${result.conversationId}`);
+        onOpenChange(false); // Close dialog
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast({
+        title: 'Could not start conversation',
+        description: error instanceof Error ? error.message : 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreatingConversation(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0">
-        <DialogHeader className="px-6 py-4 border-b">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle>Client Profile Insights</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6">
-          <div className="space-y-6 py-4">
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <div className="space-y-6 py-4 px-6">
             {/* Profile Images Carousel */}
             {profile.profile_images && profile.profile_images.length > 0 && (
               <ImageCarousel images={profile.profile_images} alt="Client Profile" />
@@ -181,6 +220,17 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
             </div>
           </div>
         </ScrollArea>
+        
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <Button
+            onClick={handleMessage}
+            disabled={isCreatingConversation}
+            className="w-full"
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            {isCreatingConversation ? 'Starting conversation...' : 'Send Message'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

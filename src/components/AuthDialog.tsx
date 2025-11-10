@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Eye, EyeOff, Flame, X, Mail, Lock, User } from 'lucide-react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Eye, EyeOff, Flame, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import { loginSchema, signupSchema, forgotPasswordSchema } from '@/schemas/auth';
 
 interface AuthDialogProps {
@@ -117,7 +118,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     }
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+  const handleOAuthSignIn = async (provider: 'google') => {
     setIsLoading(true);
     try {
       const { error } = await signInWithOAuth(provider, role);
@@ -133,226 +134,219 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full mx-auto border-0 p-0 overflow-hidden bg-white rounded-2xl shadow-2xl">
-        <DialogTitle className="sr-only">
-          {isLogin ? 'Sign In' : 'Sign Up'} as {role}
-        </DialogTitle>
-        <DialogDescription className="sr-only">
-          {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Tinderent
-        </DialogDescription>
+    <DialogPrimitive.Root open={isOpen} onOpenChange={onClose}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gradient-to-br from-background via-background to-muted/20">
+          <div className="min-h-full flex items-center justify-center p-4 sm:p-6">
+            <div className="w-full max-w-md">
+              <DialogTitle className="sr-only">
+                {isLogin ? 'Sign In' : 'Sign Up'} as {role}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Tinderent
+              </DialogDescription>
 
-        <div className="relative">
-          {/* Compact Header */}
-          <div className={`relative px-6 py-4 overflow-hidden ${
-            role === 'client'
-              ? 'bg-gradient-to-br from-orange-400 to-red-500'
-              : 'bg-gradient-to-br from-red-500 to-pink-600'
-          }`}>
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
-            >
-              <X className="w-4 h-4" />
-            </button>
+              {/* Back Button */}
+              <button
+                onClick={onClose}
+                className="mb-8 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+              >
+                <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                <span className="text-sm font-medium">Back</span>
+              </button>
 
-            {/* Header Content */}
-            <div className="text-center text-white relative z-10">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-2 backdrop-blur-sm">
-                <Flame className="w-6 h-6 text-white" />
+              {/* Logo and Header */}
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mb-4 shadow-lg">
+                  <Flame className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <h2 className="text-3xl font-bold text-foreground mb-2">
+                  {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
+                </h2>
+                <p className="text-muted-foreground">
+                  {isForgotPassword 
+                    ? 'Enter your email to receive a reset link' 
+                    : `${isLogin ? 'Sign in' : 'Sign up'} to continue as ${role}`
+                  }
+                </p>
               </div>
-              <h1 className="text-xl font-bold mb-1">
-                {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back!' : 'Join Tinderent'}
-              </h1>
-              <p className="text-white/90 text-xs capitalize font-medium">
-                {isForgotPassword ? 'Enter your email' : `${isLogin ? 'Sign in' : 'Sign up'} as ${role}`}
-              </p>
-            </div>
-          </div>
 
-          {/* Main Content */}
-          <div className="bg-white p-5 space-y-3">
+              {/* Main Card */}
+              <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-xl">
+                {!isForgotPassword && (
+                  <>
+                    {/* Google OAuth Button */}
+                    <Button
+                      type="button"
+                      onClick={() => handleOAuthSignIn('google')}
+                      disabled={isLoading}
+                      variant="outline"
+                      className="w-full h-12 border-2 font-medium text-base hover:bg-accent transition-all"
+                    >
+                      <FaGoogle className="w-5 h-5 mr-3 text-red-500" />
+                      Continue with Google
+                    </Button>
 
-            {!isForgotPassword && (
-              <>
-                {/* OAuth Buttons */}
-                <div className="space-y-2">
-                  <Button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('google')}
-                    disabled={isLoading}
-                    className="w-full h-9 bg-white border-2 border-gray-200 text-gray-700 font-medium text-sm rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <FaGoogle className="w-4 h-4 text-red-500" />
-                    <span>Google</span>
-                  </Button>
+                    {/* Divider */}
+                    <div className="relative flex items-center my-8">
+                      <div className="flex-grow border-t border-border"></div>
+                      <span className="flex-shrink mx-4 text-muted-foreground text-sm">or</span>
+                      <div className="flex-grow border-t border-border"></div>
+                    </div>
+                  </>
+                )}
 
-                  <Button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('facebook')}
-                    disabled={isLoading}
-                    className="w-full h-9 bg-[#1877F2] text-white font-medium text-sm rounded-xl hover:bg-[#166FE5] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <FaFacebook className="w-4 h-4" />
-                    <span>Facebook</span>
-                  </Button>
-                </div>
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Name Field (Sign Up Only) */}
+                  {!isLogin && !isForgotPassword && (
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                        Full Name
+                      </Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                          className="pl-11 h-12 bg-background border-border text-base"
+                          placeholder="John Doe"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-                {/* Divider */}
-                <div className="relative flex items-center py-1">
-                  <div className="flex-grow border-t border-gray-200"></div>
-                  <span className="flex-shrink mx-3 text-gray-400 text-xs font-medium">or</span>
-                  <div className="flex-grow border-t border-gray-200"></div>
-                </div>
-              </>
-            )}
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Name Field (Sign Up Only) */}
-              {!isLogin && !isForgotPassword && (
-                <div>
-                  <Label htmlFor="name" className="text-gray-700 font-medium text-sm mb-1.5 block">
-                    Full Name
-                  </Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      className="pl-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
-                      placeholder="Your name"
-                    />
+                  {/* Email Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                      Email
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="pl-11 h-12 bg-background border-border text-base"
+                        placeholder="you@example.com"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
 
-              {/* Email Field */}
-              <div>
-                <Label htmlFor="email" className="text-gray-700 font-medium text-sm mb-1.5 block">
-                  Email
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="pl-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
-                    placeholder="your@email.com"
-                  />
-                </div>
-              </div>
+                  {/* Password Field */}
+                  {!isForgotPassword && (
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                        Password
+                      </Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          className="pl-11 pr-11 h-12 bg-background border-border text-base"
+                          placeholder="••••••••"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                      {!isLogin && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Must be 8+ characters with uppercase, lowercase, and number
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-              {/* Password Field */}
-              {!isForgotPassword && (
-                <div>
-                  <Label htmlFor="password" className="text-gray-700 font-medium text-sm mb-1.5 block">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="pl-10 pr-10 h-9 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm placeholder-gray-400 focus:bg-white focus:border-orange-400 focus:ring-1 focus:ring-orange-200 transition-all"
-                      placeholder="••••••••"
-                    />
+                  {/* Remember Me & Forgot Password */}
+                  {isLogin && !isForgotPassword && (
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="w-4 h-4 rounded border-input text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotPassword(true)}
+                        className="text-sm text-primary hover:underline font-medium"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all mt-6"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+                        Please wait...
+                      </>
+                    ) : (
+                      <span>{isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}</span>
+                    )}
+                  </Button>
+                </form>
+
+                {/* Toggle Sign In/Up */}
+                <div className="text-center mt-6">
+                  {isForgotPassword ? (
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      onClick={() => {
+                        setIsForgotPassword(false);
+                        setEmail('');
+                      }}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      ← Back to Sign In
                     </button>
-                  </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {isLogin ? "Don't have an account? " : "Already have an account? "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(!isLogin);
+                          setEmail('');
+                          setPassword('');
+                          setName('');
+                        }}
+                        className="text-primary hover:underline font-semibold"
+                      >
+                        {isLogin ? 'Sign Up' : 'Sign In'}
+                      </button>
+                    </p>
+                  )}
                 </div>
-              )}
-
-              {/* Remember Me & Forgot Password */}
-              {isLogin && !isForgotPassword && (
-                <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-400"
-                    />
-                    <span className="text-gray-600 text-xs">Remember me</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsForgotPassword(true)}
-                    className="text-xs text-orange-600 hover:text-orange-700 font-medium"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg hover:from-orange-600 hover:to-red-600 transition-all mt-2 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                    Please wait...
-                  </>
-                ) : (
-                  <span>{isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}</span>
-                )}
-              </Button>
-            </form>
-
-            {/* Toggle Sign In/Up */}
-            <div className="text-center pt-2">
-              {isForgotPassword ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsForgotPassword(false);
-                    setEmail('');
-                  }}
-                  className="font-medium text-orange-600 hover:text-orange-700 transition-colors text-xs"
-                >
-                  ← Back to Sign In
-                </button>
-              ) : (
-                <>
-                  <span className="text-gray-600 text-xs">
-                    {isLogin ? "Don't have an account? " : "Already have an account? "}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsLogin(!isLogin);
-                      setEmail('');
-                      setPassword('');
-                      setName('');
-                    }}
-                    className="font-semibold text-orange-600 hover:text-orange-700 transition-colors text-xs"
-                  >
-                    {isLogin ? 'Sign Up' : 'Sign In'}
-                  </button>
-                </>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

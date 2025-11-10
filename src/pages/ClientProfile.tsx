@@ -9,6 +9,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const ClientProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -16,6 +17,7 @@ const ClientProfile = () => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const { data: profile, isLoading } = useClientProfile();
   const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   // Auto-open dialog if no profile exists yet
   useEffect(() => {
@@ -23,14 +25,6 @@ const ClientProfile = () => {
       setShowEditDialog(true);
     }
   }, [profile, isLoading]);
-
-  // Debug profile data
-  useEffect(() => {
-    console.log('Profile data in ClientProfile:', profile);
-    if (profile?.profile_images) {
-      console.log('Profile images:', profile.profile_images);
-    }
-  }, [profile]);
 
   const handlePhotoClick = (index: number) => {
     setSelectedPhotoIndex(index);
@@ -157,6 +151,32 @@ const ClientProfile = () => {
                     </Button>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+          >
+            <Card className="dynamic-card interactive-card bg-card border-border mt-6">
+              <CardHeader>
+                <CardTitle className="text-card-foreground">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button 
+                    className="w-full group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
+                    onClick={() => navigate('/client/settings?tab=subscription')}
+                  >
+                    <span className="group-hover:animate-pulse">View Subscription Options</span>
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Manage premium packages and messaging activations in Settings
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </motion.div>

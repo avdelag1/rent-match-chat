@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Users, Search, MapPin } from "lucide-react";
+import { Heart, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -35,15 +36,28 @@ interface LikedClient {
 export function LikedClients() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [userRole, setUserRole] = useState<'client' | 'owner'>('owner');
+  const categoryFromUrl = searchParams.get('category') || 'all';
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl);
   const queryClient = useQueryClient();
   const startConversation = useStartConversation();
   const { canStartNewConversation } = useMessagingQuota();
 
-  const { data: likedClients = [], isLoading } = useQuery({
+  // Category configuration
+  const categories = [
+    { id: 'all', label: 'All', icon: Users },
+    { id: 'property', label: 'Property', icon: Home },
+    { id: 'moto', label: 'Moto', icon: Car },
+    { id: 'bicycle', label: 'Bicycle', icon: Bike },
+    { id: 'yacht', label: 'Yacht', icon: Ship }
+  ];
+
+  const { data: likedClients = [], isLoading, refetch } = useQuery({
     queryKey: ['liked-clients', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -83,7 +97,7 @@ export function LikedClients() {
       const filteredProfiles = clientProfiles.filter(p => p !== null);
 
       // Return ONLY the filtered client profiles, not all profiles
-      return filteredProfiles.map(profile => {
+      const likedClientsList = filteredProfiles.map(profile => {
         const like = likes.find(l => l.target_id === profile.id);
         return {
           id: profile.id,
@@ -103,8 +117,17 @@ export function LikedClients() {
           verified: profile.verified
         };
       }) as LikedClient[];
+
+      // Deduplicate by client ID and keep the most recent like
+      const deduplicatedClients = Array.from(
+        new Map(likedClientsList.map(client => [client.id, client])).values()
+      ).sort((a, b) => new Date(b.liked_at).getTime() - new Date(a.liked_at).getTime());
+
+      return deduplicatedClients;
     },
     enabled: !!user?.id,
+    staleTime: 0, // Always refetch to get latest profile updates
+    refetchInterval: 30000, // Refetch every 30 seconds for profile updates
   });
 
   const removeLikeMutation = useMutation({
@@ -127,31 +150,58 @@ export function LikedClients() {
   });
 
   const handleMessage = async (client: LikedClient) => {
-    console.log('💬 Starting conversation with liked client:', client.name);
+    if (isCreatingConversation) return;
     
-    // Always allow messaging - bypass quota
+    setIsCreatingConversation(true);
+    
     try {
+      toast.loading('Starting conversation...', { id: 'start-conv' });
+      
       const result = await startConversation.mutateAsync({
         otherUserId: client.user_id,
         initialMessage: `Hi ${client.name}! I'm interested in discussing potential rental opportunities with you.`,
-        canStartNewConversation: true // Always allow
+        canStartNewConversation: true,
       });
-      
+
       if (result?.conversationId) {
-        toast.success("Conversation started!");
-        navigate(`/messages?startConversation=${client.user_id}`);
+        toast.success('Opening chat...', { id: 'start-conv' });
+        navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Failed to start conversation:', error);
-      toast.error("Failed to start conversation. Please try again.");
+      console.error('Error starting conversation:', error);
+      toast.error('Could not start conversation', { id: 'start-conv' });
+    } finally {
+      setIsCreatingConversation(false);
     }
   };
 
-  const filteredClients = likedClients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (client.bio && client.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (client.occupation && client.occupation.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Filter by search term and category
+  const filteredClients = likedClients.filter(client => {
+    // Search filter
+    const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (client.bio && client.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (client.occupation && client.occupation.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    if (!matchesSearch) return false;
+
+    // Category filter
+    if (selectedCategory === 'all') return true;
+
+    // Check if client's interests include the selected category
+    if (client.interests && Array.isArray(client.interests)) {
+      return client.interests.some(interest =>
+        interest.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
+    }
+
+    return false;
+  });
+
+  // Handle category change
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSearchParams({ category });
+  };
 
 
   const handleRemoveLike = (clientId: string) => {
@@ -159,8 +209,8 @@ export function LikedClients() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background">
-      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
+    <div className="w-full h-full overflow-y-auto bg-background">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl pb-24 sm:pb-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -188,11 +238,40 @@ export function LikedClients() {
                 className="pl-9 sm:pl-10 h-10 sm:h-11"
               />
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
-              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-medium">{filteredClients.length} clients</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="font-medium">{filteredClients.length} clients</span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => refetch()}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
             </div>
           </div>
+
+          {/* Category Tabs */}
+          <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full mb-6">
+            <TabsList className="grid w-full grid-cols-5 h-auto">
+              {categories.map(({ id, label, icon: Icon }) => (
+                <TabsTrigger
+                  key={id}
+                  value={id}
+                  className="flex items-center gap-1 sm:gap-2 px-2 py-2 text-xs sm:text-sm"
+                >
+                  <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{label}</span>
+                  <span className="sm:hidden">{label.substring(0, 4)}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </motion.div>
 
         {isLoading ? (
@@ -256,9 +335,9 @@ export function LikedClients() {
                       size="sm"
                       onClick={() => handleMessage(client)}
                       className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
-                      disabled={startConversation.isPending}
+                      disabled={isCreatingConversation}
                     >
-                      <MessageSquare className="w-4 h-4" />
+                      <MessageCircle className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"

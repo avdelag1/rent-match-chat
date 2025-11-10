@@ -11,25 +11,42 @@ export function useUnreadMessageCount() {
     queryFn: async () => {
       if (!user?.id) return 0;
 
-      // Get all conversations for this user
-      const { data: conversations } = await supabase
-        .from('conversations')
-        .select('id')
-        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`);
+      try {
+        // Get all conversations for this user
+        const { data: conversations, error: convError } = await supabase
+          .from('conversations')
+          .select('id')
+          .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
+          .eq('status', 'active');
 
-      if (!conversations?.length) return 0;
+        if (convError) throw convError;
+        if (!conversations?.length) return 0;
 
-      const conversationIds = conversations.map(c => c.id);
+        // Get conversation IDs as array
+        const conversationIds = conversations.map(c => c.id);
 
-      // Count unread messages (messages not sent by current user)
-      const { count } = await supabase
-        .from('conversation_messages')
-        .select('id', { count: 'exact', head: true })
-        .in('conversation_id', conversationIds)
-        .neq('sender_id', user.id)
-        .eq('is_read', false);
+        // Single query: get all unread messages for these conversations
+        const { data: unreadMessages, error: unreadError } = await supabase
+          .from('conversation_messages')
+          .select('conversation_id')
+          .in('conversation_id', conversationIds)
+          .neq('sender_id', user.id)
+          .eq('is_read', false);
 
-      return count || 0;
+        if (unreadError) throw unreadError;
+
+        // Count unique conversation IDs with unread messages
+        const uniqueConversationIds = new Set(
+          (unreadMessages || []).map(m => m.conversation_id)
+        );
+
+        const count = uniqueConversationIds.size;
+        console.log('[UnreadCount] Conversations with unread messages:', count);
+        return count;
+      } catch (error) {
+        console.error('[UnreadCount] Error:', error);
+        return 0;
+      }
     },
     enabled: !!user?.id,
     refetchInterval: 30000, // Refetch every 30 seconds as backup

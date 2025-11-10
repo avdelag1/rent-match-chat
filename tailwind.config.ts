@@ -1,5 +1,6 @@
 
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
 	darkMode: ["class"],
@@ -107,20 +108,32 @@ export default {
 					'50%': { transform: 'translateY(-5px)' }
 				},
 				'fade-in-up': {
-					'0%': { opacity: '0', transform: 'translateY(20px)' },
-					'100%': { opacity: '1', transform: 'translateY(0)' }
+					'0%': { opacity: '0', transform: 'translateY(20px) translateZ(0)' },
+					'100%': { opacity: '1', transform: 'translateY(0) translateZ(0)' }
 				},
 				'slide-in-smooth': {
-					'0%': { opacity: '0', transform: 'translateX(-30px)' },
-					'100%': { opacity: '1', transform: 'translateX(0)' }
+					'0%': { opacity: '0', transform: 'translateX(-30px) translateZ(0)' },
+					'100%': { opacity: '1', transform: 'translateX(0) translateZ(0)' }
 				},
 				'elastic-bounce': {
-					'0%': { transform: 'scale(1)' },
-					'30%': { transform: 'scale(1.15)' },
-					'40%': { transform: 'scale(0.95)' },
-					'60%': { transform: 'scale(1.05)' },
-					'80%': { transform: 'scale(0.98)' },
-					'100%': { transform: 'scale(1)' }
+					'0%': { transform: 'scale(1) translateZ(0)' },
+					'30%': { transform: 'scale(1.15) translateZ(0)' },
+					'40%': { transform: 'scale(0.95) translateZ(0)' },
+					'60%': { transform: 'scale(1.05) translateZ(0)' },
+					'80%': { transform: 'scale(0.98) translateZ(0)' },
+					'100%': { transform: 'scale(1) translateZ(0)' }
+				},
+				'shimmer': {
+					'0%': { backgroundPosition: '-1000px 0' },
+					'100%': { backgroundPosition: '1000px 0' }
+				},
+				'particle-burst': {
+					'0%': { transform: 'scale(0) translateZ(0)', opacity: '1' },
+					'100%': { transform: 'scale(2) translateZ(0)', opacity: '0' }
+				},
+				'glow-pulse': {
+					'0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)' },
+					'50%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.8)' }
 				}
 			},
 			animation: {
@@ -129,9 +142,12 @@ export default {
 				'bounce-gentle': 'bounce-gentle 2s ease-in-out infinite',
 				'fade-in-up': 'fade-in-up 0.6s ease-out',
 				'slide-in-smooth': 'slide-in-smooth 0.5s ease-out',
-				'elastic-bounce': 'elastic-bounce 0.6s ease-out'
+				'elastic-bounce': 'elastic-bounce 0.6s ease-out',
+				'shimmer': 'shimmer 2s linear infinite',
+				'particle-burst': 'particle-burst 0.6s ease-out',
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite'
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [tailwindcssAnimate],
 } satisfies Config;

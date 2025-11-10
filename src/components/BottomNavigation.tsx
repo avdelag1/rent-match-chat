@@ -1,12 +1,13 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, SlidersHorizontal, Heart, MessageCircle, User, Plus, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUnreadMatches } from '@/hooks/useUnreadMatches';
+import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 
 interface BottomNavigationProps {
   userRole: 'client' | 'owner';
   onFilterClick?: () => void;
   onAddListingClick?: () => void;
+  onListingsClick?: () => void;
 }
 
 interface NavItem {
@@ -19,10 +20,10 @@ interface NavItem {
   isCenter?: boolean;
 }
 
-export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }: BottomNavigationProps) {
+export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, onListingsClick }: BottomNavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { unreadCount } = useUnreadMatches();
+  const { unreadCount } = useUnreadMessageCount();
 
   // Client/Renter Navigation Items
   const clientNavItems: NavItem[] = [
@@ -68,17 +69,17 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
       path: '/owner/dashboard',
     },
     {
-      id: 'add',
-      label: 'Add',
-      icon: Plus,
-      onClick: onAddListingClick,
-      isCenter: true,
+      id: 'liked',
+      label: 'Liked',
+      icon: Heart,
+      path: '/owner/liked-clients',
     },
     {
       id: 'listings',
       label: 'Listings',
       icon: List,
       path: '/owner/properties',
+      isCenter: true,
     },
     {
       id: 'messages',
@@ -111,7 +112,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-border/50 z-50 pb-safe shadow-2xl">
       <div className="flex items-center justify-around h-16 max-w-screen-xl mx-auto px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -122,7 +123,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
               key={item.id}
               onClick={() => handleNavClick(item)}
               className={cn(
-                'flex flex-col items-center justify-center flex-1 h-full relative group transition-all',
+                'flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-200 select-none touch-manipulation',
                 active && 'text-primary',
                 !active && 'text-muted-foreground',
                 item.isCenter && 'flex-initial px-6'
@@ -131,7 +132,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
               {/* Center button special styling */}
               {item.isCenter ? (
                 <div className="relative -top-2">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-3 shadow-md shadow-orange-500/30 group-active:scale-95 transition-transform">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-3 shadow-lg shadow-orange-500/40 group-hover:shadow-orange-500/60 group-active:scale-95 group-hover:scale-105 transition-all duration-200">
                     <Icon className="h-5 w-5 text-white" />
                   </div>
                 </div>
@@ -147,9 +148,9 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
                   {/* Icon */}
                   <Icon
                     className={cn(
-                      'h-6 w-6 mb-1 transition-all',
+                      'h-6 w-6 mb-1 transition-all duration-200',
                       active && 'scale-110',
-                      !active && 'group-active:scale-95'
+                      !active && 'group-active:scale-95 group-hover:scale-105'
                     )}
                   />
 
@@ -163,9 +164,9 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick }:
                     {item.label}
                   </span>
 
-                  {/* Active indicator */}
+                  {/* Active indicator with animation */}
                   {active && (
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-t-full" />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-t-full animate-elastic-bounce shadow-glow" />
                   )}
                 </>
               )}

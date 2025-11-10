@@ -49,6 +49,7 @@ const ClientProfileCardComponent = ({
   hasPremium
 }: ClientProfileCardProps) => {
   const [imageIndex, setImageIndex] = useState(0);
+  const [tapFlash, setTapFlash] = useState<'left' | 'right' | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -98,18 +99,31 @@ const ClientProfileCardComponent = ({
     }
   }, [prevImage, nextImage, onTap]);
 
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (!isTop) return;
+    
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const clickX = e.clientX - rect.left;
+    const side = clickX < rect.width / 2 ? 'left' : 'right';
+    
+    setTapFlash(side);
+    setTimeout(() => setTapFlash(null), 160);
+  }, [isTop]);
+
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
-    const threshold = 60;
+    const threshold = 150; // Increased from 30-60px to 150px for proper snap-back
     const velocity = info.velocity.x;
     const absVelocity = Math.abs(velocity);
 
-    // ✅ FIX #2: Lower threshold for more responsive swipes
-    const effectiveThreshold = absVelocity > 600 ? 30 : 40;
-
-    if (Math.abs(info.offset.x) > effectiveThreshold || absVelocity > 350) {
+    // Check if drag distance OR velocity is enough for a swipe
+    // Otherwise, spring animation will snap card back to center
+    if (Math.abs(info.offset.x) > threshold || absVelocity > 500) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
+    // Card will automatically snap back if threshold not met
   }, [onSwipe]);
 
   const getSwipeIndicator = () => {
@@ -136,20 +150,36 @@ const ClientProfileCardComponent = ({
       ref={cardRef}
       style={cardStyle}
       drag={isTop ? "x" : false}
-      dragConstraints={isTop ? { left: -400, right: 400 } : { left: 0, right: 0 }}
-      dragElastic={0.7}
+      dragConstraints={isTop ? { left: 0, right: 0 } : { left: 0, right: 0 }}
+      dragElastic={0.2}
+      onPointerDown={handlePointerDown}
       onDragEnd={handleDragEnd}
       className={`transform-gpu ${isTop ? 'cursor-pointer' : 'pointer-events-none cursor-default'}`}
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 40, mass: 0.8 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
     >
-      <Card className="relative w-full h-[700px] bg-white border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="relative w-full h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px] bg-white border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
 
       {/* Swipe Indicator */}
       {getSwipeIndicator()}
 
-      {/* Main Image - Fixed height for consistent card sizing */}
-      <div className="relative h-[580px] overflow-hidden">
+      {/* Main Image - Responsive height for consistent card sizing */}
+      <div className="relative h-[70%] overflow-hidden">
+        {/* Tap Flash Overlay */}
+        {tapFlash && (
+          <motion.div
+            className={`absolute inset-0 pointer-events-none z-10 ${
+              tapFlash === 'right' 
+                ? 'bg-emerald-500/30' 
+                : 'bg-rose-500/30'
+            }`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
+          />
+        )}
+
         {images.length > 0 ? (
           <img
             src={images[imageIndex]}
@@ -219,42 +249,20 @@ const ClientProfileCardComponent = ({
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-        
-        {/* Message Button - Top Right - Always Clickable */}
-        <Button
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('💬 Message button clicked for:', profile.name);
-            onMessage();
-          }}
-          className="absolute top-4 right-4 w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 backdrop-blur-sm text-white hover:from-orange-600 hover:to-pink-600 border-2 border-white shadow-lg p-0 z-20 transition-all hover:scale-110"
-        >
-          <MessageCircle className="w-5 h-5" />
-        </Button>
-
-        {/* Age Badge */}
-        <Badge className="absolute top-4 right-20 bg-black/50 text-white border-none px-3 py-1">
-          {profile.age}
-        </Badge>
-        
-        {/* Location */}
-        {profile.location && (
-          <div className="absolute top-4 left-4 flex items-center gap-1 bg-black/50 rounded-full px-3 py-1">
-            <MapPin className="w-4 h-4 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
-            <span className="text-white text-sm">
-              {profile.location.city}
-            </span>
-          </div>
-        )}
       </div>
       
       {/* Bottom Content - Compact */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent">
+      <div 
+        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onTap();
+        }}
+      >
         <div className="space-y-2">
           {/* Name */}
           <div>
-            <h3 className="text-2xl font-bold text-foreground mb-2">{profile.name}</h3>
+            <h3 className="text-2xl font-bold text-foreground mb-2 drop-shadow-sm">{profile.name}</h3>
           </div>
           
           {/* Profile Tags with Defaults */}
@@ -281,7 +289,7 @@ const ClientProfileCardComponent = ({
                   }
                   
                   return (
-                    <Badge key={index} variant="outline" className={badgeClass}>
+                    <Badge key={index} variant="outline" className={`${badgeClass} font-medium`}>
                       {tag}
                     </Badge>
                   );

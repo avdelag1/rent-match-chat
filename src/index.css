@@ -260,39 +260,64 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   }
   
-  /* Optimized animations for 60fps performance */
+  /* GPU-Accelerated Animations - 60fps Performance */
   @keyframes fast-fade-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(10px) translateZ(0);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) translateZ(0);
     }
   }
   
   @keyframes quick-scale {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
+    0% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(1.02) translateZ(0); }
+    100% { transform: scale(1) translateZ(0); }
   }
   
   @keyframes smooth-slide {
     from {
       opacity: 0;
-      transform: translateX(-15px);
+      transform: translateX(-15px) translateZ(0);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: translateX(0) translateZ(0);
     }
   }
 
   @keyframes minimal-bounce {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.98); }
-    100% { transform: scale(1); }
+    0% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(0.98) translateZ(0); }
+    100% { transform: scale(1) translateZ(0); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  @keyframes particle-burst {
+    0% {
+      transform: scale(0) translateZ(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2) translateZ(0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+    }
   }
 
   .gradient-text {
@@ -365,5 +390,57 @@ body {
   .super-glow {
     box-shadow: var(--shadow-premium);
     border: 2px solid hsl(280, 100%, 70%);
+  }
+
+  /* Modern ripple effect */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-out;
+    pointer-events: none;
+  }
+
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  /* Glassmorphism utilities */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
+  }
+
+  /* Smooth scroll */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Touch optimization */
+  .touch-optimized {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 }

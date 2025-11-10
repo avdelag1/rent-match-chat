@@ -24,7 +24,7 @@ const OwnerSettings = () => {
   }, [searchParams]);
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto p-4 md:p-8">
+      <div className="w-full h-full overflow-y-auto max-h-[calc(100vh-8rem)] p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">Owner Settings</h1>

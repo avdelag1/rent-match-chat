@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, Search, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
+import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,9 +24,12 @@ export function MessagingDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   
-  const { data: conversations = [], isLoading, refetch } = useConversations();
+  const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
+
+  // Mark messages as read when viewing conversation
+  useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
 
   const filteredConversations = conversations.filter(conv =>
     conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -33,13 +37,115 @@ export function MessagingDashboard() {
 
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
-  // Handle auto-start conversation from URL parameter
+  // Realtime subscription for new conversations
   useEffect(() => {
+    if (!user?.id) return;
+
+    const conversationsChannel = supabase
+      .channel(`conversations-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversations',
+          filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
+        },
+        (payload) => {
+          console.log('New conversation created:', payload);
+          // Refetch conversations to get the new one with proper joins
+          refetch();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations',
+          filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
+        },
+        (payload) => {
+          console.log('Conversation updated:', payload);
+          // Refetch to get updated last_message_at
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(conversationsChannel);
+    };
+  }, [user?.id, refetch]);
+
+  // Handle direct conversation opening or auto-start from URL parameters
+  useEffect(() => {
+    const conversationId = searchParams.get('conversationId');
     const startConversationUserId = searchParams.get('startConversation');
-    if (startConversationUserId && !isStartingConversation) {
+    
+    // Direct conversation ID - open immediately
+    if (conversationId && !isStartingConversation) {
+      handleDirectOpenConversation(conversationId);
+    }
+    // User ID - start new conversation
+    else if (startConversationUserId && !isStartingConversation) {
       handleAutoStartConversation(startConversationUserId);
     }
   }, [searchParams]);
+
+  const handleDirectOpenConversation = async (conversationId: string) => {
+    setIsStartingConversation(true);
+    console.log('[MessagingDashboard] Opening conversation:', conversationId);
+    
+    try {
+      // Try to find conversation in current list
+      let conversation = conversations.find(c => c.id === conversationId);
+      
+      // If not found, wait for it to appear (handles realtime timing)
+      if (!conversation) {
+        console.log('[MessagingDashboard] Conversation not in cache, waiting...');
+        toast({
+          title: 'Loading conversation...',
+          description: 'Please wait while we fetch your conversation.',
+        });
+        
+        // Try up to 10 times (10 seconds total)
+        for (let attempt = 1; attempt <= 10; attempt++) {
+          console.log(`[MessagingDashboard] Attempt ${attempt}/10 to find conversation`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refetch();
+          conversation = conversations.find(c => c.id === conversationId);
+          if (conversation) break;
+        }
+        
+        if (conversation) {
+          console.log('[MessagingDashboard] Conversation found!', conversation);
+          setSelectedConversationId(conversationId);
+          setSearchParams({});
+          toast({
+            title: '✅ Conversation opened',
+            description: 'You can now send messages!',
+          });
+        } else {
+          throw new Error('Conversation not found after 10 seconds');
+        }
+      } else {
+        console.log('[MessagingDashboard] Conversation already in cache');
+        setSelectedConversationId(conversationId);
+        setSearchParams({});
+      }
+    } catch (error) {
+      console.error('[MessagingDashboard] Error opening conversation:', error);
+      toast({
+        title: '❌ Could not open conversation',
+        description: 'The conversation may not exist. Try refreshing the page.',
+        variant: 'destructive',
+      });
+      setSearchParams({});
+    } finally {
+      setIsStartingConversation(false);
+    }
+  };
 
   const handleAutoStartConversation = async (userId: string) => {
     setIsStartingConversation(true);
