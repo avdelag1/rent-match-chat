@@ -139,7 +139,7 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
                 {profileData.location && (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {profileData.location}
+                    {typeof profileData.location === 'string' ? profileData.location : JSON.stringify(profileData.location)}
                   </span>
                 )}
                 {profileData.occupation && (
