@@ -3,21 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Home, Anchor, Bike, CircleDot } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface CategorySelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCategorySelect: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => void;
+  onCategorySelect?: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => void;
+  navigateToNewPage?: boolean;
 }
 
 export function CategorySelectionDialog({ 
   open, 
   onOpenChange, 
-  onCategorySelect 
+  onCategorySelect,
+  navigateToNewPage = false
 }: CategorySelectionDialogProps) {
+  const navigate = useNavigate();
+
   const handleSelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
-    onCategorySelect(category, mode);
-    onOpenChange(false);
+    if (navigateToNewPage) {
+      // Navigate to the new listing page with category and mode as query params
+      navigate(`/owner/listings/new?category=${category}&mode=${mode}`);
+      onOpenChange(false);
+    } else {
+      // Use callback for inline form (backward compatibility)
+      if (onCategorySelect) {
+        onCategorySelect(category, mode);
+      } else {
+        console.warn('CategorySelectionDialog: onCategorySelect callback is required when navigateToNewPage is false');
+      }
+      onOpenChange(false);
+    }
   };
 
   return (
