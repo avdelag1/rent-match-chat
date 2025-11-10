@@ -147,7 +147,7 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
       </div>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Interest Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -162,12 +162,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               <SelectItem value="both">Rent or Buy</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Filter clients looking to rent, purchase, or both bicycles</p>
+          <p className="text-sm text-muted-foreground">Filter clients looking to rent, purchase, or both bicycles</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Bicycle Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -189,12 +189,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Match clients with preferences for specific bike categories</p>
+          <p className="text-sm text-muted-foreground">Match clients with preferences for specific bike categories</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Frame Size</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -211,12 +211,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               <SelectItem value="xl">X-Large (6'3"+)</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Find clients by fit to avoid mismatches in sizing</p>
+          <p className="text-sm text-muted-foreground">Find clients by fit to avoid mismatches in sizing</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Terrain Preference</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -238,12 +238,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Target clients based on where they plan to ride</p>
+          <p className="text-sm text-muted-foreground">Target clients based on where they plan to ride</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Accessories Needed</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -265,12 +265,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Connect with clients seeking bundles or add-ons</p>
+          <p className="text-sm text-muted-foreground">Connect with clients seeking bundles or add-ons</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Fitness Level</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -286,12 +286,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               <SelectItem value="professional">Professional</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Filter by rider's activity level for appropriate recommendations</p>
+          <p className="text-sm text-muted-foreground">Filter by rider's activity level for appropriate recommendations</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Price Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -310,12 +310,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               className="w-full"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Set budget range for bicycle purchase or rental</p>
+          <p className="text-sm text-muted-foreground">Set budget range for bicycle purchase or rental</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Condition</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -332,12 +332,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Filter by bicycle condition and quality</p>
+          <p className="text-sm text-muted-foreground">Filter by bicycle condition and quality</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Wheel Size</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -359,12 +359,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Match clients by preferred wheel diameter</p>
+          <p className="text-sm text-muted-foreground">Match clients by preferred wheel diameter</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Suspension Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -381,12 +381,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Filter by suspension configuration</p>
+          <p className="text-sm text-muted-foreground">Filter by suspension configuration</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Frame Material</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -403,12 +403,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Filter by frame construction material</p>
+          <p className="text-sm text-muted-foreground">Filter by frame construction material</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Number of Gears</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -427,12 +427,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               className="w-full"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Filter by gear count range</p>
+          <p className="text-sm text-muted-foreground">Filter by gear count range</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Year/Age</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -451,12 +451,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
               className="w-full"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Filter by manufacturing year</p>
+          <p className="text-sm text-muted-foreground">Filter by manufacturing year</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">E-Bike Features</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -475,7 +475,7 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
                 max={150}
                 step={5}
               />
-              <p className="text-xs text-muted-foreground">Required electric range per charge</p>
+              <p className="text-sm text-muted-foreground">Required electric range per charge</p>
             </div>
           )}
         </CollapsibleContent>
