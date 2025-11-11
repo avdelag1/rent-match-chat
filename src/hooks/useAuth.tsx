@@ -11,6 +11,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  userRole: 'client' | 'owner' | null;
+  roleLoading: boolean;
   signUp: (email: string, password: string, role: 'client' | 'owner', name?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string, role: 'client' | 'owner') => Promise<{ error: any }>;
   signInWithOAuth: (provider: 'google', role: 'client' | 'owner') => Promise<{ error: any }>;
@@ -23,11 +25,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<'client' | 'owner' | null>(null);
+  const [roleLoading, setRoleLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const { createProfileIfMissing } = useProfileSetup();
   const { handleOAuthUserSetup: linkOAuthAccount, checkExistingAccount } = useAccountLinking();
+
+  // Fetch user role whenever user changes
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) {
+        setUserRole(null);
+        setRoleLoading(false);
+        return;
+      }
+
+      setRoleLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching user role:', error);
+          setUserRole(null);
+        } else {
+          setUserRole(data?.role || null);
+        }
+      } catch (error) {
+        console.error('Error in fetchUserRole:', error);
+        setUserRole(null);
+      } finally {
+        setRoleLoading(false);
+      }
+    };
+
+    fetchUserRole();
+  }, [user?.id]);
 
   useEffect(() => {
     let isInitialLoad = true;
@@ -386,6 +424,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     loading,
+    userRole,
+    roleLoading,
     signUp,
     signIn,
     signInWithOAuth,

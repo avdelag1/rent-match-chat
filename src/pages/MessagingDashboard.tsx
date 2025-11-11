@@ -18,12 +18,12 @@ import { toast } from '@/hooks/use-toast';
 
 export function MessagingDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isStartingConversation, setIsStartingConversation] = useState(false);
-  
+
   const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
@@ -205,46 +205,33 @@ export function MessagingDashboard() {
   };
 
   const handleBackToDashboard = () => {
-    // Get user role from profile data via auth hook
-    const getUserRole = async () => {
-      try {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user?.id)
-          .maybeSingle();
-        
-        const role = roleData?.role || user?.user_metadata?.role || 'client';
-        if (role === 'owner') {
-          navigate('/owner/dashboard');
-        } else {
-          navigate('/client/dashboard');
-        }
-      } catch (error) {
-        console.error('Error getting user role:', error);
-        navigate('/client/dashboard'); // Default fallback
-      }
-    };
-    
-    getUserRole();
+    // Use cached userRole from useAuth to avoid unnecessary database query
+    if (userRole === 'owner') {
+      navigate('/owner/dashboard');
+    } else {
+      navigate('/client/dashboard');
+    }
   };
 
   if (selectedConversation && selectedConversation.other_user) {
     return (
-      <div className="h-screen flex flex-col overflow-hidden">
-        <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col min-h-0">
-          <MessagingInterface
-            conversationId={selectedConversation.id}
-            otherUser={selectedConversation.other_user}
-            onBack={() => setSelectedConversationId(null)}
-          />
+      <PageTransition>
+        <div className="h-screen flex flex-col overflow-hidden">
+          <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col min-h-0">
+            <MessagingInterface
+              conversationId={selectedConversation.id}
+              otherUser={selectedConversation.other_user}
+              onBack={() => setSelectedConversationId(null)}
+            />
+          </div>
         </div>
-      </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
+    <PageTransition>
+      <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -353,5 +340,6 @@ export function MessagingDashboard() {
         </Card>
       </div>
     </div>
+    </PageTransition>
   );
 }
