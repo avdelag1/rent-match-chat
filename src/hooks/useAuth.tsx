@@ -267,57 +267,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: null };
         }
 
-        // SECURITY FIX: If no role in user_roles, check profiles table as fallback
-        console.log('[Auth] No role in user_roles, checking profiles table...');
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error('[Auth] Profile check error:', profileError);
-        }
-
-        if (profileData?.role) {
-          // Found role in profiles table - sync it to user_roles
-          console.log('[Auth] Found role in profiles:', profileData.role, '- Syncing to user_roles');
-          const actualRole = profileData.role as 'client' | 'owner';
-
-          // Log and notify if user clicked wrong button
-          if (actualRole !== role) {
-            console.log('[Auth] ⚠️ User clicked wrong role button. Actual:', actualRole, 'Selected:', role);
-            toast({
-              title: "Wrong Login Button",
-              description: `You're a ${actualRole}, but clicked "Sign in as ${role}". Please use the correct button next time.`,
-              variant: "default"
-            });
-          }
-
-          const { error: insertError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: data.user.id,
-              role: actualRole,  // Use role from profiles, NOT selected button
-            });
-
-          if (insertError) {
-            console.error('[Auth] Failed to sync role to user_roles:', insertError);
-            // Don't fail login, just log the error
-          }
-
-          await createProfileIfMissing(data.user, actualRole);
-
-          toast({
-            title: "Welcome back!",
-            description: `Redirecting to your ${actualRole} dashboard...`,
-          });
-
-          return { error: null };
-        }
-
         // No role found anywhere - this shouldn't happen for existing users
-        console.error('[Auth] ❌ No role found in user_roles OR profiles for existing user!');
+        console.error('[Auth] ❌ No role found in user_roles for existing user!');
         await supabase.auth.signOut();
 
         throw new Error('Account setup incomplete. Please contact support or sign up again.');

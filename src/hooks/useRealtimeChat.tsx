@@ -226,8 +226,8 @@ export function useRealtimeChat(conversationId: string) {
       supabase.removeChannel(typingChannel);
       
       // Clear typing timeout
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
       
       // Clear state
@@ -240,11 +240,11 @@ export function useRealtimeChat(conversationId: string) {
   // Cleanup typing on unmount
   useEffect(() => {
     return () => {
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [typingTimeout]);
+  }, []);
 
   return {
     startTyping,

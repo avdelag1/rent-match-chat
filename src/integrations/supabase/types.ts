@@ -7141,22 +7141,6 @@ export type Database = {
               p_blocked_reason?: string
               p_end_date: string
               p_is_available: boolean
-              p_property_id: string
-              p_start_date: string
-            }
-            Returns: {
-              blocked_reason: string
-              end_date: string
-              is_available: boolean
-              property_id: string
-              start_date: string
-            }[]
-          }
-        | {
-            Args: {
-              p_blocked_reason?: string
-              p_end_date: string
-              p_is_available: boolean
               p_property_id: number
               p_start_date: string
             }
@@ -7165,6 +7149,22 @@ export type Database = {
               end_date: string
               is_available: boolean
               property_id: number
+              start_date: string
+            }[]
+          }
+        | {
+            Args: {
+              p_blocked_reason?: string
+              p_end_date: string
+              p_is_available: boolean
+              p_property_id: string
+              p_start_date: string
+            }
+            Returns: {
+              blocked_reason: string
+              end_date: string
+              is_available: boolean
+              property_id: string
               start_date: string
             }[]
           }
