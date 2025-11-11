@@ -123,22 +123,45 @@ export function useRealtimeChat(conversationId: string) {
           // Update messages immediately
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
             if (!oldData) return [completeMessage];
-            
-            // Check for both real IDs and temporary optimistic IDs
-            const exists = oldData.some((msg: any) => 
-              msg.id === newMessage.id || 
-              (msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id)
-            );
-            
+
+            // Enhanced duplicate detection:
+            // 1. Check for exact ID match (handles duplicate real-time events)
+            // 2. Check for temporary optimistic IDs that match content and sender
+            // 3. Check for near-duplicate messages (same sender, text, within 2 seconds)
+            const newMessageTime = new Date(newMessage.created_at).getTime();
+
+            const exists = oldData.some((msg: any) => {
+              if (msg.id === newMessage.id) return true;
+
+              // Check for optimistic message replacement
+              if (msg.id.toString().startsWith('temp-') &&
+                  msg.message_text === newMessage.message_text &&
+                  msg.sender_id === newMessage.sender_id) {
+                return true;
+              }
+
+              // Check for near-duplicates (within 2 seconds, same content and sender)
+              const msgTime = new Date(msg.created_at).getTime();
+              if (Math.abs(msgTime - newMessageTime) < 2000 &&
+                  msg.message_text === newMessage.message_text &&
+                  msg.sender_id === newMessage.sender_id) {
+                return true;
+              }
+
+              return false;
+            });
+
             if (exists) {
               // Replace optimistic message with real message if it exists
-              return oldData.map((msg: any) => 
-                msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id
+              return oldData.map((msg: any) =>
+                msg.id.toString().startsWith('temp-') &&
+                msg.message_text === newMessage.message_text &&
+                msg.sender_id === newMessage.sender_id
                   ? completeMessage
                   : msg
               );
             }
-            
+
             return [...oldData, completeMessage];
           });
 
