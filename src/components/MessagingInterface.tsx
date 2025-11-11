@@ -23,7 +23,7 @@ interface MessagingInterfaceProps {
   onBack: () => void;
 }
 
-export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: MessagingInterfaceProps) => {
+const MessagingInterfaceComponent = ({ conversationId, otherUser, onBack }: MessagingInterfaceProps) => {
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
   const { data: messages = [], isLoading } = useConversationMessages(conversationId);
@@ -220,6 +220,35 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
       </form>
     </Card>
   );
-});
+};
+
+// Custom memo comparison function to prevent unnecessary re-renders
+const arePropsEqual = (
+  prevProps: MessagingInterfaceProps,
+  nextProps: MessagingInterfaceProps
+) => {
+  // Compare conversation ID
+  if (prevProps.conversationId !== nextProps.conversationId) {
+    return false;
+  }
+
+  // Deep compare otherUser object
+  if (prevProps.otherUser.id !== nextProps.otherUser.id ||
+      prevProps.otherUser.full_name !== nextProps.otherUser.full_name ||
+      prevProps.otherUser.avatar_url !== nextProps.otherUser.avatar_url ||
+      prevProps.otherUser.role !== nextProps.otherUser.role) {
+    return false;
+  }
+
+  // onBack comparison (if using useCallback, reference should be stable)
+  if (prevProps.onBack !== nextProps.onBack) {
+    return false;
+  }
+
+  // Props are equal, skip re-render
+  return true;
+};
+
+export const MessagingInterface = memo(MessagingInterfaceComponent, arePropsEqual);
 
 MessagingInterface.displayName = 'MessagingInterface';

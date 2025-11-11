@@ -1,5 +1,5 @@
 import { PageTransition } from '@/components/PageTransition';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,10 +15,12 @@ import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function MessagingDashboard() {
   const navigate = useNavigate();
   const { user, userRole } = useAuth();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,11 +33,19 @@ export function MessagingDashboard() {
   // Mark messages as read when viewing conversation
   useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  // Memoize filtered conversations to prevent recreation
+  const filteredConversations = useMemo(() =>
+    conversations.filter(conv =>
+      conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    [conversations, searchQuery]
   );
 
-  const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
+  // Memoize selected conversation to prevent recreation and flickering
+  const selectedConversation = useMemo(() =>
+    conversations.find(conv => conv.id === selectedConversationId),
+    [conversations, selectedConversationId]
+  );
 
   // Realtime subscription for new conversations
   useEffect(() => {
@@ -53,8 +63,10 @@ export function MessagingDashboard() {
         },
         (payload) => {
           console.log('New conversation created:', payload);
-          // Refetch conversations to get the new one with proper joins
-          refetch();
+          // Only refetch if not currently in an active chat (prevents flickering)
+          if (!selectedConversationId) {
+            refetch();
+          }
         }
       )
       .on(
@@ -67,8 +79,17 @@ export function MessagingDashboard() {
         },
         (payload) => {
           console.log('Conversation updated:', payload);
-          // Refetch to get updated last_message_at
-          refetch();
+          // Use setQueryData instead of refetch to prevent flickering
+          // Only update the specific conversation that changed
+          queryClient.setQueryData(['conversations', user.id], (oldConversations: any) => {
+            if (!oldConversations) return oldConversations;
+
+            return oldConversations.map((conv: any) =>
+              conv.id === payload.new.id
+                ? { ...conv, ...payload.new }
+                : conv
+            );
+          });
         }
       )
       .subscribe();
@@ -76,7 +97,7 @@ export function MessagingDashboard() {
     return () => {
       supabase.removeChannel(conversationsChannel);
     };
-  }, [user?.id, refetch]);
+  }, [user?.id, refetch, selectedConversationId, queryClient]);
 
   // Handle direct conversation opening or auto-start from URL parameters
   useEffect(() => {
@@ -204,14 +225,19 @@ export function MessagingDashboard() {
     }
   };
 
-  const handleBackToDashboard = () => {
+  const handleBackToDashboard = useCallback(() => {
     // Use cached userRole from useAuth to avoid unnecessary database query
     if (userRole === 'owner') {
       navigate('/owner/dashboard');
     } else {
       navigate('/client/dashboard');
     }
-  };
+  }, [userRole, navigate]);
+
+  // Memoize onBack callback to prevent MessagingInterface re-renders
+  const handleBackToList = useCallback(() => {
+    setSelectedConversationId(null);
+  }, []);
 
   if (selectedConversation && selectedConversation.other_user) {
     return (
@@ -221,7 +247,7 @@ export function MessagingDashboard() {
             <MessagingInterface
               conversationId={selectedConversation.id}
               otherUser={selectedConversation.other_user}
-              onBack={() => setSelectedConversationId(null)}
+              onBack={handleBackToList}
             />
           </div>
         </div>
