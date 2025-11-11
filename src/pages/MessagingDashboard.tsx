@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, Search, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
-import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,8 +29,8 @@ export function MessagingDashboard() {
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
 
-  // Mark messages as read when viewing conversation
-  useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
+  // Note: useMarkMessagesAsRead is called in MessagingInterface, not here
+  // to avoid double-calling the hook
 
   // Memoize filtered conversations to prevent recreation
   const filteredConversations = useMemo(() =>
@@ -62,7 +61,6 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          console.log('New conversation created:', payload);
           // Only refetch if not currently in an active chat (prevents flickering)
           if (!selectedConversationId) {
             refetch();
@@ -78,7 +76,6 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          console.log('Conversation updated:', payload);
           // Use setQueryData instead of refetch to prevent flickering
           // Only update the specific conversation that changed
           queryClient.setQueryData(['conversations', user.id], (oldConversations: any) => {

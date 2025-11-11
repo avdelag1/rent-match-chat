@@ -34,11 +34,8 @@ export function useConversations() {
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
       if (!user?.id) {
-        console.log('[useConversations] No user ID, returning empty array');
         return [];
       }
-
-      console.log('[useConversations] Fetching conversations for user:', user.id);
 
       try {
         // OPTIMIZED: Single query with joins instead of N+1 queries
@@ -53,16 +50,12 @@ export function useConversations() {
           .order('last_message_at', { ascending: false, nullsFirst: false });
 
         if (error) {
-          console.error('[useConversations] Error loading conversations:', error);
           // Gracefully handle auth errors
           if (error.code === '42501' || error.code === 'PGRST301') {
-            console.warn('[useConversations] Auth check failed, returning empty conversations');
             return [];
           }
           throw error;
         }
-
-        console.log('[useConversations] Raw conversations data:', data?.length || 0, 'conversations');
 
         // Defensive null check
         if (!data) return [];
@@ -94,13 +87,6 @@ export function useConversations() {
           // Determine role based on which side of the conversation the other user is
           const otherUserRole = isClient ? 'owner' : 'client';
 
-          console.log('[useConversations] Processing conversation:', {
-            id: conversation.id,
-            isClient,
-            otherUserProfile: otherUserProfile?.full_name,
-            otherUserRole
-          });
-
           return {
             id: conversation.id,
             client_id: conversation.client_id,
@@ -120,18 +106,13 @@ export function useConversations() {
           };
         });
 
-        console.log('[useConversations] Processed conversations:', conversationsWithProfiles.length);
         return conversationsWithProfiles;
       } catch (error: any) {
-        // Better error handling with user-friendly messages
-        console.error('[useConversations] Error fetching conversations:', error.message);
-        
         // For temporary auth issues, return empty array to avoid blocking UI
         if (error.message?.includes('JWT') || error.message?.includes('auth')) {
-          console.warn('[useConversations] Auth error detected, returning empty conversations');
           return [];
         }
-        
+
         throw error;
       }
     },
@@ -182,9 +163,13 @@ export function useConversationMessages(conversationId: string) {
       return data || [];
     },
     enabled: !!conversationId,
-    staleTime: 30000, // 30 seconds - messages are updated via realtime, not refetch
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    // Messages are ONLY updated via real-time subscriptions, NEVER refetch
+    staleTime: Infinity, // Never consider stale - real-time handles all updates
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnMount: false, // Don't refetch on component mount
+    refetchOnReconnect: false, // Don't refetch on network reconnect
+    refetchInterval: false, // No polling
   });
 }
 

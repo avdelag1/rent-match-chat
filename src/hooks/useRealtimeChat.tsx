@@ -47,8 +47,8 @@ export function useRealtimeChat(conversationId: string) {
         userName: user.user_metadata?.full_name || 'User',
         isTyping: true,
         timestamp: Date.now()
-      }).catch((error: any) => {
-        console.error('[Typing] Error tracking presence:', error);
+      }).catch(() => {
+        // Silently handle presence tracking errors
       });
     }
 
@@ -75,8 +75,8 @@ export function useRealtimeChat(conversationId: string) {
       userName: user.user_metadata?.full_name || 'User',
       isTyping: false,
       timestamp: Date.now()
-    }).catch((error: any) => {
-      console.error('[Typing] Error stopping presence:', error);
+    }).catch(() => {
+      // Silently handle presence tracking errors
     });
   }, [conversationId, user?.id, typingTimeout, typingChannelRef]);
 
@@ -173,8 +173,11 @@ export function useRealtimeChat(conversationId: string) {
         }
       )
       .on('presence', { event: 'sync' }, () => {
-        const newState = messagesChannel.presenceState();
-        setIsConnected(true);
+        // Only update if not already connected to avoid unnecessary re-renders
+        setIsConnected(prev => {
+          if (!prev) return true;
+          return prev;
+        });
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         // User joined
@@ -214,7 +217,20 @@ export function useRealtimeChat(conversationId: string) {
           });
         });
 
-        setTypingUsers(currentTyping);
+        // Only update if typing users actually changed to avoid unnecessary re-renders
+        setTypingUsers(prev => {
+          // If lengths differ, definitely changed
+          if (prev.length !== currentTyping.length) return currentTyping;
+
+          // If same length, check if user IDs are different
+          const prevIds = prev.map(u => u.userId).sort().join(',');
+          const currentIds = currentTyping.map(u => u.userId).sort().join(',');
+
+          if (prevIds !== currentIds) return currentTyping;
+
+          // No changes, keep previous state
+          return prev;
+        });
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
         // New typing presence
@@ -223,7 +239,6 @@ export function useRealtimeChat(conversationId: string) {
         // Left typing presence
       })
       .subscribe(async (status) => {
-        console.log('[Typing] Channel status:', status);
         if (status === 'SUBSCRIBED') {
           // Store channel reference for startTyping/stopTyping
           setTypingChannelRef(typingChannel);
@@ -231,8 +246,6 @@ export function useRealtimeChat(conversationId: string) {
       });
 
     return () => {
-      console.log('[Realtime] Cleaning up channels for conversation:', conversationId);
-      
       // Stop typing before cleanup
       if (isTyping) {
         stopTyping();
