@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, memo, useMemo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeActionButtons } from './SwipeActionButtons';
@@ -31,7 +31,7 @@ interface TinderentSwipeContainerProps {
   filters?: ListingFilters;
 }
 
-export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
+const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [page, setPage] = useState(0);
   const [allListings, setAllListings] = useState<any[]>([]);
@@ -54,11 +54,16 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     refetch: refetchRegular
   } = useListings([]);
 
-  // Use accumulated listings
-  const listings = allListings.length > 0 ? allListings : (smartListings.length > 0 ? smartListings : regularListings);
+  // Use accumulated listings - memoized to prevent unnecessary recalculations
+  const listings = useMemo(() => 
+    allListings.length > 0 ? allListings : (smartListings.length > 0 ? smartListings : regularListings),
+    [allListings, smartListings, regularListings]
+  );
+  
   const isLoading = smartLoading || regularLoading;
   const error = smartError;
   const isRefetching = smartRefetching;
+  
   const refetch = useCallback(() => {
     setCurrentIndex(0);
     setPage(0);
@@ -95,50 +100,29 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
-    if (!currentListing) {
-      console.log('No current listing found for swipe');
-      return;
-    }
-
-    console.log('Starting swipe:', { 
-      listingId: currentListing.id, 
-      direction, 
-      currentIndex,
-      listingTitle: currentListing.title 
-    });
+    if (!currentListing) return;
 
     setSwipeDirection(direction);
-    
-    // Trigger haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
     
-    // Record swipe
     swipeMutation.mutate({
       targetId: currentListing.id,
       direction,
       targetType: 'listing'
     });
 
-    // Record the swipe for undo functionality
-    recordSwipe(
-      currentListing.id, 
-      'listing', 
-      direction === 'right' ? 'like' : 'pass'
-    );
-
-    // Record listing view for smart recycling
+    recordSwipe(currentListing.id, 'listing', direction === 'right' ? 'like' : 'pass');
     recordProfileView.mutate({
       profileId: currentListing.id,
       viewType: 'listing',
       action: direction === 'right' ? 'like' : 'pass'
     });
 
-    // Move to next card after animation with proper delay for smooth rhythm
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
     }, 300);
-  }, [currentIndex, listings, swipeMutation, recordSwipe]);
+  }, [currentIndex, listings, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
     handleSwipe(direction);
@@ -382,4 +366,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       />
     </div>
   );
-}
+};
+
+export const TinderentSwipeContainer = memo(TinderentSwipeContainerComponent);
