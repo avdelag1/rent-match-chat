@@ -30,6 +30,9 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   const sendMessage = useSendMessage();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLengthRef = useRef(messages.length);
+  const isUserAtBottomRef = useRef(true);
 
   // Enable realtime chat for live message updates
   const { startTyping, stopTyping, typingUsers, isConnected } = useRealtimeChat(conversationId);
@@ -37,10 +40,41 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   // Mark messages as read when viewing this conversation
   useMarkMessagesAsRead(conversationId, true);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Track if user is at bottom of chat
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const threshold = 100; // pixels from bottom
+      const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+      isUserAtBottomRef.current = isAtBottom;
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Initial scroll to bottom when messages first load
+  useEffect(() => {
+    if (messages.length > 0 && prevMessagesLengthRef.current === 0) {
+      // Instant scroll on initial load
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+    }
+  }, [messages.length > 0]);
+
+  // Auto-scroll to bottom ONLY when new messages arrive AND user is at bottom
+  useEffect(() => {
+    const hasNewMessages = messages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (hasNewMessages && isUserAtBottomRef.current && messages.length > 0) {
+      // Use requestAnimationFrame to avoid layout thrashing
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  }, [messages.length]); // Only depend on length, not entire array
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +138,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-sm text-muted-foreground">
