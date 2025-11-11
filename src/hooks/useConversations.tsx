@@ -144,19 +144,13 @@ export function useConversations() {
   });
 
   // Helper to ensure a conversation is loaded in cache after creation
-  // Reduced polling to prevent flickering - rely more on realtime subscriptions
-  const ensureConversationInCache = async (conversationId: string, maxAttempts = 3): Promise<Conversation | null> => {
+  const ensureConversationInCache = async (conversationId: string, maxAttempts = 10): Promise<Conversation | null> => {
     for (let i = 0; i < maxAttempts; i++) {
-      // Check cache first without refetching
+      await query.refetch();
       const conversations = query.data || [];
       const conv = conversations.find((c: Conversation) => c.id === conversationId);
       if (conv) return conv;
-
-      // Only refetch if not found and not last attempt
-      if (i < maxAttempts - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await query.refetch();
-      }
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     return null;
   };

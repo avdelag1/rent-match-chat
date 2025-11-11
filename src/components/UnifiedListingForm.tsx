@@ -241,7 +241,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   };
 
   const uploadImageToStorage = async (file: File, userId: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop() || 'jpg';
+    const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
     const { error } = await supabase.storage

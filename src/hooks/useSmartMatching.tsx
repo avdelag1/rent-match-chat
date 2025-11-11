@@ -188,14 +188,9 @@ export interface ListingFilters {
   distance?: number;
 }
 
-export function useSmartListingMatching(
-  excludeSwipedIds: string[] = [], 
-  filters?: ListingFilters,
-  page: number = 0,
-  pageSize: number = 10
-) {
+export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters?: ListingFilters) {
   return useQuery({
-    queryKey: ['smart-listings', filters, page], // Include page in query key
+    queryKey: ['smart-listings', filters], // Include filters in query key to refetch when they change
     queryFn: async () => {
       try {
         // Get current user's preferences
@@ -250,10 +245,7 @@ export function useSmartListingMatching(
           }
         }
 
-        // Apply pagination
-        const start = page * pageSize;
-        const end = start + pageSize - 1;
-        const { data: listings, error } = await query.range(start, end);
+        const { data: listings, error } = await query.limit(50);
 
         if (error) {
           // Only log non-RLS errors to avoid console spam
@@ -296,10 +288,11 @@ export function useSmartListingMatching(
           };
         });
 
-        // Sort by match percentage - no client-side limiting
+        // Sort by match percentage - show all listings, even low matches
         const sortedListings = matchedListings
           .filter(listing => listing.matchPercentage >= 0)
-          .sort((a, b) => b.matchPercentage - a.matchPercentage);
+          .sort((a, b) => b.matchPercentage - a.matchPercentage)
+          .slice(0, 50); // Limit final results
         
         // Fallback: if no matches found but we have listings, show them all with default score
         if (sortedListings.length === 0 && filteredListings.length > 0) {
@@ -308,7 +301,7 @@ export function useSmartListingMatching(
             matchPercentage: 20,
             matchReasons: ['General listing'],
             incompatibleReasons: []
-          }));
+          })).slice(0, 50);
         }
 
         return sortedListings;
@@ -318,7 +311,7 @@ export function useSmartListingMatching(
       }
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
     refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
     retry: 3,
     retryDelay: 1000,
@@ -586,13 +579,9 @@ function calculateClientMatch(ownerPrefs: any, clientProfile: any): {
   };
 }
 
-export function useSmartClientMatching(
-  category?: 'property' | 'moto' | 'bicycle' | 'yacht',
-  page: number = 0,
-  pageSize: number = 10
-) {
+export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle' | 'yacht') {
   return useQuery({
-    queryKey: ['smart-clients', category, page],
+    queryKey: ['smart-clients', category],
     queryFn: async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
@@ -600,10 +589,7 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
-        // Fetch client profiles with pagination
-        const start = page * pageSize;
-        const end = start + pageSize - 1;
+        // CRITICAL: Exclude admin users from client discovery
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select(`
@@ -611,8 +597,8 @@ export function useSmartClientMatching(
             user_roles!inner(role)
           `)
           .neq('id', user.user.id)
-          .eq('user_roles.role', 'client')
-          .range(start, end);
+          .neq('user_roles.role', 'admin')
+          .limit(100);
 
         if (profileError) {
           throw profileError;
@@ -622,8 +608,9 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Map profiles with placeholder images - already filtered for clients only at DB level
+        // Show all non-admin profiles with placeholders
         const filteredProfiles = profiles
+          .filter(profile => !profile.user_roles || profile.user_roles.role !== 'admin')
           .map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0)
@@ -659,9 +646,10 @@ export function useSmartClientMatching(
           };
         });
 
-        // Sort by match score - no client-side limiting
+        // Sort by match score
         const sortedClients = matchedClients
-          .sort((a, b) => b.matchPercentage - a.matchPercentage);
+          .sort((a, b) => b.matchPercentage - a.matchPercentage)
+          .slice(0, 50);
 
         return sortedClients;
       } catch (error) {
@@ -670,7 +658,7 @@ export function useSmartClientMatching(
     },
     enabled: true,
     staleTime: 30 * 1000, // 30 seconds - shorter to reflect filter changes faster
-    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
+    refetchOnWindowFocus: true,
     retry: 3,
     retryDelay: 1000,
   });

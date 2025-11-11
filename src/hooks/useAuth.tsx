@@ -215,8 +215,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string, role: 'client' | 'owner') => {
     try {
-      console.log('[Auth] Starting sign in - selected role:', role);
-
+      console.log('[Auth] Starting sign in for role:', role);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -228,7 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // CRITICAL: Check user's ACTUAL role from user_roles table (source of truth)
+        // Check user's role from user_roles table
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
@@ -240,57 +240,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw new Error('Failed to verify user role');
         }
 
-        console.log('[Auth] User role from user_roles:', roleData?.role);
+        console.log('[Auth] User role from DB:', roleData?.role);
 
-        // If role exists in user_roles, use it (ignore selected button)
-        if (roleData) {
-          const actualRole = roleData.role as 'client' | 'owner';
-
-          // Log and notify if user clicked wrong button
-          if (actualRole !== role) {
-            console.log('[Auth] ⚠️ User clicked wrong role button. Actual:', actualRole, 'Selected:', role);
-            toast({
-              title: "Wrong Login Button",
-              description: `You're a ${actualRole}, but clicked "Sign in as ${role}". Please use the correct button next time.`,
-              variant: "default"
-            });
-          }
-
-          // Ensure profile exists with correct role
-          await createProfileIfMissing(data.user, actualRole);
-
+        // STRICT ROLE VALIDATION - Block login if role mismatch
+        if (roleData && roleData.role !== role) {
+          console.error('[Auth] ROLE MISMATCH - Blocking login. DB has:', roleData.role, 'but selected:', role);
+          
+          // Sign out the user immediately
+          await supabase.auth.signOut();
+          
+          const errorMessage = roleData.role === 'client' 
+            ? 'These credentials are for a client account. Please use the client login page.'
+            : 'These credentials are for an owner account. Please use the owner login page.';
+          
           toast({
-            title: "Welcome back!",
-            description: `Redirecting to your ${actualRole} dashboard...`,
+            title: "Wrong Login Page",
+            description: errorMessage,
+            variant: "destructive",
           });
-
-          return { error: null };
+          
+          return { error: new Error(errorMessage) };
         }
 
-        // No role found anywhere - this shouldn't happen for existing users
-        console.error('[Auth] ❌ No role found in user_roles for existing user!');
-        await supabase.auth.signOut();
+        // If no role exists, create it (new user)
+        if (!roleData) {
+          console.log('[Auth] No existing role, creating new role:', role);
+          const { error: insertError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: data.user.id,
+              role: role,
+            });
 
-        throw new Error('Account setup incomplete. Please contact support or sign up again.');
+          if (insertError) {
+            console.error('[Auth] Failed to create user role:', insertError);
+            throw new Error('Failed to set up user account');
+          }
+        }
+
+        // Ensure profile exists
+        await createProfileIfMissing(data.user, role);
+
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
       }
 
       return { error: null };
     } catch (error: any) {
       console.error('Sign in error:', error);
       let errorMessage = 'Failed to sign in. Please try again.';
-
+      
       if (error.message === 'Invalid login credentials') {
         errorMessage = 'Invalid email or password. Please check your credentials and try again.';
       } else if (error.message?.includes('Email not confirmed')) {
         errorMessage = 'Please check your email and click the confirmation link before signing in.';
       } else if (error.message?.includes('Too many requests')) {
         errorMessage = 'Too many login attempts. Please wait a moment and try again.';
-      } else if (error.message?.includes('Account setup incomplete')) {
-        errorMessage = error.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-
+      
       toast({
         title: "Sign In Failed",
         description: errorMessage,

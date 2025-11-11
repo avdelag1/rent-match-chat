@@ -36,24 +36,17 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
     };
 
     setSwipeSession(prev => [...prev, pattern]);
-
+    
     // Store in local storage for persistence
     const stored = localStorage.getItem('swipePatterns') || '[]';
-    let patterns = [];
-    try {
-      patterns = JSON.parse(stored);
-    } catch (error) {
-      console.error('Failed to parse swipePatterns:', error);
-      localStorage.removeItem('swipePatterns');
-      patterns = [];
-    }
+    const patterns = JSON.parse(stored);
     patterns.push(pattern);
-
+    
     // Keep only last 1000 patterns
     if (patterns.length > 1000) {
       patterns.splice(0, patterns.length - 1000);
     }
-
+    
     localStorage.setItem('swipePatterns', JSON.stringify(patterns));
   };
 
@@ -62,13 +55,7 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
     queryKey: ['swipe-metrics', userRole],
     queryFn: async (): Promise<SwipeMetrics> => {
       const stored = localStorage.getItem('swipePatterns') || '[]';
-      let patterns: SwipePattern[] = [];
-      try {
-        patterns = JSON.parse(stored);
-      } catch (error) {
-        console.error('Failed to parse swipePatterns:', error);
-        localStorage.removeItem('swipePatterns');
-      }
+      const patterns: SwipePattern[] = JSON.parse(stored);
       
       const today = patterns.filter(p => {
         const patternDate = new Date();
@@ -128,13 +115,7 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
   // Get daily swipe breakdown
   const getDailyBreakdown = () => {
     const stored = localStorage.getItem('swipePatterns') || '[]';
-    let patterns: SwipePattern[] = [];
-    try {
-      patterns = JSON.parse(stored);
-    } catch (error) {
-      console.error('Failed to parse swipePatterns:', error);
-      localStorage.removeItem('swipePatterns');
-    }
+    const patterns: SwipePattern[] = JSON.parse(stored);
     
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();

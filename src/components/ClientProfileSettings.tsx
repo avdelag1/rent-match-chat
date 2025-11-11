@@ -6,11 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { User, MapPin, Phone, Mail, Calendar, Flame, Home, Trash2 } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Calendar, Flame, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 export function ClientProfileSettings() {
   const { user } = useAuth();
@@ -76,44 +74,6 @@ export function ClientProfileSettings() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: 'Error',
-          description: 'You must be logged in to delete your account.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('delete-user', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Account Deleted',
-        description: 'Your account has been permanently deleted.',
-      });
-
-      // Sign out after successful deletion
-      await supabase.auth.signOut();
-      window.location.href = '/';
-    } catch (error: any) {
-      console.error('Delete account error:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete account. Please try again.',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -315,42 +275,6 @@ export function ClientProfileSettings() {
           {isLoading ? 'Saving...' : 'Save Profile'}
         </Button>
       </div>
-
-      {/* Danger Zone */}
-      <Card className="bg-destructive/10 border-destructive/20">
-        <CardHeader>
-          <CardTitle className="text-destructive flex items-center gap-2">
-            <Trash2 className="w-5 h-5" />
-            Danger Zone
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Once you delete your account, there is no going back. This will permanently delete your profile, messages, and all associated data.
-          </p>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full">
-                Delete Account Permanently
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
-                  Yes, delete my account
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -76,7 +76,7 @@ export function MessagingDashboard() {
     return () => {
       supabase.removeChannel(conversationsChannel);
     };
-  }, [user?.id]);
+  }, [user?.id, refetch]);
 
   // Handle direct conversation opening or auto-start from URL parameters
   useEffect(() => {
@@ -108,10 +108,10 @@ export function MessagingDashboard() {
           title: 'Loading conversation...',
           description: 'Please wait while we fetch your conversation.',
         });
-
-        // Reduced polling to prevent flickering - try up to 3 times (3 seconds total)
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          console.log(`[MessagingDashboard] Attempt ${attempt}/3 to find conversation`);
+        
+        // Try up to 10 times (10 seconds total)
+        for (let attempt = 1; attempt <= 10; attempt++) {
+          console.log(`[MessagingDashboard] Attempt ${attempt}/10 to find conversation`);
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refetch();
           conversation = conversations.find(c => c.id === conversationId);
@@ -127,7 +127,7 @@ export function MessagingDashboard() {
             description: 'You can now send messages!',
           });
         } else {
-          throw new Error('Conversation not found after 3 seconds');
+          throw new Error('Conversation not found after 10 seconds');
         }
       } else {
         console.log('[MessagingDashboard] Conversation already in cache');

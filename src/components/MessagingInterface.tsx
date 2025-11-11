@@ -4,12 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, AlertCircle, Zap } from 'lucide-react';
+import { ArrowLeft, Send } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
 import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { useAuth } from '@/hooks/useAuth';
-import { useMonthlyMessageLimits } from '@/hooks/useMonthlyMessageLimits';
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -31,9 +30,6 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   const sendMessage = useSendMessage();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Check monthly message limits
-  const { canSendMessage, messagesRemaining, isAtLimit, hasMonthlyLimit } = useMonthlyMessageLimits();
 
   // Enable realtime chat for live message updates
   const { startTyping, stopTyping, typingUsers, isConnected } = useRealtimeChat(conversationId);
@@ -154,27 +150,6 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Limit Warning */}
-      {hasMonthlyLimit && isAtLimit && (
-        <div className="px-4 py-3 bg-red-50 dark:bg-red-950 border-t border-red-200 dark:border-red-800 flex items-start gap-3">
-          <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-red-700 dark:text-red-300">
-            <p className="font-medium">Monthly message limit reached</p>
-            <p className="text-xs opacity-80">Upgrade your plan to send more messages</p>
-          </div>
-        </div>
-      )}
-
-      {/* Limit Info */}
-      {hasMonthlyLimit && !isAtLimit && (
-        <div className="px-4 py-2 bg-blue-50 dark:bg-blue-950 border-t border-blue-200 dark:border-blue-800 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300">
-            <Zap className="w-3 h-3" />
-            <span>{messagesRemaining} messages remaining this month</span>
-          </div>
-        </div>
-      )}
-
       {/* Input */}
       <form onSubmit={handleSendMessage} className="p-4 border-t shrink-0 bg-background/95">
         <div className="flex gap-2 items-end">
@@ -188,9 +163,9 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
                 stopTyping();
               }
             }}
-            placeholder={isAtLimit ? "Monthly limit reached" : "Type a message..."}
+            placeholder="Type a message..."
             className="flex-1 text-sm min-h-[44px]"
-            disabled={sendMessage.isPending || isAtLimit}
+            disabled={sendMessage.isPending}
             maxLength={1000}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -201,10 +176,9 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
           />
           <Button
             type="submit"
-            disabled={!newMessage.trim() || sendMessage.isPending || isAtLimit}
+            disabled={!newMessage.trim() || sendMessage.isPending}
             size="sm"
             className="shrink-0 h-[44px] w-[44px] rounded-lg"
-            title={isAtLimit ? "Monthly message limit reached" : "Send message"}
           >
             <Send className="w-4 h-4" />
           </Button>

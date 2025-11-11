@@ -10,7 +10,6 @@ import { ChevronDown, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
-import { ClientDemographicFilters } from './ClientDemographicFilters';
 
 interface YachtClientFiltersProps {
   onApply: (filters: any) => void;
@@ -42,14 +41,6 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
   const [waterActivities, setWaterActivities] = useState<string[]>(initialFilters.water_activities || []);
   const [navigationEquipment, setNavigationEquipment] = useState<string[]>(initialFilters.navigation_equipment || []);
   const [hasStabilizers, setHasStabilizers] = useState(initialFilters.has_stabilizers || false);
-
-  // Client demographic filters
-  const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
-  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
-  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
-  const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
-  const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
-  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
   const yachtTypeOptions = ['Sailboat', 'Motor Yacht', 'Catamaran', 'Luxury Cruiser', 'Sport Yacht', 'Mega Yacht'];
   const amenityOptions = ['Jacuzzi', 'Water Toys', 'Chef Service', 'Helipad', 'Cinema Room', 'Spa'];
@@ -99,15 +90,7 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
       hull_material: hullMaterial,
       water_activities: waterActivities,
       navigation_equipment: navigationEquipment,
-      has_stabilizers: hasStabilizers,
-      // Client demographic filters
-      gender_preference: genderPreference,
-      nationalities,
-      languages,
-      relationship_status: relationshipStatus,
-      has_pets_filter: hasPetsFilter,
-      age_min: ageRange[0],
-      age_max: ageRange[1]
+      has_stabilizers: hasStabilizers
     });
   };
 
@@ -131,13 +114,6 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
     setWaterActivities([]);
     setNavigationEquipment([]);
     setHasStabilizers(false);
-    // Clear client demographic filters
-    setGenderPreference('any');
-    setNationalities([]);
-    setLanguages([]);
-    setRelationshipStatus([]);
-    setHasPetsFilter('any');
-    setAgeRange([18, 65]);
     onApply({});
   };
 
@@ -187,7 +163,7 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
       </div>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Interest Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -202,27 +178,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               <SelectItem value="both">Rent or Buy</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter clients interested in chartering, purchasing, or both yachts</p>
+          <p className="text-xs text-muted-foreground">Filter clients interested in chartering, purchasing, or both yachts</p>
         </CollapsibleContent>
       </Collapsible>
 
-      <ClientDemographicFilters
-        genderPreference={genderPreference}
-        setGenderPreference={setGenderPreference}
-        ageRange={ageRange}
-        setAgeRange={setAgeRange}
-        relationshipStatus={relationshipStatus}
-        setRelationshipStatus={setRelationshipStatus}
-        hasPetsFilter={hasPetsFilter}
-        setHasPetsFilter={setHasPetsFilter}
-        nationalities={nationalities}
-        setNationalities={setNationalities}
-        languages={languages}
-        setLanguages={setLanguages}
-      />
-
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Yacht Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -244,12 +205,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Target clients seeking specific yacht designs</p>
+          <p className="text-xs text-muted-foreground">Target clients seeking specific yacht designs</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Yacht Size (feet)</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -268,12 +229,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Match clients with preferences for yacht scale and capacity</p>
+          <p className="text-xs text-muted-foreground">Match clients with preferences for yacht scale and capacity</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Crew Requirements</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -289,12 +250,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               <SelectItem value="captain_only">Captain Only</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter by whether clients need crew support</p>
+          <p className="text-xs text-muted-foreground">Filter by whether clients need crew support</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Duration Preference</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -311,12 +272,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               <SelectItem value="long_term">Long-Term</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Find clients based on rental/purchase timeline needs</p>
+          <p className="text-xs text-muted-foreground">Find clients based on rental/purchase timeline needs</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Luxury Amenities</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -338,12 +299,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Connect with high-end clients whose expectations match your yachts</p>
+          <p className="text-xs text-muted-foreground">Connect with high-end clients whose expectations match your yachts</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Price Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -362,12 +323,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Charter rate or purchase price range</p>
+          <p className="text-xs text-muted-foreground">Charter rate or purchase price range</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Year Built</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -386,12 +347,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Filter by yacht age</p>
+          <p className="text-xs text-muted-foreground">Filter by yacht age</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Guest Capacity</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -406,12 +367,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               step={1}
             />
           </div>
-          <p className="text-sm text-muted-foreground">Minimum passenger capacity</p>
+          <p className="text-xs text-muted-foreground">Minimum passenger capacity</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Cabin Count</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -426,12 +387,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               step={1}
             />
           </div>
-          <p className="text-sm text-muted-foreground">Number of sleeping cabins</p>
+          <p className="text-xs text-muted-foreground">Number of sleeping cabins</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Condition</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -448,12 +409,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Overall yacht condition</p>
+          <p className="text-xs text-muted-foreground">Overall yacht condition</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Fuel Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -475,12 +436,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Propulsion system type</p>
+          <p className="text-xs text-muted-foreground">Propulsion system type</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Engine Power (HP)</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -499,12 +460,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Total engine horsepower range</p>
+          <p className="text-xs text-muted-foreground">Total engine horsepower range</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Speed (Knots)</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -523,12 +484,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Maximum or cruising speed</p>
+          <p className="text-xs text-muted-foreground">Maximum or cruising speed</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -543,12 +504,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               step={100}
             />
           </div>
-          <p className="text-sm text-muted-foreground">Cruising range on full tanks</p>
+          <p className="text-xs text-muted-foreground">Cruising range on full tanks</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Hull Material</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -565,12 +526,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Hull construction material</p>
+          <p className="text-xs text-muted-foreground">Hull construction material</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Water Activities</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -592,12 +553,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Intended use and activities</p>
+          <p className="text-xs text-muted-foreground">Intended use and activities</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Navigation Equipment</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -619,12 +580,12 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Required navigation and safety equipment</p>
+          <p className="text-xs text-muted-foreground">Required navigation and safety equipment</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Additional Features</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -633,7 +594,7 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
             <Label>Stabilizers</Label>
             <Switch checked={hasStabilizers} onCheckedChange={setHasStabilizers} />
           </div>
-          <p className="text-sm text-muted-foreground">Yacht has stabilization system for smooth sailing</p>
+          <p className="text-xs text-muted-foreground">Yacht has stabilization system for smooth sailing</p>
         </CollapsibleContent>
       </Collapsible>
 

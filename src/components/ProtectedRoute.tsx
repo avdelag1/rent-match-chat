@@ -47,35 +47,27 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
     // Redirect to login if not authenticated
     if (!user) {
-      console.log('[ProtectedRoute] No user found, redirecting to login');
+      console.log('No user found, redirecting to login');
       navigate('/', { replace: true, state: { from: location } });
       return;
     }
 
     if (!userRole) {
       // Role not found after React Query retries - this shouldn't happen
-      console.error('[ProtectedRoute] ❌ User authenticated but no role found after retries');
+      console.error('ProtectedRoute: User authenticated but no role found after retries');
       toast({
         title: "Account setup incomplete",
-        description: "Please refresh or contact support if this persists.",
+        description: "Please contact support if this persists.",
         variant: "destructive"
       });
       navigate('/', { replace: true });
       return;
     }
 
-    // CRITICAL: Check role-based access for protected routes
+    // Check role-based access for protected routes
     if (requiredRole && userRole !== requiredRole) {
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      console.log(`[ProtectedRoute] 🚨 AUTHORIZATION VIOLATION: User role="${userRole}" tried to access ${location.pathname} which requires role="${requiredRole}"`);
-      console.log(`[ProtectedRoute] Redirecting to correct dashboard:`, targetPath);
-
-      toast({
-        title: "Access Denied",
-        description: `Redirecting to your ${userRole} dashboard.`,
-        variant: "destructive"
-      });
-
+      console.log('User has wrong role for this route, redirecting to:', targetPath);
       navigate(targetPath, { replace: true });
     }
   }, [user, userRole, loading, profileLoading, navigate, location, requiredRole]);

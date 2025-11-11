@@ -32,7 +32,7 @@ export default function OwnerFiltersExplore() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/owner/dashboard')}
+            onClick={() => navigate(-1)}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -41,7 +41,7 @@ export default function OwnerFiltersExplore() {
             variant="ghost"
             size="sm"
             onClick={handleClearAll}
-            className="text-primary hover:text-primary/80"
+            className="text-destructive"
           >
             Clear All
           </Button>
@@ -54,7 +54,7 @@ export default function OwnerFiltersExplore() {
           <TabsTrigger value="property" className="relative">
             Property
             {activeCategory === 'property' && activeFilterCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-primary text-primary-foreground text-xs">
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-primary text-xs">
                 {activeFilterCount}
               </Badge>
             )}
