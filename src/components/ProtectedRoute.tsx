@@ -1,8 +1,6 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -13,35 +11,13 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, userRole, roleLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: userRole, isLoading: profileLoading } = useQuery({
-    queryKey: ['user-role', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Role fetch error in ProtectedRoute:', error);
-        return null;
-      }
-      return data?.role;
-    },
-    enabled: !!user,
-    retry: 3,
-    retryDelay: 500,
-  });
-
   useEffect(() => {
     // Show loading while checking auth/role
-    if (loading || profileLoading) {
+    if (loading || roleLoading) {
       return;
     }
 
@@ -53,8 +29,8 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     }
 
     if (!userRole) {
-      // Role not found after React Query retries - this shouldn't happen
-      console.error('ProtectedRoute: User authenticated but no role found after retries');
+      // Role not found - this shouldn't happen
+      console.error('ProtectedRoute: User authenticated but no role found');
       toast({
         title: "Account setup incomplete",
         description: "Please contact support if this persists.",
@@ -70,9 +46,9 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       console.log('User has wrong role for this route, redirecting to:', targetPath);
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, navigate, location, requiredRole]);
+  }, [user, userRole, loading, roleLoading, navigate, location, requiredRole]);
 
-  if (loading || profileLoading) {
+  if (loading || roleLoading) {
     return (
       <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
         <div className="space-y-4">
