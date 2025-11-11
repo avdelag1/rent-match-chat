@@ -296,8 +296,8 @@ body {
   }
 
   @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
   }
 
   @keyframes particle-burst {
@@ -318,21 +318,6 @@ body {
     50% {
       box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
     }
-  }
-
-  @keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
-  @keyframes float-subtle {
-    0%, 100% { transform: translateY(0px) translateZ(0); }
-    50% { transform: translateY(-4px) translateZ(0); }
-  }
-
-  @keyframes blur-in {
-    from { filter: blur(20px); opacity: 0; }
-    to { filter: blur(0); opacity: 1; }
   }
 
   .gradient-text {
@@ -457,89 +442,5 @@ body {
   .touch-optimized {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Animated mesh gradient */
-  .animated-gradient {
-    background: linear-gradient(135deg,
-      hsl(345, 85%, 55%) 0%,
-      hsl(12, 100%, 58%) 25%,
-      hsl(20, 100%, 62%) 50%,
-      hsl(30, 95%, 65%) 75%,
-      hsl(40, 90%, 70%) 100%);
-    background-size: 200% 200%;
-    animation: gradient-shift 15s ease infinite;
-  }
-
-  /* 3D card tilt (subtle professional) */
-  .card-tilt {
-    transform-style: preserve-3d;
-    transition: transform 0.3s ease;
-  }
-
-  .card-tilt:hover {
-    transform: perspective(1000px) rotateX(2deg) rotateY(2deg) translateZ(10px);
-  }
-
-  /* Smooth blur on scroll */
-  .blur-on-scroll {
-    transition: backdrop-filter 0.3s ease, background-color 0.3s ease;
-  }
-
-  .blur-on-scroll.scrolled {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    background-color: rgba(255, 255, 255, 0.8);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
-  .dark .blur-on-scroll.scrolled {
-    background-color: rgba(0, 0, 0, 0.8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  /* Progressive image loading */
-  .progressive-image {
-    animation: blur-in 0.5s ease;
-  }
-
-  /* Ripple effect container */
-  .ripple-container {
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* Button press feedback */
-  .press-feedback {
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-  }
-
-  .press-feedback:active {
-    transform: scale(0.96) translateZ(0);
-  }
-
-  /* Smooth hover glow */
-  .hover-glow {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-
-  .hover-glow:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px) translateZ(0);
-  }
-
-  /* Floating animation for decorative elements */
-  .float-animate {
-    animation: float-subtle 6s ease-in-out infinite;
-  }
-
-  /* Scroll snap for cards */
-  .scroll-snap-x {
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-  }
-
-  .scroll-snap-item {
-    scroll-snap-align: center;
   }
 }

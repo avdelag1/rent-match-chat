@@ -64,7 +64,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
 
   const handleImageUpload = async (file: File): Promise<string> => {
     try {
-      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${user?.id}/${fileName}`;
 

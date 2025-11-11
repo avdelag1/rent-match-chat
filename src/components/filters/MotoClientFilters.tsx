@@ -10,7 +10,6 @@ import { ChevronDown, Save } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
-import { ClientDemographicFilters } from './ClientDemographicFilters';
 
 interface MotoClientFiltersProps {
   onApply: (filters: any) => void;
@@ -40,14 +39,6 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
   const [features, setFeatures] = useState<string[]>(initialFilters.features || []);
   const [batteryCapacity, setBatteryCapacity] = useState(initialFilters.battery_capacity_min || 0);
   const [isElectricOnly, setIsElectricOnly] = useState(initialFilters.is_electric_only || false);
-
-  // Client demographic filters
-  const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
-  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
-  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
-  const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
-  const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
-  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
   const motoTypeOptions = ['Sport Bike', 'Cruiser', 'Scooter', 'Off-Road', 'Touring', 'Street'];
   const usagePurposeOptions = ['Commuting', 'Touring', 'Racing', 'Off-Road', 'City Riding'];
@@ -106,15 +97,7 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
       has_abs: hasABS,
       features: features,
       battery_capacity_min: batteryCapacity,
-      is_electric_only: isElectricOnly,
-      // Client demographic filters
-      gender_preference: genderPreference,
-      nationalities,
-      languages,
-      relationship_status: relationshipStatus,
-      has_pets_filter: hasPetsFilter,
-      age_min: ageRange[0],
-      age_max: ageRange[1]
+      is_electric_only: isElectricOnly
     });
   };
 
@@ -136,13 +119,6 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
     setFeatures([]);
     setBatteryCapacity(0);
     setIsElectricOnly(false);
-    // Clear client demographic filters
-    setGenderPreference('any');
-    setNationalities([]);
-    setLanguages([]);
-    setRelationshipStatus([]);
-    setHasPetsFilter('any');
-    setAgeRange([18, 65]);
     onApply({});
   };
 
@@ -191,7 +167,7 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
       </div>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Interest Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -206,27 +182,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               <SelectItem value="both">Rent or Buy</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter clients interested in renting, buying, or both motorcycles</p>
+          <p className="text-xs text-muted-foreground">Filter clients interested in renting, buying, or both motorcycles</p>
         </CollapsibleContent>
       </Collapsible>
 
-      <ClientDemographicFilters
-        genderPreference={genderPreference}
-        setGenderPreference={setGenderPreference}
-        ageRange={ageRange}
-        setAgeRange={setAgeRange}
-        relationshipStatus={relationshipStatus}
-        setRelationshipStatus={setRelationshipStatus}
-        hasPetsFilter={hasPetsFilter}
-        setHasPetsFilter={setHasPetsFilter}
-        nationalities={nationalities}
-        setNationalities={setNationalities}
-        languages={languages}
-        setLanguages={setLanguages}
-      />
-
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Moto Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -248,12 +209,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Target clients seeking specific motorcycle styles</p>
+          <p className="text-xs text-muted-foreground">Target clients seeking specific motorcycle styles</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Engine Size (CC)</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -272,12 +233,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Find clients based on preferred power and size</p>
+          <p className="text-xs text-muted-foreground">Find clients based on preferred power and size</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Experience Level</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -293,12 +254,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               <SelectItem value="expert">Expert</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter by rider experience to ensure safety and suitability</p>
+          <p className="text-xs text-muted-foreground">Filter by rider experience to ensure safety and suitability</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Usage Purpose</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -320,12 +281,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Connect with clients whose intended use aligns with your motos</p>
+          <p className="text-xs text-muted-foreground">Connect with clients whose intended use aligns with your motos</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Price Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -344,12 +305,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Set budget range for motorcycle purchase or rental</p>
+          <p className="text-xs text-muted-foreground">Set budget range for motorcycle purchase or rental</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Year</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -368,12 +329,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Filter by manufacturing year</p>
+          <p className="text-xs text-muted-foreground">Filter by manufacturing year</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Mileage</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -392,12 +353,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Filter by odometer reading</p>
+          <p className="text-xs text-muted-foreground">Filter by odometer reading</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Transmission</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -414,12 +375,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter by transmission type</p>
+          <p className="text-xs text-muted-foreground">Filter by transmission type</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Condition</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -436,12 +397,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter by motorcycle condition</p>
+          <p className="text-xs text-muted-foreground">Filter by motorcycle condition</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Fuel Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -463,12 +424,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Filter by power source</p>
+          <p className="text-xs text-muted-foreground">Filter by power source</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Engine Configuration</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -485,12 +446,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter by number of cylinders</p>
+          <p className="text-xs text-muted-foreground">Filter by number of cylinders</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Cooling System</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -507,12 +468,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">Filter by engine cooling method</p>
+          <p className="text-xs text-muted-foreground">Filter by engine cooling method</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Safety & Features</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -538,12 +499,12 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Filter by safety and comfort features</p>
+          <p className="text-xs text-muted-foreground">Filter by safety and comfort features</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
           <Label className="font-medium">Electric Features</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -562,7 +523,7 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
                 max={30}
                 step={1}
               />
-              <p className="text-sm text-muted-foreground">Required battery capacity for electric motorcycles</p>
+              <p className="text-xs text-muted-foreground">Required battery capacity for electric motorcycles</p>
             </div>
           )}
         </CollapsibleContent>

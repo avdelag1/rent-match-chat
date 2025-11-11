@@ -71,35 +71,3 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-
-## 🗄️ Database Migrations
-
-This project includes a **Migration Viewer** tool to help you browse and apply Supabase migrations one by one.
-
-### Quick Start
-
-**Linux/Mac:**
-```sh
-./start-migration-viewer.sh
-```
-
-**Windows:**
-```cmd
-start-migration-viewer.bat
-```
-
-Then open your browser to `http://localhost:8080/migration-viewer.html`
-
-### Features
-
-- 📊 Browse all 136+ migrations sequentially
-- 📋 One-click copy SQL to clipboard
-- 🔍 Search migrations by name or date
-- ⌨️ Keyboard shortcuts (← → for navigation, Ctrl+C to copy)
-- 📈 View migration metadata (date, size, line count)
-
-### Documentation
-
-For detailed instructions, see [MIGRATION_VIEWER_GUIDE.md](./MIGRATION_VIEWER_GUIDE.md)
-
-For migration status and schema information, see [supabase/migrations/MIGRATION_STATUS.md](./supabase/migrations/MIGRATION_STATUS.md)

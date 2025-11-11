@@ -87,7 +87,7 @@ export function useUnreadMessageCount() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, query]);
 
   return {
     unreadCount: query.data || 0,

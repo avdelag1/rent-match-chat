@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,22 +25,22 @@ export function useRealtimeChat(conversationId: string) {
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Track typing with debounce - use ref to avoid circular dependencies
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Track typing with debounce
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [typingChannelRef, setTypingChannelRef] = useState<any>(null);
 
   const startTyping = useCallback(() => {
     if (!conversationId || !user?.id || !typingChannelRef) return;
 
     // Clear existing timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
     }
 
     // Send typing status if not already typing
     if (!isTyping) {
       setIsTyping(true);
-
+      
       // Use existing channel reference
       typingChannelRef.track({
         userId: user.id,
@@ -53,27 +53,21 @@ export function useRealtimeChat(conversationId: string) {
     }
 
     // Set timeout to stop typing after 3 seconds of inactivity
-    typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
-      typingChannelRef?.track({
-        userId: user.id,
-        userName: user.user_metadata?.full_name || 'User',
-        isTyping: false,
-        timestamp: Date.now()
-      }).catch((error: any) => {
-        console.error('[Typing] Error stopping presence:', error);
-      });
+    const timeout = setTimeout(() => {
+      stopTyping();
     }, 3000);
-  }, [conversationId, user?.id, isTyping, typingChannelRef]);
+
+    setTypingTimeout(timeout);
+  }, [conversationId, user?.id, isTyping, typingTimeout, typingChannelRef]);
 
   const stopTyping = useCallback(() => {
     if (!conversationId || !user?.id || !typingChannelRef) return;
 
     setIsTyping(false);
-
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = null;
+    
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+      setTypingTimeout(null);
     }
 
     typingChannelRef.track({
@@ -84,7 +78,7 @@ export function useRealtimeChat(conversationId: string) {
     }).catch((error: any) => {
       console.error('[Typing] Error stopping presence:', error);
     });
-  }, [conversationId, user?.id, typingChannelRef]);
+  }, [conversationId, user?.id, typingTimeout, typingChannelRef]);
 
   // Set up real-time subscriptions
   useEffect(() => {
@@ -129,22 +123,45 @@ export function useRealtimeChat(conversationId: string) {
           // Update messages immediately
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
             if (!oldData) return [completeMessage];
-            
-            // Check for both real IDs and temporary optimistic IDs
-            const exists = oldData.some((msg: any) => 
-              msg.id === newMessage.id || 
-              (msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id)
-            );
-            
+
+            // Enhanced duplicate detection:
+            // 1. Check for exact ID match (handles duplicate real-time events)
+            // 2. Check for temporary optimistic IDs that match content and sender
+            // 3. Check for near-duplicate messages (same sender, text, within 2 seconds)
+            const newMessageTime = new Date(newMessage.created_at).getTime();
+
+            const exists = oldData.some((msg: any) => {
+              if (msg.id === newMessage.id) return true;
+
+              // Check for optimistic message replacement
+              if (msg.id.toString().startsWith('temp-') &&
+                  msg.message_text === newMessage.message_text &&
+                  msg.sender_id === newMessage.sender_id) {
+                return true;
+              }
+
+              // Check for near-duplicates (within 2 seconds, same content and sender)
+              const msgTime = new Date(msg.created_at).getTime();
+              if (Math.abs(msgTime - newMessageTime) < 2000 &&
+                  msg.message_text === newMessage.message_text &&
+                  msg.sender_id === newMessage.sender_id) {
+                return true;
+              }
+
+              return false;
+            });
+
             if (exists) {
               // Replace optimistic message with real message if it exists
-              return oldData.map((msg: any) => 
-                msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id
+              return oldData.map((msg: any) =>
+                msg.id.toString().startsWith('temp-') &&
+                msg.message_text === newMessage.message_text &&
+                msg.sender_id === newMessage.sender_id
                   ? completeMessage
                   : msg
               );
             }
-            
+
             return [...oldData, completeMessage];
           });
 

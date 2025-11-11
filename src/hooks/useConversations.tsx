@@ -144,19 +144,13 @@ export function useConversations() {
   });
 
   // Helper to ensure a conversation is loaded in cache after creation
-  // Reduced polling to prevent flickering - rely more on realtime subscriptions
-  const ensureConversationInCache = async (conversationId: string, maxAttempts = 3): Promise<Conversation | null> => {
+  const ensureConversationInCache = async (conversationId: string, maxAttempts = 10): Promise<Conversation | null> => {
     for (let i = 0; i < maxAttempts; i++) {
-      // Check cache first without refetching
+      await query.refetch();
       const conversations = query.data || [];
       const conv = conversations.find((c: Conversation) => c.id === conversationId);
       if (conv) return conv;
-
-      // Only refetch if not found and not last attempt
-      if (i < maxAttempts - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await query.refetch();
-      }
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     return null;
   };
@@ -188,6 +182,9 @@ export function useConversationMessages(conversationId: string) {
       return data || [];
     },
     enabled: !!conversationId,
+    staleTime: 30000, // 30 seconds - messages are updated via realtime, not refetch
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 }
 
@@ -423,17 +420,18 @@ export function useSendMessage() {
       // Replace optimistic message with real message
       queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
         if (!oldData) return [data];
-        
-        return oldData.map((msg: any) => 
+
+        return oldData.map((msg: any) =>
           msg.id.toString().startsWith('temp-') && msg.message_text === data.message_text
             ? data
             : msg
         );
       });
-      
-      // Invalidate conversations to update last message
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
+
+      // Note: We don't invalidate queries here because:
+      // 1. Real-time subscriptions handle conversations list updates
+      // 2. Prevents unnecessary refetches that cause flickering
+      // 3. Optimistic update already updated the UI
     },
     onError: (error: Error, variables) => {
       // Remove optimistic message on error

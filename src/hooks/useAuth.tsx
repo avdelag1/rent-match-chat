@@ -11,6 +11,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  userRole: 'client' | 'owner' | null;
+  roleLoading: boolean;
   signUp: (email: string, password: string, role: 'client' | 'owner', name?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string, role: 'client' | 'owner') => Promise<{ error: any }>;
   signInWithOAuth: (provider: 'google', role: 'client' | 'owner') => Promise<{ error: any }>;
@@ -23,11 +25,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<'client' | 'owner' | null>(null);
+  const [roleLoading, setRoleLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const { createProfileIfMissing } = useProfileSetup();
   const { handleOAuthUserSetup: linkOAuthAccount, checkExistingAccount } = useAccountLinking();
+
+  // Fetch user role whenever user changes
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!user) {
+        setUserRole(null);
+        setRoleLoading(false);
+        return;
+      }
+
+      setRoleLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching user role:', error);
+          setUserRole(null);
+        } else {
+          setUserRole(data?.role || null);
+        }
+      } catch (error) {
+        console.error('Error in fetchUserRole:', error);
+        setUserRole(null);
+      } finally {
+        setRoleLoading(false);
+      }
+    };
+
+    fetchUserRole();
+  }, [user?.id]);
 
   useEffect(() => {
     let isInitialLoad = true;
@@ -215,8 +253,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string, role: 'client' | 'owner') => {
     try {
-      console.log('[Auth] Starting sign in - selected role:', role);
-
+      console.log('[Auth] Starting sign in for role:', role);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -228,7 +266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // CRITICAL: Check user's ACTUAL role from user_roles table (source of truth)
+        // Check user's role from user_roles table
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
@@ -240,106 +278,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw new Error('Failed to verify user role');
         }
 
-        console.log('[Auth] User role from user_roles:', roleData?.role);
+        console.log('[Auth] User role from DB:', roleData?.role);
 
-        // If role exists in user_roles, use it (ignore selected button)
-        if (roleData) {
-          const actualRole = roleData.role as 'client' | 'owner';
-
-          // Log and notify if user clicked wrong button
-          if (actualRole !== role) {
-            console.log('[Auth] ⚠️ User clicked wrong role button. Actual:', actualRole, 'Selected:', role);
-            toast({
-              title: "Wrong Login Button",
-              description: `You're a ${actualRole}, but clicked "Sign in as ${role}". Please use the correct button next time.`,
-              variant: "default"
-            });
-          }
-
-          // Ensure profile exists with correct role
-          await createProfileIfMissing(data.user, actualRole);
-
+        // STRICT ROLE VALIDATION - Block login if role mismatch
+        if (roleData && roleData.role !== role) {
+          console.error('[Auth] ROLE MISMATCH - Blocking login. DB has:', roleData.role, 'but selected:', role);
+          
+          // Sign out the user immediately
+          await supabase.auth.signOut();
+          
+          const errorMessage = roleData.role === 'client' 
+            ? 'These credentials are for a client account. Please use the client login page.'
+            : 'These credentials are for an owner account. Please use the owner login page.';
+          
           toast({
-            title: "Welcome back!",
-            description: `Redirecting to your ${actualRole} dashboard...`,
+            title: "Wrong Login Page",
+            description: errorMessage,
+            variant: "destructive",
           });
-
-          return { error: null };
+          
+          return { error: new Error(errorMessage) };
         }
 
-        // SECURITY FIX: If no role in user_roles, check profiles table as fallback
-        console.log('[Auth] No role in user_roles, checking profiles table...');
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error('[Auth] Profile check error:', profileError);
-        }
-
-        if (profileData?.role) {
-          // Found role in profiles table - sync it to user_roles
-          console.log('[Auth] Found role in profiles:', profileData.role, '- Syncing to user_roles');
-          const actualRole = profileData.role as 'client' | 'owner';
-
-          // Log and notify if user clicked wrong button
-          if (actualRole !== role) {
-            console.log('[Auth] ⚠️ User clicked wrong role button. Actual:', actualRole, 'Selected:', role);
-            toast({
-              title: "Wrong Login Button",
-              description: `You're a ${actualRole}, but clicked "Sign in as ${role}". Please use the correct button next time.`,
-              variant: "default"
-            });
-          }
-
+        // If no role exists, create it (new user)
+        if (!roleData) {
+          console.log('[Auth] No existing role, creating new role:', role);
           const { error: insertError } = await supabase
             .from('user_roles')
             .insert({
               user_id: data.user.id,
-              role: actualRole,  // Use role from profiles, NOT selected button
+              role: role,
             });
 
           if (insertError) {
-            console.error('[Auth] Failed to sync role to user_roles:', insertError);
-            // Don't fail login, just log the error
+            console.error('[Auth] Failed to create user role:', insertError);
+            throw new Error('Failed to set up user account');
           }
-
-          await createProfileIfMissing(data.user, actualRole);
-
-          toast({
-            title: "Welcome back!",
-            description: `Redirecting to your ${actualRole} dashboard...`,
-          });
-
-          return { error: null };
         }
 
-        // No role found anywhere - this shouldn't happen for existing users
-        console.error('[Auth] ❌ No role found in user_roles OR profiles for existing user!');
-        await supabase.auth.signOut();
+        // Ensure profile exists
+        await createProfileIfMissing(data.user, role);
 
-        throw new Error('Account setup incomplete. Please contact support or sign up again.');
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
       }
 
       return { error: null };
     } catch (error: any) {
       console.error('Sign in error:', error);
       let errorMessage = 'Failed to sign in. Please try again.';
-
+      
       if (error.message === 'Invalid login credentials') {
         errorMessage = 'Invalid email or password. Please check your credentials and try again.';
       } else if (error.message?.includes('Email not confirmed')) {
         errorMessage = 'Please check your email and click the confirmation link before signing in.';
       } else if (error.message?.includes('Too many requests')) {
         errorMessage = 'Too many login attempts. Please wait a moment and try again.';
-      } else if (error.message?.includes('Account setup incomplete')) {
-        errorMessage = error.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-
+      
       toast({
         title: "Sign In Failed",
         description: errorMessage,
@@ -424,6 +424,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     loading,
+    userRole,
+    roleLoading,
     signUp,
     signIn,
     signInWithOAuth,
