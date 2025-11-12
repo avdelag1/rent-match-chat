@@ -29,7 +29,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
 
       try {
         // OPTIMIZED: Get client profiles with role in ONE query using JOIN
-        // CRITICAL: Only show users with 'client' role (excludes owners, admins, etc.)
+        // CRITICAL: Exclude admin users from discovery
         const { data: clientProfiles, error } = await supabase
           .from('profiles_public')
           .select(`
@@ -37,6 +37,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = []) {
             user_roles!inner(role)
           `)
           .eq('user_roles.role', 'client')
+          .neq('user_roles.role', 'admin')
           .limit(100);
 
         if (error) {

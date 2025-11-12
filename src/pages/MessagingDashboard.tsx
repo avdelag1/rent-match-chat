@@ -76,10 +76,6 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          // CRITICAL: Only update if we're NOT in an active chat to prevent flickering
-          // When user is actively chatting, don't update the list - it causes unnecessary re-renders
-          if (selectedConversationId) return;
-
           // Use setQueryData instead of refetch to prevent flickering
           // Only update the specific conversation that changed
           queryClient.setQueryData(['conversations', user.id], (oldConversations: any) => {

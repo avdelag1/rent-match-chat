@@ -54,12 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Error fetching user role:', error);
           setUserRole(null);
         } else {
-          const role = data?.role;
-          if (role === 'client' || role === 'owner') {
-            setUserRole(role);
-          } else {
-            setUserRole(null);
-          }
+          setUserRole(data?.role || null);
         }
       } catch (error) {
         console.error('Error in fetchUserRole:', error);

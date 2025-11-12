@@ -167,19 +167,9 @@ export function useConversationMessages(conversationId: string) {
     staleTime: Infinity, // Never consider stale - real-time handles all updates
     gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnMount: 'always', // Always fetch on mount to get initial messages
+    refetchOnMount: false, // Don't refetch on component mount
     refetchOnReconnect: false, // Don't refetch on network reconnect
     refetchInterval: false, // No polling
-    // CRITICAL: Structural sharing prevents re-renders when data hasn't actually changed
-    structuralSharing: (oldData, newData) => {
-      if (!oldData || !newData) return newData;
-      // Type guard to ensure arrays
-      if (!Array.isArray(oldData) || !Array.isArray(newData)) return newData;
-      // Only update if message count or last message actually changed
-      if (oldData.length !== newData.length) return newData;
-      if (oldData[oldData.length - 1]?.id !== newData[newData.length - 1]?.id) return newData;
-      return oldData; // Keep old reference if nothing changed
-    }
   });
 }
 
