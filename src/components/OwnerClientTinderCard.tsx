@@ -166,7 +166,7 @@ export function OwnerClientTinderCard({
       </motion.div>
 
       {/* Card Content */}
-      <div className="relative w-full h-[calc(100vh-280px)] max-h-[650px] rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <div className="relative w-full h-[calc(100vh-260px)] max-h-[680px] rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Main Image with Tap Zones */}
         <div 
           className="relative w-full h-full cursor-pointer select-none"
