@@ -173,11 +173,7 @@ export function useRealtimeChat(conversationId: string) {
         }
       )
       .on('presence', { event: 'sync' }, () => {
-        // Only update if not already connected to avoid unnecessary re-renders
-        setIsConnected(prev => {
-          if (!prev) return true;
-          return prev;
-        });
+        // Presence sync event - do nothing, connection already set in subscribe callback
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         // User joined
@@ -187,6 +183,9 @@ export function useRealtimeChat(conversationId: string) {
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
+          // Set connected immediately when subscribed
+          setIsConnected(true);
+
           // Track presence
           await messagesChannel.track({
             userId: user.id,
