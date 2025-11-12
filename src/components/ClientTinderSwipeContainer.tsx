@@ -214,12 +214,12 @@ export function ClientTinderSwipeContainer({
       />
 
       {/* Full-Screen Card Stack */}
-      <div className="relative w-full h-full pt-16 pb-0 px-2 sm:px-4 flex items-center justify-center">
-        <div className="relative w-full h-full max-w-lg">
+      <div className="absolute inset-0 w-full h-full top-16">
+        <div className="relative w-full h-full">
           {/* Next Card (Behind) - Peek Effect */}
           {nextProfile && (
             <motion.div
-              className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+              className="absolute inset-0 w-full h-full overflow-hidden"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 0.95, opacity: 0 }}
             >
@@ -257,7 +257,7 @@ export function ClientTinderSwipeContainer({
                   stiffness: 300,
                   damping: 30,
                 }}
-                className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+                className="absolute inset-0 w-full h-full overflow-hidden"
               >
                 <ClientTinderSwipeCard
                   profile={currentProfile}
