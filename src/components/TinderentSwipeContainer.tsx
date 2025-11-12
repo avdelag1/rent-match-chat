@@ -289,9 +289,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const currentListing = listings[currentIndex];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
-      {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-180px)] max-w-lg mx-auto">
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-background">
+      {/* Full-Screen Card Stack */}
+      <div className="absolute inset-0 w-full h-full">
         <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div
@@ -299,16 +299,15 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
-                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
                 y: 0,
                 opacity: 0,
                 rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
                 scale: 0.85,
                 transition: {
                   type: "spring",
-                  stiffness: 300,
-                  damping: 25,
-                  mass: 0.8,
+                  stiffness: 400,
+                  damping: 35,
                   duration: 0.3
                 }
               }}
@@ -316,10 +315,8 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                 type: "spring",
                 stiffness: 300,
                 damping: 30,
-                mass: 1
               }}
-              className="w-full h-full"
-              style={{ willChange: 'transform, opacity' }}
+              className="absolute inset-0 w-full h-full"
             >
               <TinderSwipeCard
                 listing={currentListing}
@@ -332,7 +329,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons - New component */}
+      {/* Action Buttons - Floating on top of card */}
       <SwipeActionButtons
         onUndo={() => undoLastSwipe()}
         onPass={() => handleButtonSwipe('left')}
