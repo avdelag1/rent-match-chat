@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
-import { SwipeActionButtons } from './SwipeActionButtons';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { SwipeTopBar } from './owner/SwipeTopBar';
 import { MatchCelebration } from './MatchCelebration';
@@ -15,7 +14,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, AlertCircle } from 'lucide-react';
+import { RotateCcw, AlertCircle, X, Eye, Heart } from 'lucide-react';
 
 interface ClientTinderSwipeContainerProps {
   onClientTap?: (clientId: string) => void;
@@ -214,71 +213,153 @@ export function ClientTinderSwipeContainer({
         }}
       />
 
-      {/* Full-Screen Card Stack */}
-      <div className="absolute inset-0 w-full h-full">
-        {/* Next Card (Behind) - Peek Effect */}
-        {nextProfile && (
-          <motion.div
-            className="absolute inset-0 w-full h-full"
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 0.95, opacity: 0 }}
-          >
-            <ClientTinderSwipeCard
-              profile={nextProfile}
-              onSwipe={() => {}}
-              isTop={false}
-              showNextCard={true}
-            />
-          </motion.div>
-        )}
-
-        {/* Top Card (Active) */}
-        <AnimatePresence mode="wait">
-          {currentProfile && (
+      {/* Full-Screen Card Stack with Floating Buttons */}
+      <div className="relative w-full h-full pt-16 pb-0 px-2 sm:px-4 flex items-center justify-center">
+        <div className="relative w-full h-full max-w-lg">
+          {/* Next Card (Behind) - Peek Effect */}
+          {nextProfile && (
             <motion.div
-              key={currentProfile.user_id}
-              initial={{ scale: 1, opacity: 1 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{
-                x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
-                y: 0,
-                opacity: 0,
-                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
-                scale: 0.85,
-                transition: {
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 35,
-                  duration: 0.3,
-                },
-              }}
-              transition={{
-                type: 'spring',
-                stiffness: 300,
-                damping: 30,
-              }}
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 0.95, opacity: 0 }}
             >
               <ClientTinderSwipeCard
-                profile={currentProfile}
-                onSwipe={handleSwipe}
-                onTap={() => onClientTap?.(currentProfile.user_id)}
-                onInsights={handleInsights}
-                isTop={true}
+                profile={nextProfile}
+                onSwipe={() => {}}
+                isTop={false}
+                showNextCard={true}
               />
             </motion.div>
           )}
-        </AnimatePresence>
-      </div>
 
-      {/* Action Buttons - Fixed at Bottom */}
-      <SwipeActionButtons
-        onUndo={handleUndo}
-        onPass={() => handleButtonSwipe('left')}
-        onInfo={handleInsights}
-        onLike={() => handleButtonSwipe('right')}
-        canUndo={canUndo}
-      />
+          {/* Top Card (Active) */}
+          <AnimatePresence mode="wait">
+            {currentProfile && (
+              <motion.div
+                key={currentProfile.user_id}
+                initial={{ scale: 1, opacity: 1 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{
+                  x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
+                  y: 0,
+                  opacity: 0,
+                  rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                  scale: 0.85,
+                  transition: {
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 35,
+                    duration: 0.3,
+                  },
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 30,
+                }}
+                className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+              >
+                <ClientTinderSwipeCard
+                  profile={currentProfile}
+                  onSwipe={handleSwipe}
+                  onTap={() => onClientTap?.(currentProfile.user_id)}
+                  onInsights={handleInsights}
+                  isTop={true}
+                />
+
+                {/* Floating Action Buttons - Overlay on Card */}
+                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-4 sm:p-6">
+                  {/* Top Spacer */}
+                  <div className="flex-1" />
+
+                  {/* Bottom Floating Buttons */}
+                  <div className="pointer-events-auto w-full flex items-center justify-center gap-3 sm:gap-4 bg-gradient-to-t from-black/60 via-black/30 to-transparent rounded-b-3xl pt-8 pb-6 px-4">
+                    {/* Undo Button */}
+                    <motion.div
+                      whileHover={{ scale: canUndo ? 1.05 : 1 }}
+                      whileTap={{ scale: canUndo ? 0.95 : 1 }}
+                    >
+                      <button
+                        onClick={handleUndo}
+                        disabled={!canUndo}
+                        className={`
+                          relative h-12 w-12 sm:h-14 sm:w-14 rounded-full border-2 p-0 flex items-center justify-center
+                          transition-all duration-200 shadow-md
+                          ${canUndo
+                            ? 'border-yellow-400 bg-yellow-500/20 hover:bg-yellow-500 hover:text-white text-yellow-300'
+                            : 'border-gray-600 bg-gray-600/10 text-gray-600 cursor-not-allowed opacity-50'
+                          }
+                        `}
+                        aria-label="Undo"
+                      >
+                        <RotateCcw className="h-5 w-5 sm:h-6 sm:w-6" />
+                      </button>
+                    </motion.div>
+
+                    {/* Pass Button */}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <button
+                        onClick={() => handleButtonSwipe('left')}
+                        className="
+                          h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2 border-red-400
+                          bg-red-500/20 hover:bg-red-500 hover:text-white
+                          text-red-300 p-0 shadow-lg transition-all duration-200
+                          flex items-center justify-center
+                        "
+                        aria-label="Pass"
+                      >
+                        <X className="h-6 w-6 sm:h-7 sm:w-7 stroke-[2.5]" />
+                      </button>
+                    </motion.div>
+
+                    {/* Info Button */}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <button
+                        onClick={handleInsights}
+                        className="
+                          h-12 w-12 sm:h-14 sm:w-14 rounded-full border-2 border-blue-400
+                          bg-blue-500/20 hover:bg-blue-500 hover:text-white
+                          text-blue-300 p-0 shadow-md transition-all duration-200
+                          flex items-center justify-center
+                        "
+                        aria-label="Info"
+                      >
+                        <Eye className="h-5 w-5 sm:h-6 sm:w-6" />
+                      </button>
+                    </motion.div>
+
+                    {/* Like Button */}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <button
+                        onClick={() => handleButtonSwipe('right')}
+                        className="
+                          relative h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2
+                          bg-gradient-to-br from-orange-400 to-red-500
+                          border-orange-300 text-white p-0 shadow-lg
+                          hover:shadow-orange-500/50 transition-all duration-200
+                          flex items-center justify-center
+                        "
+                        aria-label="Like"
+                      >
+                        <Heart className="h-6 w-6 sm:h-7 sm:w-7 fill-white" />
+                      </button>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
 
       {/* Insights Modal */}
       {currentProfile && (

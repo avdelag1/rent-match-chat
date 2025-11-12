@@ -2,14 +2,13 @@ import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { OwnerClientTinderCard } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
-import { MatchPercentageBadge } from './MatchPercentageBadge';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
-import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft } from 'lucide-react';
+import { X, RotateCcw, Heart, SlidersHorizontal, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
@@ -302,8 +301,7 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
-
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-background">
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
@@ -314,26 +312,26 @@ export function ClientSwipeContainer({
             exit={{ opacity: 0 }}
           >
             <motion.div
-              initial={{ 
-                scale: 0, 
-                opacity: 0, 
+              initial={{
+                scale: 0,
+                opacity: 0,
                 x: emojiAnimation.position === 'right' ? 80 : -80,
                 rotate: emojiAnimation.position === 'right' ? 15 : -15
               }}
-              animate={{ 
-                scale: 2.5, 
-                opacity: 1, 
+              animate={{
+                scale: 2.5,
+                opacity: 1,
                 x: emojiAnimation.position === 'right' ? 40 : -40,
                 rotate: 0
               }}
-              exit={{ 
+              exit={{
                 scale: emojiAnimation.type === 'like' ? 3.5 : 1.5,
-                opacity: 0, 
+                opacity: 0,
                 y: emojiAnimation.type === 'like' ? -250 : -100,
                 x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -300 : 300),
                 rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -75 : 75)
               }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 500,
                 damping: 30,
@@ -347,8 +345,8 @@ export function ClientSwipeContainer({
               <div className="relative">
                 {/* Glow effect */}
                 <div className={`absolute inset-0 blur-3xl opacity-50 ${
-                  emojiAnimation.type === 'like' 
-                    ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                  emojiAnimation.type === 'like'
+                    ? 'bg-gradient-to-r from-orange-400 to-red-500'
                     : 'bg-gradient-to-r from-gray-400 to-blue-300'
                 }`} />
                 {/* Emoji */}
@@ -361,118 +359,123 @@ export function ClientSwipeContainer({
         )}
       </AnimatePresence>
 
-      {/* Single Card Container - No infinite scrolling */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
-        <AnimatePresence mode="wait">
-          {currentClient && (
-            <motion.div
-              key={currentClient.user_id}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{
-                scale: 1,
-                opacity: 1
-              }}
-              exit={{
-                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
-                opacity: 0,
-                rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
-                scale: 0.85,
-                transition: {
+      {/* Full-Screen Card Container with Floating Buttons */}
+      <div className="relative w-full h-full pt-4 px-2 sm:px-4 flex items-center justify-center">
+        <div className="relative w-full h-full max-w-lg">
+          <AnimatePresence mode="wait">
+            {currentClient && (
+              <motion.div
+                key={currentClient.user_id}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{
+                  scale: 1,
+                  opacity: 1
+                }}
+                exit={{
+                  x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                  opacity: 0,
+                  rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
+                  scale: 0.85,
+                  transition: {
+                    type: "spring",
+                    stiffness: 180,
+                    damping: 15,
+                    mass: 0.5,
+                    duration: 0.3
+                  }
+                }}
+                transition={{
                   type: "spring",
-                  stiffness: 180,
-                  damping: 15,
-                  mass: 0.5,
-                  duration: 0.3
-                }
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 0.7
-              }}
-              className="w-full h-full"
-              style={{
-                willChange: 'transform, opacity'
-              }}
-            >
-              <OwnerClientTinderCard
-                profile={currentClient}
-                onSwipe={handleSwipe}
-                onTap={() => onClientTap(currentClient.user_id)}
-                onInsights={() => handleInsights(currentClient.user_id)}
-                onMessage={() => handleConnect(currentClient.user_id)}
-                isTop={true}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Enhanced 3 Button Action Bar - Return, Dislike, Like */}
-      <div className="fixed bottom-20 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto pb-4 pt-8">
-          <motion.div
-            className="flex justify-center gap-4 sm:gap-6 items-center px-4"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            {/* Return/Back Button - 3D Enhanced */}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button
-                size="lg"
-                variant="ghost"
-                className="relative w-16 h-16 rounded-full bg-white border-4 border-gray-500 text-gray-600 hover:bg-gradient-to-br hover:from-gray-500 hover:to-gray-600 hover:text-white hover:border-gray-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(107,114,128,0.3),0_2px_8px_rgba(107,114,128,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(107,114,128,0.4),0_4px_12px_rgba(107,114,128,0.3)] transform-gpu"
-                onClick={() => navigate(-1)}
-                disabled={false}
-                aria-label="Go back"
-                title="Return"
+                  stiffness: 300,
+                  damping: 30,
+                  mass: 0.7
+                }}
+                className="w-full h-full rounded-3xl overflow-hidden"
+                style={{
+                  willChange: 'transform, opacity'
+                }}
               >
-                <ArrowLeft className="w-8 h-8 stroke-[3]" />
-              </Button>
-            </motion.div>
+                <OwnerClientTinderCard
+                  profile={currentClient}
+                  onSwipe={handleSwipe}
+                  onTap={() => onClientTap(currentClient.user_id)}
+                  onInsights={() => handleInsights(currentClient.user_id)}
+                  onMessage={() => handleConnect(currentClient.user_id)}
+                  isTop={true}
+                  hasPremium={hasPremiumMessaging}
+                />
 
-            {/* Dislike Button - 3D Enhanced */}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button
-                size="lg"
-                variant="ghost"
-                className="relative w-16 h-16 rounded-full bg-white border-4 border-red-500 text-red-500 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 hover:text-white hover:border-red-600 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(239,68,68,0.3),0_2px_8px_rgba(239,68,68,0.2),inset_0_-2px_4px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_24px_rgba(239,68,68,0.4),0_4px_12px_rgba(239,68,68,0.3)] transform-gpu"
-                onClick={() => handleSwipe('left')}
-                disabled={swipeMutation.isPending || !currentClient}
-                aria-label="Dislike"
-                title="Dislike"
-              >
-                <X className="w-8 h-8 stroke-[3]" />
-              </Button>
-            </motion.div>
+                {/* Floating Action Buttons - Overlay on Card */}
+                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-4 sm:p-6">
+                  {/* Top Spacer */}
+                  <div className="flex-1" />
 
-            {/* Like Button - 3D Enhanced (Largest, Center) */}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button
-                size="lg"
-                variant="ghost"
-                className="relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 text-white border-4 border-orange-300 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 hover:border-orange-400 transition-all duration-300 p-0 shadow-[0_8px_16px_rgba(249,115,22,0.4),0_2px_8px_rgba(249,115,22,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),0_0_30px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_24px_rgba(249,115,22,0.5),0_4px_12px_rgba(249,115,22,0.4),0_0_40px_rgba(249,115,22,0.3)] transform-gpu animate-pulse-subtle"
-                onClick={() => handleSwipe('right')}
-                disabled={swipeMutation.isPending || !currentClient}
-                aria-label="Like"
-                title="Like"
-              >
-                <Heart className="w-10 h-10 fill-current drop-shadow-lg" />
-              </Button>
-            </motion.div>
-          </motion.div>
+                  {/* Bottom Floating Buttons */}
+                  <div className="pointer-events-auto w-full flex items-center justify-center gap-2 sm:gap-3 md:gap-4 bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-3xl pt-8 pb-6 px-4">
+                    {/* Return Button */}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <button
+                        onClick={() => navigate(-1)}
+                        className="
+                          h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full border-2 border-gray-400
+                          bg-gray-500/20 hover:bg-gray-500 hover:text-white
+                          text-gray-300 p-0 shadow-lg transition-all duration-200
+                          flex items-center justify-center
+                        "
+                        aria-label="Go back"
+                      >
+                        <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 stroke-[3]" />
+                      </button>
+                    </motion.div>
+
+                    {/* Dislike Button */}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <button
+                        onClick={() => handleSwipe('left')}
+                        disabled={swipeMutation.isPending || !currentClient}
+                        className="
+                          h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full border-2 border-red-400
+                          bg-red-500/20 hover:bg-red-500 hover:text-white
+                          text-red-300 p-0 shadow-lg transition-all duration-200
+                          flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed
+                        "
+                        aria-label="Dislike"
+                      >
+                        <X className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 stroke-[3]" />
+                      </button>
+                    </motion.div>
+
+                    {/* Like Button (Larger) */}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <button
+                        onClick={() => handleSwipe('right')}
+                        disabled={swipeMutation.isPending || !currentClient}
+                        className="
+                          h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full border-2
+                          bg-gradient-to-br from-orange-400 via-pink-500 to-rose-500
+                          border-orange-300 text-white p-0 shadow-lg
+                          hover:shadow-orange-500/50 transition-all duration-200
+                          flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed
+                        "
+                        aria-label="Like"
+                      >
+                        <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-10 md:w-10 fill-white" />
+                      </button>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
