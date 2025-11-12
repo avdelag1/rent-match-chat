@@ -130,15 +130,6 @@ const MessagingInterfaceComponent = ({ conversationId, otherUser, onBack }: Mess
         </div>
       </div>
 
-      {/* Connection Status */}
-      {!isConnected && (
-        <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-950 border-b border-yellow-200 dark:border-yellow-800 text-center">
-          <p className="text-xs text-yellow-800 dark:text-yellow-200">
-            🔄 Connecting to chat...
-          </p>
-        </div>
-      )}
-
       {/* Messages */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
