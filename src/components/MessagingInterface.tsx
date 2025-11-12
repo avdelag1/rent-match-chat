@@ -55,26 +55,28 @@ const MessagingInterfaceComponent = ({ conversationId, otherUser, onBack }: Mess
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Initial scroll to bottom when messages first load
+  // Optimized scroll logic - handles both initial load and new messages
   useEffect(() => {
-    if (messages.length > 0 && prevMessagesLengthRef.current === 0) {
-      // Instant scroll on initial load
-      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-    }
-  }, [messages.length > 0]);
-
-  // Auto-scroll to bottom ONLY when new messages arrive AND user is at bottom
-  useEffect(() => {
+    // Only process if messages actually changed (not just re-render)
+    if (messages.length === prevMessagesLengthRef.current) return;
+    
     const hasNewMessages = messages.length > prevMessagesLengthRef.current;
+    const isInitialLoad = prevMessagesLengthRef.current === 0;
     prevMessagesLengthRef.current = messages.length;
 
+    // Instant scroll on initial load
+    if (isInitialLoad && messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+      return;
+    }
+
+    // Smooth scroll only if user is at bottom AND new messages arrived
     if (hasNewMessages && isUserAtBottomRef.current && messages.length > 0) {
-      // Use requestAnimationFrame to avoid layout thrashing
       requestAnimationFrame(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       });
     }
-  }, [messages.length]); // Only depend on length, not entire array
+  }, [messages]); // Depend on messages array for proper change detection
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
