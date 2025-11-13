@@ -589,18 +589,20 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           return [];
         }
 
-        // CRITICAL: Exclude admin users from client discovery
+        // Query profiles directly - RLS policy will enforce access control
+        // Fetch active client profiles for owner discovery
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
-          .select(`
-            id, full_name, age, gender, interests, preferred_activities, city, lifestyle_tags, images, avatar_url, verified, budget_min, budget_max, monthly_income, has_pets, smoking, party_friendly,
-            user_roles!inner(role)
-          `)
+          .select(
+            'id, full_name, age, gender, interests, preferred_activities, city, lifestyle_tags, images, avatar_url, verified, budget_min, budget_max, monthly_income, has_pets, smoking, party_friendly'
+          )
           .neq('id', user.user.id)
-          .neq('user_roles.role', 'admin')
+          .eq('is_active', true)
+          .eq('onboarding_completed', true)
           .limit(100);
 
         if (profileError) {
+          console.error('[SmartClientMatching] Error fetching profiles:', profileError);
           throw profileError;
         }
 
@@ -608,15 +610,13 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           return [];
         }
 
-        // Show all non-admin profiles with placeholders
-        const filteredProfiles = profiles
-          .filter(profile => !profile.user_roles || profile.user_roles.role !== 'admin')
-          .map(profile => ({
-            ...profile,
-            images: (profile.images && profile.images.length > 0)
-              ? profile.images
-              : ['/placeholder-avatar.svg']
-          }));
+        // Show all active profiles with placeholders for missing images
+        const filteredProfiles = profiles.map(profile => ({
+          ...profile,
+          images: (profile.images && profile.images.length > 0)
+            ? profile.images
+            : ['/placeholder-avatar.svg']
+        }));
 
         // Calculate match scores - SIMPLIFIED: Give everyone 70% match for now
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
@@ -653,6 +653,7 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
 
         return sortedClients;
       } catch (error) {
+        console.error('[SmartClientMatching] Error:', error);
         return [];
       }
     },
