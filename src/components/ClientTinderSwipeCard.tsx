@@ -217,7 +217,7 @@ export function ClientTinderSwipeCard({
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
-            height: isBottomSheetExpanded ? '85%' : '30%'
+            height: isBottomSheetExpanded ? '75%' : '25%'
           }}
           transition={{
             type: "spring",
