@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
-import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { SwipeTopBar } from './owner/SwipeTopBar';
 import { MatchCelebration } from './MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -36,7 +35,6 @@ export function ClientTinderSwipeContainer({
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [insightsOpen, setInsightsOpen] = useState(false);
 
   // Match celebration state
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -105,9 +103,9 @@ export function ClientTinderSwipeContainer({
   };
 
   const handleInsights = useCallback(() => {
-    setInsightsOpen(true);
     if (onInsights && currentProfile) {
       onInsights(currentProfile.user_id);
+      triggerHaptic('light');
     }
   }, [onInsights, currentProfile]);
 
@@ -356,15 +354,6 @@ export function ClientTinderSwipeContainer({
           </motion.div>
         </div>
       </div>
-
-      {/* Insights Modal */}
-      {currentProfile && (
-        <SwipeInsightsModal
-          open={insightsOpen}
-          onOpenChange={setInsightsOpen}
-          profile={currentProfile}
-        />
-      )}
 
       {/* Match Celebration */}
       <MatchCelebration
