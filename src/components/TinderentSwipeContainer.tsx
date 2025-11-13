@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeActionButtons } from './SwipeActionButtons';
-import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { useListings } from '@/hooks/useListings';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -34,7 +33,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const [insightsModalOpen, setInsightsModalOpen] = useState(false);
 
   // Get listings with filters applied
   const {
@@ -123,8 +121,11 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
 
 
   const handleInsights = () => {
-    setInsightsModalOpen(true);
-    triggerHaptic('light');
+    const currentListing = listings[currentIndex];
+    if (currentListing && onInsights) {
+      onInsights(currentListing.id);
+      triggerHaptic('light');
+    }
   };
 
   const handleMessage = async () => {
@@ -337,13 +338,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         onLike={() => handleButtonSwipe('right')}
         canUndo={canUndo}
         disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
-      />
-
-      {/* Insights Modal */}
-      <SwipeInsightsModal
-        open={insightsModalOpen}
-        onOpenChange={setInsightsModalOpen}
-        listing={currentListing}
       />
     </div>
   );
