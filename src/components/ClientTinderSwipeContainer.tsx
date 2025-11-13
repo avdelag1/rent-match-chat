@@ -212,7 +212,7 @@ export function ClientTinderSwipeContainer({
       />
 
       {/* Full-Screen Card Stack - Use absolute positioning like TinderentSwipeContainer */}
-      <div className="absolute inset-0 w-full h-full pt-16">
+      <div className="absolute inset-0 w-full h-full pt-16 pb-24">
         <AnimatePresence mode="wait">
           {currentProfile && (
             <motion.div
