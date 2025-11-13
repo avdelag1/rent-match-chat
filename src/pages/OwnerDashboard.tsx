@@ -55,7 +55,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   return (
     <DashboardLayout userRole="owner">
       <PageTransition>
-        <div className="w-full h-full">
+        <div className="absolute inset-0">
           {/* Full-screen Tinder-style swipe cards */}
           <ClientTinderSwipeContainer
             onClientTap={handleProfileTap}
