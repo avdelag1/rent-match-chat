@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, User, Calendar, Flame, Star, MessageCircle } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
-import { ImageCarousel } from './ImageCarousel';
+import { ZoomableImageCarousel } from './ZoomableImageCarousel';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
@@ -93,7 +93,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
           <div className="space-y-6 py-4 px-6">
             {/* Profile Images Carousel */}
             {profile.profile_images && profile.profile_images.length > 0 && (
-              <ImageCarousel images={profile.profile_images} alt="Client Profile" />
+              <ZoomableImageCarousel images={profile.profile_images} alt="Client Profile" />
             )}
 
             {/* Basic Info */}

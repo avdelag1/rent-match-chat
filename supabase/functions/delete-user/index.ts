@@ -24,33 +24,33 @@ serve(async (req) => {
     }
 
     // Get the Supabase admin client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(
-        JSON.stringify({ error: 'Missing Supabase configuration' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+  if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
+    return new Response(
+      JSON.stringify({ error: 'Missing Supabase configuration' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
 
-    // Create admin client with service role key (has full access)
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
+  // Create admin client with service role key (has full access)
+  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+
+  // Create anon client to verify the user
+  const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        authorization: authHeader,
       },
-    })
-
-    // Create anon client to verify the user
-    const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          authorization: authHeader,
-        },
-      },
-    })
+    },
+  })
 
     // Verify the user making the request
     const { data: { user }, error: userError } = await supabaseAnon.auth.getUser()
@@ -98,11 +98,13 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    
     return new Response(
       JSON.stringify({
         success: false,
         error: 'Internal server error',
-        details: error.message,
+        details: errorMessage,
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
