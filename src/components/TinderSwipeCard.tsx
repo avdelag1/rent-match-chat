@@ -58,8 +58,8 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
   // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 140;
-    const velocityThreshold = 600;
+    const swipeThresholdX = 120; // More sensitive swipe threshold
+    const velocityThreshold = 500; // Reduced for better sensitivity
 
     // Check for swipes (left/right only)
     if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {

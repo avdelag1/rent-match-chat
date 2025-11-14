@@ -87,7 +87,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
 
   // OPTIMIZED: Memoize callbacks to prevent re-creation with enhanced snap-back
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
-    const threshold = 150; // Increased threshold for better control
+    const threshold = 120; // More sensitive swipe threshold
     const velocity = info.velocity.x;
     
     // Check if this was a tap (minimal movement)
