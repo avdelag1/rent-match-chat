@@ -10,13 +10,15 @@ interface OwnerClientSwipeDialogProps {
 export function OwnerClientSwipeDialog({ open, onOpenChange }: OwnerClientSwipeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-full h-[90vh] p-0">
-        <div className="relative w-full h-full">
+      <DialogContent className="max-w-2xl w-full">
+        <DialogHeader>
+          <DialogTitle>Discover Potential Clients</DialogTitle>
+        </DialogHeader>
+        <div className="py-2">
           <ClientSwipeContainer
             onClientTap={() => {}}
             onInsights={() => {}}
             onMessageClick={() => {}}
-            fullscreen={false}
           />
         </div>
       </DialogContent>
