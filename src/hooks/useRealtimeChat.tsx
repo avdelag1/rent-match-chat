@@ -23,11 +23,12 @@ export function useRealtimeChat(conversationId: string) {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true); // Start as true to avoid initial flicker
 
   // Track typing with debounce - use ref to avoid circular dependencies
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingChannelRef = useRef<any>(null);
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const startTyping = useCallback(() => {
     if (!conversationId || !user?.id || !typingChannelRef.current) return;
@@ -157,6 +158,11 @@ export function useRealtimeChat(conversationId: string) {
       )
       .on('presence', { event: 'sync' }, () => {
         const newState = messagesChannel.presenceState();
+        // Clear any pending connection timeout
+        if (connectionTimeoutRef.current) {
+          clearTimeout(connectionTimeoutRef.current);
+          connectionTimeoutRef.current = null;
+        }
         setIsConnected(true);
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
@@ -166,7 +172,12 @@ export function useRealtimeChat(conversationId: string) {
         // User left
       })
       .subscribe(async (status) => {
+        console.log('[Realtime] Messages channel status:', status);
+
         if (status === 'SUBSCRIBED') {
+          // Set connected immediately on subscribe
+          setIsConnected(true);
+
           // Track presence
           await messagesChannel.track({
             userId: user.id,
@@ -175,6 +186,14 @@ export function useRealtimeChat(conversationId: string) {
             status: 'online',
             lastSeen: new Date().toISOString()
           });
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          // Only show disconnected after a delay to prevent flicker
+          if (connectionTimeoutRef.current) {
+            clearTimeout(connectionTimeoutRef.current);
+          }
+          connectionTimeoutRef.current = setTimeout(() => {
+            setIsConnected(false);
+          }, 1000); // Wait 1 second before showing disconnected
         }
       });
 
@@ -219,6 +238,13 @@ export function useRealtimeChat(conversationId: string) {
       // Clear typing timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+
+      // Clear connection timeout
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
       }
 
       // Clear typing state
@@ -230,7 +256,7 @@ export function useRealtimeChat(conversationId: string) {
 
       // Clear state
       setTypingUsers([]);
-      setIsConnected(false);
+      setIsConnected(true); // Reset to true to avoid flicker on next mount
       typingChannelRef.current = null;
     };
   }, [conversationId, user?.id, queryClient]);
@@ -240,6 +266,11 @@ export function useRealtimeChat(conversationId: string) {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
       }
     };
   }, []);
