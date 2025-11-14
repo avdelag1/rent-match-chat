@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from '@/components/DashboardLayout';
 // Force rebuild - using new Tinder-style container
-import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
+import { ClientTinderSwipeContainer } from '@/components/ClientTinderSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useNavigate } from 'react-router-dom';
@@ -55,9 +55,9 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   return (
     <DashboardLayout userRole="owner">
       <PageTransition>
-        <div className="absolute inset-0">
+        <div className="w-full h-full">
           {/* Full-screen Tinder-style swipe cards */}
-          <ClientSwipeContainer
+          <ClientTinderSwipeContainer
             onClientTap={handleProfileTap}
             onInsights={handleProfileTap}
             onMessageClick={handleStartConversation}

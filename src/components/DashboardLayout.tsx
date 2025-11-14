@@ -215,10 +215,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         onSettingsClick={handleSettingsClick}
       />
 
-      {/* Main Content - Full screen area for card feed */}
-      <main className="fixed inset-0 pt-14 pb-16 bg-background">
-        <div className="w-full h-full relative">
-          {React.Children.map(children, (child) => {
+      {/* Main Content - Full screen area for card feed with proper scrolling */}
+      <main className="fixed inset-0 pt-14 pb-16 overflow-hidden rounded-3xl md:rounded-2xl m-1 md:m-2 bg-background">
+        <div className="w-full h-full overflow-y-auto rounded-3xl md:rounded-2xl">{
+          React.Children.map(children, (child) => {
             if (React.isValidElement(child)) {
               return React.cloneElement(child as React.ReactElement, {
                 onPropertyInsights: handlePropertyInsights,
@@ -228,7 +228,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               } as any);
             }
             return child;
-          })}
+          })
+        }
         </div>
       </main>
 

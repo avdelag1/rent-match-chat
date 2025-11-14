@@ -69,8 +69,8 @@ export function ClientTinderSwipeCard({
   // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 80;
-    const velocityThreshold = 500;
+    const swipeThresholdX = 140;
+    const velocityThreshold = 600;
 
     // Check for swipes (left/right only)
     if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
@@ -125,7 +125,7 @@ export function ClientTinderSwipeCard({
         mass: 0.6
       }}
     >
-      <Card className="relative w-full h-full overflow-hidden bg-card border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <Card className="relative w-full h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] overflow-hidden bg-card border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} y={y} />
         {/* Main Image with Tap Zones */}
@@ -217,7 +217,7 @@ export function ClientTinderSwipeCard({
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '25%'
+            height: isBottomSheetExpanded ? '85%' : '30%'
           }}
           transition={{
             type: "spring",
