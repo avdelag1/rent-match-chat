@@ -82,10 +82,9 @@ export function OwnerClientTinderCard({
   const handleDragEnd = (event: any, info: PanInfo) => {
     const { offset, velocity } = info;
 
-    // Threshold: 35% of screen width, velocity-based swipes
-    const screenWidth = window.innerWidth;
-    const swipeThresholdX = screenWidth * 0.35;
-    const velocityThreshold = 600; // px/s
+    // More sensitive swipe threshold for easier swiping
+    const swipeThresholdX = 120; // pixels - reduced from 35% screen width
+    const velocityThreshold = 500; // px/s - reduced for better sensitivity
 
     // Horizontal swipes - Right (accept) or Left (reject)
     const absOffsetX = Math.abs(offset.x);
@@ -126,38 +125,40 @@ export function OwnerClientTinderCard({
       }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
     >
-      {/* Enhanced Swipe Overlays with Emojis */}
-      {/* Right Swipe - GREEN LIKE with Emoji */}
+      {/* Swipe Overlays - Clean Design */}
+      {/* Right Swipe - GREEN LIKE */}
       <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-green-500/20"
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
         style={{ opacity: rightOverlayOpacity }}
       >
-        <motion.div 
-          className="flex flex-col items-center gap-3"
-          style={{ 
-            scale: useTransform(rightOverlayOpacity, [0, 1], [0.7, 1]),
-            rotate: -15
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 via-emerald-500/20 to-green-600/30" />
+        <motion.div
+          className="relative text-center"
+          style={{
+            scale: useTransform(rightOverlayOpacity, [0, 1], [0.8, 1.1]),
+            rotate: -12
           }}
         >
-          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(34,197,94,0.9)] tracking-wider">
+          <span className="text-6xl font-black text-white tracking-wider">
             LIKE
           </span>
         </motion.div>
       </motion.div>
 
-      {/* Left Swipe - RED PASS with Emoji */}
+      {/* Left Swipe - RED PASS */}
       <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-red-500/20"
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
         style={{ opacity: leftOverlayOpacity }}
       >
-        <motion.div 
-          className="flex flex-col items-center gap-3"
-          style={{ 
-            scale: useTransform(leftOverlayOpacity, [0, 1], [0.7, 1]),
-            rotate: 15
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 via-rose-500/20 to-red-600/30" />
+        <motion.div
+          className="relative text-center"
+          style={{
+            scale: useTransform(leftOverlayOpacity, [0, 1], [0.8, 1.1]),
+            rotate: 12
           }}
         >
-          <span className="text-6xl font-black text-white drop-shadow-[0_6px_24px_rgba(239,68,68,0.9)] tracking-wider">
+          <span className="text-6xl font-black text-white tracking-wider">
             PASS
           </span>
         </motion.div>
@@ -278,15 +279,6 @@ export function OwnerClientTinderCard({
                   </div>
                 )}
               </div>
-              
-              {profile.budget_max && (
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-primary">
-                    ${profile.budget_max.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-muted-foreground">budget</div>
-                </div>
-              )}
             </div>
 
             {/* Quick Stats */}
