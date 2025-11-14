@@ -1,24 +1,20 @@
 import { useState, useCallback } from 'react';
-import { triggerHaptic } from '@/utils/haptics';
-import { OwnerClientTinderCard } from './OwnerClientTinderCard';
+import { OwnerSwipeCard } from './OwnerSwipeCard';
 import { MatchCelebration } from './MatchCelebration';
-import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
-import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
-import { X, RotateCcw, Heart, SlidersHorizontal, ArrowLeft } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { X, Heart, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast as sonnerToast } from 'sonner';
-import { useStartConversation } from '@/hooks/useConversations';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { triggerHaptic } from '@/utils/haptics';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
   onInsights?: (clientId: string) => void;
   onMessageClick?: (clientId: string) => void;
-  profiles?: any[]; // Accept profiles from parent
+  profiles?: any[];
   isLoading?: boolean;
   error?: any;
 }
@@ -27,39 +23,17 @@ export function ClientSwipeContainer({
   onClientTap, 
   onInsights, 
   onMessageClick,
-  profiles: externalProfiles,
-  isLoading: externalIsLoading,
-  error: externalError 
+  profiles = [],
+  isLoading = false,
+  error 
 }: ClientSwipeContainerProps) {
-  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
     clientProfile?: any;
     ownerProfile?: any;
   }>({ isOpen: false });
-  const [emojiAnimation, setEmojiAnimation] = useState<{
-    show: boolean;
-    type: 'like' | 'dislike';
-    position: 'left' | 'right';
-  }>({ show: false, type: 'like', position: 'right' });
 
-  // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching();
-  
-  const clientProfiles = externalProfiles || internalProfiles;
-  const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
-  const error = externalError !== undefined ? externalError : internalError;
-  
-  // Comprehensive logging
-  console.log('🎴 ClientSwipeContainer: external profiles:', externalProfiles?.length || 0);
-  console.log('🎴 ClientSwipeContainer: internal profiles:', internalProfiles?.length || 0);
-  console.log('🎴 ClientSwipeContainer: final profiles:', clientProfiles?.length || 0);
-  console.log('🎴 ClientSwipeContainer: isLoading:', isLoading);
-  console.log('🎴 ClientSwipeContainer: error:', error);
-  
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
       setMatchCelebration({
@@ -69,425 +43,150 @@ export function ClientSwipeContainer({
       });
     }
   });
-  const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
-  const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
-  const startConversation = useStartConversation();
 
+  const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
-    const currentClient = clientProfiles[currentIndex];
+    const currentClient = profiles[currentIndex];
     if (!currentClient) return;
 
-    setSwipeDirection(direction);
-    
-    // Trigger haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
     
-    // Show emoji immediately for better UX
-    setEmojiAnimation({ 
-      show: true, 
-      type: direction === 'right' ? 'like' : 'dislike',
-      position: direction === 'right' ? 'right' : 'left'
-    });
-    
-    setTimeout(() => {
-      setEmojiAnimation({ show: false, type: 'like', position: 'right' });
-    }, 400);
-    
-    // Record swipe with match checking
     swipeMutation.mutate({
       targetId: currentClient.user_id,
       direction,
       targetType: 'profile'
     });
 
-    // Record the swipe for undo functionality
     recordSwipe(currentClient.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
 
-    // Move to next card after animation with proper delay for smooth rhythm
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 300); // 300ms delay for smooth visual rhythm
-  }, [currentIndex, clientProfiles, swipeMutation, recordSwipe]);
-
-  const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
-    swipeMutation.mutate({
-      targetId,
-      direction: 'right',
-      targetType: targetType as 'listing' | 'profile'
-    });
-    setCurrentIndex(prev => prev + 1);
-    
-    sonnerToast.success('⭐ Super Like Sent!', {
-      description: 'Your super like has been sent to this client.',
-    });
-  }, [swipeMutation]);
+    }, 300);
+  }, [currentIndex, profiles, swipeMutation, recordSwipe]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
     handleSwipe(direction);
   };
 
-  const handleRefresh = async () => {
-    setCurrentIndex(0);
-    await refetch();
-    sonnerToast.success('Profiles Updated', {
-      description: 'Latest client profiles loaded.',
-    });
-  };
-
-  const handleInsights = (clientId: string) => {
-    if (onInsights) {
-      onInsights(clientId);
-    } else {
-      sonnerToast.success('Client Insights', {
-        description: 'Viewing detailed insights for this client.',
-      });
+  const handleUndo = () => {
+    if (canUndo && currentIndex > 0) {
+      undoLastSwipe();
+      setCurrentIndex(prev => prev - 1);
+      sonnerToast.success('Swipe undone');
     }
   };
 
-  const handleConnect = async (clientId: string) => {
-    if (isCreatingConversation) return;
-    
-    console.log('[ClientSwipe] Message button clicked for client:', clientId);
-    setIsCreatingConversation(true);
-    
-    try {
-      sonnerToast.loading('⏳ Creating conversation...', { id: 'start-conv' });
-      
-      console.log('[ClientSwipe] Starting conversation with client:', clientId);
-      const result = await startConversation.mutateAsync({
-        otherUserId: clientId,
-        initialMessage: "Hi! I'd like to connect with you.",
-        canStartNewConversation: true,
-      });
-
-      console.log('[ClientSwipe] Conversation created:', result);
-
-      if (result?.conversationId) {
-        sonnerToast.success('✅ Conversation created! Opening chat...', { id: 'start-conv' });
-        
-        // Wait 500ms before navigating to ensure DB is updated
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        console.log('[ClientSwipe] Navigating to conversation:', result.conversationId);
-        navigate(`/messages?conversationId=${result.conversationId}`);
-      }
-    } catch (error) {
-      console.error('[ClientSwipe] Error starting conversation:', error);
-      sonnerToast.error('❌ Could not start conversation', { 
-        id: 'start-conv',
-        description: error instanceof Error ? error.message : 'Please try again'
-      });
-    } finally {
-      setIsCreatingConversation(false);
-    }
-  };
-
-
-  const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
-
-  if (isLoading || isRefetching) {
+  if (isLoading) {
     return (
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 600px)' }}>
-        <div className="w-full h-full bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden">
-          <div className="p-6 space-y-4">
-            <Skeleton className="w-full h-[60vh] rounded-lg" />
-            <Skeleton className="w-3/4 h-6" />
-            <Skeleton className="w-1/2 h-4" />
-          </div>
+      <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-background">
+        <div className="w-[90vw] max-w-md h-[70vh] rounded-3xl overflow-hidden">
+          <Skeleton className="w-full h-full" />
         </div>
       </div>
     );
   }
 
   if (error) {
-    console.error('ClientSwipeContainer error:', error);
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
-          <div className="text-6xl mb-4">😞</div>
-          <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load client profiles right now.</p>
-          <Button 
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Try Again
+      <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-background">
+        <div className="text-center p-8">
+          <p className="text-muted-foreground">Error loading profiles</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentIndex >= profiles.length) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-background">
+        <div className="text-center p-8">
+          <h3 className="text-2xl font-bold mb-2">No More Profiles</h3>
+          <p className="text-muted-foreground mb-4">Check back later for new clients!</p>
+          <Button onClick={() => setCurrentIndex(0)} variant="outline">
+            Start Over
           </Button>
         </div>
       </div>
     );
   }
 
-  if (clientProfiles.length === 0) {
-    return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
-          <p className="text-muted-foreground mb-4">
-            No clients match your current preferences.
-          </p>
-          
-          {/* Debug Information */}
-          <div className="text-sm text-muted-foreground space-y-2 bg-orange-100 p-4 rounded-lg mb-4">
-            <p className="font-semibold text-orange-900">🐛 Debug Info:</p>
-            <ul className="text-left space-y-1 text-orange-800">
-              <li>External Profiles: {externalProfiles?.length || 0}</li>
-              <li>Internal Profiles: {internalProfiles?.length || 0}</li>
-              <li>Final Profiles: {clientProfiles?.length || 0}</li>
-              <li>Loading: {isLoading ? 'Yes' : 'No'}</li>
-            </ul>
-          </div>
-          
-          <div className="text-sm text-muted-foreground space-y-2 bg-muted/30 p-4 rounded-lg mb-4">
-            <p className="font-semibold">Tips to find more clients:</p>
-            <ul className="list-disc list-inside text-left space-y-1">
-              <li>Adjust your budget range</li>
-              <li>Expand age preferences</li>
-              <li>Remove lifestyle filters</li>
-              <li>Ensure clients have photos uploaded</li>
-            </ul>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => navigate('/owner/filters')}
-              variant="outline"
-              className="gap-2 flex-1"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Clear Filters
-            </Button>
-            <Button 
-              onClick={handleRefresh}
-              variant="default"
-              className="gap-2 flex-1"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (currentIndex >= clientProfiles.length) {
-    return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
-          <p className="text-muted-foreground mb-4">
-            Check back later for new profiles.
-          </p>
-          <Button 
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2 w-full"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Check for New Profiles
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const currentClient = clientProfiles[currentIndex];
+  const currentProfile = profiles[currentIndex];
+  const nextProfile = profiles[currentIndex + 1];
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-background">
-      {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
-      <AnimatePresence>
-        {emojiAnimation.show && (
-          <motion.div
-            className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{
-                scale: 0,
-                opacity: 0,
-                x: emojiAnimation.position === 'right' ? 80 : -80,
-                rotate: emojiAnimation.position === 'right' ? 15 : -15
-              }}
-              animate={{
-                scale: 2.5,
-                opacity: 1,
-                x: emojiAnimation.position === 'right' ? 40 : -40,
-                rotate: 0
-              }}
-              exit={{
-                scale: emojiAnimation.type === 'like' ? 3.5 : 1.5,
-                opacity: 0,
-                y: emojiAnimation.type === 'like' ? -250 : -100,
-                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -300 : 300),
-                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -75 : 75)
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
-                mass: 0.5
-              }}
-              style={{ willChange: 'transform, opacity' }}
-              className={`absolute ${
-                emojiAnimation.position === 'right' ? 'right-8' : 'left-8'
-              } top-1/3`}
-            >
-              <div className="relative">
-                {/* Glow effect */}
-                <div className={`absolute inset-0 blur-3xl opacity-50 ${
-                  emojiAnimation.type === 'like'
-                    ? 'bg-gradient-to-r from-orange-400 to-red-500'
-                    : 'bg-gradient-to-r from-gray-400 to-blue-300'
-                }`} />
-                {/* Emoji */}
-                <div className="relative text-[100px] drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">
-                  {emojiAnimation.type === 'like' ? '🔥' : '💨'}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Full-Screen Card Container with Floating Buttons */}
-      <div className="relative w-full h-full pt-4 px-2 sm:px-4 flex items-center justify-center">
-        <div className="relative w-full h-full max-w-lg">
-          <AnimatePresence mode="wait">
-            {currentClient && (
-              <motion.div
-                key={currentClient.user_id}
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{
-                  scale: 1,
-                  opacity: 1
-                }}
-                exit={{
-                  x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
-                  opacity: 0,
-                  rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
-                  scale: 0.85,
-                  transition: {
-                    type: "spring",
-                    stiffness: 180,
-                    damping: 15,
-                    mass: 0.5,
-                    duration: 0.3
-                  }
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30,
-                  mass: 0.7
-                }}
-                className="w-full h-full rounded-3xl overflow-hidden"
-                style={{
-                  willChange: 'transform, opacity'
-                }}
-              >
-                <OwnerClientTinderCard
-                  profile={currentClient}
-                  onSwipe={handleSwipe}
-                  onTap={() => onClientTap(currentClient.user_id)}
-                  onInsights={() => handleInsights(currentClient.user_id)}
-                  onMessage={() => handleConnect(currentClient.user_id)}
-                  isTop={true}
-                  hasPremium={hasPremiumMessaging}
-                />
-
-                {/* Floating Action Buttons - Overlay on Card */}
-                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-4 sm:p-6">
-                  {/* Top Spacer */}
-                  <div className="flex-1" />
-
-                  {/* Bottom Floating Buttons */}
-                  <div className="pointer-events-auto w-full flex items-center justify-center gap-2 sm:gap-3 md:gap-4 bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-3xl pt-8 pb-6 px-4">
-                    {/* Return Button */}
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <button
-                        onClick={() => navigate(-1)}
-                        className="
-                          h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full border-2 border-gray-400
-                          bg-gray-500/20 hover:bg-gray-500 hover:text-white
-                          text-gray-300 p-0 shadow-lg transition-all duration-200
-                          flex items-center justify-center
-                        "
-                        aria-label="Go back"
-                      >
-                        <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 stroke-[3]" />
-                      </button>
-                    </motion.div>
-
-                    {/* Dislike Button */}
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <button
-                        onClick={() => handleSwipe('left')}
-                        disabled={swipeMutation.isPending || !currentClient}
-                        className="
-                          h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full border-2 border-red-400
-                          bg-red-500/20 hover:bg-red-500 hover:text-white
-                          text-red-300 p-0 shadow-lg transition-all duration-200
-                          flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed
-                        "
-                        aria-label="Dislike"
-                      >
-                        <X className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 stroke-[3]" />
-                      </button>
-                    </motion.div>
-
-                    {/* Like Button (Larger) */}
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <button
-                        onClick={() => handleSwipe('right')}
-                        disabled={swipeMutation.isPending || !currentClient}
-                        className="
-                          h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full border-2
-                          bg-gradient-to-br from-orange-400 via-pink-500 to-rose-500
-                          border-orange-300 text-white p-0 shadow-lg
-                          hover:shadow-orange-500/50 transition-all duration-200
-                          flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed
-                        "
-                        aria-label="Like"
-                      >
-                        <Heart className="h-6 w-6 sm:h-7 sm:w-7 md:h-10 md:w-10 fill-white" />
-                      </button>
-                    </motion.div>
-                  </div>
-                </div>
-              </motion.div>
+      {/* Swipe Cards Stack */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="relative w-full max-w-md h-[75vh] md:h-[80vh]">
+          <AnimatePresence>
+            {nextProfile && (
+              <OwnerSwipeCard
+                key={nextProfile.user_id}
+                profile={nextProfile}
+                onSwipe={() => {}}
+                isTop={false}
+              />
+            )}
+            {currentProfile && (
+              <OwnerSwipeCard
+                key={currentProfile.user_id}
+                profile={currentProfile}
+                onSwipe={handleSwipe}
+                isTop={true}
+              />
             )}
           </AnimatePresence>
         </div>
       </div>
 
+      {/* Action Buttons */}
+      <div className="fixed bottom-8 left-0 right-0 flex justify-center items-center gap-4 z-50 px-4">
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={() => handleButtonSwipe('left')}
+          disabled={swipeMutation.isPending}
+          className="h-16 w-16 rounded-full bg-background/80 backdrop-blur-sm border-2 border-red-500 hover:bg-red-500/10"
+        >
+          <X className="h-8 w-8 text-red-500" />
+        </Button>
+
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={handleUndo}
+          disabled={!canUndo || isUndoing}
+          className="h-14 w-14 rounded-full bg-background/80 backdrop-blur-sm"
+        >
+          <RotateCcw className="h-6 w-6" />
+        </Button>
+
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={() => handleButtonSwipe('right')}
+          disabled={swipeMutation.isPending}
+          className="h-16 w-16 rounded-full bg-background/80 backdrop-blur-sm border-2 border-green-500 hover:bg-green-500/10"
+        >
+          <Heart className="h-8 w-8 text-green-500" />
+        </Button>
+      </div>
+
+      {/* Match Celebration */}
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
         onClose={() => setMatchCelebration({ isOpen: false })}
+        onMessage={() => {
+          if (matchCelebration.clientProfile && onMessageClick) {
+            onMessageClick(matchCelebration.clientProfile.id || matchCelebration.clientProfile.user_id);
+          }
+        }}
         matchedUser={{
-          name: matchCelebration.clientProfile?.name || 'User',
-          avatar: matchCelebration.clientProfile?.images?.[0],
+          name: matchCelebration.clientProfile?.name || 'Client',
+          avatar: matchCelebration.clientProfile?.avatar_url,
           role: 'client'
         }}
-        onMessage={() => currentClient?.user_id && handleConnect(currentClient.user_id)}
       />
     </div>
   );
