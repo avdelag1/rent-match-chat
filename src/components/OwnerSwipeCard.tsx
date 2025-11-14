@@ -80,8 +80,8 @@ export function OwnerSwipeCard({
   // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 140;
-    const velocityThreshold = 600;
+    const swipeThresholdX = 80;
+    const velocityThreshold = 500;
 
     // Check for swipes (left/right only)
     if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
