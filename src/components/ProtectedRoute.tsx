@@ -45,6 +45,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
       console.log('User has wrong role for this route, redirecting to:', targetPath);
       navigate(targetPath, { replace: true });
+      return; // Important: return early to prevent rendering children
     }
   }, [user, userRole, loading, roleLoading, navigate, location, requiredRole]);
 

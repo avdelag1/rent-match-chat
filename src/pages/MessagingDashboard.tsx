@@ -126,16 +126,20 @@ export function MessagingDashboard() {
           title: 'Loading conversation...',
           description: 'Please wait while we fetch your conversation.',
         });
-        
+
         // Try up to 10 times (10 seconds total)
         for (let attempt = 1; attempt <= 10; attempt++) {
           console.log(`[MessagingDashboard] Attempt ${attempt}/10 to find conversation`);
           await new Promise(resolve => setTimeout(resolve, 1000));
-          await refetch();
-          conversation = conversations.find(c => c.id === conversationId);
+
+          // Refetch and get fresh data
+          const result = await refetch();
+          const freshConversations = result.data || [];
+          conversation = freshConversations.find(c => c.id === conversationId);
+
           if (conversation) break;
         }
-        
+
         if (conversation) {
           console.log('[MessagingDashboard] Conversation found!', conversation);
           setSelectedConversationId(conversationId);
@@ -199,16 +203,14 @@ export function MessagingDashboard() {
 
       if (result.conversationId) {
         // Wait a moment for the conversation to be available
-        setTimeout(async () => {
-          await refetch();
-          setSelectedConversationId(result.conversationId);
-          setSearchParams({});
-          toast({
-            title: 'Conversation started',
-            description: 'You can now send messages!',
-          });
-          setIsStartingConversation(false);
-        }, 500);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await refetch();
+        setSelectedConversationId(result.conversationId);
+        setSearchParams({});
+        toast({
+          title: 'Conversation started',
+          description: 'You can now send messages!',
+        });
       }
     } catch (error) {
       console.error('Error auto-starting conversation:', error);

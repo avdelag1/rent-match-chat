@@ -46,8 +46,8 @@ export function useRealtimeChat(conversationId: string) {
         userName: user.user_metadata?.full_name || 'User',
         isTyping: true,
         timestamp: Date.now()
-      }).catch(() => {
-        // Silently handle presence tracking errors
+      }).catch((err: any) => {
+        console.error('[useRealtimeChat] Failed to send typing indicator:', err);
       });
     }
 
@@ -72,8 +72,8 @@ export function useRealtimeChat(conversationId: string) {
       userName: user.user_metadata?.full_name || 'User',
       isTyping: false,
       timestamp: Date.now()
-    }).catch(() => {
-      // Silently handle presence tracking errors
+    }).catch((err: any) => {
+      console.error('[useRealtimeChat] Failed to stop typing indicator:', err);
     });
   }, [conversationId, user?.id]);
 
@@ -99,74 +99,82 @@ export function useRealtimeChat(conversationId: string) {
           filter: `conversation_id=eq.${conversationId}`
         },
         async (payload) => {
-          const newMessage = payload.new;
+          try {
+            const newMessage = payload.new;
 
-          // Get sender details
-          const { data: senderProfile } = await supabase
-            .from('profiles')
-            .select('id, full_name, avatar_url')
-            .eq('id', newMessage.sender_id)
-            .single();
+            // Get sender details
+            const { data: senderProfile, error: profileError } = await supabase
+              .from('profiles')
+              .select('id, full_name, avatar_url')
+              .eq('id', newMessage.sender_id)
+              .single();
 
-          const completeMessage = {
-            ...newMessage,
-            sender: senderProfile || {
-              id: newMessage.sender_id,
-              full_name: 'Unknown',
-              avatar_url: null
+            if (profileError) {
+              console.error('[useRealtimeChat] Failed to fetch sender profile:', profileError);
             }
-          };
 
-          // Update messages immediately
-          queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
-            if (!oldData) return [completeMessage];
+            const completeMessage = {
+              ...newMessage,
+              sender: senderProfile || {
+                id: newMessage.sender_id,
+                full_name: 'Unknown',
+                avatar_url: null
+              }
+            };
 
-            // Enhanced duplicate detection:
-            // 1. Check for exact ID match (handles duplicate real-time events)
-            // 2. Check for temporary optimistic IDs that match content and sender
-            // 3. Check for near-duplicate messages (same sender, text, within 2 seconds)
-            const newMessageTime = new Date(newMessage.created_at).getTime();
+            // Update messages immediately
+            queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
+              if (!oldData) return [completeMessage];
 
-            const exists = oldData.some((msg: any) => {
-              if (msg.id === newMessage.id) return true;
+              // Enhanced duplicate detection:
+              // 1. Check for exact ID match (handles duplicate real-time events)
+              // 2. Check for temporary optimistic IDs that match content and sender
+              // 3. Check for near-duplicate messages (same sender, text, within 2 seconds)
+              const newMessageTime = new Date(newMessage.created_at).getTime();
 
-              // Check for optimistic message replacement
-              if (msg.id.toString().startsWith('temp-') &&
+              const exists = oldData.some((msg: any) => {
+                if (msg.id === newMessage.id) return true;
+
+                // Check for optimistic message replacement
+                if (msg.id.toString().startsWith('temp-') &&
+                    msg.message_text === newMessage.message_text &&
+                    msg.sender_id === newMessage.sender_id) {
+                  return true;
+                }
+
+                // Check for near-duplicates (within 2 seconds, same content and sender)
+                const msgTime = new Date(msg.created_at).getTime();
+                if (Math.abs(msgTime - newMessageTime) < 2000 &&
+                    msg.message_text === newMessage.message_text &&
+                    msg.sender_id === newMessage.sender_id) {
+                  return true;
+                }
+
+                return false;
+              });
+
+              if (exists) {
+                // Replace optimistic message with real message if it exists
+                return oldData.map((msg: any) =>
+                  msg.id.toString().startsWith('temp-') &&
                   msg.message_text === newMessage.message_text &&
-                  msg.sender_id === newMessage.sender_id) {
-                return true;
+                  msg.sender_id === newMessage.sender_id
+                    ? completeMessage
+                    : msg
+                );
               }
 
-              // Check for near-duplicates (within 2 seconds, same content and sender)
-              const msgTime = new Date(msg.created_at).getTime();
-              if (Math.abs(msgTime - newMessageTime) < 2000 &&
-                  msg.message_text === newMessage.message_text &&
-                  msg.sender_id === newMessage.sender_id) {
-                return true;
-              }
-
-              return false;
+              return [...oldData, completeMessage];
             });
 
-            if (exists) {
-              // Replace optimistic message with real message if it exists
-              return oldData.map((msg: any) =>
-                msg.id.toString().startsWith('temp-') &&
-                msg.message_text === newMessage.message_text &&
-                msg.sender_id === newMessage.sender_id
-                  ? completeMessage
-                  : msg
-              );
-            }
+            // Clear typing status for sender
+            setTypingUsers(prev => prev.filter(u => u.userId !== newMessage.sender_id));
 
-            return [...oldData, completeMessage];
-          });
-
-          // Clear typing status for sender
-          setTypingUsers(prev => prev.filter(u => u.userId !== newMessage.sender_id));
-
-          // Dispatch custom event for notifications
-          window.dispatchEvent(new CustomEvent('new-message', { detail: newMessage }));
+            // Dispatch custom event for notifications
+            window.dispatchEvent(new CustomEvent('new-message', { detail: newMessage }));
+          } catch (error) {
+            console.error('[useRealtimeChat] Error processing new message:', error);
+          }
         }
       )
       .on('presence', { event: 'sync' }, () => {
@@ -184,13 +192,20 @@ export function useRealtimeChat(conversationId: string) {
           setIsConnected(true);
 
           // Track presence
-          await messagesChannel.track({
-            userId: user.id,
-            userName: user.user_metadata?.full_name || 'User',
-            avatarUrl: user.user_metadata?.avatar_url,
-            status: 'online',
-            lastSeen: new Date().toISOString()
-          });
+          try {
+            await messagesChannel.track({
+              userId: user.id,
+              userName: user.user_metadata?.full_name || 'User',
+              avatarUrl: user.user_metadata?.avatar_url,
+              status: 'online',
+              lastSeen: new Date().toISOString()
+            });
+          } catch (error) {
+            console.error('[useRealtimeChat] Failed to track presence on messages channel:', error);
+          }
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('[useRealtimeChat] Messages channel error');
+          setIsConnected(false);
         }
       });
 
@@ -238,6 +253,9 @@ export function useRealtimeChat(conversationId: string) {
         if (status === 'SUBSCRIBED') {
           // Store channel reference for startTyping/stopTyping
           typingChannelRef.current = typingChannel;
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('[useRealtimeChat] Typing channel error');
+          typingChannelRef.current = null;
         }
       });
 

@@ -81,30 +81,37 @@ export function useConversations() {
         });
 
         // Transform data to include other_user and last_message
-        const conversationsWithProfiles = data.map((conversation: any) => {
-          const isClient = conversation.client_id === user.id;
-          const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
-          // Determine role based on which side of the conversation the other user is
-          const otherUserRole = isClient ? 'owner' : 'client';
+        const conversationsWithProfiles = data
+          .map((conversation: any) => {
+            const isClient = conversation.client_id === user.id;
+            const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
+            // Determine role based on which side of the conversation the other user is
+            const otherUserRole = isClient ? 'owner' : 'client';
 
-          return {
-            id: conversation.id,
-            client_id: conversation.client_id,
-            owner_id: conversation.owner_id,
-            listing_id: conversation.listing_id,
-            last_message_at: conversation.last_message_at,
-            status: conversation.status,
-            created_at: conversation.created_at,
-            updated_at: conversation.updated_at,
-            other_user: otherUserProfile ? {
-              id: otherUserProfile.id,
-              full_name: otherUserProfile.full_name,
-              avatar_url: otherUserProfile.avatar_url,
-              role: otherUserRole || 'client'
-            } : undefined,
-            last_message: lastMessagesMap.get(conversation.id)
-          };
-        });
+            if (!otherUserProfile) {
+              console.warn('[useConversations] Missing profile for conversation:', conversation.id);
+              return null;
+            }
+
+            return {
+              id: conversation.id,
+              client_id: conversation.client_id,
+              owner_id: conversation.owner_id,
+              listing_id: conversation.listing_id,
+              last_message_at: conversation.last_message_at,
+              status: conversation.status,
+              created_at: conversation.created_at,
+              updated_at: conversation.updated_at,
+              other_user: {
+                id: otherUserProfile.id,
+                full_name: otherUserProfile.full_name || 'Unknown',
+                avatar_url: otherUserProfile.avatar_url,
+                role: otherUserRole || 'client'
+              },
+              last_message: lastMessagesMap.get(conversation.id)
+            };
+          })
+          .filter((conv: any) => conv !== null);
 
         return conversationsWithProfiles;
       } catch (error: any) {
@@ -223,8 +230,13 @@ export function useStartConversation() {
             .select('id', { count: 'exact' })
             .eq('user_id', user.id)
             .limit(1);
-          
-          myRole = (myListingsCheck.data && myListingsCheck.data.length > 0) ? 'owner' : 'client';
+
+          if (myListingsCheck.error) {
+            console.warn('[useStartConversation] Error checking user listings:', myListingsCheck.error);
+            myRole = 'client';
+          } else {
+            myRole = (myListingsCheck.data && myListingsCheck.data.length > 0) ? 'owner' : 'client';
+          }
 
           // Check if other user has listings
           const otherListingsCheck = await (supabase as any)
@@ -232,10 +244,15 @@ export function useStartConversation() {
             .select('id', { count: 'exact' })
             .eq('user_id', otherUserId)
             .limit(1);
-          
-          otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
+
+          if (otherListingsCheck.error) {
+            console.warn('[useStartConversation] Error checking other user listings:', otherListingsCheck.error);
+            otherRole = 'owner'; // Assume other user is owner if we can't check
+          } else {
+            otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
+          }
         } catch (roleCheckError) {
-          console.warn('Could not determine roles from listings, defaulting to client-owner');
+          console.warn('[useStartConversation] Could not determine roles from listings:', roleCheckError);
           // If we can't determine roles, assume the initiator is client and other is owner
           myRole = 'client';
           otherRole = 'owner';
