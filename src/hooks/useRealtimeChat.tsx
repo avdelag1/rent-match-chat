@@ -27,10 +27,10 @@ export function useRealtimeChat(conversationId: string) {
 
   // Track typing with debounce - use ref to avoid circular dependencies
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [typingChannelRef, setTypingChannelRef] = useState<any>(null);
+  const typingChannelRef = useRef<any>(null);
 
   const startTyping = useCallback(() => {
-    if (!conversationId || !user?.id || !typingChannelRef) return;
+    if (!conversationId || !user?.id || !typingChannelRef.current) return;
 
     // Clear existing timeout
     if (typingTimeoutRef.current) {
@@ -42,7 +42,7 @@ export function useRealtimeChat(conversationId: string) {
       setIsTyping(true);
 
       // Use existing channel reference
-      typingChannelRef.track({
+      typingChannelRef.current.track({
         userId: user.id,
         userName: user.user_metadata?.full_name || 'User',
         isTyping: true,
@@ -55,7 +55,7 @@ export function useRealtimeChat(conversationId: string) {
     // Set timeout to stop typing after 3 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-      typingChannelRef?.track({
+      typingChannelRef.current?.track({
         userId: user.id,
         userName: user.user_metadata?.full_name || 'User',
         isTyping: false,
@@ -64,10 +64,10 @@ export function useRealtimeChat(conversationId: string) {
         console.error('[Typing] Error stopping presence:', error);
       });
     }, 3000);
-  }, [conversationId, user?.id, isTyping, typingChannelRef]);
+  }, [conversationId, user?.id, isTyping]);
 
   const stopTyping = useCallback(() => {
-    if (!conversationId || !user?.id || !typingChannelRef) return;
+    if (!conversationId || !user?.id || !typingChannelRef.current) return;
 
     setIsTyping(false);
 
@@ -76,7 +76,7 @@ export function useRealtimeChat(conversationId: string) {
       typingTimeoutRef.current = null;
     }
 
-    typingChannelRef.track({
+    typingChannelRef.current.track({
       userId: user.id,
       userName: user.user_metadata?.full_name || 'User',
       isTyping: false,
@@ -84,7 +84,7 @@ export function useRealtimeChat(conversationId: string) {
     }).catch((error: any) => {
       console.error('[Typing] Error stopping presence:', error);
     });
-  }, [conversationId, user?.id, typingChannelRef]);
+  }, [conversationId, user?.id]);
 
   // Set up real-time subscriptions
   useEffect(() => {
@@ -209,33 +209,31 @@ export function useRealtimeChat(conversationId: string) {
         console.log('[Typing] Channel status:', status);
         if (status === 'SUBSCRIBED') {
           // Store channel reference for startTyping/stopTyping
-          setTypingChannelRef(typingChannel);
+          typingChannelRef.current = typingChannel;
         }
       });
 
     return () => {
       console.log('[Realtime] Cleaning up channels for conversation:', conversationId);
-      
-      // Stop typing before cleanup
-      if (isTyping) {
-        stopTyping();
-      }
-      
-      // Remove channels
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(typingChannel);
-      
+
       // Clear typing timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      
+
+      // Clear typing state
+      setIsTyping(false);
+
+      // Remove channels
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(typingChannel);
+
       // Clear state
       setTypingUsers([]);
       setIsConnected(false);
-      setTypingChannelRef(null);
+      typingChannelRef.current = null;
     };
-  }, [conversationId, user?.id, queryClient, stopTyping]);
+  }, [conversationId, user?.id, queryClient]);
 
   // Cleanup typing on unmount
   useEffect(() => {

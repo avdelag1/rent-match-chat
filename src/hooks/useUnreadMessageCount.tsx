@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useUnreadMessageCount() {
   const { user } = useAuth();
+  const refetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const query = useQuery({
     queryKey: ['unread-message-count', user?.id],
@@ -49,10 +50,22 @@ export function useUnreadMessageCount() {
       }
     },
     enabled: !!user?.id,
-    refetchInterval: 30000, // Refetch every 30 seconds as backup
+    refetchInterval: 60000, // Refetch every 60 seconds (reduced from 30s to minimize unnecessary calls)
+    staleTime: 5000, // Consider data fresh for 5 seconds to prevent excessive refetching
   });
 
+  // Debounced refetch function to prevent excessive updates
+  const debouncedRefetch = () => {
+    if (refetchTimeoutRef.current) {
+      clearTimeout(refetchTimeoutRef.current);
+    }
+    refetchTimeoutRef.current = setTimeout(() => {
+      query.refetch();
+    }, 1000); // Wait 1 second before refetching
+  };
+
   // Set up real-time subscription for unread messages
+  // Only listen to new message events (not updates) to reduce refetch frequency
   useEffect(() => {
     if (!user?.id) return;
 
@@ -65,9 +78,11 @@ export function useUnreadMessageCount() {
           schema: 'public',
           table: 'conversation_messages'
         },
-        () => {
-          // Refetch count when new messages are inserted
-          query.refetch();
+        (payload) => {
+          // Only refetch if the message is not from the current user
+          if (payload.new.sender_id !== user.id) {
+            debouncedRefetch();
+          }
         }
       )
       .on(
@@ -77,14 +92,19 @@ export function useUnreadMessageCount() {
           schema: 'public',
           table: 'conversation_messages'
         },
-        () => {
-          // Refetch count when messages are updated (marked as read)
-          query.refetch();
+        (payload) => {
+          // Only refetch if is_read status changed
+          if (payload.old.is_read !== payload.new.is_read) {
+            debouncedRefetch();
+          }
         }
       )
       .subscribe();
 
     return () => {
+      if (refetchTimeoutRef.current) {
+        clearTimeout(refetchTimeoutRef.current);
+      }
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
