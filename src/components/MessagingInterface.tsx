@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -24,6 +24,26 @@ interface MessagingInterfaceProps {
   onBack: () => void;
 }
 
+// Memoized message component to prevent unnecessary re-renders
+const MessageBubble = memo(({ message, isMyMessage }: { message: any; isMyMessage: boolean }) => (
+  <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
+    <div
+      className={`max-w-[75%] p-3 rounded-lg ${
+        isMyMessage
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-muted'
+      }`}
+    >
+      <p className="text-sm break-words whitespace-pre-wrap">{message.message_text}</p>
+      <p className={`text-xs mt-1.5 opacity-70`}>
+        {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+      </p>
+    </div>
+  </div>
+));
+
+MessageBubble.displayName = 'MessageBubble';
+
 export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: MessagingInterfaceProps) => {
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
@@ -31,6 +51,8 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   const sendMessage = useSendMessage();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const previousMessageCountRef = useRef(0);
 
   // Check monthly message limits
   const { canSendMessage, messagesRemaining, isAtLimit, hasMonthlyLimit } = useMonthlyMessageLimits();
@@ -41,10 +63,26 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   // Mark messages as read when viewing this conversation
   useMarkMessagesAsRead(conversationId, true);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Check if user is scrolled to bottom
+  const isScrolledToBottom = useCallback(() => {
+    if (!messagesContainerRef.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    // Consider "bottom" if within 100px of the bottom
+    return scrollHeight - scrollTop - clientHeight < 100;
+  }, []);
+
+  // Auto-scroll to bottom only when:
+  // 1. User is already at the bottom (to show new messages)
+  // 2. User sends a message (previousMessageCountRef tracks this)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const messageCountIncreased = messages.length > previousMessageCountRef.current;
+    previousMessageCountRef.current = messages.length;
+
+    if (messageCountIncreased && isScrolledToBottom()) {
+      // Use instant scroll to prevent flickering
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+    }
+  }, [messages, isScrolledToBottom]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,7 +146,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-sm text-muted-foreground">
@@ -116,28 +154,13 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
             </p>
           </div>
         ) : (
-          messages.map((message) => {
-            const isMyMessage = message.sender_id === user?.id;
-            return (
-              <div
-                key={message.id}
-                className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[75%] p-3 rounded-lg ${
-                    isMyMessage
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  }`}
-                >
-                  <p className="text-sm break-words whitespace-pre-wrap">{message.message_text}</p>
-                  <p className={`text-xs mt-1.5 opacity-70`}>
-                    {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
-                  </p>
-                </div>
-              </div>
-            );
-          })
+          messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              isMyMessage={message.sender_id === user?.id}
+            />
+          ))
         )}
         {/* Typing indicator */}
         {typingUsers.length > 0 && (
