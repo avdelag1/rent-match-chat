@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/utils/prodLogger";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -17,7 +18,7 @@ const Index = () => {
     queryFn: async () => {
       if (!user) return null;
 
-      console.log('[Index] Fetching role for user:', user.id);
+      logger.log('[Index] Fetching role for user:', user.id);
 
       const { data, error } = await supabase
         .from('user_roles')
@@ -26,35 +27,37 @@ const Index = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('[Index] Role fetch error:', error);
+        logger.error('[Index] Role fetch error:', error);
         throw error; // Let React Query handle retries
       }
 
-      console.log('[Index] Role fetched successfully:', data?.role);
+      logger.log('[Index] Role fetched successfully:', data?.role);
       return data?.role;
     },
     enabled: !!user,
-    retry: 2, // Reduce from 3 to 2
-    retryDelay: 500, // Reduce from 800ms to 500ms for faster retries
-    staleTime: 5000, // Cache role data for 5s to prevent immediate refetch
+    retry: 2,
+    retryDelay: 500,
+    staleTime: 60000, // Increased from 5s to 60s - user roles don't change frequently
+    cacheTime: 300000, // Cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnMount: false, // Don't refetch on component mount if data is fresh
   });
 
   // Add timeout fallback - if query takes too long, force refetch
   useEffect(() => {
     if (user && profileLoading) {
       const timeout = setTimeout(() => {
-        console.log('[Index] Query taking too long, forcing refetch...');
+        logger.log('[Index] Query taking too long, forcing refetch...');
         refetch();
       }, 5000); // Increase from 3s to 5s for new users
 
       return () => clearTimeout(timeout);
     }
-  }, [user, profileLoading]);
+  }, [user, profileLoading, refetch]);
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
-    console.log('[Index] Redirect check:', {
+    logger.log('[Index] Redirect check:', {
       user: !!user,
       userEmail: user?.email,
       userRole,
@@ -68,7 +71,7 @@ const Index = () => {
     if (user) {
       // If query failed after all retries, show error ONLY if we're not in the middle of signup
       if (isError && !profileLoading) {
-        console.error('[Index] User authenticated but role query failed after retries');
+        logger.error('[Index] User authenticated but role query failed after retries');
 
         // Don't show error immediately after signup - give cache more time
         const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
@@ -79,25 +82,25 @@ const Index = () => {
             variant: "destructive"
           });
         } else {
-          console.log('[Index] New user detected, waiting for profile setup...');
+          logger.log('[Index] New user detected, waiting for profile setup...');
         }
         return;
       }
 
       // If still loading, wait
       if (profileLoading) {
-        console.log('[Index] Still loading role...');
+        logger.log('[Index] Still loading role...');
         return;
       }
 
       // If no role found after query completed
       if (!userRole) {
-        console.error('[Index] ❌ No role found for authenticated user:', user.email);
+        logger.error('[Index] ❌ No role found for authenticated user:', user.email);
         const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
 
         // For brand new users, be more patient
         if (userAge < 15000) {
-          console.log('[Index] Brand new user, waiting for role creation...');
+          logger.log('[Index] Brand new user, waiting for role creation...');
           return;
         }
 
@@ -111,7 +114,7 @@ const Index = () => {
 
       // CRITICAL: Success - redirect to correct dashboard based on ACTUAL role from DB
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      console.log(`[Index] ✅ Authenticated user ${user.email} with role="${userRole}" -> Redirecting to: ${targetPath}`);
+      logger.log(`[Index] ✅ Authenticated user ${user.email} with role="${userRole}" -> Redirecting to: ${targetPath}`);
       navigate(targetPath, { replace: true });
     }
   }, [user, userRole, loading, profileLoading, isError, navigate]);

@@ -53,6 +53,8 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const previousMessageCountRef = useRef(0);
+  const [showConnecting, setShowConnecting] = useState(false);
+  const connectingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check monthly message limits
   const { canSendMessage, messagesRemaining, isAtLimit, hasMonthlyLimit } = useMonthlyMessageLimits();
@@ -62,6 +64,30 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
 
   // Mark messages as read when viewing this conversation
   useMarkMessagesAsRead(conversationId, true);
+
+  // Debounce showing "Connecting" message to prevent flicker
+  useEffect(() => {
+    if (!isConnected) {
+      // Only show "Connecting" message after 500ms of being disconnected
+      connectingTimeoutRef.current = setTimeout(() => {
+        setShowConnecting(true);
+      }, 500);
+    } else {
+      // Clear timeout and hide connecting message immediately when connected
+      if (connectingTimeoutRef.current) {
+        clearTimeout(connectingTimeoutRef.current);
+        connectingTimeoutRef.current = null;
+      }
+      setShowConnecting(false);
+    }
+
+    return () => {
+      if (connectingTimeoutRef.current) {
+        clearTimeout(connectingTimeoutRef.current);
+        connectingTimeoutRef.current = null;
+      }
+    };
+  }, [isConnected]);
 
   // Check if user is scrolled to bottom
   const isScrolledToBottom = useCallback(() => {
@@ -137,7 +163,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
       </div>
 
       {/* Connection Status */}
-      {!isConnected && (
+      {showConnecting && (
         <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-950 border-b border-yellow-200 dark:border-yellow-800 text-center">
           <p className="text-xs text-yellow-800 dark:text-yellow-200">
             🔄 Connecting to chat...
