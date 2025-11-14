@@ -199,7 +199,7 @@ export function ClientTinderSwipeContainer({
   const nextProfile = profiles[currentIndex + 1];
 
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-background">
+    <div className="absolute inset-0 w-full h-full overflow-hidden bg-background">
       {/* Top Bar - Fixed */}
       <SwipeTopBar
         currentIndex={currentIndex}
