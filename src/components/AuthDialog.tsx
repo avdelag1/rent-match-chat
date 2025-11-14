@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Eye, EyeOff, Flame, Mail, Lock, User, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Flame, Mail, Lock, User, ArrowLeft, Loader } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -118,18 +118,21 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     }
   };
 
-  const handleOAuthSignIn = async (provider: 'google') => {
+  const handleOAuthSignIn = async (e: React.MouseEvent<HTMLButtonElement>, provider: 'google') => {
+    e.preventDefault();
+    e.stopPropagation();
+
     setIsLoading(true);
     try {
       const { error } = await signInWithOAuth(provider, role);
 
       if (error) throw error;
 
-      onClose();
+      // Don't close dialog - let OAuth redirect handle page flow
+      // Supabase will redirect to Google, then back to the app
     } catch (error: any) {
       console.error(`OAuth error for ${provider}:`, error);
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Only reset loading on error
     }
   };
 
@@ -179,13 +182,22 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     {/* Google OAuth Button */}
                     <Button
                       type="button"
-                      onClick={() => handleOAuthSignIn('google')}
+                      onClick={(e) => handleOAuthSignIn(e, 'google')}
                       disabled={isLoading}
                       variant="outline"
                       className="w-full h-12 border-2 font-medium text-base hover:bg-accent transition-all"
                     >
-                      <FaGoogle className="w-5 h-5 mr-3 text-red-500" />
-                      Continue with Google
+                      {isLoading ? (
+                        <>
+                          <Loader className="w-5 h-5 mr-3 animate-spin" />
+                          Connecting to Google...
+                        </>
+                      ) : (
+                        <>
+                          <FaGoogle className="w-5 h-5 mr-3 text-red-500" />
+                          Continue with Google
+                        </>
+                      )}
                     </Button>
 
                     {/* Divider */}
