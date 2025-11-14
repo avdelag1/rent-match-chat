@@ -542,4 +542,60 @@ body {
   .scroll-snap-item {
     scroll-snap-align: center;
   }
+
+  /* ===== MOBILE PERFORMANCE OPTIMIZATIONS ===== */
+
+  /* Remove 300ms tap delay on mobile - instant interaction */
+  button,
+  a,
+  [role="button"],
+  .cursor-pointer,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Instant visual feedback for clicks */
+  button:active,
+  a:active,
+  [role="button"]:active {
+    transform: scale(0.96) translateZ(0);
+    transition: transform 0.05s ease;
+  }
+
+  /* Prevent text selection on interactive elements during swipe */
+  button,
+  a,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Optimize for 60fps scrolling and animations */
+  .swipe-card,
+  [class*="card"],
+  .motion-element {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Prevent flickering on state changes */
+  .no-flicker {
+    transition: none;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Safe area support for notched devices */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top);
+  }
 }

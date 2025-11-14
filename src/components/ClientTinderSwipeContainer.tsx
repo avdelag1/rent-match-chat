@@ -167,13 +167,23 @@ export function ClientTinderSwipeContainer({
     }
   }, [currentProfile, startConversation, navigate]);
 
-  // Loading state
+  // Loading state - Smooth skeleton that matches card dimensions
   if (isLoading) {
     return (
-      <div className="relative w-full h-screen flex items-center justify-center px-4">
-        <Card className="w-full max-w-md h-[600px] flex items-center justify-center">
-          <Skeleton className="w-full h-full rounded-3xl" />
-        </Card>
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
+          {/* Skeleton placeholder with exact card dimensions */}
+          <div className="aspect-[9/16] w-full rounded-3xl overflow-hidden bg-card/50">
+            <Skeleton className="w-full h-full" />
+          </div>
+          {/* Bottom buttons space */}
+          <div className="mt-8 flex items-center justify-center gap-4 h-16 opacity-50">
+            <Skeleton className="h-14 w-14 rounded-full" />
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-16 w-16 rounded-full" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -181,8 +191,8 @@ export function ClientTinderSwipeContainer({
   // Error state
   if (error) {
     return (
-      <div className="relative w-full h-screen flex items-center justify-center px-4">
-        <Card className="w-full max-w-md p-8 text-center">
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md p-8 text-center border border-destructive/20 bg-destructive/5">
           <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
           <h3 className="text-xl font-bold mb-2">Something went wrong</h3>
           <p className="text-muted-foreground mb-4">Couldn't load profiles</p>
@@ -195,10 +205,10 @@ export function ClientTinderSwipeContainer({
     );
   }
 
-  // Empty state
+  // Empty state - No profiles matching filters
   if (profiles.length === 0) {
     return (
-      <div className="relative w-full h-screen flex items-center justify-center px-4">
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
         <Card className="w-full max-w-md p-8 text-center">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-2xl font-bold mb-2">No Profiles Found</h3>
@@ -214,11 +224,11 @@ export function ClientTinderSwipeContainer({
     );
   }
 
-  // All cards swiped
+  // All cards swiped - End of deck
   if (currentIndex >= profiles.length) {
     return (
-      <div className="relative w-full h-screen flex items-center justify-center px-4">
-        <Card className="w-full max-w-md p-8 text-center">
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
           <p className="text-muted-foreground mb-4">Check back later for new profiles</p>
