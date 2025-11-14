@@ -82,10 +82,10 @@ export function OwnerClientTinderCard({
   const handleDragEnd = (event: any, info: PanInfo) => {
     const { offset, velocity } = info;
 
-    // Enhanced threshold: 30% of screen width for better sensitivity, velocity-based swipes
+    // Threshold: 35% of screen width, velocity-based swipes
     const screenWidth = window.innerWidth;
-    const swipeThresholdX = screenWidth * 0.30; // Reduced from 0.35 for easier swipes
-    const velocityThreshold = 500; // px/s - Reduced from 600 for more responsive swipes
+    const swipeThresholdX = screenWidth * 0.35;
+    const velocityThreshold = 600; // px/s
 
     // Horizontal swipes - Right (accept) or Left (reject)
     const absOffsetX = Math.abs(offset.x);
@@ -100,9 +100,9 @@ export function OwnerClientTinderCard({
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
-  // Calculate overlay opacity based on drag distance (matching the new 30% threshold)
-  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.30], [0, 1]);
-  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.30, 0], [1, 0]);
+  // Calculate overlay opacity based on drag distance
+  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);
+  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.35, 0], [1, 0]);
 
   const cardStyle = {
     x,
@@ -114,15 +114,15 @@ export function OwnerClientTinderCard({
     <motion.div
       drag={isTop}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.3}
+      dragElastic={0.2}
       onDragEnd={handleDragEnd}
       style={cardStyle}
       animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 600,
-        damping: 40,
-        mass: 0.5
+        stiffness: 500,
+        damping: 35,
+        mass: 0.6
       }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
     >
@@ -166,7 +166,7 @@ export function OwnerClientTinderCard({
       </motion.div>
 
       {/* Card Content */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <div className="relative w-full h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Main Image with Tap Zones */}
         <div 
           className="relative w-full h-full cursor-pointer select-none"

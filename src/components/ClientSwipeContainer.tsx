@@ -21,17 +21,15 @@ interface ClientSwipeContainerProps {
   profiles?: any[]; // Accept profiles from parent
   isLoading?: boolean;
   error?: any;
-  fullscreen?: boolean; // Whether to use fullscreen mode or contained mode
 }
 
-export function ClientSwipeContainer({
-  onClientTap,
-  onInsights,
+export function ClientSwipeContainer({ 
+  onClientTap, 
+  onInsights, 
   onMessageClick,
   profiles: externalProfiles,
   isLoading: externalIsLoading,
-  error: externalError,
-  fullscreen = true // Default to fullscreen for backward compatibility
+  error: externalError 
 }: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -190,16 +188,14 @@ export function ClientSwipeContainer({
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
 
   if (isLoading || isRefetching) {
-    const containerClass = fullscreen
-      ? "fixed inset-0 flex items-center justify-center bg-background"
-      : "relative w-full mx-auto h-[600px]";
-
     return (
-      <div className={containerClass}>
-        <div className="w-full max-w-xl bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden p-6 space-y-4">
-          <Skeleton className="w-full h-[400px] rounded-lg" />
-          <Skeleton className="w-3/4 h-6" />
-          <Skeleton className="w-1/2 h-4" />
+      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 600px)' }}>
+        <div className="w-full h-full bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden">
+          <div className="p-6 space-y-4">
+            <Skeleton className="w-full h-[60vh] rounded-lg" />
+            <Skeleton className="w-3/4 h-6" />
+            <Skeleton className="w-1/2 h-4" />
+          </div>
         </div>
       </div>
     );
@@ -207,17 +203,13 @@ export function ClientSwipeContainer({
 
   if (error) {
     console.error('ClientSwipeContainer error:', error);
-    const containerClass = fullscreen
-      ? "fixed inset-0 flex items-center justify-center bg-background"
-      : "relative w-full h-[600px] flex items-center justify-center";
-
     return (
-      <div className={containerClass}>
-        <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8 max-w-md">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
           <p className="text-muted-foreground mb-4">We couldn't load client profiles right now.</p>
-          <Button
+          <Button 
             onClick={handleRefresh}
             variant="outline"
             className="gap-2"
@@ -231,13 +223,9 @@ export function ClientSwipeContainer({
   }
 
   if (clientProfiles.length === 0) {
-    const containerClass = fullscreen
-      ? "fixed inset-0 flex items-center justify-center bg-background"
-      : "relative w-full h-[600px] flex items-center justify-center";
-
     return (
-      <div className={containerClass}>
-        <div className="text-center bg-card/90 backdrop-blur-sm border rounded-xl p-8 shadow-xl max-w-md">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
           <p className="text-muted-foreground mb-4">
@@ -289,19 +277,15 @@ export function ClientSwipeContainer({
   }
 
   if (currentIndex >= clientProfiles.length) {
-    const containerClass = fullscreen
-      ? "fixed inset-0 flex items-center justify-center bg-background"
-      : "relative w-full h-[600px] flex items-center justify-center";
-
     return (
-      <div className={containerClass}>
-        <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8 max-w-md">
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
           <p className="text-muted-foreground mb-4">
             Check back later for new profiles.
           </p>
-          <Button
+          <Button 
             onClick={handleRefresh}
             variant="outline"
             className="gap-2 w-full"
@@ -316,13 +300,8 @@ export function ClientSwipeContainer({
 
   const currentClient = clientProfiles[currentIndex];
 
-  // Container classes based on mode
-  const containerClass = fullscreen
-    ? "fixed inset-0 w-screen h-screen overflow-hidden bg-background"
-    : "relative w-full h-[600px] overflow-hidden bg-background rounded-lg";
-
   return (
-    <div className={containerClass}>
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-background">
       {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
       <AnimatePresence>
         {emojiAnimation.show && (
@@ -380,8 +359,8 @@ export function ClientSwipeContainer({
         )}
       </AnimatePresence>
 
-      {/* Card Container with Floating Buttons */}
-      <div className={`relative w-full h-full ${fullscreen ? 'pt-4 px-2 sm:px-4' : 'p-0'} flex items-center justify-center`}>
+      {/* Full-Screen Card Container with Floating Buttons */}
+      <div className="relative w-full h-full pt-4 px-2 sm:px-4 flex items-center justify-center">
         <div className="relative w-full h-full max-w-lg">
           <AnimatePresence mode="wait">
             {currentClient && (
