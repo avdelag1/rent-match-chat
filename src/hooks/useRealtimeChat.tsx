@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -20,29 +20,28 @@ interface UserPresence {
 export function useRealtimeChat(conversationId: string) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Track typing with debounce
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [typingChannelRef, setTypingChannelRef] = useState<any>(null);
+  // Use refs to avoid recreating functions on every render
+  const isTypingRef = useRef(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingChannelRef = useRef<any>(null);
 
   const startTyping = useCallback(() => {
-    if (!conversationId || !user?.id || !typingChannelRef) return;
+    if (!conversationId || !user?.id || !typingChannelRef.current) return;
 
     // Clear existing timeout
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
 
     // Send typing status if not already typing
-    if (!isTyping) {
-      setIsTyping(true);
-      
-      // Use existing channel reference
-      typingChannelRef.track({
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+
+      typingChannelRef.current.track({
         userId: user.id,
         userName: user.user_metadata?.full_name || 'User',
         isTyping: true,
@@ -53,24 +52,22 @@ export function useRealtimeChat(conversationId: string) {
     }
 
     // Set timeout to stop typing after 3 seconds of inactivity
-    const timeout = setTimeout(() => {
+    typingTimeoutRef.current = setTimeout(() => {
       stopTyping();
     }, 3000);
-
-    setTypingTimeout(timeout);
-  }, [conversationId, user?.id, isTyping, typingTimeout, typingChannelRef]);
+  }, [conversationId, user?.id]);
 
   const stopTyping = useCallback(() => {
-    if (!conversationId || !user?.id || !typingChannelRef) return;
+    if (!conversationId || !user?.id || !typingChannelRef.current) return;
 
-    setIsTyping(false);
-    
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-      setTypingTimeout(null);
+    isTypingRef.current = false;
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
     }
 
-    typingChannelRef.track({
+    typingChannelRef.current.track({
       userId: user.id,
       userName: user.user_metadata?.full_name || 'User',
       isTyping: false,
@@ -78,7 +75,7 @@ export function useRealtimeChat(conversationId: string) {
     }).catch(() => {
       // Silently handle presence tracking errors
     });
-  }, [conversationId, user?.id, typingTimeout, typingChannelRef]);
+  }, [conversationId, user?.id]);
 
   // Set up real-time subscriptions
   useEffect(() => {
@@ -103,7 +100,7 @@ export function useRealtimeChat(conversationId: string) {
         },
         async (payload) => {
           const newMessage = payload.new;
-          
+
           // Get sender details
           const { data: senderProfile } = await supabase
             .from('profiles')
@@ -113,13 +110,13 @@ export function useRealtimeChat(conversationId: string) {
 
           const completeMessage = {
             ...newMessage,
-            sender: senderProfile || { 
-              id: newMessage.sender_id, 
-              full_name: 'Unknown', 
-              avatar_url: null 
+            sender: senderProfile || {
+              id: newMessage.sender_id,
+              full_name: 'Unknown',
+              avatar_url: null
             }
           };
-          
+
           // Update messages immediately
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
             if (!oldData) return [completeMessage];
@@ -167,7 +164,7 @@ export function useRealtimeChat(conversationId: string) {
 
           // Clear typing status for sender
           setTypingUsers(prev => prev.filter(u => u.userId !== newMessage.sender_id));
-          
+
           // Dispatch custom event for notifications
           window.dispatchEvent(new CustomEvent('new-message', { detail: newMessage }));
         }
@@ -240,45 +237,34 @@ export function useRealtimeChat(conversationId: string) {
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           // Store channel reference for startTyping/stopTyping
-          setTypingChannelRef(typingChannel);
+          typingChannelRef.current = typingChannel;
         }
       });
 
     return () => {
       // Stop typing before cleanup
-      if (isTyping) {
-        stopTyping();
+      if (isTypingRef.current) {
+        isTypingRef.current = false;
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = null;
+        }
       }
-      
+
       // Remove channels
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(typingChannel);
-      
-      // Clear typing timeout
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-      }
-      
+
       // Clear state
       setTypingUsers([]);
       setIsConnected(false);
-      setTypingChannelRef(null);
+      typingChannelRef.current = null;
     };
-  }, [conversationId, user?.id, queryClient, stopTyping]);
-
-  // Cleanup typing on unmount
-  useEffect(() => {
-    return () => {
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-      }
-    };
-  }, [typingTimeout]);
+  }, [conversationId, user?.id, queryClient]);
 
   return {
     startTyping,
     stopTyping,
-    isTyping,
     typingUsers,
     onlineUsers,
     isConnected
