@@ -84,6 +84,7 @@ export function useProfileSetup() {
           .from('profiles')
           .upsert([{
             ...profileData,
+            role: role,  // ✅ CRITICAL FIX: Set role in profiles table!
             is_active: true,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()

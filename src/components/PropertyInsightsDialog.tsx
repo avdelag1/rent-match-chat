@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
-import { ZoomableImageCarousel } from './ZoomableImageCarousel';
+import { ImageCarousel } from './ImageCarousel';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
@@ -75,7 +75,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
           <div className="space-y-6 py-4 px-6 pb-8">
             {/* Property Images Carousel */}
             {listing.images && listing.images.length > 0 && (
-              <ZoomableImageCarousel images={listing.images} alt="Property" />
+              <ImageCarousel images={listing.images} alt="Property" />
             )}
 
             {/* Basic Info */}

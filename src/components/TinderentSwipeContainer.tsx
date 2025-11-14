@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, memo, useMemo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeActionButtons } from './SwipeActionButtons';
@@ -9,6 +9,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
+import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RotateCcw, Sparkles } from 'lucide-react';
@@ -30,20 +31,22 @@ interface TinderentSwipeContainerProps {
   filters?: ListingFilters;
 }
 
-export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) {
+const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [page, setPage] = useState(0);
+  const [allListings, setAllListings] = useState<any[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
 
-  // Get listings with filters applied
+  // Get listings with filters applied and pagination
   const {
     data: smartListings = [],
     isLoading: smartLoading,
     error: smartError,
     isRefetching: smartRefetching,
     refetch: refetchSmart
-  } = useSmartListingMatching([], filters);
+  } = useSmartListingMatching([], filters, page, 10);
   
   const { 
     data: regularListings = [], 
@@ -51,13 +54,20 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
     refetch: refetchRegular
   } = useListings([]);
 
-  // Use smart listings if available, otherwise fallback to regular
-  const listings = smartListings.length > 0 ? smartListings : regularListings;
+  // Use accumulated listings - memoized to prevent unnecessary recalculations
+  const listings = useMemo(() => 
+    allListings.length > 0 ? allListings : (smartListings.length > 0 ? smartListings : regularListings),
+    [allListings, smartListings, regularListings]
+  );
+  
   const isLoading = smartLoading || regularLoading;
   const error = smartError;
   const isRefetching = smartRefetching;
+  
   const refetch = useCallback(() => {
-    setCurrentIndex(0); // Reset to first listing on refresh
+    setCurrentIndex(0);
+    setPage(0);
+    setAllListings([]);
     refetchSmart();
     refetchRegular();
   }, [refetchSmart, refetchRegular]);
@@ -67,46 +77,52 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const navigate = useNavigate();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
   const startConversation = useStartConversation();
+  const recordProfileView = useRecordProfileView();
+
+  // Add newly fetched listings to the stack
+  useEffect(() => {
+    if (smartListings.length > 0) {
+      setAllListings(prev => {
+        const existingIds = new Set(prev.map(l => l.id));
+        const newListings = smartListings.filter(l => !existingIds.has(l.id));
+        return [...prev, ...newListings];
+      });
+    }
+  }, [smartListings]);
+
+  // Preload next batch when user is 3 cards away from end
+  useEffect(() => {
+    const remainingCards = listings.length - currentIndex;
+    if (remainingCards <= 3 && !isLoading) {
+      setPage(prev => prev + 1);
+    }
+  }, [currentIndex, listings.length, isLoading]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
-    if (!currentListing) {
-      console.log('No current listing found for swipe');
-      return;
-    }
-
-    console.log('Starting swipe:', { 
-      listingId: currentListing.id, 
-      direction, 
-      currentIndex,
-      listingTitle: currentListing.title 
-    });
+    if (!currentListing) return;
 
     setSwipeDirection(direction);
-    
-    // Trigger haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
     
-    // Record swipe
     swipeMutation.mutate({
       targetId: currentListing.id,
       direction,
       targetType: 'listing'
     });
 
-    // Record the swipe for undo functionality
-    recordSwipe(
-      currentListing.id, 
-      'listing', 
-      direction === 'right' ? 'like' : 'pass'
-    );
+    recordSwipe(currentListing.id, 'listing', direction === 'right' ? 'like' : 'pass');
+    recordProfileView.mutate({
+      profileId: currentListing.id,
+      viewType: 'listing',
+      action: direction === 'right' ? 'like' : 'pass'
+    });
 
-    // Move to next card after animation with proper delay for smooth rhythm
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
       setSwipeDirection(null);
     }, 300);
-  }, [currentIndex, listings, swipeMutation, recordSwipe]);
+  }, [currentIndex, listings, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
     handleSwipe(direction);
@@ -289,9 +305,9 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
   const currentListing = listings[currentIndex];
 
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-background">
-      {/* Full-Screen Card Stack */}
-      <div className="absolute inset-0 w-full h-full">
+    <div className="relative w-full h-full flex flex-col items-center justify-center">
+      {/* Card Container - Full screen swipe experience */}
+      <div className="relative w-full h-[calc(100vh-180px)] max-w-lg mx-auto">
         <AnimatePresence mode="wait">
           {currentListing && (
             <motion.div
@@ -299,15 +315,16 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
-                x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
+                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
                 y: 0,
                 opacity: 0,
                 rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
                 scale: 0.85,
                 transition: {
                   type: "spring",
-                  stiffness: 400,
-                  damping: 35,
+                  stiffness: 300,
+                  damping: 25,
+                  mass: 0.8,
                   duration: 0.3
                 }
               }}
@@ -315,8 +332,10 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
                 type: "spring",
                 stiffness: 300,
                 damping: 30,
+                mass: 1
               }}
-              className="absolute inset-0 w-full h-full"
+              className="w-full h-full"
+              style={{ willChange: 'transform, opacity' }}
             >
               <TinderSwipeCard
                 listing={currentListing}
@@ -329,7 +348,7 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons - Floating on top of card */}
+      {/* Action Buttons - New component */}
       <SwipeActionButtons
         onUndo={() => undoLastSwipe()}
         onPass={() => handleButtonSwipe('left')}
@@ -347,4 +366,6 @@ export function TinderentSwipeContainer({ onListingTap, onInsights, onMessageCli
       />
     </div>
   );
-}
+};
+
+export const TinderentSwipeContainer = memo(TinderentSwipeContainerComponent);

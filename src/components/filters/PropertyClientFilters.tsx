@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, Save } from 'lucide-react';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
+import { ClientDemographicFilters } from './ClientDemographicFilters';
 
 interface PropertyClientFiltersProps {
   onApply: (filters: any) => void;
@@ -37,6 +38,14 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [orientations, setOrientations] = useState<string[]>(initialFilters.orientations || []);
   const [hasElevator, setHasElevator] = useState(initialFilters.has_elevator || false);
   const [parkingSpots, setParkingSpots] = useState(initialFilters.parking_spots_min || 0);
+
+  // Client demographic filters
+  const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
+  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
+  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
+  const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
+  const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
+  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
   const propertyTypeOptions = ['Apartment', 'House', 'Studio', 'Villa', 'Commercial', 'Land'];
   const amenityOptions = ['Pool', 'Parking', 'Gym', 'Security', 'Garden', 'Balcony'];
@@ -71,7 +80,15 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       view_types: viewTypes,
       orientations: orientations,
       has_elevator: hasElevator,
-      parking_spots_min: parkingSpots
+      parking_spots_min: parkingSpots,
+      // Client demographic filters
+      gender_preference: genderPreference,
+      nationalities,
+      languages,
+      relationship_status: relationshipStatus,
+      has_pets_filter: hasPetsFilter,
+      age_min: ageRange[0],
+      age_max: ageRange[1]
     });
   };
 
@@ -91,6 +108,13 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     setOrientations([]);
     setHasElevator(false);
     setParkingSpots(0);
+    // Clear client demographic filters
+    setGenderPreference('any');
+    setNationalities([]);
+    setLanguages([]);
+    setRelationshipStatus([]);
+    setHasPetsFilter('any');
+    setAgeRange([18, 65]);
     onApply({});
   };
 
@@ -130,7 +154,7 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       </div>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Interest Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -145,12 +169,27 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               <SelectItem value="both">Rent or Buy</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Filter clients based on whether they're seeking to rent, purchase, or both</p>
+          <p className="text-sm text-muted-foreground">Filter clients based on whether they're seeking to rent, purchase, or both</p>
         </CollapsibleContent>
       </Collapsible>
 
+      <ClientDemographicFilters
+        genderPreference={genderPreference}
+        setGenderPreference={setGenderPreference}
+        ageRange={ageRange}
+        setAgeRange={setAgeRange}
+        relationshipStatus={relationshipStatus}
+        setRelationshipStatus={setRelationshipStatus}
+        hasPetsFilter={hasPetsFilter}
+        setHasPetsFilter={setHasPetsFilter}
+        nationalities={nationalities}
+        setNationalities={setNationalities}
+        languages={languages}
+        setLanguages={setLanguages}
+      />
+
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Property Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -172,12 +211,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Match clients looking for specific property types</p>
+          <p className="text-sm text-muted-foreground">Match clients looking for specific property types</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Budget Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -196,12 +235,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               className="w-full"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Find clients within a specific budget range</p>
+          <p className="text-sm text-muted-foreground">Find clients within a specific budget range</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Requirements</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -218,7 +257,7 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Amenities</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -240,12 +279,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Connect with clients whose needs align with your property features</p>
+          <p className="text-sm text-muted-foreground">Connect with clients whose needs align with your property features</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Additional Preferences</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -266,7 +305,7 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Property Size</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -285,12 +324,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               className="w-full"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Filter by square footage</p>
+          <p className="text-sm text-muted-foreground">Filter by square footage</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Year Built</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -309,12 +348,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               className="w-full"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Filter by construction or renovation year</p>
+          <p className="text-sm text-muted-foreground">Filter by construction or renovation year</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Floor Level</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -331,12 +370,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Preferred floor range in building</p>
+          <p className="text-sm text-muted-foreground">Preferred floor range in building</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">View Type</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -358,12 +397,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Desired view from property</p>
+          <p className="text-sm text-muted-foreground">Desired view from property</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Orientation</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -385,12 +424,12 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Building/unit orientation for natural light</p>
+          <p className="text-sm text-muted-foreground">Building/unit orientation for natural light</p>
         </CollapsibleContent>
       </Collapsible>
 
       <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted rounded">
+        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
           <Label className="font-medium">Parking</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
@@ -405,7 +444,7 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               step={1}
             />
           </div>
-          <p className="text-xs text-muted-foreground">Required number of parking spaces</p>
+          <p className="text-sm text-muted-foreground">Required number of parking spaces</p>
         </CollapsibleContent>
       </Collapsible>
 

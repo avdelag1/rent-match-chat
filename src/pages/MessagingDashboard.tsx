@@ -1,5 +1,5 @@
 import { PageTransition } from '@/components/PageTransition';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,41 +10,32 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, Search, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
+import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
 
 export function MessagingDashboard() {
   const navigate = useNavigate();
-  const { user, userRole } = useAuth();
-  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isStartingConversation, setIsStartingConversation] = useState(false);
-
+  
   const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
 
-  // Note: useMarkMessagesAsRead is called in MessagingInterface, not here
-  // to avoid double-calling the hook
+  // Mark messages as read when viewing conversation
+  useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
 
-  // Memoize filtered conversations to prevent recreation
-  const filteredConversations = useMemo(() =>
-    conversations.filter(conv =>
-      conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    [conversations, searchQuery]
+  const filteredConversations = conversations.filter(conv =>
+    conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Memoize selected conversation to prevent recreation and flickering
-  const selectedConversation = useMemo(() =>
-    conversations.find(conv => conv.id === selectedConversationId),
-    [conversations, selectedConversationId]
-  );
+  const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
   // Realtime subscription for new conversations
   useEffect(() => {
@@ -61,10 +52,9 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          // Only refetch if not currently in an active chat (prevents flickering)
-          if (!selectedConversationId) {
-            refetch();
-          }
+          console.log('New conversation created:', payload);
+          // Refetch conversations to get the new one with proper joins
+          refetch();
         }
       )
       .on(
@@ -76,17 +66,9 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          // Use setQueryData instead of refetch to prevent flickering
-          // Only update the specific conversation that changed
-          queryClient.setQueryData(['conversations', user.id], (oldConversations: any) => {
-            if (!oldConversations) return oldConversations;
-
-            return oldConversations.map((conv: any) =>
-              conv.id === payload.new.id
-                ? { ...conv, ...payload.new }
-                : conv
-            );
-          });
+          console.log('Conversation updated:', payload);
+          // Refetch to get updated last_message_at
+          refetch();
         }
       )
       .subscribe();
@@ -94,7 +76,7 @@ export function MessagingDashboard() {
     return () => {
       supabase.removeChannel(conversationsChannel);
     };
-  }, [user?.id, refetch, selectedConversationId, queryClient]);
+  }, [user?.id]);
 
   // Handle direct conversation opening or auto-start from URL parameters
   useEffect(() => {
@@ -126,10 +108,10 @@ export function MessagingDashboard() {
           title: 'Loading conversation...',
           description: 'Please wait while we fetch your conversation.',
         });
-        
-        // Try up to 10 times (10 seconds total)
-        for (let attempt = 1; attempt <= 10; attempt++) {
-          console.log(`[MessagingDashboard] Attempt ${attempt}/10 to find conversation`);
+
+        // Reduced polling to prevent flickering - try up to 3 times (3 seconds total)
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          console.log(`[MessagingDashboard] Attempt ${attempt}/3 to find conversation`);
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refetch();
           conversation = conversations.find(c => c.id === conversationId);
@@ -145,7 +127,7 @@ export function MessagingDashboard() {
             description: 'You can now send messages!',
           });
         } else {
-          throw new Error('Conversation not found after 10 seconds');
+          throw new Error('Conversation not found after 3 seconds');
         }
       } else {
         console.log('[MessagingDashboard] Conversation already in cache');
@@ -222,39 +204,47 @@ export function MessagingDashboard() {
     }
   };
 
-  const handleBackToDashboard = useCallback(() => {
-    // Use cached userRole from useAuth to avoid unnecessary database query
-    if (userRole === 'owner') {
-      navigate('/owner/dashboard');
-    } else {
-      navigate('/client/dashboard');
-    }
-  }, [userRole, navigate]);
-
-  // Memoize onBack callback to prevent MessagingInterface re-renders
-  const handleBackToList = useCallback(() => {
-    setSelectedConversationId(null);
-  }, []);
+  const handleBackToDashboard = () => {
+    // Get user role from profile data via auth hook
+    const getUserRole = async () => {
+      try {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user?.id)
+          .maybeSingle();
+        
+        const role = roleData?.role || user?.user_metadata?.role || 'client';
+        if (role === 'owner') {
+          navigate('/owner/dashboard');
+        } else {
+          navigate('/client/dashboard');
+        }
+      } catch (error) {
+        console.error('Error getting user role:', error);
+        navigate('/client/dashboard'); // Default fallback
+      }
+    };
+    
+    getUserRole();
+  };
 
   if (selectedConversation && selectedConversation.other_user) {
     return (
-      <PageTransition>
-        <div className="h-screen flex flex-col overflow-hidden">
-          <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col min-h-0">
-            <MessagingInterface
-              conversationId={selectedConversation.id}
-              otherUser={selectedConversation.other_user}
-              onBack={handleBackToList}
-            />
-          </div>
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col min-h-0">
+          <MessagingInterface
+            conversationId={selectedConversation.id}
+            otherUser={selectedConversation.other_user}
+            onBack={() => setSelectedConversationId(null)}
+          />
         </div>
-      </PageTransition>
+      </div>
     );
   }
 
   return (
-    <PageTransition>
-      <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
+    <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -363,6 +353,5 @@ export function MessagingDashboard() {
         </Card>
       </div>
     </div>
-    </PageTransition>
   );
 }

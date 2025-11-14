@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
+import { SwipeActionButtons } from './SwipeActionButtons';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { SwipeTopBar } from './owner/SwipeTopBar';
 import { MatchCelebration } from './MatchCelebration';
@@ -8,13 +9,14 @@ import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
+import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, AlertCircle, X, Eye, Heart } from 'lucide-react';
+import { RotateCcw, AlertCircle } from 'lucide-react';
 
 interface ClientTinderSwipeContainerProps {
   onClientTap?: (clientId: string) => void;
@@ -35,6 +37,8 @@ export function ClientTinderSwipeContainer({
 }: ClientTinderSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [page, setPage] = useState(0);
+  const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
 
@@ -45,16 +49,36 @@ export function ClientTinderSwipeContainer({
     ownerProfile?: any;
   }>({ isOpen: false });
 
-  // Use external profiles if provided, otherwise fetch internally
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching();
+  // Fetch profiles with pagination
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching(undefined, page, 10);
   
-  const profiles = externalProfiles || internalProfiles;
+  const profiles = externalProfiles || allProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
   const error = externalError !== undefined ? externalError : internalError;
 
   const swipeMutation = useSwipe();
   const { recordSwipe, undoLastSwipe, canUndo } = useSwipeUndo();
   const startConversation = useStartConversation();
+  const recordProfileView = useRecordProfileView();
+
+  // Add newly fetched profiles to the stack
+  useEffect(() => {
+    if (!externalProfiles && internalProfiles.length > 0) {
+      setAllProfiles(prev => {
+        const existingIds = new Set(prev.map(p => p.user_id));
+        const newProfiles = internalProfiles.filter(p => !existingIds.has(p.user_id));
+        return [...prev, ...newProfiles];
+      });
+    }
+  }, [internalProfiles, externalProfiles]);
+
+  // Preload next batch when user is 3 cards away from end
+  useEffect(() => {
+    const remainingCards = profiles.length - currentIndex;
+    if (remainingCards <= 3 && !isLoading && !externalProfiles) {
+      setPage(prev => prev + 1);
+    }
+  }, [currentIndex, profiles.length, isLoading, externalProfiles]);
 
   const currentProfile = profiles[currentIndex];
 
@@ -80,6 +104,13 @@ export function ClientTinderSwipeContainer({
       direction === 'left' ? 'pass' : 'like'
     );
 
+    // Record profile view for smart recycling
+    recordProfileView.mutate({
+      profileId: currentProfile.user_id,
+      viewType: 'profile',
+      action: direction === 'left' ? 'pass' : 'like'
+    });
+
     // Move to next card
     setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
@@ -100,6 +131,8 @@ export function ClientTinderSwipeContainer({
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
+    setPage(0);
+    setAllProfiles([]);
     await refetch();
     toast.success('Refreshed', { description: 'Latest profiles loaded' });
   };
@@ -214,148 +247,70 @@ export function ClientTinderSwipeContainer({
       />
 
       {/* Full-Screen Card Stack */}
-      <div className="relative w-full h-full pt-16 pb-0 px-2 sm:px-4 flex items-center justify-center">
-        <div className="relative w-full h-full max-w-lg">
-          {/* Next Card (Behind) - Peek Effect */}
-          {nextProfile && (
+      <div className="absolute inset-0 w-full h-full">
+        {/* Next Card (Behind) - Peek Effect */}
+        {nextProfile && (
+          <motion.div
+            className="absolute inset-0 w-full h-full"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 0.95, opacity: 0 }}
+          >
+            <ClientTinderSwipeCard
+              profile={nextProfile}
+              onSwipe={() => {}}
+              isTop={false}
+              showNextCard={true}
+            />
+          </motion.div>
+        )}
+
+        {/* Top Card (Active) */}
+        <AnimatePresence mode="wait">
+          {currentProfile && (
             <motion.div
-              className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 0.95, opacity: 0 }}
+              key={currentProfile.user_id}
+              initial={{ scale: 1, opacity: 1 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{
+                x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
+                y: 0,
+                opacity: 0,
+                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                scale: 0.85,
+                transition: {
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 35,
+                  duration: 0.3,
+                },
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 30,
+              }}
+              className="absolute inset-0 w-full h-full"
             >
               <ClientTinderSwipeCard
-                profile={nextProfile}
-                onSwipe={() => {}}
-                isTop={false}
-                showNextCard={true}
+                profile={currentProfile}
+                onSwipe={handleSwipe}
+                onTap={() => onClientTap?.(currentProfile.user_id)}
+                onInsights={handleInsights}
+                isTop={true}
               />
             </motion.div>
           )}
-
-          {/* Top Card (Active) */}
-          <AnimatePresence mode="wait">
-            {currentProfile && (
-              <motion.div
-                key={currentProfile.user_id}
-                initial={{ scale: 1, opacity: 1 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{
-                  x: swipeDirection === 'right' ? 1000 : swipeDirection === 'left' ? -1000 : 0,
-                  y: 0,
-                  opacity: 0,
-                  rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
-                  scale: 0.85,
-                  transition: {
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 35,
-                    duration: 0.3,
-                  },
-                }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 30,
-                }}
-                className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
-              >
-                <ClientTinderSwipeCard
-                  profile={currentProfile}
-                  onSwipe={handleSwipe}
-                  onTap={() => onClientTap?.(currentProfile.user_id)}
-                  onInsights={handleInsights}
-                  isTop={true}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        </AnimatePresence>
       </div>
 
-      {/* Floating Action Buttons - Positioned Fixed at Bottom (Outside Card Stack) */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-        <div className="flex items-center justify-center gap-3 sm:gap-4 px-4 py-6 pb-safe pointer-events-auto">
-          {/* Undo Button */}
-          <motion.div
-            whileHover={{ scale: canUndo ? 1.05 : 1 }}
-            whileTap={{ scale: canUndo ? 0.95 : 1 }}
-          >
-            <button
-              onClick={handleUndo}
-              disabled={!canUndo}
-              className={`
-                relative h-12 w-12 sm:h-14 sm:w-14 rounded-full border-2 p-0 flex items-center justify-center
-                transition-all duration-200 shadow-md
-                ${canUndo
-                  ? 'border-yellow-400 bg-yellow-500/20 hover:bg-yellow-500 hover:text-white text-yellow-300'
-                  : 'border-gray-600 bg-gray-600/10 text-gray-600 cursor-not-allowed opacity-50'
-                }
-              `}
-              aria-label="Undo"
-            >
-              <RotateCcw className="h-5 w-5 sm:h-6 sm:w-6" />
-            </button>
-          </motion.div>
-
-          {/* Pass Button */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <button
-              onClick={() => handleButtonSwipe('left')}
-              className="
-                h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2 border-red-400
-                bg-red-500/20 hover:bg-red-500 hover:text-white
-                text-red-300 p-0 shadow-lg transition-all duration-200
-                flex items-center justify-center
-              "
-              aria-label="Pass"
-            >
-              <X className="h-6 w-6 sm:h-7 sm:w-7 stroke-[2.5]" />
-            </button>
-          </motion.div>
-
-          {/* Info Button */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <button
-              onClick={handleInsights}
-              className="
-                h-12 w-12 sm:h-14 sm:w-14 rounded-full border-2 border-blue-400
-                bg-blue-500/20 hover:bg-blue-500 hover:text-white
-                text-blue-300 p-0 shadow-md transition-all duration-200
-                flex items-center justify-center
-              "
-              aria-label="Info"
-            >
-              <Eye className="h-5 w-5 sm:h-6 sm:w-6" />
-            </button>
-          </motion.div>
-
-          {/* Like Button */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <button
-              onClick={() => handleButtonSwipe('right')}
-              className="
-                relative h-14 w-14 sm:h-16 sm:w-16 rounded-full border-2
-                bg-gradient-to-br from-orange-400 to-red-500
-                border-orange-300 text-white p-0 shadow-lg
-                hover:shadow-orange-500/50 transition-all duration-200
-                flex items-center justify-center
-              "
-              aria-label="Like"
-            >
-              <Heart className="h-6 w-6 sm:h-7 sm:w-7 fill-white" />
-            </button>
-          </motion.div>
-        </div>
-      </div>
+      {/* Action Buttons - Fixed at Bottom */}
+      <SwipeActionButtons
+        onUndo={handleUndo}
+        onPass={() => handleButtonSwipe('left')}
+        onInfo={handleInsights}
+        onLike={() => handleButtonSwipe('right')}
+        canUndo={canUndo}
+      />
 
       {/* Insights Modal */}
       {currentProfile && (

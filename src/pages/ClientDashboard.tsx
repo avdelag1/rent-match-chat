@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
@@ -10,20 +10,21 @@ interface ClientDashboardProps {
   onMessageClick?: () => void;
 }
 
-const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
+const ClientDashboard = memo(({ onPropertyInsights, onMessageClick }: ClientDashboardProps) => {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const { data: listings = [] } = useListings([]);
 
-  const handleListingTap = (listingId: string) => {
+  const handleListingTap = useCallback((listingId: string) => {
     setSelectedListingId(listingId);
     setInsightsOpen(true);
-    if (onPropertyInsights) {
-      onPropertyInsights(listingId);
-    }
-  };
+    onPropertyInsights?.(listingId);
+  }, [onPropertyInsights]);
 
-  const selectedListing = listings.find(l => l.id === selectedListingId) || null;
+  const selectedListing = useMemo(() => 
+    listings.find(l => l.id === selectedListingId) || null,
+    [listings, selectedListingId]
+  );
 
   return (
     <DashboardLayout userRole="client">
@@ -46,6 +47,8 @@ const ClientDashboard = ({ onPropertyInsights, onMessageClick }: ClientDashboard
       </PageTransition>
     </DashboardLayout>
   );
-};
+});
+
+ClientDashboard.displayName = 'ClientDashboard';
 
 export default ClientDashboard;

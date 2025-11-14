@@ -34,8 +34,11 @@ export function useConversations() {
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
       if (!user?.id) {
+        console.log('[useConversations] No user ID, returning empty array');
         return [];
       }
+
+      console.log('[useConversations] Fetching conversations for user:', user.id);
 
       try {
         // OPTIMIZED: Single query with joins instead of N+1 queries
@@ -50,12 +53,16 @@ export function useConversations() {
           .order('last_message_at', { ascending: false, nullsFirst: false });
 
         if (error) {
+          console.error('[useConversations] Error loading conversations:', error);
           // Gracefully handle auth errors
           if (error.code === '42501' || error.code === 'PGRST301') {
+            console.warn('[useConversations] Auth check failed, returning empty conversations');
             return [];
           }
           throw error;
         }
+
+        console.log('[useConversations] Raw conversations data:', data?.length || 0, 'conversations');
 
         // Defensive null check
         if (!data) return [];
@@ -87,6 +94,13 @@ export function useConversations() {
           // Determine role based on which side of the conversation the other user is
           const otherUserRole = isClient ? 'owner' : 'client';
 
+          console.log('[useConversations] Processing conversation:', {
+            id: conversation.id,
+            isClient,
+            otherUserProfile: otherUserProfile?.full_name,
+            otherUserRole
+          });
+
           return {
             id: conversation.id,
             client_id: conversation.client_id,
@@ -106,13 +120,18 @@ export function useConversations() {
           };
         });
 
+        console.log('[useConversations] Processed conversations:', conversationsWithProfiles.length);
         return conversationsWithProfiles;
       } catch (error: any) {
+        // Better error handling with user-friendly messages
+        console.error('[useConversations] Error fetching conversations:', error.message);
+        
         // For temporary auth issues, return empty array to avoid blocking UI
         if (error.message?.includes('JWT') || error.message?.includes('auth')) {
+          console.warn('[useConversations] Auth error detected, returning empty conversations');
           return [];
         }
-
+        
         throw error;
       }
     },
@@ -125,13 +144,19 @@ export function useConversations() {
   });
 
   // Helper to ensure a conversation is loaded in cache after creation
-  const ensureConversationInCache = async (conversationId: string, maxAttempts = 10): Promise<Conversation | null> => {
+  // Reduced polling to prevent flickering - rely more on realtime subscriptions
+  const ensureConversationInCache = async (conversationId: string, maxAttempts = 3): Promise<Conversation | null> => {
     for (let i = 0; i < maxAttempts; i++) {
-      await query.refetch();
+      // Check cache first without refetching
       const conversations = query.data || [];
       const conv = conversations.find((c: Conversation) => c.id === conversationId);
       if (conv) return conv;
-      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Only refetch if not found and not last attempt
+      if (i < maxAttempts - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await query.refetch();
+      }
     }
     return null;
   };
@@ -163,13 +188,6 @@ export function useConversationMessages(conversationId: string) {
       return data || [];
     },
     enabled: !!conversationId,
-    // Messages are ONLY updated via real-time subscriptions, NEVER refetch
-    staleTime: Infinity, // Never consider stale - real-time handles all updates
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnMount: false, // Don't refetch on component mount
-    refetchOnReconnect: false, // Don't refetch on network reconnect
-    refetchInterval: false, // No polling
   });
 }
 
@@ -405,18 +423,17 @@ export function useSendMessage() {
       // Replace optimistic message with real message
       queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
         if (!oldData) return [data];
-
-        return oldData.map((msg: any) =>
+        
+        return oldData.map((msg: any) => 
           msg.id.toString().startsWith('temp-') && msg.message_text === data.message_text
             ? data
             : msg
         );
       });
-
-      // Note: We don't invalidate queries here because:
-      // 1. Real-time subscriptions handle conversations list updates
-      // 2. Prevents unnecessary refetches that cause flickering
-      // 3. Optimistic update already updated the UI
+      
+      // Invalidate conversations to update last message
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
     },
     onError: (error: Error, variables) => {
       // Remove optimistic message on error

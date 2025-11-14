@@ -17,11 +17,18 @@ interface OwnerDashboardProps {
 const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProps) => {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
-  const { data: profiles = [], isLoading, error } = useSmartClientMatching();
+  const [forceUpdate, setForceUpdate] = useState(0);
+  const { data: profiles = [], refetch, isLoading, error } = useSmartClientMatching();
   const navigate = useNavigate();
   const startConversation = useStartConversation();
 
+  // Debug logging - Force rebuild
+  console.log('🏠 OwnerDashboard: profiles count:', profiles.length);
+  console.log('🏠 OwnerDashboard: isLoading:', isLoading);
+  console.log('🏠 OwnerDashboard: error:', error);
+
   const handleProfileTap = (profileId: string) => {
+    console.log('Profile tapped:', profileId);
     setSelectedProfileId(profileId);
     setInsightsOpen(true);
     if (onClientInsights) {
@@ -35,7 +42,7 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
         title: 'Starting conversation...',
         description: 'Please wait...',
       });
-
+      
       const result = await startConversation.mutateAsync({
         otherUserId: clientId,
         initialMessage: "Hi! I'd like to connect with you.",
@@ -53,11 +60,12 @@ const OwnerDashboard = ({ onClientInsights, onMessageClick }: OwnerDashboardProp
   const selectedProfile = profiles.find(p => p.user_id === selectedProfileId) || null;
 
   return (
-    <DashboardLayout userRole="owner">
-      <PageTransition>
-        <div className="w-full h-full">
+    <DashboardLayout userRole="owner" key={`owner-dash-${forceUpdate}`}>
+      <PageTransition key={`transition-${forceUpdate}`}>
+        <div className="w-full h-full" key={`container-${forceUpdate}`}>
           {/* Full-screen Tinder-style swipe cards */}
           <ClientTinderSwipeContainer
+            key={`swipe-container-${forceUpdate}`}
             onClientTap={handleProfileTap}
             onInsights={handleProfileTap}
             onMessageClick={handleStartConversation}

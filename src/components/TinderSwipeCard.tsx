@@ -103,7 +103,7 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
         mass: 0.6
       }}
     >
-      <Card className="relative w-full h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
+      <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} y={y} />
 
@@ -174,7 +174,7 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '25%'
+            height: isBottomSheetExpanded ? '85%' : '30%'
           }}
           transition={{
             type: "spring",

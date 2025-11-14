@@ -156,7 +156,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${user.data.user.id}/${fileName}`;
 
@@ -216,9 +216,18 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
     };
 
     console.log('Profile payload:', payload);
-    await saveMutation.mutateAsync(payload);
-    toast({ title: 'Profile saved', description: 'Your comprehensive profile has been updated.' });
-    onOpenChange(false);
+    try {
+      await saveMutation.mutateAsync(payload);
+      toast({ title: 'Profile saved', description: 'Your comprehensive profile has been updated.' });
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast({
+        title: 'Error saving profile',
+        description: error instanceof Error ? error.message : 'Please try again',
+        variant: 'destructive'
+      });
+    }
   };
 
   const toggleTag = (tag: string, isInterestTag: boolean) => {
