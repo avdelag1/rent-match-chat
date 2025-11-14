@@ -85,15 +85,9 @@ export function ClientTinderSwipeCard({
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
-  // Calculate overlay opacity based on drag distance - memoized
-  const rightOverlayOpacity = useMemo(() => 
-    useTransform(x, [0, screenWidth * 0.35], [0, 1]),
-    [x, screenWidth]
-  );
-  const leftOverlayOpacity = useMemo(() =>
-    useTransform(x, [-screenWidth * 0.35, 0], [1, 0]),
-    [x, screenWidth]
-  );
+  // Calculate overlay opacity based on drag distance
+  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);
+  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.35, 0], [1, 0]);
 
   const cardStyle = {
     x,
@@ -125,7 +119,7 @@ export function ClientTinderSwipeCard({
         mass: 0.6
       }}
     >
-      <Card className="relative w-full h-[calc(100vh-80px)] max-h-[calc(100vh-80px)] overflow-hidden bg-card border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} y={y} />
         {/* Main Image with Tap Zones */}

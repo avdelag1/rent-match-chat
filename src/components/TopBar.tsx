@@ -1,4 +1,4 @@
-import { Bell, Settings, Flame, Users } from 'lucide-react';
+import { Bell, Settings, Flame, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -6,12 +6,12 @@ import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 interface TopBarProps {
   onNotificationsClick?: () => void;
   onSettingsClick?: () => void;
-  onFilterClick?: () => void;
-  userRole?: 'client' | 'owner';
+  onFiltersClick?: () => void;
   className?: string;
+  showFilters?: boolean;
 }
 
-export function TopBar({ onNotificationsClick, onSettingsClick, onFilterClick, userRole, className }: TopBarProps) {
+export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
 
   return (
@@ -44,16 +44,15 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFilterClick, u
             )}
           </Button>
 
-          {/* Client Discovery (Owner Only) */}
-          {userRole === 'owner' && onFilterClick && (
+          {/* Filters (Owner only) */}
+          {showFilters && (
             <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9"
-              onClick={onFilterClick}
-              title="Discover Clients"
+              onClick={onFiltersClick}
             >
-              <Users className="h-5 w-5" />
+              <Filter className="h-5 w-5" />
             </Button>
           )}
 

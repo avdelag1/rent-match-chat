@@ -16,9 +16,9 @@ const Index = () => {
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
+
       console.log('[Index] Fetching role for user:', user.id);
-      
+
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -29,7 +29,7 @@ const Index = () => {
         console.error('[Index] Role fetch error:', error);
         throw error; // Let React Query handle retries
       }
-      
+
       console.log('[Index] Role fetched successfully:', data?.role);
       return data?.role;
     },
@@ -37,7 +37,6 @@ const Index = () => {
     retry: 2, // Reduce from 3 to 2
     retryDelay: 500, // Reduce from 800ms to 500ms for faster retries
     staleTime: 5000, // Cache role data for 5s to prevent immediate refetch
-    refetchOnMount: true, // Always refetch on mount
     refetchOnWindowFocus: false, // Don't refetch on focus
   });
 
@@ -48,22 +47,29 @@ const Index = () => {
         console.log('[Index] Query taking too long, forcing refetch...');
         refetch();
       }, 5000); // Increase from 3s to 5s for new users
-      
+
       return () => clearTimeout(timeout);
     }
-  }, [user, profileLoading, refetch]);
+  }, [user, profileLoading]);
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
-    console.log('[Index] Redirect check:', { user: !!user, userRole, loading, profileLoading, isError });
-    
+    console.log('[Index] Redirect check:', {
+      user: !!user,
+      userEmail: user?.email,
+      userRole,
+      loading,
+      profileLoading,
+      isError
+    });
+
     if (loading) return;
-    
+
     if (user) {
       // If query failed after all retries, show error ONLY if we're not in the middle of signup
       if (isError && !profileLoading) {
         console.error('[Index] User authenticated but role query failed after retries');
-        
+
         // Don't show error immediately after signup - give cache more time
         const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
         if (userAge > 15000) { // Increase from 10s to 15s for new users
@@ -77,24 +83,24 @@ const Index = () => {
         }
         return;
       }
-      
+
       // If still loading, wait
       if (profileLoading) {
         console.log('[Index] Still loading role...');
         return;
       }
-      
+
       // If no role found after query completed
       if (!userRole) {
-        console.error('[Index] No role found for authenticated user');
+        console.error('[Index] ❌ No role found for authenticated user:', user.email);
         const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
-        
+
         // For brand new users, be more patient
         if (userAge < 15000) {
           console.log('[Index] Brand new user, waiting for role creation...');
           return;
         }
-        
+
         toast({
           title: "Account Setup Incomplete",
           description: "Please refresh the page or contact support if this persists.",
@@ -102,10 +108,10 @@ const Index = () => {
         });
         return;
       }
-      
-      // Success - redirect
+
+      // CRITICAL: Success - redirect to correct dashboard based on ACTUAL role from DB
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      console.log('[Index] Redirecting to:', targetPath);
+      console.log(`[Index] ✅ Authenticated user ${user.email} with role="${userRole}" -> Redirecting to: ${targetPath}`);
       navigate(targetPath, { replace: true });
     }
   }, [user, userRole, loading, profileLoading, isError, navigate]);

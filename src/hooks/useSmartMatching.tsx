@@ -188,9 +188,14 @@ export interface ListingFilters {
   distance?: number;
 }
 
-export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters?: ListingFilters) {
+export function useSmartListingMatching(
+  excludeSwipedIds: string[] = [], 
+  filters?: ListingFilters,
+  page: number = 0,
+  pageSize: number = 10
+) {
   return useQuery({
-    queryKey: ['smart-listings', filters], // Include filters in query key to refetch when they change
+    queryKey: ['smart-listings', filters, page], // Include page in query key
     queryFn: async () => {
       try {
         // Get current user's preferences
@@ -245,7 +250,10 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
           }
         }
 
-        const { data: listings, error } = await query.limit(50);
+        // Apply pagination
+        const start = page * pageSize;
+        const end = start + pageSize - 1;
+        const { data: listings, error } = await query.range(start, end);
 
         if (error) {
           // Only log non-RLS errors to avoid console spam
@@ -288,11 +296,10 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
           };
         });
 
-        // Sort by match percentage - show all listings, even low matches
+        // Sort by match percentage - no client-side limiting
         const sortedListings = matchedListings
           .filter(listing => listing.matchPercentage >= 0)
-          .sort((a, b) => b.matchPercentage - a.matchPercentage)
-          .slice(0, 50); // Limit final results
+          .sort((a, b) => b.matchPercentage - a.matchPercentage);
         
         // Fallback: if no matches found but we have listings, show them all with default score
         if (sortedListings.length === 0 && filteredListings.length > 0) {
@@ -301,7 +308,7 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
             matchPercentage: 20,
             matchReasons: ['General listing'],
             incompatibleReasons: []
-          })).slice(0, 50);
+          }));
         }
 
         return sortedListings;
@@ -311,7 +318,7 @@ export function useSmartListingMatching(excludeSwipedIds: string[] = [], filters
       }
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
     retry: 3,
     retryDelay: 1000,
@@ -579,9 +586,13 @@ function calculateClientMatch(ownerPrefs: any, clientProfile: any): {
   };
 }
 
-export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle' | 'yacht') {
+export function useSmartClientMatching(
+  category?: 'property' | 'moto' | 'bicycle' | 'yacht',
+  page: number = 0,
+  pageSize: number = 10
+) {
   return useQuery({
-    queryKey: ['smart-clients', category],
+    queryKey: ['smart-clients', category, page],
     queryFn: async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
@@ -589,7 +600,10 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           return [];
         }
 
-        // CRITICAL: Exclude admin users from client discovery
+        // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
+        // Fetch client profiles with pagination
+        const start = page * pageSize;
+        const end = start + pageSize - 1;
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select(`
@@ -597,8 +611,8 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
             user_roles!inner(role)
           `)
           .neq('id', user.user.id)
-          .neq('user_roles.role', 'admin')
-          .limit(100);
+          .eq('user_roles.role', 'client')
+          .range(start, end);
 
         if (profileError) {
           throw profileError;
@@ -608,9 +622,8 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           return [];
         }
 
-        // Show all non-admin profiles with placeholders
+        // Map profiles with placeholder images - already filtered for clients only at DB level
         const filteredProfiles = profiles
-          .filter(profile => !profile.user_roles || profile.user_roles.role !== 'admin')
           .map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0)
@@ -646,10 +659,9 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
           };
         });
 
-        // Sort by match score
+        // Sort by match score - no client-side limiting
         const sortedClients = matchedClients
-          .sort((a, b) => b.matchPercentage - a.matchPercentage)
-          .slice(0, 50);
+          .sort((a, b) => b.matchPercentage - a.matchPercentage);
 
         return sortedClients;
       } catch (error) {
@@ -658,7 +670,7 @@ export function useSmartClientMatching(category?: 'property' | 'moto' | 'bicycle
     },
     enabled: true,
     staleTime: 30 * 1000, // 30 seconds - shorter to reflect filter changes faster
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     retry: 3,
     retryDelay: 1000,
   });

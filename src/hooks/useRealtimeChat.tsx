@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,49 +25,55 @@ export function useRealtimeChat(conversationId: string) {
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Track typing with debounce
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  // Track typing with debounce - use ref to avoid circular dependencies
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [typingChannelRef, setTypingChannelRef] = useState<any>(null);
 
   const startTyping = useCallback(() => {
     if (!conversationId || !user?.id || !typingChannelRef) return;
 
     // Clear existing timeout
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
 
     // Send typing status if not already typing
     if (!isTyping) {
       setIsTyping(true);
-      
+
       // Use existing channel reference
       typingChannelRef.track({
         userId: user.id,
         userName: user.user_metadata?.full_name || 'User',
         isTyping: true,
         timestamp: Date.now()
-      }).catch(() => {
-        // Silently handle presence tracking errors
+      }).catch((error: any) => {
+        console.error('[Typing] Error tracking presence:', error);
       });
     }
 
     // Set timeout to stop typing after 3 seconds of inactivity
-    const timeout = setTimeout(() => {
-      stopTyping();
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      typingChannelRef?.track({
+        userId: user.id,
+        userName: user.user_metadata?.full_name || 'User',
+        isTyping: false,
+        timestamp: Date.now()
+      }).catch((error: any) => {
+        console.error('[Typing] Error stopping presence:', error);
+      });
     }, 3000);
-
-    setTypingTimeout(timeout);
-  }, [conversationId, user?.id, isTyping, typingTimeout, typingChannelRef]);
+  }, [conversationId, user?.id, isTyping, typingChannelRef]);
 
   const stopTyping = useCallback(() => {
     if (!conversationId || !user?.id || !typingChannelRef) return;
 
     setIsTyping(false);
-    
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-      setTypingTimeout(null);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
     }
 
     typingChannelRef.track({
@@ -75,10 +81,10 @@ export function useRealtimeChat(conversationId: string) {
       userName: user.user_metadata?.full_name || 'User',
       isTyping: false,
       timestamp: Date.now()
-    }).catch(() => {
-      // Silently handle presence tracking errors
+    }).catch((error: any) => {
+      console.error('[Typing] Error stopping presence:', error);
     });
-  }, [conversationId, user?.id, typingTimeout, typingChannelRef]);
+  }, [conversationId, user?.id, typingChannelRef]);
 
   // Set up real-time subscriptions
   useEffect(() => {
@@ -123,45 +129,22 @@ export function useRealtimeChat(conversationId: string) {
           // Update messages immediately
           queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
             if (!oldData) return [completeMessage];
-
-            // Enhanced duplicate detection:
-            // 1. Check for exact ID match (handles duplicate real-time events)
-            // 2. Check for temporary optimistic IDs that match content and sender
-            // 3. Check for near-duplicate messages (same sender, text, within 2 seconds)
-            const newMessageTime = new Date(newMessage.created_at).getTime();
-
-            const exists = oldData.some((msg: any) => {
-              if (msg.id === newMessage.id) return true;
-
-              // Check for optimistic message replacement
-              if (msg.id.toString().startsWith('temp-') &&
-                  msg.message_text === newMessage.message_text &&
-                  msg.sender_id === newMessage.sender_id) {
-                return true;
-              }
-
-              // Check for near-duplicates (within 2 seconds, same content and sender)
-              const msgTime = new Date(msg.created_at).getTime();
-              if (Math.abs(msgTime - newMessageTime) < 2000 &&
-                  msg.message_text === newMessage.message_text &&
-                  msg.sender_id === newMessage.sender_id) {
-                return true;
-              }
-
-              return false;
-            });
-
+            
+            // Check for both real IDs and temporary optimistic IDs
+            const exists = oldData.some((msg: any) => 
+              msg.id === newMessage.id || 
+              (msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id)
+            );
+            
             if (exists) {
               // Replace optimistic message with real message if it exists
-              return oldData.map((msg: any) =>
-                msg.id.toString().startsWith('temp-') &&
-                msg.message_text === newMessage.message_text &&
-                msg.sender_id === newMessage.sender_id
+              return oldData.map((msg: any) => 
+                msg.id.toString().startsWith('temp-') && msg.message_text === newMessage.message_text && msg.sender_id === newMessage.sender_id
                   ? completeMessage
                   : msg
               );
             }
-
+            
             return [...oldData, completeMessage];
           });
 
@@ -173,7 +156,8 @@ export function useRealtimeChat(conversationId: string) {
         }
       )
       .on('presence', { event: 'sync' }, () => {
-        // Presence sync event - do nothing, connection already set in subscribe callback
+        const newState = messagesChannel.presenceState();
+        setIsConnected(true);
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         // User joined
@@ -183,9 +167,6 @@ export function useRealtimeChat(conversationId: string) {
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Set connected immediately when subscribed
-          setIsConnected(true);
-
           // Track presence
           await messagesChannel.track({
             userId: user.id,
@@ -216,20 +197,7 @@ export function useRealtimeChat(conversationId: string) {
           });
         });
 
-        // Only update if typing users actually changed to avoid unnecessary re-renders
-        setTypingUsers(prev => {
-          // If lengths differ, definitely changed
-          if (prev.length !== currentTyping.length) return currentTyping;
-
-          // If same length, check if user IDs are different
-          const prevIds = prev.map(u => u.userId).sort().join(',');
-          const currentIds = currentTyping.map(u => u.userId).sort().join(',');
-
-          if (prevIds !== currentIds) return currentTyping;
-
-          // No changes, keep previous state
-          return prev;
-        });
+        setTypingUsers(currentTyping);
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
         // New typing presence
@@ -238,6 +206,7 @@ export function useRealtimeChat(conversationId: string) {
         // Left typing presence
       })
       .subscribe(async (status) => {
+        console.log('[Typing] Channel status:', status);
         if (status === 'SUBSCRIBED') {
           // Store channel reference for startTyping/stopTyping
           setTypingChannelRef(typingChannel);
@@ -245,6 +214,8 @@ export function useRealtimeChat(conversationId: string) {
       });
 
     return () => {
+      console.log('[Realtime] Cleaning up channels for conversation:', conversationId);
+      
       // Stop typing before cleanup
       if (isTyping) {
         stopTyping();
@@ -255,8 +226,8 @@ export function useRealtimeChat(conversationId: string) {
       supabase.removeChannel(typingChannel);
       
       // Clear typing timeout
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
       
       // Clear state
@@ -269,11 +240,11 @@ export function useRealtimeChat(conversationId: string) {
   // Cleanup typing on unmount
   useEffect(() => {
     return () => {
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [typingTimeout]);
+  }, []);
 
   return {
     startTyping,

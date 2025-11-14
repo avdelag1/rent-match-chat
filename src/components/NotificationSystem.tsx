@@ -99,11 +99,11 @@ export function NotificationSystem() {
               }
 
               // Invalidate relevant queries to update UI
-              // Note: We only invalidate conversations and unread count here.
-              // Message cache updates are handled exclusively by useRealtimeChat.tsx
-              // to prevent duplicate messages from race conditions.
               queryClient.invalidateQueries({ queryKey: ['conversations'] });
               queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
+              queryClient.invalidateQueries({ 
+                queryKey: ['conversation-messages', newMessage.conversation_id] 
+              });
             }
           }
         }
