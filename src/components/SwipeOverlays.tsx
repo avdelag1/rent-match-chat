@@ -1,5 +1,5 @@
 import { MotionValue, useTransform, motion } from 'framer-motion';
-import { Heart, X, Star } from 'lucide-react';
+import { Heart, ThumbsDown } from 'lucide-react';
 
 interface SwipeOverlaysProps {
   x: MotionValue<number>;
@@ -7,73 +7,41 @@ interface SwipeOverlaysProps {
 }
 
 export function SwipeOverlays({ x, y }: SwipeOverlaysProps) {
-  // Calculate opacity based on drag distance - smoother transitions
-  const likeOpacity = useTransform(x, [0, 200], [0, 1]);
-  const passOpacity = useTransform(x, [-200, 0], [1, 0]);
-  
-  // Scale animations for emojis and text
-  const likeScale = useTransform(likeOpacity, [0, 1], [0.8, 1.1]);
-  const passScale = useTransform(passOpacity, [0, 1], [0.8, 1.1]);
+  // Calculate opacity based on drag distance - more responsive
+  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
+  const passOpacity = useTransform(x, [-150, 0], [1, 0]);
+
+  // Scale animations for icons
+  const likeScale = useTransform(likeOpacity, [0, 1], [0.8, 1.2]);
+  const passScale = useTransform(passOpacity, [0, 1], [0.8, 1.2]);
 
   return (
     <>
-      {/* Like Overlay (Right Swipe) - ENHANCED GREEN with Emoji */}
+      {/* Like Overlay (Right Swipe) - GREEN with Heart Icon */}
       <motion.div
         style={{ opacity: likeOpacity }}
         className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 via-emerald-500/20 to-green-600/30 backdrop-blur-sm" />
-        <motion.div 
-          className="relative transform -rotate-12 flex flex-col items-center gap-4"
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/10 backdrop-blur-sm" />
+        <motion.div
+          className="relative transform -rotate-12"
           style={{ scale: likeScale }}
         >
-          <motion.div 
-            className="text-9xl"
-            animate={{ 
-              scale: [1, 1.1, 1],
-              rotate: [0, -5, 5, 0]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 1.5,
-              ease: "easeInOut"
-            }}
-          >
-            💚
-          </motion.div>
-          <span className="text-7xl font-black text-white drop-shadow-[0_6px_30px_rgba(34,197,94,1)] tracking-wider modern-text-shadow">
-            LIKE
-          </span>
+          <Heart className="w-32 h-32 text-green-500 fill-green-500 drop-shadow-lg" />
         </motion.div>
       </motion.div>
 
-      {/* Pass Overlay (Left Swipe) - ENHANCED RED with Emoji */}
+      {/* Pass Overlay (Left Swipe) - RED with Thumbs Down Icon */}
       <motion.div
         style={{ opacity: passOpacity }}
         className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 via-rose-500/20 to-red-600/30 backdrop-blur-sm" />
-        <motion.div 
-          className="relative transform rotate-12 flex flex-col items-center gap-4"
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-rose-500/10 backdrop-blur-sm" />
+        <motion.div
+          className="relative transform rotate-12"
           style={{ scale: passScale }}
         >
-          <motion.div 
-            className="text-9xl"
-            animate={{ 
-              scale: [1, 1.1, 1],
-              rotate: [0, 5, -5, 0]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 1.5,
-              ease: "easeInOut"
-            }}
-          >
-            ❌
-          </motion.div>
-          <span className="text-7xl font-black text-white drop-shadow-[0_6px_30px_rgba(239,68,68,1)] tracking-wider modern-text-shadow">
-            PASS
-          </span>
+          <ThumbsDown className="w-32 h-32 text-red-500 fill-red-500 drop-shadow-lg" />
         </motion.div>
       </motion.div>
     </>
