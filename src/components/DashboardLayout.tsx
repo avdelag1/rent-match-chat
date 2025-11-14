@@ -1,5 +1,5 @@
 
-import React, { ReactNode, useState, useEffect } from 'react'
+import React, { ReactNode, useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from "@/hooks/useAuth"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
@@ -121,48 +121,49 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
 
-  const handleLikedPropertySelect = (listingId: string) => {
+  // ✅ FIX: Memoize all handler functions to prevent infinite re-renders
+  const handleLikedPropertySelect = useCallback((listingId: string) => {
     setSelectedListingId(listingId)
     setShowPropertyDetails(true)
-  }
+  }, [])
 
-  const handleMessageClick = () => {
+  const handleMessageClick = useCallback(() => {
     const roleText = userRole === 'owner' ? 'clients' : 'owners'
     setSubscriptionReason(`Unlock messaging to connect with ${roleText}!`)
     setShowSubscriptionPackages(true)
-  }
+  }, [userRole])
 
-  const handlePropertyInsights = (listingId: string) => {
+  const handlePropertyInsights = useCallback((listingId: string) => {
     setSelectedListingId(listingId)
     setShowPropertyInsights(true)
-  }
+  }, [])
 
-  const handleClientInsights = (profileId: string) => {
+  const handleClientInsights = useCallback((profileId: string) => {
     setSelectedProfileId(profileId)
     setShowClientInsights(true)
-  }
+  }, [])
 
-  const handleFilterClick = () => {
+  const handleFilterClick = useCallback(() => {
     setShowFilters(true)
-  }
+  }, [])
 
-  const handleAddListingClick = () => {
+  const handleAddListingClick = useCallback(() => {
     setShowCategoryDialog(true)
-  }
+  }, [])
 
-  const handleListingsClick = () => {
+  const handleListingsClick = useCallback(() => {
     navigate('/owner/properties');
-  }
+  }, [navigate])
 
-  const handleNotificationsClick = () => {
+  const handleNotificationsClick = useCallback(() => {
     setShowNotifications(true)
-  }
+  }, [])
 
-  const handleSettingsClick = () => {
+  const handleSettingsClick = useCallback(() => {
     setShowSettingsMenu(true)
-  }
+  }, [])
 
-  const handleMenuItemClick = (action: string) => {
+  const handleMenuItemClick = useCallback((action: string) => {
     switch (action) {
       case 'add-listing':
         setShowCategoryDialog(true)
@@ -183,9 +184,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       default:
         break
     }
-  }
+  }, [])
 
-  const handleApplyFilters = (filters: any) => {
+  const handleApplyFilters = useCallback((filters: any) => {
     console.log('Applied filters:', filters);
     setAppliedFilters(filters);
 
@@ -203,7 +204,22 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
         : 'Showing all listings',
     });
-  }
+  }, [])
+
+  // ✅ FIX: Memoize cloned children to prevent infinite re-renders
+  const enhancedChildren = useMemo(() => {
+    return React.Children.map(children, (child) => {
+      if (React.isValidElement(child)) {
+        return React.cloneElement(child as React.ReactElement, {
+          onPropertyInsights: handlePropertyInsights,
+          onClientInsights: handleClientInsights,
+          onMessageClick: handleMessageClick,
+          filters: appliedFilters,
+        } as any);
+      }
+      return child;
+    });
+  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, appliedFilters]);
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-background relative">
@@ -219,19 +235,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
       {/* Main Content - Full screen area for card feed with proper scrolling */}
       <main className="fixed inset-0 pt-14 pb-16 overflow-hidden rounded-3xl md:rounded-2xl m-1 md:m-2 bg-background">
-        <div className="w-full h-full overflow-y-auto rounded-3xl md:rounded-2xl">{
-          React.Children.map(children, (child) => {
-            if (React.isValidElement(child)) {
-              return React.cloneElement(child as React.ReactElement, {
-                onPropertyInsights: handlePropertyInsights,
-                onClientInsights: handleClientInsights,
-                onMessageClick: handleMessageClick,
-                filters: appliedFilters,
-              } as any);
-            }
-            return child;
-          })
-        }
+        <div className="w-full h-full overflow-y-auto rounded-3xl md:rounded-2xl">
+          {enhancedChildren}
         </div>
       </main>
 
