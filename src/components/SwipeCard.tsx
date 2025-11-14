@@ -58,7 +58,7 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
 
-    const threshold = 150; // Increased threshold for better control
+    const threshold = 120; // More sensitive swipe threshold
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
 
     // Only swipe if dragged enough (prevent ghost taps)
@@ -109,7 +109,7 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
 
-    const threshold = 150; // Increased threshold for better control
+    const threshold = 120; // More sensitive swipe threshold
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
 
     // Only swipe if dragged enough (prevent ghost taps)

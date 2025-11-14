@@ -42,11 +42,6 @@ export function ClientSwipeContainer({
     clientProfile?: any;
     ownerProfile?: any;
   }>({ isOpen: false });
-  const [emojiAnimation, setEmojiAnimation] = useState<{
-    show: boolean;
-    type: 'like' | 'dislike';
-    position: 'left' | 'right';
-  }>({ show: false, type: 'like', position: 'right' });
 
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching();
@@ -84,18 +79,7 @@ export function ClientSwipeContainer({
     
     // Trigger haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
-    
-    // Show emoji immediately for better UX
-    setEmojiAnimation({ 
-      show: true, 
-      type: direction === 'right' ? 'like' : 'dislike',
-      position: direction === 'right' ? 'right' : 'left'
-    });
-    
-    setTimeout(() => {
-      setEmojiAnimation({ show: false, type: 'like', position: 'right' });
-    }, 400);
-    
+
     // Record swipe with match checking
     swipeMutation.mutate({
       targetId: currentClient.user_id,
@@ -233,18 +217,7 @@ export function ClientSwipeContainer({
           <p className="text-muted-foreground mb-4">
             No clients match your current preferences.
           </p>
-          
-          {/* Debug Information */}
-          <div className="text-sm text-muted-foreground space-y-2 bg-orange-100 p-4 rounded-lg mb-4">
-            <p className="font-semibold text-orange-900">🐛 Debug Info:</p>
-            <ul className="text-left space-y-1 text-orange-800">
-              <li>External Profiles: {externalProfiles?.length || 0}</li>
-              <li>Internal Profiles: {internalProfiles?.length || 0}</li>
-              <li>Final Profiles: {clientProfiles?.length || 0}</li>
-              <li>Loading: {isLoading ? 'Yes' : 'No'}</li>
-            </ul>
-          </div>
-          
+
           <div className="text-sm text-muted-foreground space-y-2 bg-muted/30 p-4 rounded-lg mb-4">
             <p className="font-semibold">Tips to find more clients:</p>
             <ul className="list-disc list-inside text-left space-y-1">
@@ -304,64 +277,6 @@ export function ClientSwipeContainer({
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
-
-      {/* Emoji Animation Overlay - Fixed positioning for maximum visibility */}
-      <AnimatePresence>
-        {emojiAnimation.show && (
-          <motion.div
-            className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{ 
-                scale: 0, 
-                opacity: 0, 
-                x: emojiAnimation.position === 'right' ? 80 : -80,
-                rotate: emojiAnimation.position === 'right' ? 15 : -15
-              }}
-              animate={{ 
-                scale: 2.5, 
-                opacity: 1, 
-                x: emojiAnimation.position === 'right' ? 40 : -40,
-                rotate: 0
-              }}
-              exit={{ 
-                scale: emojiAnimation.type === 'like' ? 3.5 : 1.5,
-                opacity: 0, 
-                y: emojiAnimation.type === 'like' ? -250 : -100,
-                x: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -300 : 300),
-                rotate: emojiAnimation.type === 'like' ? 0 : (emojiAnimation.position === 'left' ? -75 : 75)
-              }}
-              transition={{ 
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
-                mass: 0.5
-              }}
-              style={{ willChange: 'transform, opacity' }}
-              className={`absolute ${
-                emojiAnimation.position === 'right' ? 'right-8' : 'left-8'
-              } top-1/3`}
-            >
-              <div className="relative">
-                {/* Glow effect */}
-                <div className={`absolute inset-0 blur-3xl opacity-50 ${
-                  emojiAnimation.type === 'like' 
-                    ? 'bg-gradient-to-r from-orange-400 to-red-500' 
-                    : 'bg-gradient-to-r from-gray-400 to-blue-300'
-                }`} />
-                {/* Emoji */}
-                <div className="relative text-[100px] drop-shadow-[0_10px_50px_rgba(0,0,0,0.8)]">
-                  {emojiAnimation.type === 'like' ? '🔥' : '💨'}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Single Card Container - No infinite scrolling */}
       <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
         <AnimatePresence mode="wait">
