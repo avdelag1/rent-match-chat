@@ -41,6 +41,7 @@ export function ClientTinderSwipeContainer({
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [loadingTimeoutExceeded, setLoadingTimeoutExceeded] = useState(false);
 
   // Match celebration state
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -51,7 +52,7 @@ export function ClientTinderSwipeContainer({
 
   // Fetch profiles with pagination
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching(undefined, page, 10);
-  
+
   const profiles = externalProfiles || allProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
   const error = externalError !== undefined ? externalError : internalError;
@@ -61,12 +62,27 @@ export function ClientTinderSwipeContainer({
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
 
+  // Add timeout safety to prevent infinite loading
+  useEffect(() => {
+    if (isLoading) {
+      const timeout = setTimeout(() => {
+        console.warn('[ClientTinderSwipeContainer] Loading timeout - forcing fallback');
+        setLoadingTimeoutExceeded(true);
+      }, 5000); // 5 second timeout
+      return () => clearTimeout(timeout);
+    } else {
+      setLoadingTimeoutExceeded(false);
+    }
+  }, [isLoading]);
+
   // Add newly fetched profiles to the stack
   useEffect(() => {
     if (!externalProfiles && internalProfiles.length > 0) {
+      console.log('[ClientTinderSwipeContainer] Adding profiles:', internalProfiles.length);
       setAllProfiles(prev => {
         const existingIds = new Set(prev.map(p => p.user_id));
         const newProfiles = internalProfiles.filter(p => !existingIds.has(p.user_id));
+        console.log('[ClientTinderSwipeContainer] New profiles to add:', newProfiles.length);
         return [...prev, ...newProfiles];
       });
     }
@@ -76,6 +92,7 @@ export function ClientTinderSwipeContainer({
   useEffect(() => {
     const remainingCards = profiles.length - currentIndex;
     if (remainingCards <= 3 && !isLoading && !externalProfiles) {
+      console.log('[ClientTinderSwipeContainer] Preloading next page, remaining cards:', remainingCards);
       setPage(prev => prev + 1);
     }
   }, [currentIndex, profiles.length, isLoading, externalProfiles]);
@@ -168,7 +185,10 @@ export function ClientTinderSwipeContainer({
   }, [currentProfile, startConversation, navigate]);
 
   // Loading state - Smooth skeleton that matches card dimensions
-  if (isLoading) {
+  // Don't show loading if: profiles exist OR timeout exceeded OR error occurred
+  const shouldShowLoading = isLoading && profiles.length === 0 && !loadingTimeoutExceeded && !error;
+
+  if (shouldShowLoading) {
     return (
       <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
@@ -189,7 +209,7 @@ export function ClientTinderSwipeContainer({
   }
 
   // Error state
-  if (error) {
+  if (error && profiles.length === 0) {
     return (
       <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
         <Card className="w-full max-w-md p-8 text-center border border-destructive/20 bg-destructive/5">
@@ -199,6 +219,23 @@ export function ClientTinderSwipeContainer({
           <Button onClick={handleRefresh} variant="outline">
             <RotateCcw className="w-4 h-4 mr-2" />
             Try Again
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Loading timeout fallback - no data after 5s
+  if (loadingTimeoutExceeded && profiles.length === 0 && !error) {
+    return (
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md p-8 text-center">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-yellow-500" />
+          <h3 className="text-xl font-bold mb-2">Loading Taking Longer Than Expected</h3>
+          <p className="text-muted-foreground mb-4">Please try refreshing or check your connection</p>
+          <Button onClick={handleRefresh} variant="outline">
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Refresh
           </Button>
         </Card>
       </div>
