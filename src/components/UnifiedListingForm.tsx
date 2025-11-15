@@ -15,6 +15,7 @@ import { CategorySelector, Category, Mode } from './CategorySelector';
 import { YachtListingForm, YachtFormData } from './YachtListingForm';
 import { MotorcycleListingForm, MotorcycleFormData } from './MotorcycleListingForm';
 import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
+import { VehicleListingForm, VehicleFormData } from './VehicleListingForm';
 import { PropertyListingForm } from './PropertyListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
 
@@ -149,6 +150,30 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           includes_lights: formData.includes_lights,
           includes_basket: formData.includes_basket,
           includes_pump: formData.includes_pump,
+        });
+      } else if (selectedCategory === 'vehicle') {
+        Object.assign(listingData, {
+          vehicle_type: formData.vehicle_type,
+          body_type: formData.body_type,
+          vehicle_brand: formData.vehicle_brand,
+          vehicle_model: formData.vehicle_model,
+          vehicle_year: formData.vehicle_year,
+          vehicle_color: formData.vehicle_color,
+          vehicle_condition: formData.vehicle_condition,
+          mileage: formData.mileage,
+          transmission_type: formData.transmission_type,
+          fuel_type: formData.fuel_type,
+          drive_type: formData.drive_type,
+          number_of_doors: formData.number_of_doors,
+          seating_capacity: formData.seating_capacity,
+          engine_size: formData.engine_size,
+          engine_cylinders: formData.engine_cylinders,
+          horsepower: formData.horsepower,
+          fuel_economy_city: formData.fuel_economy_city,
+          fuel_economy_highway: formData.fuel_economy_highway,
+          battery_capacity: formData.battery_capacity,
+          electric_range: formData.electric_range,
+          vehicle_features: formData.features,
         });
       } else if (selectedCategory === 'property') {
         Object.assign(listingData, {
@@ -473,12 +498,18 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           )}
 
           {selectedCategory === 'bicycle' && (
-            <BicycleListingForm 
+            <BicycleListingForm
               onDataChange={(data) => setFormData({ ...formData, ...data })}
               initialData={formData as BicycleFormData}
             />
           )}
 
+          {selectedCategory === 'vehicle' && (
+            <VehicleListingForm
+              onDataChange={(data) => setFormData({ ...formData, ...data })}
+              initialData={formData as VehicleFormData}
+            />
+          )}
 
           {/* Photos */}
           <Card>
