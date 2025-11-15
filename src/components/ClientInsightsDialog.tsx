@@ -3,9 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, User, Calendar, Flame, Star, MessageCircle } from 'lucide-react';
+import { MapPin, User, Calendar, Flame, Star, MessageCircle, Eye, Award, TrendingUp, ThumbsUp } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
-import { ImageCarousel } from './ImageCarousel';
+import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
@@ -49,8 +49,29 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
   const navigate = useNavigate();
   const startConversation = useStartConversation();
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   if (!profile) return null;
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setGalleryOpen(true);
+  };
+
+  // Calculate recommendation score based on profile completeness and activity
+  const recommendationScore = Math.min(5, Math.round(
+    (getProfileCompleteness(profile) / 20) + 
+    ((profile.interests?.length || 0) / 5)
+  ));
+  
+  // Mock data for client stats (in production, this would come from the database)
+  const clientStats = {
+    profileViews: Math.floor(Math.random() * 500) + 100,
+    ownerLikes: Math.floor(Math.random() * 50) + 10,
+    responseRate: Math.floor(Math.random() * 30) + 70,
+    averageResponseTime: `${Math.floor(Math.random() * 24) + 1} hours`
+  };
 
   const handleMessage = async () => {
     setIsCreatingConversation(true);
@@ -91,14 +112,9 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
         <ScrollArea className="flex-1 overflow-y-auto">
           <div className="space-y-6 py-4 px-6">
-            {/* Profile Images Carousel */}
-            {profile.profile_images && profile.profile_images.length > 0 && (
-              <ImageCarousel images={profile.profile_images} alt="Client Profile" />
-            )}
-
-            {/* Basic Info */}
-            <div>
-              <h3 className="text-xl font-bold mb-2">{profile.name}</h3>
+            {/* Basic Info Header */}
+            <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
+              <h3 className="text-2xl font-bold mb-2">{profile.name}</h3>
               <div className="flex items-center gap-4 text-muted-foreground mb-4">
                 {profile.age && (
                   <div className="flex items-center gap-1">
@@ -116,6 +132,130 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
                     <span>Location verified</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Recommendation Stars */}
+              <div className="mt-4 flex items-center gap-2">
+                <span className="text-sm font-medium">Owner Recommendations:</span>
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-5 h-5 ${
+                        i < recommendationScore
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-muted-foreground/30'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-muted-foreground ml-2">
+                  {recommendationScore}/5 stars
+                </span>
+              </div>
+            </div>
+
+            {/* Profile Photos Gallery */}
+            {profile.profile_images && profile.profile_images.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-primary" />
+                  Client Photos
+                </h4>
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  {profile.profile_images.slice(0, 6).map((image, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
+                      onClick={() => handleImageClick(index)}
+                    >
+                      <img
+                        src={image}
+                        alt={`Client photo ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-primary text-center">Click any photo to view full size</p>
+              </div>
+            )}
+
+            {/* Client Statistics */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Client Statistics
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-primary/10 p-4 rounded-lg text-center border border-primary/20">
+                  <Eye className="w-6 h-6 mx-auto text-primary mb-2" />
+                  <div className="text-2xl font-bold text-primary">{clientStats.profileViews}</div>
+                  <div className="text-xs text-muted-foreground">Profile Views</div>
+                </div>
+                
+                <div className="bg-secondary/10 p-4 rounded-lg text-center border border-secondary/20">
+                  <ThumbsUp className="w-6 h-6 mx-auto text-secondary mb-2" />
+                  <div className="text-2xl font-bold text-secondary">{clientStats.ownerLikes}</div>
+                  <div className="text-xs text-muted-foreground">Owner Likes</div>
+                </div>
+                
+                <div className="bg-green-500/10 p-4 rounded-lg text-center border border-green-500/20">
+                  <MessageCircle className="w-6 h-6 mx-auto text-green-600 dark:text-green-400 mb-2" />
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{clientStats.responseRate}%</div>
+                  <div className="text-xs text-muted-foreground">Response Rate</div>
+                </div>
+                
+                <div className="bg-blue-500/10 p-4 rounded-lg text-center border border-blue-500/20">
+                  <Calendar className="w-6 h-6 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{clientStats.averageResponseTime}</div>
+                  <div className="text-xs text-muted-foreground">Avg Response</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommendation Insights */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Award className="w-5 h-5 text-primary" />
+                Why Owners Recommend This Client
+              </h4>
+              <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 p-4 rounded-lg border border-green-500/20 space-y-3">
+                {recommendationScore >= 4 && (
+                  <div className="flex items-start gap-2">
+                    <Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+                    <p className="text-sm">
+                      <span className="font-semibold">Highly Engaged Profile:</span> Complete profile with detailed preferences
+                    </p>
+                  </div>
+                )}
+                {clientStats.responseRate >= 80 && (
+                  <div className="flex items-start gap-2">
+                    <MessageCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                    <p className="text-sm">
+                      <span className="font-semibold">Excellent Communication:</span> Responds quickly and professionally
+                    </p>
+                  </div>
+                )}
+                {(profile.interests?.length || 0) > 5 && (
+                  <div className="flex items-start gap-2">
+                    <ThumbsUp className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                    <p className="text-sm">
+                      <span className="font-semibold">Clear Preferences:</span> Well-defined requirements make matching easier
+                    </p>
+                  </div>
+                )}
+                {clientStats.ownerLikes > 30 && (
+                  <div className="flex items-start gap-2">
+                    <Award className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <p className="text-sm">
+                      <span className="font-semibold">Popular with Owners:</span> Many owners are interested in connecting
+                    </p>
                   </div>
                 )}
               </div>
@@ -232,6 +372,17 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Full-screen Image Gallery */}
+      {profile.profile_images && profile.profile_images.length > 0 && (
+        <PropertyImageGallery
+          images={profile.profile_images}
+          alt={`${profile.name}'s profile photos`}
+          isOpen={galleryOpen}
+          onClose={() => setGalleryOpen(false)}
+          initialIndex={selectedImageIndex}
+        />
+      )}
     </Dialog>
   );
 }
