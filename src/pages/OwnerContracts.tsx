@@ -80,8 +80,8 @@ const OwnerContracts = () => {
                     <CardContent className="w-full h-full overflow-y-auto p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-full h-full overflow-y-auto p-2 bg-blue-100 rounded-lg">
-                            <FileText className="w-6 h-6 text-blue-600" />
+                          <div className="w-10 h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-6 h-6 text-blue-400" />
                           </div>
                           <div>
                             <h3 className="font-semibold text-white">{deal.contract?.title}</h3>
@@ -140,13 +140,13 @@ const OwnerContracts = () => {
                     <CardContent className="w-full h-full overflow-y-auto p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-full h-full overflow-y-auto p-2 bg-blue-100 rounded-lg">
-                            <FileText className="w-6 h-6 text-blue-600" />
+                          <div className="w-10 h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-6 h-6 text-blue-400" />
                           </div>
                           <div>
                             <h3 className="font-semibold text-white">{contract.title}</h3>
                             <p className="text-white/70 text-sm">
-                              {contract.contract_type.replace('_', ' ').toUpperCase()} • 
+                              {contract.contract_type.replace('_', ' ').toUpperCase()} •
                               Created {formatDistanceToNow(new Date(contract.created_at))} ago
                             </p>
                           </div>
