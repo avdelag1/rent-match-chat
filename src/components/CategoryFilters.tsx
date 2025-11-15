@@ -9,10 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { X, RotateCcw, Home, Ship, Bike, Bike as Motorcycle, PawPrint, Zap, Palette, Flame, Coffee, Music } from 'lucide-react';
+import { X, RotateCcw, Home, Ship, Bike, Bike as Motorcycle, Car, PawPrint, Zap, Palette, Flame, Coffee, Music } from 'lucide-react';
 import { useSavedFilters } from '@/hooks/useSavedFilters';
 
-type Category = 'property' | 'yacht' | 'motorcycle' | 'bicycle';
+type Category = 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle';
 type Mode = 'rent' | 'sale' | 'both';
 
 interface CategoryFiltersProps {
@@ -148,7 +148,7 @@ export function CategoryFilters({
                   <CardTitle className="text-base">What are you looking for?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <Button
                       variant={category === 'property' ? 'default' : 'outline'}
                       className="flex flex-col items-center gap-2 h-auto py-4"
@@ -180,6 +180,14 @@ export function CategoryFilters({
                     >
                       <Bike className="w-6 h-6" />
                       <span className="text-sm font-medium">Bicycle</span>
+                    </Button>
+                    <Button
+                      variant={category === 'vehicle' ? 'default' : 'outline'}
+                      className="flex flex-col items-center gap-2 h-auto py-4"
+                      onClick={() => setCategory('vehicle')}
+                    >
+                      <Car className="w-6 h-6" />
+                      <span className="text-sm font-medium">Vehicle</span>
                     </Button>
                   </div>
                 </CardContent>
