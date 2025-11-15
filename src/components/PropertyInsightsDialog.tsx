@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
-import { ImageCarousel } from './ImageCarousel';
+import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
@@ -21,6 +21,8 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
   const navigate = useNavigate();
   const startConversation = useStartConversation();
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   if (!listing) return null;
 
@@ -73,9 +75,30 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
         <ScrollArea className="flex-1 h-full">
           <div className="space-y-6 py-4 px-6 pb-8">
-            {/* Property Images Carousel */}
+            {/* Property Images Grid - Clickable */}
             {listing.images && listing.images.length > 0 && (
-              <ImageCarousel images={listing.images} alt="Property" />
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm text-muted-foreground">Property Photos</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {listing.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        setGalleryOpen(true);
+                      }}
+                      className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                    >
+                      <img
+                        src={image}
+                        alt={`Property ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">Click any photo to view full size</p>
+              </div>
             )}
 
             {/* Basic Info */}
@@ -170,6 +193,17 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Full Screen Image Gallery */}
+      {listing.images && listing.images.length > 0 && (
+        <PropertyImageGallery
+          images={listing.images}
+          alt={listing.title}
+          isOpen={galleryOpen}
+          onClose={() => setGalleryOpen(false)}
+          initialIndex={selectedImageIndex}
+        />
+      )}
     </Dialog>
   );
 }
