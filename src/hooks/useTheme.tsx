@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-type Theme = 'default' | 'dark' | 'amber' | 'red';
+// New Matte Theme System - Premium AI app aesthetic
+type Theme = 'grey-matte' | 'black-matte' | 'white-matte' | 'red-matte';
 
 interface ThemeContextType {
   theme: Theme;
@@ -12,7 +13,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('default');
+  const [theme, setThemeState] = useState<Theme>('grey-matte');
   const { user } = useAuth();
 
   // Load theme from database when user logs in
@@ -25,49 +26,59 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             .select('theme_preference')
             .eq('id', user.id)
             .maybeSingle();
-          
+
           if (error) throw error;
-          
-          if (data?.theme_preference && ['default', 'dark', 'amber', 'red'].includes(data.theme_preference)) {
-            setThemeState(data.theme_preference as Theme);
+
+          // Support both old and new theme names for backwards compatibility
+          const validThemes = ['grey-matte', 'black-matte', 'white-matte', 'red-matte'];
+          const legacyThemeMap: Record<string, Theme> = {
+            'default': 'grey-matte',
+            'dark': 'black-matte',
+            'amber': 'white-matte',
+            'red': 'red-matte'
+          };
+
+          if (data?.theme_preference) {
+            const preferredTheme = data.theme_preference;
+            if (validThemes.includes(preferredTheme)) {
+              setThemeState(preferredTheme as Theme);
+            } else if (legacyThemeMap[preferredTheme]) {
+              setThemeState(legacyThemeMap[preferredTheme]);
+            }
           }
         } catch (error) {
           console.error('Failed to load theme preference:', error);
-          setThemeState('default');
+          setThemeState('grey-matte');
         }
       };
       loadUserTheme();
     } else {
-      // Reset to default when logged out
-      setThemeState('default');
+      // Reset to grey-matte when logged out
+      setThemeState('grey-matte');
     }
   }, [user?.id]);
 
   // Apply theme class to document
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('dark', 'amber', 'red');
+    // Remove all theme classes
+    root.classList.remove('grey-matte', 'black-matte', 'white-matte', 'red-matte', 'dark', 'amber', 'red');
 
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else if (theme === 'amber') {
-      root.classList.add('amber');
-    } else if (theme === 'red') {
-      root.classList.add('red');
-    }
+    // Add current theme class
+    root.classList.add(theme);
   }, [theme]);
 
   // Save theme to database and update state
   const setTheme = async (newTheme: Theme) => {
     setThemeState(newTheme);
-    
+
     if (user?.id) {
       try {
         const { error } = await supabase
           .from('profiles')
           .update({ theme_preference: newTheme })
           .eq('id', user.id);
-        
+
         if (error) throw error;
       } catch (error) {
         console.error('Failed to save theme preference:', error);
