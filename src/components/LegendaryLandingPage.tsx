@@ -212,7 +212,7 @@ function LegendaryLandingPage() {
                   delay: 0.4,
                   bounce: 0.6
                 }}
-                className="absolute -top-4 left-1/2 -translate-x-1/2 cursor-pointer"
+                className="absolute -top-8 md:-top-10 left-1/2 -translate-x-1/2 cursor-pointer"
                 onClick={handleFlameClick}
               >
                 <motion.div
@@ -223,20 +223,20 @@ function LegendaryLandingPage() {
                     scaleY: [1, 1.4, 0.85, 1.15, 1],
                     scaleX: [1, 0.85, 1.15, 0.92, 1],
                     filter: [
-                      "brightness(1) saturate(1) drop-shadow(0 0 8px rgba(251, 146, 60, 0.7))",
-                      "brightness(1.6) saturate(1.4) drop-shadow(0 0 15px rgba(251, 146, 60, 1))",
-                      "brightness(1.3) saturate(1.2) drop-shadow(0 0 12px rgba(251, 146, 60, 0.8))",
-                      "brightness(1) saturate(1) drop-shadow(0 0 8px rgba(251, 146, 60, 0.7))"
+                      "brightness(1) saturate(1) drop-shadow(0 0 12px rgba(251, 146, 60, 0.7))",
+                      "brightness(1.6) saturate(1.4) drop-shadow(0 0 20px rgba(251, 146, 60, 1))",
+                      "brightness(1.3) saturate(1.2) drop-shadow(0 0 16px rgba(251, 146, 60, 0.8))",
+                      "brightness(1) saturate(1) drop-shadow(0 0 12px rgba(251, 146, 60, 0.7))"
                     ]
                   } : {
-                    y: [0, -2, 0, -1.5, 0],
+                    y: [0, -3, 0, -2, 0],
                     rotate: [0, 2, -1, 1, 0],
                     scaleY: [1, 1.08, 0.96, 1.04, 1],
                     scaleX: [1, 0.96, 1.04, 0.98, 1],
                     filter: [
-                      "drop-shadow(0 0 6px rgba(251, 146, 60, 0.6))",
-                      "drop-shadow(0 0 10px rgba(251, 146, 60, 0.8))",
-                      "drop-shadow(0 0 6px rgba(251, 146, 60, 0.6))"
+                      "drop-shadow(0 0 10px rgba(251, 146, 60, 0.6))",
+                      "drop-shadow(0 0 15px rgba(251, 146, 60, 0.8))",
+                      "drop-shadow(0 0 10px rgba(251, 146, 60, 0.6))"
                     ]
                   }}
                   transition={flameClicked ? {
@@ -249,7 +249,7 @@ function LegendaryLandingPage() {
                   }}
                 >
                   <Flame
-                    className="w-10 h-10 md:w-12 md:h-12 text-transparent"
+                    className="w-14 h-14 md:w-16 md:h-16 text-transparent"
                     fill="url(#flameGradient)"
                     strokeWidth={0}
                   />
