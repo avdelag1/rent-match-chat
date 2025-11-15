@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Listing } from '@/hooks/useListings';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { Eye, TrendingUp, Clock, Users, MapPin, DollarSign, Calendar, Shield, CheckCircle, Star } from 'lucide-react';
+import { PropertyImageGallery } from './PropertyImageGallery';
+import { useState } from 'react';
 
 interface SwipeInsightsModalProps {
   open: boolean;
@@ -13,10 +15,18 @@ interface SwipeInsightsModalProps {
 }
 
 export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: SwipeInsightsModalProps) {
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
   if (!listing && !profile) return null;
 
   // Determine if we're showing client profile or property listing insights
   const isClientProfile = !!profile;
+
+  // Get images for gallery
+  const images = isClientProfile 
+    ? (profile?.profile_images || [])
+    : (listing?.images || []);
 
   // Mock insights data - in production, fetch from API
   const insights = {
@@ -60,6 +70,35 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                       <span>{profile.city || 'Location not specified'}</span>
                     </div>
                   </div>
+
+                  {/* Profile Photos Grid - Clickable */}
+                  {profile.profile_images && profile.profile_images.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <Users className="w-5 h-5 text-primary" />
+                        Profile Photos
+                      </h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {profile.profile_images.map((image, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setSelectedImageIndex(index);
+                              setGalleryOpen(true);
+                            }}
+                            className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                          >
+                            <img
+                              src={image}
+                              alt={`${profile.name} photo ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Click any photo to view full size</p>
+                    </div>
+                  )}
 
                   {/* Application Quality Score */}
                   <div className="space-y-3">
@@ -175,6 +214,35 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                       <span>{listing.neighborhood}, {listing.city}</span>
                     </div>
                   </div>
+
+                  {/* Property Images Grid - Clickable */}
+                  {listing.images && listing.images.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <Eye className="w-5 h-5 text-primary" />
+                        Property Photos
+                      </h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {listing.images.map((image, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setSelectedImageIndex(index);
+                              setGalleryOpen(true);
+                            }}
+                            className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                          >
+                            <img
+                              src={image}
+                              alt={`Property ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Click any photo to view full size</p>
+                    </div>
+                  )}
 
                 {/* View Statistics */}
                 <div className="space-y-3">
@@ -292,6 +360,17 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               ) : null}
             </motion.div>
           </DialogContent>
+
+          {/* Full Screen Image Gallery */}
+          {images.length > 0 && (
+            <PropertyImageGallery
+              images={images}
+              alt={isClientProfile ? profile?.name || 'Profile' : listing?.title || 'Property'}
+              isOpen={galleryOpen}
+              onClose={() => setGalleryOpen(false)}
+              initialIndex={selectedImageIndex}
+            />
+          )}
         </Dialog>
       )}
     </AnimatePresence>
