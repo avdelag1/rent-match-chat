@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, memo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ interface TinderSwipeCardProps {
   isTop?: boolean;
 }
 
-export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: TinderSwipeCardProps) {
+const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: TinderSwipeCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -297,4 +297,9 @@ export function TinderSwipeCard({ listing, onSwipe, onTap, isTop = true }: Tinde
       </Card>
     </motion.div>
   );
-}
+};
+
+// Memoize with custom comparison - only re-render if listing ID or isTop changes
+export const TinderSwipeCard = memo(TinderSwipeCardComponent, (prevProps, nextProps) => {
+  return prevProps.listing.id === nextProps.listing.id && prevProps.isTop === nextProps.isTop;
+});

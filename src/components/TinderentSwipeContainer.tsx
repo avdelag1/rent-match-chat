@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, memo, useMemo } from 'react';
+import { useState, useCallback, useEffect, memo, useMemo, useRef } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeActionButtons } from './SwipeActionButtons';
@@ -38,6 +38,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
+  
+  // Fetch guards to prevent infinite loops
+  const isFetchingMore = useRef(false);
+  const lastFetchedPage = useRef(-1);
 
   // Get listings with filters applied and pagination
   const {
@@ -54,11 +58,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     refetch: refetchRegular
   } = useListings([]);
 
-  // Use accumulated listings - memoized to prevent unnecessary recalculations
-  const listings = useMemo(() => 
-    allListings.length > 0 ? allListings : (smartListings.length > 0 ? smartListings : regularListings),
-    [allListings, smartListings, regularListings]
-  );
+  // Use accumulated listings - memoized with length checks to prevent unnecessary recalculations
+  const listings = useMemo(() => {
+    if (allListings.length > 0) return allListings;
+    if (smartListings.length > 0) return smartListings;
+    return regularListings;
+  }, [allListings.length, smartListings.length, regularListings.length]);
   
   const isLoading = smartLoading || regularLoading;
   const error = smartError;
@@ -79,24 +84,36 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
 
-  // Add newly fetched listings to the stack
+  // Add newly fetched listings to the stack - with guard to prevent unnecessary updates
   useEffect(() => {
-    if (smartListings.length > 0) {
+    if (smartListings.length > 0 && !isLoading) {
       setAllListings(prev => {
         const existingIds = new Set(prev.map(l => l.id));
         const newListings = smartListings.filter(l => !existingIds.has(l.id));
-        return [...prev, ...newListings];
+        if (newListings.length > 0) {
+          return [...prev, ...newListings];
+        }
+        return prev; // Don't update if no new listings
       });
+      isFetchingMore.current = false; // Reset fetch guard
     }
-  }, [smartListings]);
+  }, [smartListings, isLoading]);
 
-  // Preload next batch when user is 3 cards away from end
+  // Preload next batch when user is 3 cards away from end - with guards to prevent infinite loop
   useEffect(() => {
     const remainingCards = listings.length - currentIndex;
-    if (remainingCards <= 3 && !isLoading) {
+    const shouldFetch = 
+      remainingCards <= 3 && 
+      !isLoading && 
+      !isFetchingMore.current &&
+      lastFetchedPage.current !== page;
+    
+    if (shouldFetch) {
+      isFetchingMore.current = true;
+      lastFetchedPage.current = page;
       setPage(prev => prev + 1);
     }
-  }, [currentIndex, listings.length, isLoading]);
+  }, [currentIndex, listings.length, isLoading, page]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
@@ -216,7 +233,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   const progress = listings.length > 0 ? ((currentIndex + 1) / listings.length) * 100 : 0;
 
-  if (isLoading || isRefetching) {
+  // Only show skeleton on initial load, not during background refetch
+  if (isLoading && listings.length === 0) {
     return (
       <div className="relative w-full h-[550px] max-w-sm mx-auto">
         <Card className="w-full h-[450px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
