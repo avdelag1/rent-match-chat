@@ -38,7 +38,7 @@ const Index = () => {
     retry: 2,
     retryDelay: 500,
     staleTime: 60000, // Increased from 5s to 60s - user roles don't change frequently
-    cacheTime: 300000, // Cache for 5 minutes
+    gcTime: 300000, // Cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus
     refetchOnMount: false, // Don't refetch on component mount if data is fresh
   });
