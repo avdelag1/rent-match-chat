@@ -189,99 +189,61 @@ function LegendaryLandingPage() {
         ))}
       </AnimatePresence>
 
-      {/* Main Content - Centered Layout */}
-      <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-md w-full">
-
-        {/* Title with Flame as the dot on 'i' */}
+      {/* Main Content */}
+      <div className="relative z-10 text-center space-y-12 max-w-md w-full">
+        
+        {/* Pure Lucide Flame Icon - No Containers */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative mb-8"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ 
+            type: "spring", 
+            duration: 0.8, 
+            delay: 0.2,
+            bounce: 0.6 
+          }}
+          className="flex justify-center mb-8 relative cursor-pointer"
+          onClick={handleFlameClick}
         >
-          <h1 className="text-6xl md:text-7xl font-bold text-white tracking-wider drop-shadow-lg text-center relative">
-            T<span className="relative inline-block">
-              I
-              {/* Animated Flame as the dot on 'i' */}
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{
-                  type: "spring",
-                  duration: 0.8,
-                  delay: 0.4,
-                  bounce: 0.6
-                }}
-                className="absolute -top-8 md:-top-10 left-1/2 -translate-x-1/2 cursor-pointer"
-                onClick={handleFlameClick}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.15 }}
-                  whileTap={{ scale: 0.9 }}
-                  animate={flameClicked ? {
-                    rotate: [0, 10, -6, 4, -2, 0],
-                    scaleY: [1, 1.4, 0.85, 1.15, 1],
-                    scaleX: [1, 0.85, 1.15, 0.92, 1],
-                    filter: [
-                      "brightness(1) saturate(1) drop-shadow(0 0 12px rgba(251, 146, 60, 0.7))",
-                      "brightness(1.6) saturate(1.4) drop-shadow(0 0 20px rgba(251, 146, 60, 1))",
-                      "brightness(1.3) saturate(1.2) drop-shadow(0 0 16px rgba(251, 146, 60, 0.8))",
-                      "brightness(1) saturate(1) drop-shadow(0 0 12px rgba(251, 146, 60, 0.7))"
-                    ]
-                  } : {
-                    y: [0, -3, 0, -2, 0],
-                    rotate: [0, 2, -1, 1, 0],
-                    scaleY: [1, 1.08, 0.96, 1.04, 1],
-                    scaleX: [1, 0.96, 1.04, 0.98, 1],
-                    filter: [
-                      "drop-shadow(0 0 10px rgba(251, 146, 60, 0.6))",
-                      "drop-shadow(0 0 15px rgba(251, 146, 60, 0.8))",
-                      "drop-shadow(0 0 10px rgba(251, 146, 60, 0.6))"
-                    ]
-                  }}
-                  transition={flameClicked ? {
-                    duration: 1.5,
-                    ease: [0.4, 0, 0.2, 1]
-                  } : {
-                    duration: 2.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <Flame
-                    className="w-14 h-14 md:w-16 md:h-16 text-transparent"
-                    fill="url(#flameGradient)"
-                    strokeWidth={0}
-                  />
-                </motion.div>
-
-                {/* Flame Particles */}
-                <AnimatePresence>
-                  {particles.map((particle) => (
-                    <motion.div
-                      key={particle.id}
-                      className="absolute w-1 h-1 rounded-full pointer-events-none"
-                      style={{
-                        left: '50%',
-                        top: '50%',
-                        background: `linear-gradient(45deg, #f97316, #dc2626)`
-                      }}
-                      initial={{ scale: 0, x: 0, y: 0 }}
-                      animate={{
-                        scale: [0, 1.2, 0],
-                        x: particle.x * 0.5,
-                        y: particle.y * 0.5,
-                        opacity: [1, 0.9, 0],
-                        rotate: [0, 180, 360]
-                      }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                    />
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            </span>NDE<span className="text-red-500">R</span>ENT
-          </h1>
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            animate={flameClicked ? {
+              rotate: [0, 8, -5, 3, -2, 0],
+              scaleY: [1, 1.3, 0.9, 1.1, 1],
+              scaleX: [1, 0.9, 1.1, 0.95, 1],
+              filter: [
+                "brightness(1) saturate(1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))",
+                "brightness(1.5) saturate(1.3) drop-shadow(0 0 25px rgba(251, 146, 60, 0.9))",
+                "brightness(1.2) saturate(1.1) drop-shadow(0 0 20px rgba(251, 146, 60, 0.7))",
+                "brightness(1) saturate(1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))"
+              ]
+            } : {
+              y: [0, -3, 0, -2, 0],
+              rotate: [0, 2, -1, 1, 0],
+              scaleY: [1, 1.05, 0.98, 1.02, 1],
+              scaleX: [1, 0.98, 1.02, 0.99, 1],
+              filter: [
+                "drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))",
+                "drop-shadow(0 0 15px rgba(251, 146, 60, 0.7))",
+                "drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))"
+              ]
+            }}
+            transition={flameClicked ? {
+              duration: 1.5,
+              ease: [0.4, 0, 0.2, 1]
+            } : {
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Flame 
+              className="w-20 h-20 text-transparent"
+              fill="url(#flameGradient)"
+              strokeWidth={0}
+            />
+          </motion.div>
 
           {/* SVG Gradient Definition */}
           <svg width="0" height="0" className="absolute">
@@ -293,92 +255,122 @@ function LegendaryLandingPage() {
               </linearGradient>
             </defs>
           </svg>
+
+          {/* Flame Particles */}
+          <AnimatePresence>
+            {particles.map((particle) => (
+              <motion.div
+                key={particle.id}
+                className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  background: `linear-gradient(45deg, #f97316, #dc2626)`
+                }}
+                initial={{ scale: 0, x: 0, y: 0 }}
+                animate={{
+                  scale: [0, 1.5, 0],
+                  x: particle.x,
+                  y: particle.y,
+                  opacity: [1, 0.8, 0],
+                  rotate: [0, 180, 360]
+                }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 2, ease: "easeOut" }}
+              />
+            ))}
+          </AnimatePresence>
         </motion.div>
 
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="text-white/90 text-lg md:text-xl font-medium px-4 mb-12"
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="space-y-4"
         >
-          Swipe to discover your ideal property or perfect client - rent, buy & connect
-        </motion.p>
+          <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center">
+            TINDE<span className="text-red-500">R</span>ENT
+          </h1>
+          <p className="text-white/90 text-xl font-medium px-4">
+            Swipe to discover your ideal property or perfect client - rent, buy & connect
+          </p>
+        </motion.div>
 
         {/* Buttons Container with Smooth Entrance Effects */}
-        <div className="space-y-5 w-full">
-
+        <div className="space-y-6 mt-16">
+          
           {/* I'm a Client Button - Slides in from LEFT smoothly */}
           <motion.button
             onClick={() => openAuthDialog('client')}
-            className="w-full py-5 px-8 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold text-lg md:text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
-            initial={{
-              opacity: 0,
+            className="w-full py-6 px-8 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+            initial={{ 
+              opacity: 0, 
               x: -200
             }}
-            animate={{
-              opacity: 1,
+            animate={{ 
+              opacity: 1, 
               x: 0
             }}
             transition={{
               type: "spring",
               stiffness: 80,
               damping: 20,
-              delay: 0.7,
+              delay: 0.8,
               duration: 1.0
             }}
-            whileHover={{
+            whileHover={{ 
               scale: 1.02,
               transition: { duration: 0.3, ease: "easeOut" }
             }}
-            whileTap={{
+            whileTap={{ 
               scale: 0.98,
               transition: { duration: 0.1 }
             }}
           >
-            <Users className="w-5 h-5 md:w-6 md:h-6" />
+            <Users className="w-6 h-6" />
             <span>I'm a Client</span>
           </motion.button>
 
           {/* I'm an Owner Button - Slides in from RIGHT smoothly */}
           <motion.button
             onClick={() => openAuthDialog('owner')}
-            className="w-full py-5 px-8 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-lg md:text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
-            initial={{
-              opacity: 0,
+            className="w-full py-6 px-8 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+            initial={{ 
+              opacity: 0, 
               x: 200
             }}
-            animate={{
-              opacity: 1,
+            animate={{ 
+              opacity: 1, 
               x: 0
             }}
             transition={{
               type: "spring",
               stiffness: 80,
               damping: 20,
-              delay: 0.9,
+              delay: 1.0,
               duration: 1.0
             }}
-            whileHover={{
+            whileHover={{ 
               scale: 1.02,
               transition: { duration: 0.3, ease: "easeOut" }
             }}
-            whileTap={{
+            whileTap={{ 
               scale: 0.98,
               transition: { duration: 0.1 }
             }}
           >
-            <Flame className="w-5 h-5 md:w-6 md:h-6" />
+            <Flame className="w-6 h-6" />
             <span>I'm an Owner</span>
           </motion.button>
         </div>
 
-        {/* Call to action */}
+        {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 1.1 }}
-          className="text-white/80 text-base md:text-lg mt-10"
+          transition={{ duration: 0.6, delay: 1.2 }}
+          className="text-white/90 text-lg mt-12"
         >
           Choose your role to get started
         </motion.p>
