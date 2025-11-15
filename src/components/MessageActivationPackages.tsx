@@ -21,6 +21,7 @@ type MessagePackage = {
   icon: typeof MessageCircle;
   duration_days?: number;
   package_category: string;
+  paypalUrl?: string;
 };
 
 interface MessageActivationPackagesProps {
@@ -75,18 +76,37 @@ export function MessageActivationPackages({
     },
   });
 
+  // PayPal URLs mapping - ADD YOUR PAYPAL LINKS HERE
+  const getPayPalUrl = (packageCategory: string, activations: number, price: number): string => {
+    // Client packages
+    if (packageCategory === 'client_pay_per_use') {
+      if (activations === 5 && price === 99) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_5_LINK';
+      if (activations === 10 && price === 149) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_10_LINK';
+      if (activations === 15 && price === 189) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_15_LINK';
+    }
+
+    // Owner packages
+    if (packageCategory === 'owner_pay_per_use') {
+      if (activations === 5 && price === 89) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_5_LINK';
+      if (activations === 10 && price === 139) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_10_LINK';
+      if (activations === 15 && price === 179) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_15_LINK';
+    }
+
+    return ''; // Return empty if no match
+  };
+
   // Convert database packages to UI format
   const convertPackages = (dbPackages: any[] | undefined): MessagePackage[] => {
     if (!dbPackages) return [];
-    
+
     return dbPackages.map((pkg, index) => {
-      const pricePerActivation = pkg.message_activations > 0 
-        ? pkg.price / pkg.message_activations 
+      const pricePerActivation = pkg.message_activations > 0
+        ? pkg.price / pkg.message_activations
         : 0;
-      
+
       // Highlight the middle option (usually best value)
       const highlight = dbPackages.length === 3 && index === 1;
-      
+
       // Calculate savings vs first package
       let savings: string | undefined;
       if (index > 0 && dbPackages[0]) {
@@ -108,17 +128,12 @@ export function MessageActivationPackages({
         icon: highlight ? Zap : (index === 0 ? MessageCircle : Sparkles),
         duration_days: pkg.duration_days,
         package_category: pkg.package_category,
+        paypalUrl: getPayPalUrl(pkg.package_category, pkg.message_activations, pkg.price),
       };
     });
   };
 
   const handlePurchase = (pkg: MessagePackage) => {
-    // TODO: Integrate with actual payment system (PayPal/Stripe)
-    toast({
-      title: "Redirecting to Payment",
-      description: `Processing purchase of ${pkg.activations} message activations...`,
-    });
-    
     // Store selection for post-payment processing
     localStorage.setItem('pendingActivationPurchase', JSON.stringify({
       packageId: pkg.id,
@@ -126,9 +141,22 @@ export function MessageActivationPackages({
       price: pkg.price,
       package_category: pkg.package_category,
     }));
-    
-    // Placeholder: In production, redirect to payment gateway
-    console.log('Payment integration needed:', pkg);
+
+    // Open PayPal in new tab
+    if (pkg.paypalUrl && pkg.paypalUrl !== '') {
+      window.open(pkg.paypalUrl, '_blank');
+
+      toast({
+        title: "Redirecting to PayPal",
+        description: `Selected: ${pkg.name} (${formatPriceMXN(pkg.price)})`,
+      });
+    } else {
+      toast({
+        title: "PayPal link not configured",
+        description: "Please contact support to complete this purchase.",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderPackages = (packages: MessagePackage[], roleLabel: string) => (
