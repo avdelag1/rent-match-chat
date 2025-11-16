@@ -52,6 +52,16 @@ interface FilterState {
   includes_captain?: boolean;
   includes_crew?: boolean;
 
+  // Vehicle filters
+  vehicle_type?: string[];
+  vehicle_body_type?: string[];
+  vehicle_drive_type?: string[];
+  vehicle_transmission?: string[];
+  vehicle_fuel_type?: string[];
+  vehicle_condition?: string[];
+  vehicle_seating_capacity_min?: number;
+  vehicle_doors_min?: number;
+
   // Common filters
   price_min?: number;
   price_max?: number;
@@ -62,7 +72,7 @@ interface FilterState {
 interface AdvancedClientFiltersProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  category: 'property' | 'motorcycle' | 'bicycle' | 'yacht';
+  category: 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle';
   onApplyFilters: (filters: FilterState) => void;
   currentFilters?: FilterState;
 }

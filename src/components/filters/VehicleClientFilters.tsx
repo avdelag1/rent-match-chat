@@ -195,7 +195,6 @@ export function VehicleClientFilters({ onApply, initialFilters = {}, activeCount
   const handleSavePreferences = async () => {
     try {
       await savePreferencesMutation.mutateAsync({
-        interested_in_vehicles: true,
         vehicle_types: vehicleTypes.length > 0 ? vehicleTypes : null,
         vehicle_body_types: bodyTypes.length > 0 ? bodyTypes : null,
         vehicle_drive_types: driveTypes.length > 0 ? driveTypes : null,

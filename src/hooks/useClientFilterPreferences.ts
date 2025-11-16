@@ -32,6 +32,7 @@ export type ClientFilterPreferences = {
   interested_in_motorcycles?: boolean;
   interested_in_bicycles?: boolean;
   interested_in_yachts?: boolean;
+  interested_in_vehicles?: boolean;
 
   // Motorcycle preferences
   moto_types?: string[] | null;
@@ -87,6 +88,24 @@ export type ClientFilterPreferences = {
   yacht_water_activities?: string[] | null;
   yacht_navigation_equipment?: string[] | null;
   yacht_has_stabilizers?: boolean | null;
+
+  // Vehicle preferences
+  vehicle_types?: string[] | null;
+  vehicle_body_types?: string[] | null;
+  vehicle_drive_types?: string[] | null;
+  vehicle_price_min?: number | null;
+  vehicle_price_max?: number | null;
+  vehicle_year_min?: number | null;
+  vehicle_year_max?: number | null;
+  vehicle_mileage_max?: number | null;
+  vehicle_transmission?: string[] | null;
+  vehicle_fuel_types?: string[] | null;
+  vehicle_condition?: string[] | null;
+  vehicle_seating_capacity?: number | null;
+  vehicle_number_of_doors?: number | null;
+  vehicle_safety_features?: string[] | null;
+  vehicle_comfort_features?: string[] | null;
+  vehicle_tech_features?: string[] | null;
 };
 
 // Type for database operations (excluding id)

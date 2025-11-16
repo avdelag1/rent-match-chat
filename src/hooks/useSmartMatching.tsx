@@ -30,6 +30,14 @@ export interface MatchedClientProfile {
   city?: string;
   avatar_url?: string;
   verified?: boolean;
+  
+  // Category-specific preferences
+  moto_types?: string[];
+  bicycle_types?: string[];
+  yacht_types?: string[];
+  vehicle_types?: string[];
+  vehicle_body_types?: string[];
+  budget?: { min?: number; max?: number };
 }
 
 // Calculate match percentage between client preferences and listing

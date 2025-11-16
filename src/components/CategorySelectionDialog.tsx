@@ -2,13 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Anchor, Bike, CircleDot } from "lucide-react";
+import { Home, Anchor, Bike, CircleDot, Car } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface CategorySelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCategorySelect?: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => void;
+  onCategorySelect?: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle', mode: 'rent' | 'sale' | 'both') => void;
   navigateToNewPage?: boolean;
 }
 
@@ -20,7 +20,7 @@ export function CategorySelectionDialog({
 }: CategorySelectionDialogProps) {
   const navigate = useNavigate();
 
-  const handleSelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
+  const handleSelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle', mode: 'rent' | 'sale' | 'both') => {
     if (navigateToNewPage) {
       // Navigate to the new listing page with category and mode as query params
       navigate(`/owner/listings/new?category=${category}&mode=${mode}`);
@@ -176,6 +176,40 @@ export function CategorySelectionDialog({
                 </Button>
                 <Button 
                   onClick={() => handleSelect('bicycle', 'both')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Both
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Vehicle Card */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Car className="w-6 h-6 text-primary" />
+                  <CardTitle>Vehicle</CardTitle>
+                </div>
+                <CardDescription>Cars, trucks, SUVs</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  onClick={() => handleSelect('vehicle', 'rent')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Rent
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('vehicle', 'sale')} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  For Sale
+                </Button>
+                <Button 
+                  onClick={() => handleSelect('vehicle', 'both')} 
                   variant="outline" 
                   className="w-full"
                 >
