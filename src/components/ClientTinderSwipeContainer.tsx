@@ -10,6 +10,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
+import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'sonner';
@@ -62,11 +63,20 @@ export function ClientTinderSwipeContainer({
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
 
+  // Prefetch images for next 2 profiles (massively improves perceived performance)
+  usePrefetchImages({
+    currentIndex,
+    profiles,
+    prefetchCount: 2
+  });
+
   // Add timeout safety to prevent infinite loading
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
-        console.warn('[ClientTinderSwipeContainer] Loading timeout - forcing fallback');
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[ClientTinderSwipeContainer] Loading timeout - forcing fallback');
+        }
         setLoadingTimeoutExceeded(true);
       }, 5000); // 5 second timeout
       return () => clearTimeout(timeout);
@@ -78,11 +88,13 @@ export function ClientTinderSwipeContainer({
   // Add newly fetched profiles to the stack
   useEffect(() => {
     if (!externalProfiles && internalProfiles.length > 0) {
-      console.log('[ClientTinderSwipeContainer] Adding profiles:', internalProfiles.length);
       setAllProfiles(prev => {
         const existingIds = new Set(prev.map(p => p.user_id));
         const newProfiles = internalProfiles.filter(p => !existingIds.has(p.user_id));
-        console.log('[ClientTinderSwipeContainer] New profiles to add:', newProfiles.length);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[ClientTinderSwipeContainer] Adding profiles:', internalProfiles.length);
+          console.log('[ClientTinderSwipeContainer] New profiles to add:', newProfiles.length);
+        }
         return [...prev, ...newProfiles];
       });
     }
@@ -92,7 +104,9 @@ export function ClientTinderSwipeContainer({
   useEffect(() => {
     const remainingCards = profiles.length - currentIndex;
     if (remainingCards <= 3 && !isLoading && !externalProfiles) {
-      console.log('[ClientTinderSwipeContainer] Preloading next page, remaining cards:', remainingCards);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[ClientTinderSwipeContainer] Preloading next page, remaining cards:', remainingCards);
+      }
       setPage(prev => prev + 1);
     }
   }, [currentIndex, profiles.length, isLoading, externalProfiles]);
@@ -128,11 +142,9 @@ export function ClientTinderSwipeContainer({
       action: direction === 'left' ? 'pass' : 'like'
     });
 
-    // Move to next card
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 300);
+    // Move to next card (exit animation handled by Framer Motion)
+    setCurrentIndex(prev => prev + 1);
+    setSwipeDirection(null);
   }, [currentProfile, swipeMutation, recordSwipe]);
 
   const handleUndo = useCallback(async () => {
@@ -179,7 +191,9 @@ export function ClientTinderSwipeContainer({
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error starting conversation:', error);
+      }
       toast.error('Could not start conversation', { id: 'conv' });
     }
   }, [currentProfile, startConversation, navigate]);

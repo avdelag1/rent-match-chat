@@ -1,5 +1,5 @@
 
-import React, { ReactNode, useState, useEffect, useCallback, useMemo } from 'react'
+import React, { ReactNode, useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react'
 import { useAuth } from "@/hooks/useAuth"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
@@ -11,24 +11,24 @@ import { BottomNavigation } from '@/components/BottomNavigation'
 import { FilterBottomSheet } from '@/components/FilterBottomSheet'
 import { SettingsBottomSheet } from '@/components/SettingsBottomSheet'
 
-// Dialogs and Forms
-import { SubscriptionPackages } from "@/components/SubscriptionPackages"
-import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog"
-import { LegalDocumentsDialog } from "@/components/LegalDocumentsDialog"
-import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog"
-import { ClientProfileDialog } from "@/components/ClientProfileDialog"
-import { PropertyDetails } from "@/components/PropertyDetails"
-import { PropertyInsightsDialog } from "@/components/PropertyInsightsDialog"
-import { ClientInsightsDialog } from "@/components/ClientInsightsDialog"
-import { OwnerSettingsDialog } from '@/components/OwnerSettingsDialog'
-import { OwnerProfileDialog } from '@/components/OwnerProfileDialog'
-import OwnerClientSwipeDialog from '@/components/OwnerClientSwipeDialog'
-import { SupportDialog } from '@/components/SupportDialog'
-import { NotificationSystem } from '@/components/NotificationSystem'
-import { NotificationsDialog } from '@/components/NotificationsDialog'
-import { OnboardingFlow } from '@/components/OnboardingFlow'
-import { CategorySelectionDialog } from '@/components/CategorySelectionDialog'
-import { SavedSearchesDialog } from '@/components/SavedSearchesDialog'
+// Lazy-loaded Dialogs (improves bundle size and initial load)
+const SubscriptionPackages = lazy(() => import("@/components/SubscriptionPackages").then(m => ({ default: m.SubscriptionPackages })))
+const LikedPropertiesDialog = lazy(() => import("@/components/LikedPropertiesDialog").then(m => ({ default: m.LikedPropertiesDialog })))
+const LegalDocumentsDialog = lazy(() => import("@/components/LegalDocumentsDialog").then(m => ({ default: m.LegalDocumentsDialog })))
+const ClientPreferencesDialog = lazy(() => import("@/components/ClientPreferencesDialog").then(m => ({ default: m.ClientPreferencesDialog })))
+const ClientProfileDialog = lazy(() => import("@/components/ClientProfileDialog").then(m => ({ default: m.ClientProfileDialog })))
+const PropertyDetails = lazy(() => import("@/components/PropertyDetails").then(m => ({ default: m.PropertyDetails })))
+const PropertyInsightsDialog = lazy(() => import("@/components/PropertyInsightsDialog").then(m => ({ default: m.PropertyInsightsDialog })))
+const ClientInsightsDialog = lazy(() => import("@/components/ClientInsightsDialog").then(m => ({ default: m.ClientInsightsDialog })))
+const OwnerSettingsDialog = lazy(() => import('@/components/OwnerSettingsDialog').then(m => ({ default: m.OwnerSettingsDialog })))
+const OwnerProfileDialog = lazy(() => import('@/components/OwnerProfileDialog').then(m => ({ default: m.OwnerProfileDialog })))
+const OwnerClientSwipeDialog = lazy(() => import('@/components/OwnerClientSwipeDialog'))
+const SupportDialog = lazy(() => import('@/components/SupportDialog').then(m => ({ default: m.SupportDialog })))
+const NotificationSystem = lazy(() => import('@/components/NotificationSystem').then(m => ({ default: m.NotificationSystem })))
+const NotificationsDialog = lazy(() => import('@/components/NotificationsDialog').then(m => ({ default: m.NotificationsDialog })))
+const OnboardingFlow = lazy(() => import('@/components/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })))
+const CategorySelectionDialog = lazy(() => import('@/components/CategorySelectionDialog').then(m => ({ default: m.CategorySelectionDialog })))
+const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog').then(m => ({ default: m.SavedSearchesDialog })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -265,120 +265,132 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* All Dialogs/Modals */}
-      <SubscriptionPackages
-        isOpen={showSubscriptionPackages}
-        onClose={() => setShowSubscriptionPackages(false)}
-        reason={subscriptionReason}
-        userRole={userRole}
-      />
+      <Suspense fallback={null}>
+        <SubscriptionPackages
+          isOpen={showSubscriptionPackages}
+          onClose={() => setShowSubscriptionPackages(false)}
+          reason={subscriptionReason}
+          userRole={userRole}
+        />
+      </Suspense>
 
       {userRole === 'client' && (
-        <>
-          <LikedPropertiesDialog
-            isOpen={showLikedProperties}
-            onClose={() => setShowLikedProperties(false)}
-            onPropertySelect={handleLikedPropertySelect}
-          />
+        <Suspense fallback={null}>
+          <>
+            <LikedPropertiesDialog
+              isOpen={showLikedProperties}
+              onClose={() => setShowLikedProperties(false)}
+              onPropertySelect={handleLikedPropertySelect}
+            />
 
-          <ClientPreferencesDialog
-            open={showPreferences}
-            onOpenChange={setShowPreferences}
-          />
+            <ClientPreferencesDialog
+              open={showPreferences}
+              onOpenChange={setShowPreferences}
+            />
 
-          <ClientProfileDialog
-            open={showProfile}
-            onOpenChange={setShowProfile}
-          />
+            <ClientProfileDialog
+              open={showProfile}
+              onOpenChange={setShowProfile}
+            />
 
-          <PropertyDetails
-            listingId={selectedListingId}
-            isOpen={showPropertyDetails}
-            onClose={() => {
-              setShowPropertyDetails(false)
-              setSelectedListingId(null)
-            }}
-            onMessageClick={handleMessageClick}
-          />
+            <PropertyDetails
+              listingId={selectedListingId}
+              isOpen={showPropertyDetails}
+              onClose={() => {
+                setShowPropertyDetails(false)
+                setSelectedListingId(null)
+              }}
+              onMessageClick={handleMessageClick}
+            />
 
-          <PropertyInsightsDialog
-            open={showPropertyInsights}
-            onOpenChange={(open) => {
-              setShowPropertyInsights(open)
-              if (!open) setSelectedListingId(null)
-            }}
-            listing={selectedListing || null}
-          />
+            <PropertyInsightsDialog
+              open={showPropertyInsights}
+              onOpenChange={(open) => {
+                setShowPropertyInsights(open)
+                if (!open) setSelectedListingId(null)
+              }}
+              listing={selectedListing || null}
+            />
 
-          <SavedSearchesDialog
-            open={showSavedSearches}
-            onOpenChange={setShowSavedSearches}
-          />
-        </>
+            <SavedSearchesDialog
+              open={showSavedSearches}
+              onOpenChange={setShowSavedSearches}
+            />
+          </>
+        </Suspense>
       )}
 
       {userRole === 'owner' && (
-        <>
-          <ClientInsightsDialog
-            open={showClientInsights}
-            onOpenChange={(open) => {
-              setShowClientInsights(open)
-              if (!open) setSelectedProfileId(null)
-            }}
-            profile={selectedProfile || null}
-          />
+        <Suspense fallback={null}>
+          <>
+            <ClientInsightsDialog
+              open={showClientInsights}
+              onOpenChange={(open) => {
+                setShowClientInsights(open)
+                if (!open) setSelectedProfileId(null)
+              }}
+              profile={selectedProfile || null}
+            />
 
-          <OwnerSettingsDialog
-            open={showOwnerSettings}
-            onOpenChange={setShowOwnerSettings}
-          />
+            <OwnerSettingsDialog
+              open={showOwnerSettings}
+              onOpenChange={setShowOwnerSettings}
+            />
 
-          <OwnerProfileDialog
-            open={showOwnerProfile}
-            onOpenChange={setShowOwnerProfile}
-          />
+            <OwnerProfileDialog
+              open={showOwnerProfile}
+              onOpenChange={setShowOwnerProfile}
+            />
 
-          <OwnerClientSwipeDialog
-            open={showOwnerSwipe}
-            onOpenChange={setShowOwnerSwipe}
-          />
+            <OwnerClientSwipeDialog
+              open={showOwnerSwipe}
+              onOpenChange={setShowOwnerSwipe}
+            />
 
-          <LegalDocumentsDialog
-            open={showLegalDocuments}
-            onOpenChange={setShowLegalDocuments}
-          />
+            <LegalDocumentsDialog
+              open={showLegalDocuments}
+              onOpenChange={setShowLegalDocuments}
+            />
 
-          <CategorySelectionDialog
-            open={showCategoryDialog}
-            onOpenChange={setShowCategoryDialog}
-            onCategorySelect={(category, mode) => {
-              setShowCategoryDialog(false);
-              navigate(`/owner/properties?category=${category}&mode=${mode}`);
-            }}
-          />
-        </>
+            <CategorySelectionDialog
+              open={showCategoryDialog}
+              onOpenChange={setShowCategoryDialog}
+              onCategorySelect={(category, mode) => {
+                setShowCategoryDialog(false);
+                navigate(`/owner/properties?category=${category}&mode=${mode}`);
+              }}
+            />
+          </>
+        </Suspense>
       )}
 
-      <SupportDialog
-        isOpen={showSupport}
-        onClose={() => setShowSupport(false)}
-        userRole={userRole}
-      />
+      <Suspense fallback={null}>
+        <SupportDialog
+          isOpen={showSupport}
+          onClose={() => setShowSupport(false)}
+          userRole={userRole}
+        />
+      </Suspense>
 
-      <NotificationsDialog
-        isOpen={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
+      <Suspense fallback={null}>
+        <NotificationsDialog
+          isOpen={showNotifications}
+          onClose={() => setShowNotifications(false)}
+        />
+      </Suspense>
 
-      <OnboardingFlow
-        open={showOnboarding}
-        onComplete={() => {
-          setShowOnboarding(false);
-          toast({
-            title: 'Profile Complete!',
-            description: 'Welcome to TindeRent. Start exploring!',
-          });
-        }}
-      />
+      <Suspense fallback={null}>
+        <OnboardingFlow
+          open={showOnboarding}
+          onComplete={() => {
+            setShowOnboarding(false);
+            toast({
+              title: 'Profile Complete!',
+              description: 'Welcome to TindeRent. Start exploring!',
+            });
+          }}
+        />
+      </Suspense>
     </div>
   )
 }

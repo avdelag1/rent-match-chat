@@ -152,7 +152,7 @@ export function ClientTinderSwipeCard({
             <div className="absolute top-4 left-0 right-0 flex gap-2 px-4 z-10">
               {images.map((_, idx) => (
                 <div
-                  key={idx}
+                  key={`image-${idx}`}
                   className="flex-1 h-1 rounded-full bg-white/30 backdrop-blur-sm overflow-hidden"
                 >
                   <div
@@ -277,7 +277,7 @@ export function ClientTinderSwipeCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.interests.map((interest, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
+                        <Badge key={`interest-${idx}`} variant="secondary" className="text-xs">
                           {interest}
                         </Badge>
                       ))}
@@ -293,7 +293,7 @@ export function ClientTinderSwipeCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.preferred_activities.map((activity, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
+                        <Badge key={`activity-${idx}`} variant="outline" className="text-xs">
                           {activity}
                         </Badge>
                       ))}
@@ -309,7 +309,7 @@ export function ClientTinderSwipeCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.lifestyle_tags.map((tag, idx) => (
-                        <Badge key={idx} variant="outline">
+                        <Badge key={`lifestyle-${idx}`} variant="outline">
                           {tag}
                         </Badge>
                       ))}
