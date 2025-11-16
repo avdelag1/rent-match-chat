@@ -300,7 +300,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
                     <div className="grid grid-cols-2 gap-3">
                       {listing.amenities.map((amenity, idx) => (
                         <div
-                          key={idx}
+                          key={`amenity-${idx}`}
                           className="flex items-center gap-2 text-muted-foreground"
                         >
                           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">

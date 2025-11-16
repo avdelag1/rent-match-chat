@@ -10,6 +10,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
+import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RotateCcw, Sparkles } from 'lucide-react';
@@ -83,6 +84,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
+
+  // Prefetch images for next 2 listings (massively improves perceived performance)
+  usePrefetchImages({
+    currentIndex,
+    profiles: allListings,
+    prefetchCount: 2
+  });
 
   // Add newly fetched listings to the stack - with guard to prevent unnecessary updates
   useEffect(() => {
