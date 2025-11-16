@@ -91,7 +91,7 @@ export function ActivityFeed({ userRole }: ActivityFeedProps) {
       case 'message': return <MessageCircle className="w-4 h-4 text-blue-400" />;
       case 'view': return <Eye className="w-4 h-4 text-gray-400" />;
       case 'match': return <TrendingUp className="w-4 h-4 text-green-400" />;
-      case 'favorite': return <Flame className="w-4 h-4 text-orange-400" />;
+      case 'favorite': return <Flame className="w-4 h-4 text-red-400" />;
       default: return <Bell className="w-4 h-4 text-white" />;
     }
   };

@@ -405,7 +405,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
           </Button>
           <Button 
             onClick={handleApply}
-            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold"
+            className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold"
           >
             ✅ Apply Filters
           </Button>

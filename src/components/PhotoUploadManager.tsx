@@ -179,7 +179,7 @@ export function PhotoUploadManager({
           <div
             className={`border-2 border-dashed rounded-xl transition-all cursor-pointer touch-manipulation ${
               dragOver 
-                ? 'border-orange-400 bg-orange-500/10' 
+                ? 'border-red-400 bg-red-500/10' 
                 : 'border-white/30 hover:border-white/50 bg-white/5'
             }`}
             onDrop={handleDrop}
@@ -189,8 +189,8 @@ export function PhotoUploadManager({
           >
             <div className="p-6 sm:p-8 text-center">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-orange-500/20 flex items-center justify-center">
-                  <Upload className="w-6 h-6 sm:w-7 sm:h-7 text-orange-400" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <Upload className="w-6 h-6 sm:w-7 sm:h-7 text-red-400" />
                 </div>
                 <div>
                   <p className="text-sm sm:text-base font-semibold text-white mb-1">
@@ -203,7 +203,7 @@ export function PhotoUploadManager({
                 <Button 
                   type="button"
                   disabled={uploading}
-                  className="h-10 sm:h-11 px-6 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  className="h-10 sm:h-11 px-6 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
                 >
                   {uploading ? 'Uploading...' : currentPhotos.length === 0 ? 'Select Photos' : `Add More (${maxPhotos - currentPhotos.length} left)`}
                 </Button>

@@ -183,7 +183,7 @@ export function SimpleListingCard({ listing, onLike, onPass, onMessage, onTap }:
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className="text-2xl font-bold text-orange-600">${listing.price?.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-red-600">${listing.price?.toLocaleString()}</div>
             <div className="text-sm text-gray-600 font-medium">/month</div>
           </div>
         </div>

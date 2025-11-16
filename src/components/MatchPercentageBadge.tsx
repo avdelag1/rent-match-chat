@@ -11,8 +11,8 @@ export function MatchPercentageBadge({ percentage, reasons, className }: MatchPe
   const getMatchColor = (percentage: number) => {
     if (percentage >= 90) return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-green-400';
     if (percentage >= 70) return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-blue-400';
-    if (percentage >= 50) return 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white border-orange-400';
-    if (percentage >= 30) return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400';
+    if (percentage >= 50) return 'bg-gradient-to-r from-red-600 to-yellow-500 text-white border-red-400';
+    if (percentage >= 30) return 'bg-gradient-to-r from-amber-500 to-red-500 text-white border-amber-400';
     return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-gray-400';
   };
 

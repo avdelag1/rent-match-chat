@@ -92,7 +92,7 @@ export function PWAInstallPrompt() {
           <Card className="bg-white/95 backdrop-blur-sm shadow-lg border border-gray-200">
             <CardContent className="p-3">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
                   <span className="text-white text-sm font-bold">📱</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -105,7 +105,7 @@ export function PWAInstallPrompt() {
                   <Button
                     onClick={handleInstall}
                     size="sm"
-                    className="h-7 px-3 text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 font-medium shadow-sm"
+                    className="h-7 px-3 text-xs bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 font-medium shadow-sm"
                   >
                     Add
                   </Button>

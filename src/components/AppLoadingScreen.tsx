@@ -16,7 +16,7 @@ export function AppLoadingScreen() {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center"
+              className="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-500 flex items-center justify-center"
             >
               <Flame className="w-6 h-6 text-white" />
             </motion.div>

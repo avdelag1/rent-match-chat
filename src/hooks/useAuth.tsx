@@ -303,26 +303,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithOAuth = async (provider: 'google', role: 'client' | 'owner') => {
     try {
       console.log(`[OAuth] Starting ${provider} OAuth for role: ${role}`);
-      
+      console.log(`[OAuth] Current origin: ${window.location.origin}`);
+
       // Store the role in localStorage BEFORE OAuth redirect
       localStorage.setItem('pendingOAuthRole', role);
-      
+
       // Build OAuth options with Google-specific query params
       const queryParams: Record<string, string> = {
         prompt: 'consent',
         access_type: 'offline',
       };
-      
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          queryParams
+          queryParams,
+          skipBrowserRedirect: false
         }
       });
 
       if (error) {
         console.error(`[OAuth] ${provider} OAuth error:`, error);
+        console.error(`[OAuth] Error details:`, {
+          message: error.message,
+          status: error.status,
+          statusText: error.statusText
+        });
         localStorage.removeItem('pendingOAuthRole');
         throw error;
       }
@@ -330,20 +337,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log(`[OAuth] ${provider} OAuth initiated successfully`);
       return { error: null };
     } catch (error: any) {
-      console.error(`[OAuth] ${provider} OAuth error:`, error);
+      console.error(`[OAuth] ${provider} OAuth error caught:`, error);
       localStorage.removeItem('pendingOAuthRole');
       let errorMessage = `Failed to sign in with ${provider}. Please try again.`;
-      
+
       if (error.message?.includes('Email link is invalid')) {
         errorMessage = 'OAuth link expired. Please try signing in again.';
       } else if (error.message?.includes('access_denied')) {
         errorMessage = `Access denied. Please grant permission to continue with ${provider}.`;
-      } else if (error.message?.includes('Provider not enabled')) {
-        errorMessage = `${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not enabled. Please contact support or use email/password login.`;
+      } else if (error.message?.includes('Provider not enabled') || error.message?.includes('not enabled')) {
+        errorMessage = `${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not enabled in Supabase. Please check the Supabase dashboard configuration.`;
+      } else if (error.message?.includes('redirect_uri_mismatch')) {
+        errorMessage = 'Redirect URL configuration error. Please verify your domain is whitelisted in Supabase.';
+      } else if (error.message?.includes('invalid_client')) {
+        errorMessage = 'Invalid OAuth credentials. Please verify your Google OAuth setup in Supabase.';
+      } else if (error.message?.includes('invalid_grant')) {
+        errorMessage = 'Authorization grant error. Please try signing in again.';
+      } else if (error.status === 400 || error.status === 401 || error.status === 403) {
+        errorMessage = `OAuth configuration error (${error.status}). Please check Supabase setup and Google OAuth credentials.`;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       toast({
         title: "OAuth Sign In Failed",
         description: errorMessage,

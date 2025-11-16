@@ -246,17 +246,17 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
             Saved Searches & Alerts
           </DialogTitle>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-white/10">
-            <TabsTrigger value="list" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500">
+            <TabsTrigger value="list" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500">
               My Searches ({savedSearches.length})
             </TabsTrigger>
-            <TabsTrigger value="create" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500">
+            <TabsTrigger value="create" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500">
               Create New
             </TabsTrigger>
           </TabsList>
@@ -295,7 +295,7 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
                   <p className="text-white/60 mb-4">No saved searches yet</p>
                   <Button
                     onClick={() => setActiveTab('create')}
-                    className="bg-gradient-to-r from-orange-500 to-red-500"
+                    className="bg-gradient-to-r from-red-600 to-red-500"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Your First Search
@@ -504,7 +504,7 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
                       <Switch
                         checked={alertsEnabled}
                         onCheckedChange={setAlertsEnabled}
-                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-orange-500 data-[state=checked]:to-red-500"
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-red-600 data-[state=checked]:to-red-500"
                       />
                     </div>
 
@@ -539,7 +539,7 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
               <Button
                 onClick={handleSaveSearch}
                 disabled={isLoading || !searchName.trim() || !!priceError}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:opacity-50"
+                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 disabled:opacity-50"
               >
                 {isLoading ? (
                   <>

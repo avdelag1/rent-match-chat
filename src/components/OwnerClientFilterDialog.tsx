@@ -568,9 +568,9 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           </div>
 
           {/* Demographic Preferences Section */}
-          <div className="space-y-3 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200">
-            <Label className="text-base font-semibold text-orange-900">Demographic Preferences</Label>
-            <p className="text-sm text-orange-700">
+          <div className="space-y-3 p-4 bg-gradient-to-r from-red-50 to-red-50 rounded-lg border border-red-200">
+            <Label className="text-base font-semibold text-red-900">Demographic Preferences</Label>
+            <p className="text-sm text-red-700">
               These filters help match you with compatible clients. All selections are optional and used only for improving match quality.
             </p>
           </div>

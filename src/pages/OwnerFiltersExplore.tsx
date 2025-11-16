@@ -111,7 +111,7 @@ export default function OwnerFiltersExplore() {
       <div className="fixed bottom-20 left-0 right-0 p-4 bg-background border-t border-border">
         <Button
           onClick={handleApplyFilters}
-          className="w-full max-w-2xl mx-auto bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white"
+          className="w-full max-w-2xl mx-auto bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 text-white"
           size="lg"
         >
           Apply Filters {activeFilterCount > 0 && `(${activeFilterCount})`}

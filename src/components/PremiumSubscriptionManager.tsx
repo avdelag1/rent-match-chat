@@ -30,7 +30,7 @@ export function PremiumSubscriptionManager({ userRole }: PremiumSubscriptionMana
   const getSubscriptionGradient = (tier?: string) => {
     switch (tier) {
       case 'platinum': return 'from-purple-500 to-pink-500';
-      case 'gold': return 'from-yellow-400 to-orange-500';
+      case 'gold': return 'from-yellow-400 to-red-500';
       case 'silver': return 'from-gray-400 to-gray-600';
       default: return 'from-blue-500 to-cyan-500';
     }

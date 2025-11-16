@@ -49,7 +49,7 @@ export function SuperLikeButton({ targetId, targetType, onSuperLike, disabled }:
     <Button
       size="sm"
       variant="outline"
-      className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white border-none"
+      className="bg-gradient-to-r from-yellow-400 to-red-500 hover:from-yellow-500 hover:to-red-600 text-white border-none"
       onClick={handleSuperLike}
       disabled={disabled || isUsing}
     >

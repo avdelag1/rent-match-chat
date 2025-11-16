@@ -197,7 +197,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
             <p className="text-sm sm:text-base text-white/90 drop-shadow-sm">Manage all your rental properties</p>
           </div>
           <Button 
-            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold shadow-lg w-full sm:w-auto"
+            className="gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold shadow-lg w-full sm:w-auto"
             onClick={handleAddProperty}
           >
             <Plus className="w-4 h-4" />

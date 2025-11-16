@@ -244,7 +244,7 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
                 </Button>
                 
                 <Button
-                  className="flex-1 gap-2 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                  className="flex-1 gap-2 h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
                   onClick={() => handleSwipe('right')}
                   disabled={swipeMutation.isPending}
                 >

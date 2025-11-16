@@ -132,11 +132,11 @@ export function AdvancedClientFilters({
       <DialogContent className="sm:max-w-4xl max-h-[90vh] bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
               Advanced Filters
             </DialogTitle>
             {activeFiltersCount > 0 && (
-              <Badge className="bg-gradient-to-r from-orange-500 to-red-500">
+              <Badge className="bg-gradient-to-r from-red-600 to-red-500">
                 {activeFiltersCount} Active
               </Badge>
             )}
@@ -360,7 +360,7 @@ export function AdvancedClientFilters({
                             size="sm"
                             onClick={() => toggleArrayFilter('property_subtype', type.toLowerCase())}
                             className={filters.property_subtype?.includes(type.toLowerCase()) ?
-                              'bg-gradient-to-r from-orange-500 to-red-500' :
+                              'bg-gradient-to-r from-red-600 to-red-500' :
                               'border-white/20 text-white hover:bg-white/10'
                             }
                           >
@@ -380,7 +380,7 @@ export function AdvancedClientFilters({
                             size="sm"
                             onClick={() => toggleArrayFilter('view_type', view.toLowerCase())}
                             className={filters.view_type?.includes(view.toLowerCase()) ?
-                              'bg-gradient-to-r from-orange-500 to-red-500' :
+                              'bg-gradient-to-r from-red-600 to-red-500' :
                               'border-white/20 text-white hover:bg-white/10'
                             }
                           >
@@ -412,7 +412,7 @@ export function AdvancedClientFilters({
                             size="sm"
                             onClick={() => toggleArrayFilter('motorcycle_type', type.toLowerCase())}
                             className={filters.motorcycle_type?.includes(type.toLowerCase()) ?
-                              'bg-gradient-to-r from-orange-500 to-red-500' :
+                              'bg-gradient-to-r from-red-600 to-red-500' :
                               'border-white/20 text-white hover:bg-white/10'
                             }
                           >
@@ -515,7 +515,7 @@ export function AdvancedClientFilters({
                           size="sm"
                           onClick={() => toggleArrayFilter('bicycle_type', type.toLowerCase())}
                           className={filters.bicycle_type?.includes(type.toLowerCase()) ?
-                            'bg-gradient-to-r from-orange-500 to-red-500' :
+                            'bg-gradient-to-r from-red-600 to-red-500' :
                             'border-white/20 text-white hover:bg-white/10'
                           }
                         >
@@ -535,7 +535,7 @@ export function AdvancedClientFilters({
                           size="sm"
                           onClick={() => toggleArrayFilter('frame_size', size)}
                           className={filters.frame_size?.includes(size) ?
-                            'bg-gradient-to-r from-orange-500 to-red-500' :
+                            'bg-gradient-to-r from-red-600 to-red-500' :
                             'border-white/20 text-white hover:bg-white/10'
                           }
                         >
@@ -591,7 +591,7 @@ export function AdvancedClientFilters({
                           size="sm"
                           onClick={() => toggleArrayFilter('yacht_type', type.toLowerCase().replace(' ', '_'))}
                           className={filters.yacht_type?.includes(type.toLowerCase().replace(' ', '_')) ?
-                            'bg-gradient-to-r from-orange-500 to-red-500' :
+                            'bg-gradient-to-r from-red-600 to-red-500' :
                             'border-white/20 text-white hover:bg-white/10'
                           }
                         >
@@ -681,7 +681,7 @@ export function AdvancedClientFilters({
             </Button>
             <Button
               onClick={handleApplyFilters}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
             >
               <Filter className="w-4 h-4 mr-2" />
               Apply Filters
