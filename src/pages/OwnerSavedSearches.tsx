@@ -39,7 +39,7 @@ const OwnerSavedSearches = () => {
               </Button>
               <Button
                 onClick={() => setShowFilterDialog(true)}
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-red-500 hover:bg-red-600"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Configure Filters

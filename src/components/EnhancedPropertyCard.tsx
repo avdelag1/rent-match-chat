@@ -114,7 +114,7 @@ const EnhancedPropertyCardComponent = ({
     const xValue = x.get();
     if (xValue > 70) {
       return (
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-[2px] rounded-2xl flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-red-600/10 to-red-500/10 backdrop-blur-[2px] rounded-2xl flex items-center justify-center pointer-events-none">
           <div className="absolute top-1/3 text-white/80 font-bold text-3xl drop-shadow-2xl rotate-12">
             LIKE
           </div>
@@ -292,7 +292,7 @@ const EnhancedPropertyCardComponent = ({
             
             {/* Right side - Price */}
             <div className="text-right">
-              <div className="text-3xl font-bold text-orange-600">
+              <div className="text-3xl font-bold text-red-600">
                 ${listing.price?.toLocaleString()}
               </div>
               <div className="text-sm text-gray-600">/month</div>

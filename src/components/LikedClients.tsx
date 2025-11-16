@@ -218,7 +218,7 @@ export function LikedClients() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white flex-shrink-0">
+              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-red-500 to-red-500 text-white flex-shrink-0">
                 <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
@@ -300,7 +300,7 @@ export function LikedClients() {
             {!searchTerm && (
               <Button 
                 onClick={() => window.location.href = '/owner/dashboard'}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-sm sm:text-base"
+                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-sm sm:text-base"
               >
                 Browse Clients
               </Button>

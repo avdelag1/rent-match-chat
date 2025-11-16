@@ -170,7 +170,7 @@ function LegendaryLandingPage() {
         {ripples.map((ripple) => (
           <motion.div
             key={ripple.id}
-            className="absolute border-2 border-orange-400/40 rounded-full pointer-events-none"
+            className="absolute border-2 border-red-400/40 rounded-full pointer-events-none"
             style={{
               left: ripple.x - 25,
               top: ripple.y - 25,
@@ -303,7 +303,7 @@ function LegendaryLandingPage() {
           {/* I'm a Client Button - Slides in from LEFT smoothly */}
           <motion.button
             onClick={() => openAuthDialog('client')}
-            className="w-full py-6 px-8 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+            className="w-full py-6 px-8 bg-gradient-to-r from-red-400 to-red-500 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
             initial={{ 
               opacity: 0, 
               x: -200

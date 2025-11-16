@@ -36,7 +36,7 @@ const NotificationIcon = ({ type }: { type?: string }) => {
 
   switch (type) {
     case 'new_match':
-      return <Flame className={`${iconClass} text-orange-500`} />;
+      return <Flame className={`${iconClass} text-red-500`} />;
     case 'new_message':
       return <MessageCircle className={`${iconClass} text-blue-500`} />;
     case 'new_like':
@@ -220,7 +220,7 @@ export function NotificationsDropdown() {
               >
                 <Badge
                   variant="default"
-                  className="h-5 min-w-5 flex items-center justify-center p-0 px-1 text-xs bg-gradient-to-r from-orange-500 to-red-500"
+                  className="h-5 min-w-5 flex items-center justify-center p-0 px-1 text-xs bg-gradient-to-r from-red-600 to-red-500"
                 >
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </Badge>

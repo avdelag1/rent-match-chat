@@ -50,7 +50,7 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
           <div className="relative">
             <Heart className="w-6 h-6" />
             {likesCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-orange-500 to-pink-500 text-white text-xs">
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-600 to-pink-500 text-white text-xs">
                 {likesCount > 9 ? '9+' : likesCount}
               </Badge>
             )}

@@ -79,7 +79,7 @@ export class ErrorBoundaryWrapper extends Component<Props, State> {
                 </Button>
                 <Button 
                   onClick={this.handleGoHome}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600"
+                  className="flex-1 bg-red-500 hover:bg-red-600"
                 >
                   <Home className="w-4 h-4 mr-2" />
                   Go Home

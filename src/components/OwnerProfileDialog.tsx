@@ -93,7 +93,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
         <DialogHeader className="px-4 sm:px-6 py-4 border-b border-white/10 shrink-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+            <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
               Edit Owner Profile
             </DialogTitle>
             <Badge variant="outline" className="bg-white/10 border-white/20 text-white">
@@ -111,7 +111,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
                   <Label className="text-white text-lg sm:text-xl font-bold">📸 Business Photos</Label>
                   <p className="text-white/60 text-xs sm:text-sm mt-1">Add photos of your properties • Up to 10 photos</p>
                 </div>
-                <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-400">
+                <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-400">
                   {profileImages.length}/10
                 </Badge>
               </div>
@@ -135,7 +135,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="Your property business name"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
 
@@ -147,7 +147,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
                   onChange={(e) => setBusinessDescription(e.target.value)}
                   placeholder="Tell clients about your properties and services..."
                   rows={4}
-                  className="text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  className="text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
 
@@ -158,7 +158,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
                   value={businessLocation}
                   onChange={(e) => setBusinessLocation(e.target.value)}
                   placeholder="City, Country"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
 
@@ -170,7 +170,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                   placeholder="business@example.com"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
 
@@ -182,7 +182,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                   placeholder="+1 (555) 000-0000"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
             </div>
@@ -201,7 +201,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
             <Button
               onClick={handleSave}
               disabled={saveMutation.isPending}
-              className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold shadow-lg"
+              className="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold shadow-lg"
             >
               {saveMutation.isPending ? 'Saving...' : 'Save Profile'}
             </Button>

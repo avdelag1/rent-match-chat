@@ -290,7 +290,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
         <DialogHeader className="px-4 sm:px-6 py-4 border-b border-white/10 shrink-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+            <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
               Edit Your Profile
             </DialogTitle>
             <Badge variant="outline" className="bg-white/10 border-white/20 text-white">
@@ -308,7 +308,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   <Label className="text-white text-lg sm:text-xl font-bold">📸 Profile Photos</Label>
                   <p className="text-white/60 text-xs sm:text-sm mt-1">Add up to 10 photos • First photo is your main photo</p>
                 </div>
-                <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-400">
+                <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-400">
                   {profileImages.length}/10
                 </Badge>
               </div>
@@ -332,7 +332,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder="Enter your full name" 
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                   required
                 />
               </div>
@@ -346,7 +346,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                     value={age}
                     onChange={(e) => setAge(e.target.value ? Number(e.target.value) : '')}
                     placeholder="25"
-                    className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-orange-400"
+                    className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                     min="18"
                     max="99"
                   />
@@ -354,7 +354,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 <div className="space-y-2">
                   <Label className="text-white/90 text-sm sm:text-base">Gender</Label>
                   <Select value={gender ?? ''} onValueChange={setGender}>
-                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -375,7 +375,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
               <div className="space-y-2">
                 <Label className="text-white/90 text-sm sm:text-base">Nationality</Label>
                 <Select value={nationality} onValueChange={setNationality}>
-                  <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                  <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                     <SelectValue placeholder="Select nationality" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -410,7 +410,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 <div className="space-y-2">
                   <Label className="text-white/90 text-sm sm:text-base">Relationship Status</Label>
                   <Select value={relationshipStatus} onValueChange={setRelationshipStatus}>
-                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -427,7 +427,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                     <Switch
                       checked={hasChildren}
                       onCheckedChange={setHasChildren}
-                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-orange-500 data-[state=checked]:to-red-500"
+                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-red-600 data-[state=checked]:to-red-500"
                     />
                     <span className="ml-3 text-white">{hasChildren ? 'Yes' : 'No'}</span>
                   </div>
@@ -443,7 +443,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 <div className="space-y-2">
                   <Label className="text-white/90 text-sm sm:text-base">Smoking Habit</Label>
                   <Select value={smokingHabit} onValueChange={setSmokingHabit}>
-                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -457,7 +457,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 <div className="space-y-2">
                   <Label className="text-white/90 text-sm sm:text-base">Drinking Habit</Label>
                   <Select value={drinkingHabit} onValueChange={setDrinkingHabit}>
-                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -471,7 +471,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 <div className="space-y-2">
                   <Label className="text-white/90 text-sm sm:text-base">Cleanliness Level</Label>
                   <Select value={cleanlinessLevel} onValueChange={setCleanlinessLevel}>
-                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -485,7 +485,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 <div className="space-y-2">
                   <Label className="text-white/90 text-sm sm:text-base">Noise Tolerance</Label>
                   <Select value={noiseTolerance} onValueChange={setNoiseTolerance}>
-                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -500,7 +500,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
               <div className="space-y-2">
                 <Label className="text-white/90 text-sm sm:text-base">Work Schedule</Label>
                 <Select value={workSchedule} onValueChange={setWorkSchedule}>
-                  <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-orange-400">
+                  <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
                     <SelectValue placeholder="Select work schedule" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/20 text-white">
@@ -565,8 +565,8 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                       variant={interestCategories.includes(interest) ? 'default' : 'outline'}
                       className={`cursor-pointer transition-all ${
                         interestCategories.includes(interest)
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-transparent'
-                          : 'bg-white/5 border-white/20 text-white/70 hover:border-orange-400 hover:bg-white/10'
+                          ? 'bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white border-transparent'
+                          : 'bg-white/5 border-white/20 text-white/70 hover:border-red-400 hover:bg-white/10'
                       }`}
                       onClick={() => toggleInterestCategory(interest)}
                     >
@@ -615,7 +615,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
 
                 {/* Transportation Tags */}
                 <div className="space-y-3">
-                  <h4 className="text-sm sm:text-base font-semibold text-orange-400 flex items-center gap-2">
+                  <h4 className="text-sm sm:text-base font-semibold text-red-400 flex items-center gap-2">
                     🚗 Transportation & Mobility
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
@@ -624,14 +624,14 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                         key={tag}
                         className={`flex items-center gap-3 p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all active:scale-95 ${
                           activities.includes(tag)
-                            ? 'bg-orange-500/20 border-orange-400 text-white shadow-lg shadow-orange-500/20'
+                            ? 'bg-red-500/20 border-red-400 text-white shadow-lg shadow-red-500/20'
                             : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                         }`}
                         onClick={() => toggleTag(tag, false)}
                       >
                         <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-all ${
                           activities.includes(tag)
-                            ? 'bg-orange-500 border-orange-500'
+                            ? 'bg-red-500 border-red-500'
                             : 'border-white/40 bg-transparent'
                         }`}>
                           {activities.includes(tag) && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
@@ -703,7 +703,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                 {/* Tag Counter & Clear Button */}
                 <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border-2 border-white/20">
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-sm sm:text-lg">
+                    <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-red-600 to-red-500 text-white font-bold text-sm sm:text-lg">
                       {totalTags}
                     </div>
                     <div>
@@ -745,7 +745,7 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
           <Button 
             onClick={handleSave} 
             disabled={saveMutation.isPending || isLoading || !name.trim()}
-            className="flex-1 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-base"
+            className="flex-1 h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold text-base"
           >
             {saveMutation.isPending ? 'Saving...' : 'Save Profile'}
           </Button>

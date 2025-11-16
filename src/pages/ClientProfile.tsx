@@ -193,7 +193,7 @@ const ClientProfile = () => {
         <div className="flex gap-3">
           <Button
             onClick={() => setShowEditDialog(true)}
-            className="flex-1 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold shadow-lg transform transition-all duration-200 active:scale-95"
+            className="flex-1 h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold shadow-lg transform transition-all duration-200 active:scale-95"
           >
             {profile ? '✏️ Edit' : '➕ Create'}
           </Button>

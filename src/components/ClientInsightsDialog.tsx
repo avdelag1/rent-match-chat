@@ -287,7 +287,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                     <h5 className="text-sm font-medium text-muted-foreground mb-2">Transportation & Mobility</h5>
                     <div className="flex flex-wrap gap-2">
                       {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], TRANSPORTATION_TAGS).map((tag, index) => (
-                        <Badge key={index} className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20">
+                        <Badge key={index} className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">
                           {tag}
                         </Badge>
                       ))}

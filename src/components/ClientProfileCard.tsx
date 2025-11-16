@@ -200,7 +200,7 @@ const ClientProfileCardComponent = ({
           />
         ) : (
           <div 
-            className="w-full h-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center cursor-pointer relative overflow-hidden"
+            className="w-full h-full bg-gradient-to-br from-red-400 via-pink-500 to-purple-600 flex items-center justify-center cursor-pointer relative overflow-hidden"
             onClick={handleImageClick}
           >
             <div className="absolute inset-0 bg-black/20" />
@@ -279,7 +279,7 @@ const ClientProfileCardComponent = ({
                   if (PROPERTY_TAGS.includes(tag)) {
                     badgeClass += " bg-blue-500/20 text-blue-600 dark:text-blue-300 border-blue-500/30";
                   } else if (TRANSPORTATION_TAGS.includes(tag)) {
-                    badgeClass += " bg-orange-500/20 text-orange-600 dark:text-orange-300 border-orange-500/30";
+                    badgeClass += " bg-red-500/20 text-red-600 dark:text-red-300 border-red-500/30";
                   } else if (LIFESTYLE_TAGS.includes(tag)) {
                     badgeClass += " bg-purple-500/20 text-purple-600 dark:text-purple-300 border-purple-500/30";
                   } else if (FINANCIAL_TAGS.includes(tag)) {

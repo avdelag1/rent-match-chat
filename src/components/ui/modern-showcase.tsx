@@ -52,7 +52,7 @@ export const ModernShowcase = () => {
           <h2 className="text-2xl font-bold">3D Tilt Cards (Hover Me!)</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <TiltCard intensity={3}>
-              <Card className="p-6 bg-gradient-to-br from-orange-500 to-pink-500 text-white">
+              <Card className="p-6 bg-gradient-to-br from-red-600 to-pink-500 text-white">
                 <h3 className="text-xl font-bold mb-2">Card 1</h3>
                 <p>Hover over me to see the 3D tilt effect</p>
               </Card>

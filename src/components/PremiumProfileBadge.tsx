@@ -26,7 +26,7 @@ export function PremiumProfileBadge({ tier, showText = true, size = 'md' }: Prem
         return {
           icon: Star,
           label: 'Premium+',
-          color: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+          color: 'bg-gradient-to-r from-yellow-500 to-red-500',
           textColor: 'text-white',
           variant: 'default' as const,
         };

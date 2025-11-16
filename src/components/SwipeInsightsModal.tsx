@@ -167,10 +167,10 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   {/* Competition Level */}
                   <div className="space-y-3">
                     <h4 className="font-semibold flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-orange-500" />
+                      <TrendingUp className="w-5 h-5 text-red-500" />
                       Competition Level
                     </h4>
-                    <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl">
+                    <div className="p-4 bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/20 dark:to-red-950/20 rounded-xl">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium">
@@ -293,7 +293,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                 {/* Response Rate */}
                 <div className="space-y-3">
                   <h4 className="font-semibold flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-orange-500" />
+                    <Clock className="w-5 h-5 text-red-500" />
                     Owner Response
                   </h4>
                   <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl">
@@ -334,7 +334,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     <Badge className={`
                       ${insights.demandLevel === 'high' 
                         ? 'bg-red-500/20 text-red-700 dark:text-red-400' 
-                        : 'bg-orange-500/20 text-orange-700 dark:text-orange-400'
+                        : 'bg-red-500/20 text-red-700 dark:text-red-400'
                       }
                     `}>
                       {insights.demandLevel === 'high' ? '🔥 High Demand' : '📈 Medium Demand'}
@@ -354,7 +354,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                       <Badge className={`
                         ${insights.priceVsMarket < 0 
                           ? 'bg-green-500/20 text-green-700 dark:text-green-400' 
-                          : 'bg-orange-500/20 text-orange-700 dark:text-orange-400'
+                          : 'bg-red-500/20 text-red-700 dark:text-red-400'
                         }
                       `}>
                         {insights.priceVsMarket > 0 ? '+' : ''}{insights.priceVsMarket}%

@@ -37,12 +37,12 @@ const ClientSettings = () => {
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full gap-1 p-1 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200">
-              <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
-              <TabsTrigger value="preferences" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Preferences</TabsTrigger>
-              <TabsTrigger value="subscription" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Subscription</TabsTrigger>
-              <TabsTrigger value="security" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Security</TabsTrigger>
-              <TabsTrigger value="search" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Search</TabsTrigger>
-              <TabsTrigger value="theme" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Theme</TabsTrigger>
+              <TabsTrigger value="profile" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Profile</TabsTrigger>
+              <TabsTrigger value="preferences" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Preferences</TabsTrigger>
+              <TabsTrigger value="subscription" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Subscription</TabsTrigger>
+              <TabsTrigger value="security" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Security</TabsTrigger>
+              <TabsTrigger value="search" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Search</TabsTrigger>
+              <TabsTrigger value="theme" className="text-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all">Theme</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="mt-6">
@@ -85,8 +85,8 @@ const ClientSettings = () => {
                       </p>
                     </div>
 
-                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200">
-                      <Car className="w-10 h-10 text-orange-600 mb-3" />
+                    <div className="w-full h-full overflow-y-auto p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border-2 border-red-200">
+                      <Car className="w-10 h-10 text-red-600 mb-3" />
                       <h3 className="text-lg font-semibold mb-2">Motorcycles</h3>
                       <p className="text-sm text-muted-foreground mb-4">
                         Specify your preferred bike types, engine size, and features
@@ -113,7 +113,7 @@ const ClientSettings = () => {
                   <Button
                     onClick={() => setShowPreferences(true)}
                     size="lg"
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                    className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
                   >
                     <Heart className="w-5 h-5 mr-2" />
                     Set My Preferences

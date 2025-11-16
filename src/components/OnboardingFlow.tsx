@@ -175,12 +175,12 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             className="text-center space-y-6 py-8"
           >
             <div className="flex justify-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center">
                 <Sparkles className="w-10 h-10 text-white" />
               </div>
             </div>
             <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-3">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent mb-3">
                 Welcome to TindeRent!
               </h2>
               <p className="text-lg text-white/80">
@@ -211,7 +211,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             className="space-y-4"
           >
             <div className="text-center mb-6">
-              <Camera className="w-12 h-12 mx-auto mb-3 text-orange-400" />
+              <Camera className="w-12 h-12 mx-auto mb-3 text-red-400" />
               <h3 className="text-2xl font-bold text-white mb-2">Add Your Photos</h3>
               <p className="text-white/70">Upload at least one photo to get started</p>
             </div>
@@ -234,7 +234,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             className="space-y-6"
           >
             <div className="text-center mb-6">
-              <User className="w-12 h-12 mx-auto mb-3 text-orange-400" />
+              <User className="w-12 h-12 mx-auto mb-3 text-red-400" />
               <h3 className="text-2xl font-bold text-white mb-2">Basic Information</h3>
               <p className="text-white/70">Tell us who you are</p>
             </div>
@@ -292,7 +292,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             className="space-y-6"
           >
             <div className="text-center mb-6">
-              <Globe className="w-12 h-12 mx-auto mb-3 text-orange-400" />
+              <Globe className="w-12 h-12 mx-auto mb-3 text-red-400" />
               <h3 className="text-2xl font-bold text-white mb-2">A Bit More About You</h3>
               <p className="text-white/70">This helps us find better matches</p>
             </div>
@@ -337,7 +337,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
                 <Switch
                   checked={hasChildren}
                   onCheckedChange={setHasChildren}
-                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-orange-500 data-[state=checked]:to-red-500"
+                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-red-600 data-[state=checked]:to-red-500"
                 />
               </div>
             </div>
@@ -353,7 +353,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             className="space-y-6"
           >
             <div className="text-center mb-6">
-              <Heart className="w-12 h-12 mx-auto mb-3 text-orange-400" />
+              <Heart className="w-12 h-12 mx-auto mb-3 text-red-400" />
               <h3 className="text-2xl font-bold text-white mb-2">What Do You Love?</h3>
               <p className="text-white/70">Select at least 3 interests</p>
             </div>
@@ -367,8 +367,8 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
                     variant={interests.includes(interest) ? 'default' : 'outline'}
                     className={`cursor-pointer transition-all ${
                       interests.includes(interest)
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-500'
-                        : 'hover:border-orange-400'
+                        ? 'bg-gradient-to-r from-red-600 to-amber-500'
+                        : 'hover:border-red-400'
                     }`}
                     onClick={() => toggleInterest(interest)}
                   >
@@ -446,7 +446,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
         className="sm:max-w-2xl bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white"
       >
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
             {steps[currentStep].title}
           </DialogTitle>
         </DialogHeader>
@@ -492,7 +492,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
             >
               Next
               <ArrowRight className="w-4 h-4 ml-2" />

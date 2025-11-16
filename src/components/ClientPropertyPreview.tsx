@@ -293,7 +293,7 @@ export function ClientPropertyPreview({
               className={`flex-1 gap-2 h-12 ${
                 isLiked 
                   ? 'bg-red-500 hover:bg-red-600' 
-                  : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600'
+                  : 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600'
               } text-white`}
               onClick={handleLike}
               disabled={swipeMutation.isPending || isLiked}

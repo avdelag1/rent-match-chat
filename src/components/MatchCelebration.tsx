@@ -100,7 +100,7 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                 className="mb-8"
               >
                 <motion.h1 
-                  className="text-6xl font-bold bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 bg-clip-text text-transparent"
+                  className="text-6xl font-bold bg-gradient-to-r from-red-500 via-pink-500 to-red-500 bg-clip-text text-transparent"
                   animate={{ 
                     scale: [1, 1.1, 1],
                   }}

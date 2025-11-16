@@ -53,9 +53,9 @@ export function OwnerListingsStats({ listings }: OwnerListingsStatsProps) {
       title: 'Categories',
       value: [propertiesCount, motorcyclesCount, bicyclesCount, yachtsCount].filter(c => c > 0).length,
       icon: Activity,
-      color: 'bg-orange-500',
-      textColor: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+      color: 'bg-red-500',
+      textColor: 'text-red-600',
+      bgColor: 'bg-red-50',
       description: 'Active types'
     },
   ];
