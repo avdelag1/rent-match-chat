@@ -66,9 +66,13 @@ const ClientLikedProperties = () => {
       });
       
       console.log('✅ Conversation started successfully:', result);
-      
-      // Navigate to messages immediately - the toast is handled by the mutation
-      navigate('/messages');
+
+      // Navigate to messages with the conversation ID to open it directly
+      if (result?.conversationId) {
+        navigate(`/messages?conversationId=${result.conversationId}`);
+      } else {
+        navigate('/messages');
+      }
       
     } catch (error) {
       console.error('❌ Failed to start conversation:', error);
