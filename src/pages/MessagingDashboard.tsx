@@ -25,6 +25,7 @@ export function MessagingDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [userRole, setUserRole] = useState<'client' | 'owner'>('client');
+  const [directConversationId, setDirectConversationId] = useState<string | null>(null);
 
   const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
   const { data: stats } = useConversationStats();
@@ -105,7 +106,12 @@ export function MessagingDashboard() {
   useEffect(() => {
     const conversationId = searchParams.get('conversationId');
     const startConversationUserId = searchParams.get('startConversation');
-    
+
+    // Store direct conversation ID for priority display
+    if (conversationId) {
+      setDirectConversationId(conversationId);
+    }
+
     // Direct conversation ID - open immediately
     if (conversationId && !isStartingConversation) {
       handleDirectOpenConversation(conversationId);
@@ -119,41 +125,30 @@ export function MessagingDashboard() {
   const handleDirectOpenConversation = async (conversationId: string) => {
     setIsStartingConversation(true);
     console.log('[MessagingDashboard] Opening conversation:', conversationId);
-    
+
     try {
       // Try to find conversation in current list
       let conversation = conversations.find(c => c.id === conversationId);
-      
-      // If not found, wait for it to appear (handles realtime timing)
-      if (!conversation) {
-        console.log('[MessagingDashboard] Conversation not in cache, waiting...');
-        toast({
-          title: 'Loading conversation...',
-          description: 'Please wait while we fetch your conversation.',
-        });
 
-        // Reduced polling to prevent flickering - try up to 3 times (3 seconds total)
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          console.log(`[MessagingDashboard] Attempt ${attempt}/3 to find conversation`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          await refetch();
-          conversation = conversations.find(c => c.id === conversationId);
-          if (conversation) break;
-        }
-        
-        if (conversation) {
-          console.log('[MessagingDashboard] Conversation found!', conversation);
-          setSelectedConversationId(conversationId);
-          setSearchParams({});
-          toast({
-            title: '✅ Conversation opened',
-            description: 'You can now send messages!',
-          });
-        } else {
-          throw new Error('Conversation not found after 3 seconds');
-        }
+      // If not found, refetch immediately to get latest data
+      if (!conversation) {
+        console.log('[MessagingDashboard] Conversation not in cache, fetching...');
+        await refetch();
+        conversation = conversations.find(c => c.id === conversationId);
+      }
+
+      if (conversation) {
+        console.log('[MessagingDashboard] Conversation found!', conversation);
+        setSelectedConversationId(conversationId);
+        setSearchParams({});
+        toast({
+          title: '✅ Conversation opened',
+          description: 'You can now send messages!',
+        });
       } else {
-        console.log('[MessagingDashboard] Conversation already in cache');
+        // Even if we don't find it in the list, try to open it directly
+        // The MessagingInterface will handle fetching the messages
+        console.log('[MessagingDashboard] Opening conversation directly without full sync');
         setSelectedConversationId(conversationId);
         setSearchParams({});
       }
@@ -227,16 +222,42 @@ export function MessagingDashboard() {
     }
   };
 
-  if (selectedConversation && selectedConversation.other_user) {
+  if (selectedConversationId) {
+    // If we have a selected conversation ID, show the messaging interface
+    // If it's not in the full list yet, the MessagingInterface will handle fetching it
+    const conversation = conversations.find(c => c.id === selectedConversationId);
+
     return (
       <DashboardLayout userRole={userRole}>
         <div className="h-full flex flex-col overflow-hidden">
           <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col min-h-0">
-            <MessagingInterface
-              conversationId={selectedConversation.id}
-              otherUser={selectedConversation.other_user}
-              onBack={() => setSelectedConversationId(null)}
-            />
+            {conversation?.other_user ? (
+              <MessagingInterface
+                conversationId={selectedConversationId}
+                otherUser={conversation.other_user}
+                onBack={() => {
+                  setSelectedConversationId(null);
+                  setDirectConversationId(null);
+                }}
+              />
+            ) : (
+              // Fallback: Show loading state while conversation details load
+              <div className="flex flex-col items-center justify-center h-full gap-4">
+                <MessageCircle className="w-12 h-12 text-muted-foreground animate-pulse" />
+                <p className="text-muted-foreground">Loading conversation...</p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedConversationId(null);
+                    setDirectConversationId(null);
+                  }}
+                  className="mt-4"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </DashboardLayout>
