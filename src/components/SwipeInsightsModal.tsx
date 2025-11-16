@@ -1,11 +1,12 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Listing } from '@/hooks/useListings';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
-import { Eye, TrendingUp, Clock, Users, MapPin, DollarSign, Calendar, Shield, CheckCircle, Star } from 'lucide-react';
+import { Eye, TrendingUp, Clock, Users, MapPin, DollarSign, Calendar, Shield, CheckCircle, Star, X } from 'lucide-react';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 interface SwipeInsightsModalProps {
   open: boolean;
@@ -17,6 +18,18 @@ interface SwipeInsightsModalProps {
 export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: SwipeInsightsModalProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Handle swipe-to-close gesture
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(false);
+
+    // Close if dragged down (more responsive threshold for better UX)
+    // Triggers on: 50px+ down OR 300+ velocity OR momentum downward
+    if (info.offset.y > 50 || info.velocity.y > 300 || (info.velocity.y > 100 && info.offset.y > 20)) {
+      onOpenChange(false);
+    }
+  };
 
   if (!listing && !profile) return null;
 
@@ -45,13 +58,29 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
     <AnimatePresence>
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.3 }}
-            >
+          <motion.div
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{
+              type: 'spring',
+              damping: 35,        // Slightly increased for stability
+              stiffness: 400,      // Slightly increased for snappier feel
+              mass: 0.8,           // Lower mass for faster response
+            }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={handleDragEnd}
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',  // GPU acceleration
+              backfaceVisibility: 'hidden'
+            }}
+          >
+            <DialogContent className={`max-w-lg w-full max-h-[90vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
+              <motion.div>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
                   <Eye className="w-6 h-6 text-primary" />
@@ -371,6 +400,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               initialIndex={selectedImageIndex}
             />
           )}
+            </motion.div>
         </Dialog>
       )}
     </AnimatePresence>
