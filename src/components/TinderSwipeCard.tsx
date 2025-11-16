@@ -211,23 +211,63 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
             {/* Key Stats */}
             <div className="flex items-center gap-4 text-muted-foreground">
-              {listing.beds && (
-                <div className="flex items-center gap-1">
-                  <Bed className="w-5 h-5" />
-                  <span className="font-medium">{listing.beds}</span>
-                </div>
-              )}
-              {listing.baths && (
-                <div className="flex items-center gap-1">
-                  <Bath className="w-5 h-5" />
-                  <span className="font-medium">{listing.baths}</span>
-                </div>
-              )}
-              {listing.square_footage && (
-                <div className="flex items-center gap-1">
-                  <Square className="w-5 h-5" />
-                  <span className="font-medium">{listing.square_footage} ft²</span>
-                </div>
+              {listing.category === 'vehicle' ? (
+                <>
+                  {listing.brand && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{listing.brand}</span>
+                    </div>
+                  )}
+                  {listing.model && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{listing.model}</span>
+                    </div>
+                  )}
+                  {listing.year && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{listing.year}</span>
+                    </div>
+                  )}
+                  {listing.mileage && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{listing.mileage.toLocaleString()} km</span>
+                    </div>
+                  )}
+                </>
+              ) : listing.category === 'motorcycle' || listing.category === 'bicycle' || listing.category === 'yacht' ? (
+                <>
+                  {listing.brand && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{listing.brand}</span>
+                    </div>
+                  )}
+                  {listing.model && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{listing.model}</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {listing.beds && (
+                    <div className="flex items-center gap-1">
+                      <Bed className="w-5 h-5" />
+                      <span className="font-medium">{listing.beds}</span>
+                    </div>
+                  )}
+                  {listing.baths && (
+                    <div className="flex items-center gap-1">
+                      <Bath className="w-5 h-5" />
+                      <span className="font-medium">{listing.baths}</span>
+                    </div>
+                  )}
+                  {listing.square_footage && (
+                    <div className="flex items-center gap-1">
+                      <Square className="w-5 h-5" />
+                      <span className="font-medium">{listing.square_footage} ft²</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

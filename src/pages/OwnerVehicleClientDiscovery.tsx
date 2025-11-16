@@ -15,7 +15,7 @@ export default function OwnerVehicleClientDiscovery() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const { data: clients = [], refetch } = useSmartClientMatching('vehicle');
+  const { data: clients = [], refetch } = useSmartClientMatching('property'); // Vehicle matching uses property category for now
 
   const filteredClients = (clients || []).filter(client =>
     client.name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -171,11 +171,11 @@ export default function OwnerVehicleClientDiscovery() {
                           </div>
                         </div>
 
-                        {client.moto_types && client.moto_types.length > 0 && (
+                        {client.vehicle_types && client.vehicle_types.length > 0 && (
                           <div className="mb-3">
                             <p className="text-xs text-muted-foreground mb-1">Looking for:</p>
                             <div className="flex flex-wrap gap-1">
-                              {client.moto_types.map((type: string) => (
+                              {client.vehicle_types.map((type: string) => (
                                 <Badge key={type} variant="outline" className="text-xs">
                                   {type}
                                 </Badge>
@@ -184,11 +184,11 @@ export default function OwnerVehicleClientDiscovery() {
                           </div>
                         )}
 
-                        {client.budget && (
+                        {(client.budget_min || client.budget_max) && (
                           <div className="mb-3">
                             <p className="text-xs text-muted-foreground">Budget</p>
                             <p className="text-sm font-medium">
-                              ${client.budget.min?.toLocaleString()} - ${client.budget.max?.toLocaleString()}
+                              ${client.budget_min?.toLocaleString()} - ${client.budget_max?.toLocaleString()}
                             </p>
                           </div>
                         )}
@@ -198,14 +198,14 @@ export default function OwnerVehicleClientDiscovery() {
                             variant="outline"
                             size="sm"
                             className="flex-1"
-                            onClick={() => navigate(`/owner/client/${client.id}`)}
+                            onClick={() => navigate(`/owner/client/${client.user_id}`)}
                           >
                             View Profile
                           </Button>
                           <Button
                             size="sm"
                             className="flex-1"
-                            onClick={() => handleConnect(client.id)}
+                            onClick={() => handleConnect(client.user_id)}
                           >
                             <MessageCircle className="h-4 w-4 mr-1" />
                             Connect

@@ -408,6 +408,7 @@ export type Database = {
           floor_level_preference: string | null
           furnished_required: boolean | null
           id: string
+          interested_in_vehicles: boolean | null
           lifestyle_tags: string[] | null
           location_zones: string[] | null
           max_bathrooms: number | null
@@ -449,6 +450,22 @@ export type Database = {
           services_included: string[] | null
           updated_at: string | null
           user_id: string
+          vehicle_body_types: string[] | null
+          vehicle_comfort_features: string[] | null
+          vehicle_condition: string[] | null
+          vehicle_drive_types: string[] | null
+          vehicle_fuel_types: string[] | null
+          vehicle_mileage_max: number | null
+          vehicle_number_of_doors: number | null
+          vehicle_price_max: number | null
+          vehicle_price_min: number | null
+          vehicle_safety_features: string[] | null
+          vehicle_seating_capacity: number | null
+          vehicle_tech_features: string[] | null
+          vehicle_transmission: string[] | null
+          vehicle_types: string[] | null
+          vehicle_year_max: number | null
+          vehicle_year_min: number | null
         }
         Insert: {
           amenities_required?: string[] | null
@@ -457,6 +474,7 @@ export type Database = {
           floor_level_preference?: string | null
           furnished_required?: boolean | null
           id?: string
+          interested_in_vehicles?: boolean | null
           lifestyle_tags?: string[] | null
           location_zones?: string[] | null
           max_bathrooms?: number | null
@@ -498,6 +516,22 @@ export type Database = {
           services_included?: string[] | null
           updated_at?: string | null
           user_id: string
+          vehicle_body_types?: string[] | null
+          vehicle_comfort_features?: string[] | null
+          vehicle_condition?: string[] | null
+          vehicle_drive_types?: string[] | null
+          vehicle_fuel_types?: string[] | null
+          vehicle_mileage_max?: number | null
+          vehicle_number_of_doors?: number | null
+          vehicle_price_max?: number | null
+          vehicle_price_min?: number | null
+          vehicle_safety_features?: string[] | null
+          vehicle_seating_capacity?: number | null
+          vehicle_tech_features?: string[] | null
+          vehicle_transmission?: string[] | null
+          vehicle_types?: string[] | null
+          vehicle_year_max?: number | null
+          vehicle_year_min?: number | null
         }
         Update: {
           amenities_required?: string[] | null
@@ -506,6 +540,7 @@ export type Database = {
           floor_level_preference?: string | null
           furnished_required?: boolean | null
           id?: string
+          interested_in_vehicles?: boolean | null
           lifestyle_tags?: string[] | null
           location_zones?: string[] | null
           max_bathrooms?: number | null
@@ -547,6 +582,22 @@ export type Database = {
           services_included?: string[] | null
           updated_at?: string | null
           user_id?: string
+          vehicle_body_types?: string[] | null
+          vehicle_comfort_features?: string[] | null
+          vehicle_condition?: string[] | null
+          vehicle_drive_types?: string[] | null
+          vehicle_fuel_types?: string[] | null
+          vehicle_mileage_max?: number | null
+          vehicle_number_of_doors?: number | null
+          vehicle_price_max?: number | null
+          vehicle_price_min?: number | null
+          vehicle_safety_features?: string[] | null
+          vehicle_seating_capacity?: number | null
+          vehicle_tech_features?: string[] | null
+          vehicle_transmission?: string[] | null
+          vehicle_types?: string[] | null
+          vehicle_year_max?: number | null
+          vehicle_year_min?: number | null
         }
         Relationships: []
       }
@@ -1863,6 +1914,20 @@ export type Database = {
           year_built?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_listings_owner_profiles"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_listings_owner_profiles"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "listings_owner_id_fkey"
             columns: ["owner_id"]
@@ -6330,6 +6395,20 @@ export type Database = {
           title?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_listings_owner_profiles"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_listings_owner_profiles"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "listings_owner_id_fkey"
             columns: ["owner_id"]
