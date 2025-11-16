@@ -10,7 +10,7 @@ import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { useAuth } from '@/hooks/useAuth';
 import { useMonthlyMessageLimits } from '@/hooks/useMonthlyMessageLimits';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface MessagingInterfaceProps {

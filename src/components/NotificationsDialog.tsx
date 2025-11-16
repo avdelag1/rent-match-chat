@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bell, MessageSquare, Heart, CheckCheck, X, Star, Sparkles } from 'lucide-react';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from '@/utils/timeFormatter';
 
 interface NotificationsDialogProps {
   isOpen: boolean;
