@@ -52,8 +52,9 @@ export function BottomSheet({
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false);
 
-    // Close if dragged down more than 100px or velocity is high
-    if (info.offset.y > 100 || info.velocity.y > 500) {
+    // Close if dragged down (more responsive threshold for better UX)
+    // Triggers on: 50px+ down OR 300+ velocity OR momentum downward
+    if (info.offset.y > 50 || info.velocity.y > 300 || (info.velocity.y > 100 && info.offset.y > 20)) {
       onClose();
     }
   };
@@ -79,18 +80,24 @@ export function BottomSheet({
             exit={{ y: '100%' }}
             transition={{
               type: 'spring',
-              damping: 30,
-              stiffness: 300,
+              damping: 35,        // Slightly increased for stability
+              stiffness: 400,      // Slightly increased for snappier feel
+              mass: 0.8,           // Lower mass for faster response
             }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.5 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={handleDragEnd}
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',  // GPU acceleration
+              backfaceVisibility: 'hidden'
+            }}
             className={cn(
               'fixed bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl z-[101]',
               heightClasses[height],
-              isDragging && 'cursor-grabbing',
+              isDragging && 'cursor-grabbing opacity-95',  // Visual feedback while dragging
               className
             )}
           >
@@ -129,7 +136,14 @@ export function BottomSheet({
             )}
 
             {/* Content */}
-            <div className="overflow-y-auto px-6 py-4" style={{ maxHeight: height === 'full' ? 'calc(100vh - 140px)' : 'calc(85vh - 140px)' }}>
+            <div
+              className="overflow-y-auto px-6 py-4"
+              style={{
+                maxHeight: height === 'full' ? 'calc(100vh - 140px)' : 'calc(85vh - 140px)',
+                willChange: 'scroll-position',  // Optimize scrolling
+                WebkitOverflowScrolling: 'touch'  // Smooth iOS scroll
+              }}
+            >
               {children}
             </div>
           </motion.div>
