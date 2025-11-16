@@ -9,8 +9,8 @@ interface UseSwipeGesturesOptions {
 
 export function useSwipeGestures({
   onSwipe,
-  swipeThresholdX = 120,
-  velocityThreshold = 500
+  swipeThresholdX = 80,
+  velocityThreshold = 350
 }: UseSwipeGesturesOptions) {
   
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {

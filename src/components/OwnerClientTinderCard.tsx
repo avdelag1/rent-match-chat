@@ -83,8 +83,8 @@ export function OwnerClientTinderCard({
     const { offset, velocity } = info;
 
     // More sensitive swipe threshold for easier swiping
-    const swipeThresholdX = 120; // pixels - reduced from 35% screen width
-    const velocityThreshold = 500; // px/s - reduced for better sensitivity
+    const swipeThresholdX = 80; // pixels - reduced for better sensitivity
+    const velocityThreshold = 350; // px/s - reduced for better sensitivity
 
     // Horizontal swipes - Right (accept) or Left (reject)
     const absOffsetX = Math.abs(offset.x);
