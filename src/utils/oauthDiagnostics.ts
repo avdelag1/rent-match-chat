@@ -7,6 +7,9 @@ interface OAuthDiagnostics {
   facebookConfigured: boolean;
   redirectUrlConfigured: boolean;
   siteUrlConfigured: boolean;
+  sessionStorageAvailable: boolean;
+  localStorageAvailable: boolean;
+  sessionPersistenceEnabled: boolean;
   errors: string[];
   warnings: string[];
   recommendations: string[];
@@ -24,12 +27,47 @@ export async function diagnoseOAuthSetup(): Promise<OAuthDiagnostics> {
     facebookConfigured: false,
     redirectUrlConfigured: false,
     siteUrlConfigured: false,
+    sessionStorageAvailable: false,
+    localStorageAvailable: false,
+    sessionPersistenceEnabled: false,
     errors: [],
     warnings: [],
     recommendations: [],
   };
 
   try {
+    // Check session persistence and storage availability
+    try {
+      localStorage.setItem('__test__', 'test');
+      const testValue = localStorage.getItem('__test__');
+      diagnostics.localStorageAvailable = testValue === 'test';
+      localStorage.removeItem('__test__');
+
+      if (!diagnostics.localStorageAvailable) {
+        diagnostics.errors.push('localStorage is not working properly. Session persistence will fail.');
+        diagnostics.recommendations.push('Check browser settings: Private/Incognito mode may disable localStorage. Clear browser cache and cookies.');
+      }
+    } catch (e) {
+      diagnostics.localStorageAvailable = false;
+      diagnostics.errors.push('localStorage is not accessible. This will prevent session persistence.');
+      diagnostics.recommendations.push('Enable localStorage in browser settings or check if you\'re in private/incognito mode.');
+    }
+
+    try {
+      sessionStorage.setItem('__test__', 'test');
+      const testValue = sessionStorage.getItem('__test__');
+      diagnostics.sessionStorageAvailable = testValue === 'test';
+      sessionStorage.removeItem('__test__');
+    } catch (e) {
+      diagnostics.sessionStorageAvailable = false;
+      diagnostics.warnings.push('sessionStorage is not accessible.');
+    }
+
+    // Supabase is configured with persistSession: true and localStorage
+    diagnostics.sessionPersistenceEnabled = diagnostics.localStorageAvailable;
+    if (!diagnostics.sessionPersistenceEnabled) {
+      diagnostics.errors.push('Session persistence is not working due to localStorage issues.');
+    }
     // Test Google OAuth
     try {
       const { error: googleError } = await supabase.auth.signInWithOAuth({
@@ -144,6 +182,11 @@ export async function runOAuthDiagnostics() {
   console.log('✓ Facebook OAuth:');
   console.log(`  - Enabled: ${results.facebookEnabled ? '✅' : '❌'}`);
   console.log(`  - Configured: ${results.facebookConfigured ? '✅' : '❌'}\n`);
+
+  console.log('✓ Session Persistence:');
+  console.log(`  - localStorage: ${results.localStorageAvailable ? '✅' : '❌'}`);
+  console.log(`  - sessionStorage: ${results.sessionStorageAvailable ? '✅' : '❌'}`);
+  console.log(`  - Persistence Enabled: ${results.sessionPersistenceEnabled ? '✅' : '❌'}\n`);
 
   if (results.errors.length > 0) {
     console.log('❌ ERRORS:');
