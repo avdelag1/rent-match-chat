@@ -328,7 +328,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error(`[OAuth] Error details:`, {
           message: error.message,
           status: error.status,
-          statusText: error.statusText
+          code: error.code,
+          name: error.name
         });
         localStorage.removeItem('pendingOAuthRole');
         throw error;

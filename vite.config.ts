@@ -46,6 +46,9 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     include: ['react', 'react-dom', '@tanstack/react-query'],
   },
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
+  },
   build: {
     sourcemap: false, // Disable sourcemaps in production
     minify: 'terser',

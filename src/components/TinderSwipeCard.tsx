@@ -83,7 +83,10 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
     top: isTop ? 0 : 12,
     left: 0,
     right: 0,
-    willChange: 'transform'
+    willChange: 'transform',
+    backfaceVisibility: 'hidden' as const,
+    WebkitBackfaceVisibility: 'hidden' as const,
+    transform: 'translateZ(0)'
   };
 
   return (

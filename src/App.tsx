@@ -13,6 +13,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -387,6 +388,7 @@ const App = () => (
           </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>
+      <PerformanceMonitor />
     </QueryClientProvider>
   </GlobalErrorBoundary>
 );
