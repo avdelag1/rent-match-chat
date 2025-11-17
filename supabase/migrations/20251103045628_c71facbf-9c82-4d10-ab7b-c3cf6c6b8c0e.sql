@@ -1,8 +1,8 @@
--- Create function to grant 5 free message activations to new users
+-- Create function to grant 3 free message activations to new users
 CREATE OR REPLACE FUNCTION public.grant_welcome_message_activations()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Grant 5 free message activations with 90 day expiry
+  -- Grant 3 free message activations with 90 day expiry
   INSERT INTO public.message_activations (
     user_id,
     activation_type,
@@ -12,11 +12,11 @@ BEGIN
   ) VALUES (
     NEW.id,
     'pay_per_use',
-    5,
+    3,
     0,
     NOW() + INTERVAL '90 days'
   );
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
