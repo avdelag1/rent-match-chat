@@ -1483,10 +1483,44 @@ export type Database = {
           },
         ]
       }
+      dislikes: {
+        Row: {
+          cooldown_until: string
+          created_at: string | null
+          disliked_at: string
+          id: string
+          target_id: string
+          target_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cooldown_until?: string
+          created_at?: string | null
+          disliked_at?: string
+          id?: string
+          target_id: string
+          target_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cooldown_until?: string
+          created_at?: string | null
+          disliked_at?: string
+          id?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string | null
           direction: string
+          disliked_at: string | null
           id: string
           target_id: string
           user_id: string
@@ -1494,6 +1528,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           direction: string
+          disliked_at?: string | null
           id?: string
           target_id: string
           user_id: string
@@ -1501,6 +1536,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           direction?: string
+          disliked_at?: string | null
           id?: string
           target_id?: string
           user_id?: string

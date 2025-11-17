@@ -216,6 +216,16 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
+        // Fetch currently disliked listings (within cooldown period)
+        const { data: dislikedListings } = await supabase
+          .from('dislikes')
+          .select('target_id')
+          .eq('user_id', user.user.id)
+          .eq('target_type', 'listing')
+          .gt('cooldown_until', new Date().toISOString());
+
+        const dislikedListingIds = dislikedListings?.map(d => d.target_id) || [];
+
         // Build query with filters
         let query = supabase
           .from('listings')
@@ -283,6 +293,11 @@ export function useSmartListingMatching(
             return filters.amenities!.some(amenity => listingAmenities.includes(amenity));
           });
         }
+
+        // Filter out disliked listings (within 1-week cooldown period)
+        filteredListings = filteredListings.filter(listing =>
+          !dislikedListingIds.includes(listing.id)
+        );
 
         if (!preferences) {
           return filteredListings.map(listing => ({
@@ -608,6 +623,16 @@ export function useSmartClientMatching(
           return [];
         }
 
+        // Fetch currently disliked profiles (within cooldown period)
+        const { data: dislikedProfiles } = await supabase
+          .from('dislikes')
+          .select('target_id')
+          .eq('user_id', user.user.id)
+          .eq('target_type', 'profile')
+          .gt('cooldown_until', new Date().toISOString());
+
+        const dislikedProfileIds = dislikedProfiles?.map(d => d.target_id) || [];
+
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // Fetch client profiles with pagination
         const start = page * pageSize;
@@ -632,6 +657,7 @@ export function useSmartClientMatching(
 
         // Map profiles with placeholder images - already filtered for clients only at DB level
         const filteredProfiles = profiles
+          .filter(profile => !dislikedProfileIds.includes(profile.id))
           .map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0)
