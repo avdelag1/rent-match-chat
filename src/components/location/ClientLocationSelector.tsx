@@ -45,6 +45,7 @@ export function ClientLocationSelector({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<any>(null);
 
   // Initialize Google Map
   useEffect(() => {
@@ -84,12 +85,13 @@ export function ClientLocationSelector({
     }
 
     // Add click listener to place marker
-    mapInstance.current.addListener('click', (event: any) => {
+    const handleMapClick = async (event: any) => {
       const lat = event.latLng.lat();
       const lng = event.latLng.lng();
       setCurrentLocation({ latitude: lat, longitude: lng });
-      reverseGeocode(lat, lng);
-    });
+      await reverseGeocode(lat, lng);
+    };
+    mapInstance.current.addListener('click', handleMapClick);
 
     // Setup search autocomplete
     if (searchInputRef.current) {
@@ -100,6 +102,7 @@ export function ClientLocationSelector({
           fields: ['geometry', 'formatted_address', 'address_components'],
         }
       );
+      autocompleteRef.current = autocomplete;
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
@@ -110,8 +113,10 @@ export function ClientLocationSelector({
           setSearchInput(place.formatted_address || '');
 
           // Center map on selected location
-          mapInstance.current.setCenter({ lat, lng });
-          mapInstance.current.setZoom(15);
+          if (mapInstance.current) {
+            mapInstance.current.setCenter({ lat, lng });
+            mapInstance.current.setZoom(15);
+          }
 
           onLocationChange({
             latitude: lat,
@@ -128,8 +133,11 @@ export function ClientLocationSelector({
       if (mapInstance.current) {
         window.google.maps.event.clearInstanceListeners(mapInstance.current);
       }
+      if (autocompleteRef.current) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
     };
-  }, []);
+  }, [selectedTab, onLocationChange]);
 
   // Handle real-time location
   const handleGetCurrentLocation = async () => {
@@ -264,10 +272,28 @@ export function ClientLocationSelector({
             title: "Location Found",
             description: `Latitude: ${lat.toFixed(4)}, Longitude: ${lng.toFixed(4)}`,
           });
-        } else {
+        } else if (status === 'ZERO_RESULTS') {
           toast({
             title: "Location Not Found",
-            description: "Please enter a valid address.",
+            description: "No results found for this address. Please check the spelling and try again.",
+            variant: "destructive"
+          });
+        } else if (status === 'OVER_QUERY_LIMIT') {
+          toast({
+            title: "Too Many Requests",
+            description: "Google Maps quota exceeded. Please wait a moment before trying again.",
+            variant: "destructive"
+          });
+        } else if (status === 'REQUEST_DENIED') {
+          toast({
+            title: "API Configuration Error",
+            description: "Google Maps API key issue. Please check the configuration.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Search Error",
+            description: `Geocoding error (${status}). Please try again.`,
             variant: "destructive"
           });
         }
