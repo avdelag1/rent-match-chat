@@ -1550,6 +1550,7 @@ export type Database = {
           amenities: string[] | null
           availability_calendar: Json | null
           availability_date: string | null
+          availability_status: string | null
           balcony_count: number | null
           baths: number | null
           battery_range: number | null
@@ -1685,6 +1686,7 @@ export type Database = {
           amenities?: string[] | null
           availability_calendar?: Json | null
           availability_date?: string | null
+          availability_status?: string | null
           balcony_count?: number | null
           baths?: number | null
           battery_range?: number | null
@@ -1820,6 +1822,7 @@ export type Database = {
           amenities?: string[] | null
           availability_calendar?: Json | null
           availability_date?: string | null
+          availability_status?: string | null
           balcony_count?: number | null
           baths?: number | null
           battery_range?: number | null
@@ -8039,7 +8042,7 @@ export type Database = {
         | "disputed"
       document_status: "pending" | "approved" | "rejected"
       document_type: "property_deed" | "broker_license" | "id_card" | "other"
-      listing_status: "active" | "pending" | "inactive" | "suspended"
+      listing_status: "draft" | "active" | "inactive" | "archived" | "rented" | "sold" | "pending" | "suspended" | "maintenance"
       signature_type: "drawn" | "typed" | "uploaded"
       user_role: "client" | "owner" | "admin"
     }
@@ -8188,7 +8191,7 @@ export const Constants = {
       ],
       document_status: ["pending", "approved", "rejected"],
       document_type: ["property_deed", "broker_license", "id_card", "other"],
-      listing_status: ["active", "pending", "inactive", "suspended"],
+      listing_status: ["draft", "active", "inactive", "archived", "rented", "sold", "pending", "suspended", "maintenance"],
       signature_type: ["drawn", "typed", "uploaded"],
       user_role: ["client", "owner", "admin"],
     },

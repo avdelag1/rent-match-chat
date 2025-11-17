@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useOwnerListings } from '@/hooks/useListings';
 import { useAuth } from '@/hooks/useAuth';
@@ -137,13 +138,13 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
 
       // Invalidate and refetch to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['listings'] });
-      
+
     } catch (error: any) {
       console.error('Error deleting property:', error);
-      
+
       // Revert the optimistic update if deletion failed
       queryClient.invalidateQueries({ queryKey: ['listings'] });
-      
+
       toast({
         title: 'Error',
         description: 'Failed to delete property. Please try again.',
@@ -152,17 +153,99 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     }
   };
 
+  const handleToggleAvailability = async (listing: any, newStatus: string) => {
+    try {
+      // Optimistically update the UI
+      queryClient.setQueryData(['listings'], (oldData: any[]) => {
+        if (!oldData) return oldData;
+        return oldData.map(item =>
+          item.id === listing.id
+            ? { ...item, availability_status: newStatus, status: newStatus === 'available' ? 'active' : newStatus }
+            : item
+        );
+      });
+
+      // Show immediate feedback
+      const statusLabels: Record<string, string> = {
+        available: 'Available',
+        rented: 'Rented Out',
+        sold: 'Sold',
+        pending: 'Pending'
+      };
+
+      toast({
+        title: 'Updating Availability...',
+        description: `Marking ${listing.title} as ${statusLabels[newStatus] || newStatus}.`,
+      });
+
+      // Update in database using RPC function
+      const { error } = await supabase.rpc('toggle_listing_availability', {
+        p_listing_id: listing.id,
+        p_new_availability: newStatus
+      });
+
+      if (error) throw error;
+
+      // Show success message
+      toast({
+        title: 'Availability Updated',
+        description: `${listing.title} is now marked as ${statusLabels[newStatus] || newStatus}.`,
+      });
+
+      // Invalidate and refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+
+    } catch (error: any) {
+      console.error('Error updating availability:', error);
+
+      // Revert the optimistic update if update failed
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+
+      toast({
+        title: 'Error',
+        description: 'Failed to update availability. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusColors = {
       active: 'bg-green-100 text-green-800',
+      available: 'bg-green-100 text-green-800',
       rented: 'bg-blue-100 text-blue-800',
+      sold: 'bg-purple-100 text-purple-800',
       maintenance: 'bg-yellow-100 text-yellow-800',
       pending: 'bg-gray-100 text-gray-800',
+      inactive: 'bg-red-100 text-red-800',
     };
-    
+
     return (
       <Badge className={statusColors[status as keyof typeof statusColors] || statusColors.pending}>
         {status?.charAt(0).toUpperCase() + status?.slice(1) || 'Pending'}
+      </Badge>
+    );
+  };
+
+  const getAvailabilityBadge = (availabilityStatus: string) => {
+    const availabilityColors = {
+      available: 'bg-green-100 text-green-800 border-green-300',
+      rented: 'bg-blue-100 text-blue-800 border-blue-300',
+      sold: 'bg-purple-100 text-purple-800 border-purple-300',
+      pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    };
+
+    const availabilityIcons = {
+      available: '✓',
+      rented: '🏠',
+      sold: '💰',
+      pending: '⏳',
+    };
+
+    return (
+      <Badge variant="outline" className={availabilityColors[availabilityStatus as keyof typeof availabilityColors] || availabilityColors.available}>
+        {availabilityIcons[availabilityStatus as keyof typeof availabilityIcons] || ''}{' '}
+        {availabilityStatus?.charAt(0).toUpperCase() + availabilityStatus?.slice(1) || 'Available'}
       </Badge>
     );
   };
@@ -333,6 +416,30 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                             ${listing.price?.toLocaleString() || 'N/A'}
                             {listing.mode === 'rent' ? '/month' : ''}
                           </span>
+                        </div>
+
+                        {/* Availability Status Toggle */}
+                        <div className="pt-2 pb-2 border-t border-gray-100">
+                          <div className="flex flex-col gap-2">
+                            <Label className="text-xs text-gray-600 font-medium">Availability Status</Label>
+                            <Select
+                              value={listing.availability_status || 'available'}
+                              onValueChange={(value) => handleToggleAvailability(listing, value)}
+                            >
+                              <SelectTrigger className="w-full h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="available">✓ Available</SelectItem>
+                                <SelectItem value="rented">🏠 Rented Out</SelectItem>
+                                <SelectItem value="sold">💰 Sold</SelectItem>
+                                <SelectItem value="pending">⏳ Pending</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <div className="flex items-center gap-1">
+                              {getAvailabilityBadge(listing.availability_status || 'available')}
+                            </div>
+                          </div>
                         </div>
 
                         {/* Category-specific details */}

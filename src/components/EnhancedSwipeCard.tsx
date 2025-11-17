@@ -33,6 +33,7 @@ interface Listing {
   pet_friendly?: boolean;
   description?: string;
   amenities?: string[];
+  availability_status?: string;
 }
 
 interface EnhancedSwipeCardProps {
@@ -254,9 +255,27 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
                   <h3 className="font-bold text-lg text-white leading-tight">
                     {listing.title || 'Beautiful Property'}
                   </h3>
-                  <div className="flex items-center gap-1 text-primary">
-                    <DollarSign className="w-4 h-4" />
-                    <span className="font-semibold">{formatPrice(listing.price)}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-primary">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="font-semibold">{formatPrice(listing.price)}</span>
+                    </div>
+                    {listing.availability_status && listing.availability_status !== 'available' && (
+                      <Badge
+                        variant="outline"
+                        className={`text-xs px-2 py-0.5 ${
+                          listing.availability_status === 'rented'
+                            ? 'bg-blue-500/20 text-blue-300 border-blue-400/50'
+                            : listing.availability_status === 'sold'
+                            ? 'bg-purple-500/20 text-purple-300 border-purple-400/50'
+                            : 'bg-yellow-500/20 text-yellow-300 border-yellow-400/50'
+                        }`}
+                      >
+                        {listing.availability_status === 'rented' && '🏠 Rented'}
+                        {listing.availability_status === 'sold' && '💰 Sold'}
+                        {listing.availability_status === 'pending' && '⏳ Pending'}
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 
