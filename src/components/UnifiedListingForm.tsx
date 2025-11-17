@@ -29,6 +29,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const [selectedCategory, setSelectedCategory] = useState<Category>('property');
   const [selectedMode, setSelectedMode] = useState<Mode>('rent');
   const [images, setImages] = useState<string[]>([]);
+  // Note: location is only used for non-property listings (yachts, motorcycles, etc.)
+  // Properties use country/city/neighborhood instead of exact GPS coordinates for privacy
   const [location, setLocation] = useState<{ lat?: number; lng?: number }>({});
   const [formData, setFormData] = useState<any>({});
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -90,9 +92,12 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         price: formData.price,
         rental_rates: formData.rental_rates,
         city: formData.city,
+        country: formData.country, // Added: For properties, owners specify country
         neighborhood: formData.neighborhood,
-        latitude: location.lat,
-        longitude: location.lng,
+        // For properties: use NULL for latitude/longitude (privacy-focused)
+        // For other categories: use exact coordinates
+        latitude: selectedCategory === 'property' ? null : location.lat,
+        longitude: selectedCategory === 'property' ? null : location.lng,
       };
 
       // Add category-specific fields
