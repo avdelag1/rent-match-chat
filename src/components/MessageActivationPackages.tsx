@@ -76,20 +76,38 @@ export function MessageActivationPackages({
     },
   });
 
-  // PayPal URLs mapping - ADD YOUR PAYPAL LINKS HERE
+  // PayPal URLs mapping with hosted button IDs
   const getPayPalUrl = (packageCategory: string, activations: number, price: number): string => {
-    // Client packages
+    // Client packages - INTEGRATED
     if (packageCategory === 'client_pay_per_use') {
-      if (activations === 5 && price === 99) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_5_LINK';
-      if (activations === 10 && price === 149) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_10_LINK';
-      if (activations === 15 && price === 189) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_15_LINK';
+      // Basic: 3 messages @ 50 MXN
+      if (activations === 3 && price === 50) {
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VNM2QVBFG6TA4';
+      }
+      // Standard: 10 messages @ 99 MXN
+      if (activations === 10 && price === 99) {
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VG2C7QMAC8N6A';
+      }
+      // Premium: 15 messages @ 149 MXN
+      if (activations === 15 && price === 149) {
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9NBGA9X3BJ5UA';
+      }
     }
 
-    // Owner packages
+    // Owner packages - INTEGRATED
     if (packageCategory === 'owner_pay_per_use') {
-      if (activations === 5 && price === 89) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_5_LINK';
-      if (activations === 10 && price === 139) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_10_LINK';
-      if (activations === 15 && price === 179) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_15_LINK';
+      // Basic: 3 messages @ 35 MXN
+      if (activations === 3 && price === 35) {
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JDDDXHS82XKCC';
+      }
+      // Standard: 10 messages @ 85 MXN
+      if (activations === 10 && price === 85) {
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HHDPG2RK7WVXQ';
+      }
+      // Premium: 15 messages @ 129 MXN
+      if (activations === 15 && price === 129) {
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PELAQDVWVFPBL';
+      }
     }
 
     return ''; // Return empty if no match
