@@ -94,19 +94,19 @@ export function MessageActivationPackages({
       }
     }
 
-    // Owner packages - ADD HOSTED BUTTON IDs HERE WHEN READY
+    // Owner packages - INTEGRATED
     if (packageCategory === 'owner_pay_per_use') {
       // Basic: 3 messages @ 35 MXN
       if (activations === 3 && price === 35) {
-        return ''; // TODO: Add owner basic package hosted button ID
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JDDDXHS82XKCC';
       }
       // Standard: 10 messages @ 85 MXN
       if (activations === 10 && price === 85) {
-        return ''; // TODO: Add owner standard package hosted button ID
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HHDPG2RK7WVXQ';
       }
-      // Premium: 15 messages @ 119 MXN
-      if (activations === 15 && price === 119) {
-        return ''; // TODO: Add owner premium package hosted button ID
+      // Premium: 15 messages @ 129 MXN
+      if (activations === 15 && price === 129) {
+        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PELAQDVWVFPBL';
       }
     }
 

@@ -101,14 +101,14 @@ VALUES (
 )
 ON CONFLICT DO NOTHING;
 
--- Package 3: 15 Outreach Activations - 119 MXN
+-- Package 3: 15 Outreach Activations - 129 MXN
 INSERT INTO public.subscription_packages
   (name, tier, package_category, price, message_activations, best_deal_notifications, duration_days, legal_documents_included, features, is_active)
 VALUES (
   '15 Outreach Activations',
   'pay_per_use',
   'owner_pay_per_use',
-  119,
+  129,
   15,
   0,
   90,
