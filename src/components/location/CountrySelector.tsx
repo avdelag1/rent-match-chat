@@ -39,7 +39,6 @@ interface CountrySelectorProps {
 }
 
 export function CountrySelector({ value, onChange, required = true }: CountrySelectorProps) {
-  const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
 
   const filteredCountries = COUNTRIES.filter(country =>
@@ -51,7 +50,13 @@ export function CountrySelector({ value, onChange, required = true }: CountrySel
       <Label className="text-foreground">
         Country {required && '*'}
       </Label>
-      <Select value={value || ''} onOpenChange={setOpen}>
+      <Select
+        value={value || ''}
+        onValueChange={(selectedValue) => {
+          onChange(selectedValue);
+          setSearchValue('');
+        }}
+      >
         <SelectTrigger className="bg-background border-border text-foreground">
           <SelectValue placeholder="Select country" />
         </SelectTrigger>
@@ -72,10 +77,6 @@ export function CountrySelector({ value, onChange, required = true }: CountrySel
                   key={country}
                   value={country}
                   className="text-foreground cursor-pointer"
-                  onSelect={() => {
-                    onChange(country);
-                    setSearchValue('');
-                  }}
                 >
                   {country}
                 </SelectItem>
