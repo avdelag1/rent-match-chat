@@ -80,16 +80,16 @@ export function MessageActivationPackages({
   const getPayPalUrl = (packageCategory: string, activations: number, price: number): string => {
     // Client packages
     if (packageCategory === 'client_pay_per_use') {
-      if (activations === 5 && price === 99) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_5_LINK';
-      if (activations === 10 && price === 149) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_10_LINK';
-      if (activations === 15 && price === 189) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_15_LINK';
+      if (activations === 3 && price === 50) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_3_LINK';
+      if (activations === 10 && price === 99) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_10_LINK';
+      if (activations === 15 && price === 149) return 'https://www.paypal.com/ncp/payment/YOUR_CLIENT_15_LINK';
     }
 
     // Owner packages
     if (packageCategory === 'owner_pay_per_use') {
-      if (activations === 5 && price === 89) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_5_LINK';
-      if (activations === 10 && price === 139) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_10_LINK';
-      if (activations === 15 && price === 179) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_15_LINK';
+      if (activations === 3 && price === 35) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_3_LINK';
+      if (activations === 10 && price === 85) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_10_LINK';
+      if (activations === 15 && price === 119) return 'https://www.paypal.com/ncp/payment/YOUR_OWNER_15_LINK';
     }
 
     return ''; // Return empty if no match
