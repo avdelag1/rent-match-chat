@@ -31,38 +31,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isInitialLoad = true;
+    let isMounted = true;
 
-    // Check for existing session first to avoid race condition
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email || 'No session');
-      if (isInitialLoad) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    // Initialize auth state from Supabase session storage
+    const initializeAuth = async () => {
+      try {
+        console.log('[Auth] Initializing auth state...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('[Auth] Session retrieval error:', error);
+        }
+
+        if (isInitialLoad && isMounted) {
+          console.log('[Auth] Session restored:', session?.user?.email || 'No session');
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+          isInitialLoad = false;
+        }
+      } catch (error) {
+        console.error('[Auth] Failed to initialize auth:', error);
+        if (isInitialLoad && isMounted) {
+          setLoading(false);
+          isInitialLoad = false;
+        }
       }
-    });
+    };
+
+    // Start initialization immediately
+    initializeAuth();
 
     // Set up auth state listener for subsequent changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('[Auth] Auth state changed:', event, session?.user?.email);
         isInitialLoad = false;
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
 
-        // Handle OAuth users - setup role but DON'T redirect (Index.tsx handles redirects)
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Use Promise instead of setTimeout to avoid stale closure
-          handleOAuthUserSetupOnly(session.user).catch(err => {
-            console.error('OAuth setup failed:', err);
-          });
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+
+          // Handle OAuth users - setup role but DON'T redirect (Index.tsx handles redirects)
+          if (event === 'SIGNED_IN' && session?.user) {
+            console.log('[Auth] User signed in, triggering OAuth setup if needed...');
+            // Use Promise instead of setTimeout to avoid stale closure
+            handleOAuthUserSetupOnly(session.user).catch(err => {
+              console.error('[Auth] OAuth setup failed:', err);
+            });
+          }
         }
       }
     );
 
     return () => {
       isInitialLoad = false;
+      isMounted = false;
       subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -304,9 +329,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log(`[OAuth] Starting ${provider} OAuth for role: ${role}`);
       console.log(`[OAuth] Current origin: ${window.location.origin}`);
+      console.log(`[OAuth] Supabase URL: ${import.meta.env.VITE_SUPABASE_URL}`);
+
+      // Validate Supabase configuration
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+        throw new Error('Supabase configuration is missing. Please check your environment variables.');
+      }
 
       // Store the role in localStorage BEFORE OAuth redirect
       localStorage.setItem('pendingOAuthRole', role);
+      console.log('[OAuth] Role stored in localStorage:', role);
 
       // Build OAuth options with Google-specific query params
       const queryParams: Record<string, string> = {
@@ -314,10 +346,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         access_type: 'offline',
       };
 
+      const redirectUrl = `${window.location.origin}/`;
+      console.log('[OAuth] OAuth redirect URL:', redirectUrl);
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: redirectUrl,
           queryParams,
           skipBrowserRedirect: false
         }
@@ -336,26 +371,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       console.log(`[OAuth] ${provider} OAuth initiated successfully`);
+      console.log(`[OAuth] User should be redirected to ${provider} consent screen`);
       return { error: null };
     } catch (error: any) {
       console.error(`[OAuth] ${provider} OAuth error caught:`, error);
       localStorage.removeItem('pendingOAuthRole');
       let errorMessage = `Failed to sign in with ${provider}. Please try again.`;
 
-      if (error.message?.includes('Email link is invalid')) {
+      if (error.message?.includes('Supabase configuration is missing')) {
+        errorMessage = error.message;
+      } else if (error.message?.includes('Email link is invalid')) {
         errorMessage = 'OAuth link expired. Please try signing in again.';
       } else if (error.message?.includes('access_denied')) {
         errorMessage = `Access denied. Please grant permission to continue with ${provider}.`;
       } else if (error.message?.includes('Provider not enabled') || error.message?.includes('not enabled')) {
-        errorMessage = `${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not enabled in Supabase. Please check the Supabase dashboard configuration.`;
+        errorMessage = `${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not enabled in Supabase. Please check the Supabase dashboard and ensure Google OAuth provider is configured.`;
       } else if (error.message?.includes('redirect_uri_mismatch')) {
-        errorMessage = 'Redirect URL configuration error. Please verify your domain is whitelisted in Supabase.';
+        errorMessage = 'Redirect URL configuration error. Please verify your domain is whitelisted in Supabase OAuth settings.';
       } else if (error.message?.includes('invalid_client')) {
-        errorMessage = 'Invalid OAuth credentials. Please verify your Google OAuth setup in Supabase.';
+        errorMessage = 'Invalid OAuth credentials. Please verify your Google OAuth setup in Supabase dashboard (check Client ID and Secret).';
       } else if (error.message?.includes('invalid_grant')) {
         errorMessage = 'Authorization grant error. Please try signing in again.';
-      } else if (error.status === 400 || error.status === 401 || error.status === 403) {
-        errorMessage = `OAuth configuration error (${error.status}). Please check Supabase setup and Google OAuth credentials.`;
+      } else if (error.status === 400) {
+        errorMessage = 'Bad OAuth request. Please check Supabase configuration and try again.';
+      } else if (error.status === 401 || error.status === 403) {
+        errorMessage = `OAuth authentication failed (${error.status}). Please check Supabase setup.`;
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -370,20 +410,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Sign Out Failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    } else {
+    try {
+      console.log('[Auth] Initiating sign out...');
+
+      // Clear any pending OAuth role from localStorage
+      localStorage.removeItem('pendingOAuthRole');
+      localStorage.removeItem('rememberMe');
+
+      // Clear all React Query cache
+      queryClient.clear();
+
+      // Sign out from Supabase (removes session from localStorage and server)
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error('[Auth] Sign out error:', error);
+        toast({
+          title: "Sign Out Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Clear local state explicitly
+      setUser(null);
+      setSession(null);
+
+      console.log('[Auth] Sign out successful');
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",
       });
-      // Navigate to home page after sign out without full reload
+
+      // Navigate to home page with replace to prevent back navigation to protected routes
       navigate('/', { replace: true });
+    } catch (error) {
+      console.error('[Auth] Unexpected sign out error:', error);
+      toast({
+        title: "Sign Out Error",
+        description: "An unexpected error occurred during sign out.",
+        variant: "destructive"
+      });
     }
   };
 
