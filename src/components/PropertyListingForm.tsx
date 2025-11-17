@@ -4,11 +4,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { OwnerLocationSelector } from './location/OwnerLocationSelector';
 
 interface PropertyFormData {
   title?: string;
   description?: string;
   price?: number;
+  country?: string;
   city?: string;
   neighborhood?: string;
   address?: string;
@@ -97,44 +99,15 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
         </CardContent>
       </Card>
 
-      {/* Location */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-foreground text-lg">Location</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-foreground">City *</Label>
-              <Input
-                value={initialData.city || ''}
-                onChange={(e) => handleChange('city', e.target.value)}
-                placeholder="Tulum"
-                className="bg-background border-border text-foreground"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-foreground">Neighborhood</Label>
-              <Input
-                value={initialData.neighborhood || ''}
-                onChange={(e) => handleChange('neighborhood', e.target.value)}
-                placeholder="Aldea Zama"
-                className="bg-background border-border text-foreground"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-foreground">Address (optional - shared after activation)</Label>
-            <Input
-              value={initialData.address || ''}
-              onChange={(e) => handleChange('address', e.target.value)}
-              placeholder="Street address"
-              className="bg-background border-border text-foreground"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Location - Using OwnerLocationSelector */}
+      <OwnerLocationSelector
+        country={initialData.country}
+        city={initialData.city}
+        neighborhood={initialData.neighborhood}
+        onCountryChange={(value) => handleChange('country', value)}
+        onCityChange={(value) => handleChange('city', value)}
+        onNeighborhoodChange={(value) => handleChange('neighborhood', value)}
+      />
 
       {/* Property Details */}
       <Card className="bg-card border-border">
