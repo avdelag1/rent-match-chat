@@ -3,22 +3,23 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// Build version injector plugin for automatic cache busting
+// Build version injector plugin for cache busting
+// IMPORTANT: Keep this version in sync with APP_VERSION in index.html and CACHE_VERSION in sw.js
 function buildVersionPlugin() {
-  const buildTime = Date.now().toString();
+  const appVersion = '2.0.2'; // Static version - increment manually to force cache clear
   return {
     name: 'build-version-injector',
     transformIndexHtml(html: string) {
       // Inject version into HTML meta tag for reference
       return html.replace(
         '</head>',
-        `<meta name="app-version" content="${buildTime}" />\n</head>`
+        `<meta name="app-version" content="${appVersion}" />\n</head>`
       );
     },
     transform(code: string, id: string) {
-      // Replace __BUILD_TIME__ in service worker
+      // Replace __BUILD_TIME__ in service worker (not used currently)
       if (id.endsWith('sw.js')) {
-        return code.replace(/__BUILD_TIME__/g, buildTime);
+        return code.replace(/__BUILD_TIME__/g, appVersion);
       }
       return code;
     }
