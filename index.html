@@ -107,14 +107,39 @@
       </div>
     </div>
     
-    <!-- Aggressive Auto-Update System - Forces cache clear on every deployment -->
+    <!-- Smart Auto-Update System - Balanced cache management -->
     <script>
-      // INSTANT CACHE CLEAR - Force clear all caches immediately on page load
-      const APP_VERSION = '2.0.0-' + Date.now(); // Unique version per build
+      // STATIC APP VERSION - Only change this manually when you want to force cache clear
+      const APP_VERSION = '2.0.2'; // Increment this number to force cache clear across all users
       const STORED_VERSION = localStorage.getItem('tinderent_app_version');
 
-      // Clear everything if version doesn't match
-      if (STORED_VERSION !== APP_VERSION) {
+      // Emergency recovery - detect and fix infinite reload loops
+      const LAST_LOAD = sessionStorage.getItem('last_load_time');
+      const NOW = Date.now();
+      if (LAST_LOAD && (NOW - parseInt(LAST_LOAD)) < 3000) {
+        // Page loaded less than 3 seconds ago - might be in reload loop
+        const reloadCount = parseInt(sessionStorage.getItem('reload_count') || '0');
+        if (reloadCount > 3) {
+          console.log('⚠️ EMERGENCY RECOVERY: Detected reload loop, clearing everything...');
+          // Clear EVERYTHING (emergency recovery)
+          localStorage.clear();
+          sessionStorage.clear();
+          if ('caches' in window) {
+            caches.keys().then(names => names.forEach(name => caches.delete(name)));
+          }
+          // Set version to prevent re-triggering
+          localStorage.setItem('tinderent_app_version', APP_VERSION);
+          sessionStorage.setItem('emergency_recovery', 'true');
+        } else {
+          sessionStorage.setItem('reload_count', String(reloadCount + 1));
+        }
+      } else {
+        sessionStorage.setItem('reload_count', '0');
+      }
+      sessionStorage.setItem('last_load_time', String(NOW));
+
+      // Clear caches ONLY when version changes (manual deployment)
+      if (STORED_VERSION !== APP_VERSION && !sessionStorage.getItem('emergency_recovery')) {
         console.log('🔄 New version detected! Clearing all caches...');
 
         // Clear all caches
@@ -161,10 +186,10 @@
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('✅ Service Worker registered');
 
-            // Check for updates AGGRESSIVELY (every 10 seconds)
+            // Check for updates periodically (every 60 seconds)
             setInterval(() => {
               registration.update();
-            }, 10000);
+            }, 60000);
 
             // Immediate update check on focus
             window.addEventListener('focus', () => {
@@ -189,7 +214,7 @@
         });
       }
 
-      // Periodic version check (every 30 seconds)
+      // Periodic version check (every 5 minutes)
       setInterval(() => {
         fetch('/index.html?' + Date.now(), {
           method: 'HEAD',
@@ -209,7 +234,7 @@
         }).catch(err => {
           console.log('Version check failed:', err);
         });
-      }, 30000);
+      }, 300000);
     </script>
   </body>
 </html>
