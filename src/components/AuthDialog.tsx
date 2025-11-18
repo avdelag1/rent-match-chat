@@ -126,13 +126,16 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     try {
       const { error } = await signInWithOAuth(provider, role);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      // Don't close dialog - let OAuth redirect handle page flow
-      // Supabase will redirect to Google, then back to the app
+      // OAuth initiated successfully - browser will redirect to Google
+      // Note: Don't reset isLoading here, the page will redirect anyway
+      console.log(`${provider} OAuth initiated successfully, redirecting to provider...`);
     } catch (error: any) {
       console.error(`OAuth error for ${provider}:`, error);
-      setIsLoading(false); // Only reset loading on error
+      setIsLoading(false); // Reset loading state on error
     }
   };
 
