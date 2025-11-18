@@ -72,8 +72,34 @@ export function MessageActivationPackages({
         .eq('is_active', true)
         .order('message_activations', { ascending: true });
       if (error) throw error;
-      return data;
+
+      // CRITICAL: Only return EXACTLY 3 packages
+      const filteredData = data?.filter((pkg) => {
+        // Client packages: 3@50, 10@99, 15@149
+        if (packageCategory === 'client_pay_per_use') {
+          return (
+            (pkg.message_activations === 3 && pkg.price === 50) ||
+            (pkg.message_activations === 10 && pkg.price === 99) ||
+            (pkg.message_activations === 15 && pkg.price === 149)
+          );
+        }
+        // Owner packages: 3@35, 10@85, 15@129
+        if (packageCategory === 'owner_pay_per_use') {
+          return (
+            (pkg.message_activations === 3 && pkg.price === 35) ||
+            (pkg.message_activations === 10 && pkg.price === 85) ||
+            (pkg.message_activations === 15 && pkg.price === 129)
+          );
+        }
+        return false;
+      });
+
+      return filteredData || [];
     },
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window gets focus
   });
 
   // PayPal URLs mapping with hosted button IDs
