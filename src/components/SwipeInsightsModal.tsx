@@ -81,8 +81,8 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
           >
             <DialogContent className={`max-w-lg w-full max-h-[90vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
               <motion.div>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <DialogHeader className="text-center">
+                <DialogTitle className="text-2xl font-bold flex items-center justify-center gap-2">
                   <Eye className="w-6 h-6 text-primary" />
                   {isClientProfile ? 'Renter Insights' : 'Property Insights'}
                 </DialogTitle>
