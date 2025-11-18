@@ -216,13 +216,12 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch currently disliked listings (within cooldown period)
+        // Fetch currently disliked listings using likes table where direction='left'
         const { data: dislikedListings } = await supabase
-          .from('dislikes')
+          .from('likes')
           .select('target_id')
           .eq('user_id', user.user.id)
-          .eq('target_type', 'listing')
-          .gt('cooldown_until', new Date().toISOString());
+          .eq('direction', 'left');
 
         const dislikedListingIds = dislikedListings?.map(d => d.target_id) || [];
 
@@ -623,13 +622,12 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Fetch currently disliked profiles (within cooldown period)
+        // Fetch currently disliked profiles using likes table where direction='left'
         const { data: dislikedProfiles } = await supabase
-          .from('dislikes')
+          .from('likes')
           .select('target_id')
           .eq('user_id', user.user.id)
-          .eq('target_type', 'profile')
-          .gt('cooldown_until', new Date().toISOString());
+          .eq('direction', 'left');
 
         const dislikedProfileIds = dislikedProfiles?.map(d => d.target_id) || [];
 
