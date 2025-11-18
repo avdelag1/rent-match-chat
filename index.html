@@ -72,7 +72,7 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #f15a24 100%);
+          background: #000000;
           font-family: Inter, system-ui, -apple-system, sans-serif;
           z-index: 9999;
         }
@@ -82,12 +82,12 @@
           font-weight: 800;
           letter-spacing: 0.1em;
           margin: 0 0 2rem 0;
-          text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          text-shadow: 0 4px 12px rgba(255,255,255,0.1);
         }
         .spinner {
           width: 48px;
           height: 48px;
-          border: 4px solid rgba(255,255,255,0.2);
+          border: 4px solid rgba(255,255,255,0.1);
           border-top-color: white;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
@@ -107,73 +107,134 @@
       </div>
     </div>
     
-    <!-- Enhanced Service Worker Registration with Update Detection -->
+    <!-- Smart Auto-Update System - Balanced cache management -->
     <script>
+      // STATIC APP VERSION - Only change this manually when you want to force cache clear
+      const APP_VERSION = '2.0.2'; // Increment this number to force cache clear across all users
+      const STORED_VERSION = localStorage.getItem('tinderent_app_version');
+
+      // Emergency recovery - detect and fix infinite reload loops
+      const LAST_LOAD = sessionStorage.getItem('last_load_time');
+      const NOW = Date.now();
+      if (LAST_LOAD && (NOW - parseInt(LAST_LOAD)) < 3000) {
+        // Page loaded less than 3 seconds ago - might be in reload loop
+        const reloadCount = parseInt(sessionStorage.getItem('reload_count') || '0');
+        if (reloadCount > 3) {
+          console.log('⚠️ EMERGENCY RECOVERY: Detected reload loop, clearing everything...');
+          // Clear EVERYTHING (emergency recovery)
+          localStorage.clear();
+          sessionStorage.clear();
+          if ('caches' in window) {
+            caches.keys().then(names => names.forEach(name => caches.delete(name)));
+          }
+          // Set version to prevent re-triggering
+          localStorage.setItem('tinderent_app_version', APP_VERSION);
+          sessionStorage.setItem('emergency_recovery', 'true');
+        } else {
+          sessionStorage.setItem('reload_count', String(reloadCount + 1));
+        }
+      } else {
+        sessionStorage.setItem('reload_count', '0');
+      }
+      sessionStorage.setItem('last_load_time', String(NOW));
+
+      // Clear caches ONLY when version changes (manual deployment)
+      if (STORED_VERSION !== APP_VERSION && !sessionStorage.getItem('emergency_recovery')) {
+        console.log('🔄 New version detected! Clearing all caches...');
+
+        // Clear all caches
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+              console.log('🗑️ Deleting cache:', name);
+              caches.delete(name);
+            });
+          });
+        }
+
+        // Clear localStorage except auth tokens
+        const authToken = localStorage.getItem('supabase.auth.token');
+        const authSession = localStorage.getItem('sb-vplgtcguxujxwrgguxqq-auth-token');
+        localStorage.clear();
+        if (authToken) localStorage.setItem('supabase.auth.token', authToken);
+        if (authSession) localStorage.setItem('sb-vplgtcguxujxwrgguxqq-auth-token', authSession);
+
+        // Store new version
+        localStorage.setItem('tinderent_app_version', APP_VERSION);
+
+        console.log('✅ Cache cleared! New version:', APP_VERSION);
+      }
+
+      // Service Worker with INSTANT update
       if ('serviceWorker' in navigator) {
         let refreshing = false;
-        
+
         // Listen for service worker messages
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data && event.data.type === 'SW_UPDATED' && !refreshing) {
             refreshing = true;
-            console.log('New version available, reloading...');
-            
-            // Show update notification
-            const notification = document.createElement('div');
-            notification.innerHTML = `
-              <div style="position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, hsl(14, 100%, 57%), hsl(9, 100%, 64%)); color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 10000; font-family: Inter, sans-serif; max-width: 300px;">
-                <div style="font-weight: 600; margin-bottom: 8px;">🎉 App Updated!</div>
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">A new version is available with the latest features.</div>
-                <button onclick="window.location.reload()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; width: 100%;">Refresh Now</button>
-              </div>
-            `;
-            document.body.appendChild(notification);
-            
-            // Auto-refresh after 3 seconds if user doesn't click
-            setTimeout(() => {
-              if (!refreshing) return;
-              window.location.reload();
-            }, 3000);
+            console.log('⚡ New version available, auto-reloading...');
+
+            // Auto-reload IMMEDIATELY (no notification, no delay)
+            window.location.reload(true); // Hard reload
           }
         });
-        
+
         // Register service worker
         window.addEventListener('load', async () => {
           try {
             const registration = await navigator.serviceWorker.register('/sw.js');
-            console.log('SW registered: ', registration);
-            
-            // Check for updates every 30 seconds
+            console.log('✅ Service Worker registered');
+
+            // Check for updates periodically (every 60 seconds)
             setInterval(() => {
               registration.update();
-            }, 30000);
-            
+            }, 60000);
+
+            // Immediate update check on focus
+            window.addEventListener('focus', () => {
+              registration.update();
+            });
+
             // Listen for new service worker
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('New service worker installed');
+                  console.log('⚡ New service worker installed - reloading...');
+                  // Force immediate reload
+                  window.location.reload(true);
                 }
               });
             });
-            
+
           } catch (error) {
-            console.log('SW registration failed: ', error);
+            console.log('❌ SW registration failed:', error);
           }
         });
       }
-      
-      // Force cache clear on critical updates
-      if (localStorage.getItem('tinderent_last_clear') !== '1.0.2') {
-        console.log('Clearing caches for fresh content...');
-        if ('caches' in window) {
-          caches.keys().then(names => {
-            names.forEach(name => caches.delete(name));
-          });
-        }
-        localStorage.setItem('tinderent_last_clear', '1.0.2');
-      }
+
+      // Periodic version check (every 5 minutes)
+      setInterval(() => {
+        fetch('/index.html?' + Date.now(), {
+          method: 'HEAD',
+          cache: 'no-store'
+        }).then(response => {
+          const serverEtag = response.headers.get('etag');
+          const clientEtag = sessionStorage.getItem('index_etag');
+
+          if (serverEtag && clientEtag && serverEtag !== clientEtag) {
+            console.log('🔄 Server version changed, reloading...');
+            window.location.reload(true);
+          }
+
+          if (serverEtag) {
+            sessionStorage.setItem('index_etag', serverEtag);
+          }
+        }).catch(err => {
+          console.log('Version check failed:', err);
+        });
+      }, 300000);
     </script>
   </body>
 </html>
