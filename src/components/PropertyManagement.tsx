@@ -423,7 +423,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                           <div className="flex flex-col gap-2">
                             <Label className="text-xs text-gray-600 font-medium">Availability Status</Label>
                             <Select
-                              value={listing.availability_status || 'available'}
+                              value={(listing as any).availability_status || 'available'}
                               onValueChange={(value) => handleToggleAvailability(listing, value)}
                             >
                               <SelectTrigger className="w-full h-8 text-xs">
@@ -437,7 +437,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                               </SelectContent>
                             </Select>
                             <div className="flex items-center gap-1">
-                              {getAvailabilityBadge(listing.availability_status || 'available')}
+                              {getAvailabilityBadge((listing as any).availability_status || 'available')}
                             </div>
                           </div>
                         </div>

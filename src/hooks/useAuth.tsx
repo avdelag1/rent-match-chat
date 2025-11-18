@@ -95,44 +95,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Handle OAuth user setup WITHOUT redirecting (Index.tsx handles redirects)
   const handleOAuthUserSetupOnly = async (user: User) => {
-    // For OAuth users, check localStorage for pending role FIRST, then URL params
-    const pendingRole = localStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
-    const urlParams = new URLSearchParams(window.location.search);
-    const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
-    
-    const roleToUse = pendingRole || roleFromUrl;
-    
-    if (roleToUse) {
-      console.log('OAuth setup with role:', roleToUse);
+    try {
+      // Priority order for finding role:
+      // 1. sessionStorage (survives page refresh)
+      // 2. localStorage (backup)
+      // 3. URL params (from redirect)
+      // 4. Database (if previously set)
       
-      // Clear the pending role from localStorage
-      localStorage.removeItem('pendingOAuthRole');
+      const sessionRole = sessionStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
+      const localRole = localStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
+      const urlParams = new URLSearchParams(window.location.search);
+      const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
       
-      // Use enhanced account linking for OAuth users
-      const linkingResult = await linkOAuthAccount(user, roleToUse);
+      const pendingRole = sessionRole || localRole || roleFromUrl;
       
-      if (linkingResult.success) {
-        // Clear role from URL params if present
-        if (roleFromUrl) {
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.delete('role');
-          window.history.replaceState({}, '', newUrl.toString());
+      console.log('[OAuth] Role resolution:', {
+        sessionRole,
+        localRole,
+        roleFromUrl,
+        finalRole: pendingRole
+      });
+
+      if (!pendingRole) {
+        console.error('[OAuth] No role found for OAuth user setup');
+        
+        // Check if user already has a role in database
+        const { data: userRole } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (!userRole) {
+          toast({
+            title: 'Setup Required',
+            description: 'Please select your account type to continue.',
+            variant: 'destructive',
+          });
         }
         
-        const finalRole = linkingResult.existingProfile?.role || roleToUse;
-        console.log('OAuth profile setup complete. Role:', finalRole);
-        
-        // Ensure profile exists with correct role
-        await createProfileIfMissing(user, finalRole);
-      } else {
-        console.error('OAuth account linking failed');
+        return;
       }
-    } else {
-      // Try to get existing profile or create one if we have role in metadata
-      const role = user.user_metadata?.role as 'client' | 'owner' | undefined;
-      if (role) {
-        await createProfileIfMissing(user, role);
+
+      // Clean up storage
+      sessionStorage.removeItem('pendingOAuthRole');
+      localStorage.removeItem('pendingOAuthRole');
+      
+      // Check if user already has this role
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', pendingRole)
+        .maybeSingle();
+      
+      if (existingRole) {
+        console.log('[OAuth] User already has role:', pendingRole);
+        return;
       }
+
+      // Setup role and profile
+      console.log('[OAuth] Setting up OAuth user with role:', pendingRole);
+      await linkOAuthAccount(user, pendingRole);
+      
+      toast({
+        title: 'Welcome!',
+        description: `Your ${pendingRole} account has been created successfully.`,
+      });
+      
+    } catch (error) {
+      console.error('[OAuth] Failed to setup OAuth user:', error);
+      toast({
+        title: 'Setup Error',
+        description: 'Failed to complete account setup. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -336,9 +373,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Supabase configuration is missing. Please check your environment variables.');
       }
 
-      // Store the role in localStorage BEFORE OAuth redirect
+      // Store role in localStorage AND session storage (double backup)
       localStorage.setItem('pendingOAuthRole', role);
-      console.log('[OAuth] Role stored in localStorage:', role);
+      sessionStorage.setItem('pendingOAuthRole', role);
+      console.log('[OAuth] Role stored in localStorage and sessionStorage:', role);
 
       // Build OAuth options with Google-specific query params
       const queryParams: Record<string, string> = {
@@ -346,7 +384,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         access_type: 'offline',
       };
 
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/?role=${role}`;
       console.log('[OAuth] OAuth redirect URL:', redirectUrl);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -367,6 +405,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: error.name
         });
         localStorage.removeItem('pendingOAuthRole');
+        sessionStorage.removeItem('pendingOAuthRole');
         throw error;
       }
 
@@ -376,6 +415,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       console.error(`[OAuth] ${provider} OAuth error caught:`, error);
       localStorage.removeItem('pendingOAuthRole');
+      sessionStorage.removeItem('pendingOAuthRole');
       let errorMessage = `Failed to sign in with ${provider}. Please try again.`;
 
       if (error.message?.includes('Supabase configuration is missing')) {
