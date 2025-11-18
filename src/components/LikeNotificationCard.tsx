@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Heart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Heart, Crown, Lock } from 'lucide-react';
-import { useHasPremiumFeature } from '@/hooks/useSubscription';
+import { LikeNotificationPreview } from './LikeNotificationPreview';
+import { LikeNotificationActions } from './LikeNotificationActions';
+import { useLikeNotificationActions } from '@/hooks/useLikeNotificationActions';
 import { useNavigate } from 'react-router-dom';
 
 interface LikeNotificationCardProps {
@@ -11,94 +14,115 @@ interface LikeNotificationCardProps {
     type: string;
     title: string;
     message: string;
-    data?: {
+    metadata?: {
       liker_id?: string;
       target_id?: string;
       target_type?: string;
     };
+    related_user_id?: string;
     created_at: string;
-    read: boolean;
+    is_read: boolean;
   };
   onDismiss: (id: string) => void;
+  currentUserRole?: 'client' | 'owner';
 }
 
-export function LikeNotificationCard({ notification, onDismiss }: LikeNotificationCardProps) {
-  const hasPremium = useHasPremiumFeature('early_profile_access');
+export function LikeNotificationCard({
+  notification,
+  onDismiss,
+  currentUserRole,
+}: LikeNotificationCardProps) {
   const navigate = useNavigate();
+  const { acceptLike, rejectLike, isAccepting, isRejecting } = useLikeNotificationActions();
 
-  const handleViewProfile = () => {
-    if (!hasPremium) {
-      navigate('/subscription-packages');
-      return;
-    }
-    
-    // Navigate to the appropriate page to view who liked them
-    if (notification.data?.target_type === 'listing') {
-      navigate('/owner/liked-clients');
-    } else {
-      navigate('/client/liked-properties');
-    }
+  const likerId = notification.metadata?.liker_id || notification.related_user_id;
+  const targetId = notification.metadata?.target_id;
+  const targetType = (notification.metadata?.target_type || 'listing') as 'listing' | 'profile';
+
+  if (!likerId) {
+    return null;
+  }
+
+  const handleAccept = () => {
+    acceptLike({
+      notificationId: notification.id,
+      likerId,
+      targetId: targetId || '',
+      targetType,
+    });
+  };
+
+  const handleReject = () => {
+    rejectLike({ notificationId: notification.id });
+    onDismiss(notification.id);
+  };
+
+  const handleChat = () => {
+    // Navigate to messages/conversation
+    navigate('/messages');
   };
 
   return (
-    <Card className="p-4 relative overflow-hidden">
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shrink-0">
-          <Heart className="w-6 h-6 text-white fill-white" />
-        </div>
-        
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold">{notification.title}</h4>
-            {!notification.read && (
-              <Badge variant="secondary" className="text-xs">New</Badge>
-            )}
-          </div>
-          
-          <p className="text-sm text-muted-foreground mb-3">
-            {notification.message}
-          </p>
-          
-          {hasPremium ? (
-            <Button 
-              size="sm" 
-              onClick={handleViewProfile}
-              className="bg-gradient-to-r from-purple-500 to-pink-500"
-            >
-              <Crown className="w-3 h-3 mr-1" />
-              View Who Liked You
-            </Button>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Lock className="w-4 h-4" />
-                <span>Upgrade to see who liked you</span>
-              </div>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={handleViewProfile}
-                className="border-purple-500 text-purple-500 hover:bg-purple-50"
-              >
-                Upgrade to Premium
-              </Button>
-            </div>
-          )}
-        </div>
-        
+    <Card className="p-4 relative overflow-hidden border-pink-200 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
+      <div className="absolute top-2 right-2">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onDismiss(notification.id)}
-          className="shrink-0"
+          className="h-6 w-6 p-0"
         >
-          ✕
+          <X className="w-4 h-4" />
         </Button>
       </div>
-      
-      {!hasPremium && (
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 pointer-events-none" />
-      )}
+
+      <div className="space-y-4 pr-8">
+        {/* Header */}
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shrink-0">
+            <Heart className="w-6 h-6 text-white fill-white" />
+          </div>
+
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-semibold text-foreground">{notification.title}</h4>
+              {!notification.is_read && (
+                <Badge variant="secondary" className="text-xs">New</Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {notification.message}
+            </p>
+          </div>
+        </div>
+
+        {/* Preview - Shows limited info */}
+        <div>
+          <LikeNotificationPreview
+            likerId={likerId}
+            targetType={targetType}
+            targetId={targetId}
+            userRole={currentUserRole}
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-3 pt-2">
+          <LikeNotificationActions
+            onAccept={handleAccept}
+            onReject={handleReject}
+            onChat={handleChat}
+            isAccepting={isAccepting}
+            isRejecting={isRejecting}
+            variant="stacked"
+            showChat={false}
+          />
+
+          {/* Privacy Info */}
+          <p className="text-xs text-muted-foreground text-center">
+            Their full profile will be revealed once you accept
+          </p>
+        </div>
+      </div>
     </Card>
   );
 }
