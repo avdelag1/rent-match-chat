@@ -1,6 +1,5 @@
-// Static cache versioning - manually increment when deploying new version
-// IMPORTANT: Keep this version in sync with APP_VERSION in index.html (currently 2.0.2)
-const CACHE_VERSION = 'tinderent-v2.0.2';
+// Dynamic cache versioning - automatically updated on each build
+const CACHE_VERSION = `tinderent-v${Date.now()}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;

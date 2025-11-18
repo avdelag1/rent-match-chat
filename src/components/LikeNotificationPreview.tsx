@@ -55,14 +55,14 @@ export function LikeNotificationPreview({
         if (likerType === 'client') {
           // Show client preferences (what they're looking for)
           const { data: preferences } = await supabase
-            .from('client_filter_preferences')
-            .select('property_types, location_zones, created_at')
+            .from('client_preferences')
+            .select('property_type, location_zones, created_at')
             .eq('user_id', likerId)
             .maybeSingle();
 
           const { data: profile } = await supabase
             .from('profiles')
-            .select('city, country_of_residence')
+            .select('city, country')
             .eq('id', likerId)
             .maybeSingle();
 
@@ -70,8 +70,8 @@ export function LikeNotificationPreview({
             id: likerId,
             type: 'client',
             locationCity: profile?.city,
-            locationCountry: profile?.country_of_residence,
-            preferencesPropertyType: preferences?.property_types?.[0] || undefined,
+            locationCountry: profile?.country,
+            preferencesPropertyType: preferences?.property_type,
             preferencesLocationZones: preferences?.location_zones || [],
           });
         } else {
@@ -85,7 +85,7 @@ export function LikeNotificationPreview({
 
           const { data: profile } = await supabase
             .from('profiles')
-            .select('city, country_of_residence')
+            .select('city, country')
             .eq('id', likerId)
             .maybeSingle();
 

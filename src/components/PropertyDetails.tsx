@@ -149,20 +149,20 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
                 <div className="text-right">
                   <div className="text-3xl font-bold text-primary">${listing.price?.toLocaleString()}</div>
                   <div className="text-muted-foreground">per month</div>
-                  {(listing as any).availability_status && (listing as any).availability_status !== 'available' && (
+                  {listing.availability_status && listing.availability_status !== 'available' && (
                     <Badge
                       variant="outline"
                       className={`mt-2 ${
-                        (listing as any).availability_status === 'rented'
+                        listing.availability_status === 'rented'
                           ? 'bg-blue-100 text-blue-800 border-blue-300'
-                          : (listing as any).availability_status === 'sold'
+                          : listing.availability_status === 'sold'
                           ? 'bg-purple-100 text-purple-800 border-purple-300'
                           : 'bg-yellow-100 text-yellow-800 border-yellow-300'
                       }`}
                     >
-                      {(listing as any).availability_status === 'rented' && '🏠 Rented Out'}
-                      {(listing as any).availability_status === 'sold' && '💰 Sold'}
-                      {(listing as any).availability_status === 'pending' && '⏳ Pending'}
+                      {listing.availability_status === 'rented' && '🏠 Rented Out'}
+                      {listing.availability_status === 'sold' && '💰 Sold'}
+                      {listing.availability_status === 'pending' && '⏳ Pending'}
                     </Badge>
                   )}
                 </div>

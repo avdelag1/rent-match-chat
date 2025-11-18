@@ -52,46 +52,13 @@ const OwnerVehicleClientDiscovery = lazy(() => import("./pages/OwnerVehicleClien
 const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
 const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
 
-// Optimized React Query client with aggressive caching for better performance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Network and retry configuration
-      retry: (failureCount, error: any) => {
-        // Don't retry on 404s or auth errors
-        if (error?.status === 404 || error?.status === 401 || error?.status === 403) {
-          return false;
-        }
-        // Retry up to 2 times for other errors
-        return failureCount < 2;
-      },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-
-      // Refetch configuration
-      refetchOnWindowFocus: false, // Don't refetch on window focus (saves API calls)
-      refetchOnMount: false, // Don't refetch on component mount if data is fresh
-      refetchOnReconnect: true, // Refetch when internet reconnects
-      refetchInterval: false, // Disable automatic refetching
-
-      // Cache configuration - Aggressive caching for better performance
-      staleTime: 10 * 60 * 1000, // 10 minutes - data considered fresh for 10 min
-      gcTime: 30 * 60 * 1000, // 30 minutes - keep unused data in cache for 30 min
-
-      // Network mode
-      networkMode: 'online', // Only run queries when online
-
-      // Error handling
-      throwOnError: false, // Don't throw errors globally
-
-      // Placeholder data
-      placeholderData: (previousData) => previousData, // Keep previous data while refetching
-    },
-    mutations: {
-      // Retry failed mutations
-      retry: 1,
-      retryDelay: 1000,
-      // Network mode
-      networkMode: 'online',
+      retry: 2,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
     },
   },
 });
