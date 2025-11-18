@@ -1,4 +1,70 @@
-// Performance optimization utilities
+/**
+ * Performance Optimization Utilities
+ * Enhanced utilities for maximum app performance
+ */
+
+import { lazy, ComponentType, LazyExoticComponent } from 'react';
+
+/**
+ * Lazy load a component with retry logic for failed chunk loads
+ * This prevents "Loading chunk failed" errors in production
+ */
+export function lazyWithRetry<T extends ComponentType<any>>(
+  componentImport: () => Promise<{ default: T }>,
+  retries = 3,
+  interval = 1000
+): LazyExoticComponent<T> {
+  return lazy(async () => {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        return await componentImport();
+      } catch (error) {
+        console.warn(`Failed to load component (attempt ${attempt + 1}/${retries}):`, error);
+
+        // If this is the last attempt, throw the error
+        if (attempt === retries - 1) {
+          throw error;
+        }
+
+        // Wait before retrying with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, interval * Math.pow(2, attempt)));
+      }
+    }
+
+    throw new Error('Failed to load component after retries');
+  });
+}
+
+/**
+ * Preload an image to avoid flickering
+ */
+export function preloadImage(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+/**
+ * Check if user prefers reduced motion (accessibility)
+ */
+export function prefersReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * Detect if user is on a slow connection
+ */
+export function isSlowConnection(): boolean {
+  // @ts-ignore - navigator.connection is experimental
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (connection) {
+    return connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g';
+  }
+  return false;
+}
 
 // Debounce function for search inputs
 export function debounce<T extends (...args: any[]) => any>(
