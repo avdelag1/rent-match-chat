@@ -50,8 +50,8 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
           <div className="relative">
             <Heart className="w-6 h-6" />
             {likesCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-600 to-pink-500 text-white text-xs">
-                {likesCount > 9 ? '9+' : likesCount}
+              <Badge className="absolute -top-2 -right-2 h-6 min-w-[24px] rounded-full px-1.5 flex items-center justify-center bg-gradient-to-br from-red-600 to-pink-500 text-white text-sm font-bold leading-none shadow-md ring-2 ring-white">
+                {likesCount > 99 ? '99+' : likesCount}
               </Badge>
             )}
           </div>
@@ -63,8 +63,8 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
           <div className="relative">
             <MessageCircle className="w-6 h-6" />
             {messagesCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-blue-500 text-white text-xs">
-                {messagesCount > 9 ? '9+' : messagesCount}
+              <Badge className="absolute -top-2 -right-2 h-6 min-w-[24px] rounded-full px-1.5 flex items-center justify-center bg-blue-500 text-white text-sm font-bold leading-none shadow-md ring-2 ring-white">
+                {messagesCount > 99 ? '99+' : messagesCount}
               </Badge>
             )}
           </div>
