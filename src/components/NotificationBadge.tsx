@@ -20,13 +20,14 @@ export function NotificationBadge({ count, className = '', max = 99 }: Notificat
         exit={{ scale: 0, opacity: 0 }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
       >
-        <Badge 
-          variant="destructive" 
+        <Badge
+          variant="destructive"
           className={`
-            absolute -top-1 -right-1 min-w-[24px] h-6 px-2
+            absolute -top-1 -right-1 min-w-[26px] h-[26px] px-2
             bg-red-500 hover:bg-red-600 text-white text-sm font-bold
             rounded-full flex items-center justify-center
             animate-pulse shadow-lg ring-2 ring-white
+            leading-none
             ${className}
           `}
         >

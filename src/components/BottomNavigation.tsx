@@ -140,7 +140,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 <>
                   {/* Badge for unread messages */}
                   {item.badge && item.badge > 0 && (
-                    <span className="absolute top-1 right-1/2 translate-x-3 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1">
+                    <span className="absolute top-1 right-1/2 translate-x-3 bg-red-500 text-white text-sm font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center px-1.5 leading-none shadow-md ring-2 ring-white">
                       {item.badge > 99 ? '99+' : item.badge}
                     </span>
                   )}

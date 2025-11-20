@@ -38,7 +38,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           >
             <Bell className="h-5 w-5" />
             {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-sm font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center px-1.5 leading-none shadow-md ring-2 ring-white">
                 {notificationCount > 99 ? '99+' : notificationCount}
               </span>
             )}

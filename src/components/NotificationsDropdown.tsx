@@ -220,7 +220,7 @@ export function NotificationsDropdown() {
               >
                 <Badge
                   variant="default"
-                  className="h-5 min-w-5 flex items-center justify-center p-0 px-1 text-xs bg-gradient-to-r from-red-600 to-red-500"
+                  className="h-6 min-w-[24px] flex items-center justify-center px-1.5 text-sm font-bold bg-gradient-to-r from-red-600 to-red-500 leading-none shadow-md ring-2 ring-white"
                 >
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </Badge>
