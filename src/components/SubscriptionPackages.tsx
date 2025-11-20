@@ -159,52 +159,52 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
-          <DialogTitle className="text-2xl font-bold text-center">
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 bg-background">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b border-border">
+          <DialogTitle className="text-3xl font-bold text-center text-foreground font-brand">
             Upgrade to Premium
           </DialogTitle>
           {reason && (
-            <p className="text-center text-muted-foreground">
+            <p className="text-center text-muted-foreground text-sm mt-2">
               {reason}
             </p>
           )}
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto px-6 py-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ScrollArea className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {plans.map((pkg) => (
             <Card
               key={pkg.id}
-              className={`relative overflow-hidden ${pkg.highlight ? 'ring-2 ring-primary' : ''}`}
+              className={`relative overflow-hidden transition-all hover:shadow-lg ${pkg.highlight ? 'ring-2 ring-primary shadow-lg' : 'border-border'}`}
             >
               {pkg.highlight && (
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 py-1 text-xs font-bold rounded-bl-lg">
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">
                   POPULAR
                 </div>
               )}
 
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${getPackageColor(pkg.name)} text-white`}>
+              <CardHeader className="pb-4">
+                <div className="flex items-start gap-3">
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${getPackageColor(pkg.name)} text-white shadow-md`}>
                     {getPackageIcon(pkg.name)}
                   </div>
-                  <div>
-                    <CardTitle className="text-lg">{pkg.name}</CardTitle>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg font-bold text-foreground mb-1">{pkg.name}</CardTitle>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold">{pkg.price}</span>
+                      <span className="text-3xl font-bold text-foreground">{pkg.price}</span>
                       <span className="text-sm text-muted-foreground">/month</span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
 
-              <CardContent>
-                <div className="space-y-3 mb-6">
+              <CardContent className="pt-0">
+                <div className="space-y-2 mb-6">
                   {pkg.benefits.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span className="text-sm capitalize">
+                    <div key={index} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-foreground leading-tight">
                         {feature}
                       </span>
                     </div>
@@ -212,7 +212,7 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
                 </div>
 
                 <Button
-                  className={`w-full bg-gradient-to-r ${getPackageColor(pkg.name)} hover:opacity-90`}
+                  className={`w-full bg-gradient-to-r ${getPackageColor(pkg.name)} hover:opacity-90 text-white font-semibold`}
                   onClick={() => handleSubscribe(pkg)}
                 >
                   Buy Now
@@ -222,9 +222,9 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
           ))}
         </div>
 
-        <div className="text-center text-sm text-muted-foreground mt-6">
-          <p>Cancel anytime. Secure payments powered by PayPal.</p>
-          <p>Questions? Contact support at help@tinderent.com</p>
+        <div className="text-center text-sm text-muted-foreground mt-8 space-y-1 pb-4">
+          <p>✓ Cancel anytime · Secure payments powered by PayPal</p>
+          <p>Questions? Contact support at <span className="text-primary">help@tinderent.com</span></p>
         </div>
         </ScrollArea>
       </DialogContent>
