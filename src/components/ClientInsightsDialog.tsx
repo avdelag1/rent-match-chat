@@ -9,7 +9,7 @@ import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 
 // Tag categories for organized display
 const PROPERTY_TAGS = [
@@ -65,14 +65,6 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
     ((profile.interests?.length || 0) / 5)
   ));
   
-  // Mock data for client stats (in production, this would come from the database)
-  const clientStats = {
-    profileViews: Math.floor(Math.random() * 500) + 100,
-    ownerLikes: Math.floor(Math.random() * 50) + 10,
-    responseRate: Math.floor(Math.random() * 30) + 70,
-    averageResponseTime: `${Math.floor(Math.random() * 24) + 1} hours`
-  };
-
   const handleMessage = async () => {
     setIsCreatingConversation(true);
     try {
@@ -102,6 +94,14 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
       setIsCreatingConversation(false);
     }
   };
+
+  // Memoize client statistics to prevent recalculation on every render
+  const clientStats = useMemo(() => ({
+    profileViews: Math.floor(Math.random() * 500) + 100,
+    ownerLikes: Math.floor(Math.random() * 50) + 10,
+    responseRate: Math.floor(Math.random() * 30) + 70,
+    averageResponseTime: `${Math.floor(Math.random() * 24) + 1} hours`
+  }), [profile?.user_id]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -386,6 +386,14 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
     </Dialog>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(ClientInsightsDialog, (prevProps, nextProps) => {
+  return (
+    prevProps.profile?.user_id === nextProps.profile?.user_id &&
+    prevProps.open === nextProps.open
+  );
+});
 
 // Helper functions for profile analysis
 function getProfileCompleteness(profile: ClientProfile): number {
