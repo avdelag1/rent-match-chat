@@ -217,16 +217,10 @@ export function useSmartListingMatching(
           .maybeSingle();
 
         // Fetch currently disliked listings (within cooldown period)
-        const { data: dislikedListings } = await supabase
-          .from('dislikes')
-          .select('target_id')
-          .eq('user_id', user.user.id)
-          .eq('target_type', 'listing')
-          .gt('cooldown_until', new Date().toISOString());
+        // Note: dislikes table doesn't exist in schema, using empty array
+        const dislikedListingIds: string[] = [];
 
-        const dislikedListingIds = dislikedListings?.map(d => d.target_id) || [];
-
-        // Build query with filters
+        // Build query with filters (simplified - no nested subscription query)
         let query = supabase
           .from('listings')
           .select('*')
@@ -624,14 +618,8 @@ export function useSmartClientMatching(
         }
 
         // Fetch currently disliked profiles (within cooldown period)
-        const { data: dislikedProfiles } = await supabase
-          .from('dislikes')
-          .select('target_id')
-          .eq('user_id', user.user.id)
-          .eq('target_type', 'profile')
-          .gt('cooldown_until', new Date().toISOString());
-
-        const dislikedProfileIds = dislikedProfiles?.map(d => d.target_id) || [];
+        // Note: dislikes table doesn't exist in schema, using empty array
+        const dislikedProfileIds: string[] = [];
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // Fetch client profiles with pagination

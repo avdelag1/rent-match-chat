@@ -1257,8 +1257,11 @@ export type Database = {
           description: string
           id: string
           issue_type: string
+          priority: string | null
           reported_against: string
           reported_by: string
+          resolution_notes: string | null
+          resolved_at: string | null
           status: string | null
           updated_at: string | null
         }
@@ -1269,8 +1272,11 @@ export type Database = {
           description: string
           id?: string
           issue_type: string
+          priority?: string | null
           reported_against: string
           reported_by: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -1281,8 +1287,11 @@ export type Database = {
           description?: string
           id?: string
           issue_type?: string
+          priority?: string | null
           reported_against?: string
           reported_by?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -1483,44 +1492,10 @@ export type Database = {
           },
         ]
       }
-      dislikes: {
-        Row: {
-          cooldown_until: string
-          created_at: string | null
-          disliked_at: string
-          id: string
-          target_id: string
-          target_type: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          cooldown_until?: string
-          created_at?: string | null
-          disliked_at?: string
-          id?: string
-          target_id: string
-          target_type: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          cooldown_until?: string
-          created_at?: string | null
-          disliked_at?: string
-          id?: string
-          target_id?: string
-          target_type?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       likes: {
         Row: {
           created_at: string | null
           direction: string
-          disliked_at: string | null
           id: string
           target_id: string
           user_id: string
@@ -1528,7 +1503,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           direction: string
-          disliked_at?: string | null
           id?: string
           target_id: string
           user_id: string
@@ -1536,7 +1510,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           direction?: string
-          disliked_at?: string | null
           id?: string
           target_id?: string
           user_id?: string
@@ -3335,6 +3308,8 @@ export type Database = {
           monthly_income_range: string | null
           move_in_date: string | null
           nationality: string | null
+          oauth_pending_role: string | null
+          oauth_provider: string | null
           occupation: string | null
           onboarding_completed: boolean | null
           owner_looking_for: string | null
@@ -3373,6 +3348,7 @@ export type Database = {
           rental_duration_preference: string | null
           rental_philosophy: string | null
           required_amenities: string[] | null
+          role: string | null
           sexual_orientation: string | null
           size_preference: string | null
           smoking: boolean | null
@@ -3477,6 +3453,8 @@ export type Database = {
           monthly_income_range?: string | null
           move_in_date?: string | null
           nationality?: string | null
+          oauth_pending_role?: string | null
+          oauth_provider?: string | null
           occupation?: string | null
           onboarding_completed?: boolean | null
           owner_looking_for?: string | null
@@ -3515,6 +3493,7 @@ export type Database = {
           rental_duration_preference?: string | null
           rental_philosophy?: string | null
           required_amenities?: string[] | null
+          role?: string | null
           sexual_orientation?: string | null
           size_preference?: string | null
           smoking?: boolean | null
@@ -3619,6 +3598,8 @@ export type Database = {
           monthly_income_range?: string | null
           move_in_date?: string | null
           nationality?: string | null
+          oauth_pending_role?: string | null
+          oauth_provider?: string | null
           occupation?: string | null
           onboarding_completed?: boolean | null
           owner_looking_for?: string | null
@@ -3657,6 +3638,7 @@ export type Database = {
           rental_duration_preference?: string | null
           rental_philosophy?: string | null
           required_amenities?: string[] | null
+          role?: string | null
           sexual_orientation?: string | null
           size_preference?: string | null
           smoking?: boolean | null
@@ -7968,6 +7950,10 @@ export type Database = {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
       }
+      toggle_listing_availability: {
+        Args: { p_listing_id: string; p_new_availability: string }
+        Returns: undefined
+      }
       unblock_user:
         | { Args: { p_admin_id: string; p_user_id: string }; Returns: Json }
         | { Args: { target_user_id: string }; Returns: boolean }
@@ -8042,7 +8028,7 @@ export type Database = {
         | "disputed"
       document_status: "pending" | "approved" | "rejected"
       document_type: "property_deed" | "broker_license" | "id_card" | "other"
-      listing_status: "draft" | "active" | "inactive" | "archived" | "rented" | "sold" | "pending" | "suspended" | "maintenance"
+      listing_status: "active" | "pending" | "inactive" | "suspended"
       signature_type: "drawn" | "typed" | "uploaded"
       user_role: "client" | "owner" | "admin"
     }
@@ -8191,7 +8177,7 @@ export const Constants = {
       ],
       document_status: ["pending", "approved", "rejected"],
       document_type: ["property_deed", "broker_license", "id_card", "other"],
-      listing_status: ["draft", "active", "inactive", "archived", "rented", "sold", "pending", "suspended", "maintenance"],
+      listing_status: ["active", "pending", "inactive", "suspended"],
       signature_type: ["drawn", "typed", "uploaded"],
       user_role: ["client", "owner", "admin"],
     },

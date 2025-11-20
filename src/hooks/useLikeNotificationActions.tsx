@@ -107,7 +107,7 @@ export function useLikeNotificationActions() {
       // Mark notification as read
       await supabase
         .from('notifications')
-        .update({ is_read: true, read_at: new Date().toISOString() })
+        .update({ read: true, read_at: new Date().toISOString() })
         .eq('id', notificationId);
 
       // Send reciprocal notification
@@ -146,8 +146,7 @@ export function useLikeNotificationActions() {
       await supabase
         .from('notifications')
         .update({
-          is_read: true,
-          is_archived: true,
+          read: true,
           read_at: new Date().toISOString()
         })
         .eq('id', notificationId);
