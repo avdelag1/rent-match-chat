@@ -184,57 +184,57 @@ export function MessageActivationPackages({
         return (
           <Card 
             key={pkg.id}
-            className={`relative transition-all hover:shadow-lg ${
+            className={`relative transition-all hover:shadow-lg border ${
               pkg.highlight 
-                ? 'border-accent shadow-accent/20 ring-2 ring-accent/50' 
-                : 'hover:border-accent/50'
+                ? 'border-primary shadow-lg ring-2 ring-primary/30' 
+                : 'border-border hover:border-primary/50'
             }`}
           >
             {pkg.savings && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-md">
                 {pkg.savings}
               </div>
             )}
             
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-2 p-3 rounded-full bg-accent/10 w-fit">
-                <Icon className="w-6 h-6 text-accent" />
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-3 p-3 rounded-full bg-primary/10 w-fit shadow-sm">
+                <Icon className="w-6 h-6 text-primary" />
               </div>
-              <CardTitle className="text-xl">{pkg.name}</CardTitle>
-              <CardDescription className="text-2xl font-bold text-foreground mt-2">
+              <CardTitle className="text-xl font-bold text-foreground">{pkg.name}</CardTitle>
+              <CardDescription className="text-3xl font-bold text-foreground mt-2">
                 {formatPriceMXN(pkg.price)}
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-4">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-accent">{pkg.activations}</div>
-                <div className="text-sm text-muted-foreground">Message Activations</div>
+            <CardContent className="space-y-4 pt-0">
+              <div className="text-center py-4 bg-muted/30 rounded-lg">
+                <div className="text-5xl font-bold text-primary">{pkg.activations}</div>
+                <div className="text-sm text-muted-foreground mt-1 font-medium">Message Activations</div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {formatPriceMXN(pkg.pricePerActivation)} per activation
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4 text-accent" />
-                  <span>Start {pkg.activations} new conversations</span>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start gap-2">
+                  <MessageCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-foreground">Start {pkg.activations} new conversations</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-accent" />
-                  <span>Unlimited messages per conversation</span>
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-foreground">Unlimited messages per conversation</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-accent" />
-                  <span>{pkg.duration_days || 90}-day validity</span>
+                <div className="flex items-start gap-2">
+                  <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-foreground">{pkg.duration_days || 90}-day validity</span>
                 </div>
               </div>
             </CardContent>
 
-            <CardFooter>
+            <CardFooter className="pt-4">
               <Button 
                 onClick={() => handlePurchase(pkg)}
-                className="w-full"
+                className={`w-full font-semibold ${pkg.highlight ? 'bg-primary hover:bg-primary/90' : ''}`}
                 variant={pkg.highlight ? "default" : "outline"}
               >
                 Buy Now
@@ -254,15 +254,15 @@ export function MessageActivationPackages({
     : 'Connect with property owners. Each activation lets you start a conversation about a listing.';
 
   const content = (
-    <div className="space-y-6 p-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold gradient-text">Message Activation Packages</h2>
-        <p className="text-muted-foreground">
+    <div className="space-y-8 p-6">
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl font-bold text-foreground font-brand">Message Activation Packages</h2>
+        <p className="text-muted-foreground text-base max-w-2xl mx-auto">
           {roleDescription}
         </p>
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-lg border border-accent/20">
-          <Sparkles className="w-4 h-4 text-accent" />
-          <span className="text-sm font-medium">New users get 3 FREE activations!</span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <span className="text-sm font-semibold text-foreground">New users get 3 FREE activations!</span>
         </div>
       </div>
 
@@ -271,9 +271,9 @@ export function MessageActivationPackages({
           <p className="text-muted-foreground">Loading packages...</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="text-center">
-            <Badge variant="outline" className="text-lg px-4 py-2">
+            <Badge variant="outline" className="text-base px-4 py-2 border-primary text-primary">
               {roleLabel} Packages
             </Badge>
           </div>
@@ -281,7 +281,7 @@ export function MessageActivationPackages({
         </div>
       )}
 
-      <div className="text-center text-sm text-muted-foreground space-y-1">
+      <div className="text-center text-sm text-muted-foreground space-y-1 mt-8">
         <p>✓ Activations never expire within the validity period</p>
         <p>✓ Once a conversation starts, message unlimited within it</p>
         <p>✓ Secure payment processing via PayPal</p>
