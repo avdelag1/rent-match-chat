@@ -216,11 +216,11 @@ export function NotificationsDropdown() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
-                className="absolute -top-1 -right-1"
+                className="absolute -top-0.5 -right-0.5"
               >
                 <Badge
                   variant="default"
-                  className="h-5 min-w-[20px] flex items-center justify-center px-1.5 text-[10px] font-bold leading-none shadow-md ring-2 ring-background"
+                  className="h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs font-bold bg-gradient-to-r from-red-600 to-red-500 leading-none shadow-lg ring-2 ring-white"
                 >
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </Badge>

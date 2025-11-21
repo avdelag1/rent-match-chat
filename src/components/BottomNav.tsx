@@ -15,8 +15,8 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) => `
     flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-xl transition-all relative
-    ${isActive 
-      ? 'text-primary bg-primary/10' 
+    ${isActive
+      ? 'text-primary bg-primary/10'
       : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
     }
   `;
@@ -50,7 +50,7 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
           <div className="relative">
             <Heart className="w-6 h-6" />
             {likesCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 min-w-[20px] rounded-full px-1.5 flex items-center justify-center bg-primary text-primary-foreground text-[10px] font-bold leading-none shadow-md ring-2 ring-background">
+              <Badge className="absolute -top-1.5 -right-1.5 h-5 min-w-[20px] rounded-full px-1.5 flex items-center justify-center bg-gradient-to-br from-red-600 to-pink-500 text-white text-xs font-bold leading-none shadow-lg ring-2 ring-white">
                 {likesCount > 99 ? '99+' : likesCount}
               </Badge>
             )}
@@ -63,7 +63,7 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
           <div className="relative">
             <MessageCircle className="w-6 h-6" />
             {messagesCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 min-w-[20px] rounded-full px-1.5 flex items-center justify-center bg-primary text-primary-foreground text-[10px] font-bold leading-none shadow-md ring-2 ring-background">
+              <Badge className="absolute -top-1.5 -right-1.5 h-5 min-w-[20px] rounded-full px-1.5 flex items-center justify-center bg-blue-500 text-white text-xs font-bold leading-none shadow-lg ring-2 ring-white">
                 {messagesCount > 99 ? '99+' : messagesCount}
               </Badge>
             )}
