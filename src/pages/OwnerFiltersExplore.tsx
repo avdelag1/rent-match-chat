@@ -54,7 +54,7 @@ export default function OwnerFiltersExplore() {
           <TabsTrigger value="property" className="relative">
             Property
             {activeCategory === 'property' && activeFilterCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-6 min-w-[24px] rounded-full px-1.5 flex items-center justify-center bg-primary text-primary-foreground text-sm font-bold leading-none shadow-md">
+              <Badge className="absolute -top-1.5 -right-1.5 h-5 min-w-[20px] rounded-full px-1.5 flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold leading-none shadow-md">
                 {activeFilterCount}
               </Badge>
             )}
