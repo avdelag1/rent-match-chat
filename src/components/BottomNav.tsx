@@ -15,8 +15,8 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) => `
     flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-xl transition-all relative
-    ${isActive 
-      ? 'text-primary bg-primary/10' 
+    ${isActive
+      ? 'text-primary bg-primary/10'
       : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
     }
   `;
