@@ -59,12 +59,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     refetch: refetchRegular
   } = useListings([]);
 
-  // Use accumulated listings - memoized with deep comparison to prevent unnecessary recalculations
+  // Use accumulated listings - memoized with length checks to prevent unnecessary recalculations
   const listings = useMemo(() => {
     if (allListings.length > 0) return allListings;
     if (smartListings.length > 0) return smartListings;
     return regularListings;
-  }, [allListings, smartListings, regularListings]);
+  }, [allListings.length, smartListings.length, regularListings.length]);
   
   const isLoading = smartLoading || regularLoading;
   const error = smartError;
@@ -94,7 +94,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // Add newly fetched listings to the stack - with guard to prevent unnecessary updates
   useEffect(() => {
-    if (smartListings.length > 0 && !isLoading && !isRefetching) {
+    if (smartListings.length > 0 && !isLoading) {
       setAllListings(prev => {
         const existingIds = new Set(prev.map(l => l.id));
         const newListings = smartListings.filter(l => !existingIds.has(l.id));
@@ -105,7 +105,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       });
       isFetchingMore.current = false; // Reset fetch guard
     }
-  }, [smartListings, isLoading, isRefetching]);
+  }, [smartListings, isLoading]);
 
   // Preload next batch when user is 3 cards away from end - with guards to prevent infinite loop
   useEffect(() => {
@@ -129,14 +129,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     setSwipeDirection(direction);
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
-
-    // Optimistically update UI before mutations complete
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 300);
-
-    // Fire mutations in background (non-blocking)
+    
     swipeMutation.mutate({
       targetId: currentListing.id,
       direction,
@@ -149,6 +142,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       viewType: 'listing',
       action: direction === 'right' ? 'like' : 'pass'
     });
+
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+      setSwipeDirection(null);
+    }, 300);
   }, [currentIndex, listings, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {

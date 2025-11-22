@@ -76,17 +76,11 @@ export function ClientSwipeContainer({
     if (!currentClient) return;
 
     setSwipeDirection(direction);
-
+    
     // Trigger haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
 
-    // Optimistically update UI before mutations complete
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 300);
-
-    // Fire mutations in background (non-blocking)
+    // Record swipe with match checking
     swipeMutation.mutate({
       targetId: currentClient.user_id,
       direction,
@@ -95,6 +89,12 @@ export function ClientSwipeContainer({
 
     // Record the swipe for undo functionality
     recordSwipe(currentClient.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
+
+    // Move to next card after animation with proper delay for smooth rhythm
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+      setSwipeDirection(null);
+    }, 300); // 300ms delay for smooth visual rhythm
   }, [currentIndex, clientProfiles, swipeMutation, recordSwipe]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
