@@ -9,7 +9,7 @@ import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft } from 'lucide-react';
+import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
@@ -49,14 +49,7 @@ export function ClientSwipeContainer({
   const clientProfiles = externalProfiles || internalProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
   const error = externalError !== undefined ? externalError : internalError;
-  
-  // Comprehensive logging
-  console.log('🎴 ClientSwipeContainer: external profiles:', externalProfiles?.length || 0);
-  console.log('🎴 ClientSwipeContainer: internal profiles:', internalProfiles?.length || 0);
-  console.log('🎴 ClientSwipeContainer: final profiles:', clientProfiles?.length || 0);
-  console.log('🎴 ClientSwipeContainer: isLoading:', isLoading);
-  console.log('🎴 ClientSwipeContainer: error:', error);
-  
+
   const swipeMutation = useSwipeWithMatch({
     onMatch: (clientProfile, ownerProfile) => {
       setMatchCelebration({
@@ -114,13 +107,11 @@ export function ClientSwipeContainer({
     handleSwipe(direction);
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setCurrentIndex(0);
     await refetch();
-    sonnerToast.success('Profiles Updated', {
-      description: 'Latest client profiles loaded.',
-    });
-  };
+    sonnerToast.success('Refreshed');
+  }, [refetch]);
 
   const handleInsights = (clientId: string) => {
     if (onInsights) {
@@ -132,43 +123,36 @@ export function ClientSwipeContainer({
     }
   };
 
-  const handleConnect = async (clientId: string) => {
+  const handleConnect = useCallback(async (clientId: string) => {
     if (isCreatingConversation) return;
-    
-    console.log('[ClientSwipe] Message button clicked for client:', clientId);
+
     setIsCreatingConversation(true);
-    
+
     try {
-      sonnerToast.loading('⏳ Creating conversation...', { id: 'start-conv' });
-      
-      console.log('[ClientSwipe] Starting conversation with client:', clientId);
+      sonnerToast.loading('Creating conversation...', { id: 'start-conv' });
+
       const result = await startConversation.mutateAsync({
         otherUserId: clientId,
         initialMessage: "Hi! I'd like to connect with you.",
         canStartNewConversation: true,
       });
 
-      console.log('[ClientSwipe] Conversation created:', result);
-
       if (result?.conversationId) {
-        sonnerToast.success('✅ Conversation created! Opening chat...', { id: 'start-conv' });
-        
-        // Wait 500ms before navigating to ensure DB is updated
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        console.log('[ClientSwipe] Navigating to conversation:', result.conversationId);
+        sonnerToast.success('Opening chat...', { id: 'start-conv' });
+
+        // Brief wait for DB sync
+        await new Promise(resolve => setTimeout(resolve, 300));
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('[ClientSwipe] Error starting conversation:', error);
-      sonnerToast.error('❌ Could not start conversation', { 
+      sonnerToast.error('Could not start conversation', {
         id: 'start-conv',
-        description: error instanceof Error ? error.message : 'Please try again'
+        description: error instanceof Error ? error.message : 'Try again'
       });
     } finally {
       setIsCreatingConversation(false);
     }
-  };
+  }, [isCreatingConversation, startConversation, navigate]);
 
 
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
@@ -188,20 +172,19 @@ export function ClientSwipeContainer({
   }
 
   if (error) {
-    console.error('ClientSwipeContainer error:', error);
     return (
       <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
-          <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load client profiles right now.</p>
-          <Button 
+          <h3 className="text-xl font-bold mb-2">Error</h3>
+          <Button
             onClick={handleRefresh}
             variant="outline"
             className="gap-2"
+            size="lg"
           >
-            <RotateCcw className="w-4 h-4" />
-            Try Again
+            <RefreshCw className="w-4 h-4" />
+            Refresh
           </Button>
         </div>
       </div>
@@ -214,38 +197,15 @@ export function ClientSwipeContainer({
         <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
-          <p className="text-muted-foreground mb-4">
-            No clients match your current preferences.
-          </p>
-
-          <div className="text-sm text-muted-foreground space-y-2 bg-muted/30 p-4 rounded-lg mb-4">
-            <p className="font-semibold">Tips to find more clients:</p>
-            <ul className="list-disc list-inside text-left space-y-1">
-              <li>Adjust your budget range</li>
-              <li>Expand age preferences</li>
-              <li>Remove lifestyle filters</li>
-              <li>Ensure clients have photos uploaded</li>
-            </ul>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => navigate('/owner/filters')}
-              variant="outline"
-              className="gap-2 flex-1"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Clear Filters
-            </Button>
-            <Button 
-              onClick={handleRefresh}
-              variant="default"
-              className="gap-2 flex-1"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </div>
+          <Button
+            onClick={handleRefresh}
+            variant="default"
+            className="gap-2"
+            size="lg"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
         </div>
       </div>
     );
@@ -256,17 +216,15 @@ export function ClientSwipeContainer({
       <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
           <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
-          <p className="text-muted-foreground mb-4">
-            Check back later for new profiles.
-          </p>
-          <Button 
+          <h3 className="text-xl font-bold mb-2">All done!</h3>
+          <Button
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2 w-full"
+            className="gap-2"
+            size="lg"
           >
-            <RotateCcw className="w-4 h-4" />
-            Check for New Profiles
+            <RefreshCw className="w-4 h-4" />
+            Refresh
           </Button>
         </div>
       </div>
@@ -277,9 +235,22 @@ export function ClientSwipeContainer({
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
+      {/* Refresh Button - Top Right */}
+      <div className="absolute top-2 right-2 z-50">
+        <Button
+          onClick={handleRefresh}
+          variant="outline"
+          size="icon"
+          className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
+          disabled={isRefetching}
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
+
       {/* Single Card Container - No infinite scrolling */}
       <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           {currentClient && (
             <motion.div
               key={currentClient.user_id}
