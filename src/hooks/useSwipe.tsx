@@ -287,7 +287,7 @@ export function useSwipe() {
         // Only invalidate like-related queries on like swipes
         Promise.all([
           queryClient.invalidateQueries({ queryKey: ['likes'] }),
-          queryClient.invalidateQueries({ queryKey: variables.targetType === 'property' ? 'liked-properties' : 'liked-clients'] }),
+          queryClient.invalidateQueries({ queryKey: [variables.targetType === 'property' ? 'liked-properties' : 'liked-clients'] }),
           queryClient.invalidateQueries({ queryKey: ['matches'] }),
         ]);
       }
