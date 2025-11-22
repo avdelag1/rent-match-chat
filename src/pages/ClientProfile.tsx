@@ -19,12 +19,7 @@ const ClientProfile = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Auto-open dialog if no profile exists yet
-  useEffect(() => {
-    if (!isLoading && !profile) {
-      setShowEditDialog(true);
-    }
-  }, [profile, isLoading]);
+  // REMOVED: Auto-open dialog - let users choose when to edit
 
   const handlePhotoClick = (index: number) => {
     setSelectedPhotoIndex(index);

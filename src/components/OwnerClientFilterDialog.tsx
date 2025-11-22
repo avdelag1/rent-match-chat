@@ -10,6 +10,7 @@ import { X, Save } from 'lucide-react';
 import { useOwnerClientPreferences, OwnerClientPreferences } from '@/hooks/useOwnerClientPreferences';
 import { useSavedFilters } from '@/hooks/useSavedFilters';
 import { useToast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface OwnerClientFilterDialogProps {
   open: boolean;
@@ -398,8 +399,26 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white max-w-2xl w-[95vw] max-h-[85vh] sm:h-[90vh] flex flex-col p-0">
+    <AnimatePresence>
+      {open && (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <motion.div
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{
+              type: 'spring',
+              damping: 35,
+              stiffness: 400,
+              mass: 0.8,
+            }}
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}
+          >
+            <DialogContent className="bg-white max-w-2xl w-[95vw] max-h-[85vh] sm:h-[90vh] flex flex-col p-0">
         <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b">
           <DialogTitle className="text-xl sm:text-2xl">Client Discovery Preferences</DialogTitle>
           <p className="text-sm sm:text-base text-muted-foreground">Set your preferences to improve Smart Match recommendations</p>
@@ -1109,8 +1128,11 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
               </Button>
             </>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            </DialogFooter>
+          </DialogContent>
+          </motion.div>
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
 }
