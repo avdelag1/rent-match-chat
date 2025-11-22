@@ -219,7 +219,7 @@ export function OwnerClientTinderCard({
                 e.stopPropagation();
                 setReportDialogOpen(true);
               }}
-              className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-sm"
+              className="w-12 h-12 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
               title="Report User"
             >
               <Flag className="w-5 h-5" />
@@ -233,7 +233,7 @@ export function OwnerClientTinderCard({
                 e.stopPropagation();
                 setShareDialogOpen(true);
               }}
-              className="w-10 h-10 rounded-full bg-green-500/90 hover:bg-green-600 text-white shadow-lg backdrop-blur-sm"
+              className="w-12 h-12 rounded-full bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
               title="Share Profile"
             >
               <Share2 className="w-5 h-5" />
