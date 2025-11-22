@@ -21,6 +21,43 @@ export function useNotificationSystem() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Fetch existing notifications from database on mount
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchNotifications = async () => {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const formattedNotifications: Notification[] = data.map(notif => ({
+          id: notif.id,
+          type: notif.type as any,
+          title: notif.type === 'like' ? 'New Like' :
+                 notif.type === 'match' ? 'New Match' :
+                 notif.type === 'message' ? 'New Message' : 'Notification',
+          message: notif.message || '',
+          timestamp: new Date(notif.created_at),
+          read: notif.read || false,
+          actionUrl: notif.link_url,
+          relatedUserId: notif.related_user_id || undefined,
+        }));
+        setNotifications(formattedNotifications);
+      }
+    };
+
+    fetchNotifications();
+  }, [user?.id]);
+
   // Subscribe to real-time notifications
   useEffect(() => {
     if (!user?.id) return;
