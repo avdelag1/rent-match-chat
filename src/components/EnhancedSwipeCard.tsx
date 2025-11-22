@@ -127,12 +127,14 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
     <motion.div
       ref={cardRef}
       className={`absolute inset-0 pb-20 cursor-grab active:cursor-grabbing ${isTop ? 'z-10' : 'z-0'}`}
-      style={{ 
-        x, 
-        rotate, 
+      style={{
+        x,
+        rotate,
         opacity: isTop ? opacity : 0.8,
         scale: isTop ? 1 : 0.95,
-        ...style 
+        willChange: 'transform, opacity',
+        transform: 'translateZ(0)',
+        ...style
       }}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}

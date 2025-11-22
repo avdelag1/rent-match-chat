@@ -279,15 +279,19 @@ export function useSwipe() {
 
       return { success: true };
     },
-    onSuccess: () => {
-      // OPTIMIZED: Batch invalidate queries for better performance
-      queryClient.invalidateQueries({ queryKey: ['likes'] });
-      queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
-      queryClient.invalidateQueries({ queryKey: ['liked-clients'] });
-      queryClient.invalidateQueries({ queryKey: ['owner-swipes'] });
-      queryClient.invalidateQueries({ queryKey: ['client-profiles'] });
-      queryClient.invalidateQueries({ queryKey: ['matches'] });
-      queryClient.invalidateQueries({ queryKey: ['listings'] });
+    onSuccess: (data, variables) => {
+      // OPTIMIZED: Only invalidate relevant queries based on swipe type
+      const isLike = variables.swipeType === 'like' || variables.swipeType === 'super_like';
+
+      if (isLike) {
+        // Only invalidate like-related queries on like swipes
+        Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['likes'] }),
+          queryClient.invalidateQueries({ queryKey: variables.targetType === 'property' ? 'liked-properties' : 'liked-clients'] }),
+          queryClient.invalidateQueries({ queryKey: ['matches'] }),
+        ]);
+      }
+      // Skip invalidations on dislike - no UI changes needed
     },
     onError: (error: any) => {
       console.error('[useSwipe] Mutation error:', error);

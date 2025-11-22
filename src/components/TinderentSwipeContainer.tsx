@@ -334,7 +334,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     <div className="relative w-full h-full flex flex-col items-center justify-center">
       {/* Card Container - Full screen swipe experience */}
       <div className="relative w-full h-[calc(100vh-180px)] max-w-lg mx-auto">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync" initial={false}>
           {currentListing && (
             <motion.div
               key={currentListing.id}
