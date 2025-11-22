@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LikedPropertiesDialogProps {
   isOpen: boolean;
@@ -78,11 +79,27 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] flex flex-col p-0 overflow-hidden">
+    <AnimatePresence>
+      {isOpen && (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+          <motion.div
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{
+              type: 'spring',
+              damping: 35,
+              stiffness: 400,
+              mass: 0.8,
+            }}
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}
+          >
+            <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
           <DialogTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
             <Flame className="w-6 h-6 text-red-500" />
@@ -216,16 +233,19 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
           </div>
         )}
           </div>
-        </ScrollArea>
-      </DialogContent>
+            </ScrollArea>
+          </DialogContent>
+          </motion.div>
 
-      <PropertyImageGallery
-        images={galleryState.images}
-        alt={galleryState.alt}
-        isOpen={galleryState.isOpen}
-        onClose={() => setGalleryState(prev => ({ ...prev, isOpen: false }))}
-        initialIndex={galleryState.initialIndex}
-      />
-    </Dialog>
+          <PropertyImageGallery
+            images={galleryState.images}
+            alt={galleryState.alt}
+            isOpen={galleryState.isOpen}
+            onClose={() => setGalleryState(prev => ({ ...prev, isOpen: false }))}
+            initialIndex={galleryState.initialIndex}
+          />
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
 }

@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, MapPin, Briefcase, Heart, MessageCircle } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ClientProfileModalProps {
   profile: ClientProfile | null;
@@ -31,18 +32,36 @@ export function ClientProfileModal({
   const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white rounded-full"
-          onClick={() => onOpenChange(false)}
-        >
-          <X className="h-5 w-5" />
-        </Button>
+    <AnimatePresence>
+      {open && (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <motion.div
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{
+              type: 'spring',
+              damping: 35,
+              stiffness: 400,
+              mass: 0.8,
+            }}
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white rounded-full"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
 
-        <ScrollArea className="h-full max-h-[90vh]">
+              <ScrollArea className="h-full max-h-[90vh]">
           {/* Image Carousel */}
           {images.length > 0 && (
             <div className="relative h-96 bg-muted">
@@ -129,8 +148,11 @@ export function ClientProfileModal({
               </Button>
             </div>
           </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+              </ScrollArea>
+            </DialogContent>
+          </motion.div>
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
 }
