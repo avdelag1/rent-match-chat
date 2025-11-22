@@ -21,7 +21,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      
+
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -37,6 +37,8 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     enabled: !!user,
     retry: 3,
     retryDelay: 500,
+    staleTime: 30 * 60 * 1000, // Cache for 30 minutes (roles rarely change)
+    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour
   });
 
   useEffect(() => {
