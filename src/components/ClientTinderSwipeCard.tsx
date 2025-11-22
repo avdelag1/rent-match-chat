@@ -108,15 +108,15 @@ export function ClientTinderSwipeCard({
       style={cardStyle}
       drag={isTop ? true : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.2}
+      dragElastic={0.6}
       onDragEnd={handleDragEnd}
       className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
       animate={{ x: 0, y: 0, rotate: 0 }}
       transition={{
         type: "spring",
-        stiffness: 500,
-        damping: 35,
-        mass: 0.6
+        stiffness: 350,
+        damping: 28,
+        mass: 0.8
       }}
     >
       <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
