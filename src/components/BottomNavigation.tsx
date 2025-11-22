@@ -112,64 +112,50 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-border/50 z-50 pb-safe shadow-2xl">
-      <div className="flex items-center justify-around h-16 max-w-screen-xl mx-auto px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe pointer-events-none">
+      <div className="flex items-center justify-center gap-3 px-6 py-4 pointer-events-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item);
+
+          // Color scheme based on item
+          const getButtonStyle = () => {
+            if (item.isCenter) {
+              return 'bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/30 w-16 h-16';
+            }
+            
+            if (active) {
+              if (item.id === 'browse') return 'bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/30';
+              if (item.id === 'likes') return 'bg-gradient-to-br from-pink-500 to-red-500 text-white shadow-lg shadow-pink-500/30';
+              if (item.id === 'messages') return 'bg-blue-500 text-white shadow-lg shadow-blue-500/30';
+              return 'bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/30';
+            }
+            
+            return 'bg-white/90 backdrop-blur-md text-gray-600 border-2 border-gray-200 shadow-md';
+          };
 
           return (
             <button
               key={item.id}
               onClick={() => handleNavClick(item)}
               className={cn(
-                'flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-200 select-none touch-manipulation',
-                active && 'text-primary',
-                !active && 'text-muted-foreground',
-                item.isCenter && 'flex-initial px-6'
+                'relative rounded-full transition-all duration-200 select-none touch-manipulation flex items-center justify-center',
+                'active:scale-95 hover:scale-105',
+                getButtonStyle(),
+                item.isCenter ? 'w-16 h-16' : 'w-14 h-14'
               )}
             >
-              {/* Center button special styling */}
-              {item.isCenter ? (
-                <div className="relative -top-2">
-                  <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-full p-3 shadow-lg shadow-red-500/40 group-hover:shadow-red-500/60 group-active:scale-95 group-hover:scale-105 transition-all duration-200">
-                    <Icon className="h-5 w-5 text-white" />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {/* Badge for unread messages */}
-                  {item.badge && item.badge > 0 && (
-                    <span className="absolute top-0.5 right-1/2 translate-x-2.5 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5 leading-none shadow-lg ring-2 ring-white">
-                      {item.badge > 99 ? '99+' : item.badge}
-                    </span>
+              {/* Notification Badge - Dot Style */}
+              {item.badge && item.badge > 0 && !item.isCenter && (
+                <span 
+                  className={cn(
+                    "absolute -top-0.5 -right-0.5 rounded-full h-4 w-4 flex items-center justify-center shadow-lg ring-2 ring-white",
+                    item.id === 'messages' ? 'bg-blue-500' : 'bg-pink-500'
                   )}
-
-                  {/* Icon */}
-                  <Icon
-                    className={cn(
-                      'h-6 w-6 mb-1 transition-all duration-200',
-                      active && 'scale-110',
-                      !active && 'group-active:scale-95 group-hover:scale-105'
-                    )}
-                  />
-
-                  {/* Label */}
-                  <span
-                    className={cn(
-                      'text-xs font-medium transition-all',
-                      active && 'font-semibold'
-                    )}
-                  >
-                    {item.label}
-                  </span>
-
-                  {/* Active indicator with animation */}
-                  {active && (
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-primary to-accent rounded-t-full animate-elastic-bounce shadow-glow" />
-                  )}
-                </>
+                />
               )}
+
+              <Icon className={cn('h-6 w-6', item.isCenter && 'h-7 w-7')} />
             </button>
           );
         })}
