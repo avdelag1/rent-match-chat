@@ -16,6 +16,8 @@ import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { MessageActivationPackages } from '@/components/MessageActivationPackages';
+import { useMessageActivations } from '@/hooks/useMessageActivations';
 
 export function MessagingDashboard() {
   const navigate = useNavigate();
@@ -26,10 +28,12 @@ export function MessagingDashboard() {
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [userRole, setUserRole] = useState<'client' | 'owner'>('client');
   const [directConversationId, setDirectConversationId] = useState<string | null>(null);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
+  const { totalActivations, canSendMessage } = useMessageActivations();
 
   // Get user role
   useEffect(() => {
@@ -184,6 +188,14 @@ export function MessagingDashboard() {
         setIsStartingConversation(false);
         return;
       }
+
+      // Check if user has activations
+      if (!canSendMessage || totalActivations === 0) {
+        setShowUpgradeDialog(true);
+        setSearchParams({}); // Clear URL param
+        setIsStartingConversation(false);
+        return;
+      }
       
       // Create new conversation
       toast({
@@ -194,7 +206,7 @@ export function MessagingDashboard() {
       const result = await startConversation.mutateAsync({
         otherUserId: userId,
         initialMessage: "Hi! I'm interested in connecting.",
-        canStartNewConversation: true, // Always allow starting new conversations
+        canStartNewConversation: canSendMessage,
       });
 
       if (result.conversationId) {
@@ -210,13 +222,19 @@ export function MessagingDashboard() {
           setIsStartingConversation(false);
         }, 500);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error auto-starting conversation:', error);
-      toast({
-        title: 'Could not start conversation',
-        description: error instanceof Error ? error.message : 'Please try again later.',
-        variant: 'destructive',
-      });
+      
+      if (error?.message === 'QUOTA_EXCEEDED') {
+        setShowUpgradeDialog(true);
+      } else {
+        toast({
+          title: 'Could not start conversation',
+          description: error instanceof Error ? error.message : 'Please try again later.',
+          variant: 'destructive',
+        });
+      }
+      
       setSearchParams({});
       setIsStartingConversation(false);
     }
@@ -372,6 +390,13 @@ export function MessagingDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Dialog */}
+      <MessageActivationPackages
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        userRole={userRole}
+      />
     </DashboardLayout>
   );
 }

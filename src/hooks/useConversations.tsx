@@ -339,11 +339,8 @@ export function useStartConversation() {
     },
     onError: (error: Error) => {
       if (error.message === 'QUOTA_EXCEEDED') {
-        toast({
-          title: 'Conversation Limit Reached',
-          description: 'Upgrade your plan to start more conversations',
-          variant: 'destructive'
-        });
+        // Don't show error toast - let the component handle upgrade dialog
+        throw error;
       } else {
         toast({
           title: 'Failed to Send Message',
