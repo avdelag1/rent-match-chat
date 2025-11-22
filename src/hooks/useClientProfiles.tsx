@@ -17,11 +17,12 @@ export interface ClientProfile {
   verified?: boolean;
 }
 
-export function useClientProfiles(excludeSwipedIds: string[] = []) {
+export function useClientProfiles(excludeSwipedIds: string[] = [], options: { enabled?: boolean } = {}) {
   const { user } = useAuth();
 
   return useQuery({
     queryKey: ['client-profiles', user?.id, excludeSwipedIds],
+    enabled: options.enabled !== false,
     queryFn: async (): Promise<ClientProfile[]> => {
       if (!user) {
         return [];

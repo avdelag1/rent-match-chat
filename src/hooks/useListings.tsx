@@ -70,7 +70,7 @@ export interface Listing {
   description_full?: string;
 }
 
-export function useListings(excludeSwipedIds: string[] = []) {
+export function useListings(excludeSwipedIds: string[] = [], options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ['listings', excludeSwipedIds, 'with-filters'],
     queryFn: async () => {
@@ -129,6 +129,7 @@ export function useListings(excludeSwipedIds: string[] = []) {
         return [];
       }
     },
+    enabled: options.enabled !== false,
     retry: 3,
     retryDelay: 1000,
   });

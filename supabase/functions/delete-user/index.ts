@@ -64,14 +64,47 @@ serve(async (req) => {
 
     const userIdToDelete = user.id
 
-    // First, delete all related user data using RPC
-    const { error: rpcError } = await supabaseAdmin.rpc('delete_user_account_data', {
+    // First, delete files from storage buckets
+    const storageErrors = []
+
+    // Delete profile images
+    const { error: profileImgError } = await supabaseAdmin.storage
+      .from('profile-images')
+      .remove([`${userIdToDelete}`])
+    if (profileImgError) storageErrors.push(`Profile images: ${profileImgError.message}`)
+
+    // Delete listing images
+    const { data: listingFolders } = await supabaseAdmin.storage
+      .from('listing-images')
+      .list(userIdToDelete)
+    if (listingFolders && listingFolders.length > 0) {
+      const listingPaths = listingFolders.map(f => `${userIdToDelete}/${f.name}`)
+      const { error: listingImgError } = await supabaseAdmin.storage
+        .from('listing-images')
+        .remove(listingPaths)
+      if (listingImgError) storageErrors.push(`Listing images: ${listingImgError.message}`)
+    }
+
+    if (storageErrors.length > 0) {
+      console.warn('Storage cleanup warnings:', storageErrors)
+    }
+
+    // Delete all related user data using RPC (updated function name)
+    const { error: rpcError } = await supabaseAdmin.rpc('delete_user_account', {
       user_id_to_delete: userIdToDelete,
     })
 
     if (rpcError) {
       console.error('RPC error:', rpcError)
-      // Continue with user deletion even if RPC fails, but log it
+      // CRITICAL: Abort if data cleanup fails to prevent orphaned data
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Failed to delete user data',
+          details: rpcError.message,
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     // Delete the auth user using admin API

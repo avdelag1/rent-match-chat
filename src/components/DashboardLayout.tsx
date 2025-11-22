@@ -73,14 +73,19 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const location = useLocation()
   const { user } = useAuth()
 
-  // Get listings and profiles data for insights with error handling
-  const { data: listings = [], error: listingsError } = useListings();
-  const { data: profiles = [], error: profilesError } = useClientProfiles();
+  // Lazy load listings and profiles only when insights dialogs are opened
+  // This prevents unnecessary API calls on every page load
+  const { data: listings = [], error: listingsError } = useListings({
+    enabled: showPropertyInsights || showClientInsights
+  });
+  const { data: profiles = [], error: profilesError } = useClientProfiles({
+    enabled: showClientInsights
+  });
 
-  if (listingsError) {
+  if (listingsError && (showPropertyInsights || showClientInsights)) {
     console.error('DashboardLayout - Listings error:', listingsError);
   }
-  if (profilesError) {
+  if (profilesError && showClientInsights) {
     console.error('DashboardLayout - Profiles error:', profilesError);
   }
 

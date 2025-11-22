@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Listing } from './useListings';
 import { ClientFilterPreferences } from './useClientFilterPreferences';
+import { useVisibilityRanking } from './useVisibilityRanking';
 
 export interface MatchedListing extends Listing {
   matchPercentage: number;
@@ -194,6 +195,13 @@ export interface ListingFilters {
   bathrooms?: number[];
   amenities?: string[];
   distance?: number;
+  // Additional filters
+  premiumOnly?: boolean;
+  verified?: boolean;
+  petFriendly?: boolean;
+  furnished?: boolean;
+  lifestyleTags?: string[];
+  dietaryPreferences?: string[];
 }
 
 export function useSmartListingMatching(
@@ -220,10 +228,17 @@ export function useSmartListingMatching(
         // Note: dislikes table doesn't exist in schema, using empty array
         const dislikedListingIds: string[] = [];
 
-        // Build query with filters (simplified - no nested subscription query)
+        // Build query with filters and subscription data for premium prioritization
         let query = supabase
           .from('listings')
-          .select('*')
+          .select(`
+            *,
+            owner:profiles!listings_user_id_fkey(
+              user_subscriptions(
+                subscription_packages(tier, priority_matching, visibility_boost)
+              )
+            )
+          `)
           .eq('status', 'active')
           .eq('is_active', true);
 
@@ -260,6 +275,24 @@ export function useSmartListingMatching(
             const minBaths = Math.min(...filters.bathrooms);
             query = query.gte('baths', minBaths);
           }
+
+          // Pet friendly filter
+          if (filters.petFriendly) {
+            query = query.eq('pet_friendly', true);
+          }
+
+          // Furnished filter
+          if (filters.furnished) {
+            query = query.eq('furnished', true);
+          }
+
+          // Verified filter (owner has verified documents)
+          if (filters.verified) {
+            query = query.eq('has_verified_documents', true);
+          }
+
+          // Premium only filter (owner has premium subscription)
+          // This will be applied client-side after we get subscription data
         }
 
         // Apply pagination
@@ -288,6 +321,16 @@ export function useSmartListingMatching(
           });
         }
 
+        // Premium only filter - check if owner has premium subscription
+        if (filters?.premiumOnly) {
+          filteredListings = filteredListings.filter(listing => {
+            const ownerData = (listing as any).owner;
+            const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
+            const tier = subscriptionData?.tier || 'free';
+            return tier !== 'free' && tier !== 'basic';
+          });
+        }
+
         // Filter out disliked listings (within 1-week cooldown period)
         filteredListings = filteredListings.filter(listing =>
           !dislikedListingIds.includes(listing.id)
@@ -305,18 +348,60 @@ export function useSmartListingMatching(
         // Calculate match percentage for each listing
         const matchedListings: MatchedListing[] = filteredListings.map(listing => {
           const match = calculateListingMatch(preferences, listing as Listing);
+
+          // Extract owner's subscription tier for premium boost
+          const ownerData = (listing as any).owner;
+          const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
+          const tier = subscriptionData?.tier || 'free';
+          const visibilityBoost = subscriptionData?.visibility_boost || 0;
+          const priorityMatching = subscriptionData?.priority_matching || false;
+
+          // Apply premium boost to match percentage
+          let boostedPercentage = match.percentage;
+          if (priorityMatching && visibilityBoost > 0) {
+            // Premium boost: add up to 20 points based on visibility boost (0.25-1.0 -> 5-20 points)
+            const boostPoints = Math.min(20, visibilityBoost * 20);
+            boostedPercentage = Math.min(100, match.percentage + boostPoints);
+
+            if (boostPoints > 0) {
+              match.reasons.push(`Premium listing boost: +${boostPoints}%`);
+            }
+          }
+
           return {
             ...listing as Listing,
-            matchPercentage: match.percentage,
+            matchPercentage: boostedPercentage,
             matchReasons: match.reasons,
-            incompatibleReasons: match.incompatible
+            incompatibleReasons: match.incompatible,
+            _premiumTier: tier, // Store for sorting
+            _visibilityBoost: visibilityBoost
           };
         });
 
-        // Sort by match percentage - no client-side limiting
+        // Sort by premium tier first, then match percentage
         const sortedListings = matchedListings
           .filter(listing => listing.matchPercentage >= 0)
-          .sort((a, b) => b.matchPercentage - a.matchPercentage);
+          .sort((a, b) => {
+            // Premium tiers get priority
+            const tierOrder: Record<string, number> = {
+              unlimited: 1,
+              premium_plus: 2,
+              premium: 3,
+              basic: 4,
+              free: 5
+            };
+
+            const tierA = tierOrder[(a as any)._premiumTier] || 5;
+            const tierB = tierOrder[(b as any)._premiumTier] || 5;
+
+            // If different tiers, prioritize better tier
+            if (tierA !== tierB) {
+              return tierA - tierB;
+            }
+
+            // Same tier: sort by match percentage
+            return b.matchPercentage - a.matchPercentage;
+          });
         
         // Fallback: if no matches found but we have listings, show them all with default score
         if (sortedListings.length === 0 && filteredListings.length > 0) {
