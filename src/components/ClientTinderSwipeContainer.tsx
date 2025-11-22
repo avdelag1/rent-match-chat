@@ -9,6 +9,9 @@ import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
+import { MessageActivationPackages } from '@/components/MessageActivationPackages';
+import { SubscriptionPackages } from '@/components/SubscriptionPackages';
+import { useMessageActivations } from '@/hooks/useMessageActivations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useNavigate } from 'react-router-dom';
@@ -62,6 +65,11 @@ export function ClientTinderSwipeContainer({
   const { recordSwipe, undoLastSwipe, canUndo } = useSwipeUndo();
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
+  const { totalActivations, canSendMessage } = useMessageActivations();
+
+  // Upgrade dialog state
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState('');
 
   // Prefetch images for next 2 profiles (massively improves perceived performance)
   usePrefetchImages({
@@ -176,13 +184,20 @@ export function ClientTinderSwipeContainer({
   const handleMessage = useCallback(async () => {
     if (!currentProfile) return;
 
+    // Check if user has activations before starting conversation
+    if (!canSendMessage || totalActivations === 0) {
+      setUpgradeReason('You need message activations to start conversations. Choose a package below:');
+      setShowUpgradeDialog(true);
+      return;
+    }
+
     try {
       toast.loading('Starting conversation...', { id: 'conv' });
       
       const result = await startConversation.mutateAsync({
         otherUserId: currentProfile.user_id,
         initialMessage: "Hi! I'd like to connect with you.",
-        canStartNewConversation: true,
+        canStartNewConversation: canSendMessage,
       });
 
       if (result?.conversationId) {
@@ -190,13 +205,19 @@ export function ClientTinderSwipeContainer({
         await new Promise(resolve => setTimeout(resolve, 500));
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error starting conversation:', error);
+    } catch (error: any) {
+      if (error?.message === 'QUOTA_EXCEEDED') {
+        setUpgradeReason('You\'ve reached your conversation limit. Upgrade to continue:');
+        setShowUpgradeDialog(true);
+        toast.dismiss('conv');
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error starting conversation:', error);
+        }
+        toast.error('Could not start conversation', { id: 'conv' });
       }
-      toast.error('Could not start conversation', { id: 'conv' });
     }
-  }, [currentProfile, startConversation, navigate]);
+  }, [currentProfile, startConversation, navigate, canSendMessage, totalActivations]);
 
   // Loading state - Smooth skeleton that matches card dimensions
   // Don't show loading if: profiles exist OR timeout exceeded OR error occurred
@@ -392,6 +413,13 @@ export function ClientTinderSwipeContainer({
           avatar: currentProfile?.avatar_url,
           role: 'client'
         }}
+      />
+
+      {/* Upgrade Dialog */}
+      <MessageActivationPackages
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        userRole="client"
       />
     </div>
   );

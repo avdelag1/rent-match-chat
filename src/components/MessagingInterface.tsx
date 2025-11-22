@@ -12,6 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMonthlyMessageLimits } from '@/hooks/useMonthlyMessageLimits';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { useQueryClient } from '@tanstack/react-query';
+import { MessageActivationPackages } from '@/components/MessageActivationPackages';
+import { SubscriptionPackages } from '@/components/SubscriptionPackages';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -46,6 +48,7 @@ MessageBubble.displayName = 'MessageBubble';
 
 export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: MessagingInterfaceProps) => {
   const [newMessage, setNewMessage] = useState('');
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const { user } = useAuth();
   const { data: messages = [], isLoading } = useConversationMessages(conversationId);
   const sendMessage = useSendMessage();
@@ -203,13 +206,23 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Limit Warning */}
+      {/* Limit Warning with Upgrade Button */}
       {hasMonthlyLimit && isAtLimit && (
-        <div className="px-4 py-3 bg-red-50 dark:bg-red-950 border-t border-red-200 dark:border-red-800 flex items-start gap-3">
-          <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-red-700 dark:text-red-300">
-            <p className="font-medium">Monthly message limit reached</p>
-            <p className="text-xs opacity-80">Upgrade your plan to send more messages</p>
+        <div className="px-4 py-3 bg-red-50 dark:bg-red-950 border-t border-red-200 dark:border-red-800">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-sm text-red-700 dark:text-red-300">Monthly message limit reached</p>
+              <p className="text-xs opacity-80 text-red-600 dark:text-red-400 mt-0.5">Upgrade to continue messaging</p>
+            </div>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => setShowUpgradeDialog(true)}
+              className="shrink-0"
+            >
+              Upgrade
+            </Button>
           </div>
         </div>
       )}
@@ -259,6 +272,13 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
           </Button>
         </div>
       </form>
+
+      {/* Upgrade Dialog */}
+      <MessageActivationPackages
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        userRole={otherUser.role === 'client' ? 'owner' : 'client'}
+      />
     </Card>
   );
 });

@@ -111,7 +111,9 @@ export default function PaymentSuccess() {
               });
           }
 
-          toast.success(`Welcome to ${pkg.name}! 🎉 Your benefits are now active!`);
+          toast.success(`Welcome to ${pkg.name}! 🎉`, {
+            description: 'Your premium benefits are now active! You can now enjoy all the features of your plan.'
+          });
         } else if (isPayPerUse) {
           // Create pay-per-use activations
           const expiresAt = new Date();
@@ -130,7 +132,9 @@ export default function PaymentSuccess() {
 
           if (activError) throw activError;
 
-          toast.success(`${pkg.message_activations} activations added! Valid for ${pkg.duration_days || 30} days.`);
+          toast.success(`${pkg.message_activations} Message Activations Added! 🎉`, {
+            description: `Valid for ${pkg.duration_days || 30} days. Start conversations with your matches now!`
+          });
         }
 
         setPurchaseDetails({
