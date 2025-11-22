@@ -136,21 +136,22 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
       }}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.2}
+      dragElastic={0.6}
       onPointerDown={handlePointerDown}
       onDragEnd={handleDragEnd}
       whileTap={{ scale: 0.98 }}
       initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ 
-        scale: isTop ? 1 : 0.95, 
+      animate={{
+        scale: isTop ? 1 : 0.95,
         opacity: isTop ? 1 : 0.8,
         x: 0,
         rotate: 0
       }}
-      transition={{ 
+      transition={{
         type: "spring",
-        stiffness: 300,
-        damping: 25,
+        stiffness: 350,
+        damping: 28,
+        mass: 0.8,
         duration: 0.3
       }}
     >
@@ -354,21 +355,21 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
             </div>
           </CardContent>
 
-          {/* Text-only Swipe Indicators - LIKE/DISLIKE badges */}
+          {/* Text-only Swipe Indicators - LIKE/DISLIKE badges - Enhanced Visibility */}
           <motion.div
             className="absolute top-1/4 left-8 transform -rotate-12 pointer-events-none"
-            style={{ opacity: useTransform(x, [0, 150], [0, 1]) }}
+            style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
           >
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-2xl font-bold text-4xl border-4 border-white shadow-2xl drop-shadow-[0_8px_40px_rgba(34,197,94,1)]">
               LIKE
             </div>
           </motion.div>
 
           <motion.div
             className="absolute top-1/4 right-8 transform rotate-12 pointer-events-none"
-            style={{ opacity: useTransform(x, [-150, 0], [1, 0]) }}
+            style={{ opacity: useTransform(x, [-100, 0], [1, 0]) }}
           >
-            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-3xl border-4 border-white shadow-2xl">
+            <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-8 py-3 rounded-2xl font-bold text-4xl border-4 border-white shadow-2xl drop-shadow-[0_8px_40px_rgba(239,68,68,1)]">
               DISLIKE
             </div>
           </motion.div>

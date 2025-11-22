@@ -99,9 +99,9 @@ export function OwnerClientTinderCard({
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
-  // Calculate overlay opacity based on drag distance
-  const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);
-  const leftOverlayOpacity = useTransform(x, [-screenWidth * 0.35, 0], [1, 0]);
+  // Calculate overlay opacity based on drag distance - more responsive
+  const rightOverlayOpacity = useTransform(x, [0, 100], [0, 1]);
+  const leftOverlayOpacity = useTransform(x, [-100, 0], [1, 0]);
 
   const cardStyle = {
     x,
@@ -113,25 +113,25 @@ export function OwnerClientTinderCard({
     <motion.div
       drag={isTop}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.2}
+      dragElastic={0.6}
       onDragEnd={handleDragEnd}
       style={cardStyle}
       animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 500,
-        damping: 35,
-        mass: 0.6
+        stiffness: 350,
+        damping: 28,
+        mass: 0.8
       }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
     >
-      {/* Swipe Overlays - Clean Design */}
+      {/* Swipe Overlays - Enhanced Visibility */}
       {/* Right Swipe - GREEN LIKE */}
       <motion.div
         className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
         style={{ opacity: rightOverlayOpacity }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 via-emerald-500/20 to-green-600/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/50 via-emerald-500/40 to-green-600/50 backdrop-blur-sm" />
         <motion.div
           className="relative text-center"
           style={{
@@ -139,7 +139,7 @@ export function OwnerClientTinderCard({
             rotate: -12
           }}
         >
-          <span className="text-6xl font-black text-white tracking-wider">
+          <span className="text-8xl font-black text-white tracking-wider drop-shadow-[0_8px_40px_rgba(34,197,94,1)]" style={{ textShadow: '0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
             LIKE
           </span>
         </motion.div>
@@ -150,7 +150,7 @@ export function OwnerClientTinderCard({
         className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
         style={{ opacity: leftOverlayOpacity }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 via-rose-500/20 to-red-600/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/50 via-rose-500/40 to-red-600/50 backdrop-blur-sm" />
         <motion.div
           className="relative text-center"
           style={{
@@ -158,7 +158,7 @@ export function OwnerClientTinderCard({
             rotate: 12
           }}
         >
-          <span className="text-6xl font-black text-white tracking-wider">
+          <span className="text-8xl font-black text-white tracking-wider drop-shadow-[0_8px_40px_rgba(239,68,68,1)]" style={{ textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
             PASS
           </span>
         </motion.div>
