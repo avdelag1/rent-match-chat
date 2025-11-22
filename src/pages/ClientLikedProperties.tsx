@@ -98,44 +98,37 @@ const ClientLikedProperties = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="w-full h-full overflow-y-auto p-4 sm:p-8 bg-white pb-24">
+      <div className="w-full h-full overflow-y-auto p-4 sm:p-8 bg-background pb-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-2">
               <Flame className="w-8 h-8 text-red-500" />
               Your Liked Properties
             </h1>
-            <p className="text-gray-600">Properties you've shown interest in.</p>
+            <p className="text-muted-foreground">Properties you've shown interest in.</p>
             <div className="flex items-center justify-center gap-4 mt-4">
               <Button
                 onClick={() => refreshLikedProperties()}
                 variant="outline"
                 size="sm"
                 disabled={isLoading}
-                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
-              {conversationsRemaining > 0 && (
-                <Badge variant="secondary" className="text-sm">
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  {conversationsRemaining} conversation starters remaining
-                </Badge>
-              )}
             </div>
           </div>
 
           {isLoading ? (
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="flex items-center justify-center py-12">
-                <p className="text-gray-600">Loading your liked properties...</p>
+                <p className="text-muted-foreground">Loading your liked properties...</p>
               </CardContent>
             </Card>
           ) : likedProperties.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {likedProperties.map((property) => (
-                <Card key={property.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all duration-300 overflow-hidden group shadow-sm">
+                <Card key={property.id} className="bg-card border-border hover:bg-accent/50 transition-all duration-300 overflow-hidden group shadow-sm">
                   {/* Property Image */}
                   <div 
                     className="relative h-48 overflow-hidden cursor-pointer group"
@@ -204,7 +197,7 @@ const ClientLikedProperties = () => {
                     </div>
 
                     {/* Property Details */}
-                    <div className="flex items-center gap-4 text-gray-600 text-sm">
+                    <div className="flex items-center gap-4 text-muted-foreground text-sm">
                       {property.beds && (
                         <div className="flex items-center gap-1">
                           <Bed className="w-4 h-4" />
@@ -226,7 +219,7 @@ const ClientLikedProperties = () => {
                     </div>
 
                     {/* Price */}
-                    <div className="text-gray-900 font-bold text-xl">
+                    <div className="text-foreground font-bold text-xl">
                       ${property.price?.toLocaleString()}/month
                     </div>
 
@@ -239,7 +232,7 @@ const ClientLikedProperties = () => {
                           </span>
                         ))}
                         {property.amenities.length > 3 && (
-                          <span className="text-gray-500 text-xs">+{property.amenities.length - 3} more</span>
+                          <span className="text-muted-foreground text-xs">+{property.amenities.length - 3} more</span>
                         )}
                       </div>
                     )}
@@ -248,18 +241,13 @@ const ClientLikedProperties = () => {
                     <div className="pt-2">
                       <Button
                         onClick={() => handleContactOwner(property)}
-                        disabled={conversationsRemaining <= 0 || startConversation.isPending}
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        disabled={startConversation.isPending}
+                        className="w-full"
                       >
-                        {conversationsRemaining <= 0 ? (
-                          <>
-                            <Crown className="w-4 h-4 mr-2" />
-                            Upgrade to Contact
-                          </>
-                        ) : startConversation.isPending ? (
+                        {startConversation.isPending ? (
                           <>
                             <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            Starting Conversation...
+                            Connecting...
                           </>
                         ) : (
                           <>
@@ -274,11 +262,11 @@ const ClientLikedProperties = () => {
               ))}
             </div>
           ) : (
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Flame className="w-16 h-16 text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Liked Properties</h3>
-                <p className="text-gray-600 text-center">
+                <Flame className="w-16 h-16 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">No Liked Properties</h3>
+                <p className="text-muted-foreground text-center">
                   Properties you like will appear here.
                 </p>
               </CardContent>
