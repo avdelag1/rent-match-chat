@@ -42,12 +42,12 @@ export function SwipeActionButtons({
               onClick={() => handleAction(onUndo, 'light')}
               disabled={!canUndo || disabled}
               className={`
-                relative h-14 w-14 rounded-full border-2 p-0
+                relative h-14 w-14 rounded-full border-0 p-0
                 ${canUndo && !disabled
-                  ? 'border-yellow-500 bg-yellow-500/10 hover:bg-yellow-500 hover:text-white text-yellow-600'
-                  : 'border-muted bg-muted/20 text-muted-foreground cursor-not-allowed'
+                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/40'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-md'
                 }
-                transition-all duration-200 shadow-md
+                transition-all duration-200
               `}
             >
               <RotateCcw className="h-6 w-6" />
@@ -65,10 +65,9 @@ export function SwipeActionButtons({
               onClick={() => handleAction(onPass, 'warning')}
               disabled={disabled}
               className="
-                h-16 w-16 rounded-full border-2 border-red-500 
-                bg-red-500/10 hover:bg-red-500 hover:text-white 
-                text-red-600 p-0
-                shadow-lg hover:shadow-red-500/30
+                h-16 w-16 rounded-full border-0
+                bg-red-500 hover:bg-red-600 text-white p-0
+                shadow-lg shadow-red-500/50 hover:shadow-red-500/60
                 transition-all duration-200
               "
             >
@@ -87,10 +86,9 @@ export function SwipeActionButtons({
               onClick={() => handleAction(onInfo, 'light')}
               disabled={disabled}
               className="
-                h-12 w-12 rounded-full border-2 border-blue-500 
-                bg-blue-500/10 hover:bg-blue-500 hover:text-white 
-                text-blue-600 p-0
-                shadow-md hover:shadow-blue-500/30
+                h-12 w-12 rounded-full border-0
+                bg-blue-500 hover:bg-blue-600 text-white p-0
+                shadow-md shadow-blue-500/40 hover:shadow-blue-500/50
                 transition-all duration-200
               "
             >
