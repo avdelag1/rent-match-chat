@@ -28,9 +28,9 @@ export function SwipeActionButtons({
   };
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 z-40 pb-safe">
+    <div className="fixed bottom-20 left-0 right-0 z-40 pb-safe pointer-events-none">
       {/* Floating Button Container - Positioned above bottom nav (64px) */}
-      <div className="flex items-center justify-center gap-4 px-6 py-6">
+      <div className="flex items-center justify-center gap-4 px-6 py-6 pointer-events-auto">
           {/* 1. Undo Button (Yellow/Gold) */}
           <motion.div
             whileHover={{ scale: canUndo && !disabled ? 1.05 : 1 }}
