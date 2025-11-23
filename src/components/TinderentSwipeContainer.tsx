@@ -13,7 +13,7 @@ import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { RotateCcw, Sparkles } from 'lucide-react';
+import { RotateCcw, Sparkles, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -334,6 +334,19 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center">
+      {/* Refresh Button - Top Right */}
+      <div className="absolute top-2 right-2 z-50">
+        <Button
+          onClick={handleRefresh}
+          variant="outline"
+          size="icon"
+          className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
+          disabled={isRefetching}
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
+
       {/* Card Container - Full screen swipe experience */}
       <div className="relative w-full h-[calc(100vh-180px)] max-w-lg mx-auto">
         <AnimatePresence mode="sync" initial={false}>
