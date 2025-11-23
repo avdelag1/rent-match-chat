@@ -175,7 +175,7 @@ export function ClientTinderSwipeCard({
                 e.stopPropagation();
                 setReportDialogOpen(true);
               }}
-              className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
+              className="w-11 h-11 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
               title="Report User"
             >
               <Flag className="w-4 h-4" />
@@ -189,7 +189,7 @@ export function ClientTinderSwipeCard({
                 e.stopPropagation();
                 setShareDialogOpen(true);
               }}
-              className="w-10 h-10 rounded-full bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
+              className="w-11 h-11 rounded-full bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
               title="Share Profile"
             >
               <Share2 className="w-4 h-4" />
@@ -235,7 +235,7 @@ export function ClientTinderSwipeCard({
                 </h2>
                 {profile.city && (
                   <div className="flex items-center text-muted-foreground text-xs mb-1">
-                    <MapPin className="w-3 h-3 mr-1" />
+                    <MapPin className="w-4 h-4 mr-1" />
                     <span>{profile.city}</span>
                   </div>
                 )}

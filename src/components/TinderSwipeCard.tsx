@@ -202,7 +202,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
                   {listing.title}
                 </h2>
                 <div className="flex items-center text-muted-foreground text-xs">
-                  <MapPin className="w-3 h-3 mr-1" />
+                  <MapPin className="w-4 h-4 mr-1" />
                   <span>{listing.neighborhood}, {listing.city}</span>
                 </div>
               </div>

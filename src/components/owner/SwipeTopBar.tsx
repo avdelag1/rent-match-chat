@@ -23,7 +23,7 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-lg backdrop-blur-md"
+          className="w-11 h-11 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-lg backdrop-blur-md"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -41,7 +41,7 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
             variant="ghost"
             size="icon"
             onClick={onFilters}
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-lg backdrop-blur-md"
+            className="w-11 h-11 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-lg backdrop-blur-md"
           >
             <SlidersHorizontal className="w-5 h-5" />
           </Button>
