@@ -147,9 +147,9 @@ export function ClientTinderSwipeCard({
           {/* Bottom Gradient - Minimal for photo visibility */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/30 via-black/10 to-transparent pointer-events-none z-10" />
 
-          {/* Story-style Dots */}
+          {/* Story-style Dots - Top Edge */}
           {images.length > 1 && (
-            <div className="absolute top-4 left-0 right-0 flex gap-2 px-4 z-10">
+            <div className="absolute top-3 left-0 right-0 flex gap-2 px-4 z-10">
               {images.map((_, idx) => (
                 <div
                   key={`image-${idx}`}
@@ -165,36 +165,30 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Left - Compact Size */}
-          <div className="absolute top-4 left-4 z-30 flex items-center gap-1.5">
-            {/* Report Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setReportDialogOpen(true);
-              }}
-              className="w-11 h-11 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
-              title="Report User"
-            >
-              <Flag className="w-4 h-4" />
-            </Button>
+          {/* Action Buttons - Spread Across Top Corners */}
+          {/* Report Button - Top Left */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setReportDialogOpen(true);
+            }}
+            className="absolute top-3 left-4 z-30 p-1 text-red-500 hover:text-red-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
+            title="Report User"
+          >
+            <Flag className="w-5 h-5" />
+          </button>
 
-            {/* Share Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShareDialogOpen(true);
-              }}
-              className="w-11 h-11 rounded-full bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
-              title="Share Profile"
-            >
-              <Share2 className="w-4 h-4" />
-            </Button>
-          </div>
+          {/* Share Button - Top Right */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShareDialogOpen(true);
+            }}
+            className="absolute top-3 right-4 z-30 p-1 text-emerald-500 hover:text-emerald-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
+            title="Share Profile"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
 
           {/* Verified Badge */}
           {profile.verified && (
