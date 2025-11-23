@@ -18,63 +18,42 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
   const { isVisible, isAtTop } = useScrollDirection();
 
   return (
-    <motion.header
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isAtTop
-          ? 'bg-background/95 shadow-sm'
-          : 'bg-background/80 shadow-md',
-        'backdrop-blur-xl border-b border-border/20',
-        className
-      )}
-      animate={{
-        y: isVisible ? 0 : -80,
-        opacity: isVisible ? 1 : 0
-      }}
-      transition={{
-        duration: 0.3,
-        ease: 'easeInOut'
-      }}
-      style={{ pointerEvents: isVisible ? 'auto' : 'none' }}
-    >
-      <div className="flex items-center justify-between h-11 px-4 max-w-screen-xl mx-auto">
-        {/* Logo - Compact */}
-        <div className="flex items-center gap-2 select-none flex-shrink-0">
-          <motion.div
-            className="text-red-600 hover:text-red-500 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Flame className="h-5 w-5" />
-          </motion.div>
-          <span className="text-sm font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent hidden sm:inline">
+    <header className={cn('fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-b border-border/50 z-50 shadow-lg', className)}>
+      <div className="flex items-center justify-between h-12 px-4 max-w-screen-xl mx-auto">
+        {/* Logo with Modern Animation */}
+        <div className="flex items-center gap-1.5 select-none">
+          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-full p-1.5 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-200 hover:scale-105">
+            <Flame className="h-4 w-4 text-white" />
+          </div>
+          <span className="text-lg font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent animate-gradient-text">
             TINDERENT
           </span>
         </div>
 
-        {/* Actions - Minimal Icon Buttons */}
-        <div className="flex items-center gap-3">
-          {/* Notifications */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        {/* Actions */}
+        <div className="flex items-center gap-1.5">
+          {/* Notifications (Likes/Matches) */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative h-8 w-8"
+            onClick={onNotificationsClick}
           >
+            <Bell className="h-4 w-4" />
+            {notificationCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-red-500 rounded-full h-3.5 w-3.5 shadow-lg ring-2 ring-white" />
+            )}
+          </Button>
+
+          {/* Filters (Owner only) */}
+          {showFilters && (
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-8 w-8 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
-              onClick={onNotificationsClick}
-              title="Notifications"
+              className="h-8 w-8"
+              onClick={onFiltersClick}
             >
-              <Bell className="h-4 w-4" />
-              {notificationCount > 0 && (
-                <motion.span
-                  className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 shadow-lg"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                />
-              )}
+              <Filter className="h-4 w-4" />
             </Button>
           </motion.div>
 
@@ -97,20 +76,14 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           )}
 
           {/* Settings */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={onSettingsClick}
           >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
-              onClick={onSettingsClick}
-              title="Settings"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </motion.div>
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </motion.header>
