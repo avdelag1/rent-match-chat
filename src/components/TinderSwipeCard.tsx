@@ -25,9 +25,6 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
 
-  // Motion value for bottom sheet vertical drag
-  const sheetY = useMotionValue(0);
-
   // Guard for missing images - memoized
   const images = useMemo(() => {
     const imageCount = Array.isArray(listing.images) ? listing.images.length : 0;
@@ -192,20 +189,21 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
         {/* Bottom Sheet - Collapsible with Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing"
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           drag="y"
           dragConstraints={{ top: 0, bottom: 0 }}
           dragElastic={0.2}
           onDragEnd={handleSheetDragEnd}
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '18%'
+            height: isBottomSheetExpanded ? '75%' : '18%',
+            y: 0
           }}
           transition={{
             type: "spring",
             stiffness: 350,
             damping: 32
           }}
-          style={{ willChange: 'height', y: sheetY }}
+          style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
           <div className="flex justify-center py-2 pointer-events-none">

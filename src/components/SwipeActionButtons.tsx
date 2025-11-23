@@ -27,19 +27,20 @@ export function SwipeActionButtons({
   };
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 z-40 pb-safe pointer-events-none">
-      {/* Floating Button Container - Spread Across Width */}
-      <div className="flex items-center justify-between px-8 pointer-events-auto">
+    <div className="fixed bottom-20 left-0 right-0 z-40 pointer-events-none">
+      {/* Individual Floating Buttons - No Container Background */}
+      <div className="flex items-center justify-between px-8">
           {/* 1. Undo Button (Yellow/Gold) */}
           <motion.div
             whileHover={{ scale: canUndo && !disabled ? 1.15 : 1 }}
             whileTap={{ scale: canUndo && !disabled ? 0.9 : 1 }}
+            className="pointer-events-auto"
           >
             <button
               onClick={() => handleAction(onUndo, 'light')}
               disabled={!canUndo || disabled}
               className={`
-                relative p-2 transition-all duration-200
+                p-2 transition-all duration-200
                 ${canUndo && !disabled
                   ? 'text-yellow-500 hover:text-yellow-600 opacity-100'
                   : 'text-gray-400 opacity-50 cursor-not-allowed'
@@ -54,12 +55,13 @@ export function SwipeActionButtons({
           <motion.div
             whileHover={{ scale: !disabled ? 1.15 : 1 }}
             whileTap={{ scale: !disabled ? 0.9 : 1 }}
+            className="pointer-events-auto"
           >
             <button
               onClick={() => handleAction(onPass, 'warning')}
               disabled={disabled}
               className={`
-                relative p-2 transition-all duration-200
+                p-2 transition-all duration-200
                 ${!disabled
                   ? 'text-red-500 hover:text-red-600'
                   : 'text-gray-400 opacity-50 cursor-not-allowed'
@@ -74,12 +76,13 @@ export function SwipeActionButtons({
           <motion.div
             whileHover={{ scale: !disabled ? 1.15 : 1 }}
             whileTap={{ scale: !disabled ? 0.9 : 1 }}
+            className="pointer-events-auto"
           >
             <button
               onClick={() => handleAction(onInfo, 'light')}
               disabled={disabled}
               className={`
-                relative p-2 transition-all duration-200
+                p-2 transition-all duration-200
                 ${!disabled
                   ? 'text-blue-500 hover:text-blue-600'
                   : 'text-gray-400 opacity-50 cursor-not-allowed'
@@ -94,12 +97,13 @@ export function SwipeActionButtons({
           <motion.div
             whileHover={{ scale: !disabled ? 1.15 : 1 }}
             whileTap={{ scale: !disabled ? 0.9 : 1 }}
+            className="pointer-events-auto"
           >
             <button
               onClick={() => handleAction(onLike, 'success')}
               disabled={disabled}
               className={`
-                relative p-2 transition-all duration-200
+                p-2 transition-all duration-200
                 ${!disabled
                   ? 'text-green-500 hover:text-green-600'
                   : 'text-gray-400 opacity-50 cursor-not-allowed'
