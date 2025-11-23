@@ -331,7 +331,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const currentListing = listings[currentIndex];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
+    <div className="relative w-full h-full flex flex-col items-center justify-start">
       {/* Refresh Button - Top Right */}
       <div className="absolute top-2 right-2 z-50">
         <Button
@@ -346,7 +346,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       </div>
 
       {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-180px)] max-w-lg mx-auto">
+      <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-hidden">
         <AnimatePresence mode="sync" initial={false}>
           {currentListing && (
             <motion.div

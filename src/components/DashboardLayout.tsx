@@ -239,7 +239,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* Main Content - Full screen area for card feed with proper scrolling */}
-      <main className="fixed inset-0 pt-11 pb-16 overflow-hidden">
+      <main className="fixed inset-0 pt-11 pb-14 overflow-hidden">
         <div className="w-full h-full overflow-y-auto">
           {enhancedChildren}
         </div>
