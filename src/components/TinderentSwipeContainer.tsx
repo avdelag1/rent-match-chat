@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TinderentSwipeContainerProps {
   onListingTap: (listingId: string) => void;
@@ -331,19 +332,27 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const currentListing = listings[currentIndex];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start">
-      {/* Refresh Button - Top Right */}
-      <div className="absolute top-2 right-2 z-50">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          size="icon"
-          className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
-          disabled={isRefetching}
-        >
-          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+    <TooltipProvider>
+      <div className="relative w-full h-full flex flex-col items-center justify-start">
+        {/* Refresh Button - Top Right */}
+        <div className="absolute top-2 right-2 z-50">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="icon"
+                className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
+                disabled={isRefetching}
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Refresh new listings</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
 
       {/* Card Container - Full screen swipe experience */}
       <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-hidden">
@@ -403,7 +412,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         onOpenChange={setInsightsModalOpen}
         listing={currentListing}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
 

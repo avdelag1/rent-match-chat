@@ -15,6 +15,7 @@ import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
@@ -234,19 +235,27 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
-      {/* Refresh Button - Top Right */}
-      <div className="absolute top-2 right-2 z-50">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          size="icon"
-          className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
-          disabled={isRefetching}
-        >
-          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+    <TooltipProvider>
+      <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
+        {/* Refresh Button - Top Right */}
+        <div className="absolute top-2 right-2 z-50">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="icon"
+                className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
+                disabled={isRefetching}
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Refresh new clients</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
 
       {/* Single Card Container - No infinite scrolling */}
       <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
@@ -317,6 +326,7 @@ export function ClientSwipeContainer({
         }}
         onMessage={() => currentClient?.user_id && handleConnect(currentClient.user_id)}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
