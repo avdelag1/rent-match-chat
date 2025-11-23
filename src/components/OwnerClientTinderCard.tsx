@@ -165,17 +165,17 @@ export function OwnerClientTinderCard({
       </motion.div>
 
       {/* Card Content */}
-      <div className="relative w-full h-full max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl bg-card/95 backdrop-blur-2xl border-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Main Image with Tap Zones */}
         <div 
-          className="relative w-full h-full cursor-pointer select-none"
+          className="absolute inset-0 w-full h-full cursor-pointer select-none"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >
           <img
             src={images[currentImageIndex]}
             alt={profile.name}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
             draggable={false}
@@ -188,8 +188,11 @@ export function OwnerClientTinderCard({
             }}
           />
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+          {/* Top gradient - for UI visibility */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
+          
+          {/* Bottom gradient - for text visibility */}
+          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
 
           {/* Story-style Dots */}
           {images.length > 1 && (
@@ -252,7 +255,7 @@ export function OwnerClientTinderCard({
 
         {/* Bottom Sheet - Clean Style Matching Property Cards */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
+          className="absolute bottom-0 left-0 right-0 bg-black/85 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           animate={{
             height: isBottomSheetExpanded ? '85%' : '30%',
           }}

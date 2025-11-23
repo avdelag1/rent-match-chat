@@ -238,7 +238,7 @@ export function useSmartListingMatching(
                 subscription_packages(tier, priority_matching, visibility_boost)
               )
             )
-          `)
+          ` as any)
           .eq('status', 'active')
           .eq('is_active', true);
 
@@ -313,7 +313,7 @@ export function useSmartListingMatching(
         }
 
         // Apply client-side filters for amenities (can't be done in SQL easily with JSONB)
-        let filteredListings = listings as Listing[];
+        let filteredListings = listings as unknown as Listing[];
         if (filters?.amenities && filters.amenities.length > 0) {
           filteredListings = filteredListings.filter(listing => {
             const listingAmenities = listing.amenities || [];

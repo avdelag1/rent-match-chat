@@ -48,8 +48,8 @@ export function useNotificationSystem() {
           message: notif.message || '',
           timestamp: new Date(notif.created_at),
           read: notif.read || false,
-          actionUrl: notif.link_url,
-          relatedUserId: notif.related_user_id || undefined,
+          actionUrl: (notif as any).link_url,
+          relatedUserId: (notif as any).related_user_id || undefined,
         }));
         setNotifications(formattedNotifications);
       }

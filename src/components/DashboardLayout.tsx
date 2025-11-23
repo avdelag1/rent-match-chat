@@ -75,10 +75,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   // Lazy load listings and profiles only when insights dialogs are opened
   // This prevents unnecessary API calls on every page load
-  const { data: listings = [], error: listingsError } = useListings({
+  const { data: listings = [], error: listingsError } = useListings([], {
     enabled: showPropertyInsights || showClientInsights
   });
-  const { data: profiles = [], error: profilesError } = useClientProfiles({
+  const { data: profiles = [], error: profilesError } = useClientProfiles([], {
     enabled: showClientInsights
   });
 

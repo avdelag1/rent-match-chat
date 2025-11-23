@@ -281,13 +281,13 @@ export function useSwipe() {
     },
     onSuccess: (data, variables) => {
       // OPTIMIZED: Only invalidate relevant queries based on swipe type
-      const isLike = variables.swipeType === 'like' || variables.swipeType === 'super_like';
+      const isLike = variables.direction === 'right';
 
       if (isLike) {
         // Only invalidate like-related queries on like swipes
         Promise.all([
           queryClient.invalidateQueries({ queryKey: ['likes'] }),
-          queryClient.invalidateQueries({ queryKey: [variables.targetType === 'property' ? 'liked-properties' : 'liked-clients'] }),
+          queryClient.invalidateQueries({ queryKey: [variables.targetType === 'listing' ? 'liked-properties' : 'liked-clients'] }),
           queryClient.invalidateQueries({ queryKey: ['matches'] }),
         ]);
       }
