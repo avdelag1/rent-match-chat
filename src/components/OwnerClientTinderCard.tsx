@@ -188,11 +188,11 @@ export function OwnerClientTinderCard({
             }}
           />
           
-          {/* Top gradient - Reduced for better photo visibility */}
-          <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/40 via-black/20 to-transparent pointer-events-none z-10" />
+          {/* Top gradient - Minimal for UI visibility */}
+          <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/35 via-black/15 to-transparent pointer-events-none z-10" />
 
-          {/* Bottom gradient - Reduced opacity for better photo visibility */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/50 via-black/25 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient - Lighter for better photo visibility */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-10" />
 
           {/* Story-style Dots */}
           {images.length > 1 && (
@@ -255,9 +255,9 @@ export function OwnerClientTinderCard({
 
         {/* Bottom Sheet - Clean Style Matching Property Cards */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-black/85 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '22%',
+            height: isBottomSheetExpanded ? '75%' : '18%',
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 32 }}
           style={{ willChange: 'height' }}
@@ -268,15 +268,15 @@ export function OwnerClientTinderCard({
           </div>
 
           {/* Collapsed Content */}
-          <div className="px-5 pb-4">
-            <div className="flex justify-between items-start mb-2">
+          <div className="px-4 pb-3">
+            <div className="flex justify-between items-start mb-1.5">
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-foreground">
+                <h2 className="text-base font-bold text-foreground">
                   {profile.name}
-                  {profile.age && <span className="text-base text-muted-foreground ml-2">{profile.age}</span>}
+                  {profile.age && <span className="text-sm text-muted-foreground ml-2">{profile.age}</span>}
                 </h2>
                 {profile.city && (
-                  <div className="flex items-center text-muted-foreground text-xs mb-1">
+                  <div className="flex items-center text-muted-foreground text-xs">
                     <MapPin className="w-3 h-3 mr-1" />
                     <span>{profile.city}</span>
                   </div>
@@ -285,11 +285,11 @@ export function OwnerClientTinderCard({
             </div>
 
             {/* Quick Stats */}
-            <div className="flex items-center gap-3 text-muted-foreground text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs">
               {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <Home className="w-4 h-4" />
-                  <span className="font-medium text-xs">{profile.preferred_listing_types[0]}</span>
+                <div className="flex items-center gap-0.5">
+                  <Home className="w-3 h-3" />
+                  <span className="font-medium text-[11px]">{profile.preferred_listing_types[0]}</span>
                 </div>
               )}
             </div>
@@ -356,14 +356,14 @@ export function OwnerClientTinderCard({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full mt-2 text-muted-foreground h-6"
+              className="w-full mt-1 text-muted-foreground h-5"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsBottomSheetExpanded(!isBottomSheetExpanded);
               }}
             >
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${
+                className={`w-3 h-3 transition-transform duration-200 ${
                   isBottomSheetExpanded ? 'rotate-180' : ''
                 }`}
               />

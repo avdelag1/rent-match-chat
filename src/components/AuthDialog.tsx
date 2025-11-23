@@ -36,7 +36,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       // Load remembered email and password for this role
       const rememberedEmail = localStorage.getItem(getStorageKey(role, 'email')) || '';
       const rememberedPassword = localStorage.getItem(getStorageKey(role, 'password')) || '';
-      const hasRemembered = rememberedEmail || rememberedPassword;
+      const hasRemembered = !!(rememberedEmail || rememberedPassword);
 
       setEmail(rememberedEmail);
       setPassword(rememberedPassword);
