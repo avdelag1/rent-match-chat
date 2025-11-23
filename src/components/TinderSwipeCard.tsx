@@ -153,9 +153,6 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             }}
           />
 
-          {/* Top gradient - Minimal for UI visibility */}
-          <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black/15 to-transparent pointer-events-none z-10" />
-
           {/* Bottom gradient - Lighter for better photo visibility */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
           
