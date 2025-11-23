@@ -91,7 +91,6 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
         return [];
       }
     },
-    enabled: !!user,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 2

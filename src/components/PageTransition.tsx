@@ -20,7 +20,6 @@ const pageVariants = {
 
 const pageTransition = {
   duration: 0.15,
-  ease: [0.4, 0, 0.2, 1], // Smooth easing curve
 };
 
 export function PageTransition({ children, className = '' }: PageTransitionProps) {

@@ -97,7 +97,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       dragElastic={0.6}
       onDragEnd={handleDragEnd}
-      className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
+      className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
       animate={{ x: 0, y: 0, rotate: 0 }}
       transition={{
         type: "spring",
@@ -106,13 +106,13 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
         mass: 0.8
       }}
     >
-      <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-3xl" style={{ willChange: 'transform' }}>
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} y={y} />
 
-        {/* Main Image - 9:16 Aspect Ratio */}
+        {/* Main Image - Fullscreen */}
         <div 
-          className="relative h-full overflow-hidden cursor-pointer select-none"
+          className="absolute inset-0 w-full h-full overflow-hidden cursor-pointer select-none"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >
@@ -138,7 +138,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
           <img
             src={images[Math.min(currentImageIndex, imageCount - 1)]}
             alt={listing.title}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             draggable={false}
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
@@ -153,8 +153,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             }}
           />
 
-          {/* Gradient Overlay - from transparent to rgba(0,0,0,0.4) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+          {/* Top gradient - for UI visibility */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
+          
+          {/* Bottom gradient - for text visibility */}
+          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
           
           {/* Verification Badge */}
           {(listing as any).has_verified_documents && (
@@ -175,7 +178,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
         {/* Bottom Sheet - Collapsible with Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
+          className="absolute bottom-0 left-0 right-0 bg-black/85 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           animate={{
             height: isBottomSheetExpanded ? '85%' : '30%'
           }}
@@ -337,7 +340,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             </Button>
           </div>
         </motion.div>
-      </Card>
+      </div>
     </motion.div>
   );
 };

@@ -29,14 +29,12 @@ const ClientDashboard = memo(({ onPropertyInsights, onMessageClick }: ClientDash
   return (
     <DashboardLayout userRole="client">
       <PageTransition>
-        <div className="w-full h-full overflow-y-auto bg-gradient-to-br from-red-50 via-pink-50 to-purple-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl">
-            <TinderentSwipeContainer
-              onListingTap={handleListingTap}
-              onInsights={handleListingTap}
-              onMessageClick={onMessageClick}
-            />
-          </div>
+        <div className="fixed inset-0 w-full h-full overflow-hidden">
+          <TinderentSwipeContainer
+            onListingTap={handleListingTap}
+            onInsights={handleListingTap}
+            onMessageClick={onMessageClick}
+          />
         </div>
 
         <PropertyInsightsDialog
