@@ -144,8 +144,8 @@ export function ClientTinderSwipeCard({
             }}
           />
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+          {/* Gradient Overlay - Reduced opacity for better photo visibility */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
 
           {/* Story-style Dots */}
           {images.length > 1 && (
@@ -165,8 +165,8 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Left */}
-          <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+          {/* Action Buttons - Top Left - Compact Size */}
+          <div className="absolute top-4 left-4 z-30 flex items-center gap-1.5">
             {/* Report Button */}
             <Button
               variant="ghost"
@@ -175,10 +175,10 @@ export function ClientTinderSwipeCard({
                 e.stopPropagation();
                 setReportDialogOpen(true);
               }}
-              className="w-12 h-12 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
+              className="w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
               title="Report User"
             >
-              <Flag className="w-5 h-5" />
+              <Flag className="w-4 h-4" />
             </Button>
 
             {/* Share Button */}
@@ -189,10 +189,10 @@ export function ClientTinderSwipeCard({
                 e.stopPropagation();
                 setShareDialogOpen(true);
               }}
-              className="w-12 h-12 rounded-full bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
+              className="w-10 h-10 rounded-full bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
               title="Share Profile"
             >
-              <Share2 className="w-5 h-5" />
+              <Share2 className="w-4 h-4" />
             </Button>
           </div>
 
@@ -211,7 +211,7 @@ export function ClientTinderSwipeCard({
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
-            height: isBottomSheetExpanded ? '85%' : '30%'
+            height: isBottomSheetExpanded ? '75%' : '22%'
           }}
           transition={{
             type: "spring",
@@ -221,42 +221,42 @@ export function ClientTinderSwipeCard({
           style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
-          <div className="flex justify-center py-3">
-            <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+          <div className="flex justify-center py-2">
+            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
           </div>
 
           {/* Collapsed Content */}
-          <div className="px-6 pb-6">
-            <div className="flex justify-between items-start mb-3">
+          <div className="px-5 pb-4">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-foreground mb-1">
+                <h2 className="text-lg font-bold text-foreground">
                   {profile.name}
-                  {profile.age && <span className="text-xl text-muted-foreground ml-2">{profile.age}</span>}
+                  {profile.age && <span className="text-base text-muted-foreground ml-2">{profile.age}</span>}
                 </h2>
                 {profile.city && (
-                  <div className="flex items-center text-muted-foreground text-sm mb-2">
-                    <MapPin className="w-4 h-4 mr-1" />
+                  <div className="flex items-center text-muted-foreground text-xs mb-1">
+                    <MapPin className="w-3 h-3 mr-1" />
                     <span>{profile.city}</span>
                   </div>
                 )}
               </div>
-              
+
               {profile.budget_max && (
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-primary">
                     ${profile.budget_max.toLocaleString()}
                   </div>
-                  <div className="text-sm text-muted-foreground">budget</div>
+                  <div className="text-xs text-muted-foreground">budget</div>
                 </div>
               )}
             </div>
 
             {/* Quick Stats */}
-            <div className="flex items-center gap-4 text-muted-foreground">
+            <div className="flex items-center gap-3 text-muted-foreground text-sm">
               {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
                 <div className="flex items-center gap-1">
-                  <Home className="w-5 h-5" />
-                  <span className="font-medium">{profile.preferred_listing_types[0]}</span>
+                  <Home className="w-4 h-4" />
+                  <span className="font-medium text-xs">{profile.preferred_listing_types[0]}</span>
                 </div>
               )}
             </div>
@@ -267,7 +267,7 @@ export function ClientTinderSwipeCard({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="mt-6 overflow-y-auto max-h-[calc(85vh-200px)]"
+                className="mt-4 overflow-y-auto max-h-[calc(75vh-200px)]"
               >
                 {/* Interests */}
                 {profile.interests && profile.interests.length > 0 && (
@@ -323,14 +323,14 @@ export function ClientTinderSwipeCard({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full mt-4 text-muted-foreground"
+              className="w-full mt-2 text-muted-foreground h-6"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsBottomSheetExpanded(!isBottomSheetExpanded);
               }}
             >
               <ChevronDown
-                className={`w-5 h-5 transition-transform duration-200 ${
+                className={`w-4 h-4 transition-transform duration-200 ${
                   isBottomSheetExpanded ? 'rotate-180' : ''
                 }`}
               />
