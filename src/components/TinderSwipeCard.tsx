@@ -180,7 +180,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '12%'
+            height: isBottomSheetExpanded ? '75%' : '18%'
           }}
           transition={{
             type: "spring",

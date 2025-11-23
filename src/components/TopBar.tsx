@@ -27,19 +27,18 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           </span>
         </div>
 
-        {/* Actions - Minimal Icon Only - Spread Out */}
-        <div className="flex items-center gap-6">
+        {/* Actions - Minimal Icon Only */}
+        <div className="flex items-center gap-2">
           {/* Notifications (Likes/Matches) */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-8 w-8 hover:bg-transparent transition-colors"
+            className="relative h-9 w-9 hover:bg-background/40 transition-colors"
             onClick={onNotificationsClick}
-            title="Notifications"
           >
-            <Bell className="h-4 w-4 text-foreground/60 hover:text-foreground" />
+            <Bell className="h-4 w-4 text-foreground/70 hover:text-foreground" />
             {notificationCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-red-500 rounded-full h-2.5 w-2.5 shadow-md" />
+              <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 shadow-lg" />
             )}
           </Button>
 
@@ -48,11 +47,10 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 hover:bg-transparent transition-colors"
+              className="h-9 w-9 hover:bg-background/40 transition-colors"
               onClick={onFiltersClick}
-              title="Filters"
             >
-              <Filter className="h-4 w-4 text-foreground/60 hover:text-foreground" />
+              <Filter className="h-4 w-4 text-foreground/70 hover:text-foreground" />
             </Button>
           )}
 
@@ -60,11 +58,10 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 hover:bg-transparent transition-colors"
+            className="h-9 w-9 hover:bg-background/40 transition-colors"
             onClick={onSettingsClick}
-            title="Settings"
           >
-            <Settings className="h-4 w-4 text-foreground/60 hover:text-foreground" />
+            <Settings className="h-4 w-4 text-foreground/70 hover:text-foreground" />
           </Button>
         </div>
       </div>
