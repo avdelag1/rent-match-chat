@@ -165,8 +165,8 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Left - Compact Size */}
-          <div className="absolute top-4 left-4 z-30 flex items-center gap-1.5">
+          {/* Action Buttons - Top Right - Icon Only */}
+          <div className="absolute top-4 right-4 z-30 flex items-center gap-3">
             {/* Report Button */}
             <Button
               variant="ghost"
@@ -175,7 +175,7 @@ export function ClientTinderSwipeCard({
                 e.stopPropagation();
                 setReportDialogOpen(true);
               }}
-              className="w-11 h-11 rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
+              className="w-8 h-8 text-white/80 hover:text-white hover:bg-white/20 transition-colors backdrop-blur-sm"
               title="Report User"
             >
               <Flag className="w-4 h-4" />
@@ -189,7 +189,7 @@ export function ClientTinderSwipeCard({
                 e.stopPropagation();
                 setShareDialogOpen(true);
               }}
-              className="w-11 h-11 rounded-full bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
+              className="w-8 h-8 text-white/80 hover:text-white hover:bg-white/20 transition-colors backdrop-blur-sm"
               title="Share Profile"
             >
               <Share2 className="w-4 h-4" />
@@ -211,7 +211,7 @@ export function ClientTinderSwipeCard({
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '22%'
+            height: isBottomSheetExpanded ? '75%' : '12%'
           }}
           transition={{
             type: "spring",
