@@ -153,11 +153,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             }}
           />
 
-          {/* Top gradient - Reduced for better photo visibility */}
-          <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/40 via-black/20 to-transparent pointer-events-none z-10" />
+          {/* Top gradient - Minimal for UI visibility */}
+          <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/35 via-black/15 to-transparent pointer-events-none z-10" />
 
-          {/* Bottom gradient - Reduced opacity for better photo visibility */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/50 via-black/25 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient - Lighter for better photo visibility */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-10" />
           
           {/* Verification Badge */}
           {(listing as any).has_verified_documents && (
@@ -178,9 +178,9 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
         {/* Bottom Sheet - Collapsible with Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-black/85 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '22%'
+            height: isBottomSheetExpanded ? '75%' : '18%'
           }}
           transition={{
             type: "spring",
@@ -195,82 +195,82 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
           </div>
 
           {/* Collapsed State Content */}
-          <div className="px-5 pb-4">
-            <div className="flex justify-between items-start mb-2">
+          <div className="px-4 pb-3">
+            <div className="flex justify-between items-start mb-1.5">
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-foreground">
+                <h2 className="text-base font-bold text-foreground">
                   {listing.title}
                 </h2>
-                <div className="flex items-center text-muted-foreground text-xs mb-1">
+                <div className="flex items-center text-muted-foreground text-xs">
                   <MapPin className="w-3 h-3 mr-1" />
                   <span>{listing.neighborhood}, {listing.city}</span>
                 </div>
               </div>
 
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary">
+                <div className="text-xl font-bold text-primary">
                   ${listing.price?.toLocaleString()}
                 </div>
-                <div className="text-xs text-muted-foreground">/month</div>
+                <div className="text-[10px] text-muted-foreground">/month</div>
               </div>
             </div>
 
             {/* Key Stats */}
-            <div className="flex items-center gap-3 text-muted-foreground text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs">
               {listing.category === 'vehicle' ? (
                 <>
                   {listing.brand && (
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-xs">{listing.brand}</span>
+                    <div className="flex items-center gap-0.5">
+                      <span className="font-medium text-[11px]">{listing.brand}</span>
                     </div>
                   )}
                   {listing.model && (
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-xs">{listing.model}</span>
+                    <div className="flex items-center gap-0.5">
+                      <span className="font-medium text-[11px]">{listing.model}</span>
                     </div>
                   )}
                   {listing.year && (
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-xs">{listing.year}</span>
+                    <div className="flex items-center gap-0.5">
+                      <span className="font-medium text-[11px]">{listing.year}</span>
                     </div>
                   )}
                   {listing.mileage && (
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-xs">{listing.mileage.toLocaleString()} km</span>
+                    <div className="flex items-center gap-0.5">
+                      <span className="font-medium text-[11px]">{listing.mileage.toLocaleString()} km</span>
                     </div>
                   )}
                 </>
               ) : listing.category === 'motorcycle' || listing.category === 'bicycle' || listing.category === 'yacht' ? (
                 <>
                   {listing.brand && (
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-xs">{listing.brand}</span>
+                    <div className="flex items-center gap-0.5">
+                      <span className="font-medium text-[11px]">{listing.brand}</span>
                     </div>
                   )}
                   {listing.model && (
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-xs">{listing.model}</span>
+                    <div className="flex items-center gap-0.5">
+                      <span className="font-medium text-[11px]">{listing.model}</span>
                     </div>
                   )}
                 </>
               ) : (
                 <>
                   {listing.beds && (
-                    <div className="flex items-center gap-1">
-                      <Bed className="w-4 h-4" />
-                      <span className="font-medium text-xs">{listing.beds}</span>
+                    <div className="flex items-center gap-0.5">
+                      <Bed className="w-3 h-3" />
+                      <span className="font-medium text-[11px]">{listing.beds}</span>
                     </div>
                   )}
                   {listing.baths && (
-                    <div className="flex items-center gap-1">
-                      <Bath className="w-4 h-4" />
-                      <span className="font-medium text-xs">{listing.baths}</span>
+                    <div className="flex items-center gap-0.5">
+                      <Bath className="w-3 h-3" />
+                      <span className="font-medium text-[11px]">{listing.baths}</span>
                     </div>
                   )}
                   {listing.square_footage && (
-                    <div className="flex items-center gap-1">
-                      <Square className="w-4 h-4" />
-                      <span className="font-medium text-xs">{listing.square_footage} ft²</span>
+                    <div className="flex items-center gap-0.5">
+                      <Square className="w-3 h-3" />
+                      <span className="font-medium text-[11px]">{listing.square_footage} ft²</span>
                     </div>
                   )}
                 </>
@@ -325,7 +325,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             <Button
               variant="ghost"
               size="sm"
-              className="w-full mt-2 text-muted-foreground h-6"
+              className="w-full mt-1 text-muted-foreground h-5"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsBottomSheetExpanded(!isBottomSheetExpanded);
@@ -333,7 +333,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
               }}
             >
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${
+                className={`w-3 h-3 transition-transform duration-200 ${
                   isBottomSheetExpanded ? 'rotate-180' : ''
                 }`}
               />
