@@ -33,7 +33,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-8 w-8"
+            className="relative h-10 w-10"
             onClick={onNotificationsClick}
           >
             <Bell className="h-4 w-4" />
@@ -47,7 +47,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className="h-10 w-10"
               onClick={onFiltersClick}
             >
               <Filter className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-10 w-10"
             onClick={onSettingsClick}
           >
             <Settings className="h-4 w-4" />
