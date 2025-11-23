@@ -112,7 +112,7 @@ export function OwnerClientTinderCard({
   return (
     <motion.div
       drag={isTop}
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.6}
       onDragEnd={handleDragEnd}
       style={cardStyle}
