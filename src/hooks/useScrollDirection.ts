@@ -15,8 +15,8 @@ export function useScrollDirection() {
       // Show header when scrolling up or at top
       if (scrollDirection === 'up' || currentScrollY < 50) {
         setIsVisible(true);
-      } else if (scrollDelta > 5) {
-        // Hide header when scrolling down (with small threshold to prevent flickering)
+      } else if (scrollDelta > 25) {
+        // Hide header when scrolling down (with meaningful threshold to prevent accidental hiding)
         setIsVisible(false);
       }
 
@@ -32,7 +32,7 @@ export function useScrollDirection() {
       // Show header again after scroll stops (optional, for better UX)
       scrollTimeout.current = setTimeout(() => {
         setIsVisible(true);
-      }, 1500);
+      }, 800);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });

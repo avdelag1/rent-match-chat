@@ -28,7 +28,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
         className
       )}
       animate={{
-        y: isVisible ? 0 : -80,
+        y: isVisible ? 0 : -44,
         opacity: isVisible ? 1 : 0
       }}
       transition={{
@@ -62,14 +62,14 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-8 w-8 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
+              className="relative h-9 w-9 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
               onClick={onNotificationsClick}
               title="Notifications"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
                 <motion.span
-                  className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 shadow-lg"
+                  className="absolute -top-0.5 -right-0.5 bg-red-500 rounded-full h-4 w-4 shadow-lg"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -87,11 +87,11 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
+                className="h-9 w-9 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
                 onClick={onFiltersClick}
                 title="Filters"
               >
-                <Filter className="h-4 w-4" />
+                <Filter className="h-5 w-5" />
               </Button>
             </motion.div>
           )}
@@ -104,11 +104,11 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
+              className="h-9 w-9 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
               onClick={onSettingsClick}
               title="Settings"
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-5 w-5" />
             </Button>
           </motion.div>
         </div>

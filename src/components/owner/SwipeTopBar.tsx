@@ -16,9 +16,12 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
   return (
     <motion.div
       className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300"
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        pointerEvents: isVisible ? 'auto' : 'none'
+      }}
       animate={{
-        y: isVisible ? 0 : -70,
+        y: isVisible ? 0 : -44,
         opacity: isVisible ? 1 : 0,
         backgroundColor: isVisible ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.2)'
       }}
@@ -26,7 +29,6 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
         duration: 0.3,
         ease: 'easeInOut'
       }}
-      style={{ pointerEvents: isVisible ? 'auto' : 'none' }}
     >
       <div className="flex items-center justify-between px-4 py-3 h-11 backdrop-blur-xl bg-gradient-to-b from-black/40 to-transparent border-b border-white/5">
         {/* Back Button - Icon Only */}
@@ -38,10 +40,10 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
             variant="ghost"
             size="icon"
             onClick={onBack}
-            className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            className="h-9 w-9 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
             title="Back"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </Button>
         </motion.div>
 
@@ -50,7 +52,7 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-white/70 text-xs font-medium"
+          className="text-white/70 text-sm font-medium"
         >
           <span className="text-white">{currentIndex + 1}</span>
           <span className="text-white/50"> / {totalCount}</span>
@@ -66,10 +68,10 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
               variant="ghost"
               size="icon"
               onClick={onFilters}
-              className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              className="h-9 w-9 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
               title="Filters"
             >
-              <SlidersHorizontal className="w-4 h-4" />
+              <SlidersHorizontal className="w-5 h-5" />
             </Button>
           </motion.div>
         )}
