@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,8 @@ interface AuthDialogProps {
   role: 'client' | 'owner';
 }
 
+const getStorageKey = (role: 'client' | 'owner', field: string) => `auth_${role}_${field}`;
+
 export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -27,6 +29,24 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp, signInWithOAuth } = useAuth();
+
+  // Reset form state when role changes and load remembered credentials
+  useEffect(() => {
+    if (isOpen) {
+      // Load remembered email and password for this role
+      const rememberedEmail = localStorage.getItem(getStorageKey(role, 'email')) || '';
+      const rememberedPassword = localStorage.getItem(getStorageKey(role, 'password')) || '';
+      const hasRemembered = rememberedEmail || rememberedPassword;
+
+      setEmail(rememberedEmail);
+      setPassword(rememberedPassword);
+      setRememberMe(hasRemembered);
+      setName('');
+      setIsLogin(true);
+      setIsForgotPassword(false);
+      setShowPassword(false);
+    }
+  }, [isOpen, role]);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,10 +101,14 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         const validated = loginSchema.parse({ email, password });
         const { error } = await signIn(validated.email, validated.password, role);
         if (!error) {
+          // Store credentials if remember me is checked
           if (rememberMe) {
-            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem(getStorageKey(role, 'email'), validated.email);
+            localStorage.setItem(getStorageKey(role, 'password'), validated.password);
           } else {
-            localStorage.removeItem('rememberMe');
+            // Clear stored credentials if remember me is unchecked
+            localStorage.removeItem(getStorageKey(role, 'email'));
+            localStorage.removeItem(getStorageKey(role, 'password'));
           }
           onClose();
         } else {
@@ -94,6 +118,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         const validated = signupSchema.parse({ name, email, password });
         const { error } = await signUp(validated.email, validated.password, role, validated.name);
         if (!error) {
+          // Clear stored credentials after successful signup
+          localStorage.removeItem(getStorageKey(role, 'email'));
+          localStorage.removeItem(getStorageKey(role, 'password'));
           onClose();
         } else {
           throw error;
@@ -343,9 +370,11 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         type="button"
                         onClick={() => {
                           setIsLogin(!isLogin);
+                          // Clear form fields when toggling between login/signup
                           setEmail('');
                           setPassword('');
                           setName('');
+                          setShowPassword(false);
                         }}
                         className="text-primary hover:underline font-semibold"
                       >
