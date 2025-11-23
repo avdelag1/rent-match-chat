@@ -113,25 +113,22 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe pointer-events-none">
-      <div className="flex items-center justify-center gap-3 px-6 py-4 pointer-events-auto">
+      <div className="flex items-center justify-center gap-6 px-6 py-4 pointer-events-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item);
 
-          // Color scheme based on item
-          const getButtonStyle = () => {
-            if (item.isCenter) {
-              return 'bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/30 w-16 h-16';
-            }
-            
+          // Color scheme based on item - just icons, no circles
+          const getIconColor = () => {
             if (active) {
-              if (item.id === 'browse') return 'bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/30';
-              if (item.id === 'likes') return 'bg-gradient-to-br from-pink-500 to-red-500 text-white shadow-lg shadow-pink-500/30';
-              if (item.id === 'messages') return 'bg-blue-500 text-white shadow-lg shadow-blue-500/30';
-              return 'bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/30';
+              if (item.id === 'browse') return 'text-red-500';
+              if (item.id === 'likes' || item.id === 'liked') return 'text-pink-500';
+              if (item.id === 'messages') return 'text-blue-500';
+              if (item.id === 'listings') return 'text-red-500';
+              if (item.id === 'profile') return 'text-red-500';
+              return 'text-red-500';
             }
-            
-            return 'bg-white/90 backdrop-blur-md text-gray-600 border-2 border-gray-200 shadow-md';
+            return 'text-gray-500';
           };
 
           return (
@@ -139,23 +136,22 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               key={item.id}
               onClick={() => handleNavClick(item)}
               className={cn(
-                'relative rounded-full transition-all duration-200 select-none touch-manipulation flex items-center justify-center',
-                'active:scale-95 hover:scale-105',
-                getButtonStyle(),
-                item.isCenter ? 'w-16 h-16' : 'w-14 h-14'
+                'relative transition-all duration-200 select-none touch-manipulation flex items-center justify-center p-2',
+                'active:scale-90 hover:scale-110',
+                getIconColor()
               )}
             >
               {/* Notification Badge - Dot Style */}
-              {item.badge && item.badge > 0 && !item.isCenter && (
-                <span 
+              {item.badge && item.badge > 0 && (
+                <span
                   className={cn(
-                    "absolute -top-0.5 -right-0.5 rounded-full h-4 w-4 flex items-center justify-center shadow-lg ring-2 ring-white",
+                    "absolute -top-0.5 -right-0.5 rounded-full h-3 w-3 flex items-center justify-center shadow-lg",
                     item.id === 'messages' ? 'bg-blue-500' : 'bg-pink-500'
                   )}
                 />
               )}
 
-              <Icon className={cn('h-6 w-6', item.isCenter && 'h-7 w-7')} />
+              <Icon className={cn('h-6 w-6', item.isCenter && 'h-7 w-7')} strokeWidth={active ? 2.5 : 2} />
             </button>
           );
         })}
