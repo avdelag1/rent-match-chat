@@ -144,8 +144,8 @@ export function ClientTinderSwipeCard({
             }}
           />
           
-          {/* Gradient Overlay - Reduced opacity for better photo visibility */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+          {/* Bottom Gradient - Minimal for photo visibility */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/30 via-black/10 to-transparent pointer-events-none z-10" />
 
           {/* Story-style Dots */}
           {images.length > 1 && (
