@@ -17,21 +17,22 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
       className="fixed top-0 left-0 right-0 z-[100] bg-transparent"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-2">
         {/* Back Button */}
         <Button
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="w-10 h-10 text-white hover:bg-white/10 transition-colors"
+          className="w-8 h-8 text-white hover:bg-transparent transition-colors"
+          title="Back"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
         </Button>
 
         {/* Counter - Minimal Style */}
-        <div className="text-white/80 font-semibold text-sm">
+        <div className="text-white/70 font-medium text-xs">
           <span>{currentIndex + 1}</span>
-          <span className="text-white/50"> / {totalCount}</span>
+          <span className="text-white/40"> / {totalCount}</span>
         </div>
 
         {/* Filter Button */}
@@ -40,9 +41,10 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
             variant="ghost"
             size="icon"
             onClick={onFilters}
-            className="w-10 h-10 text-white hover:bg-white/10 transition-colors"
+            className="w-8 h-8 text-white hover:bg-transparent transition-colors"
+            title="Filters"
           >
-            <SlidersHorizontal className="w-5 h-5" />
+            <SlidersHorizontal className="w-4 h-4" />
           </Button>
         )}
       </div>
