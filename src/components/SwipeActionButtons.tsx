@@ -29,7 +29,7 @@ export function SwipeActionButtons({
   return (
     <div className="fixed bottom-20 left-0 right-0 z-40 pb-safe pointer-events-none">
       {/* Floating Button Container - Spread Across Width */}
-      <div className="flex items-center justify-between px-8 py-6 pointer-events-auto">
+      <div className="flex items-center justify-between px-8 pointer-events-auto">
           {/* 1. Undo Button (Yellow/Gold) */}
           <motion.div
             whileHover={{ scale: canUndo && !disabled ? 1.15 : 1 }}

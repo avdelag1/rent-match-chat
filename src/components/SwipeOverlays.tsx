@@ -3,10 +3,9 @@ import { Heart, X, Star } from 'lucide-react';
 
 interface SwipeOverlaysProps {
   x: MotionValue<number>;
-  y: MotionValue<number>;
 }
 
-export function SwipeOverlays({ x, y }: SwipeOverlaysProps) {
+export function SwipeOverlays({ x }: SwipeOverlaysProps) {
   // Calculate opacity based on drag distance - much more responsive
   const likeOpacity = useTransform(x, [0, 100], [0, 1]);
   const passOpacity = useTransform(x, [-100, 0], [1, 0]);

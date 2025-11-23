@@ -21,10 +21,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Motion values for drag - enhanced for smoother feel
+  // Motion values for drag - horizontal only for card swipes
   const x = useMotionValue(0);
-  const y = useMotionValue(0);
   const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
+
+  // Motion value for bottom sheet vertical drag
+  const sheetY = useMotionValue(0);
 
   // Guard for missing images - memoized
   const images = useMemo(() => {
@@ -37,11 +39,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
   const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isTop) return;
     e.stopPropagation();
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
-    
+
     // Left 30% = previous, Center 40% = expand details, Right 30% = next
     if (clickX < width * 0.3 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
@@ -54,6 +56,22 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
       triggerHaptic('medium');
     }
   }, [isTop, imageCount, isBottomSheetExpanded]);
+
+  // Handle bottom sheet drag gestures
+  const handleSheetDragEnd = useCallback((event: any, info: PanInfo) => {
+    const { offset, velocity } = info;
+    const swipeThreshold = 50;
+    const velocityThreshold = 300;
+
+    // Swipe up = expand, Swipe down = collapse
+    if (offset.y < -swipeThreshold || velocity.y < -velocityThreshold) {
+      setIsBottomSheetExpanded(true);
+      triggerHaptic('medium');
+    } else if (offset.y > swipeThreshold || velocity.y > velocityThreshold) {
+      setIsBottomSheetExpanded(false);
+      triggerHaptic('light');
+    }
+  }, []);
 
   // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
@@ -75,7 +93,6 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
   const cardStyle = {
     x,
-    y,
     rotate: isTop ? rotate : 0,
     scale: isTop ? 1 : 0.95,
     zIndex: isTop ? 10 : 1,
@@ -93,12 +110,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
     <motion.div
       ref={cardRef}
       style={cardStyle}
-      drag={isTop ? true : false}
-      dragConstraints={{ top: 0, bottom: 0 }}
+      drag={isTop ? "x" : false}
+      dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.6}
       onDragEnd={handleDragEnd}
       className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
-      animate={{ x: 0, y: 0, rotate: 0 }}
+      animate={{ x: 0, rotate: 0 }}
       transition={{
         type: "spring",
         stiffness: 350,
@@ -108,7 +125,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
     >
       <div className="absolute inset-0 w-full h-full overflow-hidden rounded-t-3xl">
         {/* Swipe Overlays */}
-        <SwipeOverlays x={x} y={y} />
+        <SwipeOverlays x={x} />
 
         {/* Main Image - Fullscreen */}
         <div
@@ -118,14 +135,14 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
         >
           {/* Story-Style Dots at Top */}
           {imageCount > 1 && (
-            <div className="absolute top-4 left-0 right-0 z-20 flex justify-center gap-1 px-4">
+            <div className="absolute top-4 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
               {images.map((_, index) => (
                 <div
                   key={index}
-                  className="flex-1 h-1 rounded-full bg-white/30 backdrop-blur-sm overflow-hidden"
+                  className="flex-1 h-1.5 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
                 >
                   <div
-                    className={`h-full bg-white transition-all duration-200 ${
+                    className={`h-full bg-white shadow-lg transition-all duration-200 ${
                       index === currentImageIndex ? 'w-full' : 'w-0'
                     }`}
                   />
@@ -175,7 +192,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
         {/* Bottom Sheet - Collapsible with Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing"
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleSheetDragEnd}
           animate={{
             height: isBottomSheetExpanded ? '75%' : '18%'
           }}
@@ -184,11 +205,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             stiffness: 350,
             damping: 32
           }}
-          style={{ willChange: 'height' }}
+          style={{ willChange: 'height', y: sheetY }}
         >
           {/* Drag Handle */}
-          <div className="flex justify-center py-2">
-            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+          <div className="flex justify-center py-2 pointer-events-none">
+            <div className="w-10 h-1.5 bg-white/50 rounded-full" />
           </div>
 
           {/* Collapsed State Content */}
