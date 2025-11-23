@@ -1,7 +1,9 @@
 import { Bell, Settings, Flame, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
 
 interface TopBarProps {
   onNotificationsClick?: () => void;
@@ -13,6 +15,7 @@ interface TopBarProps {
 
 export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
+  const { isVisible, isAtTop } = useScrollDirection();
 
   return (
     <header className={cn('fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-b border-border/50 z-50 shadow-lg', className)}>
@@ -52,6 +55,24 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             >
               <Filter className="h-4 w-4" />
             </Button>
+          </motion.div>
+
+          {/* Filters (Owner only) */}
+          {showFilters && (
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-transparent text-foreground/70 hover:text-foreground transition-colors"
+                onClick={onFiltersClick}
+                title="Filters"
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+            </motion.div>
           )}
 
           {/* Settings */}
@@ -65,6 +86,6 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           </Button>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }
