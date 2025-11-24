@@ -193,7 +193,7 @@ export function OwnerClientTinderCard({
 
           {/* Story-style Dots - Top Edge */}
           {images.length > 1 && (
-            <div className="absolute top-3 left-0 right-0 flex gap-2 px-4 z-10">
+            <div className="absolute top-16 left-0 right-0 flex gap-2 px-4 z-10">
               {images.map((_, idx) => (
                 <div
                   key={idx}

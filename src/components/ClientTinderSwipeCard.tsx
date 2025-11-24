@@ -121,7 +121,7 @@ export function ClientTinderSwipeCard({
     >
       <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-t-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Swipe Overlays */}
-        <SwipeOverlays x={x} y={y} />
+        <SwipeOverlays x={x} />
         {/* Main Image with Tap Zones */}
         <div
           className="relative w-full h-full cursor-pointer select-none rounded-t-3xl overflow-hidden"
@@ -149,7 +149,7 @@ export function ClientTinderSwipeCard({
 
           {/* Story-style Dots - Top Edge */}
           {images.length > 1 && (
-            <div className="absolute top-3 left-0 right-0 flex gap-2 px-4 z-10">
+            <div className="absolute top-16 left-0 right-0 flex gap-2 px-4 z-10">
               {images.map((_, idx) => (
                 <div
                   key={`image-${idx}`}
