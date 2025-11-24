@@ -189,12 +189,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
         {/* Bottom Sheet - Collapsible with Glassmorphism */}
          <motion.div
--          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
--          drag="y"
--          dragConstraints={{ top: 0, bottom: 0 }}
--          dragElastic={0.2}
--          onDragEnd={handleSheetDragEnd}
-+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
            animate={{
              height: isBottomSheetExpanded ? '75%' : '18%',
              y: 0
