@@ -13,6 +13,20 @@ export function useMonthlySubscriptionBenefits() {
   const { user } = useAuth();
   const messageActivations = useMessageActivations();
 
+  // Extract subscription details
+  const pkg = subscription?.subscription_packages;
+  const planName = pkg?.name || 'free';
+  const tier = pkg?.tier || 'free';
+  const isMonthly = subscription?.subscription_packages?.package_category?.includes('monthly');
+
+  // Define message limits per tier
+  const messageLimit = tier === 'unlimited' ? 999
+    : tier === 'premium_plus' ? 20
+    : tier === 'premium' ? 15
+    : tier === 'basic' ? 8
+    : tier === 'pay_per_use' ? 0
+    : 0;
+
   // Fetch monthly message usage
   const { data: monthlyUsage } = useQuery({
     queryKey: ['monthly-message-usage', user?.id],
@@ -38,20 +52,6 @@ export function useMonthlySubscriptionBenefits() {
     },
     enabled: !!user?.id && !!subscription?.is_active,
   });
-
-  // Extract subscription details
-  const pkg = subscription?.subscription_packages;
-  const planName = pkg?.name || 'free';
-  const tier = pkg?.tier || 'free';
-  const isMonthly = subscription?.subscription_packages?.package_category?.includes('monthly');
-
-  // Define message limits per tier
-  const messageLimit = tier === 'unlimited' ? 999
-    : tier === 'premium_plus' ? 20
-    : tier === 'premium' ? 15
-    : tier === 'basic' ? 8
-    : tier === 'pay_per_use' ? 0
-    : 0;
 
   // Define visibility ranking (lower = more visible)
   const visibilityRank = tier === 'unlimited' ? 1

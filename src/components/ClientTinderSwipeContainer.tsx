@@ -386,24 +386,17 @@ export function ClientTinderSwipeContainer({
       </div>
 
       {/* Action Buttons - Overlay at Bottom of Card */}
--      <SwipeActionButtons
--        onUndo={handleUndo}
--        onPass={() => handleButtonSwipe('left')}
--        onInfo={handleInsights}
--        onLike={() => handleButtonSwipe('right')}
--        canUndo={canUndo}
--      />
-+      <div className="pointer-events-none absolute inset-x-0 bottom-6 z-40 flex justify-center">
-+        <div className="w-full max-w-md px-4">
-+          <SwipeActionButtons
-+            onUndo={handleUndo}
-+            onPass={() => handleButtonSwipe('left')}
-+            onInfo={handleInsights}
-+            onLike={() => handleButtonSwipe('right')}
-+            canUndo={canUndo}
-+          />
-+        </div>
-+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-6 z-40 flex justify-center">
+        <div className="w-full max-w-md px-4">
+          <SwipeActionButtons
+            onUndo={handleUndo}
+            onPass={() => handleButtonSwipe('left')}
+            onInfo={handleInsights}
+            onLike={() => handleButtonSwipe('right')}
+            canUndo={canUndo}
+          />
+        </div>
+      </div>
  
       {/* Insights Modal */}
       {currentProfile && (
