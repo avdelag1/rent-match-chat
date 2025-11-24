@@ -251,9 +251,9 @@ We are not liable for delays or failures due to circumstances beyond our reasona
 
 For questions about these Terms, contact us:
 
-- **Email**: support@tinderent.com
-- **Address**: [Your Business Address]
-- **Phone**: [Your Business Phone]
+- **Email**: villarrealdg@gmail.com
+- **Address**: Mexico
+- **Phone**: Contact via email
 
 ## 16. Special Provisions
 

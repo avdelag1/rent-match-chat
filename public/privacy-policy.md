@@ -60,7 +60,7 @@ You have the right to:
 - **Opt-Out**: Disable location services, push notifications, or marketing emails
 - **Data Portability**: Receive your data in a portable format
 
-To exercise these rights, contact us at: [support@tinderent.com]
+To exercise these rights, contact us at: villarrealdg@gmail.com
 
 ## 6. Data Security
 
@@ -114,9 +114,9 @@ We may update this Privacy Policy periodically. We will notify you of significan
 
 If you have questions about this Privacy Policy, please contact us:
 
-- **Email**: support@tinderent.com
-- **Address**: [Your Business Address]
-- **Phone**: [Your Business Phone]
+- **Email**: villarrealdg@gmail.com
+- **Address**: Mexico
+- **Phone**: Contact via email
 
 ## 14. Regional Specific Provisions
 
