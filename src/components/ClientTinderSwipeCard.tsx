@@ -104,21 +104,23 @@ export function ClientTinderSwipeCard({
 
   return (
     <motion.div
-      ref={cardRef}
-      style={cardStyle}
-      drag={isTop ? true : false}
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.6}
-      onDragEnd={handleDragEnd}
-      className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
-      animate={{ x: 0, y: 0, rotate: 0 }}
-      transition={{
-        type: "spring",
-        stiffness: 350,
-        damping: 28,
-        mass: 0.8
-      }}
-    >
+       ref={cardRef}
+       style={cardStyle}
+-      drag={isTop ? true : false}
+-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
++      drag={isTop ? "x" : false}
++      dragConstraints={{ left: 0, right: 0 }}
+       dragElastic={0.6}
+       onDragEnd={handleDragEnd}
+       className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
+       animate={{ x: 0, y: 0, rotate: 0 }}
+       transition={{
+         type: "spring",
+         stiffness: 350,
+         damping: 28,
+         mass: 0.8
+       }}
+     >
       <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-t-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} />
