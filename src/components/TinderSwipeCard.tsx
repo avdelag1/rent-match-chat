@@ -188,23 +188,24 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
         </div>
 
         {/* Bottom Sheet - Collapsible with Glassmorphism */}
-        <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
-          drag="y"
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleSheetDragEnd}
-          animate={{
-            height: isBottomSheetExpanded ? '75%' : '18%',
-            y: 0
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 350,
-            damping: 32
-          }}
-          style={{ willChange: 'height' }}
-        >
+         <motion.div
+-          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+-          drag="y"
+-          dragConstraints={{ top: 0, bottom: 0 }}
+-          dragElastic={0.2}
+-          onDragEnd={handleSheetDragEnd}
++          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+           animate={{
+             height: isBottomSheetExpanded ? '75%' : '18%',
+             y: 0
+           }}
+           transition={{
+             type: "spring",
+             stiffness: 350,
+             damping: 32
+           }}
+           style={{ willChange: 'height' }}
+         >
           {/* Drag Handle */}
           <div className="flex justify-center py-2 pointer-events-none">
             <div className="w-10 h-1.5 bg-white/50 rounded-full" />
