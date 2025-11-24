@@ -90,8 +90,10 @@ const App = () => (
                   <Suspense fallback={
                     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
                       <div className="space-y-4 text-center">
+                        <div className="text-white text-2xl font-bold mb-4">TindeRent</div>
                         <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
                         <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
+                        <p className="text-white/60 text-sm mt-4">Loading your app...</p>
                       </div>
                     </div>
                   }>
