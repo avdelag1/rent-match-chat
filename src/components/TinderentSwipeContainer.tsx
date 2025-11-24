@@ -332,18 +332,20 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-start">
-      {/* Refresh Button - Top Right */}
-      <div className="absolute top-2 right-2 z-50">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          size="icon"
-          className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
-          disabled={isRefetching}
-        >
-          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+      {/* Refresh Button - Top Right - Only show when all cards swiped */}
+      {currentIndex >= listings.length && (
+        <div className="absolute top-2 right-2 z-50">
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="icon"
+            className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
+            disabled={isRefetching}
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
+      )}
 
       {/* Card Container - Full screen swipe experience */}
       <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-hidden">
