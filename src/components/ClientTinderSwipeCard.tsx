@@ -119,7 +119,7 @@ export function ClientTinderSwipeCard({
          mass: 0.8
        }}
      >
-      <Card className="relative w-full h-[min(85vh,650px)] overflow-hidden bg-card/95 backdrop-blur-2xl border-none shadow-card rounded-t-3xl" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+      <div className="absolute inset-0 w-full h-full overflow-hidden rounded-t-3xl">
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} />
         {/* Main Image with Tap Zones */}
@@ -144,19 +144,19 @@ export function ClientTinderSwipeCard({
             }}
           />
           
-          {/* Bottom Gradient - Minimal for photo visibility */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/30 via-black/10 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient - Lighter for better photo visibility */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
 
-          {/* Story-style Dots - Top Edge */}
+          {/* Story-Style Dots at Top */}
           {images.length > 1 && (
-            <div className="absolute top-16 left-0 right-0 flex gap-2 px-4 z-10">
+            <div className="absolute top-16 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
               {images.map((_, idx) => (
                 <div
                   key={`image-${idx}`}
-                  className="flex-1 h-1 rounded-full bg-white/30 backdrop-blur-sm overflow-hidden"
+                  className="flex-1 h-1.5 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
                 >
                   <div
-                    className={`h-full bg-white transition-all duration-200 ${
+                    className={`h-full bg-white shadow-lg transition-all duration-200 ${
                       idx === currentImageIndex ? 'w-full' : 'w-0'
                     }`}
                   />
@@ -201,11 +201,12 @@ export function ClientTinderSwipeCard({
           )}
         </div>
 
-        {/* Bottom Sheet - Clean Style Matching Property Cards */}
+        {/* Bottom Sheet - Collapsible with Glassmorphism */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl rounded-t-[24px] shadow-2xl border-t border-border/50"
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '22%'
+            height: isBottomSheetExpanded ? '75%' : '18%',
+            y: 0
           }}
           transition={{
             type: "spring",
@@ -215,17 +216,17 @@ export function ClientTinderSwipeCard({
           style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
-          <div className="flex justify-center py-2">
-            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+          <div className="flex justify-center py-2 pointer-events-none">
+            <div className="w-10 h-1.5 bg-white/50 rounded-full" />
           </div>
 
-          {/* Collapsed Content */}
-          <div className="px-5 pb-4">
-            <div className="flex justify-between items-start mb-2">
+          {/* Collapsed State Content */}
+          <div className="px-4 pb-3">
+            <div className="flex justify-between items-start mb-1.5">
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-foreground">
+                <h2 className="text-base font-bold text-foreground">
                   {profile.name}
-                  {profile.age && <span className="text-base text-muted-foreground ml-2">{profile.age}</span>}
+                  {profile.age && <span className="text-sm text-muted-foreground ml-2">{profile.age}</span>}
                 </h2>
                 {profile.city && (
                   <div className="flex items-center text-muted-foreground text-xs mb-1">
@@ -237,20 +238,20 @@ export function ClientTinderSwipeCard({
 
               {profile.budget_max && (
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-xl font-bold text-primary">
                     ${profile.budget_max.toLocaleString()}
                   </div>
-                  <div className="text-xs text-muted-foreground">budget</div>
+                  <div className="text-[10px] text-muted-foreground">/month</div>
                 </div>
               )}
             </div>
 
-            {/* Quick Stats */}
-            <div className="flex items-center gap-3 text-muted-foreground text-sm">
+            {/* Key Stats */}
+            <div className="flex items-center gap-2 text-muted-foreground text-xs">
               {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <Home className="w-4 h-4" />
-                  <span className="font-medium text-xs">{profile.preferred_listing_types[0]}</span>
+                <div className="flex items-center gap-0.5">
+                  <Home className="w-3 h-3" />
+                  <span className="font-medium text-[11px]">{profile.preferred_listing_types[0]}</span>
                 </div>
               )}
             </div>
@@ -317,21 +318,22 @@ export function ClientTinderSwipeCard({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full mt-2 text-muted-foreground h-6"
+              className="w-full mt-1 text-muted-foreground h-5"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsBottomSheetExpanded(!isBottomSheetExpanded);
+                triggerHaptic('light');
               }}
             >
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${
+                className={`w-3 h-3 transition-transform duration-200 ${
                   isBottomSheetExpanded ? 'rotate-180' : ''
                 }`}
               />
             </Button>
           </div>
         </motion.div>
-      </Card>
+      </div>
 
       {/* Report Dialog */}
       <ReportDialog
