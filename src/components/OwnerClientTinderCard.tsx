@@ -111,8 +111,8 @@ export function OwnerClientTinderCard({
 
   return (
     <motion.div
-      drag={isTop}
-      dragConstraints={{ top: 0, bottom: 0 }}
+      drag={isTop ? "x" : false}
+      dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.6}
       onDragEnd={handleDragEnd}
       style={cardStyle}
@@ -246,41 +246,115 @@ export function OwnerClientTinderCard({
 
         {/* Bottom Sheet - Clean Style Matching Property Cards */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0.2}
+          onDragEnd={(event, info) => {
+            const { offset, velocity } = info;
+            const swipeThreshold = 50;
+            const velocityThreshold = 300;
+
+            // Swipe up = expand, Swipe down = collapse
+            if (offset.y < -swipeThreshold || velocity.y < -velocityThreshold) {
+              setIsBottomSheetExpanded(true);
+            } else if (offset.y > swipeThreshold || velocity.y > velocityThreshold) {
+              setIsBottomSheetExpanded(false);
+            }
+          }}
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '18%',
+            height: isBottomSheetExpanded ? '75%' : '22%',
+            y: 0
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 32 }}
           style={{ willChange: 'height' }}
         >
           {/* Drag Handle */}
-          <div className="flex justify-center py-2">
-            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+          <div className="flex justify-center py-2 pointer-events-none">
+            <div className="w-10 h-1.5 bg-white/50 rounded-full" />
           </div>
 
           {/* Collapsed Content */}
           <div className="px-4 pb-3">
-            <div className="flex justify-between items-start mb-1.5">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex-1">
                 <h2 className="text-base font-bold text-foreground">
                   {profile.name}
                   {profile.age && <span className="text-sm text-muted-foreground ml-2">{profile.age}</span>}
                 </h2>
                 {profile.city && (
-                  <div className="flex items-center text-muted-foreground text-xs">
-                    <MapPin className="w-4 h-4 mr-1" />
+                  <div className="flex items-center text-muted-foreground text-xs mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 mr-1" />
                     <span>{profile.city}</span>
                   </div>
                 )}
               </div>
+
+              {/* Budget Display */}
+              {profile.budget_max && (
+                <div className="text-right">
+                  <div className="text-lg font-bold text-emerald-500">
+                    ${profile.budget_max.toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">max budget</div>
+                </div>
+              )}
             </div>
 
-            {/* Quick Stats */}
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
+            {/* Enhanced Quick Stats - Two Rows */}
+            <div className="space-y-1.5 mb-1">
+              {/* Row 1: Looking For */}
               {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
-                <div className="flex items-center gap-0.5">
-                  <Home className="w-3 h-3" />
-                  <span className="font-medium text-[11px]">{profile.preferred_listing_types[0]}</span>
+                <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                  <Home className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-[10px] text-muted-foreground/70">Looking for:</span>
+                  <div className="flex gap-1">
+                    {profile.preferred_listing_types.slice(0, 2).map((type, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-[10px] h-5 px-2">
+                        {type}
+                      </Badge>
+                    ))}
+                    {profile.preferred_listing_types.length > 2 && (
+                      <Badge variant="secondary" className="text-[10px] h-5 px-2">
+                        +{profile.preferred_listing_types.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 2: Top Interests */}
+              {profile.interests && profile.interests.length > 0 && (
+                <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                  <Heart className="w-3.5 h-3.5 text-pink-400" />
+                  <span className="text-[10px] text-muted-foreground/70">Interests:</span>
+                  <div className="flex gap-1 flex-wrap">
+                    {profile.interests.slice(0, 3).map((interest, idx) => (
+                      <Badge key={idx} variant="outline" className="text-[10px] h-5 px-2">
+                        {interest}
+                      </Badge>
+                    ))}
+                    {profile.interests.length > 3 && (
+                      <Badge variant="outline" className="text-[10px] h-5 px-2">
+                        +{profile.interests.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 3: Match Percentage */}
+              {profile.matchPercentage && (
+                <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                  <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="text-[10px] text-muted-foreground/70">Match:</span>
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden max-w-[120px]">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                      style={{ width: `${profile.matchPercentage}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] font-bold text-purple-500">{profile.matchPercentage}%</span>
                 </div>
               )}
             </div>
