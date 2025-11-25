@@ -19,6 +19,10 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import TestSwipe from "./pages/TestSwipe";
 
+// Legal pages
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+
 // Lazy load all dashboard and authenticated pages for better performance
 const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
 const ClientProfile = lazy(() => import("./pages/ClientProfile"));
@@ -378,6 +382,10 @@ const App = () => (
 
                     {/* TEST PAGE - No auth required */}
                     <Route path="/test-swipe" element={<TestSwipe />} />
+
+                    {/* Legal Pages - Public Access */}
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/terms-of-service" element={<TermsOfService />} />
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
