@@ -99,10 +99,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           .from('profiles')
           .select('onboarding_completed, full_name, city, age')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error checking onboarding status:', error);
+          return;
+        }
+
+        if (!data) {
+          console.log('No profile found for user');
           return;
         }
 
