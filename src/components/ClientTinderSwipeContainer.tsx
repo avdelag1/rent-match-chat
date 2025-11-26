@@ -317,13 +317,32 @@ export function ClientTinderSwipeContainer({
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-start">
       {/* Full-Screen Card Stack */}
-      <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-hidden">
+      <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-visible">
         <AnimatePresence mode="sync" initial={false}>
+          {/* Show next card behind current card for stack effect */}
+          {nextProfile && (
+            <motion.div
+              key={`next-${nextProfile.user_id}`}
+              initial={{ scale: 0.95, y: 8, opacity: 0.8 }}
+              animate={{ scale: 0.95, y: 8, opacity: 0.8 }}
+              className="w-full h-full absolute inset-0 pointer-events-none"
+              style={{ zIndex: 0 }}
+            >
+              <ClientTinderSwipeCard
+                profile={nextProfile}
+                onSwipe={() => {}}
+                isTop={false}
+                showNextCard={true}
+              />
+            </motion.div>
+          )}
+
+          {/* Current card on top */}
           {currentProfile && (
             <motion.div
               key={currentProfile.user_id}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 1, y: 0, opacity: 1 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
                 y: 0,
@@ -344,8 +363,8 @@ export function ClientTinderSwipeContainer({
                 damping: 30,
                 mass: 1
               }}
-              className="w-full h-full"
-              style={{ willChange: 'transform, opacity' }}
+              className="w-full h-full absolute inset-0"
+              style={{ willChange: 'transform, opacity', zIndex: 1 }}
             >
               <ClientTinderSwipeCard
                 profile={currentProfile}

@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { FaGoogle } from 'react-icons/fa';
 import { loginSchema, signupSchema, forgotPasswordSchema } from '@/schemas/auth';
+import { Capacitor } from '@capacitor/core';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -29,6 +30,10 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp, signInWithOAuth } = useAuth();
+
+  // Check if running on a native platform (iOS/Android)
+  // Hide Google OAuth on native platforms to prevent external browser redirects
+  const isNativePlatform = Capacitor.isNativePlatform();
 
   // Reset form state when role changes and load remembered credentials
   useEffect(() => {
@@ -204,9 +209,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Main Card */}
               <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-xl">
-                {!isForgotPassword && (
+                {!isForgotPassword && !isNativePlatform && (
                   <>
-                    {/* Google OAuth Button */}
+                    {/* Google OAuth Button - Hidden on native mobile apps */}
                     <Button
                       type="button"
                       onClick={(e) => handleOAuthSignIn(e, 'google')}
