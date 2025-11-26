@@ -392,8 +392,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons - Overlay at Bottom of Card */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-20 z-40 flex justify-center">
+      {/* Action Buttons - Overlay at Bottom of Card - Higher Up */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-28 z-40 flex justify-center">
         <div className="w-full max-w-md px-4">
           <SwipeActionButtons
             onUndo={() => undoLastSwipe()}
