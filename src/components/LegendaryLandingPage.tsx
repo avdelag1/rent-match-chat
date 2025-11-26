@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Users, Sparkles } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
-import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 function LegendaryLandingPage() {
   const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' }>({
@@ -383,9 +382,6 @@ function LegendaryLandingPage() {
         onClose={closeAuthDialog}
         role={authDialog.role}
       />
-
-      {/* PWA Install Prompt */}
-      <PWAInstallPrompt />
     </motion.div>
   );
 }
