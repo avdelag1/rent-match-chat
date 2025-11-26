@@ -329,6 +329,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   }
 
   const currentListing = listings[currentIndex];
+  const nextListing = listings[currentIndex + 1];
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-start">
@@ -348,13 +349,31 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       )}
 
       {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-hidden">
+      <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-visible">
         <AnimatePresence mode="sync" initial={false}>
+          {/* Show next card behind current card for stack effect */}
+          {nextListing && (
+            <motion.div
+              key={`next-${nextListing.id}`}
+              initial={{ scale: 0.95, y: 8, opacity: 0.8 }}
+              animate={{ scale: 0.95, y: 8, opacity: 0.8 }}
+              className="w-full h-full absolute inset-0 pointer-events-none"
+              style={{ zIndex: 0 }}
+            >
+              <TinderSwipeCard
+                listing={nextListing}
+                onSwipe={() => {}}
+                isTop={false}
+              />
+            </motion.div>
+          )}
+
+          {/* Current card on top */}
           {currentListing && (
             <motion.div
               key={currentListing.id}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 1, y: 0, opacity: 1 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
                 y: 0,
@@ -375,8 +394,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 damping: 30,
                 mass: 1
               }}
-              className="w-full h-full"
-              style={{ willChange: 'transform, opacity' }}
+              className="w-full h-full absolute inset-0"
+              style={{ willChange: 'transform, opacity', zIndex: 1 }}
             >
               <TinderSwipeCard
                 listing={currentListing}

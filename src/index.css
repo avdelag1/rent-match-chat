@@ -771,4 +771,13 @@ body {
   .safe-area-pt {
     padding-top: env(safe-area-inset-top);
   }
+
+  /* Combined safe area with additional padding for mobile app UI */
+  .pt-safe {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  }
+
+  .pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
 }
