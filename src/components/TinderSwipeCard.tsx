@@ -120,13 +120,13 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
         mass: 0.8
       }}
     >
-      <div className="absolute inset-0 w-full h-full overflow-hidden rounded-t-3xl">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} />
 
         {/* Main Image - Fullscreen */}
         <div
-          className="absolute inset-0 w-full h-full overflow-hidden cursor-pointer select-none rounded-t-3xl"
+          className="absolute inset-0 w-full h-full overflow-hidden cursor-pointer select-none"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >

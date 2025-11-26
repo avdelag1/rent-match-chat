@@ -107,22 +107,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
   }, [smartListings, isLoading]);
 
-  // Preload next batch when user is 3 cards away from end - with guards to prevent infinite loop
-  useEffect(() => {
-    const remainingCards = listings.length - currentIndex;
-    const shouldFetch = 
-      remainingCards <= 3 && 
-      !isLoading && 
-      !isFetchingMore.current &&
-      lastFetchedPage.current !== page;
-    
-    if (shouldFetch) {
-      isFetchingMore.current = true;
-      lastFetchedPage.current = page;
-      setPage(prev => prev + 1);
-    }
-  }, [currentIndex, listings.length, isLoading, page]);
-
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const currentListing = listings[currentIndex];
     if (!currentListing) return;
@@ -349,7 +333,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       )}
 
       {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-140px)] max-w-lg mx-auto rounded-t-3xl overflow-visible">
+      <div className="relative w-full h-full max-w-lg mx-auto overflow-visible">
         <AnimatePresence mode="sync" initial={false}>
           {/* Show next card behind current card for stack effect */}
           {nextListing && (
@@ -409,7 +393,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       </div>
 
       {/* Action Buttons - Overlay at Bottom of Card */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-24 z-40 flex justify-center">
+      <div className="pointer-events-none absolute inset-x-0 bottom-20 z-40 flex justify-center">
         <div className="w-full max-w-md px-4">
           <SwipeActionButtons
             onUndo={() => undoLastSwipe()}

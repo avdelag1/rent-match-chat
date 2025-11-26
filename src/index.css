@@ -780,4 +780,25 @@ body {
   .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
   }
+
+  /* Native app specific: Edge-to-edge fullscreen */
+  @supports (padding-top: env(safe-area-inset-top)) {
+    /* True fullscreen experience for native apps */
+    .native-fullscreen {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    /* Remove any default padding/margins on native */
+    .native-no-padding {
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Prevent overscroll bounce on iOS */
+    body {
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }

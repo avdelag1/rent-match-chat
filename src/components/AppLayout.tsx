@@ -1,4 +1,3 @@
-import { UpdateNotification } from './UpdateNotification';
 import { SkipToMainContent, useFocusManagement } from './AccessibilityHelpers';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useOfflineDetection } from '@/hooks/useOfflineDetection';
@@ -23,7 +22,6 @@ export function AppLayout({ children }: AppLayoutProps) {
           {children}
         </div>
       </main>
-      <UpdateNotification />
     </div>
   );
 }
