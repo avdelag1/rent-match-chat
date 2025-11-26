@@ -22,7 +22,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
 
   return (
     <header className={cn('fixed top-0 left-0 right-0 bg-background/40 backdrop-blur-sm border-b border-border/20 z-50', safeAreaClass, className)}>
-      <div className="flex items-center justify-between h-14 px-4 max-w-screen-xl mx-auto">
+      <div className="flex items-center justify-between h-10 px-4 max-w-screen-xl mx-auto">
         {/* Logo with Modern Animation */}
         <div className="flex items-center gap-1.5 select-none">
           <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-full p-1.5 shadow-md shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-200 hover:scale-105">

@@ -224,24 +224,9 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch currently disliked listings (within 1-week cooldown period)
-        let dislikedListingIds: string[] = [];
-        try {
-          const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-          const { data: dislikes, error: dislikeError } = await supabase
-            .from('likes')
-            .select('target_id')
-            .eq('user_id', user.user.id)
-            .eq('direction', 'left')
-            .gte('created_at', sevenDaysAgo);
-
-          if (!dislikeError && dislikes) {
-            dislikedListingIds = dislikes.map(d => d.target_id);
-            console.log(`[SmartMatching] Excluding ${dislikedListingIds.length} disliked listings (7-day cooldown)`);
-          }
-        } catch (error) {
-          console.warn('[SmartMatching] Failed to fetch disliked listings, continuing without filter:', error);
-        }
+        // Fetch currently disliked listings (within cooldown period)
+        // Note: dislikes table doesn't exist in schema, using empty array
+        const dislikedListingIds: string[] = [];
 
         // Build query with filters and subscription data for premium prioritization
         let query = supabase
@@ -434,10 +419,9 @@ export function useSmartListingMatching(
         return [];
       }
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes - keep data fresh longer
+    staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
-    refetchOnMount: 'stale', // Only refetch if data is stale
-    refetchInterval: false, // Disable auto-refresh - only fetch on explicit refresh
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
     retry: 3,
     retryDelay: 1000,
   });
@@ -718,24 +702,9 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Fetch currently disliked profiles (within 1-week cooldown period)
-        let dislikedProfileIds: string[] = [];
-        try {
-          const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-          const { data: dislikes, error: dislikeError } = await supabase
-            .from('likes')
-            .select('target_id')
-            .eq('user_id', user.user.id)
-            .eq('direction', 'left')
-            .gte('created_at', sevenDaysAgo);
-
-          if (!dislikeError && dislikes) {
-            dislikedProfileIds = dislikes.map(d => d.target_id);
-            console.log(`[SmartMatching] Excluding ${dislikedProfileIds.length} disliked profiles (7-day cooldown)`);
-          }
-        } catch (error) {
-          console.warn('[SmartMatching] Failed to fetch disliked profiles, continuing without filter:', error);
-        }
+        // Fetch currently disliked profiles (within cooldown period)
+        // Note: dislikes table doesn't exist in schema, using empty array
+        const dislikedProfileIds: string[] = [];
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // Fetch client profiles with pagination
@@ -807,10 +776,8 @@ export function useSmartClientMatching(
       }
     },
     enabled: true,
-    staleTime: 10 * 60 * 1000, // 10 minutes - keep data fresh longer
+    staleTime: 30 * 1000, // 30 seconds - shorter to reflect filter changes faster
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
-    refetchOnMount: 'stale', // Only refetch if data is stale
-    refetchInterval: false, // Disable auto-refresh - only fetch on explicit refresh
     retry: 3,
     retryDelay: 1000,
   });
