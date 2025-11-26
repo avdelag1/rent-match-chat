@@ -30,8 +30,8 @@ export function SwipeActionButtons({
 
   return (
     <div className="pointer-events-none w-full">
-      {/* Individual Floating Buttons - Bigger & More Spaced */}
-      <div className="flex items-center justify-between px-6">
+      {/* Individual Floating Buttons - No Container Background */}
+      <div className="flex items-center justify-between px-8">
         {/* 1. Undo Button (Yellow/Gold) */}
         <motion.div
           whileHover={{ scale: canUndo && !disabled ? 1.15 : 1 }}
@@ -42,14 +42,14 @@ export function SwipeActionButtons({
             onClick={() => handleAction(onUndo, 'light')}
             disabled={!canUndo || disabled}
             className={`
-              p-3 transition-all duration-200
+              p-2 transition-all duration-200
               ${canUndo && !disabled
                 ? 'text-yellow-500 hover:text-yellow-600 opacity-100'
                 : 'text-gray-400 opacity-50 cursor-not-allowed'
               }
             `}
           >
-            <RotateCcw className="h-7 w-7" />
+            <RotateCcw className="h-6 w-6" />
           </button>
         </motion.div>
 
@@ -63,14 +63,14 @@ export function SwipeActionButtons({
             onClick={() => handleAction(onPass, 'warning')}
             disabled={disabled}
             className={`
-              p-3 transition-all duration-200
+              p-2 transition-all duration-200
               ${!disabled
                 ? 'text-red-500 hover:text-red-600'
                 : 'text-gray-400 opacity-50 cursor-not-allowed'
               }
             `}
           >
-            <X className="h-9 w-9 stroke-[2.5]" />
+            <X className="h-7 w-7 stroke-[2.5]" />
           </button>
         </motion.div>
 
@@ -84,14 +84,14 @@ export function SwipeActionButtons({
             onClick={() => handleAction(onInfo, 'light')}
             disabled={disabled}
             className={`
-              p-3 transition-all duration-200
+              p-2 transition-all duration-200
               ${!disabled
                 ? 'text-blue-500 hover:text-blue-600'
                 : 'text-gray-400 opacity-50 cursor-not-allowed'
               }
             `}
           >
-            <Eye className="h-6 w-6" />
+            <Eye className="h-5 w-5" />
           </button>
         </motion.div>
 
@@ -105,14 +105,14 @@ export function SwipeActionButtons({
             onClick={() => handleAction(onLike, 'success')}
             disabled={disabled}
             className={`
-              p-3 transition-all duration-200
+              p-2 transition-all duration-200
               ${!disabled
                 ? 'text-green-500 hover:text-green-600'
                 : 'text-gray-400 opacity-50 cursor-not-allowed'
               }
             `}
           >
-            <Heart className="h-9 w-9 fill-currentColor" />
+            <Heart className="h-7 w-7 fill-currentColor" />
           </button>
         </motion.div>
       </div>

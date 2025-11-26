@@ -113,28 +113,22 @@ export function MessageActivationPackages({
     return ''; // Return empty if no match
   };
 
-  // Convert database packages to UI format - ONLY show packages with PayPal links
+  // Convert database packages to UI format
   const convertPackages = (dbPackages: any[] | undefined): MessagePackage[] => {
     if (!dbPackages) return [];
 
-    // First, filter packages that have valid PayPal URLs
-    const packagesWithPayPal = dbPackages.filter(pkg => {
-      const paypalUrl = getPayPalUrl(pkg.package_category, pkg.message_activations, pkg.price);
-      return paypalUrl !== '';
-    });
-
-    return packagesWithPayPal.map((pkg, index) => {
+    return dbPackages.map((pkg, index) => {
       const pricePerActivation = pkg.message_activations > 0
         ? pkg.price / pkg.message_activations
         : 0;
 
       // Highlight the middle option (usually best value)
-      const highlight = packagesWithPayPal.length === 3 && index === 1;
+      const highlight = dbPackages.length === 3 && index === 1;
 
       // Calculate savings vs first package
       let savings: string | undefined;
-      if (index > 0 && packagesWithPayPal[0]) {
-        const firstPricePerActivation = packagesWithPayPal[0].price / packagesWithPayPal[0].message_activations;
+      if (index > 0 && dbPackages[0]) {
+        const firstPricePerActivation = dbPackages[0].price / dbPackages[0].message_activations;
         const savingsPercent = Math.round(((firstPricePerActivation - pricePerActivation) / firstPricePerActivation) * 100);
         if (savingsPercent > 0) {
           savings = `${savingsPercent}% OFF`;
