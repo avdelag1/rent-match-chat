@@ -181,7 +181,7 @@ export function useSwipedListings() {
 
         // Only exclude listings swiped within the last 5 days
         const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
-        
+
         const { data: likes, error } = await supabase
           .from('likes')
           .select('target_id')
@@ -192,10 +192,46 @@ export function useSwipedListings() {
           console.error('Swipes query error:', error);
           return [];
         }
-        
+
         return likes?.map(l => l.target_id) || [];
       } catch (error) {
         console.error('Error in useSwipedListings:', error);
+        return [];
+      }
+    },
+    retry: 3,
+    retryDelay: 1000,
+  });
+}
+
+// Hook to get disliked listings that should be excluded for 1 week
+export function useDislikedListings() {
+  return useQuery({
+    queryKey: ['disliked-listings'],
+    queryFn: async () => {
+      try {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return [];
+
+        // Exclude listings disliked (swiped left) within the last 7 days
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+        const { data: dislikes, error } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.user.id)
+          .eq('direction', 'left')
+          .gte('created_at', sevenDaysAgo);
+
+        if (error) {
+          console.error('Disliked listings query error:', error);
+          return [];
+        }
+
+        console.log(`Found ${dislikes?.length || 0} disliked listings to exclude for 7 days`);
+        return dislikes?.map(l => l.target_id) || [];
+      } catch (error) {
+        console.error('Error in useDislikedListings:', error);
         return [];
       }
     },
