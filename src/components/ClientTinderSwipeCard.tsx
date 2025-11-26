@@ -149,7 +149,7 @@ export function ClientTinderSwipeCard({
 
           {/* Story-Style Dots at Top */}
           {images.length > 1 && (
-            <div className="absolute top-16 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
+            <div className="absolute top-8 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
               {images.map((_, idx) => (
                 <div
                   key={`image-${idx}`}
