@@ -316,10 +316,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start pt-16 md:pt-20">
+    <div className="relative w-full h-full flex flex-col items-center justify-start">
       {/* Refresh Button - Top Right - Only show when all cards swiped */}
       {currentIndex >= listings.length && (
-        <div className="absolute top-16 md:top-20 right-2 z-50">
+        <div className="absolute top-2 right-2 z-50">
           <Button
             onClick={handleRefresh}
             variant="outline"
@@ -393,7 +393,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       </div>
 
       {/* Action Buttons - Overlay at Bottom of Card - Higher Up */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-20 z-40 flex justify-center md:bottom-32">
+      <div className="pointer-events-none absolute inset-x-0 bottom-28 z-40 flex justify-center">
         <div className="w-full max-w-md px-4">
           <SwipeActionButtons
             onUndo={() => undoLastSwipe()}
