@@ -83,8 +83,8 @@ export function OwnerClientTinderCard({
     const { offset, velocity } = info;
 
     // More sensitive swipe threshold for easier swiping
-    const swipeThresholdX = 80; // pixels - reduced for better sensitivity
-    const velocityThreshold = 350; // px/s - reduced for better sensitivity
+    const swipeThresholdX = 60; // pixels - reduced for better sensitivity
+    const velocityThreshold = 300; // px/s - reduced for better sensitivity
 
     // Horizontal swipes - Right (accept) or Left (reject)
     const absOffsetX = Math.abs(offset.x);
@@ -113,13 +113,13 @@ export function OwnerClientTinderCard({
     <motion.div
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.6}
+      dragElastic={0.5}
       onDragEnd={handleDragEnd}
       style={cardStyle}
       animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 350,
+        stiffness: 400,
         damping: 28,
         mass: 0.8
       }}
@@ -263,7 +263,7 @@ export function OwnerClientTinderCard({
           }}
           className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '22%',
+            height: isBottomSheetExpanded ? '75%' : '14%',
             y: 0
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 32 }}
