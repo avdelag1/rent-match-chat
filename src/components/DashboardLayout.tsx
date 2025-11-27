@@ -236,10 +236,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const isNativePlatform = Capacitor.isNativePlatform();
 
   // Add safe area padding for native platforms to avoid status bar overlap
-  // Reduced padding for edge-to-edge card experience
+  // Minimal padding for full-screen card experience
   const mainPaddingClass = isNativePlatform
-    ? 'pt-[calc(env(safe-area-inset-top,0px)+2.5rem)] pb-[calc(env(safe-area-inset-bottom,0px)+3rem)]'
-    : 'pt-10 pb-14';
+    ? 'pt-[calc(env(safe-area-inset-top,0px)+0rem)] pb-[calc(env(safe-area-inset-bottom,0px)+0rem)]'
+    : 'pt-0 pb-0';
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-background relative">
