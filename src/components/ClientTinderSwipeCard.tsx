@@ -1,12 +1,11 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2, ChevronDown } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { ReportDialog } from '@/components/ReportDialog';
-import { ShareDialog } from '@/components/ShareDialog';
 import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
 
@@ -30,7 +29,6 @@ export function ClientTinderSwipeCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -165,29 +163,17 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Spread Across Top Corners */}
-          {/* Report Button - Top Left */}
+          {/* Action Buttons - Top Right Corner */}
+          {/* Report Button - Top Right */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               setReportDialogOpen(true);
             }}
-            className="absolute top-3 left-4 z-30 p-1 text-red-500 hover:text-red-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
+            className="absolute top-3 right-4 z-30 p-1 text-red-500 hover:text-red-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
             title="Report User"
           >
             <Flag className="w-5 h-5" />
-          </button>
-
-          {/* Share Button - Top Right */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShareDialogOpen(true);
-            }}
-            className="absolute top-3 right-4 z-30 p-1 text-emerald-500 hover:text-emerald-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
-            title="Share Profile"
-          >
-            <Share2 className="w-5 h-5" />
           </button>
 
           {/* Verified Badge */}
@@ -205,7 +191,7 @@ export function ClientTinderSwipeCard({
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '14%',
+            height: isBottomSheetExpanded ? '75%' : '45%',
             y: 0
           }}
           transition={{
@@ -342,15 +328,6 @@ export function ClientTinderSwipeCard({
         reportedUserId={profile.user_id}
         reportedUserName={profile.name}
         category="user_profile"
-      />
-
-      {/* Share Dialog */}
-      <ShareDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        profileId={profile.user_id}
-        title={`${profile.name}'s Profile`}
-        description={`Check out ${profile.name} on Rent Match - ${profile.matchPercentage}% match!`}
       />
     </motion.div>
   );
