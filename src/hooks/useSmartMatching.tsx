@@ -224,9 +224,14 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch currently disliked listings (within cooldown period)
-        // Note: dislikes table doesn't exist in schema, using empty array
-        const dislikedListingIds: string[] = [];
+        // Fetch already-liked listings (right swipes) to exclude them
+        const { data: likedListings } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.user.id)
+          .eq('direction', 'right');
+
+        const likedListingIds = new Set(likedListings?.map(like => like.target_id) || []);
 
         // Build query with filters and subscription data for premium prioritization
         let query = supabase
@@ -331,9 +336,9 @@ export function useSmartListingMatching(
           });
         }
 
-        // Filter out disliked listings (within 1-week cooldown period)
+        // Filter out already-liked listings
         filteredListings = filteredListings.filter(listing =>
-          !dislikedListingIds.includes(listing.id)
+          !likedListingIds.has(listing.id)
         );
 
         if (!preferences) {
@@ -702,9 +707,14 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Fetch currently disliked profiles (within cooldown period)
-        // Note: dislikes table doesn't exist in schema, using empty array
-        const dislikedProfileIds: string[] = [];
+        // Fetch already-liked profiles (right swipes only) to exclude them
+        const { data: likedProfiles } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.user.id)
+          .eq('direction', 'right');
+
+        const likedProfileIds = new Set(likedProfiles?.map(like => like.target_id) || []);
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // Fetch client profiles with pagination
@@ -728,9 +738,9 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Map profiles with placeholder images - already filtered for clients only at DB level
+        // Map profiles with placeholder images - filter out already-liked profiles
         const filteredProfiles = profiles
-          .filter(profile => !dislikedProfileIds.includes(profile.id))
+          .filter(profile => !likedProfileIds.has(profile.id))
           .map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0)
