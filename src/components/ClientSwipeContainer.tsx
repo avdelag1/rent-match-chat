@@ -298,7 +298,7 @@ export function ClientSwipeContainer({
       </div>
 
       {/* Consistent Action Buttons - Matches Client Side */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-24 z-40 flex justify-center">
+      <div className="pointer-events-none absolute inset-x-0 bottom-[35%] z-40 flex justify-center">
         <div className="w-full max-w-md px-4">
           <SwipeActionButtons
             onUndo={undoLastSwipe}
