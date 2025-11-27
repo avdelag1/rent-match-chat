@@ -315,72 +315,74 @@ export function ClientTinderSwipeContainer({
   const nextProfile = profiles[currentIndex + 1];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start">
-      {/* Full-Screen Card Stack - Enlarged to fill entire screen */}
-      <div className="relative w-full h-screen max-w-full mx-auto overflow-visible">
-        <AnimatePresence mode="sync" initial={false}>
-          {/* Show next card behind current card for stack effect */}
-          {nextProfile && (
-            <motion.div
-              key={`next-${nextProfile.user_id}`}
-              initial={{ scale: 0.95, y: 8, opacity: 0.8 }}
-              animate={{ scale: 0.95, y: 8, opacity: 0.8 }}
-              className="w-full h-full absolute inset-0 pointer-events-none"
-              style={{ zIndex: 0 }}
-            >
-              <ClientTinderSwipeCard
-                profile={nextProfile}
-                onSwipe={() => {}}
-                isTop={false}
-                showNextCard={true}
-              />
-            </motion.div>
-          )}
+    <div className="relative w-full h-full flex flex-col items-center justify-between overflow-hidden">
+      {/* Main Card Container - Takes up 90% of screen, centered */}
+      <div className="flex-1 w-full flex items-center justify-center px-4 pt-4 pb-4 overflow-hidden">
+        <div className="relative w-full max-w-md aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl">
+          <AnimatePresence mode="sync" initial={false}>
+            {/* Show next card behind current card for stack effect */}
+            {nextProfile && (
+              <motion.div
+                key={`next-${nextProfile.user_id}`}
+                initial={{ scale: 0.95, y: 8, opacity: 0.8 }}
+                animate={{ scale: 0.95, y: 8, opacity: 0.8 }}
+                className="absolute inset-0"
+                style={{ zIndex: 0 }}
+              >
+                <ClientTinderSwipeCard
+                  profile={nextProfile}
+                  onSwipe={() => {}}
+                  isTop={false}
+                  showNextCard={true}
+                />
+              </motion.div>
+            )}
 
-          {/* Current card on top */}
-          {currentProfile && (
-            <motion.div
-              key={currentProfile.user_id}
-              initial={{ scale: 1, y: 0, opacity: 1 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{
-                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
-                y: 0,
-                opacity: 0,
-                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
-                scale: 0.85,
-                transition: {
+            {/* Current card on top */}
+            {currentProfile && (
+              <motion.div
+                key={currentProfile.user_id}
+                initial={{ scale: 1, y: 0, opacity: 1 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{
+                  x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                  y: 0,
+                  opacity: 0,
+                  rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                  scale: 0.85,
+                  transition: {
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 25,
+                    mass: 0.8,
+                    duration: 0.3
+                  }
+                }}
+                transition={{
                   type: "spring",
                   stiffness: 300,
-                  damping: 25,
-                  mass: 0.8,
-                  duration: 0.3
-                }
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 1
-              }}
-              className="w-full h-full absolute inset-0"
-              style={{ willChange: 'transform, opacity', zIndex: 1 }}
-            >
-              <ClientTinderSwipeCard
-                profile={currentProfile}
-                onSwipe={handleSwipe}
-                onTap={() => onClientTap?.(currentProfile.user_id)}
-                onInsights={handleInsights}
-                isTop={true}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  damping: 30,
+                  mass: 1
+                }}
+                className="absolute inset-0"
+                style={{ willChange: 'transform, opacity', zIndex: 1 }}
+              >
+                <ClientTinderSwipeCard
+                  profile={currentProfile}
+                  onSwipe={handleSwipe}
+                  onTap={() => onClientTap?.(currentProfile.user_id)}
+                  onInsights={handleInsights}
+                  isTop={true}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* Action Buttons - Float over image, not bottom sheet */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-20 z-40 flex justify-center">
-        <div className="w-full max-w-md px-4">
+      {/* Action Buttons - Below card with proper spacing */}
+      <div className="w-full flex justify-center px-4 py-6">
+        <div className="w-full max-w-md">
           <SwipeActionButtons
             onUndo={handleUndo}
             onPass={() => handleButtonSwipe('left')}

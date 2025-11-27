@@ -132,8 +132,9 @@ img {
 /* Card responsiveness - adapts to screen size */
 .swipe-card {
   width: 100%;
-  height: auto;
-  max-height: 85vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Tablet styles - larger cards */
