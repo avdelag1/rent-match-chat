@@ -234,7 +234,7 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center z-0">
+    <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden flex flex-col z-0">
       {/* Refresh Button - Top Right */}
       <div className="absolute top-2 right-2 z-50">
         <Button
@@ -248,58 +248,60 @@ export function ClientSwipeContainer({
         </Button>
       </div>
 
-      {/* Single Card Container - No infinite scrolling */}
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto mb-20 h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px]">
-        <AnimatePresence mode="sync">
-          {currentClient && (
-            <motion.div
-              key={currentClient.user_id}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{
-                scale: 1,
-                opacity: 1
-              }}
-              exit={{
-                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
-                opacity: 0,
-                rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
-                scale: 0.85,
-                transition: {
+      {/* Full-Screen Card Container - Fills viewport height */}
+      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4 overflow-hidden">
+        <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] mx-auto">
+          <AnimatePresence mode="sync">
+            {currentClient && (
+              <motion.div
+                key={currentClient.user_id}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{
+                  scale: 1,
+                  opacity: 1
+                }}
+                exit={{
+                  x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                  opacity: 0,
+                  rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
+                  scale: 0.85,
+                  transition: {
+                    type: "spring",
+                    stiffness: 180,
+                    damping: 15,
+                    mass: 0.5,
+                    duration: 0.3
+                  }
+                }}
+                transition={{
                   type: "spring",
-                  stiffness: 180,
-                  damping: 15,
-                  mass: 0.5,
-                  duration: 0.3
-                }
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 0.7
-              }}
-              className="w-full h-full"
-              style={{
-                willChange: 'transform, opacity'
-              }}
-            >
-              <OwnerClientTinderCard
-                profile={currentClient}
-                onSwipe={handleSwipe}
-                onTap={() => onClientTap(currentClient.user_id)}
-                onInsights={() => handleInsights(currentClient.user_id)}
-                onMessage={() => handleConnect(currentClient.user_id)}
-                isTop={true}
-                hasPremium={hasPremiumMessaging}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  stiffness: 300,
+                  damping: 30,
+                  mass: 0.7
+                }}
+                className="w-full h-full"
+                style={{
+                  willChange: 'transform, opacity'
+                }}
+              >
+                <OwnerClientTinderCard
+                  profile={currentClient}
+                  onSwipe={handleSwipe}
+                  onTap={() => onClientTap(currentClient.user_id)}
+                  onInsights={() => handleInsights(currentClient.user_id)}
+                  onMessage={() => handleConnect(currentClient.user_id)}
+                  isTop={true}
+                  hasPremium={hasPremiumMessaging}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* Consistent Action Buttons - Matches Client Side */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[35%] z-40 flex justify-center">
-        <div className="w-full max-w-md px-4">
+      {/* Action Buttons - Below card at bottom */}
+      <div className="w-full flex justify-center px-3 sm:px-4 py-4 sm:py-6 flex-shrink-0">
+        <div className="w-full max-w-[min(100%-24px,560px)]">
           <SwipeActionButtons
             onUndo={undoLastSwipe}
             onPass={() => handleSwipe('left')}

@@ -315,10 +315,10 @@ export function ClientTinderSwipeContainer({
   const nextProfile = profiles[currentIndex + 1];
 
   return (
-    <div className="relative w-full h-screen bg-background overflow-hidden">
-      {/* Full-Screen Card Container - Extends to bottom of viewport */}
-      <div className="absolute inset-0 w-full h-full flex items-center justify-center px-3 sm:px-4">
-        <div className="relative w-full h-full max-w-[min(100%-24px,560px)] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black">
+    <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden flex flex-col">
+      {/* Full-Screen Card Container - Fills viewport with proper aspect ratio */}
+      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4">
+        <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black">
           <AnimatePresence mode="sync" initial={false}>
             {/* Show next card behind current card for stack effect */}
             {nextProfile && (
@@ -380,9 +380,9 @@ export function ClientTinderSwipeContainer({
         </div>
       </div>
 
-      {/* Action Buttons - Floating on top of card, centered at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 w-full flex justify-center px-3 sm:px-4 py-4 sm:py-8 pointer-events-none z-40">
-        <div className="w-full max-w-[min(100%-24px,560px)] pointer-events-auto">
+      {/* Action Buttons - Below card, fixed at bottom */}
+      <div className="w-full flex justify-center px-3 sm:px-4 py-4 sm:py-6 flex-shrink-0">
+        <div className="w-full max-w-[min(100%-24px,560px)]">
           <SwipeActionButtons
             onUndo={handleUndo}
             onPass={() => handleButtonSwipe('left')}
