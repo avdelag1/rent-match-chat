@@ -117,35 +117,35 @@ img {
   overflow-x: hidden;
 }
 
-/* Swipe container responsiveness - full screen with proper sizing */
+/* Swipe container responsiveness - full screen height */
 .swipe-container {
   width: 100%;
   max-width: min(100% - 24px, 560px);
   margin: 0 auto;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-/* Card responsiveness - fills viewport properly */
+/* Card responsiveness - fills entire screen height and width */
 .swipe-card {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  min-height: 600px;
 }
 
 /* Mobile styles - base layout */
 @media (max-width: 639px) {
   .swipe-container {
     max-width: min(100% - 24px, 400px);
+    height: 100vh;
   }
 
   .swipe-card {
-    min-height: 500px;
+    height: 100%;
   }
 }
 
@@ -157,10 +157,11 @@ img {
 
   .swipe-container {
     max-width: min(100% - 32px, 500px);
+    height: 100vh;
   }
 
   .swipe-card {
-    min-height: 600px;
+    height: 100%;
   }
 }
 
@@ -173,10 +174,11 @@ img {
 
   .swipe-container {
     max-width: 560px;
+    height: 100vh;
   }
 
   .swipe-card {
-    min-height: 700px;
+    height: 100%;
   }
 }
 
@@ -188,10 +190,11 @@ img {
 
   .swipe-container {
     max-width: 560px;
+    height: 100vh;
   }
 
   .swipe-card {
-    min-height: 800px;
+    height: 100%;
   }
 }
 
