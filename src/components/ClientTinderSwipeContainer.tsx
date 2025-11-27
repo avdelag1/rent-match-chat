@@ -316,8 +316,8 @@ export function ClientTinderSwipeContainer({
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-start">
-      {/* Full-Screen Card Stack */}
-      <div className="relative w-full h-[calc(100vh-120px)] max-w-lg mx-auto rounded-t-3xl overflow-visible mt-8 md:mt-12">
+      {/* Full-Screen Card Stack - Enlarged to fill entire screen */}
+      <div className="relative w-full h-screen max-w-full mx-auto overflow-visible">
         <AnimatePresence mode="sync" initial={false}>
           {/* Show next card behind current card for stack effect */}
           {nextProfile && (
@@ -379,7 +379,7 @@ export function ClientTinderSwipeContainer({
       </div>
 
       {/* Action Buttons - Float over image, not bottom sheet */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-24 z-40 flex justify-center">
+      <div className="pointer-events-none absolute inset-x-0 bottom-20 z-40 flex justify-center">
         <div className="w-full max-w-md px-4">
           <SwipeActionButtons
             onUndo={handleUndo}

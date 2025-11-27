@@ -111,12 +111,12 @@ export function ClientTinderSwipeCard({
          mass: 0.8
        }}
      >
-      <div className="absolute inset-0 w-full h-full overflow-hidden rounded-t-3xl">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} />
         {/* Main Image with Tap Zones */}
         <div
-          className="relative w-full h-full cursor-pointer select-none rounded-t-3xl overflow-hidden"
+          className="relative w-full h-full cursor-pointer select-none overflow-hidden"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >
@@ -182,7 +182,7 @@ export function ClientTinderSwipeCard({
         </div>
 
         {/* Simple Bottom Info Overlay */}
-        <div className="absolute bottom-36 left-0 right-0 px-6 z-20 pointer-events-none">
+        <div className="absolute bottom-28 left-0 right-0 px-6 z-20 pointer-events-none">
           <div className="flex justify-between items-end">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-white drop-shadow-lg">
