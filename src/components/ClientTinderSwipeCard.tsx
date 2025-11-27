@@ -1,9 +1,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, ChevronDown } from 'lucide-react';
+import { MapPin, CheckCircle, Flag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { ReportDialog } from '@/components/ReportDialog';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -27,7 +25,6 @@ export function ClientTinderSwipeCard({
   showNextCard = false
 }: ClientTinderSwipeCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -51,18 +48,15 @@ export function ClientTinderSwipeCard({
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    // Left 30% = previous, Center 40% = expand details, Right 30% = next
+    // Left 30% = previous, Right 30% = next
     if (clickX < width * 0.3 && images.length > 1) {
       setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
       triggerHaptic('light');
     } else if (clickX > width * 0.7 && images.length > 1) {
       setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
       triggerHaptic('light');
-    } else {
-      setIsBottomSheetExpanded(!isBottomSheetExpanded);
-      triggerHaptic('medium');
     }
-  }, [images.length, isBottomSheetExpanded]);
+  }, [images.length]);
 
   // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -142,8 +136,8 @@ export function ClientTinderSwipeCard({
             }}
           />
           
-          {/* Bottom gradient - Lighter for better photo visibility */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient for text readability */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
 
           {/* Story-Style Dots at Top */}
           {images.length > 1 && (
@@ -187,138 +181,32 @@ export function ClientTinderSwipeCard({
           )}
         </div>
 
-        {/* Bottom Sheet - Collapsible with Glassmorphism */}
-        <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
-          animate={{
-            height: isBottomSheetExpanded ? '75%' : '45%',
-            y: 0
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 400,
-            damping: 32
-          }}
-          style={{ willChange: 'height' }}
-        >
-          {/* Drag Handle */}
-          <div className="flex justify-center py-2 pointer-events-none">
-            <div className="w-10 h-1.5 bg-white/50 rounded-full" />
-          </div>
+        {/* Simple Bottom Info Overlay */}
+        <div className="absolute bottom-4 left-0 right-0 px-6 z-20 pointer-events-none">
+          <div className="flex justify-between items-end">
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+                {profile.name}
+                {profile.age && <span className="text-lg text-white/90 ml-2">{profile.age}</span>}
+              </h2>
+              {profile.city && (
+                <div className="flex items-center text-white/90 text-sm mt-1">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  <span>{profile.city}</span>
+                </div>
+              )}
+            </div>
 
-          {/* Collapsed State Content */}
-          <div className="px-4 pb-3">
-            <div className="flex justify-between items-start mb-1.5">
-              <div className="flex-1">
-                <h2 className="text-base font-bold text-foreground">
-                  {profile.name}
-                  {profile.age && <span className="text-sm text-muted-foreground ml-2">{profile.age}</span>}
-                </h2>
-                {profile.city && (
-                  <div className="flex items-center text-muted-foreground text-xs mb-1">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    <span>{profile.city}</span>
-                  </div>
-                )}
+            {profile.budget_max && (
+              <div className="text-right">
+                <div className="text-2xl font-bold text-white drop-shadow-lg">
+                  ${profile.budget_max.toLocaleString()}
+                </div>
+                <div className="text-xs text-white/80">max budget</div>
               </div>
-
-              {profile.budget_max && (
-                <div className="text-right">
-                  <div className="text-xl font-bold text-primary">
-                    ${profile.budget_max.toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">/month</div>
-                </div>
-              )}
-            </div>
-
-            {/* Key Stats */}
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
-              {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
-                <div className="flex items-center gap-0.5">
-                  <Home className="w-3 h-3" />
-                  <span className="font-medium text-[11px]">{profile.preferred_listing_types[0]}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Expanded State Content */}
-            {isBottomSheetExpanded && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mt-4 overflow-y-auto max-h-[calc(75vh-200px)]"
-              >
-                {/* Interests */}
-                {profile.interests && profile.interests.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-foreground mb-3">
-                      Interests
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {profile.interests.map((interest, idx) => (
-                        <Badge key={`interest-${idx}`} variant="secondary" className="text-xs">
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Preferred Activities */}
-                {profile.preferred_activities && profile.preferred_activities.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-foreground mb-3">
-                      Preferred Activities
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {profile.preferred_activities.map((activity, idx) => (
-                        <Badge key={`activity-${idx}`} variant="outline" className="text-xs">
-                          {activity}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Lifestyle */}
-                {profile.lifestyle_tags && profile.lifestyle_tags.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-foreground mb-3">
-                      Lifestyle
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {profile.lifestyle_tags.map((tag, idx) => (
-                        <Badge key={`lifestyle-${idx}`} variant="outline">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
             )}
-
-            {/* Expand/Collapse Indicator */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-1 text-muted-foreground h-5"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsBottomSheetExpanded(!isBottomSheetExpanded);
-                triggerHaptic('light');
-              }}
-            >
-              <ChevronDown
-                className={`w-3 h-3 transition-transform duration-200 ${
-                  isBottomSheetExpanded ? 'rotate-180' : ''
-                }`}
-              />
-            </Button>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Report Dialog */}
