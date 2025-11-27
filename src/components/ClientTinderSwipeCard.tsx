@@ -102,7 +102,7 @@ export function ClientTinderSwipeCard({
        dragConstraints={{ left: 0, right: 0 }}
        dragElastic={0.5}
        onDragEnd={handleDragEnd}
-       className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
+       className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden"
        animate={{ x: 0, y: 0, rotate: 0 }}
        transition={{
          type: "spring",
@@ -111,12 +111,12 @@ export function ClientTinderSwipeCard({
          mass: 0.8
        }}
      >
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
+      <div className="w-full h-full overflow-hidden flex flex-col">
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} />
         {/* Main Image with Tap Zones */}
         <div
-          className="relative w-full h-full cursor-pointer select-none overflow-hidden"
+          className="relative flex-1 w-full cursor-pointer select-none overflow-hidden"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >
@@ -127,8 +127,7 @@ export function ClientTinderSwipeCard({
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
             draggable={false}
-            style={{ 
-              aspectRatio: '9/16',
+            style={{
               willChange: 'transform',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
@@ -181,28 +180,28 @@ export function ClientTinderSwipeCard({
           )}
         </div>
 
-        {/* Simple Bottom Info Overlay */}
-        <div className="absolute bottom-28 left-0 right-0 px-6 z-20 pointer-events-none">
+        {/* Simple Bottom Info Overlay - Inside Image Container */}
+        <div className="absolute bottom-0 left-0 right-0 px-6 py-8 z-20 pointer-events-none">
           <div className="flex justify-between items-end">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg line-clamp-2">
                 {profile.name}
                 {profile.age && <span className="text-lg text-white/90 ml-2">{profile.age}</span>}
               </h2>
               {profile.city && (
                 <div className="flex items-center text-white/90 text-sm mt-1">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span>{profile.city}</span>
+                  <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                  <span className="truncate">{profile.city}</span>
                 </div>
               )}
             </div>
 
             {profile.budget_max && (
-              <div className="text-right">
-                <div className="text-2xl font-bold text-white drop-shadow-lg">
+              <div className="text-right ml-4 flex-shrink-0">
+                <div className="text-xl font-bold text-white drop-shadow-lg">
                   ${profile.budget_max.toLocaleString()}
                 </div>
-                <div className="text-xs text-white/80">max budget</div>
+                <div className="text-xs text-white/80 whitespace-nowrap">max budget</div>
               </div>
             )}
           </div>
