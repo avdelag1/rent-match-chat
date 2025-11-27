@@ -248,10 +248,10 @@ export function ClientSwipeContainer({
         </Button>
       </div>
 
-      {/* Full-Screen Card Container - Fills viewport height */}
-      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4 overflow-hidden">
+      {/* Full-Screen Card Container - Positioned lower on screen */}
+      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4 pt-6 sm:pt-12 overflow-hidden">
         <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] mx-auto">
-          <AnimatePresence mode="sync">
+          <AnimatePresence mode="wait">
             {currentClient && (
               <motion.div
                 key={currentClient.user_id}
