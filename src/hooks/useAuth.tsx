@@ -142,9 +142,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { profile: existingProfile } = await checkExistingAccount(email);
       
       if (existingProfile) {
+        const existingRole = existingProfile.role;
+        const correctPage = existingRole === 'client' ? 'Client' : 'Owner';
+        const wrongPage = role === 'client' ? 'Client' : 'Owner';
+        
+        // Check if trying to sign up with different role
+        if (existingRole !== role) {
+          toast({
+            title: "Email Already Registered",
+            description: `This email is already registered as a ${existingRole.toUpperCase()} account. To use both roles, please create a separate account with a different email address.`,
+            variant: "destructive"
+          });
+          return { error: new Error(`Email already registered with ${existingRole} role`) };
+        }
+        
+        // Same role - just redirect to sign in
         toast({
           title: "Account Already Exists",
-          description: `An account with this email already exists as a ${existingProfile.role}. Please sign in instead.`,
+          description: `An account with this email already exists. Please sign in instead.`,
           variant: "destructive"
         });
         return { error: new Error('User already registered') };
@@ -267,18 +282,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         console.log('[Auth] User role from user_roles:', roleData?.role);
 
-        // If role exists in user_roles, use it (ignore selected button)
+        // If role exists in user_roles, check if it matches the page
         if (roleData) {
           const actualRole = roleData.role as 'client' | 'owner';
 
-          // Log and notify if user clicked wrong button
+          // CRITICAL: Reject login if user is on wrong page
           if (actualRole !== role) {
-            console.log('[Auth] ⚠️ User clicked wrong role button. Actual:', actualRole, 'Selected:', role);
+            console.log('[Auth] ❌ Login rejected - wrong page. Actual:', actualRole, 'Attempted:', role);
+            await supabase.auth.signOut(); // Sign them out immediately
+            
+            const correctPage = actualRole === 'client' ? 'Client' : 'Owner';
+            const wrongPage = role === 'client' ? 'Client' : 'Owner';
+            
             toast({
-              title: "Wrong Login Button",
-              description: `You're a ${actualRole}, but clicked "Sign in as ${role}". Please use the correct button next time.`,
-              variant: "default"
+              title: "Wrong Login Page",
+              description: `This email is registered as a ${actualRole.toUpperCase()} account. Please go to the ${correctPage} login page to sign in.`,
+              variant: "destructive"
             });
+
+            throw new Error(`ROLE_MISMATCH: This is a ${actualRole} account, not a ${role} account.`);
           }
 
           // Ensure profile exists with correct role
