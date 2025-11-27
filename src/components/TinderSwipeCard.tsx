@@ -73,8 +73,8 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
   // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 80; // More sensitive swipe threshold
-    const velocityThreshold = 350; // Reduced for better sensitivity
+    const swipeThresholdX = 60; // More responsive threshold
+    const velocityThreshold = 300; // Lower for easier swipes
 
     // Check for swipes (left/right only)
     if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
@@ -109,14 +109,14 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
       style={cardStyle}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.6}
+      dragElastic={0.5}
       onDragEnd={handleDragEnd}
       className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
       animate={{ x: 0, rotate: 0 }}
       transition={{
         type: "spring",
-        stiffness: 350,
-        damping: 28,
+        stiffness: 400,
+        damping: 30,
         mass: 0.8
       }}
     >
@@ -187,16 +187,16 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
           )}
         </div>
 
-        {/* Bottom Sheet - Collapsible with Glassmorphism */}
+         {/* Bottom Sheet - Collapsible with Glassmorphism */}
          <motion.div
            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
            animate={{
-             height: isBottomSheetExpanded ? '75%' : '18%',
+             height: isBottomSheetExpanded ? '75%' : '14%',
              y: 0
            }}
            transition={{
              type: "spring",
-             stiffness: 350,
+             stiffness: 400,
              damping: 32
            }}
            style={{ willChange: 'height' }}

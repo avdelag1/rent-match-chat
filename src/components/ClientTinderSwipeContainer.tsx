@@ -378,8 +378,8 @@ export function ClientTinderSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons - Overlay at Bottom of Card */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-32 z-40 flex justify-center md:bottom-48">
+      {/* Action Buttons - Float over image, not bottom sheet */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[35%] z-40 flex justify-center">
         <div className="w-full max-w-md px-4">
           <SwipeActionButtons
             onUndo={handleUndo}

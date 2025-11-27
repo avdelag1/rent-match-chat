@@ -51,10 +51,74 @@ export function useRecordProfileView() {
   });
 }
 
-// Get profile IDs that should be excluded (seen in last 7 days)
-export function useExcludedProfiles(viewType: 'profile' | 'listing' = 'profile') {
+// Get permanently excluded profiles (disliked/passed) - unless listing was updated after swipe
+export function usePermanentlyExcludedProfiles(viewType: 'profile' | 'listing' = 'profile') {
   return useQuery({
-    queryKey: ['excluded-profiles', viewType],
+    queryKey: ['permanently-excluded', viewType],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return [];
+
+      // Get ALL passed/disliked cards (no time limit)
+      const { data: passedCards, error } = await supabase
+        .from('profile_views')
+        .select('viewed_profile_id, created_at')
+        .eq('user_id', user.user.id)
+        .eq('view_type', viewType)
+        .eq('action', 'pass');
+
+      if (error) {
+        console.error('Error fetching permanently excluded profiles:', error);
+        return [];
+      }
+
+      if (!passedCards?.length) return [];
+
+      // For listings: check if they were updated AFTER the swipe
+      if (viewType === 'listing') {
+        const listingIds = passedCards.map(p => p.viewed_profile_id);
+        const { data: listings } = await supabase
+          .from('listings')
+          .select('id, updated_at')
+          .in('id', listingIds);
+
+        // Filter out listings that were updated after swipe (show them again)
+        const stillExcluded = passedCards.filter(card => {
+          const listing = listings?.find(l => l.id === card.viewed_profile_id);
+          if (!listing?.updated_at) return true; // No update info, stay excluded
+          return new Date(listing.updated_at) <= new Date(card.created_at);
+        });
+
+        return stillExcluded.map(v => v.viewed_profile_id);
+      }
+
+      // For client profiles: check if they were updated AFTER the swipe
+      if (viewType === 'profile') {
+        const profileIds = passedCards.map(p => p.viewed_profile_id);
+        const { data: profiles } = await supabase
+          .from('client_profiles')
+          .select('user_id, updated_at')
+          .in('user_id', profileIds);
+
+        const stillExcluded = passedCards.filter(card => {
+          const profile = profiles?.find(p => p.user_id === card.viewed_profile_id);
+          if (!profile?.updated_at) return true;
+          return new Date(profile.updated_at) <= new Date(card.created_at);
+        });
+
+        return stillExcluded.map(v => v.viewed_profile_id);
+      }
+
+      return passedCards.map(v => v.viewed_profile_id);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Get temporarily excluded profiles (liked in last 7 days)
+export function useTemporarilyExcludedProfiles(viewType: 'profile' | 'listing' = 'profile') {
+  return useQuery({
+    queryKey: ['temp-excluded-likes', viewType],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return [];
@@ -67,17 +131,29 @@ export function useExcludedProfiles(viewType: 'profile' | 'listing' = 'profile')
         .select('viewed_profile_id')
         .eq('user_id', user.user.id)
         .eq('view_type', viewType)
+        .eq('action', 'like')
         .gte('created_at', sevenDaysAgo.toISOString());
 
       if (error) {
-        console.error('Error fetching excluded profiles:', error);
+        console.error('Error fetching temporarily excluded profiles:', error);
         return [];
       }
 
       return data?.map(v => v.viewed_profile_id) || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
+}
+
+// Combined exclusion hook for convenience
+export function useExcludedProfiles(viewType: 'profile' | 'listing' = 'profile') {
+  const { data: permanent = [] } = usePermanentlyExcludedProfiles(viewType);
+  const { data: temporary = [] } = useTemporarilyExcludedProfiles(viewType);
+  
+  return {
+    data: [...permanent, ...temporary],
+    isLoading: false,
+  };
 }
 
 // Get user's like/dislike patterns for smart matching

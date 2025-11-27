@@ -1640,6 +1640,7 @@ export type Database = {
           transportation_access: string[] | null
           tulum_location: string | null
           unit_type: string | null
+          updated_at: string | null
           vehicle_brand: string | null
           vehicle_condition: string | null
           vehicle_model: string | null
@@ -1776,6 +1777,7 @@ export type Database = {
           transportation_access?: string[] | null
           tulum_location?: string | null
           unit_type?: string | null
+          updated_at?: string | null
           vehicle_brand?: string | null
           vehicle_condition?: string | null
           vehicle_model?: string | null
@@ -1912,6 +1914,7 @@ export type Database = {
           transportation_access?: string[] | null
           tulum_location?: string | null
           unit_type?: string | null
+          updated_at?: string | null
           vehicle_brand?: string | null
           vehicle_condition?: string | null
           vehicle_model?: string | null
