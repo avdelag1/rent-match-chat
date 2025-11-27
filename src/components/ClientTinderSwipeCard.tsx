@@ -182,7 +182,7 @@ export function ClientTinderSwipeCard({
         </div>
 
         {/* Simple Bottom Info Overlay */}
-        <div className="absolute bottom-4 left-0 right-0 px-6 z-20 pointer-events-none">
+        <div className="absolute bottom-36 left-0 right-0 px-6 z-20 pointer-events-none">
           <div className="flex justify-between items-end">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-white drop-shadow-lg">
