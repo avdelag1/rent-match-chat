@@ -30,26 +30,27 @@ export function SwipeActionButtons({
 
   return (
     <div className="pointer-events-none w-full">
-      {/* Individual Floating Buttons - No Container Background */}
-      <div className="flex items-center justify-between px-8">
+      {/* Individual Floating Buttons - Horizontal layout with proper spacing */}
+      <div className="flex items-center justify-center gap-6 sm:gap-8">
         {/* 1. Undo Button (Yellow/Gold) */}
         <motion.div
           whileHover={{ scale: canUndo && !disabled ? 1.15 : 1 }}
           whileTap={{ scale: canUndo && !disabled ? 0.9 : 1 }}
-          className="pointer-events-auto"
+          className="pointer-events-auto flex-shrink-0"
         >
           <button
             onClick={() => handleAction(onUndo, 'light')}
             disabled={!canUndo || disabled}
             className={`
-              p-2 transition-all duration-200
+              h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full transition-all duration-200
               ${canUndo && !disabled
-                ? 'text-yellow-500 hover:text-yellow-600 opacity-100'
-                : 'text-gray-400 opacity-50 cursor-not-allowed'
+                ? 'text-yellow-500 hover:text-yellow-600 opacity-100 hover:bg-yellow-500/10'
+                : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}
+            title="Undo last swipe"
           >
-            <RotateCcw className="h-6 w-6" />
+            <RotateCcw className="h-6 w-6 sm:h-7 sm:w-7" />
           </button>
         </motion.div>
 
@@ -57,20 +58,21 @@ export function SwipeActionButtons({
         <motion.div
           whileHover={{ scale: !disabled ? 1.15 : 1 }}
           whileTap={{ scale: !disabled ? 0.9 : 1 }}
-          className="pointer-events-auto"
+          className="pointer-events-auto flex-shrink-0"
         >
           <button
             onClick={() => handleAction(onPass, 'warning')}
             disabled={disabled}
             className={`
-              p-2 transition-all duration-200
+              h-14 w-14 sm:h-16 sm:w-16 flex items-center justify-center rounded-full transition-all duration-200
               ${!disabled
-                ? 'text-red-500 hover:text-red-600'
-                : 'text-gray-400 opacity-50 cursor-not-allowed'
+                ? 'text-red-500 hover:text-red-600 opacity-100 hover:bg-red-500/10'
+                : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}
+            title="Pass"
           >
-            <X className="h-7 w-7 stroke-[2.5]" />
+            <X className="h-7 w-7 sm:h-8 sm:w-8 stroke-[2.5]" />
           </button>
         </motion.div>
 
@@ -78,20 +80,21 @@ export function SwipeActionButtons({
         <motion.div
           whileHover={{ scale: !disabled ? 1.15 : 1 }}
           whileTap={{ scale: !disabled ? 0.9 : 1 }}
-          className="pointer-events-auto"
+          className="pointer-events-auto flex-shrink-0"
         >
           <button
             onClick={() => handleAction(onInfo, 'light')}
             disabled={disabled}
             className={`
-              p-2 transition-all duration-200
+              h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full transition-all duration-200
               ${!disabled
-                ? 'text-blue-500 hover:text-blue-600'
-                : 'text-gray-400 opacity-50 cursor-not-allowed'
+                ? 'text-blue-500 hover:text-blue-600 opacity-100 hover:bg-blue-500/10'
+                : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}
+            title="View profile"
           >
-            <Eye className="h-5 w-5" />
+            <Eye className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </motion.div>
 
@@ -99,20 +102,21 @@ export function SwipeActionButtons({
         <motion.div
           whileHover={{ scale: !disabled ? 1.15 : 1 }}
           whileTap={{ scale: !disabled ? 0.9 : 1 }}
-          className="pointer-events-auto"
+          className="pointer-events-auto flex-shrink-0"
         >
           <button
             onClick={() => handleAction(onLike, 'success')}
             disabled={disabled}
             className={`
-              p-2 transition-all duration-200
+              h-14 w-14 sm:h-16 sm:w-16 flex items-center justify-center rounded-full transition-all duration-200
               ${!disabled
-                ? 'text-green-500 hover:text-green-600'
-                : 'text-gray-400 opacity-50 cursor-not-allowed'
+                ? 'text-green-500 hover:text-green-600 opacity-100 hover:bg-green-500/10'
+                : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}
+            title="Like"
           >
-            <Heart className="h-7 w-7 fill-currentColor" />
+            <Heart className="h-7 w-7 sm:h-8 sm:w-8 fill-currentColor" />
           </button>
         </motion.div>
       </div>
