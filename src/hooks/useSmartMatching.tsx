@@ -709,6 +709,9 @@ export function useSmartClientMatching(
         }
 
         // Fetch already-liked profiles (right swipes only) to exclude them
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
         const { data: likedProfiles, error: likesError } = await supabase
           .from('likes')
           .select('target_id')
@@ -744,7 +747,7 @@ export function useSmartClientMatching(
 
         // Map profiles with placeholder images - filter out excluded profiles
         const filteredProfiles = profiles
-          .filter(profile => !excludedIds.has(profile.id))
+          .filter(profile => !likedProfileIds.has(profile.id))
           .map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0)
