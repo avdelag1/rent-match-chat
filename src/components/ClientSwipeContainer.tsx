@@ -8,6 +8,7 @@ import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
+import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { Button } from '@/components/ui/button';
 import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -62,6 +63,7 @@ export function ClientSwipeContainer({
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
   const startConversation = useStartConversation();
+  const recordProfileView = useRecordProfileView();
 
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
@@ -72,6 +74,13 @@ export function ClientSwipeContainer({
     
     // Trigger haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
+
+    // Record profile view for exclusion logic
+    recordProfileView.mutate({
+      profileId: currentClient.user_id,
+      viewType: 'profile',
+      action: direction === 'left' ? 'pass' : 'like'
+    });
 
     // Record swipe with match checking
     swipeMutation.mutate({
@@ -267,8 +276,8 @@ export function ClientSwipeContainer({
                   scale: 0.85,
                   transition: {
                     type: "spring",
-                    stiffness: 180,
-                    damping: 15,
+                    stiffness: 300,
+                    damping: 25,
                     mass: 0.5,
                     duration: 0.3
                   }
