@@ -3,7 +3,7 @@ import { Flame } from 'lucide-react';
 
 export function AppLoadingScreen() {
   return (
-    <div className="fixed inset-0 bg-gradient-primary flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
       <div className="text-center space-y-6">
         {/* Animated Logo */}
         <motion.div
