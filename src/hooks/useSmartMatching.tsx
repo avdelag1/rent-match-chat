@@ -225,13 +225,14 @@ export function useSmartListingMatching(
           .maybeSingle();
 
         // Fetch already-liked listings (right swipes) to exclude them
-        const { data: likedListings } = await supabase
+        const { data: likedListings, error: likesError } = await supabase
           .from('likes')
           .select('target_id')
           .eq('user_id', user.user.id)
           .eq('direction', 'right');
 
-        const likedListingIds = new Set(likedListings?.map(like => like.target_id) || []);
+        // If likes table has permission issues, just continue without filtering
+        const likedListingIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
 
         // Build query with filters and subscription data for premium prioritization
         let query = supabase
@@ -707,22 +708,17 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Get temporarily excluded (liked in last 7 days)
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        const { data: recentLikes } = await supabase
-          .from('profile_views')
-          .select('viewed_profile_id')
+        // Fetch already-liked profiles (right swipes only) to exclude them
+        const { data: likedProfiles, error: likesError } = await supabase
+          .from('likes')
+          .select('target_id')
           .eq('user_id', user.user.id)
           .eq('view_type', 'profile')
           .eq('action', 'like')
           .gte('created_at', sevenDaysAgo.toISOString());
 
-        // Build exclusion set: ONLY temporarily exclude recently liked profiles (passes still visible for now)
-        const excludedIds = new Set([
-          ...(recentLikes || []).map(v => v.viewed_profile_id)
-        ]);
+        // If likes table has permission issues, just continue without filtering
+        const likedProfileIds = new Set(!likesError ? (likedProfiles?.map(like => like.target_id) || []) : []);
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // Fetch client profiles with pagination

@@ -169,11 +169,11 @@ export function ClientSwipeContainer({
   if (isLoading || isRefetching) {
     return (
       <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 600px)' }}>
-        <div className="w-full h-full bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl overflow-hidden">
+        <div className="w-full h-full bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-sm border-2 border-slate-700/50 rounded-3xl overflow-hidden">
           <div className="p-6 space-y-4">
-            <Skeleton className="w-full h-[60vh] rounded-lg" />
-            <Skeleton className="w-3/4 h-6" />
-            <Skeleton className="w-1/2 h-4" />
+            <Skeleton className="w-full h-[60vh] rounded-lg bg-slate-700" />
+            <Skeleton className="w-3/4 h-6 bg-slate-700" />
+            <Skeleton className="w-1/2 h-4 bg-slate-700" />
           </div>
         </div>
       </div>
