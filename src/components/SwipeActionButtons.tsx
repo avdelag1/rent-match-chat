@@ -44,7 +44,7 @@ export function SwipeActionButtons({
             className={`
               h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full transition-all duration-200
               ${canUndo && !disabled
-                ? 'text-yellow-500 hover:text-yellow-600 opacity-100 hover:bg-yellow-500/10'
+                ? 'text-yellow-500 hover:text-yellow-600 opacity-100'
                 : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}
@@ -66,7 +66,7 @@ export function SwipeActionButtons({
             className={`
               h-14 w-14 sm:h-16 sm:w-16 flex items-center justify-center rounded-full transition-all duration-200
               ${!disabled
-                ? 'text-red-500 hover:text-red-600 opacity-100 hover:bg-red-500/10'
+                ? 'text-red-500 hover:text-red-600 opacity-100'
                 : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}
@@ -88,7 +88,7 @@ export function SwipeActionButtons({
             className={`
               h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full transition-all duration-200
               ${!disabled
-                ? 'text-blue-500 hover:text-blue-600 opacity-100 hover:bg-blue-500/10'
+                ? 'text-blue-500 hover:text-blue-600 opacity-100'
                 : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}
@@ -110,7 +110,7 @@ export function SwipeActionButtons({
             className={`
               h-14 w-14 sm:h-16 sm:w-16 flex items-center justify-center rounded-full transition-all duration-200
               ${!disabled
-                ? 'text-green-500 hover:text-green-600 opacity-100 hover:bg-green-500/10'
+                ? 'text-green-500 hover:text-green-600 opacity-100'
                 : 'text-gray-400 opacity-40 cursor-not-allowed'
               }
             `}

@@ -713,7 +713,9 @@ export function useSmartClientMatching(
           .from('likes')
           .select('target_id')
           .eq('user_id', user.user.id)
-          .eq('direction', 'right');
+          .eq('view_type', 'profile')
+          .eq('action', 'like')
+          .gte('created_at', sevenDaysAgo.toISOString());
 
         // If likes table has permission issues, just continue without filtering
         const likedProfileIds = new Set(!likesError ? (likedProfiles?.map(like => like.target_id) || []) : []);
@@ -740,9 +742,9 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Map profiles with placeholder images - filter out already-liked profiles
+        // Map profiles with placeholder images - filter out excluded profiles
         const filteredProfiles = profiles
-          .filter(profile => !likedProfileIds.has(profile.id))
+          .filter(profile => !excludedIds.has(profile.id))
           .map(profile => ({
             ...profile,
             images: (profile.images && profile.images.length > 0)
