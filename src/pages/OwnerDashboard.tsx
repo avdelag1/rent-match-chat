@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, memo } from 'react';
-import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { ClientTinderSwipeContainer } from '@/components/ClientTinderSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
@@ -54,24 +53,20 @@ const OwnerDashboard = memo(({ onClientInsights, onMessageClick }: OwnerDashboar
 
   return (
     <DashboardLayout userRole="owner">
-      <PageTransition>
-        <div className="fixed inset-0 w-full h-full overflow-hidden">
-          <ClientTinderSwipeContainer
-            onClientTap={handleProfileTap}
-            onInsights={handleProfileTap}
-            onMessageClick={handleStartConversation}
-            profiles={profiles}
-            isLoading={isLoading}
-            error={error}
-          />
-        </div>
+      <ClientTinderSwipeContainer
+        onClientTap={handleProfileTap}
+        onInsights={handleProfileTap}
+        onMessageClick={handleStartConversation}
+        profiles={profiles}
+        isLoading={isLoading}
+        error={error}
+      />
 
-        <ClientInsightsDialog
-          open={insightsOpen}
-          onOpenChange={setInsightsOpen}
-          profile={selectedProfile}
-        />
-      </PageTransition>
+      <ClientInsightsDialog
+        open={insightsOpen}
+        onOpenChange={setInsightsOpen}
+        profile={selectedProfile}
+      />
     </DashboardLayout>
   );
 });
