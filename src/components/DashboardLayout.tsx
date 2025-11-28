@@ -254,7 +254,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* Main Content - Full screen area for card feed with proper scrolling */}
-      <main className={`fixed inset-0 overflow-hidden ${mainPaddingClass}`}>
+      <main className={`fixed top-10 left-0 right-0 bottom-16 overflow-hidden ${mainPaddingClass}`}>
         <div className="w-full h-full overflow-y-auto">
           {enhancedChildren}
         </div>
