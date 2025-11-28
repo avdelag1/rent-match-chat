@@ -707,14 +707,6 @@ export function useSmartClientMatching(
           return [];
         }
 
-        // Get permanently excluded (passed profiles - unless updated)
-        const { data: passedViews } = await supabase
-          .from('profile_views')
-          .select('viewed_profile_id, created_at')
-          .eq('user_id', user.user.id)
-          .eq('view_type', 'profile')
-          .eq('action', 'pass');
-
         // Get temporarily excluded (liked in last 7 days)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -726,6 +718,11 @@ export function useSmartClientMatching(
           .eq('view_type', 'profile')
           .eq('action', 'like')
           .gte('created_at', sevenDaysAgo.toISOString());
+
+        // Build exclusion set: ONLY temporarily exclude recently liked profiles (passes still visible for now)
+        const excludedIds = new Set([
+          ...(recentLikes || []).map(v => v.viewed_profile_id)
+        ]);
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // Fetch client profiles with pagination
@@ -748,31 +745,6 @@ export function useSmartClientMatching(
         if (!profiles?.length) {
           return [];
         }
-
-        // Check if passed profiles have been updated since the swipe
-        let permanentlyExcluded: string[] = [];
-        if (passedViews && passedViews.length > 0) {
-          const passedProfileIds = passedViews.map(v => v.viewed_profile_id);
-          const { data: profileUpdates } = await supabase
-            .from('profiles')
-            .select('id, updated_at')
-            .in('id', passedProfileIds);
-
-          // Only exclude if NOT updated after swipe
-          permanentlyExcluded = passedViews
-            .filter(view => {
-              const profile = profileUpdates?.find(p => p.id === view.viewed_profile_id);
-              if (!profile?.updated_at) return true; // No update info, stay excluded
-              return new Date(profile.updated_at) <= new Date(view.created_at);
-            })
-            .map(v => v.viewed_profile_id);
-        }
-
-        // Build exclusion set
-        const excludedIds = new Set([
-          ...permanentlyExcluded,
-          ...(recentLikes || []).map(v => v.viewed_profile_id)
-        ]);
 
         // Map profiles with placeholder images - filter out excluded profiles
         const filteredProfiles = profiles
