@@ -29,6 +29,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const { signIn, signUp, signInWithOAuth } = useAuth();
 
   // Check if running on a native platform (iOS/Android)
@@ -120,6 +121,17 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           throw error;
         }
       } else {
+        // Check if user agreed to terms during signup
+        if (!agreeToTerms) {
+          toast({
+            title: "Terms Required",
+            description: "Please agree to the terms and conditions to continue.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
         const validated = signupSchema.parse({ name, email, password });
         const { error } = await signUp(validated.email, validated.password, role, validated.name);
         if (!error) {
@@ -257,7 +269,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           required
-                          className="pl-11 h-12 bg-background border-border text-base"
+                          className="pl-11 h-12 text-base"
                           placeholder="John Doe"
                         />
                       </div>
@@ -277,7 +289,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="pl-11 h-12 bg-background border-border text-base"
+                        className="pl-11 h-12 text-base"
                         placeholder="you@example.com"
                       />
                     </div>
@@ -297,7 +309,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="pl-11 pr-11 h-12 bg-background border-border text-base"
+                          className="pl-11 pr-11 h-12 text-base"
                           placeholder="••••••••"
                         />
                         <button
@@ -313,6 +325,40 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           Must be 8+ characters with uppercase, lowercase, and number
                         </p>
                       )}
+                    </div>
+                  )}
+
+                  {/* Terms and Conditions (Sign Up Only) */}
+                  {!isLogin && !isForgotPassword && (
+                    <div className="space-y-3 pt-2">
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={agreeToTerms}
+                          onChange={(e) => setAgreeToTerms(e.target.checked)}
+                          className="w-5 h-5 rounded border-input text-primary focus:ring-primary mt-0.5 flex-shrink-0"
+                        />
+                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                          I agree to the{' '}
+                          <a
+                            href="/terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-medium"
+                          >
+                            terms and conditions
+                          </a>
+                          {' '}and{' '}
+                          <a
+                            href="/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-medium"
+                          >
+                            privacy policy
+                          </a>
+                        </span>
+                      </label>
                     </div>
                   )}
 
@@ -380,6 +426,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           setPassword('');
                           setName('');
                           setShowPassword(false);
+                          setAgreeToTerms(false);
                         }}
                         className="text-primary hover:underline font-semibold"
                       >

@@ -31,12 +31,18 @@ export function ClientTinderSwipeCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Enhanced rotation based on drag distance
-  const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
+  // Tinder-like rotation - more dramatic and responsive
+  const rotate = useTransform(x, [-500, -200, 0, 200, 500], [-25, -15, 0, 15, 25]);
 
-  const images = useMemo(() => 
-    profile.profile_images && profile.profile_images.length > 0 
-      ? profile.profile_images 
+  // Scale effect - slight zoom on drag
+  const scale = useTransform(x, [-300, 0, 300], [0.95, 1, 0.95]);
+
+  // Opacity for card exit effect
+  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.5, 0.75, 1, 0.75, 0.5]);
+
+  const images = useMemo(() =>
+    profile.profile_images && profile.profile_images.length > 0
+      ? profile.profile_images
       : [profile.avatar_url || '/placeholder-avatar.svg'],
     [profile.profile_images, profile.avatar_url]
   );
@@ -58,20 +64,22 @@ export function ClientTinderSwipeCard({
     }
   }, [images.length]);
 
-  // Enhanced drag handling with better physics
+  // Tinder-like drag handling with improved physics
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 60; // More responsive threshold
-    const velocityThreshold = 300; // Lower for easier swipes
+    // More flexible thresholds for natural feel
+    const swipeThresholdX = 50; // Slightly lower for better responsiveness
+    const velocityThreshold = 250; // Snap swipe with lower velocity
 
-    // Check for swipes (left/right only)
+    // Check for swipes (left/right only) - more flexible
     if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
       const direction = offset.x > 0 ? 'right' : 'left';
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
       onSwipe(direction);
       return;
     }
-    
+
+    // Snap back with nice spring animation
     triggerHaptic('light');
   }, [onSwipe]);
 
@@ -85,13 +93,14 @@ export function ClientTinderSwipeCard({
     x,
     y,
     rotate: isTop ? rotate : 0,
-    scale: isTop ? 1 : 0.95,
+    scale: isTop ? scale : 0.95,
+    opacity: isTop ? opacity : 1,
     zIndex: isTop ? 10 : 1,
     position: 'absolute' as const,
     top: isTop ? 0 : 12,
     left: 0,
     right: 0,
-    willChange: 'transform'
+    willChange: 'transform, opacity'
   };
 
   return (
@@ -99,16 +108,16 @@ export function ClientTinderSwipeCard({
        ref={cardRef}
        style={cardStyle}
        drag={isTop ? "x" : false}
-       dragConstraints={{ left: 0, right: 0 }}
-       dragElastic={0.5}
+       dragConstraints={{ left: -500, right: 500 }}
+       dragElastic={0.2}
        onDragEnd={handleDragEnd}
        className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden"
-       animate={{ x: 0, y: 0, rotate: 0 }}
+       animate={{ x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 }}
        transition={{
          type: "spring",
-         stiffness: 400,
+         stiffness: 300,
          damping: 30,
-         mass: 0.8
+         mass: 1
        }}
      >
       <div className="w-full h-full overflow-hidden flex flex-col">
