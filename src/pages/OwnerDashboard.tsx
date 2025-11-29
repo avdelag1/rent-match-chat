@@ -2,7 +2,9 @@ import { useState, useCallback, useMemo, memo } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { ClientTinderSwipeContainer } from '@/components/ClientTinderSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
+import { ProfilePhotoNotification } from '@/components/ProfilePhotoNotification';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
+import { useOwnerProfile } from '@/hooks/useOwnerProfile';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useStartConversation } from '@/hooks/useConversations';
@@ -16,8 +18,12 @@ const OwnerDashboard = memo(({ onClientInsights, onMessageClick }: OwnerDashboar
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const { data: profiles = [], refetch, isLoading, error } = useSmartClientMatching();
+  const { data: ownerProfile } = useOwnerProfile();
   const navigate = useNavigate();
   const startConversation = useStartConversation();
+
+  // Check if owner has uploaded at least one photo
+  const hasPhotos = ownerProfile?.profile_images && ownerProfile.profile_images.length > 0;
 
   const handleProfileTap = useCallback((profileId: string) => {
     setSelectedProfileId(profileId);
@@ -53,6 +59,9 @@ const OwnerDashboard = memo(({ onClientInsights, onMessageClick }: OwnerDashboar
 
   return (
     <DashboardLayout userRole="owner">
+      {/* Profile Photo Upload Notification */}
+      <ProfilePhotoNotification hasPhotos={!!hasPhotos} userRole="owner" />
+
       <ClientTinderSwipeContainer
         onClientTap={handleProfileTap}
         onInsights={handleProfileTap}

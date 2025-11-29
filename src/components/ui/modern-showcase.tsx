@@ -92,21 +92,17 @@ export const ModernShowcase = () => {
           <h2 className="text-2xl font-bold">Progressive Image Loading</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="p-4">
-              <ProgressiveImage
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800"
-                alt="Modern apartment"
-                className="w-full h-64 object-cover rounded-lg"
-              />
+              <div className="w-full h-64 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg font-semibold">Progressive Image Demo</span>
+              </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 Images load with blur-up effect
               </p>
             </Card>
             <Card className="p-4">
-              <ProgressiveImage
-                src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"
-                alt="Luxury property"
-                className="w-full h-64 object-cover rounded-lg"
-              />
+              <div className="w-full h-64 bg-gradient-to-br from-pink-500 to-orange-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg font-semibold">Progressive Image Demo</span>
+              </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 Smooth transition from blur to sharp
               </p>
