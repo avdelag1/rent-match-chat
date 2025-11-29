@@ -165,30 +165,20 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
       />
       <div className="w-full min-h-screen bg-background">
         <motion.div 
-          className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 max-w-7xl"
+          className="w-full h-full px-0 py-0"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          
-          {/* Main Content - No Header, Just Cards */}
-          <div className="w-full">
-            
-            {/* Swipe Section */}
-            <motion.div variants={itemVariants} className="w-full">
-              <Card className="overflow-hidden">
-                <CardContent className="flex justify-center pb-6 sm:pb-8 px-3 sm:px-6 pt-6">
-                  <div className="w-full max-w-4xl">
-                    <ClientSwipeContainer 
-                      onClientTap={handleClientTap} 
-                      onInsights={handleInsights}
-                      onMessageClick={onMessageClick}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Main Content - Fullscreen Swipe Card */}
+          <div className="w-full h-full flex items-center justify-center">
+            <motion.div variants={itemVariants} className="w-full h-full max-w-4xl">
+              <ClientSwipeContainer 
+                onClientTap={handleClientTap} 
+                onInsights={handleInsights}
+                onMessageClick={onMessageClick}
+              />
             </motion.div>
-
           </div>
         </motion.div>
       </div>
