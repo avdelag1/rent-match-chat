@@ -245,7 +245,7 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="w-full h-full bg-background overflow-hidden flex flex-col">
+    <div className="w-full h-full overflow-hidden flex flex-col">
       {/* Refresh Button - Top Right */}
       <div className="absolute top-3 right-3 z-50">
         <Button
@@ -260,7 +260,7 @@ export function ClientSwipeContainer({
       </div>
 
       {/* Full-Screen Card Container - Positioned lower on screen */}
-      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4 pt-6 sm:pt-12 overflow-hidden">
+      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4 pt-6 sm:pt-12">
         <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] mx-auto">
           <AnimatePresence mode="wait">
             {currentClient && (
