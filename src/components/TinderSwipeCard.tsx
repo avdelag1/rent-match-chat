@@ -156,6 +156,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             draggable={false}
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
+            fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
             style={{
               willChange: 'transform',
               backfaceVisibility: 'hidden',
