@@ -72,29 +72,20 @@ export function LikedClients() {
       if (likesError) throw likesError;
       if (!likes || likes.length === 0) return [];
 
-      // Get the profiles for those users
+      // Get the profiles for those users, filtering to only clients using JOIN
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('*')
-        .in('id', likes.map(like => like.target_id));
+        .select(`
+          *,
+          user_roles!inner(role)
+        `)
+        .in('id', likes.map(like => like.target_id))
+        .eq('user_roles.role', 'client');
 
       if (profilesError) throw profilesError;
       if (!profiles) return [];
 
-      // Filter to only client profiles by checking user_roles
-      const clientProfiles = await Promise.all(
-        profiles.map(async (profile) => {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profile.id)
-            .maybeSingle();
-
-          return roleData?.role === 'client' ? profile : null;
-        })
-      );
-
-      const filteredProfiles = clientProfiles.filter(p => p !== null);
+      const filteredProfiles = profiles;
 
       // Return ONLY the filtered client profiles, not all profiles
       const likedClientsList = filteredProfiles.map(profile => {
