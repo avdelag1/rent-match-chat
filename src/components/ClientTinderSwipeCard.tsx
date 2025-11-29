@@ -32,13 +32,13 @@ export function ClientTinderSwipeCard({
   const y = useMotionValue(0);
 
   // Tinder-like rotation - more dramatic and responsive
-  const rotate = useTransform(x, [-500, -200, 0, 200, 500], [-25, -15, 0, 15, 25]);
+  const rotate = useTransform(x, [-400, -150, 0, 150, 400], [-20, -10, 0, 10, 20]);
 
   // Scale effect - slight zoom on drag
-  const scale = useTransform(x, [-300, 0, 300], [0.95, 1, 0.95]);
+  const scale = useTransform(x, [-300, 0, 300], [0.98, 1, 0.98]);
 
   // Opacity for card exit effect
-  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.5, 0.75, 1, 0.75, 0.5]);
+  const opacity = useTransform(x, [-400, -200, 0, 200, 400], [0.3, 0.85, 1, 0.85, 0.3]);
 
   const images = useMemo(() =>
     profile.profile_images && profile.profile_images.length > 0
@@ -68,8 +68,8 @@ export function ClientTinderSwipeCard({
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     // More flexible thresholds for natural feel
-    const swipeThresholdX = 50; // Slightly lower for better responsiveness
-    const velocityThreshold = 250; // Snap swipe with lower velocity
+    const swipeThresholdX = 80; // Slightly lower for better responsiveness
+    const velocityThreshold = 300; // Snap swipe with lower velocity
 
     // Check for swipes (left/right only) - more flexible
     if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
@@ -109,15 +109,16 @@ export function ClientTinderSwipeCard({
        style={cardStyle}
        drag={isTop ? "x" : false}
        dragConstraints={{ left: -500, right: 500 }}
-       dragElastic={0.2}
+       dragElastic={0.15}
+       dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
        onDragEnd={handleDragEnd}
-       className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden"
+       className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
        animate={{ x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 }}
        transition={{
          type: "spring",
-         stiffness: 300,
-         damping: 30,
-         mass: 1
+         stiffness: 400,
+         damping: 35,
+         mass: 0.8
        }}
      >
       <div className="w-full h-full overflow-hidden flex flex-col">
@@ -132,7 +133,7 @@ export function ClientTinderSwipeCard({
           <img
             src={images[currentImageIndex]}
             alt={profile.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-3xl"
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
             fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
@@ -150,7 +151,7 @@ export function ClientTinderSwipeCard({
 
           {/* Story-Style Dots at Top */}
           {images.length > 1 && (
-            <div className="absolute top-8 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
+            <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
               {images.map((_, idx) => (
                 <div
                   key={`image-${idx}`}

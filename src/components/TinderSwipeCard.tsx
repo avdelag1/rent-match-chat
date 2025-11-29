@@ -23,7 +23,9 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
 
   // Motion values for drag - horizontal only for card swipes
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-400, 0, 400], [-20, 0, 20]);
+  const rotate = useTransform(x, [-400, -150, 0, 150, 400], [-20, -10, 0, 10, 20]);
+  const scale = useTransform(x, [-300, 0, 300], [0.98, 1, 0.98]);
+  const opacity = useTransform(x, [-400, -200, 0, 200, 400], [0.3, 0.85, 1, 0.85, 0.3]);
 
   // Guard for missing images - memoized
   const images = useMemo(() => {
@@ -73,7 +75,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
   // Enhanced drag handling with better physics
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
-    const swipeThresholdX = 60; // More responsive threshold
+    const swipeThresholdX = 80; // More responsive threshold
     const velocityThreshold = 300; // Lower for easier swipes
 
     // Check for swipes (left/right only)
@@ -91,7 +93,8 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
   const cardStyle = {
     x,
     rotate: isTop ? rotate : 0,
-    scale: isTop ? 1 : 0.95,
+    scale: isTop ? scale : 0.95,
+    opacity: isTop ? opacity : 1,
     zIndex: isTop ? 10 : 1,
     position: 'absolute' as const,
     top: isTop ? 0 : 12,
@@ -109,14 +112,15 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
       style={cardStyle}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.5}
+      dragElastic={0.15}
+      dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
       onDragEnd={handleDragEnd}
-      className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation"
+      className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
       animate={{ x: 0, rotate: 0 }}
       transition={{
         type: "spring",
         stiffness: 400,
-        damping: 30,
+        damping: 35,
         mass: 0.8
       }}
     >
@@ -132,7 +136,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
         >
           {/* Story-Style Dots at Top */}
           {imageCount > 1 && (
-            <div className="absolute top-8 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
+            <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
               {images.map((_, index) => (
                 <div
                   key={index}
@@ -152,7 +156,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
           <img
             src={images[Math.min(currentImageIndex, imageCount - 1)]}
             alt={listing.title}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover rounded-3xl"
             draggable={false}
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
