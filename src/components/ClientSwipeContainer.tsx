@@ -245,7 +245,7 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden flex flex-col z-0">
+    <div className="w-full h-full bg-background overflow-hidden flex flex-col">
       {/* Refresh Button - Top Right */}
       <div className="absolute top-3 right-3 z-50">
         <Button
