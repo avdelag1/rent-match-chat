@@ -51,12 +51,18 @@ export function OwnerClientTinderCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Enhanced rotation based on drag distance (20 degrees max for better visual)
-  const rotate = useTransform(x, [-300, 0, 300], [-20, 0, 20]);
+  // Tinder-like rotation - more dramatic and responsive
+  const rotate = useTransform(x, [-500, -200, 0, 200, 500], [-25, -15, 0, 15, 25]);
 
-  const images = useMemo(() => 
-    profile.profile_images && profile.profile_images.length > 0 
-      ? profile.profile_images 
+  // Scale effect - slight zoom on drag
+  const scale = useTransform(x, [-300, 0, 300], [0.95, 1, 0.95]);
+
+  // Opacity for card exit effect
+  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.5, 0.75, 1, 0.75, 0.5]);
+
+  const images = useMemo(() =>
+    profile.profile_images && profile.profile_images.length > 0
+      ? profile.profile_images
       : [profile.avatar_url || '/placeholder-avatar.svg'],
     [profile.profile_images, profile.avatar_url]
   );
@@ -82,11 +88,11 @@ export function OwnerClientTinderCard({
   const handleDragEnd = (event: any, info: PanInfo) => {
     const { offset, velocity } = info;
 
-    // More sensitive swipe threshold for easier swiping
-    const swipeThresholdX = 60; // pixels - reduced for better sensitivity
-    const velocityThreshold = 300; // px/s - reduced for better sensitivity
+    // More flexible thresholds for natural feel
+    const swipeThresholdX = 50; // Slightly lower for better responsiveness
+    const velocityThreshold = 250; // Snap swipe with lower velocity
 
-    // Horizontal swipes - Right (accept) or Left (reject)
+    // Horizontal swipes - Right (accept) or Left (reject) - more flexible
     const absOffsetX = Math.abs(offset.x);
     const absVelocityX = Math.abs(velocity.x);
 
@@ -95,6 +101,8 @@ export function OwnerClientTinderCard({
       onSwipe(direction);
       return;
     }
+
+    // Snap back with nice spring animation
   };
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
@@ -106,24 +114,26 @@ export function OwnerClientTinderCard({
   const cardStyle = {
     x,
     y,
-    rotate,
+    rotate: isTop ? rotate : 0,
+    scale: isTop ? scale : 0.95,
+    opacity: isTop ? opacity : 0,
   };
 
   return (
     <motion.div
       drag={isTop ? "x" : false}
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.5}
+      dragConstraints={{ left: -500, right: 500 }}
+      dragElastic={0.2}
       onDragEnd={handleDragEnd}
       style={cardStyle}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
+      animate={{ x: 0, y: 0, rotate: 0, scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 400,
-        damping: 28,
-        mass: 0.8
+        stiffness: 300,
+        damping: 30,
+        mass: 1
       }}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation"
+      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden"
     >
       {/* Swipe Overlays - Enhanced Visibility */}
       {/* Right Swipe - GREEN LIKE */}
