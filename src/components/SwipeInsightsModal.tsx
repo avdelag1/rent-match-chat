@@ -79,7 +79,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               backfaceVisibility: 'hidden'
             }}
           >
-            <DialogContent className={`max-w-lg w-full max-h-[90vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
+            <DialogContent className={`max-w-lg w-full max-h-[90vh] h-[85vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
               <motion.div>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -121,6 +121,9 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                               src={image}
                               alt={`${profile.name} photo ${index + 1}`}
                               className="w-full h-full object-cover"
+                              loading={index < 3 ? "eager" : "lazy"}
+                              decoding="async"
+                              fetchPriority={index === 0 ? "high" : "auto"}
                             />
                           </button>
                         ))}
@@ -265,6 +268,9 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                               src={image}
                               alt={`Property ${index + 1}`}
                               className="w-full h-full object-cover"
+                              loading={index < 3 ? "eager" : "lazy"}
+                              decoding="async"
+                              fetchPriority={index === 0 ? "high" : "auto"}
                             />
                           </button>
                         ))}

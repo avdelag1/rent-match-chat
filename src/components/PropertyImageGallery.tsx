@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { getFullImageUrl, getThumbnailUrl, preloadImage } from '@/utils/imageOptimization';
 
 interface PropertyImageGalleryProps {
   images: string[];
@@ -11,15 +12,27 @@ interface PropertyImageGalleryProps {
   initialIndex?: number;
 }
 
-export function PropertyImageGallery({ 
-  images, 
-  alt, 
-  isOpen, 
-  onClose, 
-  initialIndex = 0 
+export function PropertyImageGallery({
+  images,
+  alt,
+  isOpen,
+  onClose,
+  initialIndex = 0
 }: PropertyImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isZoomed, setIsZoomed] = useState(false);
+
+  // Prefetch adjacent images for instant navigation
+  useEffect(() => {
+    if (!isOpen || !images.length) return;
+
+    const nextIndex = (currentIndex + 1) % images.length;
+    const prevIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
+
+    // Prefetch next and previous images
+    preloadImage(getFullImageUrl(images[nextIndex])).catch(() => {});
+    preloadImage(getFullImageUrl(images[prevIndex])).catch(() => {});
+  }, [currentIndex, images, isOpen]);
 
   if (!images || images.length === 0) return null;
 
@@ -77,13 +90,16 @@ export function PropertyImageGallery({
           <div className="flex-1 flex items-center justify-center p-4 pt-16">
             <div className="relative max-w-full max-h-full">
               <img
-                src={images[currentIndex]}
+                src={getFullImageUrl(images[currentIndex])}
                 alt={`${alt} ${currentIndex + 1}`}
                 className={`max-w-full max-h-full object-contain transition-transform duration-300 ${
                   isZoomed ? 'scale-150 cursor-grab' : 'cursor-zoom-in'
                 }`}
                 onClick={() => setIsZoomed(!isZoomed)}
                 draggable={false}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
             </div>
           </div>
@@ -128,9 +144,11 @@ export function PropertyImageGallery({
                     }`}
                   >
                     <img
-                      src={image}
+                      src={getThumbnailUrl(image)}
                       alt={`${alt} thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
                 ))}

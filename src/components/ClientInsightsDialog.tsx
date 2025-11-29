@@ -175,6 +175,9 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                         src={image}
                         alt={`Client photo ${index + 1}`}
                         className="w-full h-full object-cover"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index === 0 ? "high" : "auto"}
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                         <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

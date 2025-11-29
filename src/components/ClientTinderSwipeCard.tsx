@@ -126,6 +126,7 @@ export function ClientTinderSwipeCard({
             className="w-full h-full object-cover"
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
+            fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
             draggable={false}
             style={{
               willChange: 'transform',

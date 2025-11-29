@@ -93,6 +93,9 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
                         src={image}
                         alt={`Property ${index + 1}`}
                         className="w-full h-full object-cover"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index === 0 ? "high" : "auto"}
                       />
                     </button>
                   ))}
