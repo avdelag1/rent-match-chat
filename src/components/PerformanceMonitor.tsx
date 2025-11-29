@@ -6,7 +6,7 @@ export function PerformanceMonitor() {
   const [memory, setMemory] = useState(0);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
+    if (import.meta.env.PROD) return;
 
     let frameCount = 0;
     let lastTime = performance.now();
@@ -37,7 +37,7 @@ export function PerformanceMonitor() {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  if (process.env.NODE_ENV !== 'development') return null;
+  if (import.meta.env.PROD) return null;
 
   return (
     <Card className="fixed bottom-4 right-4 p-3 z-[9999] bg-black/80 text-white backdrop-blur-sm border border-white/10">

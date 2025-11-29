@@ -154,10 +154,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   const handleMessage = async () => {
     const currentListing = listings[currentIndex];
-    console.log('[TinderentSwipe] Message button clicked for listing:', currentListing?.id);
     
     if (!currentListing?.owner_id || isCreatingConversation) {
-      console.log('[TinderentSwipe] Cannot start conversation - no owner or already creating');
       toast({
         title: 'Cannot Start Conversation',
         description: 'Owner information not available.',
@@ -166,7 +164,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
 
     if (needsUpgrade) {
-      console.log('[TinderentSwipe] User needs upgrade for messaging');
       navigate('/client/settings#subscription');
       toast({
         title: 'Subscription Required',
@@ -176,13 +173,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
 
     if (!hasPremiumMessaging) {
-      console.log('[TinderentSwipe] User does not have premium messaging');
       navigate('/client/settings#subscription');
       return;
     }
 
     setIsCreatingConversation(true);
-    console.log('[TinderentSwipe] Creating conversation with owner:', currentListing.owner_id);
     
     try {
       toast({
@@ -197,7 +192,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         canStartNewConversation: true,
       });
 
-      console.log('[TinderentSwipe] Conversation created:', result);
 
       if (result?.conversationId) {
         toast({
@@ -208,7 +202,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         // Wait 500ms before navigating to ensure DB is updated
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        console.log('[TinderentSwipe] Navigating to conversation:', result.conversationId);
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {

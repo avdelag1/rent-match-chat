@@ -20,8 +20,6 @@ async function fetchOwnProfile() {
   const uid = auth.user?.id;
   if (!uid) return null;
 
-  console.log('Fetching owner profile for user:', uid);
-
   const { data, error } = await supabase
     .from('owner_profiles')
     .select('*')
@@ -32,8 +30,7 @@ async function fetchOwnProfile() {
     console.error('Error fetching owner profile:', error);
     throw error;
   }
-  
-  console.log('Fetched owner profile data:', data);
+
   return data as OwnerProfile | null;
 }
 
@@ -62,7 +59,6 @@ export function useSaveOwnerProfile() {
       let profileData: OwnerProfile;
 
       if (existing?.id) {
-        console.log('Updating existing owner profile with:', updates);
         const { data, error } = await supabase
           .from('owner_profiles')
           .update(updates)
@@ -73,10 +69,8 @@ export function useSaveOwnerProfile() {
           console.error('Error updating owner profile:', error);
           throw error;
         }
-        console.log('Updated owner profile data:', data);
         profileData = data as OwnerProfile;
       } else {
-        console.log('Creating new owner profile with:', updates);
         const { data, error } = await supabase
           .from('owner_profiles')
           .insert([{ ...updates, user_id: uid }])
@@ -86,7 +80,6 @@ export function useSaveOwnerProfile() {
           console.error('Error creating owner profile:', error);
           throw error;
         }
-        console.log('Created owner profile data:', data);
         profileData = data as OwnerProfile;
       }
 

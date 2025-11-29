@@ -76,7 +76,7 @@ Timestamp: ${new Date().toISOString()}
                 We encountered an unexpected error. Please reload the page to continue.
               </p>
               
-              {process.env.NODE_ENV === 'development' && error && (
+              {import.meta.env.DEV && error && (
                 <div className="bg-black/40 border border-white/10 p-3 rounded-lg text-xs font-mono text-red-300 overflow-auto max-h-32">
                   <strong>Error:</strong> {error.message}
                   {error.stack && (

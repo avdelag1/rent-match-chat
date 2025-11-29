@@ -42,7 +42,6 @@ export function useUnreadMessageCount() {
         );
 
         const count = uniqueConversationIds.size;
-        console.log('[UnreadCount] Conversations with unread messages:', count);
         return count;
       } catch (error) {
         console.error('[UnreadCount] Error:', error);

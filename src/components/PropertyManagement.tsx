@@ -39,7 +39,6 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   // Auto-open form when category is provided via URL params
   useEffect(() => {
     if (initialCategory && initialMode) {
-      console.log('Auto-opening form for category:', initialCategory, 'mode:', initialMode);
       setEditingProperty({ category: initialCategory, mode: initialMode });
       setIsFormOpen(true);
       setActiveTab(initialCategory);
@@ -66,9 +65,6 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     return matchesSearch && matchesCategory;
   });
 
-  console.log('PropertyManagement - Current user:', user?.id);
-  console.log('PropertyManagement - Owner listings:', listings.length);
-  console.log('PropertyManagement - Filtered listings:', filteredListings.length);
 
   const handleAddProperty = () => {
     setEditingProperty(null);
@@ -84,13 +80,11 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   };
 
   const handleEditProperty = (listing: any) => {
-    console.log('Edit property:', listing.id);
     setEditingProperty(listing);
     setIsFormOpen(true);
   };
 
   const handleViewProperty = (listing: any) => {
-    console.log('View property:', listing.id);
     setViewingProperty(listing);
     setShowPreview(true);
   };

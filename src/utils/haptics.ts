@@ -28,7 +28,6 @@ export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | '
     try {
       (window as any).Haptics.impact({ style: type });
     } catch (e) {
-      console.log('Haptics not available');
     }
   }
 };

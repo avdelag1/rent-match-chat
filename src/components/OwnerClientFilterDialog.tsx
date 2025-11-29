@@ -190,7 +190,6 @@ const INTEREST_CATEGORIES = [
 ];
 
 export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilterDialogProps) {
-  console.log('🎛️ OwnerClientFilterDialog rendered, open:', open);
   
   const { preferences, updatePreferences, isUpdating } = useOwnerClientPreferences();
   const { saveFilter } = useSavedFilters();

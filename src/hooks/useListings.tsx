@@ -114,14 +114,7 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
           console.error('Listings query error:', error);
           throw error;
         }
-        
-        console.log(`Loaded ${listings?.length || 0} listings for owner properties:`, listings);
-        console.log('Query filters applied:', { 
-          status: 'active', 
-          is_active: true, 
-          excludeSwipedIds: excludeSwipedIds.length,
-          preferredListingTypes 
-        });
+
         return (listings as Listing[]) || [];
       } catch (error) {
         console.error('Error in useListings:', error);
@@ -143,7 +136,6 @@ export function useOwnerListings() {
       try {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) {
-          console.log('No authenticated user for owner listings');
           return [];
         }
 
@@ -159,7 +151,6 @@ export function useOwnerListings() {
           throw error;
         }
         
-        console.log(`Loaded ${listings?.length || 0} owner listings for user ${user.user.id}:`, listings);
         return (listings as Listing[]) || [];
       } catch (error) {
         console.error('Error in useOwnerListings:', error);

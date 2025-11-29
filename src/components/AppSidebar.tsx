@@ -205,7 +205,6 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ userRole: propUserRole, onMenuI
       if (onMenuItemClick) onMenuItemClick('support')
     } else if (item.action === 'filters') {
       // Close sidebar first on mobile, then open filters
-      console.log('🎛️ Closing sidebar, opening filters...')
       setOpenMobile(false)
       setTimeout(() => {
         if (onMenuItemClick) onMenuItemClick('filters')

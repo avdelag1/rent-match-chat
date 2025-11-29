@@ -198,7 +198,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }
 
       if (editingId) {
-        console.log('Updating listing with ID:', editingId);
         
         if (!editingId) {
           throw new Error('Listing ID is missing. Cannot update.');

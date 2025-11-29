@@ -24,15 +24,22 @@ export function UpdateNotification() {
   useEffect(() => {
     // Listen for service worker updates
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
+      const handleMessage = (event: MessageEvent) => {
         if (event.data && event.data.type === 'SW_UPDATED') {
           setNewVersion(event.data.version);
           setShowUpdate(true);
-          
+
           // Store new version in localStorage
           localStorage.setItem('app_version', event.data.version);
         }
-      });
+      };
+
+      navigator.serviceWorker.addEventListener('message', handleMessage);
+
+      // Cleanup listener on unmount
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', handleMessage);
+      };
     }
   }, []);
 

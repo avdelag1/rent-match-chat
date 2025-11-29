@@ -39,7 +39,6 @@ export function useSecuritySettings() {
           .maybeSingle();
 
         if (error) {
-          console.warn('Security settings table not available:', error);
           // Return defaults if table doesn't exist
           return {
             ...DEFAULT_SETTINGS,
@@ -63,7 +62,6 @@ export function useSecuritySettings() {
 
         return data;
       } catch (err) {
-        console.warn('Error fetching security settings:', err);
         return {
           ...DEFAULT_SETTINGS,
           id: '',
@@ -121,7 +119,6 @@ export function useSecuritySettings() {
           return data;
         }
       } catch (err) {
-        console.warn('Error updating security settings:', err);
         throw err;
       }
     },

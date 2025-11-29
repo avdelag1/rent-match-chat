@@ -6,7 +6,6 @@ export function clearAllCaches(): Promise<void> {
       caches.keys().then(names => {
         Promise.all(names.map(name => caches.delete(name)))
           .then(() => {
-            console.log('All caches cleared');
             resolve();
           });
       });
@@ -30,17 +29,27 @@ export function checkForUpdates(): void {
 }
 
 // Set up automatic update checking
-export function setupUpdateChecker(): void {
+export function setupUpdateChecker(): () => void {
   if ('serviceWorker' in navigator) {
     // Check for updates every 5 minutes (reduced from 30 seconds)
-    setInterval(checkForUpdates, 300000);
-    
+    const intervalId = setInterval(checkForUpdates, 300000);
+
     // Check immediately on focus
     window.addEventListener('focus', checkForUpdates);
-    
+
     // Check on network reconnection
     window.addEventListener('online', checkForUpdates);
+
+    // Return cleanup function
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', checkForUpdates);
+      window.removeEventListener('online', checkForUpdates);
+    };
   }
+
+  // Return no-op cleanup if service worker not available
+  return () => {};
 }
 
 // Force clear cache and version check
@@ -62,8 +71,6 @@ export function checkAppVersion(): void {
   const storedVersion = localStorage.getItem('app_version');
   
   if (currentVersion && storedVersion && currentVersion !== storedVersion) {
-    console.log('🔄 New version detected:', currentVersion);
-    console.log('📦 Old version was:', storedVersion);
     
     // Clear caches immediately
     clearAllCaches().then(() => {
@@ -87,7 +94,6 @@ export function forceVersionCheck(): Promise<boolean> {
           const storedVersion = localStorage.getItem('app_version');
           
           if (swVersion !== storedVersion) {
-            console.log('🔄 Version mismatch detected');
             resolve(true);
           } else {
             resolve(false);

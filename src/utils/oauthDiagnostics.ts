@@ -168,54 +168,28 @@ export async function diagnoseOAuthSetup(): Promise<OAuthDiagnostics> {
  * Run OAuth diagnostics and display results in console
  */
 export async function runOAuthDiagnostics() {
-  console.log('🔍 Running OAuth Diagnostics...\n');
 
   const results = await diagnoseOAuthSetup();
 
-  console.log('📊 OAUTH CONFIGURATION STATUS:');
-  console.log('================================\n');
 
-  console.log('✓ Google OAuth:');
-  console.log(`  - Enabled: ${results.googleEnabled ? '✅' : '❌'}`);
-  console.log(`  - Configured: ${results.googleConfigured ? '✅' : '❌'}\n`);
 
-  console.log('✓ Facebook OAuth:');
-  console.log(`  - Enabled: ${results.facebookEnabled ? '✅' : '❌'}`);
-  console.log(`  - Configured: ${results.facebookConfigured ? '✅' : '❌'}\n`);
 
-  console.log('✓ Session Persistence:');
-  console.log(`  - localStorage: ${results.localStorageAvailable ? '✅' : '❌'}`);
-  console.log(`  - sessionStorage: ${results.sessionStorageAvailable ? '✅' : '❌'}`);
-  console.log(`  - Persistence Enabled: ${results.sessionPersistenceEnabled ? '✅' : '❌'}\n`);
 
   if (results.errors.length > 0) {
-    console.log('❌ ERRORS:');
     results.errors.forEach((error, idx) => {
-      console.log(`  ${idx + 1}. ${error}`);
     });
-    console.log('');
   }
 
   if (results.warnings.length > 0) {
-    console.log('⚠️  WARNINGS:');
     results.warnings.forEach((warning, idx) => {
-      console.log(`  ${idx + 1}. ${warning}`);
     });
-    console.log('');
   }
 
   if (results.recommendations.length > 0) {
-    console.log('💡 RECOMMENDATIONS:');
     results.recommendations.forEach((rec, idx) => {
-      console.log(`  ${idx + 1}. ${rec}`);
     });
-    console.log('');
   }
 
-  console.log('================================');
-  console.log('📖 For detailed setup instructions, see:');
-  console.log('   - OAUTH_SETUP_GUIDE.md');
-  console.log('   - OAUTH_IMPLEMENTATION_STATUS.md\n');
 
   return results;
 }

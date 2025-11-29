@@ -147,7 +147,6 @@ export async function shareViaNavigator(params: {
       return true;
     } catch (error) {
       // User cancelled or error occurred
-      console.log('Share cancelled or failed:', error);
       return false;
     }
   }

@@ -144,8 +144,7 @@ export function useCategoryListings(
           console.error('Listings query error:', error);
           throw error;
         }
-        
-        console.log(`Loaded ${listings?.length || 0} ${category} listings (${mode}):`, listings);
+
         return (listings as CategoryListing[]) || [];
       } catch (error) {
         console.error('Error in useCategoryListings:', error);

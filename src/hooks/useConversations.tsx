@@ -34,11 +34,8 @@ export function useConversations() {
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
       if (!user?.id) {
-        console.log('[useConversations] No user ID, returning empty array');
         return [];
       }
-
-      console.log('[useConversations] Fetching conversations for user:', user.id);
 
       try {
         // OPTIMIZED: Single query with joins instead of N+1 queries
@@ -56,13 +53,10 @@ export function useConversations() {
           console.error('[useConversations] Error loading conversations:', error);
           // Gracefully handle auth errors
           if (error.code === '42501' || error.code === 'PGRST301') {
-            console.warn('[useConversations] Auth check failed, returning empty conversations');
             return [];
           }
           throw error;
         }
-
-        console.log('[useConversations] Raw conversations data:', data?.length || 0, 'conversations');
 
         // Defensive null check
         if (!data) return [];
@@ -94,13 +88,6 @@ export function useConversations() {
           // Determine role based on which side of the conversation the other user is
           const otherUserRole = isClient ? 'owner' : 'client';
 
-          console.log('[useConversations] Processing conversation:', {
-            id: conversation.id,
-            isClient,
-            otherUserProfile: otherUserProfile?.full_name,
-            otherUserRole
-          });
-
           return {
             id: conversation.id,
             client_id: conversation.client_id,
@@ -120,18 +107,17 @@ export function useConversations() {
           };
         });
 
-        console.log('[useConversations] Processed conversations:', conversationsWithProfiles.length);
         return conversationsWithProfiles;
       } catch (error: any) {
         // Better error handling with user-friendly messages
         console.error('[useConversations] Error fetching conversations:', error.message);
-        
+
+
         // For temporary auth issues, return empty array to avoid blocking UI
         if (error.message?.includes('JWT') || error.message?.includes('auth')) {
-          console.warn('[useConversations] Auth error detected, returning empty conversations');
           return [];
         }
-        
+
         throw error;
       }
     },
@@ -250,10 +236,10 @@ export function useStartConversation() {
             .select('id', { count: 'exact' })
             .eq('user_id', otherUserId)
             .limit(1);
-          
+
+
           otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
         } catch (roleCheckError) {
-          console.warn('Could not determine roles from listings, defaulting to client-owner');
           // If we can't determine roles, assume the initiator is client and other is owner
           myRole = 'client';
           otherRole = 'owner';
@@ -324,14 +310,10 @@ export function useStartConversation() {
       return { conversationId, message };
     },
     onSuccess: async (data) => {
-      console.log('[useStartConversation] Conversation created successfully:', data.conversationId);
-      
       // Immediately refetch conversations
       await queryClient.refetchQueries({ queryKey: ['conversations'] });
       await queryClient.invalidateQueries({ queryKey: ['conversations-started-count'] });
-      
-      console.log('[useStartConversation] Queries refetched');
-      
+
       toast({
         title: '💬 Conversation Started',
         description: 'Redirecting to chat...',

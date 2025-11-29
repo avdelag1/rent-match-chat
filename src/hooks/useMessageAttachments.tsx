@@ -41,7 +41,6 @@ export const useUploadAttachment = () => {
       attachmentType: 'image' | 'document' | 'video';
     }) => {
       // Feature is disabled - return null gracefully
-      console.warn('File attachments feature is not yet available');
       return null;
     },
     onSuccess: () => {
@@ -63,7 +62,6 @@ export const useDeleteAttachment = () => {
   return useMutation({
     mutationFn: async (_attachmentId: string) => {
       // Feature is disabled - return null gracefully
-      console.warn('File attachments feature is not yet available');
       return null;
     },
     onSuccess: () => {
@@ -81,6 +79,5 @@ export const useDeleteAttachment = () => {
 
 export const getAttachmentUrl = async (_filePath: string): Promise<string | null> => {
   // Feature is disabled - return null gracefully
-  console.warn('File attachments feature is not yet available');
   return null;
 };

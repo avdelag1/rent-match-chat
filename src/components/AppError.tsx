@@ -30,7 +30,7 @@ export function AppError({ error, resetError }: AppErrorProps) {
             We encountered an unexpected error. Don't worry, we're working to fix it!
           </p>
           
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.DEV && (
             <div className="bg-gray-100 p-3 rounded-lg text-xs font-mono text-red-800 overflow-auto max-h-32">
               <strong>Error:</strong> {error.message}
               {error.stack && (

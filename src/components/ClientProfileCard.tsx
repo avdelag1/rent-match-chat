@@ -59,7 +59,6 @@ const ClientProfileCardComponent = ({
   const hasMultipleImages = images.length > 1;
 
   // DEBUG logging
-  console.log('🎴 ClientProfileCard rendering:', {
     name: profile.name,
     age: profile.age,
     profile_images: profile.profile_images,

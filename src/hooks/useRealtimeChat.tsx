@@ -172,7 +172,6 @@ export function useRealtimeChat(conversationId: string) {
         // User left
       })
       .subscribe(async (status) => {
-        console.log('[Realtime] Messages channel status:', status);
 
         if (status === 'SUBSCRIBED') {
           // Set connected immediately on subscribe
@@ -225,7 +224,6 @@ export function useRealtimeChat(conversationId: string) {
         // Left typing presence
       })
       .subscribe(async (status) => {
-        console.log('[Typing] Channel status:', status);
         if (status === 'SUBSCRIBED') {
           // Store channel reference for startTyping/stopTyping
           typingChannelRef.current = typingChannel;
@@ -233,7 +231,6 @@ export function useRealtimeChat(conversationId: string) {
       });
 
     return () => {
-      console.log('[Realtime] Cleaning up channels for conversation:', conversationId);
 
       // Clear typing timeout
       if (typingTimeoutRef.current) {
