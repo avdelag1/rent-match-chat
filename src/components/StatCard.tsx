@@ -22,10 +22,10 @@ export function StatCard({ title, value, icon: Icon, trend, delay = 0 }: StatCar
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <Card className="border-2 border-border/50 bg-card hover:border-primary/30 transition-all duration-300 overflow-hidden group">
+      <Card className="border-2 border-border/50 bg-card hover:border-primary/30 transition-all duration-300 overflow-hidden group rounded-3xl shadow-lg hover:shadow-xl">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300">
+            <div className="p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300 backdrop-blur-sm">
               <Icon className="w-6 h-6 text-primary" />
             </div>
             {trend && (

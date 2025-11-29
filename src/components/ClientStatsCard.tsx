@@ -7,7 +7,7 @@ export function ClientStatsCard() {
 
   if (isLoading) {
     return (
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+      <Card className="bg-white/15 backdrop-blur-md border-white/20 rounded-3xl">
         <CardHeader>
           <CardTitle className="text-white">Loading your activity...</CardTitle>
         </CardHeader>
@@ -16,7 +16,7 @@ export function ClientStatsCard() {
   }
 
   return (
-    <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+    <Card className="bg-white/15 backdrop-blur-md border-white/20 rounded-3xl">
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />

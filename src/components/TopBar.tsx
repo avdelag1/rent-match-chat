@@ -21,11 +21,11 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
   const safeAreaClass = isNativePlatform ? 'pt-safe' : '';
 
   return (
-    <header className={cn('fixed top-0 left-0 right-0 bg-background/40 backdrop-blur-sm border-b border-border/20 z-50', safeAreaClass, className)}>
+    <header className={cn('fixed top-0 left-0 right-0 bg-background/50 backdrop-blur-md border-b border-white/10 z-50', safeAreaClass, className)}>
       <div className="flex items-center justify-between h-10 px-4 max-w-screen-xl mx-auto">
         {/* Logo with Modern Animation */}
         <div className="flex items-center gap-1.5 select-none">
-          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-full p-1.5 shadow-md shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-200 hover:scale-105">
+          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-1.5 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-200 hover:scale-110">
             <Flame className="h-4 w-4 text-white" />
           </div>
           <span className="text-lg font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent animate-gradient-text">
@@ -39,12 +39,12 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 hover:bg-background/40 transition-colors"
+            className="relative h-9 w-9 hover:bg-background/60 hover:backdrop-blur-md rounded-xl transition-all duration-200"
             onClick={onNotificationsClick}
           >
             <Bell className="h-4 w-4 text-foreground/70 hover:text-foreground" />
             {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 shadow-lg" />
+              <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 shadow-lg animate-pulse" />
             )}
           </Button>
 
@@ -53,7 +53,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-background/40 transition-colors"
+              className="h-9 w-9 hover:bg-background/60 hover:backdrop-blur-md rounded-xl transition-all duration-200"
               onClick={onFiltersClick}
             >
               <Filter className="h-4 w-4 text-foreground/70 hover:text-foreground" />
@@ -64,7 +64,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 hover:bg-background/40 transition-colors"
+            className="h-9 w-9 hover:bg-background/60 hover:backdrop-blur-md rounded-xl transition-all duration-200"
             onClick={onSettingsClick}
           >
             <Settings className="h-4 w-4 text-foreground/70 hover:text-foreground" />
