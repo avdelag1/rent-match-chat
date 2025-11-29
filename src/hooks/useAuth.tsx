@@ -36,7 +36,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize auth state from Supabase session storage
     const initializeAuth = async () => {
       try {
-        console.log('[Auth] Initializing auth state...');
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -44,7 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (isInitialLoad && isMounted) {
-          console.log('[Auth] Session restored:', session?.user?.email || 'No session');
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
@@ -65,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener for subsequent changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('[Auth] Auth state changed:', event, session?.user?.email);
         isInitialLoad = false;
 
         if (isMounted) {
@@ -75,7 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           // Handle OAuth users - setup role but DON'T redirect (Index.tsx handles redirects)
           if (event === 'SIGNED_IN' && session?.user) {
-            console.log('[Auth] User signed in, triggering OAuth setup if needed...');
             // Use Promise instead of setTimeout to avoid stale closure
             handleOAuthUserSetupOnly(session.user).catch(err => {
               console.error('[Auth] OAuth setup failed:', err);
@@ -101,10 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
     
     const roleToUse = pendingRole || roleFromUrl;
-    
+
     if (roleToUse) {
-      console.log('OAuth setup with role:', roleToUse);
-      
       // Clear the pending role from localStorage
       localStorage.removeItem('pendingOAuthRole');
       
@@ -118,10 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           newUrl.searchParams.delete('role');
           window.history.replaceState({}, '', newUrl.toString());
         }
-        
+
         const finalRole = linkingResult.existingProfile?.role || roleToUse;
-        console.log('OAuth profile setup complete. Role:', finalRole);
-        
+
         // Ensure profile exists with correct role
         await createProfileIfMissing(user, finalRole);
       } else {
@@ -197,13 +190,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           title: "Creating your account...",
           description: "Setting up your profile.",
         });
-        
+
         // Auto-create profile for immediate sign-ups
-        console.log('[useAuth] Creating profile for user:', data.user.id, 'with role:', role);
         const profileResult = await createProfileIfMissing(data.user, role);
-        
-        console.log('[useAuth] Profile creation result:', profileResult ? 'Success' : 'Failed');
-        
+
         if (!profileResult) {
           // Profile/role creation failed
           console.error('[useAuth] Profile creation failed, signing out user');
@@ -218,9 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Wait for database consistency
         await new Promise(resolve => setTimeout(resolve, 500));
-        
-        console.log('[useAuth] Profile setup complete, user should be able to access dashboard');
-        
+
         // Note: Cache invalidation moved to useProfileSetup after role creation completes
         
         toast({
@@ -255,8 +243,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string, role: 'client' | 'owner') => {
     try {
-      console.log('[Auth] Starting sign in - selected role:', role);
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -280,15 +266,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw new Error('Failed to verify user role');
         }
 
-        console.log('[Auth] User role from user_roles:', roleData?.role);
-
         // If role exists in user_roles, check if it matches the page
         if (roleData) {
           const actualRole = roleData.role as 'client' | 'owner';
 
           // CRITICAL: Reject login if user is on wrong page
           if (actualRole !== role) {
-            console.log('[Auth] ❌ Login rejected - wrong page. Actual:', actualRole, 'Attempted:', role);
             await supabase.auth.signOut(); // Sign them out immediately
             
             const correctPage = actualRole === 'client' ? 'Client' : 'Owner';
@@ -349,10 +332,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithOAuth = async (provider: 'google', role: 'client' | 'owner') => {
     try {
-      console.log(`[OAuth] Starting ${provider} OAuth for role: ${role}`);
-      console.log(`[OAuth] Current origin: ${window.location.origin}`);
-      console.log(`[OAuth] Supabase URL: ${import.meta.env.VITE_SUPABASE_URL}`);
-
       // Validate Supabase configuration
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
         throw new Error('Supabase configuration is missing. Please check your environment variables.');
@@ -360,7 +339,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Store the role in localStorage BEFORE OAuth redirect
       localStorage.setItem('pendingOAuthRole', role);
-      console.log('[OAuth] Role stored in localStorage:', role);
 
       // Build OAuth options with Google-specific query params
       const queryParams: Record<string, string> = {
@@ -369,7 +347,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       const redirectUrl = `${window.location.origin}/`;
-      console.log('[OAuth] OAuth redirect URL:', redirectUrl);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -392,8 +369,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error;
       }
 
-      console.log(`[OAuth] ${provider} OAuth initiated successfully`);
-      console.log(`[OAuth] User should be redirected to ${provider} consent screen`);
       return { error: null };
     } catch (error: any) {
       console.error(`[OAuth] ${provider} OAuth error caught:`, error);
@@ -433,8 +408,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      console.log('[Auth] Initiating sign out...');
-
       // Clear any pending OAuth role from localStorage
       localStorage.removeItem('pendingOAuthRole');
       localStorage.removeItem('rememberMe');
@@ -459,7 +432,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setSession(null);
 
-      console.log('[Auth] Sign out successful');
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",

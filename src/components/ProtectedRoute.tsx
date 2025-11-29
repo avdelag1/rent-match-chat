@@ -49,7 +49,6 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
     // Redirect to login if not authenticated
     if (!user) {
-      console.log('[ProtectedRoute] No user found, redirecting to login');
       navigate('/', { replace: true, state: { from: location } });
       return;
     }
@@ -69,8 +68,6 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     // CRITICAL: Check role-based access for protected routes
     if (requiredRole && userRole !== requiredRole) {
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      console.log(`[ProtectedRoute] 🚨 AUTHORIZATION VIOLATION: User role="${userRole}" tried to access ${location.pathname} which requires role="${requiredRole}"`);
-      console.log(`[ProtectedRoute] Redirecting to correct dashboard:`, targetPath);
 
       toast({
         title: "Access Denied",

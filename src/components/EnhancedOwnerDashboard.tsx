@@ -99,7 +99,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   }
 
   const handleClientTap = (clientId: string) => {
-    console.log('Client tapped:', clientId);
     setSelectedClientId(clientId);
     setInsightsOpen(true);
   };
@@ -122,7 +121,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
 
   const handleStartConversation = () => {
     // Navigate to messaging or implement conversation start
-    console.log('Starting conversation...');
   };
 
   const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {

@@ -108,7 +108,6 @@ export function useSmartFilters(userRole: 'client' | 'owner') {
       filters: filterSet
     };
     
-    console.log('Applied smart filter:', analytics);
     return filterSet;
   };
 

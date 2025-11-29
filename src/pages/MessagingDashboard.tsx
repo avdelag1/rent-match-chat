@@ -80,7 +80,6 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          console.log('New conversation created:', payload);
           // Refetch conversations to get the new one with proper joins
           refetch();
         }
@@ -94,7 +93,6 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          console.log('Conversation updated:', payload);
           // Refetch to get updated last_message_at
           refetch();
         }
@@ -128,7 +126,6 @@ export function MessagingDashboard() {
 
   const handleDirectOpenConversation = async (conversationId: string) => {
     setIsStartingConversation(true);
-    console.log('[MessagingDashboard] Opening conversation:', conversationId);
 
     try {
       // Try to find conversation in current list
@@ -136,13 +133,11 @@ export function MessagingDashboard() {
 
       // If not found, refetch immediately to get latest data
       if (!conversation) {
-        console.log('[MessagingDashboard] Conversation not in cache, fetching...');
         await refetch();
         conversation = conversations.find(c => c.id === conversationId);
       }
 
       if (conversation) {
-        console.log('[MessagingDashboard] Conversation found!', conversation);
         setSelectedConversationId(conversationId);
         setSearchParams({});
         toast({
@@ -152,7 +147,6 @@ export function MessagingDashboard() {
       } else {
         // Even if we don't find it in the list, try to open it directly
         // The MessagingInterface will handle fetching the messages
-        console.log('[MessagingDashboard] Opening conversation directly without full sync');
         setSelectedConversationId(conversationId);
         setSearchParams({});
       }

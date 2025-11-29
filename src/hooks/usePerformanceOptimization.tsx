@@ -14,11 +14,9 @@ export function usePerformanceOptimization() {
       if (currentTime - lastTime >= 1000) {
         const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
         
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`FPS: ${fps}`);
-          
+        if (import.meta.env.DEV) {
+
           if (fps < 30) {
-            console.warn('Low FPS detected. Consider reducing animations.');
           }
         }
         
@@ -53,7 +51,7 @@ export function usePerformanceOptimization() {
     }
     
     // Force garbage collection in development
-    if (process.env.NODE_ENV === 'development' && 'gc' in window) {
+    if (import.meta.env.DEV && 'gc' in window) {
       (window as any).gc();
     }
   }, []);

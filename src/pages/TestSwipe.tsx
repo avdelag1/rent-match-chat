@@ -13,8 +13,6 @@ export default function TestSwipe() {
         </div>
 
         <TinderentSwipeContainer 
-          onListingTap={(id) => console.log('Tapped listing:', id)}
-          onInsights={(id) => console.log('View insights:', id)}
         />
       </div>
     </div>

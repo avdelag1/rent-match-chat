@@ -108,7 +108,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         }
 
         if (!data) {
-          console.log('No profile found for user');
           return;
         }
 
@@ -198,7 +197,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [])
 
   const handleApplyFilters = useCallback((filters: any) => {
-    console.log('Applied filters:', filters);
     setAppliedFilters(filters);
 
     // Count active filters for user feedback

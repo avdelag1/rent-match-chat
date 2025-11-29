@@ -19,8 +19,7 @@ export interface VitalMetric {
  */
 function reportMetric(metric: VitalMetric) {
   // Development logging
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[Web Vitals] ${metric.name}: ${metric.value.toFixed(2)}ms (${metric.rating})`);
+  if (import.meta.env.DEV) {
   }
 
   // Send to analytics service
@@ -109,7 +108,6 @@ export function monitorLCP() {
   try {
     observer.observe({ entryTypes: ['largest-contentful-paint'] });
   } catch (e) {
-    console.warn('LCP monitoring not supported');
   }
 }
 
@@ -142,7 +140,6 @@ export function monitorFID() {
   try {
     observer.observe({ entryTypes: ['first-input'] });
   } catch (e) {
-    console.warn('FID monitoring not supported');
   }
 }
 
@@ -175,7 +172,6 @@ export function monitorCLS() {
   try {
     observer.observe({ entryTypes: ['layout-shift'] });
   } catch (e) {
-    console.warn('CLS monitoring not supported');
   }
 }
 
@@ -188,8 +184,7 @@ export function initWebVitalsMonitoring() {
     monitorFID();
     monitorCLS();
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('✅ Web Vitals monitoring initialized');
+    if (import.meta.env.DEV) {
     }
   }
 }

@@ -53,10 +53,6 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   };
 
   const handleApply = () => {
-    console.log('[AdvancedFilters] ===== APPLY CLICKED =====');
-    console.log('[AdvancedFilters] User role:', userRole);
-    console.log('[AdvancedFilters] Filters being applied:', JSON.stringify(filters, null, 2));
-    console.log('[AdvancedFilters] Listing types:', filters.listingTypes);
     
     onApplyFilters(filters);
     onClose();
@@ -160,8 +156,6 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                   }
                   className="cursor-pointer text-center justify-center p-3 text-base font-medium transition-all hover:scale-105"
                   onClick={async () => {
-                    console.log('[AdvancedFilters] Listing type clicked:', type);
-                    console.log('[AdvancedFilters] Current listingTypes:', filters.listingTypes);
                     
                     let newTypes;
                     if (type === 'both') {
@@ -174,7 +168,6 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                         : [type];
                     }
                     
-                    console.log('[AdvancedFilters] New listingTypes:', newTypes);
                     setFilters(prev => ({ ...prev, listingTypes: newTypes }));
                     
                     // Auto-save to user preferences

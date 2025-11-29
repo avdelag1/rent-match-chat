@@ -30,7 +30,6 @@ export function CategorySelectionDialog({
       if (onCategorySelect) {
         onCategorySelect(category, mode);
       } else {
-        console.warn('CategorySelectionDialog: onCategorySelect callback is required when navigateToNewPage is false');
       }
       onOpenChange(false);
     }

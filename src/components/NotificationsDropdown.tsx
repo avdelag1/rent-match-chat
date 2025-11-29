@@ -78,7 +78,6 @@ export function NotificationsDropdown() {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log('Notification change:', payload);
 
           if (payload.eventType === 'INSERT') {
             setNotifications((prev) => [payload.new as Notification, ...prev]);

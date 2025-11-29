@@ -20,7 +20,6 @@ export function useMarkMessagesAsRead(conversationId: string, isActive: boolean)
       if (error) {
         console.error('[MarkAsRead] Error:', error);
       } else {
-        console.log('[MarkAsRead] Marked messages as read for conversation:', conversationId);
       }
     };
 

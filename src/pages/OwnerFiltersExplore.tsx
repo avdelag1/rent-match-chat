@@ -68,7 +68,6 @@ export default function OwnerFiltersExplore() {
           <TabsContent value="property" className="mt-0">
             <PropertyClientFilters 
               onApply={(filters) => {
-                console.log('Applied filters:', filters);
                 setActiveFilterCount(Object.keys(filters).length);
               }}
               activeCount={activeCategory === 'property' ? activeFilterCount : 0}
@@ -78,7 +77,6 @@ export default function OwnerFiltersExplore() {
           <TabsContent value="moto" className="mt-0">
             <MotoClientFilters 
               onApply={(filters) => {
-                console.log('Applied filters:', filters);
                 setActiveFilterCount(Object.keys(filters).length);
               }}
               activeCount={activeCategory === 'moto' ? activeFilterCount : 0}
@@ -88,7 +86,6 @@ export default function OwnerFiltersExplore() {
           <TabsContent value="bicycle" className="mt-0">
             <BicycleClientFilters 
               onApply={(filters) => {
-                console.log('Applied filters:', filters);
                 setActiveFilterCount(Object.keys(filters).length);
               }}
               activeCount={activeCategory === 'bicycle' ? activeFilterCount : 0}
@@ -98,7 +95,6 @@ export default function OwnerFiltersExplore() {
           <TabsContent value="yacht" className="mt-0">
             <YachtClientFilters 
               onApply={(filters) => {
-                console.log('Applied filters:', filters);
                 setActiveFilterCount(Object.keys(filters).length);
               }}
               activeCount={activeCategory === 'yacht' ? activeFilterCount : 0}

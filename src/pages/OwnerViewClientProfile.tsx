@@ -54,7 +54,6 @@ export default function OwnerViewClientProfile() {
 
       // Merge: Use profile_images from client_profiles if available (newer), otherwise use profiles.images
       if (clientProfile?.profile_images && clientProfile.profile_images.length > 0) {
-        console.log('Using updated photos from client_profiles:', clientProfile.profile_images);
         profileData.images = clientProfile.profile_images;
       }
 

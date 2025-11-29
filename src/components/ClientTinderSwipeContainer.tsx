@@ -82,8 +82,7 @@ export function ClientTinderSwipeContainer({
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('[ClientTinderSwipeContainer] Loading timeout - forcing fallback');
+        if (import.meta.env.DEV) {
         }
         setLoadingTimeoutExceeded(true);
       }, 5000); // 5 second timeout
@@ -99,9 +98,7 @@ export function ClientTinderSwipeContainer({
       setAllProfiles(prev => {
         const existingIds = new Set(prev.map(p => p.user_id));
         const newProfiles = internalProfiles.filter(p => !existingIds.has(p.user_id));
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[ClientTinderSwipeContainer] Adding profiles:', internalProfiles.length);
-          console.log('[ClientTinderSwipeContainer] New profiles to add:', newProfiles.length);
+        if (import.meta.env.DEV) {
         }
         return [...prev, ...newProfiles];
       });
@@ -112,8 +109,7 @@ export function ClientTinderSwipeContainer({
   useEffect(() => {
     const remainingCards = profiles.length - currentIndex;
     if (remainingCards <= 3 && !isLoading && !externalProfiles) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[ClientTinderSwipeContainer] Preloading next page, remaining cards:', remainingCards);
+      if (import.meta.env.DEV) {
       }
       setPage(prev => prev + 1);
     }
@@ -212,7 +208,7 @@ export function ClientTinderSwipeContainer({
         setShowUpgradeDialog(true);
         toast.dismiss('conv');
       } else {
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.error('Error starting conversation:', error);
         }
         toast.error('Could not start conversation', { id: 'conv' });

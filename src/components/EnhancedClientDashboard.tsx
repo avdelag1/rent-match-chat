@@ -47,7 +47,6 @@ const EnhancedClientDashboard = ({ onPropertyInsights, onMessageClick, locationF
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
 
   const handleListingTap = (listingId: string) => {
-    console.log('Listing tapped:', listingId);
     setSelectedListingId(listingId);
     setInsightsOpen(true);
   };

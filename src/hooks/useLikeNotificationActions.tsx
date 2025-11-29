@@ -18,7 +18,6 @@ export function useLikeNotificationActions() {
       targetId,
       targetType,
     }: Omit<LikeNotificationActionParams, 'action'>) => {
-      console.log('[useLikeNotification] Accepting like from:', likerId);
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -140,7 +139,6 @@ export function useLikeNotificationActions() {
 
   const rejectLikeMutation = useMutation({
     mutationFn: async ({ notificationId }: { notificationId: string }) => {
-      console.log('[useLikeNotification] Rejecting like');
 
       // Just mark notification as read/archived
       await supabase

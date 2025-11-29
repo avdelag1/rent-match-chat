@@ -29,8 +29,6 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
-      console.log('Swipe with match auth check passed:', { userId: currentUser.id, targetId, direction });
-
       // Use atomic upsert to prevent race conditions
       const { data: like, error: likeError } = await supabase
         .from('likes')

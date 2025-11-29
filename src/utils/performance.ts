@@ -36,7 +36,7 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 // Image lazy loading with intersection observer
-export function setupLazyLoading() {
+export function setupLazyLoading(): () => void {
   if ('IntersectionObserver' in window) {
     const imageObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
@@ -52,7 +52,15 @@ export function setupLazyLoading() {
     document.querySelectorAll('img[data-src]').forEach(img => {
       imageObserver.observe(img);
     });
+
+    // Return cleanup function
+    return () => {
+      imageObserver.disconnect();
+    };
   }
+
+  // Return no-op cleanup if IntersectionObserver not available
+  return () => {};
 }
 
 // Memory cleanup utility
@@ -67,24 +75,34 @@ export function cleanupMemory() {
   }
   
   // Force garbage collection if available (dev mode)
-  if (process.env.NODE_ENV === 'development' && 'gc' in window) {
+  if (import.meta.env.DEV && 'gc' in window) {
     (window as any).gc();
   }
 }
 
 // Bundle analyzer helper
-export function logBundleSize() {
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Bundle loaded at:', new Date().toISOString());
-    
+export function logBundleSize(): () => void {
+  if (import.meta.env.DEV) {
     // Log performance metrics
-    window.addEventListener('load', () => {
+    const handleLoad = () => {
       const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      console.log('Performance metrics:', {
-        'DOM Content Loaded': perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
-        'Load Complete': perfData.loadEventEnd - perfData.loadEventStart,
-        'Total Load Time': perfData.loadEventEnd - perfData.fetchStart
-      });
-    });
+      if (perfData) {
+        const metrics = {
+          'DOM Content Loaded': perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+          'Load Complete': perfData.loadEventEnd - perfData.loadEventStart,
+          'Total Load Time': perfData.loadEventEnd - perfData.fetchStart
+        };
+      }
+    };
+
+    window.addEventListener('load', handleLoad);
+
+    // Return cleanup function
+    return () => {
+      window.removeEventListener('load', handleLoad);
+    };
   }
+
+  // Return no-op cleanup if not in dev mode
+  return () => {};
 }

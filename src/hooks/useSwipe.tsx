@@ -13,8 +13,6 @@ export function useSwipe() {
       direction: 'left' | 'right';
       targetType?: 'listing' | 'profile';
     }) => {
-      console.log('[useSwipe] Starting swipe mutation:', { targetId, direction, targetType });
-
       // OPTIMIZED: Defensive auth check
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) {
@@ -25,8 +23,6 @@ export function useSwipe() {
         console.error('[useSwipe] No user found');
         throw new Error('User not authenticated. Please refresh the page.');
       }
-
-      console.log('[useSwipe] User authenticated:', user.id);
 
       // Use atomic upsert to prevent race conditions
       const { data: likeData, error } = await supabase
@@ -46,8 +42,6 @@ export function useSwipe() {
         throw error;
       }
 
-      console.log('[useSwipe] Like saved successfully:', likeData);
-      
       // Send notification to the liked user (for right swipes)
       if (direction === 'right') {
         try {

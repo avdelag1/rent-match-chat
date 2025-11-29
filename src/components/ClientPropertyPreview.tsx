@@ -67,7 +67,6 @@ export function ClientPropertyPreview({
           url: window.location.href,
         });
       } catch (error) {
-        console.log('Error sharing:', error);
       }
     } else {
       // Fallback: copy to clipboard

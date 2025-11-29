@@ -26,8 +26,6 @@ async function fetchOwnProfile() {
   const uid = auth.user?.id;
   if (!uid) return null;
 
-  console.log('Fetching profile for user:', uid);
-
   const { data, error } = await supabase
     .from('client_profiles')
     .select('*')
@@ -38,8 +36,7 @@ async function fetchOwnProfile() {
     console.error('Error fetching profile:', error);
     throw error;
   }
-  
-  console.log('Fetched profile data:', data);
+
   return data as ClientProfileLite | null;
 }
 
@@ -77,7 +74,6 @@ export function useSaveClientProfile() {
       let profileData: ClientProfileLite;
 
       if (existing?.id) {
-        console.log('Updating existing profile with:', updates);
         const { data, error } = await supabase
           .from('client_profiles')
           .update(updates)
@@ -88,10 +84,8 @@ export function useSaveClientProfile() {
           console.error('Error updating profile:', error);
           throw error;
         }
-        console.log('Updated profile data:', data);
         profileData = data as ClientProfileLite;
       } else {
-        console.log('Creating new profile with:', updates);
         const { data, error } = await supabase
           .from('client_profiles')
           .insert([{ ...updates, user_id: uid }])
@@ -101,32 +95,25 @@ export function useSaveClientProfile() {
           console.error('Error creating profile:', error);
           throw error;
         }
-        console.log('Created profile data:', data);
         profileData = data as ClientProfileLite;
       }
 
       // SYNC to profiles table - so owner sees updated data!
-      console.log('🔄 [PROFILE SYNC] Starting full profile sync to profiles table...');
-      console.log('🔄 [PROFILE SYNC] User ID:', uid);
-
       const syncPayload: any = {};
 
       // Sync images
       if (updates.profile_images !== undefined) {
         syncPayload.images = updates.profile_images;
-        console.log('🔄 [PROFILE SYNC] Images:', updates.profile_images?.length || 0);
       }
 
       // Sync name → full_name
       if (updates.name !== undefined) {
         syncPayload.full_name = updates.name;
-        console.log('🔄 [PROFILE SYNC] Name:', updates.name);
       }
 
       // Sync age
       if (updates.age !== undefined) {
         syncPayload.age = updates.age;
-        console.log('🔄 [PROFILE SYNC] Age:', updates.age);
       }
 
       // Sync interests
@@ -150,9 +137,6 @@ export function useSaveClientProfile() {
         if (syncError) {
           console.error('❌ [PROFILE SYNC] Error:', syncError);
         } else {
-          console.log('✅ [PROFILE SYNC] Successfully synced to profiles table');
-          console.log('✅ [PROFILE SYNC] Updated fields:', Object.keys(syncPayload));
-          
           // Invalidate profiles_public cache immediately after sync
           qc.invalidateQueries({ queryKey: ['profiles_public'] });
         }

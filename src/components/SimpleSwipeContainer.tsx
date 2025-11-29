@@ -24,7 +24,6 @@ export function SimpleSwipeContainer() {
   const handleLike = async () => {
     if (!currentListing) return;
 
-    console.log('🔥 LIKE - Saving listing:', currentListing.id);
 
     setDirection('right');
 
@@ -35,7 +34,6 @@ export function SimpleSwipeContainer() {
         targetType: 'listing'
       });
 
-      console.log('✅ Successfully saved listing!');
 
       sonnerToast.success('❤️ Liked!', {
         description: 'Property saved to your favorites',
@@ -56,7 +54,6 @@ export function SimpleSwipeContainer() {
   const handlePass = () => {
     if (!currentListing) return;
 
-    console.log('👎 PASS - Skipping listing:', currentListing.id);
 
     setDirection('left');
 

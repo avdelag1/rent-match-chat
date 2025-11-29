@@ -47,16 +47,9 @@ const ClientLikedProperties = () => {
   };
 
   const handleContactOwner = async (property: any) => {
-    console.log('💬 Starting conversation with property owner');
-    
+
     // Always allow messaging - bypass quota
     try {
-      console.log('Starting conversation with:', {
-        otherUserId: property.owner_id,
-        listingId: property.id,
-        propertyTitle: property.title
-      });
-
       // Start a conversation with the property owner
       const result = await startConversation.mutateAsync({
         otherUserId: property.owner_id,
@@ -65,7 +58,6 @@ const ClientLikedProperties = () => {
         canStartNewConversation: true // Always allow
       });
       
-      console.log('✅ Conversation started successfully:', result);
 
       // Navigate to messages with the conversation ID to open it directly
       if (result?.conversationId) {

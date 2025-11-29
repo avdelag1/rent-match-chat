@@ -102,8 +102,7 @@ export function measurePerformance(name: string) {
   return {
     end: () => {
       const duration = performance.now() - start;
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`${name}: ${duration.toFixed(2)}ms`);
+      if (import.meta.env.DEV) {
       }
       return duration;
     }

@@ -62,11 +62,6 @@ export function useAccountLinking() {
       
       if (roleConflict) {
         // SECURITY: Show user the conflict but NEVER change their existing role
-        console.warn('[AccountLinking] ⚠️ Role conflict detected:', {
-          existingRole: existingProfile.role,
-          requestedRole: requestedRole,
-          email: existingProfile.email
-        });
         toast({
           title: "Account Found",
           description: `You already have an account as a ${existingProfile.role}. You'll be signed in with your existing role.`,

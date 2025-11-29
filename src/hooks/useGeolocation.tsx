@@ -135,11 +135,6 @@ export function useGeolocation() {
           title: "Location detected",
           description: `${locationInfo.city}, ${locationInfo.country}`,
         });
-      } else {
-        console.warn('Coordinates obtained but reverse geocoding incomplete:', {
-          coordinates,
-          locationInfo
-        });
       }
 
     } catch (error: any) {

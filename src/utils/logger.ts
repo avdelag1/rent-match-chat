@@ -9,7 +9,7 @@
  *   logger.error('Error message');
  */
 
-const isDevelopment = import.meta.env.DEV || process.env.NODE_ENV === 'development';
+const isDevelopment = import.meta.env.DEV;
 
 type LogLevel = 'log' | 'warn' | 'error' | 'info' | 'debug';
 
@@ -30,7 +30,6 @@ class Logger {
    */
   log(...args: any[]): void {
     if (isDevelopment) {
-      console.log(...args);
     }
   }
 
@@ -39,7 +38,6 @@ class Logger {
    */
   info(...args: any[]): void {
     if (isDevelopment) {
-      console.info(...args);
     }
   }
 
@@ -53,9 +51,7 @@ class Logger {
         : message;
 
       if (data) {
-        console.debug(formatted, data);
       } else {
-        console.debug(formatted);
       }
     }
   }
@@ -66,7 +62,6 @@ class Logger {
    */
   warn(...args: any[]): void {
     if (isDevelopment) {
-      console.warn(...args);
     }
   }
 

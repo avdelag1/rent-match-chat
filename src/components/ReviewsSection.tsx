@@ -135,24 +135,7 @@ export function ReviewsSection({ profileId, canLeaveReview = false, reviewType =
   const markHelpful = async (reviewId: string) => {
     if (!user) return;
 
-    // Review helpful votes table doesn't exist in schema, skip this feature for now
-    // TODO: Create review_helpful_votes table if needed
-    /* 
-    const { error } = await supabase
-      .from('review_helpful_votes')
-      .insert({
-        review_id: reviewId,
-        user_id: user.id,
-      });
-
-    if (!error) {
-      setReviews((prev) =>
-        prev.map((r) =>
-          r.id === reviewId ? { ...r, helpful_count: r.helpful_count + 1 } : r
-        )
-      );
-    }
-    */
+    // Feature disabled: review_helpful_votes table not available in current schema
   };
 
   const StarRating = ({ value, onHover, onClick, readonly = false }: any) => (

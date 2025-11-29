@@ -56,7 +56,7 @@ export class ErrorBoundaryWrapper extends Component<Props, State> {
                 We're sorry! An unexpected error occurred. Please try refreshing the page or go back to the home page.
               </p>
               
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <details className="bg-red-900/20 p-3 rounded border border-red-500/30">
                   <summary className="cursor-pointer text-red-300 text-sm font-medium">
                     Error Details (Development)
