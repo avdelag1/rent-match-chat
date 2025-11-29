@@ -154,11 +154,11 @@ const ClientProfileCardComponent = ({
       dragElastic={0.2}
       onPointerDown={handlePointerDown}
       onDragEnd={handleDragEnd}
-      className={`transform-gpu ${isTop ? 'cursor-pointer' : 'pointer-events-none cursor-default'}`}
+      className={`transform-gpu ${isTop ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none cursor-default'}`}
       whileHover={{ scale: isTop ? 1.01 : 0.95 }}
       transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
     >
-      <Card className="relative w-full h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px] bg-white border border-gray-200 shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="relative w-full h-[75vh] sm:h-[65vh] md:h-[600px] max-h-[750px] bg-white/95 border border-white/40 shadow-2xl rounded-3xl overflow-hidden backdrop-blur-sm">
 
       {/* Swipe Indicator */}
       {getSwipeIndicator()}
@@ -233,16 +233,20 @@ const ClientProfileCardComponent = ({
           />
         </div>
         
-        {/* Image Dots */}
+        {/* Story-Style Image Dots */}
         {hasMultipleImages && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute top-6 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
             {images.map((_, idx) => (
               <div
-                key={idx}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  idx === imageIndex ? 'bg-white' : 'bg-white/40'
-                }`}
-              />
+                key={`image-${idx}`}
+                className="flex-1 h-1.5 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
+              >
+                <div
+                  className={`h-full bg-white shadow-lg transition-all duration-200 ${
+                    idx === imageIndex ? 'w-full' : 'w-0'
+                  }`}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -251,22 +255,22 @@ const ClientProfileCardComponent = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
       </div>
       
-      {/* Bottom Content - Compact */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent cursor-pointer"
+      {/* Bottom Content - Modern Glass-morphism */}
+      <div
+        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 via-black/30 to-transparent backdrop-blur-sm cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           onTap();
         }}
       >
-        <div className="space-y-2">
+        <div className="space-y-3">
           {/* Name */}
           <div>
-            <h3 className="text-2xl font-bold text-foreground mb-2 drop-shadow-sm">{profile.name}</h3>
+            <h3 className="text-2xl font-bold text-white drop-shadow-lg">{profile.name}</h3>
           </div>
-          
-          {/* Profile Tags with Defaults */}
-          <div className="flex flex-wrap gap-1.5">
+
+          {/* Profile Tags with Modern Glass-morphism */}
+          <div className="flex flex-wrap gap-2">
             {(() => {
               const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
               const defaultTags = allTags.length === 0 ? ['Digital Nomad', 'Professional', 'Verified Client'] : allTags;
@@ -274,29 +278,29 @@ const ClientProfileCardComponent = ({
               return defaultTags
                 .slice(0, 4)
                 .map((tag, index) => {
-                  // Determine tag color based on category
-                  let badgeClass = "text-xs";
+                  // Determine tag color based on category with glass-morphism
+                  let badgeClass = "text-xs font-medium backdrop-blur-md border";
                   if (PROPERTY_TAGS.includes(tag)) {
-                    badgeClass += " bg-blue-500/20 text-blue-600 dark:text-blue-300 border-blue-500/30";
+                    badgeClass += " bg-blue-500/30 text-blue-100 border-blue-400/40";
                   } else if (TRANSPORTATION_TAGS.includes(tag)) {
-                    badgeClass += " bg-red-500/20 text-red-600 dark:text-red-300 border-red-500/30";
+                    badgeClass += " bg-red-500/30 text-red-100 border-red-400/40";
                   } else if (LIFESTYLE_TAGS.includes(tag)) {
-                    badgeClass += " bg-purple-500/20 text-purple-600 dark:text-purple-300 border-purple-500/30";
+                    badgeClass += " bg-purple-500/30 text-purple-100 border-purple-400/40";
                   } else if (FINANCIAL_TAGS.includes(tag)) {
-                    badgeClass += " bg-green-500/20 text-green-600 dark:text-green-300 border-green-500/30";
+                    badgeClass += " bg-green-500/30 text-green-100 border-green-400/40";
                   } else {
-                    badgeClass += " bg-primary/10 text-primary border-primary/20";
+                    badgeClass += " bg-white/20 text-white border-white/40";
                   }
-                  
+
                   return (
-                    <Badge key={index} variant="outline" className={`${badgeClass} font-medium`}>
+                    <Badge key={index} variant="outline" className={`${badgeClass} px-3 py-1.5 rounded-lg`}>
                       {tag}
                     </Badge>
                   );
                 });
             })()}
             {([...(profile.interests || []), ...(profile.preferred_activities || [])].length > 4) && (
-              <Badge variant="outline" className="text-xs bg-muted">
+              <Badge variant="outline" className="text-xs bg-white/20 text-white border-white/40 backdrop-blur-md px-3 py-1.5 rounded-lg font-medium">
                 +{[...(profile.interests || []), ...(profile.preferred_activities || [])].length - 4} more
               </Badge>
             )}

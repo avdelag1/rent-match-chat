@@ -156,7 +156,7 @@ const EnhancedPropertyCardComponent = ({
       animate={{ x: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 25, mass: 0.5 }}
     >
-      <Card className="relative w-full h-[550px] overflow-hidden bg-white border-none shadow-2xl rounded-3xl">
+      <Card className="relative w-full h-[550px] overflow-hidden bg-white/95 border-white/40 shadow-2xl rounded-3xl backdrop-blur-sm">
         {/* Full Screen Image - Fixed height for consistent card sizing */}
         <div className="relative h-[430px] overflow-hidden">
           {imageCount > 0 ? (
@@ -211,16 +211,20 @@ const EnhancedPropertyCardComponent = ({
                 />
               </div>
 
-              {/* Image Indicators */}
+              {/* Story-Style Image Indicators */}
               {imageCount > 1 && (
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                <div className="absolute top-6 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
                   {images.map((_, index) => (
                     <div
-                      key={index}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImageIndex ? 'bg-white' : 'bg-white/40'
-                      }`}
-                    />
+                      key={`image-${index}`}
+                      className="flex-1 h-1.5 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
+                    >
+                      <div
+                        className={`h-full bg-white shadow-lg transition-all duration-200 ${
+                          index === currentImageIndex ? 'w-full' : 'w-0'
+                        }`}
+                      />
+                    </div>
                   ))}
                 </div>
               )}
@@ -235,9 +239,9 @@ const EnhancedPropertyCardComponent = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
         </div>
 
-        {/* Bottom Content - Compact */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent cursor-pointer"
+        {/* Bottom Content - Modern Glass-morphism */}
+        <div
+          className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 via-black/30 to-transparent backdrop-blur-sm cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
             onTap?.();
@@ -247,28 +251,28 @@ const EnhancedPropertyCardComponent = ({
             {/* Left side - Title and Details */}
             <div className="flex-1 mr-4">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-2xl font-bold text-gray-900">
+                <h3 className="text-2xl font-bold text-white drop-shadow-lg">
                   {listing.title}
                 </h3>
                 {(listing as any).has_verified_documents && (
-                  <Badge className="bg-blue-500/20 border-blue-400 text-blue-300 flex items-center gap-1 px-2 py-0.5">
+                  <Badge className="bg-blue-500/30 border-blue-400/40 text-blue-100 backdrop-blur-md flex items-center gap-1 px-2 py-0.5 rounded-lg">
                     {(listing as any).category === 'bicycle' ? (
                       <CheckCircle className="w-3 h-3" />
                     ) : (
                       <>
                         <ShieldCheck className="w-3 h-3" />
-                        <span className="text-xs">Verified</span>
+                        <span className="text-xs font-medium">Verified</span>
                       </>
                     )}
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center text-gray-600 text-sm mb-2">
+              <div className="flex items-center text-white/90 text-sm mb-2">
                 <MapPin className="w-4 h-4 mr-1" />
                 <span>{listing.neighborhood}, {listing.city}</span>
               </div>
               {/* Property details */}
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <div className="flex items-center space-x-4 text-sm text-white/80">
                 {listing.beds && (
                   <div className="flex items-center">
                     <Bed className="w-4 h-4 mr-1" />
@@ -292,10 +296,10 @@ const EnhancedPropertyCardComponent = ({
             
             {/* Right side - Price */}
             <div className="text-right">
-              <div className="text-3xl font-bold text-red-600">
+              <div className="text-3xl font-bold text-white drop-shadow-lg">
                 ${listing.price?.toLocaleString()}
               </div>
-              <div className="text-sm text-gray-600">/month</div>
+              <div className="text-sm text-white/70">/month</div>
             </div>
           </div>
         </div>

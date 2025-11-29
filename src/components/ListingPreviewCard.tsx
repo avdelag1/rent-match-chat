@@ -18,7 +18,7 @@ export function ListingPreviewCard({ listing, showAllDetails = false }: ListingP
   const images = listing.images || [];
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden rounded-3xl shadow-lg border-white/20 bg-card/95">
       {/* Images */}
       {images.length > 0 && (
         <CardContent className="p-0">
@@ -89,7 +89,7 @@ export function ListingPreviewCard({ listing, showAllDetails = false }: ListingP
                 <h4 className="font-semibold mb-2">Amenities</h4>
                 <div className="flex flex-wrap gap-2">
                   {listing.amenities.map((amenity: string, idx: number) => (
-                    <Badge key={idx} variant="secondary">{amenity}</Badge>
+                    <Badge key={idx} variant="secondary" className="rounded-lg bg-primary/20 text-primary border-primary/30 backdrop-blur-sm font-medium">{amenity}</Badge>
                   ))}
                 </div>
               </div>
