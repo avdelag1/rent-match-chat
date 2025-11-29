@@ -697,31 +697,42 @@ function calculateClientMatch(ownerPrefs: any, clientProfile: any): {
 export function useSmartClientMatching(
   category?: 'property' | 'moto' | 'bicycle' | 'yacht',
   page: number = 0,
-  pageSize: number = 10
+  pageSize: number = 10,
+  includeRecentLikes: boolean = false
 ) {
-  return useQuery({
-    queryKey: ['smart-clients', category, page],
+  return useQuery<MatchedClientProfile[]>({
+    queryKey: ['smart-clients', category, page, includeRecentLikes],
     queryFn: async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) {
-          return [];
+          return [] as MatchedClientProfile[];
         }
 
-        // Fetch already-liked profiles (right swipes only) to exclude them
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        // When not explicitly including recent likes, temporarily hide
+        // profiles liked in the last 7 days using profile_views table
+        const likedProfileIds = new Set<string>();
 
-        const { data: likedProfiles, error: likesError } = await supabase
-          .from('likes')
-          .select('target_id')
-          .eq('user_id', user.user.id)
-          .eq('view_type', 'profile')
-          .eq('action', 'like')
-          .gte('created_at', sevenDaysAgo.toISOString());
+        if (!includeRecentLikes) {
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-        // If likes table has permission issues, just continue without filtering
-        const likedProfileIds = new Set(!likesError ? (likedProfiles?.map(like => like.target_id) || []) : []);
+          const { data: recentLikes, error: likesError } = await supabase
+            .from('profile_views')
+            .select('viewed_profile_id, created_at')
+            .eq('user_id', user.user.id)
+            .eq('view_type', 'profile')
+            .eq('action', 'like')
+            .gte('created_at', sevenDaysAgo.toISOString());
+
+          if (!likesError && recentLikes) {
+            for (const row of recentLikes as any[]) {
+              if (row.viewed_profile_id) {
+                likedProfileIds.add(row.viewed_profile_id as string);
+              }
+            }
+          }
+        }
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // Fetch client profiles with pagination
@@ -729,10 +740,12 @@ export function useSmartClientMatching(
         const end = start + pageSize - 1;
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
-          .select(`
+          .select(
+            `
             id, full_name, age, gender, interests, preferred_activities, city, lifestyle_tags, images, avatar_url, verified, budget_min, budget_max, monthly_income, has_pets, smoking, party_friendly,
             user_roles!inner(role)
-          `)
+          ` as any
+          )
           .neq('id', user.user.id)
           .eq('user_roles.role', 'client')
           .range(start, end);
@@ -742,23 +755,22 @@ export function useSmartClientMatching(
         }
 
         if (!profiles?.length) {
-          return [];
+          return [] as MatchedClientProfile[];
         }
 
         // Map profiles with placeholder images - filter out excluded profiles
-        const filteredProfiles = profiles
+        const filteredProfiles = (profiles as any[])
           .filter(profile => !likedProfileIds.has(profile.id))
           .map(profile => ({
             ...profile,
-            images: (profile.images && profile.images.length > 0)
+            images: profile.images && profile.images.length > 0
               ? profile.images
               : ['/placeholder-avatar.svg']
           }));
 
         // Calculate match scores - SIMPLIFIED: Give everyone 70% match for now
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
-          // Skip complex matching, just assign default score
-          const match = { percentage: 70, reasons: ['Showing all profiles'], incompatible: [] };
+          const match = { percentage: 70, reasons: ['Showing all profiles'], incompatible: [] as string[] };
 
           return {
             id: Math.floor(Math.random() * 1000000),
@@ -784,12 +796,12 @@ export function useSmartClientMatching(
         });
 
         // Sort by match score - no client-side limiting
-        const sortedClients = matchedClients
-          .sort((a, b) => b.matchPercentage - a.matchPercentage);
+        const sortedClients = matchedClients.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
         return sortedClients;
       } catch (error) {
-        return [];
+        console.error('[useSmartClientMatching] Error loading client profiles', error);
+        return [] as MatchedClientProfile[];
       }
     },
     enabled: true,

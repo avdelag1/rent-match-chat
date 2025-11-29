@@ -45,6 +45,7 @@ export function ClientTinderSwipeContainer({
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [loadingTimeoutExceeded, setLoadingTimeoutExceeded] = useState(false);
+  const [includeRecentLikes, setIncludeRecentLikes] = useState(false);
 
   // Match celebration state
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -54,7 +55,7 @@ export function ClientTinderSwipeContainer({
   }>({ isOpen: false });
 
   // Fetch profiles with pagination
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching(undefined, page, 10);
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching(undefined, page, 10, includeRecentLikes);
 
   const profiles = externalProfiles || allProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
@@ -166,11 +167,12 @@ export function ClientTinderSwipeContainer({
   }, [handleSwipe]);
 
   const handleRefresh = async () => {
+    setIncludeRecentLikes(true); // Manual refresh should bring back even recently liked profiles
     setCurrentIndex(0);
     setPage(0);
     setAllProfiles([]);
     await refetch();
-    toast.success('Refreshed', { description: 'Latest profiles loaded' });
+    toast.success('Refreshed', { description: 'All profiles reloaded' });
   };
 
   const handleInsights = useCallback(() => {
@@ -250,9 +252,9 @@ export function ClientTinderSwipeContainer({
           <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
           <h3 className="text-xl font-bold mb-2">Something went wrong</h3>
           <p className="text-muted-foreground mb-4">Couldn't load profiles</p>
-          <Button onClick={handleRefresh} variant="outline">
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Try Again
+          <Button onClick={handleRefresh} variant="outline" className="gap-2 rounded-full border-primary/40">
+            <RotateCcw className="w-4 h-4" />
+            Reload clients
           </Button>
         </Card>
       </div>
