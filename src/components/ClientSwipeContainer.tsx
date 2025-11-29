@@ -45,7 +45,8 @@ export function ClientSwipeContainer({
   }>({ isOpen: false });
 
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching();
+  const [includeRecentLikes, setIncludeRecentLikes] = useState(false);
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(undefined, 0, 50, includeRecentLikes);
   
   const clientProfiles = externalProfiles || internalProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
@@ -117,9 +118,10 @@ export function ClientSwipeContainer({
   };
 
   const handleRefresh = useCallback(async () => {
+    setIncludeRecentLikes(true); // Manual refresh should show even liked profiles again
     setCurrentIndex(0);
     await refetch();
-    sonnerToast.success('Refreshed');
+    sonnerToast.success('All profiles reloaded');
   }, [refetch]);
 
   const handleInsights = (clientId: string) => {
@@ -245,15 +247,15 @@ export function ClientSwipeContainer({
   return (
     <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden flex flex-col z-0">
       {/* Refresh Button - Top Right */}
-      <div className="absolute top-2 right-2 z-50">
+      <div className="absolute top-3 right-3 z-50">
         <Button
           onClick={handleRefresh}
           variant="outline"
           size="icon"
-          className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
+          className="rounded-full shadow-lg bg-background/80 backdrop-blur-xl border border-primary/50 hover:scale-105 transition-transform duration-200"
           disabled={isRefetching}
         >
-          <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
         </Button>
       </div>
 
