@@ -51,7 +51,14 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: false, // Disable sourcemaps in production
-    minify: 'terser',
+    // Use esbuild for faster CI builds in production; switch to 'terser' for smaller output if needed
+    minify: mode === 'production' ? 'esbuild' : 'terser',
+    // Inline assets smaller than 4KB to reduce HTTP requests
+    assetsInlineLimit: 4096,
+    // Report compressed (gzip) sizes in build output
+    reportCompressedSize: true,
+    // Explicit cssCodeSplit for clarity (defaults to true)
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -65,5 +72,7 @@ export default defineConfig(({ mode }) => ({
       }
     },
     chunkSizeWarningLimit: 1000,
+    // TODO: Add rollup-plugin-visualizer for bundle analysis when needed
+    // import { visualizer } from 'rollup-plugin-visualizer'; and add to plugins
   },
 }));
