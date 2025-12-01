@@ -1,10 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2, ChevronDown, X, RotateCcw, Sparkles } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ReportDialog } from '@/components/ReportDialog';
-import { ShareDialog } from '@/components/ShareDialog';
 
 interface ClientProfile {
   user_id: string;
@@ -47,8 +45,6 @@ export function OwnerClientTinderCard({
 }: OwnerClientTinderCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -206,7 +202,7 @@ export function OwnerClientTinderCard({
 
           {/* Story-style Dots - Closer to Top Edge */}
           {images.length > 1 && (
-            <div className="absolute top-3 left-0 right-0 flex gap-2 px-4 z-10">
+            <div className="absolute top-3 left-0 right-0 flex gap-1 px-4 z-10">
               {images.map((_, idx) => (
                 <div
                   key={idx}
@@ -221,31 +217,6 @@ export function OwnerClientTinderCard({
               ))}
             </div>
           )}
-
-          {/* Top Action Buttons - Corner Placement */}
-          {/* Report Button - Top Left */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setReportDialogOpen(true);
-            }}
-            className="absolute top-16 left-4 z-30 p-2 rounded-full bg-black/40 backdrop-blur-sm text-red-400 hover:bg-red-500/20 hover:text-red-300 opacity-90 hover:opacity-100 transition-all active:scale-90"
-            title="Report User"
-          >
-            <Flag className="w-4 h-4" />
-          </button>
-
-          {/* Share Button - Top Right */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShareDialogOpen(true);
-            }}
-            className="absolute top-16 right-4 z-30 p-2 rounded-full bg-black/40 backdrop-blur-sm text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 opacity-90 hover:opacity-100 transition-all active:scale-90"
-            title="Share Profile"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
 
           {/* Verified Badge */}
           {profile.verified && (
@@ -449,83 +420,8 @@ export function OwnerClientTinderCard({
           </div>
         </motion.div>
 
-        {/* Action Buttons - Bottom Fixed Position */}
-        {isTop && (
-          <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
-            <div className="flex items-center gap-3 pointer-events-auto">
-              {/* Undo/Return Button */}
-              {onUndo && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUndo();
-                  }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  title="Undo"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
-              )}
-
-              {/* Dislike Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSwipe('left');
-                }}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Dislike"
-              >
-                <X className="w-7 h-7" strokeWidth={3} />
-              </button>
-
-              {/* Insights Button */}
-              {onInsights && hasPremium && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onInsights();
-                  }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  title="View Insights"
-                >
-                  <Sparkles className="w-5 h-5" />
-                </button>
-              )}
-
-              {/* Like Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSwipe('right');
-                }}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Like"
-              >
-                <Heart className="w-7 h-7" fill="currentColor" />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Report Dialog */}
-      <ReportDialog
-        open={reportDialogOpen}
-        onOpenChange={setReportDialogOpen}
-        reportedUserId={profile.user_id}
-        reportedUserName={profile.name}
-        category="user_profile"
-      />
-
-      {/* Share Dialog */}
-      <ShareDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        profileId={profile.user_id}
-        title={`${profile.name}'s Profile`}
-        description={`Check out ${profile.name} on Tinderent${profile.matchPercentage ? ` - ${profile.matchPercentage}% match!` : '!'}`}
-      />
     </motion.div>
   );
 }
