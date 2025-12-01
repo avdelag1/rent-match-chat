@@ -299,31 +299,39 @@ function LegendaryLandingPage() {
         {/* Buttons Container with Smooth Entrance Effects */}
         <div className="space-y-6 mt-16">
           
-          {/* I'm a Client Button - Slides in from LEFT smoothly */}
+          {/* I'm a Client Button - Slides in from LEFT with elastic bounce */}
           <motion.button
             onClick={() => openAuthDialog('client')}
             className="w-full py-6 px-8 bg-gradient-to-r from-red-400 to-red-500 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
-            initial={{ 
-              opacity: 0, 
-              x: -200
+            initial={{
+              opacity: 0,
+              x: -300,
+              scale: 0.8
             }}
-            animate={{ 
-              opacity: 1, 
-              x: 0
+            animate={{
+              opacity: 1,
+              x: 0,
+              scale: 1
             }}
             transition={{
               type: "spring",
-              stiffness: 80,
-              damping: 20,
+              stiffness: 120,
+              damping: 12,
+              mass: 1.2,
               delay: 0.8,
-              duration: 1.0
+              bounce: 0.6
             }}
-            whileHover={{ 
-              scale: 1.02,
-              transition: { duration: 0.3, ease: "easeOut" }
+            whileHover={{
+              scale: 1.03,
+              y: -3,
+              transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 10
+              }
             }}
-            whileTap={{ 
-              scale: 0.98,
+            whileTap={{
+              scale: 0.97,
               transition: { duration: 0.1 }
             }}
           >
@@ -331,31 +339,39 @@ function LegendaryLandingPage() {
             <span>I'm a Client</span>
           </motion.button>
 
-          {/* I'm an Owner Button - Slides in from RIGHT smoothly */}
+          {/* I'm an Owner Button - Slides in from RIGHT with elastic bounce */}
           <motion.button
             onClick={() => openAuthDialog('owner')}
             className="w-full py-6 px-8 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
-            initial={{ 
-              opacity: 0, 
-              x: 200
+            initial={{
+              opacity: 0,
+              x: 300,
+              scale: 0.8
             }}
-            animate={{ 
-              opacity: 1, 
-              x: 0
+            animate={{
+              opacity: 1,
+              x: 0,
+              scale: 1
             }}
             transition={{
               type: "spring",
-              stiffness: 80,
-              damping: 20,
+              stiffness: 120,
+              damping: 12,
+              mass: 1.2,
               delay: 1.0,
-              duration: 1.0
+              bounce: 0.6
             }}
-            whileHover={{ 
-              scale: 1.02,
-              transition: { duration: 0.3, ease: "easeOut" }
+            whileHover={{
+              scale: 1.03,
+              y: -3,
+              transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 10
+              }
             }}
-            whileTap={{ 
-              scale: 0.98,
+            whileTap={{
+              scale: 0.97,
               transition: { duration: 0.1 }
             }}
           >
