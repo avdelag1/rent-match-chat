@@ -136,11 +136,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
         >
           {/* Story-Style Dots at Top */}
           {imageCount > 1 && (
-            <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
+            <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
               {images.map((_, index) => (
                 <div
                   key={index}
-                  className="flex-1 h-1.5 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
+                  className="flex-1 h-1 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
                 >
                   <div
                     className={`h-full bg-white shadow-lg transition-all duration-200 ${

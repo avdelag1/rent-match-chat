@@ -58,16 +58,6 @@ const ClientProfileCardComponent = ({
   const images = profile.profile_images || [];
   const hasMultipleImages = images.length > 1;
 
-  // DEBUG logging
-    name: profile.name,
-    age: profile.age,
-    profile_images: profile.profile_images,
-    hasImages: !!profile.profile_images,
-    imagesCount: images.length,
-    firstImage: images[0],
-    isTop
-  });
-
   const nextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasMultipleImages) {

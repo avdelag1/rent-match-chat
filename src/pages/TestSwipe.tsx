@@ -13,6 +13,7 @@ export default function TestSwipe() {
         </div>
 
         <TinderentSwipeContainer 
+          onListingTap={() => {}}
         />
       </div>
     </div>
