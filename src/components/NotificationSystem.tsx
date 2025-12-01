@@ -70,8 +70,17 @@ export function NotificationSystem() {
               toast({
                 title: `💬 New Message from ${senderRole}`,
                 description: `${senderName}: ${messageText.slice(0, 60)}${messageText.length > 60 ? '...' : ''}`,
-                duration: 6000,
+                duration: 3000,
               });
+
+              // Save to notifications table
+              await supabase.from('notifications').insert([{
+                id: crypto.randomUUID(),
+                user_id: user.id,
+                type: 'message',
+                message: `${senderName}: ${messageText.slice(0, 100)}${messageText.length > 100 ? '...' : ''}`,
+                read: false
+              }]);
 
               // Show browser notification if permission granted
               if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
@@ -84,8 +93,8 @@ export function NotificationSystem() {
                   requireInteraction: false,
                 });
 
-                // Auto-close notification after 6 seconds
-                setTimeout(() => notification.close(), 6000);
+                // Auto-close notification after 3 seconds
+                setTimeout(() => notification.close(), 3000);
 
                 // Handle notification click
                 notification.onclick = () => {
@@ -145,8 +154,17 @@ export function NotificationSystem() {
             toast({
               title: `❤️ New Like from ${likerRole}`,
               description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
-              duration: 5000,
+              duration: 3000,
             });
+
+            // Save to notifications table
+            await supabase.from('notifications').insert([{
+              id: crypto.randomUUID(),
+              user_id: user.id,
+              type: 'like',
+              message: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
+              read: false
+            }]);
 
             // Show browser notification
             if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
@@ -157,7 +175,7 @@ export function NotificationSystem() {
                 badge: '/favicon.ico',
               });
 
-              setTimeout(() => notification.close(), 5000);
+              setTimeout(() => notification.close(), 3000);
             }
           }
         }

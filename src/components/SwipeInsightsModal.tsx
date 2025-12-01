@@ -64,9 +64,9 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
             exit={{ opacity: 0, y: '100%' }}
             transition={{
               type: 'spring',
-              damping: 35,        // Slightly increased for stability
-              stiffness: 400,      // Slightly increased for snappier feel
-              mass: 0.8,           // Lower mass for faster response
+              damping: 28,
+              stiffness: 500,
+              mass: 0.5,
             }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}

@@ -21,6 +21,16 @@ export function ProfilePhotoNotification({ hasPhotos, userRole }: ProfilePhotoNo
     }
   }, [hasPhotos]);
 
+  // Auto-dismiss after 4 seconds
+  useEffect(() => {
+    if (!hasPhotos && !isDismissed) {
+      const timer = setTimeout(() => {
+        setIsDismissed(true);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasPhotos, isDismissed]);
+
   // Auto-hide when user has photos
   const shouldShow = !hasPhotos && !isDismissed;
 
@@ -40,7 +50,7 @@ export function ProfilePhotoNotification({ hasPhotos, userRole }: ProfilePhotoNo
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-40 w-full max-w-2xl px-4"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-40 w-full max-w-2xl px-4"
         >
           <Alert className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 border-blue-200 dark:border-blue-800 shadow-lg">
             <Camera className="h-5 w-5 text-blue-600 dark:text-blue-400" />
