@@ -135,6 +135,10 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
         scale: isTop ? scale : 0.95,
         willChange: 'transform, opacity',
         transform: 'translateZ(0)',
+        borderRadius: '1.5rem', // 24px - ensures rounded corners during animation
+        overflow: 'hidden',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
         ...style
       }}
       drag={isTop ? "x" : false}
@@ -213,7 +217,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1">
                   {images.map((_, idx) => (
                     <div
-                      key={idx}
+                      key={`image-dot-${idx}`}
                       className={`w-1.5 h-1.5 rounded-full transition-all ${
                         idx === imageIndex ? 'bg-white' : 'bg-white/40'
                       }`}
@@ -325,14 +329,14 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
                   <Badge variant="secondary" className="text-xs">
                     Furnished
                   </Badge>
-                )}
+              )}
               </div>
 
               {/* Amenities */}
               {listing.amenities && listing.amenities.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {listing.amenities.slice(0, 3).map((amenity, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs border-white/30 text-white/70">
+                    <Badge key={`amenity-${idx}`} variant="outline" className="text-xs border-white/30 text-white/70">
                       {amenity}
                     </Badge>
                   ))}

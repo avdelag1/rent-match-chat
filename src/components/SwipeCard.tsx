@@ -148,7 +148,9 @@ export function SwipeCard({
         transform: isTop 
           ? `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)` 
           : 'scale(0.95)',
-        opacity
+        opacity,
+        borderRadius: '1.5rem', // 24px - ensures rounded corners during animation
+        overflow: 'hidden',
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}

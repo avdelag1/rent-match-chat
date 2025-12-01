@@ -115,6 +115,17 @@ export function OwnerClientTinderCard({
     rotate: isTop ? rotate : 0,
     scale: isTop ? scale : 0.95,
     opacity: isTop ? opacity : 0,
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    willChange: 'transform, opacity',
+    borderRadius: '1.5rem', // 24px - ensures rounded corners during animation
+    overflow: 'hidden' as const,
+    backfaceVisibility: 'hidden' as const,
+    WebkitBackfaceVisibility: 'hidden' as const,
+    transform: 'translateZ(0)',
   };
 
   return (
@@ -205,7 +216,7 @@ export function OwnerClientTinderCard({
             <div className="absolute top-3 left-0 right-0 flex gap-1 px-4 z-10">
               {images.map((_, idx) => (
                 <div
-                  key={idx}
+                  key={`image-dot-${idx}`}
                   className="flex-1 h-1 rounded-full bg-white/30 overflow-hidden"
                 >
                   <div
@@ -294,7 +305,7 @@ export function OwnerClientTinderCard({
                   <span className="text-[10px] text-muted-foreground/70">Looking for:</span>
                   <div className="flex gap-1">
                     {profile.preferred_listing_types.slice(0, 2).map((type, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-[10px] h-5 px-2">
+                      <Badge key={`listing-type-${idx}`} variant="secondary" className="text-[10px] h-5 px-2">
                         {type}
                       </Badge>
                     ))}
@@ -314,7 +325,7 @@ export function OwnerClientTinderCard({
                   <span className="text-[10px] text-muted-foreground/70">Interests:</span>
                   <div className="flex gap-1 flex-wrap">
                     {profile.interests.slice(0, 3).map((interest, idx) => (
-                      <Badge key={idx} variant="outline" className="text-[10px] h-5 px-2">
+                      <Badge key={`interest-preview-${idx}`} variant="outline" className="text-[10px] h-5 px-2">
                         {interest}
                       </Badge>
                     ))}
@@ -359,7 +370,7 @@ export function OwnerClientTinderCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.interests.map((interest, idx) => (
-                        <Badge key={idx} variant="secondary">
+                        <Badge key={`interest-${idx}`} variant="secondary">
                           {interest}
                         </Badge>
                       ))}
@@ -375,7 +386,7 @@ export function OwnerClientTinderCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.preferred_activities.map((activity, idx) => (
-                        <Badge key={idx} variant="outline">
+                        <Badge key={`activity-${idx}`} variant="outline">
                           {activity}
                         </Badge>
                       ))}
@@ -391,7 +402,7 @@ export function OwnerClientTinderCard({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.lifestyle_tags.map((tag, idx) => (
-                        <Badge key={idx} variant="outline">
+                        <Badge key={`lifestyle-${idx}`} variant="outline">
                           {tag}
                         </Badge>
                       ))}
