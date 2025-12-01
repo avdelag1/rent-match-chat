@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2, ChevronDown } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, Phone, Mail, Flag, Share2, ChevronDown, X, RotateCcw, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ReportDialog } from '@/components/ReportDialog';
@@ -28,6 +28,7 @@ interface OwnerClientTinderCardProps {
   onTap?: () => void;
   onInsights?: () => void;
   onMessage?: () => void;
+  onUndo?: () => void;
   isTop?: boolean;
   showNextCard?: boolean;
   hasPremium?: boolean;
@@ -39,6 +40,7 @@ export function OwnerClientTinderCard({
   onTap,
   onInsights,
   onMessage,
+  onUndo,
   isTop = false,
   showNextCard = false,
   hasPremium = false
@@ -51,14 +53,14 @@ export function OwnerClientTinderCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Tinder-like rotation - more dramatic and responsive
-  const rotate = useTransform(x, [-500, -200, 0, 200, 500], [-25, -15, 0, 15, 25]);
+  // Tinder-like rotation - smoother and more responsive
+  const rotate = useTransform(x, [-400, -150, 0, 150, 400], [-20, -10, 0, 10, 20]);
 
-  // Scale effect - slight zoom on drag
-  const scale = useTransform(x, [-300, 0, 300], [0.95, 1, 0.95]);
+  // Scale effect - minimal for better feel
+  const scale = useTransform(x, [-300, 0, 300], [0.98, 1, 0.98]);
 
-  // Opacity for card exit effect
-  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.5, 0.75, 1, 0.75, 0.5]);
+  // Opacity for card exit effect - smoother transition
+  const opacity = useTransform(x, [-400, -200, 0, 200, 400], [0.3, 0.85, 1, 0.85, 0.3]);
 
   const images = useMemo(() =>
     profile.profile_images && profile.profile_images.length > 0
@@ -88,11 +90,11 @@ export function OwnerClientTinderCard({
   const handleDragEnd = (event: any, info: PanInfo) => {
     const { offset, velocity } = info;
 
-    // More flexible thresholds for natural feel
-    const swipeThresholdX = 50; // Slightly lower for better responsiveness
-    const velocityThreshold = 250; // Snap swipe with lower velocity
+    // Optimized thresholds for smooth, natural feel
+    const swipeThresholdX = 80; // Comfortable swipe distance
+    const velocityThreshold = 300; // Quick flick threshold
 
-    // Horizontal swipes - Right (accept) or Left (reject) - more flexible
+    // Horizontal swipes - Right (like) or Left (dislike)
     const absOffsetX = Math.abs(offset.x);
     const absVelocityX = Math.abs(velocity.x);
 
@@ -102,7 +104,7 @@ export function OwnerClientTinderCard({
       return;
     }
 
-    // Snap back with nice spring animation
+    // Snap back with smooth spring animation
   };
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
@@ -122,18 +124,19 @@ export function OwnerClientTinderCard({
   return (
     <motion.div
       drag={isTop ? "x" : false}
-      dragConstraints={{ left: -500, right: 500 }}
-      dragElastic={0.2}
+      dragConstraints={{ left: -600, right: 600 }}
+      dragElastic={0.15}
+      dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
       onDragEnd={handleDragEnd}
       style={cardStyle}
       animate={{ x: 0, y: 0, rotate: 0, scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 300,
-        damping: 30,
-        mass: 1
+        stiffness: 400,
+        damping: 35,
+        mass: 0.8
       }}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden"
+      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
     >
       {/* Swipe Overlays - Enhanced Visibility */}
       {/* Right Swipe - GREEN LIKE */}
@@ -185,11 +188,11 @@ export function OwnerClientTinderCard({
           <img
             src={images[currentImageIndex]}
             alt={profile.name}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover rounded-3xl"
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
             draggable={false}
-            style={{ 
+            style={{
               aspectRatio: '9/16',
               willChange: 'transform',
               backfaceVisibility: 'hidden',
@@ -201,9 +204,9 @@ export function OwnerClientTinderCard({
           {/* Bottom gradient - Lighter for better photo visibility */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
 
-          {/* Story-style Dots - Top Edge */}
+          {/* Story-style Dots - Closer to Top Edge */}
           {images.length > 1 && (
-            <div className="absolute top-16 left-0 right-0 flex gap-2 px-4 z-10">
+            <div className="absolute top-3 left-0 right-0 flex gap-2 px-4 z-10">
               {images.map((_, idx) => (
                 <div
                   key={idx}
@@ -219,17 +222,17 @@ export function OwnerClientTinderCard({
             </div>
           )}
 
-          {/* Action Buttons - Spread Across Top Corners */}
+          {/* Top Action Buttons - Corner Placement */}
           {/* Report Button - Top Left */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               setReportDialogOpen(true);
             }}
-            className="absolute top-3 left-4 z-30 p-1 text-red-500 hover:text-red-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
+            className="absolute top-16 left-4 z-30 p-2 rounded-full bg-black/40 backdrop-blur-sm text-red-400 hover:bg-red-500/20 hover:text-red-300 opacity-90 hover:opacity-100 transition-all active:scale-90"
             title="Report User"
           >
-            <Flag className="w-5 h-5" />
+            <Flag className="w-4 h-4" />
           </button>
 
           {/* Share Button - Top Right */}
@@ -238,10 +241,10 @@ export function OwnerClientTinderCard({
               e.stopPropagation();
               setShareDialogOpen(true);
             }}
-            className="absolute top-3 right-4 z-30 p-1 text-emerald-500 hover:text-emerald-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
+            className="absolute top-16 right-4 z-30 p-2 rounded-full bg-black/40 backdrop-blur-sm text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 opacity-90 hover:opacity-100 transition-all active:scale-90"
             title="Share Profile"
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="w-4 h-4" />
           </button>
 
           {/* Verified Badge */}
@@ -445,6 +448,65 @@ export function OwnerClientTinderCard({
             </Button>
           </div>
         </motion.div>
+
+        {/* Action Buttons - Bottom Fixed Position */}
+        {isTop && (
+          <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
+            <div className="flex items-center gap-3 pointer-events-auto">
+              {/* Undo/Return Button */}
+              {onUndo && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUndo();
+                  }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  title="Undo"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* Dislike Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSwipe('left');
+                }}
+                className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="Dislike"
+              >
+                <X className="w-7 h-7" strokeWidth={3} />
+              </button>
+
+              {/* Insights Button */}
+              {onInsights && hasPremium && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onInsights();
+                  }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  title="View Insights"
+                >
+                  <Sparkles className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* Like Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSwipe('right');
+                }}
+                className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="Like"
+              >
+                <Heart className="w-7 h-7" fill="currentColor" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Report Dialog */}

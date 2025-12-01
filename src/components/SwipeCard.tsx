@@ -58,7 +58,7 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
 
-    const threshold = 120; // More sensitive swipe threshold
+    const threshold = 80; // More sensitive swipe threshold
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
 
     // Only swipe if dragged enough (prevent ghost taps)
@@ -109,7 +109,7 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
 
-    const threshold = 120; // More sensitive swipe threshold
+    const threshold = 80; // More sensitive swipe threshold
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
 
     // Only swipe if dragged enough (prevent ghost taps)
@@ -141,7 +141,7 @@ export function SwipeCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-lg ${
+      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-2xl rounded-3xl ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{
@@ -172,11 +172,11 @@ export function SwipeCard({
         )}
         
         {/* Image */}
-        <div className="relative h-3/5 overflow-hidden">
+        <div className="relative h-3/5 overflow-hidden rounded-t-3xl">
           <img
             src={primaryImage}
             alt={listing.title || 'Property'}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-3xl"
             draggable={false}
           />
           

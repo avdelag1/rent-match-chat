@@ -64,8 +64,9 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
   const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-300, 300], [-30, 30]);
-  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 1, 1, 1, 0]);
+  const rotate = useTransform(x, [-400, -150, 0, 150, 400], [-20, -10, 0, 10, 20]);
+  const scale = useTransform(x, [-300, 0, 300], [0.98, 1, 0.98]);
+  const opacity = useTransform(x, [-400, -200, 0, 200, 400], [0.3, 0.85, 1, 0.85, 0.3]);
 
   const images = listing.images && listing.images.length > 0 ? listing.images : [];
   const hasMultipleImages = images.length > 1;
@@ -88,16 +89,16 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
 
   // OPTIMIZED: Memoize callbacks to prevent re-creation with enhanced snap-back
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
-    const threshold = 120; // More sensitive swipe threshold
+    const threshold = 80; // More sensitive swipe threshold
     const velocity = info.velocity.x;
-    
+
     // Check if this was a tap (minimal movement)
     const dragDistance = Math.sqrt(
       Math.pow(info.offset.x, 2) + Math.pow(info.offset.y, 2)
     );
-    
+
     // Only trigger swipe if moved enough and not a tap
-    if (dragDistance > threshold && (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500)) {
+    if (dragDistance > threshold && (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 300)) {
       const direction = info.offset.x > 0 ? 'right' : 'left';
       onSwipe(direction);
     }
@@ -131,14 +132,15 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
         x,
         rotate,
         opacity: isTop ? opacity : 0.8,
-        scale: isTop ? 1 : 0.95,
+        scale: isTop ? scale : 0.95,
         willChange: 'transform, opacity',
         transform: 'translateZ(0)',
         ...style
       }}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.6}
+      dragElastic={0.15}
+      dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
       onPointerDown={handlePointerDown}
       onDragEnd={handleDragEnd}
       whileTap={{ scale: 0.98 }}
@@ -151,13 +153,13 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
       }}
       transition={{
         type: "spring",
-        stiffness: 350,
-        damping: 28,
+        stiffness: 400,
+        damping: 35,
         mass: 0.8,
         duration: 0.3
       }}
     >
-      <Card className="h-full swipe-card interactive-card glass-morphism border-white/20 overflow-hidden">
+      <Card className="h-full swipe-card interactive-card glass-morphism border-white/20 overflow-hidden rounded-3xl shadow-2xl">
         <div className="relative h-full">
           {/* Image Section */}
           <div className="relative h-2/3 overflow-hidden">
@@ -180,7 +182,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
               key={imageIndex}
               src={images[imageIndex]}
               alt={listing.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-3xl"
               loading="lazy"
               initial={{ scale: 1.1, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -208,7 +210,7 @@ export const EnhancedSwipeCard = memo(function EnhancedSwipeCard({
                 </button>
                 
                 {/* Image Dots */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1">
                   {images.map((_, idx) => (
                     <div
                       key={idx}
