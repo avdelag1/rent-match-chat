@@ -315,11 +315,11 @@ function LegendaryLandingPage() {
             }}
             transition={{
               type: "spring",
-              stiffness: 120,
-              damping: 12,
-              mass: 1.2,
-              delay: 0.8,
-              bounce: 0.6
+              stiffness: 200,
+              damping: 15,
+              mass: 0.8,
+              delay: 0.7,
+              bounce: 0.5
             }}
             whileHover={{
               scale: 1.03,
@@ -355,11 +355,11 @@ function LegendaryLandingPage() {
             }}
             transition={{
               type: "spring",
-              stiffness: 120,
-              damping: 12,
-              mass: 1.2,
-              delay: 1.0,
-              bounce: 0.6
+              stiffness: 200,
+              damping: 15,
+              mass: 0.8,
+              delay: 0.9,
+              bounce: 0.5
             }}
             whileHover={{
               scale: 1.03,
