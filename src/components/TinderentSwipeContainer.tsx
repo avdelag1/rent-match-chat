@@ -127,10 +127,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       action: direction === 'right' ? 'like' : 'pass'
     });
 
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 300);
+    // Move to next card immediately - exit animation handled by Framer Motion
+    setCurrentIndex(prev => prev + 1);
+    setSwipeDirection(null);
   }, [currentIndex, listings, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {

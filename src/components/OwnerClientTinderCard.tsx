@@ -1,8 +1,10 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { SwipeOverlays } from './SwipeOverlays';
+import { triggerHaptic } from '@/utils/haptics';
 
 interface ClientProfile {
   user_id: string;
@@ -45,6 +47,7 @@ export function OwnerClientTinderCard({
 }: OwnerClientTinderCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -74,16 +77,20 @@ export function OwnerClientTinderCard({
     if (clickX < width * 0.3) {
       // Left 30% - Previous image
       setCurrentImageIndex(prev => Math.max(0, prev - 1));
+      triggerHaptic('light');
     } else if (clickX > width * 0.7) {
       // Right 30% - Next image
       setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1));
+      triggerHaptic('light');
     } else {
       // Center 40% - Expand details
       setIsBottomSheetExpanded(!isBottomSheetExpanded);
+      triggerHaptic('medium');
     }
   }, [images.length, isBottomSheetExpanded]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  // Enhanced drag handling with haptic feedback matching ClientTinderSwipeCard
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
 
     // Optimized thresholds for smooth, natural feel
@@ -96,18 +103,14 @@ export function OwnerClientTinderCard({
 
     if (absOffsetX > swipeThresholdX || absVelocityX > velocityThreshold) {
       const direction = offset.x > 0 ? 'right' : 'left';
+      triggerHaptic(direction === 'right' ? 'success' : 'warning');
       onSwipe(direction);
       return;
     }
 
     // Snap back with smooth spring animation
-  };
-
-  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
-
-  // Calculate overlay opacity based on drag distance - more responsive
-  const rightOverlayOpacity = useTransform(x, [0, 100], [0, 1]);
-  const leftOverlayOpacity = useTransform(x, [-100, 0], [1, 0]);
+    triggerHaptic('light');
+  }, [onSwipe]);
 
   const cardStyle = {
     x,
@@ -115,12 +118,19 @@ export function OwnerClientTinderCard({
     rotate: isTop ? rotate : 0,
     scale: isTop ? scale : 0.95,
     opacity: isTop ? opacity : 0,
+    zIndex: isTop ? 10 : 1,
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    willChange: 'transform, opacity'
   };
 
   return (
     <motion.div
+      ref={cardRef}
       drag={isTop ? "x" : false}
-      dragConstraints={{ left: -600, right: 600 }}
+      dragConstraints={{ left: -500, right: 500 }}
       dragElastic={0.15}
       dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
       onDragEnd={handleDragEnd}
@@ -132,46 +142,10 @@ export function OwnerClientTinderCard({
         damping: 35,
         mass: 0.8
       }}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
+      className="w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
     >
-      {/* Swipe Overlays - Enhanced Visibility */}
-      {/* Right Swipe - GREEN LIKE */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
-        style={{ opacity: rightOverlayOpacity }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/50 via-emerald-500/40 to-green-600/50 backdrop-blur-sm" />
-        <motion.div
-          className="relative text-center"
-          style={{
-            scale: useTransform(rightOverlayOpacity, [0, 1], [0.8, 1.1]),
-            rotate: -12
-          }}
-        >
-          <span className="text-8xl font-black text-white tracking-wider drop-shadow-[0_8px_40px_rgba(34,197,94,1)]" style={{ textShadow: '0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
-            LIKE
-          </span>
-        </motion.div>
-      </motion.div>
-
-      {/* Left Swipe - RED PASS */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
-        style={{ opacity: leftOverlayOpacity }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/50 via-rose-500/40 to-red-600/50 backdrop-blur-sm" />
-        <motion.div
-          className="relative text-center"
-          style={{
-            scale: useTransform(leftOverlayOpacity, [0, 1], [0.8, 1.1]),
-            rotate: 12
-          }}
-        >
-          <span className="text-8xl font-black text-white tracking-wider drop-shadow-[0_8px_40px_rgba(239,68,68,1)]" style={{ textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
-            PASS
-          </span>
-        </motion.div>
-      </motion.div>
+      {/* Swipe Overlays - Use shared component for consistency */}
+      <SwipeOverlays x={x} />
 
       {/* Card Content */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
