@@ -104,11 +104,14 @@ self.addEventListener('activate', (event) => {
       // Take control of all clients immediately
       self.clients.claim(),
       
-      // Clean up old caches
+      // Clean up old caches - only delete app-related caches with tinderent prefix
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+            // Only delete caches that belong to this app and are not the current ones
+            if (cacheName.startsWith('tinderent-') && 
+                cacheName !== STATIC_CACHE && 
+                cacheName !== DYNAMIC_CACHE) {
               console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }

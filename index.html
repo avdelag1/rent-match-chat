@@ -44,7 +44,7 @@
     <meta property="twitter:url" content="https://tinderent.lovable.app/">
     <meta property="twitter:title" content="Tinderent - Find Your Perfect Rental Property or Tenant">
     <meta property="twitter:description" content="Discover your ideal rental property or tenant with Tinderent. Swipe through verified listings and connect with perfect matches.">
-    <meta property="twitter:image" content="/placeholder.svg">
+    <meta property="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/qyGlrqJHe9g2hyHsAc6ZZroRlyF2/social-images/social-1758515231924-ChatGPT Image Sep 21, 2025, 11_01_12 PM.png">
     
     <!-- PWA Support -->
     <link rel="manifest" href="/manifest.json">
@@ -57,7 +57,13 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <link rel="icon" type="image/x-icon" href="https://storage.googleapis.com/gpt-engineer-file-uploads/qyGlrqJHe9g2hyHsAc6ZZroRlyF2/uploads/1758515219868-ChatGPT Image Sep 21, 2025, 11_01_12 PM.png">
-  <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/qyGlrqJHe9g2hyHsAc6ZZroRlyF2/social-images/social-1758515231924-ChatGPT Image Sep 21, 2025, 11_01_12 PM.png">
+    
+    <!-- Reduced Motion: apply class when user prefers reduced motion -->
+    <script>
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('reduce-motion');
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </head>
 
@@ -107,72 +113,93 @@
       </div>
     </div>
     
-    <!-- Enhanced Service Worker Registration with Update Detection -->
+    <!-- Enhanced Service Worker Registration with User-Controlled Update Flow -->
     <script>
       if ('serviceWorker' in navigator) {
-        let refreshing = false;
-        
+        let updateShown = false;
+
         // Listen for service worker messages
         navigator.serviceWorker.addEventListener('message', (event) => {
-          if (event.data && event.data.type === 'SW_UPDATED' && !refreshing) {
-            refreshing = true;
-            console.log('New version available, reloading...');
-            
-            // Show update notification
-            const notification = document.createElement('div');
-            notification.innerHTML = `
-              <div style="position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, hsl(14, 100%, 57%), hsl(9, 100%, 64%)); color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 10000; font-family: Inter, sans-serif; max-width: 300px;">
-                <div style="font-weight: 600; margin-bottom: 8px;">🎉 App Updated!</div>
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">A new version is available with the latest features.</div>
-                <button onclick="window.location.reload()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; width: 100%;">Refresh Now</button>
-              </div>
-            `;
-            document.body.appendChild(notification);
-            
-            // Auto-refresh after 3 seconds if user doesn't click
-            setTimeout(() => {
-              if (!refreshing) return;
-              window.location.reload();
-            }, 3000);
-          }
+          if (!event.data || event.data.type !== 'SW_UPDATED' || updateShown) return;
+          updateShown = true;
+
+          const notification = document.createElement('div');
+          notification.setAttribute('role', 'status');
+          notification.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#ff6b35,#f15a24);color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.15);width:260px;font-family:Inter,system-ui,sans-serif;';
+          notification.innerHTML = `
+            <div style="font-weight:600;margin-bottom:6px;">🎉 App Updated!</div>
+            <div style="font-size:13px;opacity:0.9;margin-bottom:10px;">A new version is available. Refresh to see the latest features.</div>
+            <button id="sw-refresh-btn" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 12px;border-radius:6px;font-weight:500;cursor:pointer;width:100%;">Refresh Now</button>
+            <div id="sw-countdown" style="font-size:11px;opacity:0.7;margin-top:6px;text-align:center;">Auto-refresh in 30s</div>
+          `;
+          document.body.appendChild(notification);
+
+          let userClicked = false;
+          let countdown = 30;
+          const countdownEl = notification.querySelector('#sw-countdown');
+          const refreshBtn = notification.querySelector('#sw-refresh-btn');
+
+          // Handle user clicking refresh
+          refreshBtn.addEventListener('click', () => {
+            userClicked = true;
+            window.location.reload();
+          });
+
+          // Countdown timer for auto-refresh
+          const timer = setInterval(() => {
+            countdown--;
+            if (countdownEl) countdownEl.textContent = 'Auto-refresh in ' + countdown + 's';
+            if (countdown <= 0) {
+              clearInterval(timer);
+              if (!userClicked) window.location.reload();
+            }
+          }, 1000);
         });
-        
+
         // Register service worker
         window.addEventListener('load', async () => {
           try {
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('SW registered: ', registration);
-            
-            // Check for updates every 30 seconds
+
+            // Check for updates every 30 minutes (1800000ms) instead of 30 seconds
             setInterval(() => {
               registration.update();
-            }, 30000);
-            
+            }, 1800000);
+
             // Listen for new service worker
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('New service worker installed');
-                }
-              });
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('New service worker installed');
+                  }
+                });
+              }
             });
-            
+
           } catch (error) {
             console.log('SW registration failed: ', error);
           }
         });
       }
-      
-      // Force cache clear on critical updates
-      if (localStorage.getItem('tinderent_last_clear') !== '1.0.2') {
-        console.log('Clearing caches for fresh content...');
+
+      // Force cache clear on critical updates - only clear app-related caches
+      // Bump version (e.g., 1.0.3 -> 1.0.4) when breaking cache changes are needed
+      if (localStorage.getItem('tinderent_last_clear') !== '1.0.3') {
+        console.log('Clearing app caches for fresh content...');
         if ('caches' in window) {
           caches.keys().then(names => {
-            names.forEach(name => caches.delete(name));
+            names.forEach(name => {
+              // Only delete caches with tinderent prefix to avoid affecting other origins
+              if (name.startsWith('tinderent-')) {
+                caches.delete(name);
+              }
+            });
           });
         }
-        localStorage.setItem('tinderent_last_clear', '1.0.2');
+        localStorage.setItem('tinderent_last_clear', '1.0.3');
       }
     </script>
   </body>
