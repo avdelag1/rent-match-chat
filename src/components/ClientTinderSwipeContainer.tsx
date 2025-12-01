@@ -310,33 +310,13 @@ export function ClientTinderSwipeContainer({
     );
   }
 
-  const nextProfile = profiles[currentIndex + 1];
-
   return (
     <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden flex flex-col">
       {/* Full-Screen Card Container - Fills viewport with proper aspect ratio */}
       <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4">
         <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black">
           <AnimatePresence mode="sync" initial={false}>
-            {/* Show next card behind current card for stack effect */}
-            {nextProfile && (
-              <motion.div
-                key={`next-${nextProfile.user_id}`}
-                initial={{ scale: 0.95, y: 8, opacity: 0.8 }}
-                animate={{ scale: 0.95, y: 8, opacity: 0.8 }}
-                className="absolute inset-0"
-                style={{ zIndex: 0 }}
-              >
-                <ClientTinderSwipeCard
-                  profile={nextProfile}
-                  onSwipe={() => {}}
-                  isTop={false}
-                  showNextCard={true}
-                />
-              </motion.div>
-            )}
-
-            {/* Current card on top */}
+            {/* Current card - single card view to avoid double-card visual bug */}
             {currentProfile && (
               <motion.div
                 key={currentProfile.user_id}
