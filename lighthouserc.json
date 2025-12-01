@@ -21,8 +21,8 @@
         "largest-contentful-paint": ["warn", { "maxNumericValue": 2500 }],
         "interactive": ["warn", { "maxNumericValue": 3500 }],
         "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
-        "resource-summary:script:size": ["warn", { "maxNumericValue": 350000 }],
-        "resource-summary:total:size": ["warn", { "maxNumericValue": 500000 }]
+        "resource-summary:script:size": ["warn", { "maxNumericValue": 225000 }],
+        "resource-summary:total:size": ["warn", { "maxNumericValue": 350000 }]
       }
     },
     "upload": {

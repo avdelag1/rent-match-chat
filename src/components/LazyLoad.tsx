@@ -58,22 +58,22 @@ export function LazyLoad<T extends ComponentType<object>>({
 }
 
 /**
- * Helper function to create a lazy component with webpackChunkName hint
- * Note: Vite uses rollup internally, but chunk names can still be influenced
- * via the dynamic import comment syntax for debugging purposes.
+ * Helper function to create a lazy component.
+ * 
+ * Note: Vite uses Rollup for bundling, so webpack-style chunk naming comments 
+ * (like webpackChunkName) are not supported. In Vite, chunk names are controlled
+ * via vite.config.ts manualChunks configuration. This helper is a simple wrapper
+ * around React.lazy for consistency.
  * 
  * Usage:
  * ```tsx
- * const Maps = createLazyComponent(() => import('./Maps'), 'maps');
- * const Analytics = createLazyComponent(() => import('./Analytics'), 'analytics');
+ * const Maps = createLazyComponent(() => import('./Maps'));
+ * const Analytics = createLazyComponent(() => import('./Analytics'));
  * ```
  */
 export function createLazyComponent<T extends ComponentType<object>>(
-  importFn: () => Promise<{ default: T }>,
-  _chunkName?: string
+  importFn: () => Promise<{ default: T }>
 ): React.LazyExoticComponent<T> {
-  // The chunkName parameter is for documentation purposes
-  // Vite handles chunk naming through vite.config.ts manualChunks
   return React.lazy(importFn);
 }
 
