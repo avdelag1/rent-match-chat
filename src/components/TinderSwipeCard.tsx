@@ -103,7 +103,9 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
     willChange: 'transform',
     backfaceVisibility: 'hidden' as const,
     WebkitBackfaceVisibility: 'hidden' as const,
-    transform: 'translateZ(0)'
+    transform: 'translateZ(0)',
+    borderRadius: '1.5rem', // 24px - ensures rounded corners during animation
+    overflow: 'hidden' as const,
   };
 
   return (
@@ -139,7 +141,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, isTop = true }: Tin
             <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
               {images.map((_, index) => (
                 <div
-                  key={index}
+                  key={`image-dot-${index}`}
                   className="flex-1 h-1 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
                 >
                   <div
