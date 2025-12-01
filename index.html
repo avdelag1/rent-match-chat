@@ -186,6 +186,7 @@
       }
 
       // Force cache clear on critical updates - only clear app-related caches
+      // Bump version (e.g., 1.0.3 -> 1.0.4) when breaking cache changes are needed
       if (localStorage.getItem('tinderent_last_clear') !== '1.0.3') {
         console.log('Clearing app caches for fresh content...');
         if ('caches' in window) {

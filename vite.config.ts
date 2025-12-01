@@ -51,7 +51,8 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: false, // Disable sourcemaps in production
-    // Use esbuild for faster CI builds in production; switch to 'terser' for smaller output if needed
+    // esbuild is ~2x faster than terser; terser produces slightly smaller bundles but slower builds
+    // Using esbuild for production for faster CI; switch to 'terser' if bundle size is critical
     minify: mode === 'production' ? 'esbuild' : 'terser',
     // Inline assets smaller than 4KB to reduce HTTP requests
     assetsInlineLimit: 4096,
