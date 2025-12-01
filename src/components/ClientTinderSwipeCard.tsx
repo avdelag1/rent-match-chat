@@ -97,7 +97,7 @@ export function ClientTinderSwipeCard({
     opacity: isTop ? opacity : 1,
     zIndex: isTop ? 10 : 1,
     position: 'absolute' as const,
-    top: isTop ? 0 : 12,
+    top: 0,
     left: 0,
     right: 0,
     willChange: 'transform, opacity'
@@ -149,8 +149,8 @@ export function ClientTinderSwipeCard({
           {/* Bottom gradient for text readability */}
           <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
 
-          {/* Story-Style Dots at Top */}
-          {images.length > 1 && (
+          {/* Story-Style Dots at Top - Only render on active/top card to avoid duplicate indicators */}
+          {isTop && images.length > 1 && (
             <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
               {images.map((_, idx) => (
                 <div
@@ -167,21 +167,23 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Right Corner */}
+          {/* Action Buttons - Top Right Corner - Only on active/top card */}
           {/* Report Button - Top Right */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setReportDialogOpen(true);
-            }}
-            className="absolute top-3 right-4 z-30 p-1 text-red-500 hover:text-red-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
-            title="Report User"
-          >
-            <Flag className="w-5 h-5" />
-          </button>
+          {isTop && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setReportDialogOpen(true);
+              }}
+              className="absolute top-3 right-4 z-30 p-1 text-red-500 hover:text-red-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
+              title="Report User"
+            >
+              <Flag className="w-5 h-5" />
+            </button>
+          )}
 
-          {/* Verified Badge */}
-          {profile.verified && (
+          {/* Verified Badge - Only on active/top card */}
+          {isTop && profile.verified && (
             <div className="absolute top-4 right-4 z-20">
               <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
                 <CheckCircle className="w-4 h-4" />
