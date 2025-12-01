@@ -246,18 +246,6 @@ export function ClientSwipeContainer({
 
   return (
     <div className="w-full h-full overflow-hidden flex flex-col">
-      {/* Refresh Button - Top Right */}
-      <div className="absolute top-3 right-3 z-50">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          size="icon"
-          className="rounded-full shadow-lg bg-background/80 backdrop-blur-xl border border-primary/50 hover:scale-105 transition-transform duration-200"
-          disabled={isRefetching}
-        >
-          <RefreshCw className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
 
       {/* Full-Screen Card Container - Positioned lower on screen */}
       <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4 pt-6 sm:pt-12">
