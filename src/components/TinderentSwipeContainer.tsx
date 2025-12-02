@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, memo, useMemo, useRef } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
-import { SwipeActionButtons } from './SwipeActionButtons';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { useListings } from '@/hooks/useListings';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
@@ -377,6 +376,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 listing={currentListing}
                 onSwipe={handleSwipe}
                 onTap={() => onListingTap(currentListing.id)}
+                onUndo={canUndo ? () => undoLastSwipe() : undefined}
+                onInsights={handleInsights}
+                hasPremium={true}
                 isTop={true}
               />
             </motion.div>
@@ -384,19 +386,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons - Float over image, not bottom sheet */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[35%] z-40 flex justify-center">
-        <div className="w-full max-w-md px-4">
-          <SwipeActionButtons
-            onUndo={() => undoLastSwipe()}
-            onPass={() => handleButtonSwipe('left')}
-            onInfo={handleInsights}
-            onLike={() => handleButtonSwipe('right')}
-            canUndo={canUndo}
-            disabled={swipeMutation.isPending || isCreatingConversation || !currentListing}
-          />
-        </div>
-      </div>
  
       {/* Insights Modal */}
       <SwipeInsightsModal
