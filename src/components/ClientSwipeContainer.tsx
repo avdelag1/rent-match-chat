@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { OwnerClientTinderCard } from './OwnerClientTinderCard';
-import { SwipeActionButtons } from './SwipeActionButtons';
 import { MatchCelebration } from './MatchCelebration';
 import { MatchPercentageBadge } from './MatchPercentageBadge';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -289,6 +288,7 @@ export function ClientSwipeContainer({
                   onTap={() => onClientTap(currentClient.user_id)}
                   onInsights={() => handleInsights(currentClient.user_id)}
                   onMessage={() => handleConnect(currentClient.user_id)}
+                  onUndo={canUndo ? undoLastSwipe : undefined}
                   isTop={true}
                   hasPremium={hasPremiumMessaging}
                 />
@@ -298,20 +298,6 @@ export function ClientSwipeContainer({
         </div>
       </div>
 
-      {/* Action Buttons - Below card at bottom */}
-      <div className="w-full flex justify-center px-3 sm:px-4 py-4 sm:py-6 flex-shrink-0">
-        <div className="w-full max-w-[min(100%-24px,560px)]">
-          <SwipeActionButtons
-            onUndo={undoLastSwipe}
-            onPass={() => handleSwipe('left')}
-            onInfo={() => onInsights?.(currentClient.user_id)}
-            onLike={() => handleSwipe('right')}
-            canUndo={canUndo}
-            disabled={swipeMutation.isPending || !currentClient}
-          />
-        </div>
-      </div>
- 
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
         onClose={() => setMatchCelebration({ isOpen: false })}
