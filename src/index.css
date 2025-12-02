@@ -803,6 +803,77 @@ body {
   }
 }
 
+/* ===== GLOBAL SMOOTH SCROLL & PERFORMANCE ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* GPU-accelerated elements */
+.gpu-accelerate {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Super fast button interactions */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Smooth link transitions */
+a {
+  transition: color 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+/* Fast card hover/press states */
+.fast-touch {
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  will-change: transform;
+}
+
+.fast-touch:active {
+  transform: scale(0.97);
+}
+
+/* Optimized scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Ultra-smooth modal/dialog animations */
+[data-state="open"] {
+  animation: modal-in 0.15s ease-out;
+}
+
+[data-state="closed"] {
+  animation: modal-out 0.1s ease-in;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+}
+
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateZ(0);
+  }
+}
+
 /* ===== PREFERS-REDUCED-MOTION ACCESSIBILITY ===== */
 /* Reduce animation intensity for users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {

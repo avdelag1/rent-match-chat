@@ -9,17 +9,22 @@ interface PageTransitionProps {
 const pageVariants = {
   initial: {
     opacity: 0,
+    y: 8,
   },
   in: {
     opacity: 1,
+    y: 0,
   },
   out: {
     opacity: 0,
+    y: -8,
   },
 };
 
 const pageTransition = {
-  duration: 0.15,
+  type: 'tween' as const,
+  ease: 'easeOut' as const,
+  duration: 0.12,
 };
 
 export function PageTransition({ children, className = '' }: PageTransitionProps) {
@@ -30,7 +35,8 @@ export function PageTransition({ children, className = '' }: PageTransitionProps
       exit="out"
       variants={pageVariants}
       transition={pageTransition}
-      className={className}
+      className={`will-change-transform ${className}`}
+      style={{ transform: 'translateZ(0)' }}
     >
       {children}
     </motion.div>
