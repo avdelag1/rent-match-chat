@@ -315,8 +315,8 @@ function LegendaryLandingPage() {
             }}
             transition={{
               type: "spring",
-              stiffness: 200,
-              damping: 15,
+              stiffness: 140,
+              damping: 18,
               mass: 0.8,
               delay: 0.7,
               bounce: 0.5
@@ -355,8 +355,8 @@ function LegendaryLandingPage() {
             }}
             transition={{
               type: "spring",
-              stiffness: 200,
-              damping: 15,
+              stiffness: 140,
+              damping: 18,
               mass: 0.8,
               delay: 0.9,
               bounce: 0.5
