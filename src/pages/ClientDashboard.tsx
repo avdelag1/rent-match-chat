@@ -38,13 +38,11 @@ const ClientDashboard = memo(({ onPropertyInsights, onMessageClick }: ClientDash
         {/* Profile Photo Upload Notification */}
         <ProfilePhotoNotification hasPhotos={!!hasPhotos} userRole="client" />
 
-        <div className="fixed inset-0 w-full h-full overflow-hidden">
-          <TinderentSwipeContainer
-            onListingTap={handleListingTap}
-            onInsights={handleListingTap}
-            onMessageClick={onMessageClick}
-          />
-        </div>
+        <TinderentSwipeContainer
+          onListingTap={handleListingTap}
+          onInsights={handleListingTap}
+          onMessageClick={onMessageClick}
+        />
 
         <PropertyInsightsDialog
           open={insightsOpen}

@@ -7,9 +7,9 @@ import { MotoClientFilters } from './filters/MotoClientFilters';
 import { BicycleClientFilters } from './filters/BicycleClientFilters';
 import { YachtClientFilters } from './filters/YachtClientFilters';
 import { PropertyClientFilters } from './filters/PropertyClientFilters';
-
+import { VehicleClientFilters } from './filters/VehicleClientFilters';
 interface FilterOptions {
-  category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht';
+  category?: 'property' | 'vehicle' | 'motorcycle' | 'bicycle' | 'yacht';
   listingType?: 'rent' | 'sale' | 'both';
   propertyType?: string[];
   priceRange?: [number, number];
@@ -29,6 +29,7 @@ interface FilterBottomSheetProps {
 
 const CATEGORIES = [
   { value: 'property', label: 'Property' },
+  { value: 'vehicle', label: 'Vehicle' },
   { value: 'motorcycle', label: 'Motorcycle' },
   { value: 'bicycle', label: 'Bicycle' },
   { value: 'yacht', label: 'Yacht' },
@@ -41,7 +42,7 @@ export function FilterBottomSheet({
   userRole,
   initialFilters,
 }: FilterBottomSheetProps) {
-  const [selectedCategory, setSelectedCategory] = useState<'property' | 'motorcycle' | 'bicycle' | 'yacht'>(
+  const [selectedCategory, setSelectedCategory] = useState<'property' | 'vehicle' | 'motorcycle' | 'bicycle' | 'yacht'>(
     initialFilters?.category || 'property'
   );
   const [categoryFilters, setCategoryFilters] = useState<any>(initialFilters || {});
@@ -53,7 +54,7 @@ export function FilterBottomSheet({
     }
   }, [initialFilters]);
 
-  const handleCategoryChange = (category: 'property' | 'motorcycle' | 'bicycle' | 'yacht') => {
+  const handleCategoryChange = (category: 'property' | 'vehicle' | 'motorcycle' | 'bicycle' | 'yacht') => {
     setSelectedCategory(category);
     setCategoryFilters({ category });
   };
@@ -103,6 +104,14 @@ export function FilterBottomSheet({
         <div className="overflow-y-auto">
           {selectedCategory === 'property' && (
             <PropertyClientFilters
+              onApply={handleCategoryFiltersApply}
+              initialFilters={categoryFilters}
+              activeCount={activeFilterCount}
+            />
+          )}
+          
+          {selectedCategory === 'vehicle' && (
+            <VehicleClientFilters
               onApply={handleCategoryFiltersApply}
               initialFilters={categoryFilters}
               activeCount={activeFilterCount}
