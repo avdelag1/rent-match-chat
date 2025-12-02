@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
-import { SwipeActionButtons } from './SwipeActionButtons';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { MatchCelebration } from './MatchCelebration';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -349,7 +348,9 @@ export function ClientTinderSwipeContainer({
                   profile={currentProfile}
                   onSwipe={handleSwipe}
                   onTap={() => onClientTap?.(currentProfile.user_id)}
+                  onUndo={canUndo ? handleUndo : undefined}
                   onInsights={handleInsights}
+                  hasPremium={true}
                   isTop={true}
                 />
               </motion.div>
@@ -358,18 +359,6 @@ export function ClientTinderSwipeContainer({
         </div>
       </div>
 
-      {/* Action Buttons - Below card, fixed at bottom */}
-      <div className="w-full flex justify-center px-3 sm:px-4 py-4 sm:py-6 flex-shrink-0">
-        <div className="w-full max-w-[min(100%-24px,560px)]">
-          <SwipeActionButtons
-            onUndo={handleUndo}
-            onPass={() => handleButtonSwipe('left')}
-            onInfo={handleInsights}
-            onLike={() => handleButtonSwipe('right')}
-            canUndo={canUndo}
-          />
-        </div>
-      </div>
  
       {/* Insights Modal */}
       {currentProfile && (
