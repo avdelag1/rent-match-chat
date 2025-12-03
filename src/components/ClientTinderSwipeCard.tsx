@@ -127,19 +127,20 @@ export function ClientTinderSwipeCard({
          mass: 0.8
        }}
      >
-      <div className="w-full h-full overflow-hidden flex flex-col">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Swipe Overlays */}
         <SwipeOverlays x={x} />
+        
         {/* Main Image with Tap Zones */}
         <div
-          className="relative flex-1 w-full cursor-pointer select-none overflow-hidden"
+          className="absolute inset-0 w-full h-full cursor-pointer select-none overflow-hidden"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >
           <img
             src={images[currentImageIndex]}
             alt={profile.name}
-            className="w-full h-full object-cover rounded-3xl"
+            className="absolute inset-0 w-full h-full object-cover rounded-3xl"
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
             fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
@@ -155,7 +156,7 @@ export function ClientTinderSwipeCard({
           {/* Bottom gradient for text readability */}
           <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
 
-          {/* Story-Style Dots at Top - Only render on active/top card to avoid duplicate indicators */}
+          {/* Story-Style Dots at Top */}
           {isTop && images.length > 1 && (
             <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
               {images.map((_, idx) => (
@@ -173,7 +174,6 @@ export function ClientTinderSwipeCard({
             </div>
           )}
 
-          {/* Action Buttons - Top Right Corner - Only on active/top card */}
           {/* Report Button - Top Right */}
           {isTop && (
             <button
@@ -188,9 +188,9 @@ export function ClientTinderSwipeCard({
             </button>
           )}
 
-          {/* Verified Badge - Only on active/top card */}
+          {/* Verified Badge */}
           {isTop && profile.verified && (
-            <div className="absolute top-4 right-4 z-20">
+            <div className="absolute top-12 right-4 z-20">
               <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">Verified</span>
@@ -199,8 +199,8 @@ export function ClientTinderSwipeCard({
           )}
         </div>
 
-        {/* Simple Bottom Info Overlay - Inside Image Container */}
-        <div className="absolute bottom-0 left-0 right-0 px-6 py-8 z-20 pointer-events-none">
+        {/* Bottom Info Overlay */}
+        <div className="absolute bottom-24 left-0 right-0 px-6 z-20 pointer-events-none">
           <div className="flex justify-between items-end">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-white drop-shadow-lg line-clamp-2">
@@ -225,66 +225,66 @@ export function ClientTinderSwipeCard({
             )}
           </div>
         </div>
-      </div>
 
-      {/* Action Buttons - Bottom Fixed Position */}
-      {isTop && (
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
-          <div className="flex items-center gap-3 pointer-events-auto">
-            {/* Undo/Return Button */}
-            {onUndo && (
+        {/* Action Buttons - Bottom Fixed Position */}
+        {isTop && (
+          <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
+            <div className="flex items-center gap-3 pointer-events-auto">
+              {/* Undo/Return Button */}
+              {onUndo && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUndo();
+                  }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  title="Undo"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* Dislike Button */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onUndo();
+                  onSwipe('left');
                 }}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Undo"
+                className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="Dislike"
               >
-                <RotateCcw className="w-5 h-5" />
+                <X className="w-7 h-7" strokeWidth={3} />
               </button>
-            )}
 
-            {/* Dislike Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSwipe('left');
-              }}
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-              title="Dislike"
-            >
-              <X className="w-7 h-7" strokeWidth={3} />
-            </button>
+              {/* Insights Button */}
+              {onInsights && hasPremium && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onInsights();
+                  }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  title="View Insights"
+                >
+                  <Sparkles className="w-5 h-5" />
+                </button>
+              )}
 
-            {/* Insights Button */}
-            {onInsights && hasPremium && (
+              {/* Like Button */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onInsights();
+                  onSwipe('right');
                 }}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="View Insights"
+                className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="Like"
               >
-                <Sparkles className="w-5 h-5" />
+                <Heart className="w-7 h-7" fill="currentColor" />
               </button>
-            )}
-
-            {/* Like Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSwipe('right');
-              }}
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-              title="Like"
-            >
-              <Heart className="w-7 h-7" fill="currentColor" />
-            </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Report Dialog */}
       <ReportDialog
