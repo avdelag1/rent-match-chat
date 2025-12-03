@@ -45,7 +45,6 @@ export function OwnerClientTinderCard({
 }: OwnerClientTinderCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
-  const [isButtonMenuOpen, setIsButtonMenuOpen] = useState(false);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -434,90 +433,60 @@ export function OwnerClientTinderCard({
 
       </div>
 
-      {/* Action Buttons - Collapsible Submenu */}
+      {/* Action Buttons - Always Visible */}
       {isTop && (
         <div className="absolute bottom-[16%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
-          <div className="flex flex-col items-center gap-3 pointer-events-auto">
-            {/* Collapsible Action Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              animate={{
-                opacity: isButtonMenuOpen ? 1 : 0,
-                y: isButtonMenuOpen ? 0 : 20,
-                scale: isButtonMenuOpen ? 1 : 0.8
-              }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="flex items-center gap-3"
-              style={{ pointerEvents: isButtonMenuOpen ? 'auto' : 'none' }}
-            >
-              {/* Undo/Return Button */}
-              {onUndo && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUndo();
-                  }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  title="Undo"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
-              )}
-
-              {/* Dislike Button */}
+          <div className="flex items-center gap-3 pointer-events-auto">
+            {/* Undo/Return Button */}
+            {onUndo && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onSwipe('left');
+                  onUndo();
                 }}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Dislike"
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="Undo"
               >
-                <X className="w-7 h-7" strokeWidth={3} />
+                <RotateCcw className="w-5 h-5" />
               </button>
+            )}
 
-              {/* Insights Button */}
-              {onInsights && hasPremium && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onInsights();
-                  }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  title="View Insights"
-                >
-                  <Sparkles className="w-5 h-5" />
-                </button>
-              )}
-
-              {/* Like Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSwipe('right');
-                }}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Like"
-              >
-                <Heart className="w-7 h-7" fill="currentColor" />
-              </button>
-            </motion.div>
-
-            {/* Toggle Button - Always Visible */}
+            {/* Dislike Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setIsButtonMenuOpen(!isButtonMenuOpen);
+                onSwipe('left');
               }}
-              className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 text-white shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center border-2 border-white/20"
-              title={isButtonMenuOpen ? "Close Menu" : "Open Menu"}
+              className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+              title="Dislike"
             >
-              <motion.div
-                animate={{ rotate: isButtonMenuOpen ? 45 : 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              <X className="w-7 h-7" strokeWidth={3} />
+            </button>
+
+            {/* Insights Button */}
+            {onInsights && hasPremium && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onInsights();
+                }}
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="View Insights"
               >
-                <X className="w-6 h-6" strokeWidth={2.5} />
-              </motion.div>
+                <Sparkles className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Like Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onSwipe('right');
+              }}
+              className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+              title="Like"
+            >
+              <Heart className="w-7 h-7" fill="currentColor" />
             </button>
           </div>
         </div>
