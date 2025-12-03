@@ -104,8 +104,9 @@ export function ClientTinderSwipeCard({
     top: 0,
     left: 0,
     right: 0,
+    bottom: 0,
     willChange: 'transform, opacity',
-    borderRadius: '1.5rem', // 24px - ensures rounded corners during animation
+    borderRadius: '1.5rem',
     overflow: 'hidden' as const,
   };
 
