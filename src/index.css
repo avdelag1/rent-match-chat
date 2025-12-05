@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area insets for native app immersive mode */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* Utility classes for safe area */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Hide scrollbar for horizontal scrolling action buttons */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */

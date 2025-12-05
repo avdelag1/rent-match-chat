@@ -112,7 +112,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe pointer-events-none p-4">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none p-4" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }}>
       <div className="flex items-center justify-center gap-6 px-6 py-4 pointer-events-auto bg-background/60 backdrop-blur-lg rounded-3xl border border-white/10 shadow-2xl mx-auto max-w-fit">
         {navItems.map((item) => {
           const Icon = item.icon;
