@@ -463,20 +463,17 @@ export function OwnerClientTinderCard({
               <X className="w-7 h-7" strokeWidth={3} />
             </button>
 
-            {/* Insights Button - Illuminati Eye */}
+            {/* Insights Button */}
             {onInsights && hasPremium && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onInsights();
                 }}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center relative"
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
                 title="View Insights"
               >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 border-2 border-white/60 rotate-0" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} />
-                </div>
-                <Eye className="w-5 h-5 relative z-10" />
+                <Eye className="w-5 h-5" />
               </button>
             )}
 
