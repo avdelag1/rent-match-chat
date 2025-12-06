@@ -435,7 +435,7 @@ export function OwnerClientTinderCard({
 
       {/* Action Buttons - Always Visible */}
       {isTop && (
-        <div className="absolute bottom-[16%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
+        <div className="absolute bottom-[20%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
           <div className="flex items-center gap-3 pointer-events-auto">
             {/* Undo/Return Button */}
             {onUndo && (
