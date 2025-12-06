@@ -14,6 +14,7 @@ import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
+import { motion } from "framer-motion";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -90,13 +91,21 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                   <Suspense fallback={
-                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
-                      <div className="space-y-4 text-center">
-                        <div className="text-white text-2xl font-bold mb-4">TindeRent</div>
-                        <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
-                        <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
-                        <p className="text-white/60 text-sm mt-4">Loading your app...</p>
-                      </div>
+                    <div className="min-h-screen flex items-center justify-center bg-black">
+                      <motion.div
+                        animate={{
+                          y: [0, -20, 0],
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                        className="text-8xl"
+                      >
+                        🔥
+                      </motion.div>
                     </div>
                   }>
                     <Routes>

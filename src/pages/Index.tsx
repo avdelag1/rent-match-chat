@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { logger } from "@/utils/prodLogger";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -122,11 +123,21 @@ const Index = () => {
   // Show loading state ONLY when user is authenticated AND we're fetching their role
   if (user && profileLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
-        <div className="space-y-4 text-center">
-          <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
-          <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <motion.div
+          animate={{
+            y: [0, -20, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="text-8xl"
+        >
+          🔥
+        </motion.div>
       </div>
     );
   }
@@ -142,11 +153,21 @@ const Index = () => {
 
   // Show loading state while navigating to dashboard (user is authenticated and has role)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
-      <div className="space-y-4 text-center">
-        <Skeleton className="h-8 w-48 mx-auto bg-white/10" />
-        <Skeleton className="h-4 w-32 mx-auto bg-white/10" />
-      </div>
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <motion.div
+        animate={{
+          y: [0, -20, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        className="text-8xl"
+      >
+        🔥
+      </motion.div>
     </div>
   );
 };
