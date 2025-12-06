@@ -1,17 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import LegendaryLandingPage from "@/components/LegendaryLandingPage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { logger } from "@/utils/prodLogger";
-import { motion } from "framer-motion";
+import { FlameLoadingScreen } from "@/components/FlameLoadingScreen";
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   // Fetch user role from secure user_roles table
   const { data: userRole, isLoading: profileLoading, refetch, error, isError } = useQuery({
@@ -55,6 +55,18 @@ const Index = () => {
       return () => clearTimeout(timeout);
     }
   }, [user, profileLoading, refetch]);
+
+  // Add timeout to prevent infinite loading - show landing page after 10 seconds
+  useEffect(() => {
+    if (user && (profileLoading || !userRole)) {
+      const timeout = setTimeout(() => {
+        logger.log('[Index] Loading timeout reached, showing fallback...');
+        setLoadingTimeout(true);
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [user, profileLoading, userRole]);
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
@@ -121,23 +133,22 @@ const Index = () => {
   }, [user, userRole, loading, profileLoading, isError, navigate]);
 
   // Show loading state ONLY when user is authenticated AND we're fetching their role
-  if (user && profileLoading) {
+  if (user && profileLoading && !loadingTimeout) {
+    return <FlameLoadingScreen />;
+  }
+
+  // If loading timeout reached, show landing page with error message
+  if (user && loadingTimeout) {
+    logger.error('[Index] Loading timeout - showing landing page with error');
+    toast({
+      title: "Loading Issue",
+      description: "Please try signing in again.",
+      variant: "destructive"
+    });
+    // Show landing page so user can try again
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <motion.div
-          animate={{
-            y: [0, -20, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="text-8xl"
-        >
-          🔥
-        </motion.div>
+      <div className="min-h-screen">
+        <LegendaryLandingPage />
       </div>
     );
   }
@@ -152,24 +163,7 @@ const Index = () => {
   }
 
   // Show loading state while navigating to dashboard (user is authenticated and has role)
-  return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <motion.div
-        animate={{
-          y: [0, -20, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="text-8xl"
-      >
-        🔥
-      </motion.div>
-    </div>
-  );
+  return <FlameLoadingScreen />;
 };
 
 export default Index;

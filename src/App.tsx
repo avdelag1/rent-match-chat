@@ -12,9 +12,8 @@ import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
-import { motion } from "framer-motion";
+import { FlameLoadingScreen } from "@/components/FlameLoadingScreen";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -90,24 +89,7 @@ const App = () => (
                 <TooltipProvider>
                   <Toaster />
                   <Sonner />
-                  <Suspense fallback={
-                    <div className="min-h-screen flex items-center justify-center bg-black">
-                      <motion.div
-                        animate={{
-                          y: [0, -20, 0],
-                          scale: [1, 1.1, 1],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                        className="text-8xl"
-                      >
-                        🔥
-                      </motion.div>
-                    </div>
-                  }>
+                  <Suspense fallback={<FlameLoadingScreen />}>
                     <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
