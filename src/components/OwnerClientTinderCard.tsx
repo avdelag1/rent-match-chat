@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Sparkles } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -258,7 +258,7 @@ export function OwnerClientTinderCard({
           }}
           className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing z-30"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '14%',
+            height: isBottomSheetExpanded ? '75%' : '22%',
             y: 0
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 32 }}
@@ -463,17 +463,20 @@ export function OwnerClientTinderCard({
               <X className="w-7 h-7" strokeWidth={3} />
             </button>
 
-            {/* Insights Button */}
+            {/* Insights Button - Illuminati Eye */}
             {onInsights && hasPremium && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onInsights();
                 }}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center relative"
                 title="View Insights"
               >
-                <Sparkles className="w-5 h-5" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-white/60 rotate-0" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} />
+                </div>
+                <Eye className="w-5 h-5 relative z-10" />
               </button>
             )}
 

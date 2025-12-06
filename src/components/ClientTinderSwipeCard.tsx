@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, CheckCircle, Flag, X, RotateCcw, Sparkles, Heart } from 'lucide-react';
+import { MapPin, CheckCircle, Flag, X, RotateCcw, Eye, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { ReportDialog } from '@/components/ReportDialog';
@@ -257,17 +257,20 @@ export function ClientTinderSwipeCard({
                 <X className="w-7 h-7" strokeWidth={3} />
               </button>
 
-              {/* Insights Button */}
+              {/* Insights Button - Illuminati Eye */}
               {onInsights && hasPremium && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onInsights();
                   }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center relative"
                   title="View Insights"
                 >
-                  <Sparkles className="w-5 h-5" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-white/60 rotate-0" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} />
+                  </div>
+                  <Eye className="w-5 h-5 relative z-10" />
                 </button>
               )}
 
