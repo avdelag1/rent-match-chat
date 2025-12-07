@@ -15,7 +15,10 @@ export function AppLayout({ children }: AppLayoutProps) {
   useErrorReporting();
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full" style={{
+      paddingTop: 'env(safe-area-inset-top, 0px)',
+      paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+    }}>
       <SkipToMainContent />
       <main id="main-content" tabIndex={-1} className="outline-none w-full min-h-screen">
         <div className="w-full min-h-screen overflow-x-hidden">
