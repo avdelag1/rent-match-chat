@@ -735,7 +735,7 @@ export function useSmartClientMatching(
         }
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
-        // Fetch client profiles with pagination
+        // Fetch client profiles with pagination AND subscription data for premium prioritization
         const start = page * pageSize;
         const end = start + pageSize - 1;
         const { data: profiles, error: profileError } = await supabase
@@ -743,7 +743,10 @@ export function useSmartClientMatching(
           .select(
             `
             id, full_name, age, gender, interests, preferred_activities, city, lifestyle_tags, images, avatar_url, verified, budget_min, budget_max, monthly_income, has_pets, smoking, party_friendly,
-            user_roles!inner(role)
+            user_roles!inner(role),
+            user_subscriptions(
+              subscription_packages(tier, visibility_boost, priority_matching)
+            )
           ` as any
           )
           .neq('id', user.user.id)
@@ -772,6 +775,24 @@ export function useSmartClientMatching(
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
           const match = { percentage: 70, reasons: ['Showing all profiles'], incompatible: [] as string[] };
 
+          // Extract client's subscription tier for premium prioritization
+          const subscriptionData = profile.user_subscriptions?.[0]?.subscription_packages;
+          const tier = subscriptionData?.tier || 'free';
+          const visibilityBoost = subscriptionData?.visibility_boost || 0;
+          const priorityMatching = subscriptionData?.priority_matching || false;
+
+          // Apply premium boost to match percentage for premium clients
+          let boostedPercentage = match.percentage;
+          if (priorityMatching && visibilityBoost > 0) {
+            // Premium boost: add up to 20 points based on visibility boost (0.25-1.0 -> 5-20 points)
+            const boostPoints = Math.min(20, visibilityBoost * 20);
+            boostedPercentage = Math.min(100, match.percentage + boostPoints);
+
+            if (boostPoints > 0) {
+              match.reasons.push(`Premium client boost: +${boostPoints}%`);
+            }
+          }
+
           return {
             id: Math.floor(Math.random() * 1000000),
             user_id: profile.id,
@@ -786,17 +807,39 @@ export function useSmartClientMatching(
             preferred_listing_types: ['rent'],
             budget_min: profile.budget_min || 0,
             budget_max: profile.budget_max || 100000,
-            matchPercentage: match.percentage,
+            matchPercentage: boostedPercentage,
             matchReasons: match.reasons,
             incompatibleReasons: match.incompatible,
             city: profile.city || undefined,
             avatar_url: profile.avatar_url || undefined,
-            verified: profile.verified || false
-          };
+            verified: profile.verified || false,
+            _premiumTier: tier, // Store for sorting
+            _visibilityBoost: visibilityBoost
+          } as any;
         });
 
-        // Sort by match score - no client-side limiting
-        const sortedClients = matchedClients.sort((a, b) => b.matchPercentage - a.matchPercentage);
+        // Sort by premium tier first, then match percentage (same as listing matching)
+        const sortedClients = matchedClients.sort((a, b) => {
+          // Premium tiers get priority
+          const tierOrder: Record<string, number> = {
+            unlimited: 1,
+            premium_plus: 2,
+            premium: 3,
+            basic: 4,
+            free: 5
+          };
+
+          const tierA = tierOrder[(a as any)._premiumTier] || 5;
+          const tierB = tierOrder[(b as any)._premiumTier] || 5;
+
+          // If different tiers, prioritize better tier
+          if (tierA !== tierB) {
+            return tierA - tierB;
+          }
+
+          // Same tier: sort by match percentage
+          return b.matchPercentage - a.matchPercentage;
+        });
 
         return sortedClients;
       } catch (error) {
