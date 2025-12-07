@@ -11,6 +11,7 @@ import { User, MapPin, Phone, Mail, Calendar, Flame, Home, Trash2 } from 'lucide
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getStates, getCitiesForState, getNeighborhoodsForCity } from '@/data/mexicanLocations';
 
 export function ClientProfileSettings() {
   const { user } = useAuth();
@@ -21,13 +22,14 @@ export function ClientProfileSettings() {
     full_name: '',
     email: '',
     phone: '',
-    location: '',
+    state: '',
+    city: '',
     age: '',
     bio: '',
     occupation: '',
     budget_min: '',
     budget_max: '',
-    preferred_locations: [] as string[],
+    preferred_cities: [] as string[],
     lifestyle_preferences: [] as string[],
   });
 
@@ -37,10 +39,9 @@ export function ClientProfileSettings() {
     'WiFi Included', 'Utilities Included', 'Furnished', 'Balcony'
   ];
 
-  const locationOptions = [
-    'Tulum Centro', 'Tulum Beach', 'Aldea Zama', 'La Veleta',
-    'Playa del Carmen', 'Cancún', 'Cozumel', 'Bacalar'
-  ];
+  // Get Mexican states and cities for location selection
+  const states = getStates();
+  const cities = profile.state ? getCitiesForState(profile.state) : [];
 
   useEffect(() => {
     if (user?.user_metadata) {
@@ -48,13 +49,14 @@ export function ClientProfileSettings() {
         full_name: user.user_metadata.full_name || '',
         email: user.email || '',
         phone: user.user_metadata.phone || '',
-        location: user.user_metadata.location || '',
+        state: user.user_metadata.state || '',
+        city: user.user_metadata.city || '',
         age: user.user_metadata.age || '',
         bio: user.user_metadata.bio || '',
         occupation: user.user_metadata.occupation || '',
         budget_min: user.user_metadata.budget_min || '',
         budget_max: user.user_metadata.budget_max || '',
-        preferred_locations: user.user_metadata.preferred_locations || [],
+        preferred_cities: user.user_metadata.preferred_cities || [],
         lifestyle_preferences: user.user_metadata.lifestyle_preferences || [],
       });
     }
@@ -117,13 +119,13 @@ export function ClientProfileSettings() {
     }
   };
 
-  const togglePreference = (preference: string, type: 'location' | 'lifestyle') => {
-    if (type === 'location') {
+  const togglePreference = (preference: string, type: 'city' | 'lifestyle') => {
+    if (type === 'city') {
       setProfile(prev => ({
         ...prev,
-        preferred_locations: prev.preferred_locations.includes(preference)
-          ? prev.preferred_locations.filter(p => p !== preference)
-          : [...prev.preferred_locations, preference]
+        preferred_cities: prev.preferred_cities.includes(preference)
+          ? prev.preferred_cities.filter(p => p !== preference)
+          : [...prev.preferred_cities, preference]
       }));
     } else {
       setProfile(prev => ({
@@ -133,6 +135,10 @@ export function ClientProfileSettings() {
           : [...prev.lifestyle_preferences, preference]
       }));
     }
+  };
+
+  const handleStateChange = (state: string) => {
+    setProfile(prev => ({ ...prev, state, city: '' }));
   };
 
   return (
@@ -190,15 +196,39 @@ export function ClientProfileSettings() {
                 className="bg-background border-border text-foreground"
               />
             </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="location" className="text-foreground">Current Location</Label>
-              <Input
-                id="location"
-                value={profile.location}
-                onChange={(e) => setProfile(prev => ({ ...prev, location: e.target.value }))}
-                className="bg-background border-border text-foreground"
-                placeholder="e.g., Tulum, Mexico"
-              />
+            <div>
+              <Label className="text-foreground">State</Label>
+              <Select value={profile.state} onValueChange={handleStateChange}>
+                <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectValue placeholder="Select state" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border max-h-60">
+                  {states.map(s => (
+                    <SelectItem key={s} value={s} className="text-foreground">
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-foreground">City</Label>
+              <Select
+                value={profile.city}
+                onValueChange={(city) => setProfile(prev => ({ ...prev, city }))}
+                disabled={!profile.state}
+              >
+                <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectValue placeholder={profile.state ? "Select city" : "Select state first"} />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border max-h-60">
+                  {cities.map(c => (
+                    <SelectItem key={c} value={c} className="text-foreground">
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-2">
               <Label htmlFor="occupation" className="text-foreground">Occupation</Label>
@@ -266,22 +296,48 @@ export function ClientProfileSettings() {
         <CardHeader>
           <CardTitle className="text-foreground flex items-center gap-2">
             <MapPin className="w-5 h-5" />
-            Preferred Locations
+            Preferred Cities
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {locationOptions.map((location) => (
-              <Badge
-                key={location}
-                variant={profile.preferred_locations.includes(location) ? "default" : "outline"}
-                className="cursor-pointer transition-colors"
-                onClick={() => togglePreference(location, 'location')}
-              >
-                {location}
-              </Badge>
-            ))}
-          </div>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Select cities where you'd like to find properties
+          </p>
+          {profile.preferred_cities.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {profile.preferred_cities.map((city) => (
+                <Badge
+                  key={city}
+                  variant="default"
+                  className="cursor-pointer transition-colors"
+                  onClick={() => togglePreference(city, 'city')}
+                >
+                  {city} x
+                </Badge>
+              ))}
+            </div>
+          )}
+          {cities.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {cities
+                .filter(c => !profile.preferred_cities.includes(c))
+                .map((city) => (
+                  <Badge
+                    key={city}
+                    variant="outline"
+                    className="cursor-pointer transition-colors"
+                    onClick={() => togglePreference(city, 'city')}
+                  >
+                    + {city}
+                  </Badge>
+                ))}
+            </div>
+          )}
+          {!profile.state && (
+            <p className="text-sm text-muted-foreground italic">
+              Select your state above to see available cities
+            </p>
+          )}
         </CardContent>
       </Card>
 
