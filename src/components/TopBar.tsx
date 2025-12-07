@@ -2,7 +2,6 @@ import { Bell, Settings, Flame, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
-import { Capacitor } from '@capacitor/core';
 
 interface TopBarProps {
   onNotificationsClick?: () => void;
@@ -15,13 +14,8 @@ interface TopBarProps {
 export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
 
-  // Add safe area padding for native platforms (iOS/Android)
-  // This prevents content from overlapping with the status bar
-  const isNativePlatform = Capacitor.isNativePlatform();
-  const safeAreaClass = isNativePlatform ? 'pt-safe' : '';
-
   return (
-    <header className={cn('fixed top-0 left-0 right-0 bg-background/50 backdrop-blur-md border-b border-white/10 z-50', safeAreaClass, className)}>
+    <header className={cn('fixed top-0 left-0 right-0 bg-background/50 backdrop-blur-md border-b border-white/10 z-50', className)}>
       <div className="flex items-center justify-between h-10 px-4 max-w-screen-xl mx-auto">
         {/* Logo with Modern Animation */}
         <div className="flex items-center gap-1.5 select-none">

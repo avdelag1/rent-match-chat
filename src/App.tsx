@@ -17,7 +17,6 @@ import { FlameLoadingScreen } from "@/components/FlameLoadingScreen";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
-import TestSwipe from "./pages/TestSwipe";
 
 // Legal pages
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -278,22 +277,13 @@ const App = () => (
                       } 
                     />
 
-                    <Route 
-                      path="/owner/filters" 
+                    <Route
+                      path="/owner/filters-explore"
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerFiltersExplore />
                         </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/filters-explore" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerFiltersExplore />
-                        </ProtectedRoute>
-                      } 
+                      }
                     />
 
                     <Route 
@@ -370,9 +360,6 @@ const App = () => (
 
                     <Route path="/payment/success" element={<PaymentSuccess />} />
                     <Route path="/payment/cancel" element={<PaymentCancel />} />
-
-                    {/* TEST PAGE - No auth required */}
-                    <Route path="/test-swipe" element={<TestSwipe />} />
 
                     {/* Legal Pages - Public Access */}
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
