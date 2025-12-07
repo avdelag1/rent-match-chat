@@ -1,5 +1,5 @@
 import { PageTransition } from '@/components/PageTransition';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +34,17 @@ export function MessagingDashboard() {
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
   const { totalActivations, canSendMessage } = useMessageActivations();
+
+  // Debounced refetch to prevent excessive queries on rapid real-time events
+  const refetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const debouncedRefetch = useCallback(() => {
+    if (refetchTimeoutRef.current) {
+      clearTimeout(refetchTimeoutRef.current);
+    }
+    refetchTimeoutRef.current = setTimeout(() => {
+      refetch();
+    }, 500); // 500ms debounce for smoother real-time updates
+  }, [refetch]);
 
   // Get user role
   useEffect(() => {
@@ -80,8 +91,8 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          // Refetch conversations to get the new one with proper joins
-          refetch();
+          // Debounced refetch for smoother real-time updates
+          debouncedRefetch();
         }
       )
       .on(
@@ -93,16 +104,19 @@ export function MessagingDashboard() {
           filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`
         },
         (payload) => {
-          // Refetch to get updated last_message_at
-          refetch();
+          // Debounced refetch for smoother real-time updates
+          debouncedRefetch();
         }
       )
       .subscribe();
 
     return () => {
+      if (refetchTimeoutRef.current) {
+        clearTimeout(refetchTimeoutRef.current);
+      }
       supabase.removeChannel(conversationsChannel);
     };
-  }, [user?.id]);
+  }, [user?.id, debouncedRefetch]);
 
   // Handle direct conversation opening or auto-start from URL parameters
   useEffect(() => {

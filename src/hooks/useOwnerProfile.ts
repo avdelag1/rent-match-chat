@@ -38,6 +38,8 @@ export function useOwnerProfile() {
   return useQuery({
     queryKey: ['owner-profile-own'],
     queryFn: fetchOwnProfile,
+    staleTime: 5 * 60 * 1000, // 5 minutes - profile data doesn't change often
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
   });
 }
 
