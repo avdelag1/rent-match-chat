@@ -224,15 +224,15 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch already-liked listings (right swipes) to exclude them
-        const { data: likedListings, error: likesError } = await supabase
+        // Fetch ALL swiped listings (both left and right) to exclude them
+        // This prevents cards from reappearing after sign in
+        const { data: swipedListings, error: swipesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id)
-          .eq('direction', 'right');
+          .eq('user_id', user.user.id);
 
         // If likes table has permission issues, just continue without filtering
-        const likedListingIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
+        const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
 
         // Build query with filters and subscription data for premium prioritization
         let query = supabase
@@ -337,9 +337,9 @@ export function useSmartListingMatching(
           });
         }
 
-        // Filter out already-liked listings
+        // Filter out already-swiped listings (both likes and dislikes)
         filteredListings = filteredListings.filter(listing =>
-          !likedListingIds.has(listing.id)
+          !swipedListingIds.has(listing.id)
         );
 
         if (!preferences) {

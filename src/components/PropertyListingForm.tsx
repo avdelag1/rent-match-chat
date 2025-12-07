@@ -11,9 +11,9 @@ interface PropertyFormData {
   description?: string;
   price?: number;
   country?: string;
+  state?: string;
   city?: string;
   neighborhood?: string;
-  address?: string;
   property_type?: string;
   beds?: number;
   baths?: number;
@@ -102,9 +102,11 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
       {/* Location - Using OwnerLocationSelector */}
       <OwnerLocationSelector
         country={initialData.country}
+        state={initialData.state}
         city={initialData.city}
         neighborhood={initialData.neighborhood}
         onCountryChange={(value) => handleChange('country', value)}
+        onStateChange={(value) => handleChange('state', value)}
         onCityChange={(value) => handleChange('city', value)}
         onNeighborhoodChange={(value) => handleChange('neighborhood', value)}
       />
