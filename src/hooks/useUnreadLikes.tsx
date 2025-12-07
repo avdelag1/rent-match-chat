@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useRef, useCallback } from 'react';
 
 export function useUnreadLikes() {
   const { user } = useAuth();
+  const refetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['unread-likes', user?.id],
@@ -64,8 +66,47 @@ export function useUnreadLikes() {
       }
     },
     enabled: !!user?.id,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 30000, // Data fresh for 30 seconds
+    refetchOnWindowFocus: true, // Refetch when user returns to app
   });
+
+  // Debounced refetch for real-time updates
+  const debouncedRefetch = useCallback(() => {
+    if (refetchTimeoutRef.current) {
+      clearTimeout(refetchTimeoutRef.current);
+    }
+    refetchTimeoutRef.current = setTimeout(() => {
+      refetch();
+    }, 500);
+  }, [refetch]);
+
+  // Real-time subscription for instant like updates
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('unread-likes-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'likes',
+        },
+        (payload) => {
+          // Refetch on any new like - the query will filter appropriately
+          debouncedRefetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (refetchTimeoutRef.current) {
+        clearTimeout(refetchTimeoutRef.current);
+      }
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, debouncedRefetch]);
 
   return {
     unreadCount: data?.count || 0,
