@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Capacitor } from '@capacitor/core'
 
 // New Mobile Navigation Components
 import { TopBar } from '@/components/TopBar'
@@ -230,15 +229,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     });
   }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, appliedFilters]);
 
-  // Check if running on native platform for safe area padding
-  const isNativePlatform = Capacitor.isNativePlatform();
-
-  // Add safe area padding for native platforms to avoid status bar overlap
-  // Minimal padding for full-screen card experience
-  const mainPaddingClass = isNativePlatform
-    ? 'pt-[calc(env(safe-area-inset-top,0px)+0rem)] pb-[calc(env(safe-area-inset-bottom,0px)+0rem)]'
-    : 'pt-0 pb-0';
-
   return (
     <div className="min-h-screen flex flex-col w-full bg-background relative">
       <NotificationSystem />
@@ -252,7 +242,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* Main Content - Full screen area for card feed with proper scrolling */}
-      <main className={`fixed top-10 left-0 right-0 bottom-16 ${mainPaddingClass}`}>
+      <main className="fixed top-10 left-0 right-0 bottom-16">
         <div className="w-full h-full">
           {enhancedChildren}
         </div>

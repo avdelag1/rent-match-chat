@@ -2,26 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Safe area insets for native app immersive mode */
-:root {
-  --safe-area-inset-top: env(safe-area-inset-top, 0px);
-  --safe-area-inset-right: env(safe-area-inset-right, 0px);
-  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-area-inset-left: env(safe-area-inset-left, 0px);
-}
-
-/* Utility classes for safe area */
-.pb-safe {
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
-}
-
-.pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-.mb-safe {
-  margin-bottom: env(safe-area-inset-bottom, 0px);
-}
 
 /* Hide scrollbar for horizontal scrolling action buttons */
 .scrollbar-hide {
@@ -784,44 +764,6 @@ body {
     backface-visibility: hidden;
   }
 
-  /* Safe area support for notched devices */
-  .safe-area-pb {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .safe-area-pt {
-    padding-top: env(safe-area-inset-top);
-  }
-
-  /* Combined safe area with additional padding for mobile app UI */
-  .pt-safe {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
-  }
-
-  .pb-safe {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
-  }
-
-  /* Native app specific: Edge-to-edge fullscreen */
-  @supports (padding-top: env(safe-area-inset-top)) {
-    /* True fullscreen experience for native apps */
-    .native-fullscreen {
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-    }
-
-    /* Remove any default padding/margins on native */
-    .native-no-padding {
-      padding: 0;
-      margin: 0;
-    }
-
-    /* Prevent overscroll bounce on iOS */
-    body {
-      overscroll-behavior: none;
-      -webkit-overflow-scrolling: touch;
-    }
-  }
 }
 
 /* ===== GLOBAL SMOOTH SCROLL & PERFORMANCE ===== */
