@@ -46,11 +46,12 @@ export function useMonthlySubscriptionBenefits() {
   const isMonthly = subscription?.subscription_packages?.package_category?.includes('monthly');
 
   // Define message limits per tier
-  const messageLimit = tier === 'unlimited' ? 999
-    : tier === 'premium_plus' ? 20
-    : tier === 'premium' ? 15
-    : tier === 'basic' ? 8
-    : tier === 'pay_per_use' ? 0
+  // Note: These limits should match the subscription_packages table in the database
+  const messageLimit = tier === 'unlimited' ? 30  // Unlimited tier: 30 messages/month
+    : tier === 'premium_plus' ? 20  // Premium Plus tier: 20 messages/month
+    : tier === 'premium' ? 12  // Premium tier: 12 messages/month
+    : tier === 'basic' ? 6  // Basic tier: 6 messages/month
+    : tier === 'pay_per_use' ? 0  // Pay-per-use: no monthly limit
     : 0;
 
   // Define visibility ranking (lower = more visible)
