@@ -76,37 +76,37 @@ export function MessageActivationPackages({
     },
   });
 
-  // PayPal URLs mapping with hosted button IDs
+  // PayPal URLs mapping with NCP payment links
   const getPayPalUrl = (packageCategory: string, activations: number, price: number): string => {
-    // Client packages - INTEGRATED
+    // Client packages
     if (packageCategory === 'client_pay_per_use') {
       // Basic: 3 messages @ 50 MXN
       if (activations === 3 && price === 50) {
-        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VNM2QVBFG6TA4';
+        return 'https://www.paypal.com/ncp/payment/VNM2QVBFG6TA4';
       }
       // Standard: 10 messages @ 99 MXN
       if (activations === 10 && price === 99) {
-        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VG2C7QMAC8N6A';
+        return 'https://www.paypal.com/ncp/payment/VG2C7QMAC8N6A';
       }
       // Premium: 15 messages @ 149 MXN
       if (activations === 15 && price === 149) {
-        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9NBGA9X3BJ5UA';
+        return 'https://www.paypal.com/ncp/payment/9NBGA9X3BJ5UA';
       }
     }
 
-    // Owner packages - INTEGRATED
+    // Owner packages
     if (packageCategory === 'owner_pay_per_use') {
       // Basic: 3 messages @ 35 MXN
       if (activations === 3 && price === 35) {
-        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JDDDXHS82XKCC';
+        return 'https://www.paypal.com/ncp/payment/JDDDXHS82XKCC';
       }
       // Standard: 10 messages @ 85 MXN
       if (activations === 10 && price === 85) {
-        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HHDPG2RK7WVXQ';
+        return 'https://www.paypal.com/ncp/payment/HHDPG2RK7WVXQ';
       }
       // Premium: 15 messages @ 129 MXN
       if (activations === 15 && price === 129) {
-        return 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PELAQDVWVFPBL';
+        return 'https://www.paypal.com/ncp/payment/PELAQDVWVFPBL';
       }
     }
 
