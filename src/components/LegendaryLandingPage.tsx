@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Users, Sparkles } from 'lucide-react';
+import { Flame, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 
 function LegendaryLandingPage() {
@@ -9,9 +9,7 @@ function LegendaryLandingPage() {
     role: 'client'
   });
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [flameClicked, setFlameClicked] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const openAuthDialog = (role: 'client' | 'owner') => {
@@ -48,26 +46,6 @@ function LegendaryLandingPage() {
     }
   }, []);
 
-  const createFlameParticles = useCallback(() => {
-    const newParticles = Array.from({ length: 8 }, (_, i) => ({
-      id: Date.now() + i,
-      x: Math.random() * 100 - 50,
-      y: Math.random() * 100 - 50
-    }));
-    
-    setParticles(newParticles);
-    setFlameClicked(true);
-    
-    setTimeout(() => {
-      setParticles([]);
-      setFlameClicked(false);
-    }, 1500);
-  }, []);
-
-  const handleFlameClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    createFlameParticles();
-  }, [createFlameParticles]);
 
   return (
     <motion.div 
@@ -188,108 +166,130 @@ function LegendaryLandingPage() {
         ))}
       </AnimatePresence>
 
+      {/* SVG Gradient Definitions for Flame R */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <linearGradient id="flameGradientR" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#f97316" />
+            <stop offset="40%" stopColor="#ea580c" />
+            <stop offset="70%" stopColor="#dc2626" />
+            <stop offset="100%" stopColor="#fbbf24" />
+          </linearGradient>
+          <filter id="flameGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-12 max-w-md w-full">
-        
-        {/* Pure Lucide Flame Icon - No Containers */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ 
-            type: "spring", 
-            duration: 0.8, 
-            delay: 0.2,
-            bounce: 0.6 
-          }}
-          className="flex justify-center mb-8 relative cursor-pointer"
-          onClick={handleFlameClick}
-        >
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            animate={flameClicked ? {
-              rotate: [0, 8, -5, 3, -2, 0],
-              scaleY: [1, 1.3, 0.9, 1.1, 1],
-              scaleX: [1, 0.9, 1.1, 0.95, 1],
-              filter: [
-                "brightness(1) saturate(1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))",
-                "brightness(1.5) saturate(1.3) drop-shadow(0 0 25px rgba(251, 146, 60, 0.9))",
-                "brightness(1.2) saturate(1.1) drop-shadow(0 0 20px rgba(251, 146, 60, 0.7))",
-                "brightness(1) saturate(1) drop-shadow(0 0 15px rgba(251, 146, 60, 0.6))"
-              ]
-            } : {
-              y: [0, -3, 0, -2, 0],
-              rotate: [0, 2, -1, 1, 0],
-              scaleY: [1, 1.05, 0.98, 1.02, 1],
-              scaleX: [1, 0.98, 1.02, 0.99, 1],
-              filter: [
-                "drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))",
-                "drop-shadow(0 0 15px rgba(251, 146, 60, 0.7))",
-                "drop-shadow(0 0 10px rgba(251, 146, 60, 0.5))"
-              ]
-            }}
-            transition={flameClicked ? {
-              duration: 1.5,
-              ease: [0.4, 0, 0.2, 1]
-            } : {
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <Flame 
-              className="w-20 h-20 text-transparent"
-              fill="url(#flameGradient)"
-              strokeWidth={0}
-            />
-          </motion.div>
 
-          {/* SVG Gradient Definition */}
-          <svg width="0" height="0" className="absolute">
-            <defs>
-              <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stopColor="#f97316" />
-                <stop offset="50%" stopColor="#ea580c" />
-                <stop offset="100%" stopColor="#dc2626" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          {/* Flame Particles */}
-          <AnimatePresence>
-            {particles.map((particle) => (
-              <motion.div
-                key={particle.id}
-                className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
-                style={{
-                  left: '50%',
-                  top: '50%',
-                  background: `linear-gradient(45deg, #f97316, #dc2626)`
-                }}
-                initial={{ scale: 0, x: 0, y: 0 }}
-                animate={{
-                  scale: [0, 1.5, 0],
-                  x: particle.x,
-                  y: particle.y,
-                  opacity: [1, 0.8, 0],
-                  rotate: [0, 180, 360]
-                }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 2, ease: "easeOut" }}
-              />
-            ))}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Title */}
+        {/* Title with Flame R */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center">
-            TINDE<span className="text-red-500">R</span>ENT
+          <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center flex items-center justify-center">
+            <span>TINDE</span>
+            {/* Animated Flame R */}
+            <motion.span
+              className="relative inline-block mx-0.5"
+              animate={{
+                y: [0, -2, 0, -1, 0],
+                scaleY: [1, 1.03, 0.98, 1.01, 1],
+                scaleX: [1, 0.98, 1.02, 0.99, 1],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              {/* Fire glow behind R */}
+              <motion.span
+                className="absolute inset-0 blur-md"
+                style={{
+                  background: 'linear-gradient(to top, #f97316, #dc2626, #fbbf24)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+                animate={{
+                  opacity: [0.6, 1, 0.7, 0.9, 0.6],
+                  scale: [1, 1.1, 1, 1.05, 1],
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                R
+              </motion.span>
+              
+              {/* Main R with gradient */}
+              <motion.span
+                style={{
+                  background: 'linear-gradient(to top, #f97316 0%, #ea580c 30%, #dc2626 60%, #fbbf24 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  filter: 'drop-shadow(0 0 8px rgba(251, 146, 60, 0.8))',
+                }}
+                animate={{
+                  filter: [
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.6))',
+                    'drop-shadow(0 0 15px rgba(251, 146, 60, 1))',
+                    'drop-shadow(0 0 10px rgba(220, 38, 38, 0.8))',
+                    'drop-shadow(0 0 12px rgba(251, 146, 60, 0.9))',
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.6))',
+                  ]
+                }}
+                transition={{
+                  duration: 1.8,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                R
+              </motion.span>
+
+              {/* Tiny flame particles rising from R */}
+              {[...Array(3)].map((_, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: '4px',
+                    height: '6px',
+                    borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                    background: i === 0 ? '#fbbf24' : i === 1 ? '#f97316' : '#dc2626',
+                    left: `${30 + i * 20}%`,
+                    bottom: '80%',
+                    boxShadow: `0 0 4px ${i === 0 ? '#fbbf24' : i === 1 ? '#f97316' : '#dc2626'}`,
+                  }}
+                  animate={{
+                    y: [-5, -20, -30],
+                    x: [0, (i - 1) * 5, (i - 1) * 8],
+                    opacity: [0.8, 0.5, 0],
+                    scale: [0.8, 0.5, 0.2],
+                  }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    delay: i * 0.4,
+                    ease: "easeOut"
+                  }}
+                />
+              ))}
+            </motion.span>
+            <span>ENT</span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
             Swipe to discover your ideal property or perfect client - rent, buy & connect
