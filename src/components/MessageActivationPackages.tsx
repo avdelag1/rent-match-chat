@@ -178,63 +178,63 @@ export function MessageActivationPackages({
   };
 
   const renderPackages = (packages: MessagePackage[], roleLabel: string) => (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
       {packages.map((pkg) => {
         const Icon = pkg.icon;
         return (
           <Card 
             key={pkg.id}
-            className={`relative transition-all hover:shadow-lg border ${
+            className={`relative transition-all hover:shadow-lg border flex flex-col ${
               pkg.highlight 
                 ? 'border-primary shadow-lg ring-2 ring-primary/30' 
                 : 'border-border hover:border-primary/50'
             }`}
           >
             {pkg.savings && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-md">
+              <div className="absolute -top-2.5 sm:-top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-md whitespace-nowrap">
                 {pkg.savings}
               </div>
             )}
             
-            <CardHeader className="text-center pb-4">
-              <div className="mx-auto mb-3 p-3 rounded-full bg-primary/10 w-fit shadow-sm">
-                <Icon className="w-6 h-6 text-primary" />
+            <CardHeader className="text-center pb-3 sm:pb-4 pt-5 sm:pt-6 px-3 sm:px-4">
+              <div className="mx-auto mb-2 sm:mb-3 p-2 sm:p-3 rounded-full bg-primary/10 w-fit shadow-sm">
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
-              <CardTitle className="text-xl font-bold text-foreground">{pkg.name}</CardTitle>
-              <CardDescription className="text-3xl font-bold text-foreground mt-2">
+              <CardTitle className="text-lg sm:text-xl font-bold text-foreground">{pkg.name}</CardTitle>
+              <CardDescription className="text-2xl sm:text-3xl font-bold text-foreground mt-1.5 sm:mt-2">
                 {formatPriceMXN(pkg.price)}
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-4 pt-0">
-              <div className="text-center py-4 bg-muted/30 rounded-lg">
-                <div className="text-5xl font-bold text-primary">{pkg.activations}</div>
-                <div className="text-sm text-muted-foreground mt-1 font-medium">Message Activations</div>
-                <div className="text-xs text-muted-foreground mt-1">
+            <CardContent className="space-y-3 sm:space-y-4 pt-0 flex-1 flex flex-col px-3 sm:px-4">
+              <div className="text-center py-3 sm:py-4 bg-muted/30 rounded-lg">
+                <div className="text-4xl sm:text-5xl font-bold text-primary">{pkg.activations}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">Message Activations</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                   {formatPriceMXN(pkg.pricePerActivation)} per activation
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm">
-                <div className="flex items-start gap-2">
-                  <MessageCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm flex-1">
+                <div className="flex items-start gap-1.5 sm:gap-2">
+                  <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
                   <span className="text-foreground">Start {pkg.activations} new conversations</span>
                 </div>
-                <div className="flex items-start gap-2">
-                  <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-1.5 sm:gap-2">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
                   <span className="text-foreground">Unlimited messages per conversation</span>
                 </div>
-                <div className="flex items-start gap-2">
-                  <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-1.5 sm:gap-2">
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
                   <span className="text-foreground">{pkg.duration_days || 90}-day validity</span>
                 </div>
               </div>
             </CardContent>
 
-            <CardFooter className="pt-4">
+            <CardFooter className="pt-3 sm:pt-4 px-3 sm:px-4 pb-4">
               <Button 
                 onClick={() => handlePurchase(pkg)}
-                className={`w-full font-semibold ${pkg.highlight ? 'bg-primary hover:bg-primary/90' : ''}`}
+                className={`w-full font-semibold text-xs sm:text-sm py-2 sm:py-2.5 ${pkg.highlight ? 'bg-primary hover:bg-primary/90' : ''}`}
                 variant={pkg.highlight ? "default" : "outline"}
               >
                 Buy Now
@@ -254,26 +254,26 @@ export function MessageActivationPackages({
     : 'Connect with property owners. Each activation lets you start a conversation about a listing.';
 
   const content = (
-    <div className="space-y-8 p-6">
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-bold text-foreground font-brand">Message Activation Packages</h2>
-        <p className="text-muted-foreground text-base max-w-2xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 p-4 sm:p-6">
+      <div className="text-center space-y-2 sm:space-y-3">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground font-brand">Message Activation Packages</h2>
+        <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
           {roleDescription}
         </p>
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">New users get 3 FREE activations!</span>
+        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/10 rounded-lg border border-primary/20">
+          <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+          <span className="text-xs sm:text-sm font-semibold text-foreground">New users get 3 FREE activations!</span>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading packages...</p>
+        <div className="text-center py-8 sm:py-12">
+          <p className="text-muted-foreground text-sm sm:text-base">Loading packages...</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div className="text-center">
-            <Badge variant="outline" className="text-base px-4 py-2 border-primary text-primary">
+            <Badge variant="outline" className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2 border-primary text-primary">
               {roleLabel} Packages
             </Badge>
           </div>
@@ -281,7 +281,7 @@ export function MessageActivationPackages({
         </div>
       )}
 
-      <div className="text-center text-sm text-muted-foreground space-y-1 mt-8">
+      <div className="text-center text-xs sm:text-sm text-muted-foreground space-y-1 mt-6 sm:mt-8">
         <p>✓ Activations never expire within the validity period</p>
         <p>✓ Once a conversation starts, message unlimited within it</p>
         <p>✓ Secure payment processing via PayPal</p>
@@ -297,12 +297,13 @@ export function MessageActivationPackages({
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-      <div className="fixed inset-x-4 top-[10%] bottom-[10%] z-50 overflow-auto">
-        <div className="relative bg-background rounded-lg border shadow-lg">
+      <div className="fixed inset-x-2 sm:inset-x-4 top-[5%] sm:top-[10%] bottom-[5%] sm:bottom-[10%] z-50 overflow-auto">
+        <div className="relative bg-background rounded-lg border shadow-lg max-w-5xl mx-auto">
           {onClose && (
             <Button
               variant="ghost"
-              className="absolute right-4 top-4"
+              size="sm"
+              className="absolute right-2 sm:right-4 top-2 sm:top-4 z-10"
               onClick={onClose}
             >
               ✕

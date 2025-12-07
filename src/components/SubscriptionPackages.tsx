@@ -159,73 +159,73 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 bg-background">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b border-border">
-          <DialogTitle className="text-3xl font-bold text-center text-foreground font-brand">
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 bg-background overflow-hidden">
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b border-border">
+          <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-center text-foreground font-brand">
             Upgrade to Premium
           </DialogTitle>
           {reason && (
-            <p className="text-center text-muted-foreground text-sm mt-2">
+            <p className="text-center text-muted-foreground text-xs sm:text-sm mt-2">
               {reason}
             </p>
           )}
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {plans.map((pkg) => (
-            <Card
-              key={pkg.id}
-              className={`relative overflow-hidden transition-all hover:shadow-lg ${pkg.highlight ? 'ring-2 ring-primary shadow-lg' : 'border-border'}`}
-            >
-              {pkg.highlight && (
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">
-                  POPULAR
-                </div>
-              )}
-
-              <CardHeader className="pb-4">
-                <div className="flex items-start gap-3">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${getPackageColor(pkg.name)} text-white shadow-md`}>
-                    {getPackageIcon(pkg.name)}
+        <ScrollArea className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            {plans.map((pkg) => (
+              <Card
+                key={pkg.id}
+                className={`relative overflow-hidden transition-all hover:shadow-lg flex flex-col ${pkg.highlight ? 'ring-2 ring-primary shadow-lg' : 'border-border'}`}
+              >
+                {pkg.highlight && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-bl-lg">
+                    POPULAR
                   </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-bold text-foreground mb-1">{pkg.name}</CardTitle>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-foreground">{pkg.price}</span>
-                      <span className="text-sm text-muted-foreground">/month</span>
+                )}
+
+                <CardHeader className="pb-3 sm:pb-4 pt-4 sm:pt-5 px-3 sm:px-4">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br ${getPackageColor(pkg.name)} text-white shadow-md shrink-0`}>
+                      {getPackageIcon(pkg.name)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-sm sm:text-base lg:text-lg font-bold text-foreground mb-1 truncate">{pkg.name}</CardTitle>
+                      <div className="flex items-baseline gap-1 flex-wrap">
+                        <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">{pkg.price}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">/month</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent className="pt-0">
-                <div className="space-y-2 mb-6">
-                  {pkg.benefits.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-foreground leading-tight">
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <CardContent className="pt-0 flex-1 flex flex-col px-3 sm:px-4 pb-4">
+                  <div className="space-y-1.5 sm:space-y-2 mb-4 flex-1">
+                    {pkg.benefits.map((feature, index) => (
+                      <div key={index} className="flex items-start gap-1.5 sm:gap-2">
+                        <Check className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-xs sm:text-sm text-foreground leading-tight">
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
 
-                <Button
-                  className={`w-full bg-gradient-to-r ${getPackageColor(pkg.name)} hover:opacity-90 text-white font-semibold`}
-                  onClick={() => handleSubscribe(pkg)}
-                >
-                  Buy Now
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <Button
+                    className={`w-full bg-gradient-to-r ${getPackageColor(pkg.name)} hover:opacity-90 text-white font-semibold text-xs sm:text-sm py-2 sm:py-2.5`}
+                    onClick={() => handleSubscribe(pkg)}
+                  >
+                    Buy Now
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-        <div className="text-center text-sm text-muted-foreground mt-8 space-y-1 pb-4">
-          <p>✓ Cancel anytime · Secure payments powered by PayPal</p>
-          <p>Questions? Contact support at <span className="text-primary">help@tinderent.com</span></p>
-        </div>
+          <div className="text-center text-xs sm:text-sm text-muted-foreground mt-6 sm:mt-8 space-y-1 pb-2 sm:pb-4">
+            <p>✓ Cancel anytime · Secure payments powered by PayPal</p>
+            <p>Questions? Contact support at <span className="text-primary">help@tinderent.com</span></p>
+          </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>
