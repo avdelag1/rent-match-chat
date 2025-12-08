@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Faster animation configs
-const fastSpring = { type: "spring", stiffness: 500, damping: 30, mass: 0.8 };
+const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 const staggerContainer = {
   hidden: { opacity: 0 },
   show: {

@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 // Faster animation configs
-const fastSpring = { type: "spring", stiffness: 500, damping: 30, mass: 0.8 };
+const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
 const OwnerProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
