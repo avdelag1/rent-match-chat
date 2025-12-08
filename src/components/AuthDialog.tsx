@@ -39,13 +39,12 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   // Reset form state when role changes and load remembered credentials
   useEffect(() => {
     if (isOpen) {
-      // Load remembered email and password for this role
+      // Load remembered email for this role (never store passwords!)
       const rememberedEmail = localStorage.getItem(getStorageKey(role, 'email')) || '';
-      const rememberedPassword = localStorage.getItem(getStorageKey(role, 'password')) || '';
-      const hasRemembered = !!(rememberedEmail || rememberedPassword);
+      const hasRemembered = !!rememberedEmail;
 
       setEmail(rememberedEmail);
-      setPassword(rememberedPassword);
+      setPassword('');
       setRememberMe(hasRemembered);
       setName('');
       setIsLogin(true);
@@ -107,14 +106,12 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         const validated = loginSchema.parse({ email, password });
         const { error } = await signIn(validated.email, validated.password, role);
         if (!error) {
-          // Store credentials if remember me is checked
+          // Store only email if remember me is checked (never store passwords!)
           if (rememberMe) {
             localStorage.setItem(getStorageKey(role, 'email'), validated.email);
-            localStorage.setItem(getStorageKey(role, 'password'), validated.password);
           } else {
-            // Clear stored credentials if remember me is unchecked
+            // Clear stored email if remember me is unchecked
             localStorage.removeItem(getStorageKey(role, 'email'));
-            localStorage.removeItem(getStorageKey(role, 'password'));
           }
           onClose();
         } else {
