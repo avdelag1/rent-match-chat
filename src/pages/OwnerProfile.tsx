@@ -1,14 +1,18 @@
 import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { User, Mail, Calendar, MapPin, TrendingUp, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+
+// Faster animation configs
+const fastSpring = { type: "spring", stiffness: 500, damping: 30, mass: 0.8 };
 
 const OwnerProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -19,17 +23,17 @@ const OwnerProfile = () => {
   return (
     <DashboardLayout userRole="owner">
       <motion.div
-        className="w-full h-full overflow-y-auto p-8"
-        initial={{ opacity: 0, y: 20 }}
+        className="w-full h-full overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8"
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={fastSpring}
       >
         <div className="max-w-4xl mx-auto">
-          <motion.div 
+          <motion.div
             className="text-center mb-8"
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
+            transition={{ ...fastSpring, delay: 0.05 }}
           >
             <h1 className="text-3xl font-bold text-foreground mb-4">Owner Profile</h1>
             <p className="text-muted-foreground">Manage your profile and business information.</p>
@@ -38,9 +42,9 @@ const OwnerProfile = () => {
           <div className="grid gap-6">
             {/* Basic Information */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
+              transition={{ ...fastSpring, delay: 0.08 }}
             >
               <Card className="dynamic-card interactive-card bg-card border-border">
                 <CardHeader>
@@ -100,9 +104,9 @@ const OwnerProfile = () => {
 
             {/* Business Stats */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
+              transition={{ ...fastSpring, delay: 0.12 }}
             >
               <Card className="dynamic-card interactive-card bg-card border-border">
                 <CardHeader>
@@ -148,9 +152,9 @@ const OwnerProfile = () => {
 
             {/* Account Status */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
+              transition={{ ...fastSpring, delay: 0.16 }}
             >
               <Card className="dynamic-card interactive-card bg-card border-border">
                 <CardHeader>

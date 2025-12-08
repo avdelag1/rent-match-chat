@@ -12,7 +12,7 @@ import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { RotateCcw, Sparkles, RefreshCw } from 'lucide-react';
+import { RotateCcw, Sparkles, RefreshCw, Home, Search, Filter } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +38,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
-  
+  const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set()); // Track swiped listings
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // Fetch guards to prevent infinite loops
   const isFetchingMore = useRef(false);
   const lastFetchedPage = useRef(-1);
@@ -58,12 +60,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     refetch: refetchRegular
   } = useListings([]);
 
-  // Use accumulated listings - memoized with length checks to prevent unnecessary recalculations
+  // Use accumulated listings - memoized with length checks and filter out swiped items
   const listings = useMemo(() => {
-    if (allListings.length > 0) return allListings;
-    if (smartListings.length > 0) return smartListings;
-    return regularListings;
-  }, [allListings.length, smartListings.length, regularListings.length]);
+    let baseListings = allListings.length > 0 ? allListings :
+                       smartListings.length > 0 ? smartListings : regularListings;
+    // Filter out any listings that have been swiped in this session
+    if (swipedIds.size > 0) {
+      baseListings = baseListings.filter(l => !swipedIds.has(l.id));
+    }
+    return baseListings;
+  }, [allListings, smartListings, regularListings, swipedIds]);
   
   const isLoading = smartLoading || regularLoading;
   const error = smartError;
@@ -112,7 +118,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     setSwipeDirection(direction);
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
-    
+
+    // Immediately add to swiped IDs to prevent re-showing
+    setSwipedIds(prev => new Set(prev).add(currentListing.id));
+
     swipeMutation.mutate({
       targetId: currentListing.id,
       direction,
@@ -126,9 +135,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       action: direction === 'right' ? 'like' : 'pass'
     });
 
-    // Instant state update - exit animation handled by Framer Motion
-    setCurrentIndex(prev => prev + 1);
-    setSwipeDirection(null);
+    // Small delay for animation smoothness, then update index
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+      setSwipeDirection(null);
+    }, 50);
   }, [currentIndex, listings, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
@@ -136,12 +147,30 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   };
 
   const handleRefresh = async () => {
+    setIsRefreshing(true);
+    triggerHaptic('medium');
+
+    // Reset all state for fresh start
     setCurrentIndex(0);
-    await refetch();
-    toast({
-      title: 'Properties Updated',
-      description: 'All listings reloaded.',
-    });
+    setSwipedIds(new Set()); // Clear swiped IDs to show fresh listings
+    setAllListings([]);
+    setPage(0);
+
+    try {
+      await refetch();
+      toast({
+        title: 'Fresh Properties Loaded',
+        description: 'Swipe to find your perfect match!',
+      });
+    } catch (error) {
+      toast({
+        title: 'Refresh Failed',
+        description: 'Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
 
@@ -261,42 +290,104 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (listings.length === 0) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground text-sm">
-            Discover more listings by refreshing
-          </p>
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-full px-6"
+      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Refresh
-          </Button>
-        </div>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <Home className="w-12 h-12 text-primary" />
+            </div>
+          </motion.div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">No Properties Found</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Try adjusting your filters or refresh to discover new listings
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Loading...' : 'Refresh Properties'}
+              </Button>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
     );
   }
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground text-sm">
-            You've seen all available listings
-          </p>
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-full px-6"
+      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Refresh
-          </Button>
-        </div>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Search className="w-12 h-12 text-green-500" />
+              </motion.div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-2"
+          >
+            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              You've seen all available properties. Check back later or refresh for new listings.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col gap-3"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
+              >
+                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Finding Properties...' : 'Discover More'}
+              </Button>
+            </motion.div>
+
+            <p className="text-xs text-muted-foreground">
+              New properties are added daily
+            </p>
+          </motion.div>
+        </motion.div>
       </div>
     );
   }

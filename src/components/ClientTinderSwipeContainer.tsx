@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, AlertCircle } from 'lucide-react';
+import { RotateCcw, AlertCircle, Users, RefreshCw, Search } from 'lucide-react';
 
 interface ClientTinderSwipeContainerProps {
   onClientTap?: (clientId: string) => void;
@@ -45,6 +45,8 @@ export function ClientTinderSwipeContainer({
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [loadingTimeoutExceeded, setLoadingTimeoutExceeded] = useState(false);
   const [includeRecentLikes, setIncludeRecentLikes] = useState(false);
+  const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set()); // Track swiped profiles
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Match celebration state
   const [matchCelebration, setMatchCelebration] = useState<{
@@ -56,7 +58,16 @@ export function ClientTinderSwipeContainer({
   // Fetch profiles with pagination
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching(undefined, page, 10, includeRecentLikes);
 
-  const profiles = externalProfiles || allProfiles;
+  // Filter out swiped profiles
+  const profiles = useMemo(() => {
+    let baseProfiles = externalProfiles || allProfiles;
+    // Filter out any profiles that have been swiped in this session
+    if (swipedIds.size > 0) {
+      baseProfiles = baseProfiles.filter(p => !swipedIds.has(p.user_id));
+    }
+    return baseProfiles;
+  }, [externalProfiles, allProfiles, swipedIds]);
+
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
   const error = externalError !== undefined ? externalError : internalError;
 
@@ -120,10 +131,13 @@ export function ClientTinderSwipeContainer({
     if (!currentProfile) return;
 
     setSwipeDirection(direction);
-    
+
     // Haptic feedback
     if (direction === 'right') triggerHaptic('success');
     else triggerHaptic('light');
+
+    // Immediately add to swiped IDs to prevent re-showing
+    setSwipedIds(prev => new Set(prev).add(currentProfile.user_id));
 
     // Record swipe
     swipeMutation.mutate({
@@ -145,10 +159,12 @@ export function ClientTinderSwipeContainer({
       action: direction === 'left' ? 'pass' : 'like'
     });
 
-    // Move to next card (exit animation handled by Framer Motion)
-    setCurrentIndex(prev => prev + 1);
-    setSwipeDirection(null);
-  }, [currentProfile, swipeMutation, recordSwipe]);
+    // Small delay for animation smoothness, then update index
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+      setSwipeDirection(null);
+    }, 50);
+  }, [currentProfile, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleUndo = useCallback(async () => {
     await undoLastSwipe();
@@ -162,12 +178,24 @@ export function ClientTinderSwipeContainer({
   }, [handleSwipe]);
 
   const handleRefresh = async () => {
+    setIsRefreshing(true);
+    triggerHaptic('medium');
+
+    // Reset all state for fresh start
     setIncludeRecentLikes(true); // Manual refresh should bring back even recently liked profiles
     setCurrentIndex(0);
+    setSwipedIds(new Set()); // Clear swiped IDs to show fresh profiles
     setPage(0);
     setAllProfiles([]);
-    await refetch();
-    toast.success('Refreshed', { description: 'All profiles reloaded' });
+
+    try {
+      await refetch();
+      toast.success('Fresh Profiles Loaded', { description: 'Swipe to find your perfect client!' });
+    } catch (error) {
+      toast.error('Refresh Failed', { description: 'Please try again.' });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleInsights = useCallback(() => {
@@ -277,20 +305,41 @@ export function ClientTinderSwipeContainer({
   if (profiles.length === 0) {
     return (
       <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground text-sm">
-            Discover more profiles by refreshing
-          </p>
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-full px-6"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Refresh
-          </Button>
-        </div>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <Users className="w-12 h-12 text-primary" />
+            </div>
+          </motion.div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">No Clients Found</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Try adjusting your preferences or refresh to discover new clients
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+              </Button>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -299,20 +348,61 @@ export function ClientTinderSwipeContainer({
   if (currentIndex >= profiles.length) {
     return (
       <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground text-sm">
-            You've seen all available profiles
-          </p>
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-full px-6"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Refresh
-          </Button>
-        </div>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Search className="w-12 h-12 text-green-500" />
+              </motion.div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-2"
+          >
+            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              You've seen all available clients. Check back later or refresh for new profiles.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col gap-3"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
+              >
+                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Finding Clients...' : 'Discover More'}
+              </Button>
+            </motion.div>
+
+            <p className="text-xs text-muted-foreground">
+              New clients join daily
+            </p>
+          </motion.div>
+        </motion.div>
       </div>
     );
   }

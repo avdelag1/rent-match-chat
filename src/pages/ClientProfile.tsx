@@ -2,14 +2,29 @@ import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ClientProfileDialog } from "@/components/ClientProfileDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback, Suspense, lazy } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut } from "lucide-react";
+import { LogOut, User, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Faster animation configs
+const fastSpring = { type: "spring", stiffness: 500, damping: 30, mass: 0.8 };
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
+  }
+};
+const staggerItem = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: fastSpring }
+};
 
 const ClientProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -19,36 +34,60 @@ const ClientProfile = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
-  // REMOVED: Auto-open dialog - let users choose when to edit
-
-  const handlePhotoClick = (index: number) => {
+  const handlePhotoClick = useCallback((index: number) => {
     setSelectedPhotoIndex(index);
     setShowPhotoPreview(true);
-  };
+  }, []);
+
+  // Show loading skeleton for faster perceived performance
+  if (isLoading) {
+    return (
+      <DashboardLayout userRole="client">
+        <div className="w-full h-full overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="text-center mb-8">
+              <Skeleton className="h-8 w-48 mx-auto mb-4" />
+              <Skeleton className="h-4 w-64 mx-auto" />
+            </div>
+            <Card className="bg-card border-border">
+              <CardHeader><Skeleton className="h-6 w-40" /></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="aspect-square rounded-lg" />)}
+                </div>
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-48" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout userRole="client">
       <motion.div
         className="w-full h-full overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={fastSpring}
       >
         <div className="max-w-4xl mx-auto">
-          <motion.div 
+          <motion.div
             className="text-center mb-8"
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
+            transition={{ ...fastSpring, delay: 0.05 }}
           >
             <h1 className="text-3xl font-bold text-foreground mb-4">My Profile</h1>
             <p className="text-muted-foreground">Manage your profile information and preferences.</p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
+            transition={{ ...fastSpring, delay: 0.08 }}
           >
             <Card className="dynamic-card interactive-card bg-card border-border">
               <CardHeader>
@@ -152,9 +191,9 @@ const ClientProfile = () => {
 
           {/* Quick Actions */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
+            transition={{ ...fastSpring, delay: 0.12 }}
           >
             <Card className="dynamic-card interactive-card bg-card border-border mt-6">
               <CardHeader>
@@ -181,9 +220,9 @@ const ClientProfile = () => {
       {/* Sticky Mobile Buttons */}
       <motion.div
         className="sm:hidden fixed bottom-16 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent z-40"
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.4 }}
+        transition={{ ...fastSpring, delay: 0.15 }}
       >
         <div className="flex gap-3">
           <Button
