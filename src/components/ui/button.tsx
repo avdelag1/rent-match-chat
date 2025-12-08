@@ -3,7 +3,6 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { useRipple } from "@/hooks/useRipple"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold transition-all duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-95 hover:scale-[1.02] select-none touch-manipulation ripple-container press-feedback will-change-transform",
@@ -42,10 +41,35 @@ export interface ButtonProps
   asChild?: boolean
 }
 
+// Inline ripple effect to avoid hook context issues
+const createRipple = (event: React.MouseEvent<HTMLElement>) => {
+  const button = event.currentTarget;
+  const rect = button.getBoundingClientRect();
+
+  const circle = document.createElement('span');
+  const diameter = Math.max(rect.width, rect.height);
+  const radius = diameter / 2;
+
+  circle.style.width = circle.style.height = `${diameter}px`;
+  circle.style.left = `${event.clientX - rect.left - radius}px`;
+  circle.style.top = `${event.clientY - rect.top - radius}px`;
+  circle.classList.add('ripple');
+
+  const ripple = button.getElementsByClassName('ripple')[0];
+  if (ripple) {
+    ripple.remove();
+  }
+
+  button.appendChild(circle);
+
+  setTimeout(() => {
+    circle.remove();
+  }, 600);
+};
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
-    const createRipple = useRipple()
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       createRipple(e)
