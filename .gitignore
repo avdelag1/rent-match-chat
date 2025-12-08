@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
 # Capacitor
 ios
 android
