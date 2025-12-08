@@ -277,17 +277,20 @@ export function ClientTinderSwipeContainer({
   if (profiles.length === 0) {
     return (
       <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
-        <Card className="w-full max-w-md p-8 text-center">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-2xl font-bold mb-2">No Profiles Found</h3>
-          <p className="text-muted-foreground mb-4">
-            No clients match your preferences right now
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground text-sm">
+            Discover more profiles by refreshing
           </p>
-          <Button onClick={handleRefresh} className="w-full">
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Check for New Profiles
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            className="gap-2 rounded-full px-6"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Refresh
           </Button>
-        </Card>
+        </div>
       </div>
     );
   }
@@ -296,15 +299,20 @@ export function ClientTinderSwipeContainer({
   if (currentIndex >= profiles.length) {
     return (
       <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
-        <Card className="w-full max-w-md p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
-          <p className="text-muted-foreground mb-4">Check back later for new profiles</p>
-          <Button onClick={handleRefresh} className="w-full">
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Check for New Profiles
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground text-sm">
+            You've seen all available profiles
+          </p>
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            className="gap-2 rounded-full px-6"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Refresh
           </Button>
-        </Card>
+        </div>
       </div>
     );
   }

@@ -203,17 +203,18 @@ export function ClientSwipeContainer({
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center bg-white/90 backdrop-blur-sm border-white/40 rounded-xl p-8 shadow-xl max-w-md">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-2xl font-bold text-foreground mb-3">No Clients Found</h3>
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground text-sm">
+            Discover more clients by refreshing
+          </p>
           <Button
             onClick={handleRefresh}
-            variant="default"
-            className="gap-2"
-            size="lg"
+            variant="outline"
+            size="sm"
+            className="gap-2 rounded-full px-6"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </Button>
         </div>
@@ -223,17 +224,18 @@ export function ClientSwipeContainer({
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <div className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-xl p-8">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2">All done!</h3>
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground text-sm">
+            You've seen all available clients
+          </p>
           <Button
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2"
-            size="lg"
+            size="sm"
+            className="gap-2 rounded-full px-6"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </Button>
         </div>
