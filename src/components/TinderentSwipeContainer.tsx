@@ -261,44 +261,42 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (listings.length === 0) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <Card className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20 p-8">
-          <div className="text-6xl mb-4">🏠</div>
-          <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
-          <p className="text-muted-foreground mb-4">
-            Check back later or refresh for new properties.
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground text-sm">
+            Discover more listings by refreshing
           </p>
-          <Button 
+          <Button
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2 w-full"
+            size="sm"
+            className="gap-2 rounded-full px-6"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
             Refresh
           </Button>
-        </Card>
+        </div>
       </div>
     );
   }
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <Card className="text-center bg-gradient-to-br from-success/10 to-success/5 border-success/20 p-8">
-          <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-bold mb-2">You've seen them all!</h3>
-          <p className="text-muted-foreground mb-4">
-            Check back later for new properties.
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground text-sm">
+            You've seen all available listings
           </p>
-          <Button 
+          <Button
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2 w-full"
+            size="sm"
+            className="gap-2 rounded-full px-6"
           >
-            <RotateCcw className="w-4 h-4" />
-            Check for New Listings
+            <RotateCcw className="w-3.5 h-3.5" />
+            Refresh
           </Button>
-        </Card>
+        </div>
       </div>
     );
   }
