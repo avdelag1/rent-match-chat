@@ -305,7 +305,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           <div className="space-y-3">
             <h3 className="text-lg font-medium text-foreground">No Listings Available</h3>
             <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
-              Tap refresh to load new properties and start swiping
+              Refresh to see more listings
             </p>
           </div>
 
@@ -317,7 +317,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
             >
               <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : 'Refresh Listings'}
+              {isRefreshing ? 'Loading...' : 'Refresh to See Listings'}
             </Button>
           </motion.div>
         </motion.div>
@@ -357,7 +357,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           >
             <h3 className="text-lg font-medium text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
-              You've seen all properties. Tap refresh to see more listings.
+              Refresh to see more listings
             </p>
           </motion.div>
 
@@ -374,7 +374,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Loading...' : 'Refresh Listings'}
+                {isRefreshing ? 'Loading...' : 'Refresh to See Listings'}
               </Button>
             </motion.div>
           </motion.div>
