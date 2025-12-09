@@ -245,8 +245,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <main 
         className="fixed left-0 right-0 overflow-hidden"
         style={{ 
-          top: 'calc(44px + max(env(safe-area-inset-top, 0px), 24px))',
-          bottom: 'calc(72px + max(env(safe-area-inset-bottom, 0px), 8px))'
+          top: 'calc(48px + env(safe-area-inset-top, 0px))',
+          bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))'
         }}
       >
         <div className="w-full h-full overflow-hidden">
