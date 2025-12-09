@@ -233,7 +233,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     <div className="min-h-screen flex flex-col w-full bg-background relative">
       <NotificationSystem />
 
-      {/* Top Bar - Fixed with safe area */}
+      {/* Top Bar - Fixed */}
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
@@ -241,20 +241,20 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         showFilters={userRole === 'owner'}
       />
 
-      {/* Main Content - Fills space between TopBar and BottomNav */}
-      <main
-        className="fixed left-0 right-0 overflow-hidden"
-        style={{
-          top: 'calc(48px + max(env(safe-area-inset-top, 0px), 24px))',
-          bottom: 'calc(72px + max(env(safe-area-inset-bottom, 0px), 8px))'
+      {/* Main Content - Full screen area for card feed with safe area handling */}
+      <main 
+        className="fixed left-0 right-0"
+        style={{ 
+          top: 'calc(44px + env(safe-area-inset-top, 0px))',
+          bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))'
         }}
       >
-        <div className="w-full h-full overflow-hidden">
+        <div className="w-full h-full">
           {enhancedChildren}
         </div>
       </main>
 
-      {/* Bottom Navigation - Fixed with safe area */}
+      {/* Bottom Navigation - Fixed */}
       <BottomNavigation
         userRole={userRole}
         onFilterClick={handleFilterClick}

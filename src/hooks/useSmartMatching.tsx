@@ -224,14 +224,27 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Note: We NO LONGER exclude swiped listings here to allow refresh to work
-        // The TinderentSwipeContainer handles session-based exclusion
-        // This allows users to see cards again after pressing refresh
+        // Fetch ALL swiped listings (both left and right) to exclude them
+        // This prevents cards from reappearing after sign in
+        const { data: swipedListings, error: swipesError } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.user.id);
 
-        // Build query with filters - simplified to avoid foreign key issues
+        // If likes table has permission issues, just continue without filtering
+        const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
+
+        // Build query with filters and subscription data for premium prioritization
         let query = supabase
           .from('listings')
-          .select('*')
+          .select(`
+            *,
+            owner:profiles!listings_user_id_fkey(
+              user_subscriptions(
+                subscription_packages(tier, priority_matching, visibility_boost)
+              )
+            )
+          ` as any)
           .eq('status', 'active')
           .eq('is_active', true);
 
@@ -314,8 +327,20 @@ export function useSmartListingMatching(
           });
         }
 
-        // Note: Swipe exclusion is now handled at the component level
-        // This allows refresh to bring back all cards for testing
+        // Premium only filter - check if owner has premium subscription
+        if (filters?.premiumOnly) {
+          filteredListings = filteredListings.filter(listing => {
+            const ownerData = (listing as any).owner;
+            const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
+            const tier = subscriptionData?.tier || 'free';
+            return tier !== 'free' && tier !== 'basic';
+          });
+        }
+
+        // Filter out already-swiped listings (both likes and dislikes)
+        filteredListings = filteredListings.filter(listing =>
+          !swipedListingIds.has(listing.id)
+        );
 
         if (!preferences) {
           return filteredListings.map(listing => ({

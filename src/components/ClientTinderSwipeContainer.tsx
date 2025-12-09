@@ -249,10 +249,18 @@ export function ClientTinderSwipeContainer({
 
   if (shouldShowLoading) {
     return (
-      <div className="relative w-full h-full flex items-center justify-center px-4">
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          <div className="aspect-[9/16] w-full max-h-[70vh] rounded-3xl overflow-hidden bg-card/50">
+          {/* Skeleton placeholder with exact card dimensions */}
+          <div className="aspect-[9/16] w-full rounded-3xl overflow-hidden bg-card/50">
             <Skeleton className="w-full h-full" />
+          </div>
+          {/* Bottom buttons space */}
+          <div className="mt-8 flex items-center justify-center gap-4 h-16 opacity-50">
+            <Skeleton className="h-14 w-14 rounded-full" />
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-16 w-16 rounded-full" />
           </div>
         </div>
       </div>
@@ -262,27 +270,33 @@ export function ClientTinderSwipeContainer({
   // Error state
   if (error && profiles.length === 0) {
     return (
-      <div className="relative w-full h-full flex items-center justify-center px-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-6"
-        >
-          <AlertCircle className="w-16 h-16 mx-auto text-destructive/70" />
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">Something went wrong</h3>
-            <p className="text-muted-foreground text-sm">Couldn't load profiles</p>
-          </div>
-          <Button 
-            onClick={handleRefresh} 
-            disabled={isRefreshing}
-            size="lg"
-            className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 shadow-xl"
-          >
-            <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md p-8 text-center border border-destructive/20 bg-destructive/5">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+          <h3 className="text-xl font-bold mb-2">Something went wrong</h3>
+          <p className="text-muted-foreground mb-4">Couldn't load profiles</p>
+          <Button onClick={handleRefresh} variant="outline" className="gap-2 rounded-full border-primary/40">
+            <RotateCcw className="w-4 h-4" />
+            Reload clients
           </Button>
-        </motion.div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Loading timeout fallback - no data after 5s
+  if (loadingTimeoutExceeded && profiles.length === 0 && !error) {
+    return (
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md p-8 text-center">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-yellow-500" />
+          <h3 className="text-xl font-bold mb-2">Loading Taking Longer Than Expected</h3>
+          <p className="text-muted-foreground mb-4">Please try refreshing or check your connection</p>
+          <Button onClick={handleRefresh} variant="outline">
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </Card>
       </div>
     );
   }
@@ -290,40 +304,41 @@ export function ClientTinderSwipeContainer({
   // Empty state - No profiles matching filters
   if (profiles.length === 0) {
     return (
-      <div className="relative w-full h-full flex items-center justify-center px-6">
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="text-center space-y-8"
+          className="text-center space-y-6 p-8"
         >
           <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center">
-              <Users className="w-10 h-10 text-primary/70" />
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <Users className="w-12 h-12 text-primary" />
             </div>
           </motion.div>
 
-          <div className="space-y-3">
-            <h3 className="text-lg font-medium text-foreground">No Clients Available</h3>
-            <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
-              Refresh to see more clients
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">No Clients Found</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Try adjusting your preferences or refresh to discover new clients
             </p>
           </div>
 
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              size="lg"
-              className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
-            >
-              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : 'Refresh to See Clients'}
-            </Button>
-          </motion.div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     );
@@ -332,24 +347,24 @@ export function ClientTinderSwipeContainer({
   // All cards swiped - End of deck
   if (currentIndex >= profiles.length) {
     return (
-      <div className="relative w-full h-full flex items-center justify-center px-6">
+      <div className="relative w-full min-h-screen flex items-center justify-center px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="text-center space-y-8"
+          className="text-center space-y-6 p-8"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
           >
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/5 rounded-full flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Search className="w-10 h-10 text-green-500/70" />
+                <Search className="w-12 h-12 text-green-500" />
               </motion.div>
             </div>
           </motion.div>
@@ -358,11 +373,11 @@ export function ClientTinderSwipeContainer({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="space-y-3"
+            className="space-y-2"
           >
-            <h3 className="text-lg font-medium text-foreground">All Caught Up!</h3>
-            <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
-              Refresh to see more clients
+            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              You've seen all available clients. Check back later or refresh for new profiles.
             </p>
           </motion.div>
 
@@ -370,18 +385,22 @@ export function ClientTinderSwipeContainer({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="flex flex-col gap-3"
           >
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                size="lg"
-                className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
+                className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Loading...' : 'Refresh to See Clients'}
+                {isRefreshing ? 'Finding Clients...' : 'Discover More'}
               </Button>
             </motion.div>
+
+            <p className="text-xs text-muted-foreground">
+              New clients join daily
+            </p>
           </motion.div>
         </motion.div>
       </div>
@@ -389,22 +408,10 @@ export function ClientTinderSwipeContainer({
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
-      {/* Refresh Button - Always visible in top right corner */}
-      <div className="absolute top-2 right-2 z-50">
-        <Button
-          onClick={handleRefresh}
-          variant="ghost"
-          size="icon"
-          className="rounded-full h-8 w-8 bg-black/20 backdrop-blur-sm hover:bg-black/30 border border-white/10"
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`w-4 h-4 text-white ${isRefreshing ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
-
-      {/* Card Container - Fills available space */}
-      <div className="relative w-full h-full max-w-lg mx-auto overflow-visible px-3">
+    <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden flex flex-col">
+      {/* Full-Screen Card Container - Fills viewport with proper aspect ratio */}
+      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4">
+        <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black">
           <AnimatePresence mode="sync" initial={false}>
             {/* Current card - single card view to avoid double-card visual bug */}
             {currentProfile && (
@@ -448,8 +455,10 @@ export function ClientTinderSwipeContainer({
             )}
           </AnimatePresence>
         </div>
+      </div>
 
-        {/* Insights Modal */}
+ 
+      {/* Insights Modal */}
       {currentProfile && (
         <SwipeInsightsModal
           open={insightsOpen}
