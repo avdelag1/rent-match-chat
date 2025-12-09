@@ -57,7 +57,7 @@ const OwnerProfile = () => {
   return (
     <DashboardLayout userRole="owner">
       <motion.div
-        className="w-full h-full overflow-y-auto p-4 pb-24"
+        className="w-full h-full overflow-y-auto px-5 py-4 pb-24"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
