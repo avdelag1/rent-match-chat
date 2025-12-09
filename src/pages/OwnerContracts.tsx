@@ -40,7 +40,7 @@ const OwnerContracts = () => {
   if (contractsLoading || dealsLoading) {
     return (
       <DashboardLayout userRole="owner">
-        <div className="w-full h-full overflow-y-auto p-8 flex items-center justify-center">
+        <div className="w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 sm:pb-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-gray-600">Loading contracts...</p>
@@ -52,11 +52,11 @@ const OwnerContracts = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto p-8">
+      <div className="w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-4">Contract Management</h1>
-            <p className="text-white/80">Create and manage rental agreements with your clients</p>
+          <div className="text-center mb-4 sm:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-4">Contract Management</h1>
+            <p className="text-sm sm:text-base text-white/80">Create and manage rental agreements with your clients</p>
           </div>
 
           {/* Action Buttons */}
