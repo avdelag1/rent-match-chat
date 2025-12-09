@@ -309,7 +309,7 @@ export function ClientTinderSwipeContainer({
           <div className="space-y-3">
             <h3 className="text-lg font-medium text-foreground">No Clients Available</h3>
             <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
-              Tap refresh to load client profiles and start swiping
+              Refresh to see more clients
             </p>
           </div>
 
@@ -321,7 +321,7 @@ export function ClientTinderSwipeContainer({
               className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
             >
               <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+              {isRefreshing ? 'Loading...' : 'Refresh to See Clients'}
             </Button>
           </motion.div>
         </motion.div>
@@ -362,7 +362,7 @@ export function ClientTinderSwipeContainer({
           >
             <h3 className="text-lg font-medium text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
-              You've seen all clients. Tap refresh to see more profiles.
+              Refresh to see more clients
             </p>
           </motion.div>
 
@@ -379,7 +379,7 @@ export function ClientTinderSwipeContainer({
                 className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+                {isRefreshing ? 'Loading...' : 'Refresh to See Clients'}
               </Button>
             </motion.div>
           </motion.div>
