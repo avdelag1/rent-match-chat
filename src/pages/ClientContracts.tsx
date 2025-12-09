@@ -38,10 +38,10 @@ const ClientContracts = () => {
   if (contractsLoading || dealsLoading) {
     return (
       <DashboardLayout userRole="client">
-        <div className="w-full h-full overflow-y-auto p-8 flex items-center justify-center">
+        <div className="w-full h-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading contracts...</p>
+            <p className="text-muted-foreground text-sm sm:text-base">Loading contracts...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -50,44 +50,45 @@ const ClientContracts = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="w-full h-full overflow-y-auto p-8">
+      <div className="w-full h-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-4">My Contracts</h1>
-            <p className="text-white/80">Manage your rental agreements and contracts</p>
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-4">My Contracts</h1>
+            <p className="text-white/80 text-sm sm:text-base">Manage your rental agreements and contracts</p>
           </div>
 
           {/* Active Deals Section */}
           {activeDeals && activeDeals.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Active Deals</h2>
-              <div className="grid gap-4">
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">Active Deals</h2>
+              <div className="grid gap-3 sm:gap-4">
                 {activeDeals.map((deal) => (
                   <Card key={deal.id} className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="w-full h-full overflow-y-auto p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FileText className="w-6 h-6 text-blue-400" />
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-white">{deal.contract?.title}</h3>
-                            <p className="text-white/70 text-sm">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-white text-sm sm:text-base truncate">{deal.contract?.title}</h3>
+                            <p className="text-white/70 text-xs sm:text-sm">
                               {deal.contract?.contract_type.replace('_', ' ').toUpperCase()}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 ml-12 sm:ml-0">
                           <Badge className={getStatusColor(deal.status)}>
                             {getStatusIcon(deal.status)}
-                            <span className="ml-1">{deal.status.replace('_', ' ')}</span>
+                            <span className="ml-1 text-xs">{deal.status.replace('_', ' ')}</span>
                           </Badge>
                           {deal.status === 'signed_by_owner' && (
-                            <Button 
+                            <Button
                               onClick={() => setSelectedContract(deal.contract_id)}
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm"
+                              size="sm"
                             >
-                              Sign Contract
+                              Sign
                             </Button>
                           )}
                         </div>
@@ -101,50 +102,50 @@ const ClientContracts = () => {
 
           {/* All Contracts Section */}
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">All Contracts</h2>
-            
+            <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">All Contracts</h2>
+
             {!contracts || contracts.length === 0 ? (
               <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                <CardContent className="w-full h-full overflow-y-auto p-8 text-center">
-                  <FileText className="w-12 h-12 text-white/50 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">No Contracts Yet</h3>
-                  <p className="text-white/70">
+                <CardContent className="p-6 sm:p-8 text-center">
+                  <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-white/50 mx-auto mb-4" />
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">No Contracts Yet</h3>
+                  <p className="text-white/70 text-sm sm:text-base">
                     When property owners send you contracts, they will appear here.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-3 sm:gap-4">
                 {contracts.map((contract) => (
                   <Card key={contract.id} className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="w-full h-full overflow-y-auto p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FileText className="w-6 h-6 text-blue-400" />
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-white">{contract.title}</h3>
-                            <p className="text-white/70 text-sm">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-semibold text-white text-sm sm:text-base truncate">{contract.title}</h3>
+                            <p className="text-white/70 text-xs sm:text-sm">
                               {contract.contract_type.replace('_', ' ').toUpperCase()} •
                               Created {formatDistanceToNow(new Date(contract.created_at))} ago
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 ml-12 sm:ml-0">
                           <Badge className={getStatusColor(contract.status)}>
                             {getStatusIcon(contract.status)}
-                            <span className="ml-1">{contract.status.replace('_', ' ')}</span>
+                            <span className="ml-1 text-xs">{contract.status.replace('_', ' ')}</span>
                           </Badge>
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
+                          <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                             View
                           </Button>
                           {contract.status === 'signed_by_owner' && (
-                            <Button 
+                            <Button
                               onClick={() => setSelectedContract(contract.id)}
                               size="sm"
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm"
                             >
                               Sign
                             </Button>
