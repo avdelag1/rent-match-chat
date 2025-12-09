@@ -36,11 +36,7 @@ body {
   min-height: 100dvh; /* Dynamic viewport height for mobile */
   margin: 0;
   padding: 0;
-  /* Account for safe areas on body */
-  padding-top: var(--sat);
-  padding-bottom: var(--sab);
-  padding-left: var(--sal);
-  padding-right: var(--sar);
+  /* DO NOT add safe area padding here - let components handle it */
 }
 
 #root {
