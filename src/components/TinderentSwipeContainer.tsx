@@ -286,41 +286,40 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (listings.length === 0) {
     return (
-      <div className="relative w-full h-full flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="text-center space-y-6 p-8"
+          className="text-center space-y-8"
         >
           <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <Home className="w-12 h-12 text-primary" />
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center">
+              <Home className="w-10 h-10 text-primary/70" />
             </div>
           </motion.div>
 
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No Properties Found</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Try adjusting your filters or refresh to discover new listings
+          <div className="space-y-3">
+            <h3 className="text-lg font-medium text-foreground">No Listings Available</h3>
+            <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
+              Tap refresh to load new properties and start swiping
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Loading...' : 'Refresh Properties'}
-              </Button>
-            </motion.div>
-          </div>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              size="lg"
+              className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
+            >
+              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Loading...' : 'Refresh Listings'}
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     );
@@ -328,24 +327,24 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="relative w-full h-full flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="text-center space-y-6 p-8"
+          className="text-center space-y-8"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
           >
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/5 rounded-full flex items-center justify-center">
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Search className="w-12 h-12 text-green-500" />
+                <Search className="w-10 h-10 text-green-500/70" />
               </motion.div>
             </div>
           </motion.div>
@@ -354,11 +353,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="space-y-2"
+            className="space-y-3"
           >
-            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              You've seen all available properties. Check back later or refresh for new listings.
+            <h3 className="text-lg font-medium text-foreground">All Caught Up!</h3>
+            <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">
+              You've seen all properties. Tap refresh to see more listings.
             </p>
           </motion.div>
 
@@ -366,22 +365,18 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-col gap-3"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
+                size="lg"
+                className="gap-3 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-base font-medium"
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Finding Properties...' : 'Discover More'}
+                {isRefreshing ? 'Loading...' : 'Refresh Listings'}
               </Button>
             </motion.div>
-
-            <p className="text-xs text-muted-foreground">
-              New properties are added daily
-            </p>
           </motion.div>
         </motion.div>
       </div>
