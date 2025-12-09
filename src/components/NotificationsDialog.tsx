@@ -65,74 +65,76 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/5 via-background to-background">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary/10">
-                <Bell className="w-6 h-6 text-primary" />
+      <DialogContent className="max-w-2xl h-[95vh] sm:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b bg-gradient-to-r from-primary/5 via-background to-background">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10 shrink-0">
+                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
-              <div>
-                <DialogTitle className="text-xl font-bold">Notifications</DialogTitle>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0">
+                <DialogTitle className="text-lg sm:text-xl font-bold">Notifications</DialogTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
                 </p>
               </div>
             </div>
             {unreadCount > 0 && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={markAllAsRead}
-                className="gap-2 text-xs"
+                className="gap-1.5 text-[10px] sm:text-xs h-8 px-2 sm:px-3 shrink-0"
               >
-                <CheckCheck className="w-4 h-4" />
-                Mark all read
+                <CheckCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Mark all read</span>
+                <span className="sm:hidden">Read</span>
               </Button>
             )}
           </div>
         </DialogHeader>
 
-        <Tabs value={activeFilter} onValueChange={setActiveFilter} className="flex-1 flex flex-col">
-          <div className="px-6 py-3 border-b bg-muted/30">
-            <TabsList className="grid w-full grid-cols-4 h-9 bg-background/50">
-              <TabsTrigger value="all" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+        <Tabs value={activeFilter} onValueChange={setActiveFilter} className="flex-1 flex flex-col min-h-0">
+          <div className="shrink-0 px-3 sm:px-6 py-2 sm:py-3 border-b bg-muted/30">
+            <TabsList className="grid w-full grid-cols-4 h-8 sm:h-9 bg-background/50">
+              <TabsTrigger value="all" className="text-[10px] sm:text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-1 sm:px-2">
                 All
               </TabsTrigger>
-              <TabsTrigger value="unread" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-                Unread
+              <TabsTrigger value="unread" className="text-[10px] sm:text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-0.5 sm:gap-1 px-1 sm:px-2">
+                <span className="truncate">Unread</span>
                 {unreadCount > 0 && (
-                  <Badge variant="secondary" className="h-4 px-1 text-[10px]">{unreadCount}</Badge>
+                  <Badge variant="secondary" className="h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">{unreadCount}</Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="message" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                Messages
+              <TabsTrigger value="message" className="text-[10px] sm:text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-1 sm:px-2">
+                <span className="hidden sm:inline">Messages</span>
+                <span className="sm:hidden">Msgs</span>
               </TabsTrigger>
-              <TabsTrigger value="like" className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger value="like" className="text-[10px] sm:text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-1 sm:px-2">
                 Likes
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value={activeFilter} className="flex-1 m-0">
-            <ScrollArea className="h-[calc(85vh-220px)]">
-              <div className="p-4">
+          <TabsContent value={activeFilter} className="flex-1 m-0 min-h-0">
+            <ScrollArea className="h-full">
+              <div className="p-3 sm:p-4">
                 {filteredNotifications.length === 0 ? (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center py-12 text-center"
+                    className="flex flex-col items-center justify-center py-8 sm:py-12 text-center"
                   >
-                    <div className="relative mb-4">
+                    <div className="relative mb-3 sm:mb-4">
                       <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl" />
-                      <div className="relative p-5 rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
-                        <Bell className="w-10 h-10 text-primary/40" />
+                      <div className="relative p-4 sm:p-5 rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
+                        <Bell className="w-8 h-8 sm:w-10 sm:h-10 text-primary/40" />
                       </div>
                     </div>
-                    <h3 className="text-base font-semibold text-foreground mb-1">
+                    <h3 className="text-sm sm:text-base font-semibold text-foreground mb-1">
                       {activeFilter === 'all' ? 'No notifications yet' : `No ${activeFilter} notifications`}
                     </h3>
-                    <p className="text-sm text-muted-foreground max-w-xs">
+                    <p className="text-xs sm:text-sm text-muted-foreground max-w-xs px-4">
                       New activity will appear here
                     </p>
                   </motion.div>
@@ -232,13 +234,13 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
         </Tabs>
 
         {notifications.length > 0 && (
-          <div className="px-6 py-4 border-t bg-muted/30">
-            <Button 
-              variant="outline" 
-              className="w-full gap-2"
+          <div className="shrink-0 px-3 sm:px-6 py-3 sm:py-4 border-t bg-muted/30">
+            <Button
+              variant="outline"
+              className="w-full gap-2 h-9 sm:h-10 text-xs sm:text-sm"
               onClick={handleViewAll}
             >
-              <Eye className="w-4 h-4" />
+              <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               View All Notifications
             </Button>
           </div>

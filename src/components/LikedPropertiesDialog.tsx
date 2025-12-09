@@ -99,16 +99,16 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
               backfaceVisibility: 'hidden'
             }}
           >
-            <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-2 border-b">
-          <DialogTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-            <Flame className="w-6 h-6 text-red-500" />
+            <DialogContent className="max-w-4xl h-[95vh] sm:h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-2 sm:pb-3 border-b">
+          <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-center flex items-center justify-center gap-2">
+            <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
             Liked Properties
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="px-6 py-4">
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="px-3 sm:px-6 py-3 sm:py-4">
         {isLoading ? (
           <div className="grid md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
@@ -127,15 +127,15 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
             ))}
           </div>
         ) : likedProperties && likedProperties.length === 0 ? (
-          <div className="text-center py-12">
-            <Flame className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No liked properties yet</h3>
-            <p className="text-muted-foreground">
+          <div className="text-center py-8 sm:py-12 px-4">
+            <Flame className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-xl font-semibold mb-2">No liked properties yet</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Start swiping to find properties you love!
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {likedProperties && likedProperties.map((property) => (
               <Card key={property.id} className="relative group cursor-pointer hover:shadow-lg transition-shadow">
                 <Button

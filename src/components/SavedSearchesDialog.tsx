@@ -244,25 +244,28 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
+      <DialogContent className="sm:max-w-3xl h-[95vh] sm:h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b border-white/10">
+          <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
             Saved Searches & Alerts
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-white/10">
-            <TabsTrigger value="list" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500">
-              My Searches ({savedSearches.length})
-            </TabsTrigger>
-            <TabsTrigger value="create" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500">
-              Create New
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 w-full">
+          <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4">
+            <TabsList className="grid w-full grid-cols-2 bg-white/10 h-9 sm:h-10">
+              <TabsTrigger value="list" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500">
+                <span className="truncate">My Searches ({savedSearches.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="create" className="text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500">
+                Create New
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="list" className="mt-4">
-            <ScrollArea className="h-[500px] pr-4">
+          <TabsContent value="list" className="flex-1 m-0 min-h-0">
+            <ScrollArea className="h-full">
+              <div className="px-4 sm:px-6 py-3 sm:py-4">
               {isFetching ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
@@ -389,11 +392,13 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
                   ))}
                 </div>
               )}
+              </div>
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="create" className="mt-4">
-            <ScrollArea className="h-[500px] pr-4">
+          <TabsContent value="create" className="flex-1 m-0 min-h-0 flex flex-col">
+            <ScrollArea className="flex-1 min-h-0">
+              <div className="px-4 sm:px-6 py-3 sm:py-4">
               <div className="space-y-6">
                 <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                   <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
@@ -526,20 +531,21 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
                   </div>
                 </div>
               </div>
+              </div>
             </ScrollArea>
 
-            <DialogFooter className="mt-6">
+            <div className="shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-t border-white/10 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
               <Button
                 variant="ghost"
                 onClick={() => setActiveTab('list')}
-                className="text-white/70 hover:text-white"
+                className="text-white/70 hover:text-white h-10 text-sm order-2 sm:order-1"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSaveSearch}
                 disabled={isLoading || !searchName.trim() || !!priceError}
-                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 disabled:opacity-50"
+                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 disabled:opacity-50 h-10 text-sm order-1 sm:order-2"
               >
                 {isLoading ? (
                   <>
@@ -553,7 +559,7 @@ export function SavedSearchesDialog({ open, onOpenChange }: SavedSearchesDialogP
                   </>
                 )}
               </Button>
-            </DialogFooter>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
