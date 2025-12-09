@@ -15,7 +15,10 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
   const { unreadCount: notificationCount } = useUnreadNotifications();
 
   return (
-    <header className={cn('fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-white/10 z-50', className)}>
+    <header 
+      className={cn('fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-white/10 z-50', className)}
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+    >
       <div className="flex items-center justify-between h-11 px-4 max-w-screen-xl mx-auto">
         {/* Logo with Modern Animation */}
         <div className="flex items-center gap-1.5 select-none">
