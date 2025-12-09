@@ -94,7 +94,7 @@ export function PageTransition({ children, className = '', variant = 'default' }
       exit="out"
       variants={variantMap[variant]}
       transition={pageTransition}
-      className={`will-change-transform ${className}`}
+      className={`will-change-transform w-full h-full ${className}`}
       style={{
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
