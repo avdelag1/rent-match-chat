@@ -54,6 +54,7 @@ const OwnerYachtClientDiscovery = lazy(() => import("./pages/OwnerYachtClientDis
 const OwnerVehicleClientDiscovery = lazy(() => import("./pages/OwnerVehicleClientDiscovery"));
 const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
 const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -360,6 +361,16 @@ const App = () => (
 
                     <Route path="/payment/success" element={<PaymentSuccess />} />
                     <Route path="/payment/cancel" element={<PaymentCancel />} />
+
+                    {/* Notifications Page - Both Roles */}
+                    <Route 
+                      path="/notifications" 
+                      element={
+                        <ProtectedRoute>
+                          <NotificationsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
 
                     {/* Legal Pages - Public Access */}
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
