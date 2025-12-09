@@ -127,19 +127,19 @@ export function CategorySelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b bg-gradient-to-r from-primary/5 via-background to-background">
+      <DialogContent className="max-w-2xl h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b bg-gradient-to-r from-primary/5 via-background to-background">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/10">
-              <Sparkles className="w-6 h-6 text-primary" />
+            <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle className="text-lg sm:text-xl font-bold">
                 {step === 'category' ? 'Create New Listing' : `${selectedCategory?.name} Listing`}
               </DialogTitle>
-              <DialogDescription className="text-sm">
-                {step === 'category' 
-                  ? 'Select the type of listing you want to create' 
+              <DialogDescription className="text-xs sm:text-sm">
+                {step === 'category'
+                  ? 'Select the type of listing you want to create'
                   : 'Choose how you want to list this item'
                 }
               </DialogDescription>
@@ -147,8 +147,8 @@ export function CategorySelectionDialog({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1">
-          <div className="p-6">
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-4 sm:p-6 pb-6 sm:pb-8">
             <AnimatePresence mode="wait">
               {step === 'category' ? (
                 <motion.div
@@ -156,42 +156,42 @@ export function CategorySelectionDialog({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                  className="grid grid-cols-1 gap-3"
                 >
                   {categories.map((category, index) => (
                     <motion.button
                       key={category.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: index * 0.04 }}
                       onClick={() => handleCategorySelect(category)}
                       className={cn(
-                        "group relative flex items-start gap-4 p-5 rounded-2xl border-2 text-left transition-all duration-300",
-                        "hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5",
+                        "group relative flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300",
+                        "hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]",
                         "bg-gradient-to-br", category.gradient,
                         "border-border/50"
                       )}
                     >
                       {category.popular && (
-                        <Badge className="absolute -top-2 right-3 bg-primary text-primary-foreground text-xs">
+                        <Badge className="absolute -top-2 right-3 bg-primary text-primary-foreground text-[10px] sm:text-xs px-2 py-0.5">
                           Popular
                         </Badge>
                       )}
-                      
-                      <div className={cn("p-3 rounded-xl shrink-0", category.iconColor)}>
+
+                      <div className={cn("p-2.5 sm:p-3 rounded-lg sm:rounded-xl shrink-0", category.iconColor)}>
                         {category.icon}
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-foreground text-base sm:text-lg group-hover:text-primary transition-colors">
                           {category.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground mt-0.5">
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 line-clamp-1">
                           {category.description}
                         </p>
                       </div>
 
-                      <ArrowRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center" />
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center shrink-0" />
                     </motion.button>
                   ))}
                 </motion.div>
@@ -201,57 +201,57 @@ export function CategorySelectionDialog({
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-4"
+                  className="space-y-3 sm:space-y-4"
                 >
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleBack}
-                    className="mb-2 -ml-2 text-muted-foreground hover:text-foreground"
+                    className="mb-1 sm:mb-2 -ml-2 text-muted-foreground hover:text-foreground text-sm"
                   >
                     ← Back to categories
                   </Button>
 
                   {selectedCategory && (
                     <div className={cn(
-                      "flex items-center gap-4 p-4 rounded-xl mb-6",
+                      "flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl mb-4 sm:mb-6",
                       "bg-gradient-to-r", selectedCategory.gradient
                     )}>
-                      <div className={cn("p-3 rounded-xl", selectedCategory.iconColor)}>
+                      <div className={cn("p-2.5 sm:p-3 rounded-lg sm:rounded-xl", selectedCategory.iconColor)}>
                         {selectedCategory.icon}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-foreground">{selectedCategory.name}</h3>
-                        <p className="text-sm text-muted-foreground">{selectedCategory.description}</p>
+                        <h3 className="font-semibold text-foreground text-sm sm:text-base">{selectedCategory.name}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{selectedCategory.description}</p>
                       </div>
                     </div>
                   )}
 
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-muted-foreground">Listing Type</h4>
+                  <div className="space-y-2.5 sm:space-y-3">
+                    <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">Listing Type</h4>
                     {modes.map((mode, index) => (
                       <motion.button
                         key={mode.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ delay: index * 0.08 }}
                         onClick={() => handleModeSelect(mode.id)}
                         className={cn(
-                          "group w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-300",
-                          "hover:border-primary hover:bg-primary/5 hover:shadow-md",
+                          "group w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 text-left transition-all duration-300",
+                          "hover:border-primary hover:bg-primary/5 hover:shadow-md active:scale-[0.98]",
                           "border-border/50 bg-card"
                         )}
                       >
-                        <span className="text-3xl">{mode.emoji}</span>
+                        <span className="text-2xl sm:text-3xl">{mode.emoji}</span>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          <h3 className="font-semibold text-foreground text-sm sm:text-base group-hover:text-primary transition-colors">
                             {mode.label}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             {mode.description}
                           </p>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
                       </motion.button>
                     ))}
                   </div>

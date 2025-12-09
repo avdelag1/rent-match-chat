@@ -1,4 +1,3 @@
-import { PageTransition } from '@/components/PageTransition';
 import { useState, useEffect } from 'react';
 import { PropertyManagement } from "@/components/PropertyManagement";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -18,7 +17,7 @@ const OwnerProperties = () => {
       setInitialCategory(category);
       setInitialMode(mode);
     }
-    
+
     // Check for hash-based navigation (e.g., #add-yacht)
     const hash = location.hash;
     if (hash.startsWith('#add-')) {
@@ -29,11 +28,8 @@ const OwnerProperties = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto p-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Show PropertyManagement component that displays actual properties */}
-          <PropertyManagement initialCategory={initialCategory} initialMode={initialMode} />
-        </div>
+      <div className="w-full h-full overflow-hidden">
+        <PropertyManagement initialCategory={initialCategory} initialMode={initialMode} />
       </div>
     </DashboardLayout>
   );
