@@ -408,10 +408,10 @@ export function ClientTinderSwipeContainer({
   }
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-background overflow-hidden flex flex-col">
+    <div className="relative w-full flex flex-col" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
       {/* Full-Screen Card Container - Fills viewport with proper aspect ratio */}
       <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4">
-        <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black">
+        <div className="relative w-full max-w-[min(100%-24px,560px)] h-full max-h-[calc(100vh-140px)] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black">
           <AnimatePresence mode="sync" initial={false}>
             {/* Current card - single card view to avoid double-card visual bug */}
             {currentProfile && (

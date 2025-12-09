@@ -242,14 +242,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       />
 
       {/* Main Content - Full screen area for card feed */}
-      <main 
-        className="fixed left-0 right-0 overflow-hidden"
-        style={{ 
+      <main
+        className="fixed left-0 right-0"
+        style={{
           top: 'calc(44px + env(safe-area-inset-top, 0px))',
-          bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))'
+          bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))',
+          overflow: 'visible'
         }}
       >
-        <div className="w-full h-full overflow-auto">
+        <div className="w-full h-full flex items-center justify-center px-2">
           {enhancedChildren}
         </div>
       </main>
