@@ -256,10 +256,10 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
 
   if (isLoading) {
     return (
-      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6">
+      <div className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6 pb-24 sm:pb-8">
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="text-white/80 text-sm">Loading your listings...</p>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-white/80 text-xs sm:text-sm">Loading your listings...</p>
         </div>
       </div>
     );
@@ -267,21 +267,21 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
 
   if (error) {
     return (
-      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6">
+      <div className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6 pb-24 sm:pb-8">
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-          <div className="p-4 rounded-full bg-red-500/20">
-            <Home className="w-8 h-8 text-red-400" />
+          <div className="p-3 sm:p-4 rounded-full bg-red-500/20">
+            <Home className="w-6 h-6 sm:w-8 sm:h-8 text-red-400" />
           </div>
-          <h1 className="text-xl font-bold text-white">Error Loading Listings</h1>
-          <p className="text-white/60 text-sm text-center max-w-md">{error.message}</p>
+          <h1 className="text-lg sm:text-xl font-bold text-white">Error Loading Listings</h1>
+          <p className="text-white/60 text-xs sm:text-sm text-center max-w-md px-4">{error.message}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900">
-      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
+    <div className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-900">
+      <div className="p-3 sm:p-6 pb-24 sm:pb-8 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
         {/* Enhanced Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -325,25 +325,31 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
           />
         </motion.div>
 
-        {/* Tabs */}
+        {/* Tabs - Horizontally scrollable on mobile */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full h-auto p-1 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl flex flex-wrap gap-1">
-            {tabItems.map((tab) => (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                className={cn(
-                  "flex-1 min-w-fit flex items-center gap-1.5 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-lg transition-all",
-                  "data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg",
-                  "data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-gray-700/50"
-                )}
-              >
-                <tab.icon className="w-3.5 h-3.5 hidden sm:block" />
-                <span className="truncate">{tab.label}</span>
-                <span className="text-[10px] sm:text-xs opacity-70">({tab.count})</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="relative">
+            <div className="overflow-x-auto scrollbar-hide -mx-3 sm:mx-0 px-3 sm:px-0">
+              <TabsList className="w-max sm:w-full h-auto p-1 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl flex gap-1 min-w-full sm:flex-wrap">
+                {tabItems.map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className={cn(
+                      "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 text-xs sm:text-sm rounded-lg transition-all whitespace-nowrap flex-shrink-0 sm:flex-1 sm:min-w-0",
+                      "data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg",
+                      "data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-gray-700/50"
+                    )}
+                  >
+                    <tab.icon className="w-3.5 h-3.5" />
+                    <span className="truncate">{tab.label}</span>
+                    <span className="text-[10px] sm:text-xs opacity-70">({tab.count})</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            {/* Fade indicators for scroll hint on mobile */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none sm:hidden" />
+          </div>
 
           <TabsContent value={activeTab} className="mt-4 sm:mt-6">
             <AnimatePresence mode="wait">
