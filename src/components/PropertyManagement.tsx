@@ -1,9 +1,8 @@
 import { useState, useEffect, memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -12,17 +11,39 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, Calendar, DollarSign, ShieldCheck, CheckCircle } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { OwnerListingsStats } from '@/components/OwnerListingsStats';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 
 interface PropertyManagementProps {
   initialCategory?: string | null;
   initialMode?: string | null;
 }
+
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'yacht': return <Anchor className="w-3.5 h-3.5" />;
+    case 'motorcycle': return <CircleDot className="w-3.5 h-3.5" />;
+    case 'bicycle': return <Bike className="w-3.5 h-3.5" />;
+    case 'vehicle': return <Car className="w-3.5 h-3.5" />;
+    default: return <Home className="w-3.5 h-3.5" />;
+  }
+};
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case 'yacht': return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30';
+    case 'motorcycle': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+    case 'bicycle': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+    case 'vehicle': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+    default: return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+  }
+};
 
 export const PropertyManagement = memo(({ initialCategory, initialMode }: PropertyManagementProps) => {
   const { user } = useAuth();
@@ -51,7 +72,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
       listing.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       listing.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       listing.neighborhood?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Filter by category
     let matchesCategory = true;
     if (activeTab === 'property') matchesCategory = !listing.category || listing.category === 'property';
@@ -61,7 +82,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     else if (activeTab === 'active') matchesCategory = listing.status === 'active';
     else if (activeTab === 'rented') matchesCategory = listing.status === 'rented';
     else if (activeTab === 'maintenance') matchesCategory = listing.status === 'maintenance';
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -204,51 +225,41 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   };
 
   const getStatusBadge = (status: string) => {
-    const statusColors = {
-      active: 'bg-green-100 text-green-800',
-      available: 'bg-green-100 text-green-800',
-      rented: 'bg-blue-100 text-blue-800',
-      sold: 'bg-purple-100 text-purple-800',
-      maintenance: 'bg-yellow-100 text-yellow-800',
-      pending: 'bg-gray-100 text-gray-800',
-      inactive: 'bg-red-100 text-red-800',
+    const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+      active: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Active' },
+      available: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Available' },
+      rented: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Rented' },
+      sold: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'Sold' },
+      maintenance: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: 'Maintenance' },
+      pending: { bg: 'bg-gray-500/20', text: 'text-gray-400', label: 'Pending' },
+      inactive: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Inactive' },
     };
 
+    const config = statusConfig[status] || statusConfig.pending;
+
     return (
-      <Badge className={statusColors[status as keyof typeof statusColors] || statusColors.pending}>
-        {status?.charAt(0).toUpperCase() + status?.slice(1) || 'Pending'}
+      <Badge className={cn("text-[10px] sm:text-xs font-medium border-0", config.bg, config.text)}>
+        {config.label}
       </Badge>
     );
   };
 
-  const getAvailabilityBadge = (availabilityStatus: string) => {
-    const availabilityColors = {
-      available: 'bg-green-100 text-green-800 border-green-300',
-      rented: 'bg-blue-100 text-blue-800 border-blue-300',
-      sold: 'bg-purple-100 text-purple-800 border-purple-300',
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    };
-
-    const availabilityIcons = {
-      available: '✓',
-      rented: '🏠',
-      sold: '💰',
-      pending: '⏳',
-    };
-
-    return (
-      <Badge variant="outline" className={availabilityColors[availabilityStatus as keyof typeof availabilityColors] || availabilityColors.available}>
-        {availabilityIcons[availabilityStatus as keyof typeof availabilityIcons] || ''}{' '}
-        {availabilityStatus?.charAt(0).toUpperCase() + availabilityStatus?.slice(1) || 'Available'}
-      </Badge>
-    );
-  };
+  const tabItems = [
+    { id: 'all', label: 'All', icon: LayoutGrid, count: listings.length },
+    { id: 'property', label: 'Properties', icon: Home, count: listings.filter(l => !l.category || l.category === 'property').length },
+    { id: 'yacht', label: 'Yachts', icon: Anchor, count: listings.filter(l => l.category === 'yacht').length },
+    { id: 'motorcycle', label: 'Motorcycles', icon: CircleDot, count: listings.filter(l => l.category === 'motorcycle').length },
+    { id: 'bicycle', label: 'Bicycles', icon: Bike, count: listings.filter(l => l.category === 'bicycle').length },
+    { id: 'active', label: 'Active', icon: CheckCircle, count: listings.filter(l => l.status === 'active').length },
+    { id: 'rented', label: 'Rented', icon: Home, count: listings.filter(l => l.status === 'rented').length },
+  ];
 
   if (isLoading) {
     return (
-      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Loading Properties...</h1>
+      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6">
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-white/80 text-sm">Loading your listings...</p>
         </div>
       </div>
     );
@@ -256,10 +267,13 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
 
   if (error) {
     return (
-      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Error Loading Properties</h1>
-          <p className="text-white/80">{error.message}</p>
+      <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6">
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+          <div className="p-4 rounded-full bg-red-500/20">
+            <Home className="w-8 h-8 text-red-400" />
+          </div>
+          <h1 className="text-xl font-bold text-white">Error Loading Listings</h1>
+          <p className="text-white/60 text-sm text-center max-w-md">{error.message}</p>
         </div>
       </div>
     );
@@ -268,250 +282,262 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   return (
     <div className="min-h-screen overflow-y-auto overflow-x-hidden bg-gray-900">
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20 w-full sm:w-auto">
-            <h1 className="text-xl sm:text-3xl font-bold text-white drop-shadow-lg">Property Management</h1>
-            <p className="text-sm sm:text-base text-white/90 drop-shadow-sm">Manage all your rental properties</p>
+        {/* Enhanced Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+        >
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
+              <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">My Listings</h1>
+              <p className="text-xs sm:text-sm text-white/60">Manage and track all your rental properties</p>
+            </div>
           </div>
-          <Button 
-            className="gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold shadow-lg w-full sm:w-auto"
+          <Button
+            className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold shadow-lg shadow-primary/25 w-full sm:w-auto"
             onClick={handleAddProperty}
           >
             <Plus className="w-4 h-4" />
-            <span className="text-sm sm:text-base">Add Listing</span>
+            <span>Add Listing</span>
           </Button>
-        </div>
+        </motion.div>
 
         {/* Statistics Dashboard */}
         <OwnerListingsStats listings={listings} />
 
+        {/* Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="relative"
+        >
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input
+            placeholder="Search by title, location, or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-gray-800/50 border-gray-700/50 text-white placeholder:text-gray-500 focus:border-primary/50 focus:ring-primary/20"
+          />
+        </motion.div>
+
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 bg-white/10 backdrop-blur-sm h-auto">
-            <TabsTrigger 
-              value="all" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">All</span>
-              <span className="sm:hidden">All</span>
-              <span className="ml-1">({listings.length})</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="property" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">Properties</span>
-              <span className="sm:hidden">Prop</span>
-              <span className="ml-1">({listings.filter(l => !l.category || l.category === 'property').length})</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="yacht" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">Yachts</span>
-              <span className="sm:hidden">Yac</span>
-              <span className="ml-1">({listings.filter(l => l.category === 'yacht').length})</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="motorcycle" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">Motorcycles</span>
-              <span className="sm:hidden">Moto</span>
-              <span className="ml-1">({listings.filter(l => l.category === 'motorcycle').length})</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="bicycle" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">Bicycles</span>
-              <span className="sm:hidden">Bike</span>
-              <span className="ml-1">({listings.filter(l => l.category === 'bicycle').length})</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="active" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">Active</span>
-              <span className="sm:hidden">Act</span>
-              <span className="ml-1">({listings.filter(l => l.status === 'active').length})</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="rented" 
-              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-xs sm:text-sm p-2 sm:p-3"
-            >
-              <span className="hidden sm:inline">Rented</span>
-              <span className="sm:hidden">Rent</span>
-              <span className="ml-1">({listings.filter(l => l.status === 'rented').length})</span>
-            </TabsTrigger>
+          <TabsList className="w-full h-auto p-1 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl flex flex-wrap gap-1">
+            {tabItems.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className={cn(
+                  "flex-1 min-w-fit flex items-center gap-1.5 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-lg transition-all",
+                  "data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg",
+                  "data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-gray-700/50"
+                )}
+              >
+                <tab.icon className="w-3.5 h-3.5 hidden sm:block" />
+                <span className="truncate">{tab.label}</span>
+                <span className="text-[10px] sm:text-xs opacity-70">({tab.count})</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <div className="space-y-6">
-            <div className="flex gap-4 mb-4">
-              <div className="flex-1">
-                <Label htmlFor="search" className="text-white font-medium drop-shadow-sm">Search Properties</Label>
-                <Input
-                  id="search"
-                  placeholder="Search by title or location..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                />
-              </div>
-            </div>
-
-            <TabsContent value={activeTab} className="space-y-4 w-full">
+          <TabsContent value={activeTab} className="mt-4 sm:mt-6">
+            <AnimatePresence mode="wait">
               {filteredListings.length > 0 ? (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full">
-                  {filteredListings.map((listing) => (
-                    <Card key={listing.id} className="hover:shadow-lg transition-shadow bg-white/95 backdrop-blur-sm w-full">
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <CardTitle className="text-base sm:text-lg text-gray-900 truncate">
+                <motion.div
+                  key="listings"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                  {filteredListings.map((listing, index) => (
+                    <motion.div
+                      key={listing.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Card className="group overflow-hidden bg-gray-800/50 border-gray-700/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                        {/* Image Section */}
+                        <div className="relative aspect-[16/10] bg-gray-700/50 overflow-hidden">
+                          {listing.images && listing.images.length > 0 ? (
+                            <img
+                              src={listing.images[0]}
+                              alt={listing.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700/50 to-gray-800/50">
+                              <ImageIcon className="w-10 h-10 text-gray-600" />
+                            </div>
+                          )}
+
+                          {/* Overlay badges */}
+                          <div className="absolute top-2 left-2 right-2 flex items-start justify-between">
+                            <Badge className={cn(
+                              "text-[10px] sm:text-xs font-medium border flex items-center gap-1",
+                              getCategoryColor(listing.category || 'property')
+                            )}>
+                              {getCategoryIcon(listing.category || 'property')}
+                              <span className="hidden sm:inline">
+                                {listing.category === 'yacht' ? 'Yacht' :
+                                 listing.category === 'motorcycle' ? 'Moto' :
+                                 listing.category === 'bicycle' ? 'Bike' :
+                                 listing.category === 'vehicle' ? 'Vehicle' :
+                                 'Property'}
+                              </span>
+                            </Badge>
+                            <div className="flex items-center gap-1.5">
+                              {(listing as any).has_verified_documents && (
+                                <div className="p-1 rounded-full bg-blue-500/20 backdrop-blur-sm" title="Verified">
+                                  <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-400" />
+                                </div>
+                              )}
+                              {getStatusBadge(listing.status)}
+                            </div>
+                          </div>
+
+                          {/* Price badge */}
+                          <div className="absolute bottom-2 left-2">
+                            <div className="px-2 py-1 rounded-lg bg-black/70 backdrop-blur-sm">
+                              <span className="text-sm sm:text-base font-bold text-white">
+                                ${listing.price?.toLocaleString() || 'N/A'}
+                              </span>
+                              {listing.mode === 'rent' && (
+                                <span className="text-[10px] sm:text-xs text-gray-300">/mo</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Mode badge */}
+                          <div className="absolute bottom-2 right-2">
+                            <Badge className={cn(
+                              "text-[10px] sm:text-xs font-medium border-0",
+                              listing.mode === 'both' ? 'bg-amber-500/80' :
+                              listing.mode === 'sale' ? 'bg-purple-500/80' :
+                              'bg-blue-500/80',
+                              'text-white'
+                            )}>
+                              {listing.mode === 'both' ? 'Rent/Sale' :
+                               listing.mode === 'sale' ? 'For Sale' :
+                               'For Rent'}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <CardContent className="p-3 sm:p-4 space-y-3">
+                          {/* Title */}
+                          <div>
+                            <h3 className="font-semibold text-white text-sm sm:text-base line-clamp-1 group-hover:text-primary transition-colors">
                               {listing.title}
-                            </CardTitle>
-                            {(listing as any).has_verified_documents && (
-                              (listing as any).category === 'bicycle' ? (
-                                <div title="Verified documents">
-                                  <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                                </div>
-                              ) : (
-                                <div title="Verified documents">
-                                  <ShieldCheck className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                                </div>
-                              )
+                            </h3>
+                            {(listing.address || listing.city) && (
+                              <div className="flex items-center gap-1.5 mt-1 text-gray-400">
+                                <MapPin className="w-3 h-3 shrink-0" />
+                                <span className="text-xs truncate">
+                                  {listing.address || listing.city || listing.neighborhood}
+                                </span>
+                              </div>
                             )}
                           </div>
-                          <div className="flex-shrink-0 flex gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {listing.category === 'yacht' ? '⛵ Yacht' :
-                               listing.category === 'motorcycle' ? '🏍️ Moto' :
-                               listing.category === 'bicycle' ? '🚴 Bike' :
-                               '🏠 Property'}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {listing.mode === 'both' ? '💰🏠 Both' :
-                               listing.mode === 'sale' ? '💰 Sale' :
-                               '🏠 Rent'}
-                            </Badge>
-                            {getStatusBadge(listing.status)}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
-                          <span className="truncate">{listing.address || listing.description}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-sm">
-                          <DollarSign className="w-4 h-4 text-green-500 flex-shrink-0" />
-                          <span className="font-semibold text-gray-900">
-                            ${listing.price?.toLocaleString() || 'N/A'}
-                            {listing.mode === 'rent' ? '/month' : ''}
-                          </span>
-                        </div>
 
-                        {/* Availability Status Toggle */}
-                        <div className="pt-2 pb-2 border-t border-gray-100">
-                          <div className="flex flex-col gap-2">
-                            <Label className="text-xs text-gray-600 font-medium">Availability Status</Label>
+                          {/* Category-specific details */}
+                          <div className="text-xs text-gray-400">
+                            {(!listing.category || listing.category === 'property') && listing.beds && listing.baths && (
+                              <span>
+                                {listing.beds} bed{listing.beds !== 1 ? 's' : ''} • {listing.baths} bath{listing.baths !== 1 ? 's' : ''}
+                                {listing.square_footage && ` • ${listing.square_footage} sq ft`}
+                              </span>
+                            )}
+                            {listing.category === 'yacht' && (
+                              <span>
+                                {listing.length_m && `${listing.length_m}m`}
+                                {listing.berths && ` • ${listing.berths} berths`}
+                                {listing.max_passengers && ` • ${listing.max_passengers} guests`}
+                              </span>
+                            )}
+                            {listing.category === 'motorcycle' && (
+                              <span>
+                                {listing.brand} {listing.model}
+                                {listing.engine_cc && ` • ${listing.engine_cc}cc`}
+                                {listing.year && ` • ${listing.year}`}
+                              </span>
+                            )}
+                            {listing.category === 'bicycle' && (
+                              <span>
+                                {listing.brand} {listing.model}
+                                {listing.electric_assist && ' • Electric'}
+                                {listing.frame_size && ` • ${listing.frame_size}`}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Availability Status */}
+                          <div className="pt-2 border-t border-gray-700/50">
                             <Select
                               value={listing.status || 'available'}
                               onValueChange={(value) => handleToggleAvailability(listing, value)}
                             >
-                              <SelectTrigger className="w-full h-8 text-xs">
+                              <SelectTrigger className="w-full h-8 text-xs bg-gray-700/50 border-gray-600/50 text-white">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="available">✓ Available</SelectItem>
-                                <SelectItem value="rented">🏠 Rented Out</SelectItem>
-                                <SelectItem value="sold">💰 Sold</SelectItem>
-                                <SelectItem value="pending">⏳ Pending</SelectItem>
+                                <SelectItem value="available">Available</SelectItem>
+                                <SelectItem value="rented">Rented Out</SelectItem>
+                                <SelectItem value="sold">Sold</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
                               </SelectContent>
                             </Select>
-                            <div className="flex items-center gap-1">
-                              {getAvailabilityBadge(listing.status || 'available')}
-                            </div>
                           </div>
-                        </div>
 
-                        {/* Category-specific details */}
-                        {listing.category === 'property' && listing.beds && listing.baths && (
-                          <div className="text-sm text-gray-600">
-                            {listing.beds} bed{listing.beds !== 1 ? 's' : ''} • {listing.baths} bath{listing.baths !== 1 ? 's' : ''}
-                            {listing.square_footage && ` • ${listing.square_footage} sq ft`}
-                          </div>
-                        )}
-                        
-                        {listing.category === 'yacht' && (
-                          <div className="text-sm text-gray-600">
-                            {listing.length_m && `${listing.length_m}m`}
-                            {listing.berths && ` • ${listing.berths} berths`}
-                            {listing.max_passengers && ` • ${listing.max_passengers} passengers`}
-                          </div>
-                        )}
-                        
-                        {listing.category === 'motorcycle' && (
-                          <div className="text-sm text-gray-600">
-                            {listing.brand} {listing.model}
-                            {listing.engine_cc && ` • ${listing.engine_cc}cc`}
-                            {listing.year && ` • ${listing.year}`}
-                          </div>
-                        )}
-                        
-                        {listing.category === 'bicycle' && (
-                          <div className="text-sm text-gray-600">
-                            {listing.brand} {listing.model}
-                            {listing.electric_assist && ' • ⚡ Electric'}
-                            {listing.frame_size && ` • ${listing.frame_size}`}
-                          </div>
-                        )}
-
-                        {/* Responsive Action Buttons that fit on screen */}
-                        <div className="pt-3 border-t border-gray-200">
-                          <div className="grid grid-cols-3 gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 font-medium text-xs sm:text-sm p-2"
+                          {/* Action Buttons */}
+                          <div className="grid grid-cols-3 gap-2 pt-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs h-8"
                               onClick={() => handleViewProperty(listing)}
                             >
-                              <Eye className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                              <Eye className="w-3.5 h-3.5 mr-1" />
                               <span className="hidden sm:inline">View</span>
                             </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 font-medium text-xs sm:text-sm p-2"
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs h-8"
                               onClick={() => handleEditProperty(listing)}
                             >
-                              <Edit className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                              <Edit className="w-3.5 h-3.5 mr-1" />
                               <span className="hidden sm:inline">Edit</span>
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200 font-medium text-xs sm:text-sm p-2"
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/30 text-xs h-8"
                                 >
-                                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                                  <Trash2 className="w-3.5 h-3.5 mr-1" />
                                   <span className="hidden sm:inline">Del</span>
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent className="bg-gray-800 border-gray-700">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                                  <AlertDialogDescription>
+                                  <AlertDialogTitle className="text-white">Delete Listing</AlertDialogTitle>
+                                  <AlertDialogDescription className="text-gray-400">
                                     Are you sure you want to delete "{listing.title}"? This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
+                                  <AlertDialogCancel className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
                                     onClick={() => handleDeleteProperty(listing)}
-                                    className="bg-red-600 hover:bg-red-700"
+                                    className="bg-red-600 hover:bg-red-700 text-white"
                                   >
                                     Delete
                                   </AlertDialogAction>
@@ -519,29 +545,53 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                               </AlertDialogContent>
                             </AlertDialog>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               ) : (
-                <Card className="p-8 text-center bg-white/20 backdrop-blur-sm border-white/30">
-                  <Home className="w-12 h-12 mx-auto text-white/80 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2 text-white drop-shadow-sm">
-                    {searchTerm ? 'No Properties Found' : 'No Properties Yet'}
-                  </h3>
-                  <p className="text-white/90 mb-4 drop-shadow-sm">
-                {searchTerm 
-                  ? 'No properties match your search criteria.' 
-                  : activeTab === 'all' 
-                    ? "You haven't added any properties yet."
-                    : `No properties in the ${activeTab} category.`
-                }
-              </p>
-                </Card>
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                >
+                  <Card className="bg-gray-800/30 border-gray-700/30 border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+                      <div className="p-4 rounded-2xl bg-gray-700/30 mb-4">
+                        {searchTerm ? (
+                          <Search className="w-10 h-10 sm:w-12 sm:h-12 text-gray-500" />
+                        ) : (
+                          <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-gray-500" />
+                        )}
+                      </div>
+                      <h3 className="text-base sm:text-lg font-semibold text-white mb-2 text-center">
+                        {searchTerm ? 'No Results Found' : 'No Listings Yet'}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-400 mb-6 text-center max-w-md">
+                        {searchTerm
+                          ? 'Try adjusting your search terms or filters.'
+                          : activeTab === 'all'
+                            ? "Start building your portfolio by adding your first listing."
+                            : `No listings in the ${activeTab} category yet.`
+                        }
+                      </p>
+                      {!searchTerm && (
+                        <Button
+                          className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                          onClick={handleAddProperty}
+                        >
+                          <Plus className="w-4 h-4" />
+                          Add Your First Listing
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
               )}
-            </TabsContent>
-          </div>
+            </AnimatePresence>
+          </TabsContent>
         </Tabs>
 
 
