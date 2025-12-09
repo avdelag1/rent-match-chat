@@ -1,181 +1,205 @@
-import { PageTransition } from '@/components/PageTransition';
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
-import { useState, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
-import { User, Mail, Calendar, MapPin, TrendingUp, LogOut } from "lucide-react";
+import { useOwnerProfile } from "@/hooks/useOwnerProfile";
+import { 
+  User, Mail, Calendar, Building2, Eye, MessageCircle,
+  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-// Faster animation configs
 const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
 const OwnerProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { user, signOut } = useAuth();
   const { data: stats, isLoading: statsLoading } = useOwnerStats();
+  const { data: ownerProfile, isLoading: profileLoading } = useOwnerProfile();
   const navigate = useNavigate();
+
+  const isLoading = statsLoading || profileLoading;
+
+  if (isLoading) {
+    return (
+      <DashboardLayout userRole="owner">
+        <div className="w-full h-full overflow-y-auto p-4 pb-32">
+          <div className="max-w-lg mx-auto space-y-4">
+            <div className="flex items-center gap-4 mb-6">
+              <Skeleton className="w-20 h-20 rounded-full" />
+              <div className="flex-1">
+                <Skeleton className="h-6 w-32 mb-2" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+            </div>
+            <Skeleton className="h-24 rounded-xl" />
+            <Skeleton className="h-32 rounded-xl" />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const menuItems = [
+    { icon: User, label: 'Edit Profile', action: () => setShowEditDialog(true), color: 'text-blue-500' },
+    { icon: Building2, label: 'Manage Listings', action: () => navigate('/owner/properties'), color: 'text-primary' },
+    { icon: Crown, label: 'Subscription', action: () => navigate('/subscription-packages'), color: 'text-amber-500' },
+    { icon: Settings, label: 'Settings', action: () => navigate('/owner/settings'), color: 'text-gray-500' },
+    { icon: Shield, label: 'Security', action: () => navigate('/owner/security'), color: 'text-green-500' },
+    { icon: Bell, label: 'Notifications', action: () => navigate('/notifications'), color: 'text-purple-500' },
+  ];
 
   return (
     <DashboardLayout userRole="owner">
       <motion.div
-        className="w-full h-full overflow-y-auto p-4 sm:p-8 pb-24 sm:pb-8"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={fastSpring}
+        className="w-full h-full overflow-y-auto p-4 pb-32"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-lg mx-auto space-y-4">
+          {/* Profile Header */}
           <motion.div
-            className="text-center mb-8"
+            className="flex items-center gap-4"
             initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={fastSpring}
+          >
+            <div className="relative">
+              <div 
+                className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden cursor-pointer"
+                onClick={() => setShowEditDialog(true)}
+              >
+                {ownerProfile?.profile_images?.[0] ? (
+                  <img 
+                    src={ownerProfile.profile_images[0]} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Building2 className="w-10 h-10 text-primary-foreground" />
+                )}
+              </div>
+              <button
+                onClick={() => setShowEditDialog(true)}
+                className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary rounded-full flex items-center justify-center shadow-lg"
+              >
+                <Camera className="w-4 h-4 text-primary-foreground" />
+              </button>
+            </div>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-foreground">
+                {ownerProfile?.business_name || 'Set up your business'}
+              </h1>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
+          </motion.div>
+
+          {/* Business Stats */}
+          <motion.div
+            className="grid grid-cols-3 gap-3"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...fastSpring, delay: 0.05 }}
           >
-            <h1 className="text-3xl font-bold text-foreground mb-4">Owner Profile</h1>
-            <p className="text-muted-foreground">Manage your profile and business information.</p>
+            <Card className="bg-card border-border">
+              <CardContent className="p-3 text-center">
+                <Building2 className="w-5 h-5 text-primary mx-auto mb-1" />
+                <div className="text-lg font-bold text-foreground">{stats?.activeProperties || 0}</div>
+                <div className="text-xs text-muted-foreground">Listings</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-3 text-center">
+                <Eye className="w-5 h-5 text-blue-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-foreground">{stats?.totalInquiries || 0}</div>
+                <div className="text-xs text-muted-foreground">Views</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-3 text-center">
+                <MessageCircle className="w-5 h-5 text-green-500 mx-auto mb-1" />
+                <div className="text-lg font-bold text-foreground">{stats?.activeMatches || 0}</div>
+                <div className="text-xs text-muted-foreground">Inquiries</div>
+              </CardContent>
+            </Card>
           </motion.div>
 
-          <div className="grid gap-6">
-            {/* Basic Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...fastSpring, delay: 0.08 }}
-            >
-              <Card className="dynamic-card interactive-card bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground flex items-center gap-2">
-                    <User className="w-5 h-5 text-primary" />
-                    Basic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <label className="text-muted-foreground text-sm font-medium">Email</label>
-                        <p className="text-card-foreground">{user?.email || 'Not available'}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <label className="text-muted-foreground text-sm font-medium">Member Since</label>
-                        <p className="text-card-foreground">
-                          {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Not available'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
+          {/* Account Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.1 }}
+          >
+            <Card className="bg-card border-border">
+              <CardContent className="p-4 space-y-3">
+                <h3 className="text-sm font-medium text-muted-foreground">Account Info</h3>
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground text-sm">{user?.email}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground text-sm">
+                    Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                  </span>
+                </div>
+                {ownerProfile?.business_location && (
                   <div className="flex items-center gap-3">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <label className="text-muted-foreground text-sm font-medium">Business Location</label>
-                      <p className="text-muted-foreground">Not set - Click edit to add your business location</p>
-                    </div>
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-foreground text-sm">{ownerProfile.business_location}</span>
                   </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={() => setShowEditDialog(true)}
-                      className="flex-1 group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
-                    >
-                      <span className="group-hover:animate-pulse">Edit Profile</span>
-                    </Button>
-                    <Button
-                      onClick={signOut}
-                      variant="outline"
-                      className="gap-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transform transition-all duration-200 hover:scale-105 active:scale-95"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+          {/* Settings Menu */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.15 }}
+          >
+            <Card className="bg-card border-border overflow-hidden">
+              <CardContent className="p-0">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={item.action}
+                    className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border last:border-b-0"
+                  >
+                    <item.icon className={`w-5 h-5 ${item.color}`} />
+                    <span className="flex-1 text-left text-foreground">{item.label}</span>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+          </motion.div>
 
-            {/* Business Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...fastSpring, delay: 0.12 }}
+          {/* Logout Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.2 }}
+          >
+            <Button
+              onClick={signOut}
+              variant="outline"
+              className="w-full h-12 gap-2 border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
             >
-              <Card className="dynamic-card interactive-card bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    Business Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {statsLoading ? (
-                    <div className="text-center text-muted-foreground">Loading statistics...</div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <motion.div 
-                        className="text-center p-4 rounded-lg hover:bg-muted/50 transition-colors"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <div className="text-2xl font-bold text-primary mb-2">{stats?.activeProperties || 0}</div>
-                        <p className="text-muted-foreground">Active Properties</p>
-                      </motion.div>
-                      <motion.div 
-                        className="text-center p-4 rounded-lg hover:bg-muted/50 transition-colors"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <div className="text-2xl font-bold text-primary mb-2">{stats?.totalInquiries || 0}</div>
-                        <p className="text-muted-foreground">Total Inquiries</p>
-                      </motion.div>
-                      <motion.div 
-                        className="text-center p-4 rounded-lg hover:bg-muted/50 transition-colors"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <div className="text-2xl font-bold text-primary mb-2">{stats?.activeMatches || 0}</div>
-                        <p className="text-muted-foreground">Active Conversations</p>
-                      </motion.div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
+              <LogOut className="w-5 h-5" />
+              Sign Out
+            </Button>
+          </motion.div>
 
-            {/* Account Status */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...fastSpring, delay: 0.16 }}
-            >
-              <Card className="dynamic-card interactive-card bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-card-foreground">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Button 
-                      className="w-full group bg-primary hover:bg-primary/90 transform transition-all duration-200 hover:scale-105 active:scale-95"
-                      onClick={() => navigate('/owner/settings?tab=subscription')}
-                    >
-                      <span className="group-hover:animate-pulse">View Subscription Options</span>
-                    </Button>
-                    <p className="text-xs text-center text-muted-foreground">
-                      Manage premium packages and messaging activations in Settings
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+          {/* Bottom spacing for navigation */}
+          <div className="h-8" />
         </div>
       </motion.div>
 
