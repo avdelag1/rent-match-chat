@@ -224,15 +224,9 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch ALL swiped listings (both left and right) to exclude them
-        // This prevents cards from reappearing after sign in
-        const { data: swipedListings, error: swipesError } = await supabase
-          .from('likes')
-          .select('target_id')
-          .eq('user_id', user.user.id);
-
-        // If likes table has permission issues, just continue without filtering
-        const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
+        // Note: We NO LONGER exclude swiped listings here to allow refresh to work
+        // The TinderentSwipeContainer handles session-based exclusion
+        // This allows users to see cards again after pressing refresh
 
         // Build query with filters - simplified to avoid foreign key issues
         let query = supabase
@@ -320,20 +314,8 @@ export function useSmartListingMatching(
           });
         }
 
-        // Premium only filter - check if owner has premium subscription
-        if (filters?.premiumOnly) {
-          filteredListings = filteredListings.filter(listing => {
-            const ownerData = (listing as any).owner;
-            const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
-            const tier = subscriptionData?.tier || 'free';
-            return tier !== 'free' && tier !== 'basic';
-          });
-        }
-
-        // Filter out already-swiped listings (both likes and dislikes)
-        filteredListings = filteredListings.filter(listing =>
-          !swipedListingIds.has(listing.id)
-        );
+        // Note: Swipe exclusion is now handled at the component level
+        // This allows refresh to bring back all cards for testing
 
         if (!preferences) {
           return filteredListings.map(listing => ({
