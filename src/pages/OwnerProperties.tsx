@@ -28,7 +28,7 @@ const OwnerProperties = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-hidden">
+      <div className="w-full h-full overflow-y-auto overflow-x-hidden">
         <PropertyManagement initialCategory={initialCategory} initialMode={initialMode} />
       </div>
     </DashboardLayout>

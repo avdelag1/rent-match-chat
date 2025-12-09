@@ -1,14 +1,13 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Sparkles, Zap } from "lucide-react";
+import { MessageCircle, Sparkles, Zap, Clock, Shield, Check, Crown, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { formatPriceMXN } from "@/utils/subscriptionPricing";
-import { useSubscriptionPackages } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 
 type MessagePackage = {
   id: number;
@@ -17,11 +16,13 @@ type MessagePackage = {
   price: number;
   pricePerActivation: number;
   savings?: string;
-  highlight?: boolean;
+  tier: 'starter' | 'standard' | 'premium';
   icon: typeof MessageCircle;
-  duration_days?: number;
+  duration_days: number;
   package_category: string;
-  paypalUrl?: string;
+  paypalUrl: string;
+  features: string[];
+  legal_documents: number;
 };
 
 interface MessageActivationPackagesProps {
@@ -38,7 +39,6 @@ export function MessageActivationPackages({
   userRole
 }: MessageActivationPackagesProps) {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const { user } = useAuth();
 
   // Fetch user's role from profile if not provided
@@ -58,8 +58,6 @@ export function MessageActivationPackages({
   });
 
   const currentUserRole = userRole || userProfile?.role || 'client';
-
-  // Fetch ONLY packages for current user role
   const packageCategory = currentUserRole === 'owner' ? 'owner_pay_per_use' : 'client_pay_per_use';
   
   const { data: packages, isLoading } = useQuery({
@@ -76,54 +74,18 @@ export function MessageActivationPackages({
     },
   });
 
-  // PayPal URLs mapping with NCP payment links
-  const getPayPalUrl = (packageCategory: string, activations: number, price: number): string => {
-    // Client packages
-    if (packageCategory === 'client_pay_per_use') {
-      // Basic: 3 messages @ 50 MXN
-      if (activations === 3 && price === 50) {
-        return 'https://www.paypal.com/ncp/payment/VNM2QVBFG6TA4';
-      }
-      // Standard: 10 messages @ 99 MXN
-      if (activations === 10 && price === 99) {
-        return 'https://www.paypal.com/ncp/payment/VG2C7QMAC8N6A';
-      }
-      // Premium: 15 messages @ 149 MXN
-      if (activations === 15 && price === 149) {
-        return 'https://www.paypal.com/ncp/payment/9NBGA9X3BJ5UA';
-      }
-    }
-
-    // Owner packages
-    if (packageCategory === 'owner_pay_per_use') {
-      // Basic: 3 messages @ 35 MXN
-      if (activations === 3 && price === 35) {
-        return 'https://www.paypal.com/ncp/payment/JDDDXHS82XKCC';
-      }
-      // Standard: 10 messages @ 85 MXN
-      if (activations === 10 && price === 85) {
-        return 'https://www.paypal.com/ncp/payment/HHDPG2RK7WVXQ';
-      }
-      // Premium: 15 messages @ 129 MXN
-      if (activations === 15 && price === 129) {
-        return 'https://www.paypal.com/ncp/payment/PELAQDVWVFPBL';
-      }
-    }
-
-    return ''; // Return empty if no match
-  };
-
   // Convert database packages to UI format
   const convertPackages = (dbPackages: any[] | undefined): MessagePackage[] => {
-    if (!dbPackages) return [];
+    if (!dbPackages || dbPackages.length === 0) return [];
 
     return dbPackages.map((pkg, index) => {
       const pricePerActivation = pkg.message_activations > 0
         ? pkg.price / pkg.message_activations
         : 0;
 
-      // Highlight the middle option (usually best value)
-      const highlight = dbPackages.length === 3 && index === 1;
+      // Determine tier based on position
+      const tierMap: ('starter' | 'standard' | 'premium')[] = ['starter', 'standard', 'premium'];
+      const tier = tierMap[index] || 'starter';
 
       // Calculate savings vs first package
       let savings: string | undefined;
@@ -131,22 +93,42 @@ export function MessageActivationPackages({
         const firstPricePerActivation = dbPackages[0].price / dbPackages[0].message_activations;
         const savingsPercent = Math.round(((firstPricePerActivation - pricePerActivation) / firstPricePerActivation) * 100);
         if (savingsPercent > 0) {
-          savings = `${savingsPercent}% OFF`;
+          savings = `Save ${savingsPercent}%`;
         }
       }
 
+      // Parse features from database or use defaults
+      let features: string[] = [];
+      try {
+        features = Array.isArray(pkg.features) ? pkg.features : JSON.parse(pkg.features || '[]');
+      } catch {
+        features = [
+          `${pkg.message_activations} message activations`,
+          `${pkg.duration_days || 30} days validity`,
+          'Unlimited messages per conversation',
+        ];
+      }
+
+      const iconMap = {
+        starter: MessageCircle,
+        standard: Zap,
+        premium: Crown,
+      };
+
       return {
         id: pkg.id,
-        name: pkg.name,
+        name: tier.charAt(0).toUpperCase() + tier.slice(1),
         activations: pkg.message_activations,
         price: pkg.price,
         pricePerActivation,
         savings,
-        highlight,
-        icon: highlight ? Zap : (index === 0 ? MessageCircle : Sparkles),
-        duration_days: pkg.duration_days,
+        tier,
+        icon: iconMap[tier],
+        duration_days: pkg.duration_days || 30,
         package_category: pkg.package_category,
-        paypalUrl: getPayPalUrl(pkg.package_category, pkg.message_activations, pkg.price),
+        paypalUrl: pkg.paypal_link || '',
+        features,
+        legal_documents: pkg.legal_documents_included || 0,
       };
     });
   };
@@ -160,132 +142,239 @@ export function MessageActivationPackages({
       package_category: pkg.package_category,
     }));
 
-    // Open PayPal in new tab
-    if (pkg.paypalUrl && pkg.paypalUrl !== '') {
+    if (pkg.paypalUrl) {
       window.open(pkg.paypalUrl, '_blank');
-
       toast({
         title: "Redirecting to PayPal",
-        description: `Selected: ${pkg.name} (${formatPriceMXN(pkg.price)})`,
+        description: `Processing ${pkg.name} package (${formatPriceMXN(pkg.price)})`,
       });
     } else {
       toast({
-        title: "PayPal link not configured",
+        title: "Payment link unavailable",
         description: "Please contact support to complete this purchase.",
         variant: "destructive",
       });
     }
   };
 
-  const renderPackages = (packages: MessagePackage[], roleLabel: string) => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-      {packages.map((pkg) => {
-        const Icon = pkg.icon;
-        return (
-          <Card 
-            key={pkg.id}
-            className={`relative transition-all hover:shadow-lg border flex flex-col ${
-              pkg.highlight 
-                ? 'border-primary shadow-lg ring-2 ring-primary/30' 
-                : 'border-border hover:border-primary/50'
-            }`}
-          >
-            {pkg.savings && (
-              <div className="absolute -top-2.5 sm:-top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-md whitespace-nowrap">
-                {pkg.savings}
-              </div>
-            )}
-            
-            <CardHeader className="text-center pb-3 sm:pb-4 pt-5 sm:pt-6 px-3 sm:px-4">
-              <div className="mx-auto mb-2 sm:mb-3 p-2 sm:p-3 rounded-full bg-primary/10 w-fit shadow-sm">
-                <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-              </div>
-              <CardTitle className="text-lg sm:text-xl font-bold text-foreground">{pkg.name}</CardTitle>
-              <CardDescription className="text-2xl sm:text-3xl font-bold text-foreground mt-1.5 sm:mt-2">
-                {formatPriceMXN(pkg.price)}
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-3 sm:space-y-4 pt-0 flex-1 flex flex-col px-3 sm:px-4">
-              <div className="text-center py-3 sm:py-4 bg-muted/30 rounded-lg">
-                <div className="text-4xl sm:text-5xl font-bold text-primary">{pkg.activations}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">Message Activations</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                  {formatPriceMXN(pkg.pricePerActivation)} per activation
-                </div>
-              </div>
-
-              <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm flex-1">
-                <div className="flex items-start gap-1.5 sm:gap-2">
-                  <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-foreground">Start {pkg.activations} new conversations</span>
-                </div>
-                <div className="flex items-start gap-1.5 sm:gap-2">
-                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-foreground">Unlimited messages per conversation</span>
-                </div>
-                <div className="flex items-start gap-1.5 sm:gap-2">
-                  <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-foreground">{pkg.duration_days || 90}-day validity</span>
-                </div>
-              </div>
-            </CardContent>
-
-            <CardFooter className="pt-3 sm:pt-4 px-3 sm:px-4 pb-4">
-              <Button 
-                onClick={() => handlePurchase(pkg)}
-                className={`w-full font-semibold text-xs sm:text-sm py-2 sm:py-2.5 ${pkg.highlight ? 'bg-primary hover:bg-primary/90' : ''}`}
-                variant={pkg.highlight ? "default" : "outline"}
-              >
-                Buy Now
-              </Button>
-            </CardFooter>
-          </Card>
-        );
-      })}
-    </div>
-  );
-
   const packagesUI = convertPackages(packages);
   
   const roleLabel = currentUserRole === 'owner' ? 'Owner' : 'Client';
   const roleDescription = currentUserRole === 'owner' 
-    ? 'Start conversations with potential clients. Each activation lets you reach out to a new client.'
-    : 'Connect with property owners. Each activation lets you start a conversation about a listing.';
+    ? 'Connect with potential clients interested in your listings'
+    : 'Start conversations with property owners about their listings';
+
+  const getTierStyles = (tier: string) => {
+    switch (tier) {
+      case 'starter':
+        return {
+          gradient: 'from-slate-500/20 to-slate-600/10',
+          border: 'border-slate-500/30 hover:border-slate-400/50',
+          badge: 'bg-slate-500/20 text-slate-300',
+          button: 'bg-slate-600 hover:bg-slate-500',
+          glow: '',
+        };
+      case 'standard':
+        return {
+          gradient: 'from-primary/30 to-primary/10',
+          border: 'border-primary/50 hover:border-primary ring-2 ring-primary/30',
+          badge: 'bg-primary/20 text-primary',
+          button: 'bg-primary hover:bg-primary/90',
+          glow: 'shadow-lg shadow-primary/20',
+        };
+      case 'premium':
+        return {
+          gradient: 'from-amber-500/20 to-orange-500/10',
+          border: 'border-amber-500/40 hover:border-amber-400/60',
+          badge: 'bg-amber-500/20 text-amber-400',
+          button: 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400',
+          glow: 'shadow-lg shadow-amber-500/20',
+        };
+      default:
+        return {
+          gradient: 'from-muted/50 to-muted/30',
+          border: 'border-border',
+          badge: 'bg-muted text-muted-foreground',
+          button: '',
+          glow: '',
+        };
+    }
+  };
 
   const content = (
-    <div className="space-y-6 sm:space-y-8 p-4 sm:p-6">
-      <div className="text-center space-y-2 sm:space-y-3">
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground font-brand">Message Activation Packages</h2>
-        <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
-          {roleDescription}
-        </p>
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/10 rounded-lg border border-primary/20">
-          <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
-          <span className="text-xs sm:text-sm font-semibold text-foreground">New users get 3 FREE activations!</span>
+    <div className="space-y-8 p-4 sm:p-6 lg:p-8">
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center space-y-4"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+          <MessageCircle className="w-5 h-5 text-primary" />
+          <span className="text-sm font-semibold text-primary">{roleLabel} Packages</span>
         </div>
-      </div>
+        
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+          Message Activation Packages
+        </h2>
+        
+        <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
+          {roleDescription}. Choose the package that fits your needs.
+        </p>
 
+        <div className="flex items-center justify-center gap-2 text-sm">
+          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+          <span className="text-foreground font-medium">New users get 3 FREE activations!</span>
+        </div>
+      </motion.div>
+
+      {/* Packages Grid */}
       {isLoading ? (
-        <div className="text-center py-8 sm:py-12">
-          <p className="text-muted-foreground text-sm sm:text-base">Loading packages...</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-96 rounded-2xl bg-muted/50 animate-pulse" />
+          ))}
+        </div>
+      ) : packagesUI.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No packages available at this time.</p>
         </div>
       ) : (
-        <div className="space-y-4 sm:space-y-6">
-          <div className="text-center">
-            <Badge variant="outline" className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2 border-primary text-primary">
-              {roleLabel} Packages
-            </Badge>
-          </div>
-          {renderPackages(packagesUI, roleLabel)}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {packagesUI.map((pkg, index) => {
+            const Icon = pkg.icon;
+            const styles = getTierStyles(pkg.tier);
+            const isPopular = pkg.tier === 'standard';
+            
+            return (
+              <motion.div
+                key={pkg.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card 
+                  className={`relative h-full flex flex-col overflow-hidden bg-gradient-to-br ${styles.gradient} ${styles.border} ${styles.glow} transition-all duration-300`}
+                >
+                  {/* Popular Badge */}
+                  {isPopular && (
+                    <div className="absolute -top-0 left-0 right-0">
+                      <div className="bg-primary text-primary-foreground text-xs font-bold py-1.5 text-center">
+                        ⭐ BEST VALUE
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Savings Badge */}
+                  {pkg.savings && !isPopular && (
+                    <div className="absolute top-3 right-3">
+                      <Badge className={styles.badge}>{pkg.savings}</Badge>
+                    </div>
+                  )}
+                  
+                  <CardHeader className={`text-center pb-2 ${isPopular ? 'pt-10' : 'pt-6'}`}>
+                    <div className={`mx-auto mb-3 p-4 rounded-2xl ${styles.badge} w-fit`}>
+                      <Icon className="w-8 h-8" />
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-foreground">{pkg.name}</h3>
+                    
+                    <div className="mt-2">
+                      <span className="text-4xl font-bold text-foreground">{formatPriceMXN(pkg.price)}</span>
+                      <span className="text-muted-foreground text-sm ml-1">MXN</span>
+                    </div>
+                    
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {formatPriceMXN(pkg.pricePerActivation)} per activation
+                    </p>
+                  </CardHeader>
+
+                  <CardContent className="flex-1 pt-4">
+                    {/* Activations Display */}
+                    <div className="text-center py-4 mb-4 rounded-xl bg-background/50 border border-border/50">
+                      <div className="text-5xl font-bold text-foreground">{pkg.activations}</div>
+                      <div className="text-sm text-muted-foreground font-medium mt-1">
+                        Message Activations
+                      </div>
+                    </div>
+
+                    {/* Features List */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-green-500" />
+                        </div>
+                        <span className="text-foreground">Start {pkg.activations} new conversations</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-green-500" />
+                        </div>
+                        <span className="text-foreground">Unlimited messages per chat</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <Clock className="w-3 h-3 text-green-500" />
+                        </div>
+                        <span className="text-foreground">{pkg.duration_days}-day validity</span>
+                      </div>
+
+                      {pkg.legal_documents > 0 && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                            <Check className="w-3 h-3 text-green-500" />
+                          </div>
+                          <span className="text-foreground">{pkg.legal_documents} legal document{pkg.legal_documents > 1 ? 's' : ''} included</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <Shield className="w-3 h-3 text-green-500" />
+                        </div>
+                        <span className="text-foreground">Secure PayPal payment</span>
+                      </div>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="pt-4 pb-6">
+                    <Button 
+                      onClick={() => handlePurchase(pkg)}
+                      className={`w-full h-12 font-semibold text-base ${styles.button}`}
+                      size="lg"
+                    >
+                      {isPopular ? '🔥 Get Best Value' : 'Buy Now'}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
-      <div className="text-center text-xs sm:text-sm text-muted-foreground space-y-1 mt-6 sm:mt-8">
-        <p>✓ Activations never expire within the validity period</p>
-        <p>✓ Once a conversation starts, message unlimited within it</p>
-        <p>✓ Secure payment processing via PayPal</p>
-      </div>
+      {/* Trust Badges */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-border/50"
+      >
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Shield className="w-4 h-4 text-green-500" />
+          <span>Secure Payment</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Clock className="w-4 h-4 text-primary" />
+          <span>Instant Activation</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Sparkles className="w-4 h-4 text-amber-400" />
+          <span>No Hidden Fees</span>
+        </div>
+      </motion.div>
     </div>
   );
 
@@ -298,12 +387,12 @@ export function MessageActivationPackages({
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
       <div className="fixed inset-x-2 sm:inset-x-4 top-[5%] sm:top-[10%] bottom-[5%] sm:bottom-[10%] z-50 overflow-auto">
-        <div className="relative bg-background rounded-lg border shadow-lg max-w-5xl mx-auto">
+        <div className="relative bg-background rounded-2xl border shadow-2xl max-w-5xl mx-auto">
           {onClose && (
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-2 sm:right-4 top-2 sm:top-4 z-10"
+              className="absolute right-4 top-4 z-10"
               onClick={onClose}
             >
               ✕

@@ -200,16 +200,6 @@ function LegendaryLandingPage() {
             {/* Animated Flame R */}
             <motion.span
               className="relative inline-block mx-0.5"
-              animate={{
-                y: [0, -2, 0, -1, 0],
-                scaleY: [1, 1.03, 0.98, 1.01, 1],
-                scaleX: [1, 0.98, 1.02, 0.99, 1],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
             >
               {/* Fire glow behind R */}
               <motion.span
@@ -261,7 +251,7 @@ function LegendaryLandingPage() {
               </motion.span>
 
               {/* Tiny flame particles rising from R */}
-              {[...Array(3)].map((_, i) => (
+              {[...Array(5)].map((_, i) => (
                 <motion.span
                   key={i}
                   className="absolute pointer-events-none"
@@ -269,22 +259,49 @@ function LegendaryLandingPage() {
                     width: '4px',
                     height: '6px',
                     borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-                    background: i === 0 ? '#fbbf24' : i === 1 ? '#f97316' : '#dc2626',
-                    left: `${30 + i * 20}%`,
+                    background: i % 3 === 0 ? '#fbbf24' : i % 3 === 1 ? '#f97316' : '#dc2626',
+                    left: `${20 + i * 15}%`,
                     bottom: '80%',
-                    boxShadow: `0 0 4px ${i === 0 ? '#fbbf24' : i === 1 ? '#f97316' : '#dc2626'}`,
+                    boxShadow: `0 0 4px ${i % 3 === 0 ? '#fbbf24' : i % 3 === 1 ? '#f97316' : '#dc2626'}`,
                   }}
                   animate={{
                     y: [-5, -20, -30],
-                    x: [0, (i - 1) * 5, (i - 1) * 8],
+                    x: [0, (i - 2) * 4, (i - 2) * 6],
                     opacity: [0.8, 0.5, 0],
                     scale: [0.8, 0.5, 0.2],
                   }}
                   transition={{
                     duration: 1.2,
                     repeat: Infinity,
-                    delay: i * 0.4,
+                    delay: i * 0.3,
                     ease: "easeOut"
+                  }}
+                />
+              ))}
+
+              {/* Fire orbs that appear suddenly */}
+              {[...Array(4)].map((_, i) => (
+                <motion.span
+                  key={`orb-${i}`}
+                  className="absolute pointer-events-none rounded-full"
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    background: `radial-gradient(circle, ${i % 2 === 0 ? '#fbbf24' : '#ff6b35'} 0%, transparent 70%)`,
+                    left: `${15 + i * 22}%`,
+                    top: `${20 + (i % 2) * 40}%`,
+                    boxShadow: `0 0 8px ${i % 2 === 0 ? '#fbbf24' : '#ff6b35'}`,
+                  }}
+                  animate={{
+                    opacity: [0, 0, 0, 1, 0.8, 0],
+                    scale: [0, 0, 0, 1.2, 1, 0],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    delay: i * 1.5 + 0.5,
+                    ease: "easeInOut",
+                    times: [0, 0.3, 0.35, 0.45, 0.6, 1]
                   }}
                 />
               ))}

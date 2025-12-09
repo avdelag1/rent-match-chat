@@ -241,8 +241,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         showFilters={userRole === 'owner'}
       />
 
-      {/* Main Content - Full screen area for card feed with proper scrolling */}
-      <main className="fixed top-10 left-0 right-0 bottom-16">
+      {/* Main Content - Full screen area for card feed */}
+      <main className="fixed top-11 left-0 right-0 bottom-20">
         <div className="w-full h-full">
           {enhancedChildren}
         </div>
