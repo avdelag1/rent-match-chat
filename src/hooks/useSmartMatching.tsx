@@ -234,17 +234,10 @@ export function useSmartListingMatching(
         // If likes table has permission issues, just continue without filtering
         const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
 
-        // Build query with filters and subscription data for premium prioritization
+        // Build query with filters - simplified to avoid foreign key issues
         let query = supabase
           .from('listings')
-          .select(`
-            *,
-            owner:profiles!listings_user_id_fkey(
-              user_subscriptions(
-                subscription_packages(tier, priority_matching, visibility_boost)
-              )
-            )
-          ` as any)
+          .select('*')
           .eq('status', 'active')
           .eq('is_active', true);
 
