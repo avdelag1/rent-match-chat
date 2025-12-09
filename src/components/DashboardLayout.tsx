@@ -241,12 +241,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         showFilters={userRole === 'owner'}
       />
 
-      {/* Main Content - Full screen area for card feed */}
+      {/* Main Content - Full screen area for card feed with proper scrolling */}
       <main 
-        className="fixed left-0 right-0 overflow-hidden"
+        className="fixed left-0 right-0"
         style={{ 
-          top: 'calc(44px + env(safe-area-inset-top, 0px))',
-          bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))'
+          top: 'calc(48px + env(safe-area-inset-top, 0px))',
+          bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))'
         }}
       >
         <div className="w-full h-full">
