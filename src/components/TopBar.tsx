@@ -1,4 +1,4 @@
-import { Bell, Settings, Flame, Filter } from 'lucide-react';
+import { Bell, Settings, Flame, Filter, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -7,11 +7,23 @@ interface TopBarProps {
   onNotificationsClick?: () => void;
   onSettingsClick?: () => void;
   onFiltersClick?: () => void;
+  onRefreshClick?: () => void;
   className?: string;
   showFilters?: boolean;
+  showRefresh?: boolean;
+  isRefreshing?: boolean;
 }
 
-export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
+export function TopBar({ 
+  onNotificationsClick, 
+  onSettingsClick, 
+  onFiltersClick, 
+  onRefreshClick,
+  className, 
+  showFilters = false,
+  showRefresh = false,
+  isRefreshing = false
+}: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
 
   return (
@@ -21,10 +33,10 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
         className
       )}
       style={{ 
-        paddingTop: 'max(env(safe-area-inset-top, 0px), 24px)' // 24px fallback for Android status bar
+        paddingTop: 'env(safe-area-inset-top, 0px)'
       }}
     >
-      <div className="flex items-center justify-between h-11 px-4 max-w-screen-xl mx-auto">
+      <div className="flex items-center justify-between h-12 px-4 max-w-screen-xl mx-auto">
         {/* Logo with Modern Animation */}
         <div className="flex items-center gap-1.5 select-none">
           <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-2xl p-1.5 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-200 hover:scale-110">
@@ -35,18 +47,36 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           </span>
         </div>
 
-        {/* Actions - Minimal Icon Only */}
-        <div className="flex items-center gap-2">
-          {/* Notifications (Likes/Matches) */}
+        {/* Actions */}
+        <div className="flex items-center gap-1">
+          {/* Refresh Button */}
+          {showRefresh && onRefreshClick && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 hover:bg-background/60 rounded-xl transition-all duration-200"
+              onClick={onRefreshClick}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={cn(
+                "h-4 w-4 text-foreground/70 hover:text-foreground",
+                isRefreshing && "animate-spin"
+              )} />
+            </Button>
+          )}
+
+          {/* Notifications */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 hover:bg-background/60 hover:backdrop-blur-md rounded-xl transition-all duration-200"
+            className="relative h-9 w-9 hover:bg-background/60 rounded-xl transition-all duration-200"
             onClick={onNotificationsClick}
           >
             <Bell className="h-4 w-4 text-foreground/70 hover:text-foreground" />
             {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 shadow-lg animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-lg border-2 border-background">
+                {notificationCount > 99 ? '99+' : notificationCount}
+              </span>
             )}
           </Button>
 
@@ -55,7 +85,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-background/60 hover:backdrop-blur-md rounded-xl transition-all duration-200"
+              className="h-9 w-9 hover:bg-background/60 rounded-xl transition-all duration-200"
               onClick={onFiltersClick}
             >
               <Filter className="h-4 w-4 text-foreground/70 hover:text-foreground" />
@@ -66,7 +96,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 hover:bg-background/60 hover:backdrop-blur-md rounded-xl transition-all duration-200"
+            className="h-9 w-9 hover:bg-background/60 rounded-xl transition-all duration-200"
             onClick={onSettingsClick}
           >
             <Settings className="h-4 w-4 text-foreground/70 hover:text-foreground" />
