@@ -13,7 +13,7 @@
   display: none;  /* Safari and Chrome */
 }
 
-/* Global responsive foundation */
+/* Global responsive foundation with safe areas */
 html {
   font-size: 16px;
   line-height: 1.5;
@@ -21,6 +21,11 @@ html {
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
   width: 100%;
+  /* Safe area CSS variables for native apps */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 body {
@@ -28,13 +33,16 @@ body {
   overflow-x: hidden;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
   margin: 0;
   padding: 0;
+  /* DO NOT add safe area padding here - let components handle it */
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 

@@ -76,7 +76,7 @@ const ClientProfile = () => {
   return (
     <DashboardLayout userRole="client">
       <motion.div
-        className="w-full h-full overflow-y-auto p-4 pb-32"
+        className="w-full h-full overflow-y-auto px-5 py-4 pb-24"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
