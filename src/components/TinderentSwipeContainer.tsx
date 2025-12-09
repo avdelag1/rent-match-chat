@@ -399,7 +399,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     <div className="relative w-full h-full flex flex-col items-center justify-start">
       {/* Refresh Button - Top Right - Only show when all cards swiped */}
       {currentIndex >= listings.length && (
-        <div className="absolute top-2 right-2 z-50 mt-16 md:mt-20">
+        <div className="absolute top-2 right-2 z-50">
           <Button
             onClick={handleRefresh}
             variant="outline"
@@ -413,7 +413,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       )}
 
       {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto overflow-visible mt-12 md:mt-16">
+      <div className="relative w-full h-full max-w-lg mx-auto overflow-visible">
         <AnimatePresence mode="sync" initial={false}>
           {/* Show next card behind current card for stack effect */}
           {nextListing && (
