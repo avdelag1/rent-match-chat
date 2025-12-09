@@ -21,32 +21,28 @@ const OwnerSavedSearches = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="w-full h-full overflow-y-auto p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Client Filters</h1>
-              <p className="text-sm sm:text-base text-white/70 mt-1">Save and manage your ideal client search criteria</p>
+              <h1 className="text-3xl font-bold text-white">Client Filters</h1>
+              <p className="text-white/70 mt-1">Save and manage your ideal client search criteria</p>
             </div>
             <div className="flex gap-2">
               <Button
                 onClick={() => navigate('/owner/client-discovery')}
                 variant="outline"
-                size="sm"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs sm:text-sm"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/20"
               >
-                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline">View Clients</span>
-                <span className="sm:hidden">Clients</span>
+                <Users className="w-4 h-4 mr-2" />
+                View Clients
               </Button>
               <Button
                 onClick={() => setShowFilterDialog(true)}
-                size="sm"
-                className="bg-red-500 hover:bg-red-600 text-xs sm:text-sm"
+                className="bg-red-500 hover:bg-red-600"
               >
-                <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline">Configure Filters</span>
-                <span className="sm:hidden">Configure</span>
+                <Settings className="w-4 h-4 mr-2" />
+                Configure Filters
               </Button>
             </div>
           </div>

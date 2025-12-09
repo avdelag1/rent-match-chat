@@ -131,19 +131,19 @@ export default function OwnerViewClientProfile() {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="h-full overflow-y-auto bg-background">
+      <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="border-b bg-card sticky top-0 z-10">
-          <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-1 sm:mb-2">
-              <ArrowLeft className="mr-1.5 sm:mr-2 h-4 w-4" />
+          <div className="container mx-auto px-4 py-4">
+            <Button variant="ghost" onClick={() => navigate(-1)} className="mb-2">
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
           </div>
         </div>
 
         {/* Profile Content */}
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl pb-28 sm:pb-8">
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
           {/* Use the shared ClientProfilePreview component */}
           <ClientProfilePreview mode="owner-view" clientId={clientId} />
 
@@ -615,14 +615,13 @@ export default function OwnerViewClientProfile() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 sm:gap-3 sticky bottom-20 sm:bottom-6 bg-background/95 backdrop-blur-sm py-3 -mx-3 sm:-mx-4 px-3 sm:px-4">
-            <Button onClick={handleConnect} className="flex-1 text-sm sm:text-base" size="lg">
-              <MessageCircle className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="hidden sm:inline">Start Conversation</span>
-              <span className="sm:hidden">Message</span>
+          <div className="flex gap-3 sticky bottom-6">
+            <Button onClick={handleConnect} className="flex-1" size="lg">
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Start Conversation
             </Button>
             <Button variant="outline" size="lg">
-              <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Heart className="h-5 w-5" />
             </Button>
           </div>
         </div>
