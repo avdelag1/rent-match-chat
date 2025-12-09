@@ -41,7 +41,9 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           >
             <Bell className="h-4 w-4 text-foreground/70 hover:text-foreground" />
             {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-3 w-3 shadow-lg animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-lg ring-2 ring-background">
+                {notificationCount > 99 ? '99+' : notificationCount}
+              </span>
             )}
           </Button>
 

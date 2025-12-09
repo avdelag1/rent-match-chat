@@ -234,17 +234,10 @@ export function useSmartListingMatching(
         // If likes table has permission issues, just continue without filtering
         const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
 
-        // Build query with filters and subscription data for premium prioritization
+        // Build query with filters - simplified to avoid FK relationship issues
         let query = supabase
           .from('listings')
-          .select(`
-            *,
-            owner:profiles!listings_user_id_fkey(
-              user_subscriptions(
-                subscription_packages(tier, priority_matching, visibility_boost)
-              )
-            )
-          ` as any)
+          .select('*')
           .eq('status', 'active')
           .eq('is_active', true);
 
@@ -327,16 +320,6 @@ export function useSmartListingMatching(
           });
         }
 
-        // Premium only filter - check if owner has premium subscription
-        if (filters?.premiumOnly) {
-          filteredListings = filteredListings.filter(listing => {
-            const ownerData = (listing as any).owner;
-            const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
-            const tier = subscriptionData?.tier || 'free';
-            return tier !== 'free' && tier !== 'basic';
-          });
-        }
-
         // Filter out already-swiped listings (both likes and dislikes)
         filteredListings = filteredListings.filter(listing =>
           !swipedListingIds.has(listing.id)
@@ -355,59 +338,18 @@ export function useSmartListingMatching(
         const matchedListings: MatchedListing[] = filteredListings.map(listing => {
           const match = calculateListingMatch(preferences, listing as Listing);
 
-          // Extract owner's subscription tier for premium boost
-          const ownerData = (listing as any).owner;
-          const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
-          const tier = subscriptionData?.tier || 'free';
-          const visibilityBoost = subscriptionData?.visibility_boost || 0;
-          const priorityMatching = subscriptionData?.priority_matching || false;
-
-          // Apply premium boost to match percentage
-          let boostedPercentage = match.percentage;
-          if (priorityMatching && visibilityBoost > 0) {
-            // Premium boost: add up to 20 points based on visibility boost (0.25-1.0 -> 5-20 points)
-            const boostPoints = Math.min(20, visibilityBoost * 20);
-            boostedPercentage = Math.min(100, match.percentage + boostPoints);
-
-            if (boostPoints > 0) {
-              match.reasons.push(`Premium listing boost: +${boostPoints}%`);
-            }
-          }
-
           return {
             ...listing as Listing,
-            matchPercentage: boostedPercentage,
+            matchPercentage: match.percentage,
             matchReasons: match.reasons,
             incompatibleReasons: match.incompatible,
-            _premiumTier: tier, // Store for sorting
-            _visibilityBoost: visibilityBoost
           };
         });
 
-        // Sort by premium tier first, then match percentage
+        // Sort by match percentage (no premium tier sorting since we removed that query)
         const sortedListings = matchedListings
           .filter(listing => listing.matchPercentage >= 0)
-          .sort((a, b) => {
-            // Premium tiers get priority
-            const tierOrder: Record<string, number> = {
-              unlimited: 1,
-              premium_plus: 2,
-              premium: 3,
-              basic: 4,
-              free: 5
-            };
-
-            const tierA = tierOrder[(a as any)._premiumTier] || 5;
-            const tierB = tierOrder[(b as any)._premiumTier] || 5;
-
-            // If different tiers, prioritize better tier
-            if (tierA !== tierB) {
-              return tierA - tierB;
-            }
-
-            // Same tier: sort by match percentage
-            return b.matchPercentage - a.matchPercentage;
-          });
+          .sort((a, b) => b.matchPercentage - a.matchPercentage);
         
         // Fallback: if no matches found but we have listings, show them all with default score
         if (sortedListings.length === 0 && filteredListings.length > 0) {

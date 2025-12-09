@@ -396,7 +396,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start">
+    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
       {/* Refresh Button - Top Right - Only show when all cards swiped */}
       {currentIndex >= listings.length && (
         <div className="absolute top-2 right-2 z-50">
