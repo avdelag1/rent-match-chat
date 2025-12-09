@@ -248,8 +248,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Only show skeleton on initial load, not during background refetch
   if (isLoading && listings.length === 0) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto">
-        <Card className="w-full h-[450px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
+      <div className="relative w-full h-full flex items-center justify-center px-4">
+        <Card className="w-full max-w-sm bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
           <div className="p-6 space-y-4">
             <Skeleton className="w-full h-64 rounded-lg" />
             <Skeleton className="w-3/4 h-6" />
@@ -260,18 +260,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
             </div>
           </div>
         </Card>
-        <div className="text-center mt-4 text-muted-foreground">
-          <Sparkles className="w-5 h-5 mx-auto mb-2 animate-spin" />
-          Finding perfect properties...
-        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
-        <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
+      <div className="relative w-full h-full flex items-center justify-center px-4">
+        <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8 max-w-sm">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
           <p className="text-muted-foreground mb-4">We couldn't load properties right now.</p>
@@ -290,7 +286,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (listings.length === 0) {
     return (
-      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -332,7 +328,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -396,10 +392,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start">
+    <div className="relative w-full h-full flex flex-col items-center justify-center">
       {/* Refresh Button - Top Right - Only show when all cards swiped */}
       {currentIndex >= listings.length && (
-        <div className="absolute top-2 right-2 z-50 mt-16 md:mt-20">
+        <div className="absolute top-2 right-2 z-50">
           <Button
             onClick={handleRefresh}
             variant="outline"
@@ -412,8 +408,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         </div>
       )}
 
-      {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto overflow-visible mt-12 md:mt-16">
+      {/* Card Container - Fills available space */}
+      <div className="relative w-full h-full max-w-lg mx-auto overflow-visible px-3">
         <AnimatePresence mode="sync" initial={false}>
           {/* Show next card behind current card for stack effect */}
           {nextListing && (
