@@ -113,14 +113,14 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4"
+      className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3"
       style={{ 
-        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 12px)',
         paddingLeft: 'max(env(safe-area-inset-left, 0px), 8px)',
         paddingRight: 'max(env(safe-area-inset-right, 0px), 8px)'
       }}
     >
-      <div className="flex items-center justify-center gap-5 px-5 py-3 pointer-events-auto bg-background/80 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl mx-auto max-w-fit">
+      <div className="flex items-center justify-center gap-4 px-4 py-2.5 pointer-events-auto bg-background/90 backdrop-blur-xl rounded-2xl border border-border/30 shadow-2xl mx-auto max-w-fit">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item);

@@ -245,8 +245,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <main 
         className="fixed left-0 right-0"
         style={{ 
-          top: 'calc(44px + env(safe-area-inset-top, 0px))',
-          bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))'
+          top: 'calc(40px + env(safe-area-inset-top, 0px))',
+          bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))'
         }}
       >
         <div className="w-full h-full">
