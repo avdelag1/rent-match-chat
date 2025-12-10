@@ -388,7 +388,16 @@ export function useSendMessage() {
         `)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Add more context to the error for debugging
+        console.error('Message insert error:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
 
       // Update conversation last_message_at
       await supabase
