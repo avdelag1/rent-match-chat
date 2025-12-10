@@ -238,24 +238,72 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               ) : listing ? (
                 // PROPERTY LISTING INSIGHTS (Original)
                 <div className="mt-6 space-y-6">
-                  {/* Property Summary */}
+                  {/* Property Summary with Description */}
                   <div className="p-4 bg-muted/50 rounded-xl">
                     <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4" />
                       <span>{listing.neighborhood}, {listing.city}</span>
                     </div>
+                    {listing.description && (
+                      <p className="text-sm text-muted-foreground mt-3 line-clamp-3">
+                        {listing.description}
+                      </p>
+                    )}
                   </div>
+
+                  {/* Price & Key Details */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-xl">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        ${listing.price?.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-muted-foreground">per month</div>
+                    </div>
+                    {listing.square_footage && (
+                      <div className="p-3 bg-muted/50 rounded-xl">
+                        <div className="text-2xl font-bold">{listing.square_footage}</div>
+                        <div className="text-xs text-muted-foreground">sq ft</div>
+                      </div>
+                    )}
+                    {listing.beds && (
+                      <div className="p-3 bg-muted/50 rounded-xl">
+                        <div className="text-2xl font-bold">{listing.beds}</div>
+                        <div className="text-xs text-muted-foreground">bedrooms</div>
+                      </div>
+                    )}
+                    {listing.baths && (
+                      <div className="p-3 bg-muted/50 rounded-xl">
+                        <div className="text-2xl font-bold">{listing.baths}</div>
+                        <div className="text-xs text-muted-foreground">bathrooms</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Amenities - Moved up */}
+                  {listing.amenities && listing.amenities.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold">Amenities Included</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {listing.amenities.map((amenity, idx) => (
+                          <div key={idx} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                            <span className="text-sm capitalize">{amenity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Property Images Grid - Clickable */}
                   {listing.images && listing.images.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="font-semibold flex items-center gap-2">
                         <Eye className="w-5 h-5 text-primary" />
-                        Property Photos
+                        Property Photos ({listing.images.length})
                       </h4>
                       <div className="grid grid-cols-3 gap-2">
-                        {listing.images.map((image, index) => (
+                        {listing.images.slice(0, 6).map((image, index) => (
                           <button
                             key={index}
                             onClick={() => {
@@ -275,7 +323,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                           </button>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground">Click any photo to view full size</p>
+                      <p className="text-xs text-muted-foreground">Tap any photo to view full size</p>
                     </div>
                   )}
 
