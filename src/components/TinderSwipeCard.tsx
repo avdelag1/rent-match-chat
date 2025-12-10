@@ -368,7 +368,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
 
         {/* Action Buttons - Bottom Fixed Position - Animated hide/show */}
         <AnimatePresence>
-          {isTop && !hideActions && (
+          {isTop && !hideActions && !isBottomSheetExpanded && (
             <motion.div
               initial={{ opacity: 0, y: 50, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
