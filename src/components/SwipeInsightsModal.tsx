@@ -79,7 +79,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               backfaceVisibility: 'hidden'
             }}
           >
-            <DialogContent className={`max-w-lg w-full max-h-[90vh] h-[85vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
+            <DialogContent className={`max-w-lg w-full max-h-[75vh] h-[70vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
               <motion.div>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">

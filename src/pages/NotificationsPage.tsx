@@ -107,8 +107,24 @@ export default function NotificationsPage() {
     if (user?.id) {
       fetchNotifications();
       subscribeToNotifications();
+      // Auto-mark all notifications as read when visiting this page
+      markAllAsReadSilently();
     }
   }, [user?.id]);
+
+  // Mark all as read without toast (silent version for auto-marking)
+  const markAllAsReadSilently = async () => {
+    if (!user?.id) return;
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true } as any)
+        .eq('user_id', user.id)
+        .eq('read', false);
+    } catch (error) {
+      console.error('Error auto-marking as read:', error);
+    }
+  };
 
   const fetchNotifications = async () => {
     if (!user?.id) return;
