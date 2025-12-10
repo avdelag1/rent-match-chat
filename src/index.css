@@ -13,6 +13,11 @@
   display: none;  /* Safari and Chrome */
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  PROFESSIONAL SAFE AREA SYSTEM - React + Capacitor                   */
+/*  Handles Android/iOS notches, status bar, and home gesture bar       */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 /* Global responsive foundation with safe areas */
 html {
   font-size: 16px;
@@ -21,11 +26,18 @@ html {
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
   width: 100%;
-  /* Safe area CSS variables for native apps */
+
+  /* Safe area CSS variables - Available globally */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
+
+  /* Semantic safe area names for better readability */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 body {
@@ -44,6 +56,126 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
+}
+
+/* ===== PROFESSIONAL LAYOUT SYSTEM WITH SAFE AREAS ===== */
+
+/* App Root - Full screen container */
+.app-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* App Header - Fixed top bar with safe-area-top */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding-top: calc(var(--safe-top) + 8px);
+  padding-bottom: 8px;
+  padding-left: max(var(--safe-left), 16px);
+  padding-right: max(var(--safe-right), 16px);
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* App Content - Main scrollable area between header and bottom bar */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-left: max(var(--safe-left), 16px);
+  padding-right: max(var(--safe-right), 16px);
+  padding-top: 16px;
+  padding-bottom: 16px;
+  position: relative;
+}
+
+/* App Bottom Bar - Fixed bottom nav with safe-area-bottom */
+.app-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding-bottom: calc(var(--safe-bottom) + 8px);
+  padding-top: 8px;
+  padding-left: max(var(--safe-left), 16px);
+  padding-right: max(var(--safe-right), 16px);
+  background: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Utility Classes for Safe Area Padding */
+.safe-area-pt {
+  padding-top: var(--safe-top);
+}
+
+.safe-area-pb {
+  padding-bottom: var(--safe-bottom);
+}
+
+.safe-area-pl {
+  padding-left: var(--safe-left);
+}
+
+.safe-area-pr {
+  padding-right: var(--safe-right);
+}
+
+.safe-area-px {
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+.safe-area-py {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.safe-area-p {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* Utility Classes with Extra Spacing */
+.safe-area-pt-extra {
+  padding-top: calc(var(--safe-top) + 16px);
+}
+
+.safe-area-pb-extra {
+  padding-bottom: calc(var(--safe-bottom) + 16px);
+}
+
+.safe-area-px-extra {
+  padding-left: max(var(--safe-left), 16px);
+  padding-right: max(var(--safe-right), 16px);
+}
+
+/* Margin utilities for safe areas */
+.safe-area-mt {
+  margin-top: var(--safe-top);
+}
+
+.safe-area-mb {
+  margin-bottom: var(--safe-bottom);
+}
+
+.safe-area-ml {
+  margin-left: var(--safe-left);
+}
+
+.safe-area-mr {
+  margin-right: var(--safe-right);
 }
 
 /* Tinderent Design System - Theme Variables */
