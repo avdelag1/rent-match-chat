@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from 'framer-motion';
 import { MapPin, CheckCircle, Flag, X, RotateCcw, Eye, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
@@ -16,6 +16,7 @@ interface ClientTinderSwipeCardProps {
   hasPremium?: boolean;
   isTop?: boolean;
   showNextCard?: boolean;
+  hideActions?: boolean;
 }
 
 export function ClientTinderSwipeCard({
@@ -26,7 +27,8 @@ export function ClientTinderSwipeCard({
   onInsights,
   hasPremium = false,
   isTop = true,
-  showNextCard = false
+  showNextCard = false,
+  hideActions = false
 }: ClientTinderSwipeCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
@@ -227,64 +229,84 @@ export function ClientTinderSwipeCard({
           </div>
         </div>
 
-        {/* Action Buttons - Bottom Fixed Position */}
-        {isTop && (
-          <div className="absolute bottom-32 left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
-            <div className="flex items-center gap-3 pointer-events-auto">
-              {/* Undo/Return Button */}
-              {onUndo && (
-                <button
+        {/* Action Buttons - Bottom Fixed Position - Animated hide/show */}
+        <AnimatePresence>
+          {isTop && !hideActions && (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="absolute bottom-32 left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none"
+            >
+              <div className="flex items-center gap-3 pointer-events-auto">
+                {/* Undo/Return Button */}
+                {onUndo && (
+                  <motion.button
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.1 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUndo();
+                    }}
+                    className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                    title="Undo"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </motion.button>
+                )}
+
+                {/* Dislike Button */}
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.15 }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onUndo();
+                    onSwipe('left');
                   }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  title="Undo"
+                  className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  title="Dislike"
                 >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
-              )}
+                  <X className="w-7 h-7" strokeWidth={3} />
+                </motion.button>
 
-              {/* Dislike Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSwipe('left');
-                }}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Dislike"
-              >
-                <X className="w-7 h-7" strokeWidth={3} />
-              </button>
+                {/* Insights Button */}
+                {onInsights && hasPremium && (
+                  <motion.button
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.2 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onInsights();
+                    }}
+                    className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                    title="View Insights"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </motion.button>
+                )}
 
-              {/* Insights Button */}
-              {onInsights && hasPremium && (
-                <button
+                {/* Like Button */}
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.25 }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onInsights();
+                    onSwipe('right');
                   }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  title="View Insights"
+                  className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  title="Like"
                 >
-                  <Eye className="w-5 h-5" />
-                </button>
-              )}
-
-              {/* Like Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSwipe('right');
-                }}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Like"
-              >
-                <Heart className="w-7 h-7" fill="currentColor" />
-              </button>
-            </div>
-          </div>
-        )}
+                  <Heart className="w-7 h-7" fill="currentColor" />
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Report Dialog */}

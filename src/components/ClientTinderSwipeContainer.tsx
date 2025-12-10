@@ -450,6 +450,7 @@ export function ClientTinderSwipeContainer({
                   onInsights={handleInsights}
                   hasPremium={true}
                   isTop={true}
+                  hideActions={insightsOpen}
                 />
               </motion.div>
             )}

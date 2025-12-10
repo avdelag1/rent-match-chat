@@ -469,6 +469,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 onInsights={handleInsights}
                 hasPremium={true}
                 isTop={true}
+                hideActions={insightsModalOpen}
               />
             </motion.div>
           )}
