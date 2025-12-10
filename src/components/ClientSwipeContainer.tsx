@@ -23,15 +23,17 @@ interface ClientSwipeContainerProps {
   profiles?: any[]; // Accept profiles from parent
   isLoading?: boolean;
   error?: any;
+  insightsOpen?: boolean; // Whether insights modal is open - hides action buttons
 }
 
-export function ClientSwipeContainer({ 
-  onClientTap, 
-  onInsights, 
+export function ClientSwipeContainer({
+  onClientTap,
+  onInsights,
   onMessageClick,
   profiles: externalProfiles,
   isLoading: externalIsLoading,
-  error: externalError 
+  error: externalError,
+  insightsOpen = false
 }: ClientSwipeContainerProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -293,6 +295,7 @@ export function ClientSwipeContainer({
                   onUndo={canUndo ? undoLastSwipe : undefined}
                   isTop={true}
                   hasPremium={hasPremiumMessaging}
+                  hideActions={insightsOpen}
                 />
               </motion.div>
             )}

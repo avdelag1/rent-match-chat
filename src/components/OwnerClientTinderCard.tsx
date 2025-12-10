@@ -30,6 +30,7 @@ interface OwnerClientTinderCardProps {
   isTop?: boolean;
   showNextCard?: boolean;
   hasPremium?: boolean;
+  hideActions?: boolean;
 }
 
 export function OwnerClientTinderCard({
@@ -41,7 +42,8 @@ export function OwnerClientTinderCard({
   onUndo,
   isTop = false,
   showNextCard = false,
-  hasPremium = false
+  hasPremium = false,
+  hideActions = false
 }: OwnerClientTinderCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
@@ -433,10 +435,16 @@ export function OwnerClientTinderCard({
 
       </div>
 
-      {/* Action Buttons - Always Visible */}
+      {/* Action Buttons - Hide on insights/expanded */}
       {isTop && (
-        <div className="absolute bottom-[20%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none">
-          <div className="flex items-center gap-3 pointer-events-auto">
+        <div
+          className={`absolute bottom-[20%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 transition-all duration-300 ease-out ${
+            hideActions || isBottomSheetExpanded
+              ? 'opacity-0 translate-y-12 pointer-events-none'
+              : 'opacity-100 translate-y-0 pointer-events-auto'
+          }`}
+        >
+          <div className="flex items-center gap-3">
             {/* Undo/Return Button */}
             {onUndo && (
               <button

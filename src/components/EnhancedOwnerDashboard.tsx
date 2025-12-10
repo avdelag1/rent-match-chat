@@ -166,6 +166,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
           onClientTap={handleClientTap}
           onInsights={handleInsights}
           onMessageClick={onMessageClick}
+          insightsOpen={insightsOpen}
         />
       </div>
 
