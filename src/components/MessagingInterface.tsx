@@ -126,8 +126,29 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         conversationId,
         message: messageText
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send message:', error);
+
+      // Provide more helpful error messages for debugging
+      const errorMessage = error?.message || 'Unknown error occurred';
+      const errorDetails = {
+        message: errorMessage,
+        code: error?.code,
+        conversationId,
+        timestamp: new Date().toISOString()
+      };
+
+      console.error('Send error details:', errorDetails);
+
+      // Help identify common issues
+      if (errorMessage.includes('message_text')) {
+        console.error('❌ Database schema issue detected - message_text column may not exist');
+      } else if (errorMessage.includes('receiver_id')) {
+        console.error('❌ Conversation error - receiver_id could not be determined');
+      } else if (errorMessage.includes('RLS') || errorMessage.includes('policy')) {
+        console.error('❌ Permission error - Row Level Security policy may be blocking the insert');
+      }
+
       setNewMessage(messageText); // Restore message on error
     }
   };
