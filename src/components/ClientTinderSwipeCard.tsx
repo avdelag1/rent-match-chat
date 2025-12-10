@@ -349,14 +349,15 @@ export function ClientTinderSwipeCard({
         </motion.div>
 
         {/* Action Buttons - Bottom Fixed Position - Animated hide/show */}
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {isTop && !hideActions && !isBottomSheetExpanded && (
             <motion.div
+              key="action-buttons"
               initial={{ opacity: 0, y: 50, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.8 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="absolute bottom-32 left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none"
+              className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4 px-6 z-50 pointer-events-none"
             >
               <div className="flex items-center gap-3 pointer-events-auto">
                 {/* Undo/Return Button */}
