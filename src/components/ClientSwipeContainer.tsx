@@ -248,59 +248,51 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="w-full h-full overflow-hidden flex flex-col">
-
-      {/* Full-Screen Card Container - Positioned lower on screen */}
-      <div className="flex-1 w-full flex items-center justify-center px-3 sm:px-4 pt-6 sm:pt-12">
-        <div className="relative w-full max-w-[min(100%-24px,560px)] aspect-[9/16] mx-auto">
-          <AnimatePresence mode="wait">
-            {currentClient && (
-              <motion.div
-                key={currentClient.user_id}
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{
-                  scale: 1,
-                  opacity: 1
-                }}
-                exit={{
-                  x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
-                  opacity: 0,
-                  rotate: swipeDirection === 'right' ? 10 : swipeDirection === 'left' ? -10 : 0,
-                  scale: 0.85,
-                  transition: {
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 25,
-                    mass: 0.5,
-                    duration: 0.3
-                  }
-                }}
-                transition={{
+    <div className="relative w-full flex flex-col items-center justify-start" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
+      {/* Card Container - Full screen swipe experience */}
+      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto overflow-visible mt-12 md:mt-16">
+        <AnimatePresence mode="wait">
+          {currentClient && (
+            <motion.div
+              key={currentClient.user_id}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{
+                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                opacity: 0,
+                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
+                scale: 0.85,
+                transition: {
                   type: "spring",
                   stiffness: 300,
-                  damping: 30,
-                  mass: 0.7
-                }}
-                className="w-full h-full"
-                style={{
-                  willChange: 'transform, opacity'
-                }}
-              >
-                <OwnerClientTinderCard
-                  profile={currentClient}
-                  onSwipe={handleSwipe}
-                  onTap={() => onClientTap(currentClient.user_id)}
-                  onInsights={() => handleInsights(currentClient.user_id)}
-                  onMessage={() => handleConnect(currentClient.user_id)}
-                  onUndo={canUndo ? undoLastSwipe : undefined}
-                  isTop={true}
-                  hasPremium={hasPremiumMessaging}
-                  hideActions={insightsOpen}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                  damping: 25,
+                  mass: 0.8,
+                  duration: 0.3
+                }
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                mass: 1
+              }}
+              className="w-full h-full absolute inset-0"
+              style={{ willChange: 'transform, opacity', zIndex: 1 }}
+            >
+              <OwnerClientTinderCard
+                profile={currentClient}
+                onSwipe={handleSwipe}
+                onTap={() => onClientTap(currentClient.user_id)}
+                onInsights={() => handleInsights(currentClient.user_id)}
+                onMessage={() => handleConnect(currentClient.user_id)}
+                onUndo={canUndo ? undoLastSwipe : undefined}
+                isTop={true}
+                hasPremium={hasPremiumMessaging}
+                hideActions={insightsOpen}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <MatchCelebration
