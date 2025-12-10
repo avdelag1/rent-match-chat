@@ -348,19 +348,14 @@ export function ClientTinderSwipeCard({
           </div>
         </motion.div>
 
-        {/* Action Buttons - Bottom Fixed Position - Direct animation control */}
+        {/* Action Buttons - Bottom Fixed Position - CSS-based hide/show */}
         {isTop && (
-          <motion.div
-            key="action-buttons"
-            initial={{ opacity: 0, y: 50, scale: 0.8 }}
-            animate={{
-              opacity: hideActions || isBottomSheetExpanded ? 0 : 1,
-              y: hideActions || isBottomSheetExpanded ? 50 : 0,
-              scale: hideActions || isBottomSheetExpanded ? 0.8 : 1,
-            }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4 px-6 z-50"
-            style={{ pointerEvents: hideActions || isBottomSheetExpanded ? 'none' : 'auto' }}
+          <div
+            className={`absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4 px-6 z-50 transition-all duration-300 ease-out ${
+              hideActions || isBottomSheetExpanded 
+                ? 'opacity-0 translate-y-12 pointer-events-none' 
+                : 'opacity-100 translate-y-0 pointer-events-auto'
+            }`}
           >
             <div className="flex items-center gap-3">
               {/* Undo/Return Button */}
@@ -427,7 +422,7 @@ export function ClientTinderSwipeCard({
                 <Heart className="w-7 h-7" fill="currentColor" />
               </motion.button>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
 
