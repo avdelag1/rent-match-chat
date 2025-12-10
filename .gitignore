@@ -21,7 +21,17 @@ dist-ssr
 
 # Capacitor
 ios
-android
+
+# Android - ignore most files but keep critical config
+android/*
+!android/gradle.properties
+!android/app/
+android/app/*
+!android/app/src/
+android/app/src/*
+!android/app/src/main/
+android/app/src/main/*
+!android/app/src/main/AndroidManifest.xml
 
 # Editor directories and files
 .vscode/*
