@@ -167,53 +167,51 @@ export function ClientTinderSwipeCard({
           {/* Photo Info Overlays - Different info per photo */}
           {isTop && currentImageIndex < 5 && (
             <div className="absolute bottom-24 left-4 right-4 z-20 pointer-events-none">
-              <div className="bg-black/50 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                {currentImageIndex === 0 && (
-                  <>
-                    <h2 className="text-xl font-bold text-white">{profile.name}{profile.age && `, ${profile.age}`}</h2>
-                    {profile.budget_max && <p className="text-primary text-lg font-semibold">${profile.budget_max.toLocaleString()}/mo budget</p>}
-                    <p className="text-white/70 text-sm mt-1">Tap sides to browse photos</p>
-                  </>
-                )}
-                {currentImageIndex === 1 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-1">📍 Location & Duration</p>
-                    {profile.city && <p className="text-white text-base">{profile.city}</p>}
-                    {(profile as any).nationality && <p className="text-white/70 text-sm">From {(profile as any).nationality}</p>}
-                  </>
-                )}
-                {currentImageIndex === 2 && profile.interests && profile.interests.length > 0 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-2">✨ Interests</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {profile.interests.slice(0, 5).map((interest, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-primary/30 text-white text-xs rounded-full">{interest}</span>
-                      ))}
-                    </div>
-                  </>
-                )}
-                {currentImageIndex === 3 && profile.lifestyle_tags && profile.lifestyle_tags.length > 0 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-2">🏠 Lifestyle</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {profile.lifestyle_tags.slice(0, 4).map((tag, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{tag}</span>
-                      ))}
-                    </div>
-                  </>
-                )}
-                {currentImageIndex === 4 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-1">💰 Budget Range</p>
-                    <p className="text-white text-base">
-                      ${profile.budget_min?.toLocaleString() || '0'} - ${profile.budget_max?.toLocaleString() || 'Flexible'}
-                    </p>
-                    {profile.matchPercentage && (
-                      <p className="text-green-400 text-sm mt-1">{profile.matchPercentage}% match</p>
-                    )}
-                  </>
-                )}
-              </div>
+              {currentImageIndex === 0 && (
+                <div className="space-y-1">
+                  <h2 className="text-xl font-bold text-white drop-shadow-lg">{profile.name}{profile.age && `, ${profile.age}`}</h2>
+                  {profile.budget_max && <p className="text-primary text-base font-semibold drop-shadow-lg">${profile.budget_max.toLocaleString()}/mo budget</p>}
+                  <p className="text-white/70 text-xs drop-shadow">Tap sides to browse photos</p>
+                </div>
+              )}
+              {currentImageIndex === 1 && (
+                <div className="space-y-1">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">📍 Location</span>
+                  {profile.city && <p className="text-white text-sm font-medium drop-shadow-lg">{profile.city}</p>}
+                  {(profile as any).nationality && <p className="text-white/80 text-xs drop-shadow">From {(profile as any).nationality}</p>}
+                </div>
+              )}
+              {currentImageIndex === 2 && profile.interests && profile.interests.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">✨ Interests</span>
+                  <div className="flex flex-wrap gap-1">
+                    {profile.interests.slice(0, 5).map((interest, i) => (
+                      <span key={i} className="px-2 py-0.5 bg-primary/40 backdrop-blur-sm text-white text-[10px] rounded-full">{interest}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {currentImageIndex === 3 && profile.lifestyle_tags && profile.lifestyle_tags.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">🏠 Lifestyle</span>
+                  <div className="flex flex-wrap gap-1">
+                    {profile.lifestyle_tags.slice(0, 4).map((tag, i) => (
+                      <span key={i} className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {currentImageIndex === 4 && (
+                <div className="space-y-1">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">💰 Budget</span>
+                  <p className="text-white text-sm font-medium drop-shadow-lg">
+                    ${profile.budget_min?.toLocaleString() || '0'} - ${profile.budget_max?.toLocaleString() || 'Flexible'}
+                  </p>
+                  {profile.matchPercentage && (
+                    <span className="inline-block px-2 py-0.5 bg-green-500/40 backdrop-blur-sm text-white text-[10px] rounded-full">{profile.matchPercentage}% match</span>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

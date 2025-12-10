@@ -186,53 +186,51 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
           {/* Photo Info Overlays - Different info per photo */}
           {isTop && currentImageIndex < 5 && (
             <div className="absolute bottom-20 left-4 right-4 z-20 pointer-events-none">
-              <div className="bg-black/50 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                {currentImageIndex === 0 && (
-                  <>
-                    <h2 className="text-xl font-bold text-white">{listing.title}</h2>
-                    <p className="text-primary text-lg font-semibold">${listing.price?.toLocaleString()}/mo</p>
-                    <p className="text-white/70 text-sm mt-1">Tap sides to browse photos</p>
-                  </>
-                )}
-                {currentImageIndex === 1 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-1">📍 Location</p>
-                    <p className="text-white text-base">{listing.neighborhood}, {listing.city}</p>
-                    {listing.property_type && <p className="text-white/70 text-sm">{listing.property_type} · {listing.square_footage} ft²</p>}
-                  </>
-                )}
-                {currentImageIndex === 2 && listing.amenities && listing.amenities.length > 0 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-2">✨ Amenities</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {listing.amenities.slice(0, 6).map((amenity, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-primary/30 text-white text-xs rounded-full capitalize">{amenity}</span>
-                      ))}
-                    </div>
-                  </>
-                )}
-                {currentImageIndex === 3 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-2">🏠 Property Details</p>
-                    <div className="flex gap-4 text-white text-sm">
-                      {listing.beds && <span>🛏 {listing.beds} beds</span>}
-                      {listing.baths && <span>🚿 {listing.baths} baths</span>}
-                      {listing.furnished && <span>🪑 Furnished</span>}
-                    </div>
-                    {listing.pet_friendly && <p className="text-green-400 text-xs mt-1">🐾 Pet friendly</p>}
-                  </>
-                )}
-                {currentImageIndex === 4 && (
-                  <>
-                    <p className="text-white/80 text-sm font-medium mb-1">📋 Rules & Info</p>
-                    <div className="text-white/70 text-sm space-y-0.5">
-                      {(listing as any).min_rental_term_months && <p>Min stay: {(listing as any).min_rental_term_months} months</p>}
-                      {(listing as any).deposit_amount && <p>Deposit: ${(listing as any).deposit_amount.toLocaleString()}</p>}
-                      {(listing as any).has_verified_documents && <p className="text-blue-400">✓ Verified listing</p>}
-                    </div>
-                  </>
-                )}
-              </div>
+              {currentImageIndex === 0 && (
+                <div className="space-y-1">
+                  <h2 className="text-xl font-bold text-white drop-shadow-lg">{listing.title}</h2>
+                  <p className="text-primary text-base font-semibold drop-shadow-lg">${listing.price?.toLocaleString()}/mo</p>
+                  <p className="text-white/70 text-xs drop-shadow">Tap sides to browse photos</p>
+                </div>
+              )}
+              {currentImageIndex === 1 && (
+                <div className="space-y-1">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">📍 Location</span>
+                  <p className="text-white text-sm font-medium drop-shadow-lg">{listing.neighborhood}, {listing.city}</p>
+                  {listing.property_type && <p className="text-white/80 text-xs drop-shadow">{listing.property_type} · {listing.square_footage} ft²</p>}
+                </div>
+              )}
+              {currentImageIndex === 2 && listing.amenities && listing.amenities.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">✨ Amenities</span>
+                  <div className="flex flex-wrap gap-1">
+                    {listing.amenities.slice(0, 6).map((amenity, i) => (
+                      <span key={i} className="px-2 py-0.5 bg-primary/40 backdrop-blur-sm text-white text-[10px] rounded-full capitalize">{amenity}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {currentImageIndex === 3 && (
+                <div className="space-y-1.5">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">🏠 Details</span>
+                  <div className="flex flex-wrap gap-1">
+                    {listing.beds && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">🛏 {listing.beds} beds</span>}
+                    {listing.baths && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">🚿 {listing.baths} baths</span>}
+                    {listing.furnished && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">🪑 Furnished</span>}
+                    {listing.pet_friendly && <span className="px-2 py-0.5 bg-green-500/40 backdrop-blur-sm text-white text-[10px] rounded-full">🐾 Pet friendly</span>}
+                  </div>
+                </div>
+              )}
+              {currentImageIndex === 4 && (
+                <div className="space-y-1.5">
+                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">📋 Info</span>
+                  <div className="flex flex-wrap gap-1">
+                    {(listing as any).min_rental_term_months && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">Min {(listing as any).min_rental_term_months}mo</span>}
+                    {(listing as any).deposit_amount && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">${(listing as any).deposit_amount.toLocaleString()} deposit</span>}
+                    {(listing as any).has_verified_documents && <span className="px-2 py-0.5 bg-blue-500/40 backdrop-blur-sm text-white text-[10px] rounded-full">✓ Verified</span>}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
