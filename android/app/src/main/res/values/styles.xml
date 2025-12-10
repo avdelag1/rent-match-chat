@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- TindeRent App Theme - Edge-to-Edge Safe Area Support             -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+
+    <!-- Base Application Theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- Main App Theme with No Action Bar (for Capacitor apps) -->
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- ===== CRITICAL FOR SAFE AREAS ===== -->
+        <!-- Enable edge-to-edge rendering -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        <!-- Status bar color (should match your app header) -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <!-- Navigation bar color (Android bottom nav buttons) -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- Make status bar icons dark (use false for light icons) -->
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Make navigation bar icons dark (use false for light icons) -->
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- Layout in display cutout area (for devices with notches) -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+
+        <!-- Enable translucent system bars -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+
+        <!-- Fit system windows -->
+        <item name="android:fitsSystemWindows">false</item>
+    </style>
+
+    <!-- Splash Screen Theme (Optional - for app launch) -->
+    <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
+        <item name="android:background">@drawable/splash</item>
+    </style>
+</resources>

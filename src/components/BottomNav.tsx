@@ -27,8 +27,8 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
   const profileLink = userRole === 'owner' ? '/owner/profile' : '/client/profile';
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-[60] safe-area-pb">
-      <div className="flex justify-around items-center px-2 py-1 max-w-2xl mx-auto">
+    <nav className="app-bottom-bar bg-card/95 backdrop-blur-md">
+      <div className="flex justify-around items-center max-w-2xl mx-auto">
         {/* Home */}
         <NavLink to={dashboardLink} className={getNavLinkClass} end>
           <div className="relative">

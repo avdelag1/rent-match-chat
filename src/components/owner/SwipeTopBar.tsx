@@ -14,10 +14,9 @@ export function SwipeTopBar({ currentIndex, totalCount, onBack, onFilters }: Swi
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="fixed top-0 left-0 right-0 z-[100] bg-transparent"
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      className="fixed top-0 left-0 right-0 z-[100] bg-transparent safe-area-pt-extra"
     >
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-2">
         {/* Back Button */}
         <Button
           variant="ghost"

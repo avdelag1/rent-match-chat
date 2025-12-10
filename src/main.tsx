@@ -8,6 +8,40 @@ import { setupUpdateChecker, checkAppVersion } from './utils/cacheManager'
 import { ErrorBoundaryWrapper } from './components/ErrorBoundaryWrapper'
 import { initPerformanceOptimizations } from './utils/performanceMonitor'
 import { initWebVitalsMonitoring } from './utils/webVitals'
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CAPACITOR STATUS BAR INITIALIZATION
+// Configures safe area handling for iOS and Android
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+async function initializeStatusBar() {
+  // Only run on native platforms (iOS/Android)
+  if (Capacitor.isNativePlatform()) {
+    try {
+      // CRITICAL: Disable overlay mode
+      // This prevents the status bar from overlaying the webview
+      // and ensures safe-area-inset-top is properly calculated
+      await StatusBar.setOverlaysWebView({ overlay: false });
+
+      // Set status bar style (light text on dark background)
+      // Use Style.Light for light text, Style.Dark for dark text
+      await StatusBar.setStyle({ style: Style.Light });
+
+      // Optional: Set status bar background color (Android only)
+      // This should match your app's header background
+      await StatusBar.setBackgroundColor({ color: '#FF0000' });
+
+      console.log('✅ StatusBar initialized successfully');
+    } catch (error) {
+      console.warn('⚠️ StatusBar initialization failed:', error);
+    }
+  }
+}
+
+// Initialize Capacitor StatusBar before app loads
+initializeStatusBar();
 
 // Initialize performance monitoring and update checking
 logBundleSize();

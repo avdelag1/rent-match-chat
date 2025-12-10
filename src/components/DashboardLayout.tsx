@@ -230,10 +230,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, appliedFilters]);
 
   return (
-    <div className="min-h-screen flex flex-col w-full bg-background relative">
+    <div className="app-root bg-background">
       <NotificationSystem />
 
-      {/* Top Bar - Fixed */}
+      {/* Top Bar - Fixed with safe-area-top */}
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
@@ -241,20 +241,20 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         showFilters={userRole === 'owner'}
       />
 
-      {/* Main Content - Full screen area for card feed with safe area handling */}
-      <main 
-        className="fixed left-0 right-0"
-        style={{ 
-          top: 'calc(40px + env(safe-area-inset-top, 0px))',
-          bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))'
+      {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
+      <main
+        className="fixed inset-0 overflow-y-auto overflow-x-hidden"
+        style={{
+          paddingTop: 'calc(56px + var(--safe-top))', // TopBar height + safe-top
+          paddingBottom: 'calc(72px + var(--safe-bottom))', // BottomNav height + safe-bottom
+          paddingLeft: 'max(var(--safe-left), 0px)',
+          paddingRight: 'max(var(--safe-right), 0px)',
         }}
       >
-        <div className="w-full h-full">
-          {enhancedChildren}
-        </div>
+        {enhancedChildren}
       </main>
 
-      {/* Bottom Navigation - Fixed */}
+      {/* Bottom Navigation - Fixed with safe-area-bottom */}
       <BottomNavigation
         userRole={userRole}
         onFilterClick={handleFilterClick}
