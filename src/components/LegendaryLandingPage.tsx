@@ -166,7 +166,7 @@ function LegendaryLandingPage() {
         ))}
       </AnimatePresence>
 
-      {/* SVG Gradient Definitions for Flame R */}
+      {/* SVG Filter for Organic Flame Effect */}
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="flameGradientR" x1="0%" y1="100%" x2="0%" y2="0%">
@@ -175,9 +175,16 @@ function LegendaryLandingPage() {
             <stop offset="70%" stopColor="#dc2626" />
             <stop offset="100%" stopColor="#fbbf24" />
           </linearGradient>
-          <filter id="flameGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          <filter id="flameDistortion" x="-50%" y="-50%" width="200%" height="200%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="5" result="noise">
+              <animate attributeName="baseFrequency" values="0.015;0.02;0.015" dur="4s" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+          <filter id="flameGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feMerge>
+              <feMergeNode in="blur" />
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
@@ -197,114 +204,74 @@ function LegendaryLandingPage() {
         >
           <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center flex items-center justify-center">
             <span>TINDE</span>
-            {/* Animated Flame R */}
+            {/* Animated Flame R - Organic slow movement */}
             <motion.span
               className="relative inline-block mx-0.5"
+              style={{ filter: 'url(#flameDistortion)' }}
             >
-              {/* Fire glow behind R */}
+              {/* Outer flame aura - slow organic movement */}
               <motion.span
-                className="absolute inset-0 blur-md"
+                className="absolute -inset-3 rounded-full pointer-events-none"
                 style={{
-                  background: 'linear-gradient(to top, #f97316, #dc2626, #fbbf24)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
+                  background: 'radial-gradient(ellipse at center bottom, rgba(251, 146, 60, 0.6) 0%, rgba(234, 88, 12, 0.4) 30%, rgba(220, 38, 38, 0.2) 60%, transparent 80%)',
+                  filter: 'blur(12px)',
                 }}
                 animate={{
-                  opacity: [0.6, 1, 0.7, 0.9, 0.6],
-                  scale: [1, 1.1, 1, 1.05, 1],
+                  scale: [1, 1.15, 1.05, 1.2, 1],
+                  opacity: [0.5, 0.7, 0.55, 0.65, 0.5],
                 }}
                 transition={{
-                  duration: 1.2,
+                  duration: 4,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-              >
-                R
-              </motion.span>
+              />
               
-              {/* Main R with gradient */}
+              {/* Inner flame glow - subtle pulse */}
               <motion.span
+                className="absolute -inset-1 rounded pointer-events-none"
                 style={{
-                  background: 'linear-gradient(to top, #f97316 0%, #ea580c 30%, #dc2626 60%, #fbbf24 100%)',
+                  background: 'linear-gradient(to top, rgba(249, 115, 22, 0.8), rgba(220, 38, 38, 0.5), transparent)',
+                  filter: 'blur(6px)',
+                }}
+                animate={{
+                  opacity: [0.6, 0.9, 0.7, 0.85, 0.6],
+                  y: [0, -2, 1, -1, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              
+              {/* Main R with gradient - slow breathing glow */}
+              <motion.span
+                className="relative"
+                style={{
+                  background: 'linear-gradient(to top, #f97316 0%, #ea580c 25%, #dc2626 50%, #fb923c 75%, #fbbf24 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  filter: 'drop-shadow(0 0 8px rgba(251, 146, 60, 0.8))',
+                  filter: 'url(#flameGlow)',
                 }}
                 animate={{
                   filter: [
-                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.6))',
-                    'drop-shadow(0 0 15px rgba(251, 146, 60, 1))',
-                    'drop-shadow(0 0 10px rgba(220, 38, 38, 0.8))',
-                    'drop-shadow(0 0 12px rgba(251, 146, 60, 0.9))',
-                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.6))',
-                  ]
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.7)) drop-shadow(0 -4px 12px rgba(220, 38, 38, 0.5))',
+                    'drop-shadow(0 0 14px rgba(251, 146, 60, 0.9)) drop-shadow(0 -6px 18px rgba(220, 38, 38, 0.7))',
+                    'drop-shadow(0 0 10px rgba(234, 88, 12, 0.8)) drop-shadow(0 -5px 15px rgba(251, 191, 36, 0.6))',
+                    'drop-shadow(0 0 12px rgba(251, 146, 60, 0.85)) drop-shadow(0 -4px 14px rgba(220, 38, 38, 0.6))',
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.7)) drop-shadow(0 -4px 12px rgba(220, 38, 38, 0.5))',
+                  ],
                 }}
                 transition={{
-                  duration: 1.8,
+                  duration: 3.5,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
               >
                 R
               </motion.span>
-
-              {/* Tiny flame particles rising from R */}
-              {[...Array(5)].map((_, i) => (
-                <motion.span
-                  key={i}
-                  className="absolute pointer-events-none"
-                  style={{
-                    width: '4px',
-                    height: '6px',
-                    borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-                    background: i % 3 === 0 ? '#fbbf24' : i % 3 === 1 ? '#f97316' : '#dc2626',
-                    left: `${20 + i * 15}%`,
-                    bottom: '80%',
-                    boxShadow: `0 0 4px ${i % 3 === 0 ? '#fbbf24' : i % 3 === 1 ? '#f97316' : '#dc2626'}`,
-                  }}
-                  animate={{
-                    y: [-5, -20, -30],
-                    x: [0, (i - 2) * 4, (i - 2) * 6],
-                    opacity: [0.8, 0.5, 0],
-                    scale: [0.8, 0.5, 0.2],
-                  }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    delay: i * 0.3,
-                    ease: "easeOut"
-                  }}
-                />
-              ))}
-
-              {/* Fire orbs that appear suddenly */}
-              {[...Array(4)].map((_, i) => (
-                <motion.span
-                  key={`orb-${i}`}
-                  className="absolute pointer-events-none rounded-full"
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    background: `radial-gradient(circle, ${i % 2 === 0 ? '#fbbf24' : '#ff6b35'} 0%, transparent 70%)`,
-                    left: `${15 + i * 22}%`,
-                    top: `${20 + (i % 2) * 40}%`,
-                    boxShadow: `0 0 8px ${i % 2 === 0 ? '#fbbf24' : '#ff6b35'}`,
-                  }}
-                  animate={{
-                    opacity: [0, 0, 0, 1, 0.8, 0],
-                    scale: [0, 0, 0, 1.2, 1, 0],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: i * 1.5 + 0.5,
-                    ease: "easeInOut",
-                    times: [0, 0.3, 0.35, 0.45, 0.6, 1]
-                  }}
-                />
-              ))}
             </motion.span>
             <span>ENT</span>
           </h1>
