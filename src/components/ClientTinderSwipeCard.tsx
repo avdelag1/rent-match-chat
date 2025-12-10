@@ -32,6 +32,7 @@ export function ClientTinderSwipeCard({
 }: ClientTinderSwipeCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -60,13 +61,17 @@ export function ClientTinderSwipeCard({
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    // Left 30% = previous, Right 30% = next
+    // Left 30% = previous, Center 40% = toggle bottom sheet, Right 30% = next
     if (clickX < width * 0.3 && images.length > 1) {
       setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
       triggerHaptic('light');
     } else if (clickX > width * 0.7 && images.length > 1) {
       setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
       triggerHaptic('light');
+    } else {
+      // Center tap toggles bottom sheet
+      setIsBottomSheetExpanded(prev => !prev);
+      triggerHaptic('medium');
     }
   }, [images.length]);
 
@@ -202,36 +207,150 @@ export function ClientTinderSwipeCard({
           )}
         </div>
 
-        {/* Bottom Info Overlay */}
-        <div className="absolute bottom-24 left-0 right-0 px-6 z-20 pointer-events-none">
-          <div className="flex justify-between items-end">
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white drop-shadow-lg line-clamp-2">
-                {profile.name}
-                {profile.age && <span className="text-lg text-white/90 ml-2">{profile.age}</span>}
-              </h2>
-              {profile.city && (
-                <div className="flex items-center text-white/90 text-sm mt-1">
-                  <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="truncate">{profile.city}</span>
+        {/* Bottom Sheet - Collapsible with Glassmorphism */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 z-20"
+          animate={{
+            height: isBottomSheetExpanded ? '65%' : '22%',
+            y: 0
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 32
+          }}
+          style={{ willChange: 'height' }}
+        >
+          {/* Drag Handle */}
+          <div className="flex justify-center py-2 pointer-events-none">
+            <div className="w-10 h-1.5 bg-white/50 rounded-full" />
+          </div>
+
+          {/* Collapsed State Content */}
+          <div className="px-4 pb-3">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1">
+                <h2 className="text-lg font-bold text-foreground">
+                  {profile.name}
+                  {profile.age && <span className="text-base text-muted-foreground ml-2">{profile.age}</span>}
+                </h2>
+                {profile.city && (
+                  <div className="flex items-center text-muted-foreground text-xs mt-0.5">
+                    <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{profile.city}</span>
+                  </div>
+                )}
+              </div>
+
+              {profile.budget_max && (
+                <div className="text-right ml-4 flex-shrink-0">
+                  <div className="text-lg font-bold text-primary">
+                    ${profile.budget_max.toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">max budget</div>
                 </div>
               )}
             </div>
 
-            {profile.budget_max && (
-              <div className="text-right ml-4 flex-shrink-0">
-                <div className="text-xl font-bold text-white drop-shadow-lg">
-                  ${profile.budget_max.toLocaleString()}
-                </div>
-                <div className="text-xs text-white/80 whitespace-nowrap">max budget</div>
+            {/* Quick Preview - Interests badges */}
+            {!isBottomSheetExpanded && profile.interests && profile.interests.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {profile.interests.slice(0, 3).map((interest, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-[10px] px-2 py-0.5 bg-white/10 text-white/90 border-white/20">
+                    {interest}
+                  </Badge>
+                ))}
+                {profile.interests.length > 3 && (
+                  <Badge variant="secondary" className="text-[10px] px-2 py-0.5 bg-white/10 text-white/90 border-white/20">
+                    +{profile.interests.length - 3}
+                  </Badge>
+                )}
               </div>
             )}
+
+            {/* Expanded State Content */}
+            {isBottomSheetExpanded && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="mt-4 overflow-y-auto max-h-[calc(65vh-140px)] space-y-4"
+              >
+                {/* Interests Section */}
+                {profile.interests && profile.interests.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-2">Interests</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.interests.map((interest, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs px-3 py-1 bg-primary/20 text-primary border-primary/30">
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Lifestyle Tags */}
+                {profile.lifestyle_tags && profile.lifestyle_tags.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-2">Lifestyle</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.lifestyle_tags.map((tag, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs px-3 py-1 bg-secondary/20 text-secondary-foreground border-secondary/30">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Preferred Activities */}
+                {profile.preferred_activities && profile.preferred_activities.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-2">Activities</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.preferred_activities.map((activity, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs px-3 py-1 bg-accent/20 text-accent-foreground border-accent/30">
+                          {activity}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Budget Info */}
+                {(profile.budget_min || profile.budget_max) && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-2">Budget Range</h3>
+                    <p className="text-muted-foreground text-sm">
+                      ${profile.budget_min?.toLocaleString() || '0'} - ${profile.budget_max?.toLocaleString() || 'Unlimited'} /month
+                    </p>
+                  </div>
+                )}
+
+                {/* Match Percentage */}
+                {profile.matchPercentage && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-2">Match Score</h3>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-primary to-green-500 rounded-full"
+                          style={{ width: `${profile.matchPercentage}%` }}
+                        />
+                      </div>
+                      <span className="text-primary font-bold text-sm">{profile.matchPercentage}%</span>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Action Buttons - Bottom Fixed Position - Animated hide/show */}
         <AnimatePresence>
-          {isTop && !hideActions && (
+          {isTop && !hideActions && !isBottomSheetExpanded && (
             <motion.div
               initial={{ opacity: 0, y: 50, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
