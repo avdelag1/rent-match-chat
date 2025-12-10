@@ -13,7 +13,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
-import { FlameLoadingScreen } from "@/components/FlameLoadingScreen";
+import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -89,7 +89,7 @@ const App = () => (
                 <TooltipProvider>
                   <Toaster />
                   <Sonner />
-                  <Suspense fallback={<FlameLoadingScreen />}>
+                  <Suspense fallback={<AppLoadingScreen />}>
                     <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
