@@ -204,67 +204,36 @@ function LegendaryLandingPage() {
         >
           <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center flex items-center justify-center">
             <span>TINDE</span>
-            {/* Animated Flame R - Real fire movement */}
+            {/* Animated Flame R - Smooth slow flame effect */}
             <span className="relative inline-block mx-0.5">
-              {/* Rising flame particles */}
-              {[...Array(6)].map((_, i) => (
+              {/* Smooth rising heat waves */}
+              {[...Array(3)].map((_, i) => (
                 <motion.span
-                  key={i}
+                  key={`heat-${i}`}
                   className="absolute pointer-events-none"
                   style={{
-                    width: `${3 + Math.random() * 4}px`,
-                    height: `${8 + Math.random() * 12}px`,
-                    background: `linear-gradient(to top, ${
-                      i % 3 === 0 ? '#ff6b35' : i % 3 === 1 ? '#f7931e' : '#ffcc02'
-                    }, transparent)`,
-                    borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-                    left: `${10 + i * 8}%`,
-                    bottom: '20%',
+                    width: '100%',
+                    height: '60%',
+                    background: `radial-gradient(ellipse at center, rgba(251, 146, 60, ${0.15 - i * 0.04}) 0%, transparent 70%)`,
+                    left: '0',
+                    bottom: '50%',
+                    filter: 'blur(8px)',
                   }}
                   animate={{
-                    y: [-5, -35, -50],
-                    x: [0, (i % 2 === 0 ? 5 : -5), (i % 2 === 0 ? -3 : 3)],
-                    opacity: [0.9, 0.6, 0],
-                    scale: [1, 0.7, 0.3],
+                    y: [0, -15, -25, -15, 0],
+                    opacity: [0.3, 0.5, 0.3, 0.5, 0.3],
+                    scaleY: [1, 1.1, 1.2, 1.1, 1],
                   }}
                   transition={{
-                    duration: 0.8 + Math.random() * 0.4,
+                    duration: 3 + i * 0.5,
                     repeat: Infinity,
-                    ease: "easeOut",
-                    delay: i * 0.15,
+                    ease: "easeInOut",
+                    delay: i * 1,
                   }}
                 />
               ))}
               
-              {/* Flickering sparks */}
-              {[...Array(4)].map((_, i) => (
-                <motion.span
-                  key={`spark-${i}`}
-                  className="absolute pointer-events-none rounded-full"
-                  style={{
-                    width: '2px',
-                    height: '2px',
-                    background: '#fbbf24',
-                    boxShadow: '0 0 4px #fbbf24',
-                    left: `${20 + i * 15}%`,
-                    bottom: '30%',
-                  }}
-                  animate={{
-                    y: [-10, -45, -60],
-                    x: [(i % 2 === 0 ? -8 : 8), (i % 2 === 0 ? 12 : -12), (i % 2 === 0 ? -5 : 5)],
-                    opacity: [1, 0.8, 0],
-                    scale: [0.8, 1.2, 0.5],
-                  }}
-                  transition={{
-                    duration: 0.6 + Math.random() * 0.3,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                    delay: 0.3 + i * 0.2,
-                  }}
-                />
-              ))}
-              
-              {/* Main R with subtle glow */}
+              {/* Main R with smooth flickering glow */}
               <motion.span
                 className="relative"
                 style={{
@@ -275,14 +244,14 @@ function LegendaryLandingPage() {
                 }}
                 animate={{
                   filter: [
-                    'drop-shadow(0 0 3px rgba(251, 146, 60, 0.6))',
-                    'drop-shadow(0 0 5px rgba(251, 146, 60, 0.8))',
-                    'drop-shadow(0 0 4px rgba(234, 88, 12, 0.7))',
-                    'drop-shadow(0 0 3px rgba(251, 146, 60, 0.6))',
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 12px rgba(234, 88, 12, 0.3))',
+                    'drop-shadow(0 0 12px rgba(251, 146, 60, 0.7)) drop-shadow(0 -4px 16px rgba(234, 88, 12, 0.4))',
+                    'drop-shadow(0 0 10px rgba(249, 115, 22, 0.6)) drop-shadow(0 -3px 14px rgba(220, 38, 38, 0.35))',
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 12px rgba(234, 88, 12, 0.3))',
                   ],
                 }}
                 transition={{
-                  duration: 0.4,
+                  duration: 2.5,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}

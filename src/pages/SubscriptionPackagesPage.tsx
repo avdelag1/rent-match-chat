@@ -293,10 +293,15 @@ export default function SubscriptionPackagesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
       {/* Header */}
-      <div className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/50">
+      <div className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/50 pt-[env(safe-area-inset-top)]">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate(userRole === 'owner' ? '/owner/dashboard' : '/client/dashboard')} 
+              className="gap-2"
+            >
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
