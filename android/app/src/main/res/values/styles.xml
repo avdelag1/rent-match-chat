@@ -43,9 +43,4 @@
         <!-- Fit system windows -->
         <item name="android:fitsSystemWindows">false</item>
     </style>
-
-    <!-- Splash Screen Theme (Optional - for app launch) -->
-    <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
-        <item name="android:background">@drawable/splash</item>
-    </style>
 </resources>
