@@ -204,75 +204,92 @@ function LegendaryLandingPage() {
         >
           <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center flex items-center justify-center">
             <span>TINDE</span>
-            {/* Animated Flame R - Organic slow movement */}
-            <motion.span
-              className="relative inline-block mx-0.5"
-              style={{ filter: 'url(#flameDistortion)' }}
-            >
-              {/* Outer flame aura - slow organic movement */}
-              <motion.span
-                className="absolute -inset-3 rounded-full pointer-events-none"
-                style={{
-                  background: 'radial-gradient(ellipse at center bottom, rgba(251, 146, 60, 0.6) 0%, rgba(234, 88, 12, 0.4) 30%, rgba(220, 38, 38, 0.2) 60%, transparent 80%)',
-                  filter: 'blur(12px)',
-                }}
-                animate={{
-                  scale: [1, 1.15, 1.05, 1.2, 1],
-                  opacity: [0.5, 0.7, 0.55, 0.65, 0.5],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+            {/* Animated Flame R - Real fire movement */}
+            <span className="relative inline-block mx-0.5">
+              {/* Rising flame particles */}
+              {[...Array(6)].map((_, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: `${3 + Math.random() * 4}px`,
+                    height: `${8 + Math.random() * 12}px`,
+                    background: `linear-gradient(to top, ${
+                      i % 3 === 0 ? '#ff6b35' : i % 3 === 1 ? '#f7931e' : '#ffcc02'
+                    }, transparent)`,
+                    borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                    left: `${10 + i * 8}%`,
+                    bottom: '20%',
+                  }}
+                  animate={{
+                    y: [-5, -35, -50],
+                    x: [0, (i % 2 === 0 ? 5 : -5), (i % 2 === 0 ? -3 : 3)],
+                    opacity: [0.9, 0.6, 0],
+                    scale: [1, 0.7, 0.3],
+                  }}
+                  transition={{
+                    duration: 0.8 + Math.random() * 0.4,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: i * 0.15,
+                  }}
+                />
+              ))}
               
-              {/* Inner flame glow - subtle pulse */}
-              <motion.span
-                className="absolute -inset-1 rounded pointer-events-none"
-                style={{
-                  background: 'linear-gradient(to top, rgba(249, 115, 22, 0.8), rgba(220, 38, 38, 0.5), transparent)',
-                  filter: 'blur(6px)',
-                }}
-                animate={{
-                  opacity: [0.6, 0.9, 0.7, 0.85, 0.6],
-                  y: [0, -2, 1, -1, 0],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+              {/* Flickering sparks */}
+              {[...Array(4)].map((_, i) => (
+                <motion.span
+                  key={`spark-${i}`}
+                  className="absolute pointer-events-none rounded-full"
+                  style={{
+                    width: '2px',
+                    height: '2px',
+                    background: '#fbbf24',
+                    boxShadow: '0 0 4px #fbbf24',
+                    left: `${20 + i * 15}%`,
+                    bottom: '30%',
+                  }}
+                  animate={{
+                    y: [-10, -45, -60],
+                    x: [(i % 2 === 0 ? -8 : 8), (i % 2 === 0 ? 12 : -12), (i % 2 === 0 ? -5 : 5)],
+                    opacity: [1, 0.8, 0],
+                    scale: [0.8, 1.2, 0.5],
+                  }}
+                  transition={{
+                    duration: 0.6 + Math.random() * 0.3,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 0.3 + i * 0.2,
+                  }}
+                />
+              ))}
               
-              {/* Main R with gradient - slow breathing glow */}
+              {/* Main R with subtle glow */}
               <motion.span
                 className="relative"
                 style={{
-                  background: 'linear-gradient(to top, #f97316 0%, #ea580c 25%, #dc2626 50%, #fb923c 75%, #fbbf24 100%)',
+                  background: 'linear-gradient(to top, #f97316 0%, #ea580c 40%, #dc2626 70%, #fbbf24 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  filter: 'url(#flameGlow)',
                 }}
                 animate={{
                   filter: [
-                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.7)) drop-shadow(0 -4px 12px rgba(220, 38, 38, 0.5))',
-                    'drop-shadow(0 0 14px rgba(251, 146, 60, 0.9)) drop-shadow(0 -6px 18px rgba(220, 38, 38, 0.7))',
-                    'drop-shadow(0 0 10px rgba(234, 88, 12, 0.8)) drop-shadow(0 -5px 15px rgba(251, 191, 36, 0.6))',
-                    'drop-shadow(0 0 12px rgba(251, 146, 60, 0.85)) drop-shadow(0 -4px 14px rgba(220, 38, 38, 0.6))',
-                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.7)) drop-shadow(0 -4px 12px rgba(220, 38, 38, 0.5))',
+                    'drop-shadow(0 0 3px rgba(251, 146, 60, 0.6))',
+                    'drop-shadow(0 0 5px rgba(251, 146, 60, 0.8))',
+                    'drop-shadow(0 0 4px rgba(234, 88, 12, 0.7))',
+                    'drop-shadow(0 0 3px rgba(251, 146, 60, 0.6))',
                   ],
                 }}
                 transition={{
-                  duration: 3.5,
+                  duration: 0.4,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
               >
                 R
               </motion.span>
-            </motion.span>
+            </span>
             <span>ENT</span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
