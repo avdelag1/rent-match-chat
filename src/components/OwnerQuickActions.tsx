@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Plus, Users, MessageSquare, Heart, BarChart3, 
+import {
+  Plus, Users, MessageSquare, Flame, BarChart3,
   Settings, FileText, Star, TrendingUp, Bell
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -57,7 +57,7 @@ export function OwnerQuickActions({
       id: 'liked-clients',
       name: 'Liked Clients',
       description: 'View clients you\'ve shown interest in',
-      icon: <Heart className="w-6 h-6" />,
+      icon: <Flame className="w-6 h-6" />,
       route: '/owner/liked-clients',
       gradient: 'from-rose-500/20 via-rose-500/10 to-transparent',
       badge: newLikes > 0 ? newLikes : undefined,

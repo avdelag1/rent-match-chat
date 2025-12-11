@@ -6,7 +6,7 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MessageCircle, Heart, Home, Bike, Ship, Car } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Flame, Home, Bike, Ship, Car } from 'lucide-react';
 import { ClientProfilePreview } from '@/components/ClientProfilePreview';
 import { toast } from 'sonner';
 import { ClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
@@ -622,7 +622,7 @@ export default function OwnerViewClientProfile() {
               <span className="sm:hidden">Message</span>
             </Button>
             <Button variant="outline" size="lg">
-              <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Flame className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
         </div>

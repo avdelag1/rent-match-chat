@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { Heart, Star, Zap } from 'lucide-react';
+import { Flame, Star, Zap } from 'lucide-react';
 
 interface MatchPercentageBadgeProps {
   percentage: number;
@@ -18,7 +18,7 @@ export function MatchPercentageBadge({ percentage, reasons, className }: MatchPe
 
   const getMatchIcon = (percentage: number) => {
     if (percentage >= 90) return <Star className="w-3 h-3 fill-current" />;
-    if (percentage >= 70) return <Heart className="w-3 h-3 fill-current" />;
+    if (percentage >= 70) return <Flame className="w-3 h-3 fill-current" />;
     if (percentage >= 50) return <Zap className="w-3 h-3" />;
     return null;
   };

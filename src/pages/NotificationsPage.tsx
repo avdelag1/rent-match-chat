@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Bell, MessageSquare, Heart, Star, Sparkles, Trash2, 
+import {
+  Bell, MessageSquare, Flame, Star, Sparkles, Trash2,
   CheckCheck, Filter, MoreHorizontal, Archive, Eye,
   Home, Ship, Bike, Car
 } from 'lucide-react';
@@ -52,7 +52,7 @@ const NotificationIcon = ({ type, className = "w-5 h-5" }: { type: string; class
       return <MessageSquare className={`${className} text-blue-500`} />;
     case 'new_like':
     case 'like':
-      return <Heart className={`${className} text-rose-500`} />;
+      return <Flame className={`${className} text-orange-500`} />;
     case 'new_match':
     case 'match':
       return <Sparkles className={`${className} text-amber-500`} />;
@@ -75,8 +75,8 @@ const NotificationIconBg = ({ type }: { type: string }) => {
   const bgColors: Record<string, string> = {
     'new_message': 'bg-blue-500/10',
     'message': 'bg-blue-500/10',
-    'new_like': 'bg-rose-500/10',
-    'like': 'bg-rose-500/10',
+    'new_like': 'bg-orange-500/10',
+    'like': 'bg-orange-500/10',
     'new_match': 'bg-amber-500/10',
     'match': 'bg-amber-500/10',
     'super_like': 'bg-yellow-500/10',
@@ -408,8 +408,8 @@ export default function NotificationsPage() {
                 <span className="hidden sm:inline">Messages</span>
               </TabsTrigger>
               <TabsTrigger value="likes" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
-                <Heart className="w-4 h-4" />
-                <span className="hidden sm:inline">Likes</span>
+                <Flame className="w-4 h-4" />
+                <span className="hidden sm:inline">Flames</span>
               </TabsTrigger>
               <TabsTrigger value="matches" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
                 <Sparkles className="w-4 h-4" />

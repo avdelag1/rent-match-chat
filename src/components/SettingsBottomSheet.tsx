@@ -7,7 +7,7 @@ import {
   Crown,
   HelpCircle,
   Users,
-  Heart,
+  Flame,
   Filter,
   Palette,
   ChevronRight,

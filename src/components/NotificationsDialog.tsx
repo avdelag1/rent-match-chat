@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, MessageSquare, Heart, CheckCheck, Trash2, Star, Sparkles, Eye } from 'lucide-react';
+import { Bell, MessageSquare, Flame, CheckCheck, Trash2, Star, Sparkles, Eye } from 'lucide-react';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,9 +22,9 @@ const NotificationIconBg = ({ type }: { type: string }) => {
       bg: 'bg-blue-500/10', 
       icon: <MessageSquare className="w-5 h-5 text-blue-500" /> 
     },
-    'like': { 
-      bg: 'bg-rose-500/10', 
-      icon: <Heart className="w-5 h-5 text-rose-500" /> 
+    'like': {
+      bg: 'bg-orange-500/10',
+      icon: <Flame className="w-5 h-5 text-orange-500" />
     },
     'match': { 
       bg: 'bg-amber-500/10', 
@@ -111,7 +111,7 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
                 <span className="sm:hidden">Msgs</span>
               </TabsTrigger>
               <TabsTrigger value="like" className="text-[10px] sm:text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-1 sm:px-2">
-                Likes
+                Flames
               </TabsTrigger>
             </TabsList>
           </div>

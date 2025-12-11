@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, SlidersHorizontal, Heart, MessageCircle, User, Plus, List, Building2 } from 'lucide-react';
+import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 
@@ -41,8 +41,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     },
     {
       id: 'likes',
-      label: 'Likes',
-      icon: Heart,
+      label: 'Flames',
+      icon: Flame,
       path: '/client/liked-properties',
     },
     {
@@ -70,8 +70,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     },
     {
       id: 'liked',
-      label: 'Liked',
-      icon: Heart,
+      label: 'Flames',
+      icon: Flame,
       path: '/owner/liked-clients',
     },
     {
@@ -122,7 +122,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
           const getIconColor = () => {
             if (active) {
               if (item.id === 'browse') return 'text-red-500';
-              if (item.id === 'likes' || item.id === 'liked') return 'text-pink-500';
+              if (item.id === 'likes' || item.id === 'liked') return 'text-orange-500';
               if (item.id === 'messages') return 'text-blue-500';
               if (item.id === 'listings') return 'text-red-500';
               if (item.id === 'profile') return 'text-red-500';
@@ -147,7 +147,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 <span
                   className={cn(
                     "absolute -top-0.5 -right-0.5 rounded-full h-3 w-3 flex items-center justify-center shadow-lg",
-                    item.id === 'messages' ? 'bg-blue-500' : 'bg-pink-500'
+                    item.id === 'messages' ? 'bg-blue-500' : 'bg-orange-500'
                   )}
                 />
               )}

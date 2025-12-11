@@ -96,7 +96,7 @@ export function useNotificationSystem() {
               title: swiperProfile.full_name || 'Someone',
               message: swipe.swipe_type === 'super_like' 
                 ? 'gave you a Super Like! ⭐' 
-                : 'liked your profile! ❤️',
+                : 'liked your profile! 🔥',
               avatar: swiperProfile.avatar_url,
               timestamp: new Date(),
               read: false,

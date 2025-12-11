@@ -1,5 +1,5 @@
 import { motion, TargetAndTransition } from 'framer-motion';
-import { RotateCcw, X, Eye, Heart } from 'lucide-react';
+import { RotateCcw, X, Eye, Flame } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 
 interface SwipeActionButtonsProps {
@@ -174,7 +174,7 @@ export function SwipeActionButtons({
             `}
             title="Like"
           >
-            <Heart className="h-7 w-7 sm:h-8 sm:w-8 fill-current" />
+            <Flame className="h-7 w-7 sm:h-8 sm:w-8 fill-current" />
           </button>
         </motion.div>
       </div>

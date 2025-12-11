@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike } from "lucide-react";
+import { Flame, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -209,12 +209,12 @@ export function LikedClients() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-red-500 to-red-500 text-white flex-shrink-0">
-                <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white flex-shrink-0">
+                <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Liked Clients</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Manage your liked client profiles and start conversations</p>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Flamed Clients</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Manage your flamed client profiles and start conversations</p>
               </div>
             </div>
           </div>
@@ -282,16 +282,16 @@ export function LikedClients() {
             className="text-center py-12 sm:py-16 max-w-md mx-auto"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-muted flex items-center justify-center">
-              <Heart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-muted-foreground" />
+              <Flame className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-muted-foreground" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">No Liked Clients Yet</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">No Flamed Clients Yet</h2>
             <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-4">
               {searchTerm ? 'No clients match your search.' : 'Start browsing client profiles and like the ones you\'re interested in working with'}
             </p>
             {!searchTerm && (
               <Button 
                 onClick={() => window.location.href = '/owner/dashboard'}
-                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-sm sm:text-base"
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-sm sm:text-base"
               >
                 Browse Clients
               </Button>
@@ -337,7 +337,7 @@ export function LikedClients() {
                       className="shadow-lg"
                       disabled={removeLikeMutation.isPending}
                     >
-                      <Heart className="w-4 h-4 fill-current" />
+                      <Flame className="w-4 h-4 fill-current" />
                     </Button>
                   </div>
                 </div>
@@ -377,7 +377,7 @@ export function LikedClients() {
                   
                   <div className="pt-3 border-t">
                     <p className="text-xs text-muted-foreground">
-                      Liked on {new Date(client.liked_at).toLocaleDateString()}
+                      Flamed on {new Date(client.liked_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

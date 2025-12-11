@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, User, Globe, Heart, Sparkles, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Camera, User, Globe, Flame, Sparkles, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { PhotoUploadManager } from '@/components/PhotoUploadManager';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -353,7 +353,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             className="space-y-6"
           >
             <div className="text-center mb-6">
-              <Heart className="w-12 h-12 mx-auto mb-3 text-red-400" />
+              <Flame className="w-12 h-12 mx-auto mb-3 text-orange-400" />
               <h3 className="text-2xl font-bold text-white mb-2">What Do You Love?</h3>
               <p className="text-white/70">Select at least 3 interests</p>
             </div>

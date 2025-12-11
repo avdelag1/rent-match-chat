@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Bed, Bath, Square, DollarSign, Home, Users, Car, Anchor, Bike, Bike as Motorcycle, Eye, Heart, MessageSquare, X } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, DollarSign, Home, Users, Car, Anchor, Bike, Bike as Motorcycle, Eye, Flame, MessageSquare, X } from 'lucide-react';
 import { ImageCarousel } from '@/components/ImageCarousel';
 import { cn } from '@/lib/utils';
 
@@ -382,9 +382,9 @@ export function ListingPreviewDialog({
                 <div className="text-[10px] sm:text-xs text-muted-foreground">Views</div>
               </div>
               <div className="space-y-1 sm:space-y-2 p-2 sm:p-3 bg-muted/20 rounded-lg">
-                <Heart className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-muted-foreground" />
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-muted-foreground" />
                 <div className="text-lg sm:text-xl lg:text-2xl font-bold text-primary">{listing.likes || listing.like_count || 0}</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Likes</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Flames</div>
               </div>
               <div className="space-y-1 sm:space-y-2 p-2 sm:p-3 bg-muted/20 rounded-lg">
                 <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-muted-foreground" />

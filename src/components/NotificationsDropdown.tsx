@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Check, Trash2, Archive, Flame, MessageCircle, Heart, Star, FileText, Calendar } from 'lucide-react';
+import { Bell, Check, Trash2, Archive, Flame, MessageCircle, Star, FileText, Calendar } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,7 +40,7 @@ const NotificationIcon = ({ type }: { type?: string }) => {
     case 'new_message':
       return <MessageCircle className={`${iconClass} text-blue-500`} />;
     case 'new_like':
-      return <Heart className={`${iconClass} text-red-500`} />;
+      return <Flame className={`${iconClass} text-orange-500`} />;
     case 'new_review':
       return <Star className={`${iconClass} text-yellow-500`} />;
     case 'property_inquiry':

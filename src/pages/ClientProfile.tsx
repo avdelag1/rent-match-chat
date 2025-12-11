@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { 
-  LogOut, User, Settings, Shield, Bell, Heart, 
+import {
+  LogOut, User, Settings, Shield, Bell, Flame,
   MessageCircle, Camera, ChevronRight, Sparkles, Crown
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -153,7 +153,7 @@ const ClientProfile = () => {
           >
             <Card className="bg-card border-border">
               <CardContent className="p-3 text-center">
-                <Heart className="w-5 h-5 text-pink-500 mx-auto mb-1" />
+                <Flame className="w-5 h-5 text-orange-500 mx-auto mb-1" />
                 <div className="text-lg font-bold text-foreground">0</div>
                 <div className="text-xs text-muted-foreground">Likes</div>
               </CardContent>

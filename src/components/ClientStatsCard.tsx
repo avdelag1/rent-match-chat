@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useClientStats } from '@/hooks/useClientStats';
-import { Heart, MessageCircle, Eye, TrendingUp } from 'lucide-react';
+import { Flame, MessageCircle, Eye, TrendingUp } from 'lucide-react';
 
 export function ClientStatsCard() {
   const { data: stats, isLoading } = useClientStats();
@@ -27,7 +27,7 @@ export function ClientStatsCard() {
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
-              <Heart className="w-4 h-4 text-red-400" />
+              <Flame className="w-4 h-4 text-orange-400" />
               <span className="text-xl font-bold text-primary">{stats?.savedProperties || 0}</span>
             </div>
             <p className="text-white/60 text-sm">Saved Properties</p>

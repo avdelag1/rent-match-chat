@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  User, MapPin, Briefcase, Calendar, Languages, Heart, 
-  Users, Baby, Cigarette, Wine, Sparkles, Volume2, 
+import {
+  User, MapPin, Briefcase, Calendar, Languages, Flame,
+  Users, Baby, Cigarette, Wine, Sparkles, Volume2,
   Clock, Utensils, Smile, Star
 } from 'lucide-react';
 import { ImageCarousel } from '@/components/ImageCarousel';
@@ -333,7 +333,7 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
             {profileData.interest_categories && profileData.interest_categories.length > 0 && (
               <div>
                 <h4 className="font-medium mb-2 flex items-center gap-2">
-                  <Heart className="h-4 w-4 text-muted-foreground" />
+                  <Flame className="h-4 w-4 text-muted-foreground" />
                   Interest Categories
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -352,7 +352,7 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5" />
+              <Flame className="h-5 w-5" />
               Interests & Activities
             </CardTitle>
           </CardHeader>
