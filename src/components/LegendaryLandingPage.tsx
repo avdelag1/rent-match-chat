@@ -202,93 +202,27 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-6xl font-bold tracking-wider drop-shadow-lg text-center flex items-center justify-center">
-            <span className="text-white">Swipe</span>
-            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-red-500 bg-clip-text text-transparent">Matc</span>
-            {/* Animated Flame H - Smooth slow flame effect */}
-            <span className="relative inline-block">
-              {/* Smooth rising heat waves */}
-              {[...Array(3)].map((_, i) => (
-                <motion.span
-                  key={`heat-${i}`}
-                  className="absolute pointer-events-none"
-                  style={{
-                    width: '100%',
-                    height: '60%',
-                    background: `radial-gradient(ellipse at center, rgba(251, 146, 60, ${0.15 - i * 0.04}) 0%, transparent 70%)`,
-                    left: '0',
-                    bottom: '50%',
-                    filter: 'blur(8px)',
-                  }}
-                  animate={{
-                    y: [0, -15, -25, -15, 0],
-                    opacity: [0.3, 0.5, 0.3, 0.5, 0.3],
-                    scaleY: [1, 1.1, 1.2, 1.1, 1],
-                  }}
-                  transition={{
-                    duration: 3 + i * 0.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: i * 1,
-                  }}
-                />
-              ))}
-              
-              {/* Main H with smooth flickering glow */}
-              <motion.span
-                className="relative"
-                style={{
-                  background: 'linear-gradient(to top, #f97316 0%, #ea580c 40%, #dc2626 70%, #fbbf24 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-                animate={{
-                  filter: [
-                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 12px rgba(234, 88, 12, 0.3))',
-                    'drop-shadow(0 0 12px rgba(251, 146, 60, 0.7)) drop-shadow(0 -4px 16px rgba(234, 88, 12, 0.4))',
-                    'drop-shadow(0 0 10px rgba(249, 115, 22, 0.6)) drop-shadow(0 -3px 14px rgba(220, 38, 38, 0.35))',
-                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 12px rgba(234, 88, 12, 0.3))',
-                  ],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                h
-              </motion.span>
-              
-              {/* Flame particles rising from H */}
-              {[...Array(4)].map((_, i) => (
-                <motion.span
-                  key={`flame-particle-${i}`}
-                  className="absolute pointer-events-none"
-                  style={{
-                    width: `${3 + Math.random() * 4}px`,
-                    height: `${6 + Math.random() * 8}px`,
-                    background: `linear-gradient(to top, #f97316, #fbbf24, transparent)`,
-                    borderRadius: '50%',
-                    right: `${-2 + i * 4}px`,
-                    bottom: '70%',
-                    filter: 'blur(1px)',
-                  }}
-                  animate={{
-                    y: [-5, -20, -35],
-                    x: [0, (i - 1.5) * 3, (i - 1.5) * 5],
-                    opacity: [0.8, 0.5, 0],
-                    scale: [1, 0.7, 0.3],
-                  }}
-                  transition={{
-                    duration: 1.5 + i * 0.3,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                    delay: i * 0.4,
-                  }}
-                />
-              ))}
-            </span>
+          <h1 className="text-6xl font-bold tracking-wider drop-shadow-lg text-center">
+            <motion.span
+              className="inline-block"
+              style={{
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 25%, #ea580c 50%, #fbbf24 75%, #fff 100%)',
+                backgroundSize: '200% 100%',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+              animate={{
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              SwipeMatch
+            </motion.span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
             Swipe to discover your ideal property or perfect client - rent, buy & connect
