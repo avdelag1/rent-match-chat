@@ -1,4 +1,4 @@
-import { Bell, Settings, Flame, Filter } from 'lucide-react';
+import { Bell, Settings, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -17,15 +17,11 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
   return (
     <header className={cn('app-header bg-background/95 backdrop-blur-md', className)}>
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
-        {/* Logo with Modern Animation */}
+        {/* Logo - Clean without flame */}
         <div className="flex items-center gap-1.5 select-none">
-          <span className="text-base font-bold">
+          <span className="text-xl font-bold tracking-tight">
             <span className="text-white">Swipe</span>
-            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Matc</span>
-            <span className="relative inline-block">
-              <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">h</span>
-              <Flame className="absolute -top-1 -right-2 h-3 w-3 text-orange-500 animate-pulse" />
-            </span>
+            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Match</span>
           </span>
         </div>
 
