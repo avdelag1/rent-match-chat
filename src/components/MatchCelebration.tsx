@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, Star } from 'lucide-react';
+import { Flame, Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -67,11 +67,11 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                 }}
               >
                 {i % 3 === 0 ? (
-                  <Heart className="w-6 h-6 text-red-500 fill-current" />
+                  <Flame className="w-6 h-6 text-orange-500 fill-current" />
                 ) : i % 3 === 1 ? (
                   <Sparkles className="w-5 h-5 text-yellow-400" />
                 ) : (
-                  <Star className="w-4 h-4 text-pink-400 fill-current" />
+                  <Star className="w-4 h-4 text-red-400 fill-current" />
                 )}
               </motion.div>
             ))}
@@ -90,7 +90,7 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
             }}
             className="relative z-10 w-full max-w-md"
           >
-            <Card className="p-8 text-center bg-gradient-to-br from-pink-50 to-red-50 border-2 border-red-200 shadow-2xl">
+            <Card className="p-8 text-center bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 shadow-2xl">
               {/* Match Text Animation */}
               <motion.div
                 initial={{ y: -50, opacity: 0 }}
@@ -98,8 +98,8 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="mb-8"
               >
-                <motion.h1 
-                  className="text-6xl font-bold bg-gradient-to-r from-red-500 via-pink-500 to-red-500 bg-clip-text text-transparent"
+                <motion.h1
+                  className="text-6xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 bg-clip-text text-transparent"
                   animate={{ 
                     scale: [1, 1.1, 1],
                   }}
@@ -119,13 +119,13 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                   className="flex justify-center mt-4"
                 >
                   <div className="relative">
-                    <Heart className="w-16 h-16 text-red-500 fill-current" />
+                    <Flame className="w-16 h-16 text-orange-500 fill-current" />
                     <motion.div
                       animate={{ scale: [1, 1.3, 1] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
                       className="absolute inset-0"
                     >
-                      <Heart className="w-16 h-16 text-red-300 fill-current" />
+                      <Flame className="w-16 h-16 text-orange-300 fill-current" />
                     </motion.div>
                   </div>
                 </motion.div>
@@ -147,7 +147,7 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                         transition={{ delay: 0.2 }}
                         className="text-center"
                       >
-                        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-red-400 shadow-lg">
+                        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-400 shadow-lg">
                           {matchedUser?.avatar ? (
                             <img 
                               src={matchedUser.avatar} 
@@ -165,19 +165,19 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                         </p>
                       </motion.div>
 
-                      {/* Heart in the middle */}
+                      {/* Flame in the middle */}
                       <motion.div
-                        animate={{ 
+                        animate={{
                           rotate: [0, 10, -10, 0],
                           scale: [1, 1.2, 1]
                         }}
-                        transition={{ 
+                        transition={{
                           duration: 1,
                           repeat: Infinity,
                           repeatType: "reverse"
                         }}
                       >
-                        <Heart className="w-8 h-8 text-red-500 fill-current" />
+                        <Flame className="w-8 h-8 text-orange-500 fill-current" />
                       </motion.div>
 
                       {/* Current User Profile */}
@@ -187,7 +187,7 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                         transition={{ delay: 0.2 }}
                         className="text-center"
                       >
-                        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-red-400 shadow-lg">
+                        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-400 shadow-lg">
                           <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
                             You
                           </div>
@@ -216,7 +216,7 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
                     >
                       <Button
                         onClick={handleStartConversation}
-                        className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold px-6 py-2 shadow-lg"
+                        className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-6 py-2 shadow-lg"
                       >
                         Start Conversation
                       </Button>

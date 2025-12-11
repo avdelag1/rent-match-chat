@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, MessageCircle, Star, User, Bell } from 'lucide-react';
+import { X, Flame, MessageCircle, Star, User, Bell } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,13 +47,13 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'like':
-        return <Heart className="w-4 h-4 text-red-500" />;
+        return <Flame className="w-4 h-4 text-orange-500" />;
       case 'message':
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case 'super_like':
         return <Star className="w-4 h-4 text-yellow-500" />;
       case 'match':
-        return <Heart className="w-4 h-4 text-pink-500 fill-current" />;
+        return <Flame className="w-4 h-4 text-orange-500 fill-current" />;
       case 'new_user':
         return <User className="w-4 h-4 text-green-500" />;
       default:
@@ -64,13 +64,13 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
   const getNotificationColor = (type: string) => {
     switch (type) {
       case 'like':
-        return 'border-red-200 bg-red-50';
+        return 'border-orange-200 bg-orange-50';
       case 'message':
         return 'border-blue-200 bg-blue-50';
       case 'super_like':
         return 'border-yellow-200 bg-yellow-50';
       case 'match':
-        return 'border-pink-200 bg-pink-50';
+        return 'border-orange-200 bg-orange-50';
       case 'new_user':
         return 'border-green-200 bg-green-50';
       default:

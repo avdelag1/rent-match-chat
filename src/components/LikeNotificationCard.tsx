@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, X } from 'lucide-react';
+import { Flame, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LikeNotificationPreview } from './LikeNotificationPreview';
 import { LikeNotificationActions } from './LikeNotificationActions';
@@ -63,7 +63,7 @@ export function LikeNotificationCard({
   };
 
   return (
-    <Card className="p-4 relative overflow-hidden border-pink-200 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
+    <Card className="p-4 relative overflow-hidden border-orange-200 bg-gradient-to-r from-orange-50/50 to-red-50/50">
       <div className="absolute top-2 right-2">
         <Button
           variant="ghost"
@@ -78,8 +78,8 @@ export function LikeNotificationCard({
       <div className="space-y-4 pr-8">
         {/* Header */}
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shrink-0">
-            <Heart className="w-6 h-6 text-white fill-white" />
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shrink-0">
+            <Flame className="w-6 h-6 text-white fill-white" />
           </div>
 
           <div className="flex-1">

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, X, Loader2 } from 'lucide-react';
+import { Flame, MessageCircle, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LikeNotificationActionsProps {
@@ -29,7 +29,7 @@ export function LikeNotificationActions({
         <Button
           onClick={onAccept}
           disabled={isLoading}
-          className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+          className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
         >
           {isAccepting ? (
             <>
@@ -38,7 +38,7 @@ export function LikeNotificationActions({
             </>
           ) : (
             <>
-              <Heart className="w-4 h-4 mr-2 fill-current" />
+              <Flame className="w-4 h-4 mr-2 fill-current" />
               Accept & Connect
             </>
           )}
@@ -49,7 +49,7 @@ export function LikeNotificationActions({
             onClick={onChat}
             disabled={isLoading}
             variant="outline"
-            className="w-full border-pink-200 hover:bg-pink-50"
+            className="w-full border-orange-200 hover:bg-orange-50"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Open Chat
@@ -86,7 +86,7 @@ export function LikeNotificationActions({
         disabled={isLoading}
         size="sm"
         className={cn(
-          'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600',
+          'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600',
           'transition-all duration-200'
         )}
       >
@@ -97,7 +97,7 @@ export function LikeNotificationActions({
           </>
         ) : (
           <>
-            <Heart className="w-3 h-3 mr-1.5 fill-current" />
+            <Flame className="w-3 h-3 mr-1.5 fill-current" />
             Accept
           </>
         )}
@@ -110,7 +110,7 @@ export function LikeNotificationActions({
           disabled={isLoading}
           size="sm"
           variant="outline"
-          className="border-pink-200 hover:bg-pink-50"
+          className="border-orange-200 hover:bg-orange-50"
         >
           <MessageCircle className="w-3 h-3 mr-1.5" />
           Chat

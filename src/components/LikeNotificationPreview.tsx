@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Home, Heart, Loader2 } from 'lucide-react';
+import { MapPin, Home, Flame, Loader2 } from 'lucide-react';
 
 interface LikeNotificationPreviewProps {
   likerId: string;
@@ -158,8 +158,8 @@ export function LikeNotificationPreview({
         {/* Header - Show role instead of name */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white fill-white" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <Flame className="w-5 h-5 text-white fill-white" />
             </div>
             <div>
               <h4 className="font-semibold">

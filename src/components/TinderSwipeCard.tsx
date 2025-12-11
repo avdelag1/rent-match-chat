@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from '
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, RotateCcw, Eye, Heart } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, RotateCcw, Eye, Flame } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -436,10 +436,10 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                     e.stopPropagation();
                     onSwipe('right');
                   }}
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                  title="Like"
+                  className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  title="Flame"
                 >
-                  <Heart className="w-7 h-7" fill="currentColor" />
+                  <Flame className="w-7 h-7" fill="currentColor" />
                 </motion.button>
               </div>
             </motion.div>

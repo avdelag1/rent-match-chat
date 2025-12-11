@@ -152,7 +152,7 @@ export function NotificationSystem() {
             
             // Show toast notification
             toast({
-              title: `❤️ New Like from ${likerRole}`,
+              title: `🔥 New Flame from ${likerRole}`,
               description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
               duration: 3000,
             });

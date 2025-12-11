@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Flame, SlidersHorizontal, Heart, MessageCircle, User } from 'lucide-react';
+import { Flame, SlidersHorizontal, MessageCircle, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useUnreadLikes } from '@/hooks/useUnreadLikes';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
@@ -48,14 +48,14 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
         {/* Likes */}
         <NavLink to={likesLink} className={getNavLinkClass}>
           <div className="relative">
-            <Heart className="w-6 h-6" />
+            <Flame className="w-6 h-6" />
             {likesCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-[22px] min-w-[22px] rounded-full px-1.5 flex items-center justify-center bg-gradient-to-br from-red-600 to-pink-500 text-white text-[10px] font-bold leading-none shadow-lg ring-1 ring-background">
+              <Badge className="absolute -top-2 -right-2 h-[22px] min-w-[22px] rounded-full px-1.5 flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-500 text-white text-[10px] font-bold leading-none shadow-lg ring-1 ring-background">
                 {likesCount > 99 ? '99+' : likesCount}
               </Badge>
             )}
           </div>
-          <span className="text-xs font-medium">Likes</span>
+          <span className="text-xs font-medium">Flames</span>
         </NavLink>
 
         {/* Messages */}

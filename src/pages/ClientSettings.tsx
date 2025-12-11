@@ -7,7 +7,7 @@ import { ClientProfilePreview } from "@/components/ClientProfilePreview";
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { Button } from "@/components/ui/button";
-import { Heart, Home, Bike, Ship, Eye } from "lucide-react";
+import { Flame, Home, Bike, Ship, Eye } from "lucide-react";
 import { Car } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -116,7 +116,7 @@ const ClientSettings = () => {
                     size="lg"
                     className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white text-sm sm:text-base"
                   >
-                    <Heart className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    <Flame className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     Set My Preferences
                   </Button>
                 </div>

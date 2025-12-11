@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye } from 'lucide-react';
+import { MapPin, Briefcase, Flame, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -307,7 +307,7 @@ export function OwnerClientTinderCard({
               {/* Row 2: Top Interests */}
               {profile.interests && profile.interests.length > 0 && (
                 <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-                  <Heart className="w-3.5 h-3.5 text-pink-400" />
+                  <Flame className="w-3.5 h-3.5 text-orange-400" />
                   <span className="text-[10px] text-muted-foreground/70">Interests:</span>
                   <div className="flex gap-1 flex-wrap">
                     {profile.interests.slice(0, 3).map((interest, idx) => (
@@ -475,10 +475,10 @@ export function OwnerClientTinderCard({
                 e.stopPropagation();
                 onSwipe('right');
               }}
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-              title="Like"
+              className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+              title="Flame"
             >
-              <Heart className="w-7 h-7" fill="currentColor" />
+              <Flame className="w-7 h-7" fill="currentColor" />
             </button>
           </div>
         </div>

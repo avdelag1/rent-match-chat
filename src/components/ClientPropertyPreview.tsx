@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Bed, Bath, Square, Heart, MessageCircle, X, Flame, Share2 } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, MessageCircle, X, Flame, Share2 } from 'lucide-react';
 import { ImageCarousel } from '@/components/ImageCarousel';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useHasPremiumFeature } from '@/hooks/useSubscription';
@@ -40,8 +40,8 @@ export function ClientPropertyPreview({
     
     setIsLiked(true);
     toast({
-      title: "Property Liked! ❤️",
-      description: "This property has been added to your liked list.",
+      title: "Property Flamed! 🔥",
+      description: "This property has been added to your flames list.",
       duration: 3000,
     });
   };
@@ -290,22 +290,22 @@ export function ClientPropertyPreview({
             
             <Button
               className={`flex-1 gap-2 h-12 ${
-                isLiked 
-                  ? 'bg-red-500 hover:bg-red-600' 
-                  : 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600'
+                isLiked
+                  ? 'bg-orange-500 hover:bg-orange-600'
+                  : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600'
               } text-white`}
               onClick={handleLike}
               disabled={swipeMutation.isPending || isLiked}
             >
               {isLiked ? (
                 <>
-                  <Heart className="w-5 h-5 fill-current" />
-                  Liked!
+                  <Flame className="w-5 h-5 fill-current" />
+                  Flamed!
                 </>
               ) : (
                 <>
                   <Flame className="w-5 h-5" />
-                  Love It
+                  Flame It
                 </>
               )}
             </Button>

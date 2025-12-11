@@ -9,7 +9,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Heart, SlidersHorizontal, MessageCircle, Eye, ArrowLeft, RefreshCw } from 'lucide-react';
+import { X, RotateCcw, Sparkles, Flame, SlidersHorizontal, MessageCircle, Eye, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
