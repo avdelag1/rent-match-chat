@@ -7,12 +7,19 @@ import { TenantScreening } from "@/components/TenantScreening";
 import { LeaseManagement } from "@/components/LeaseManagement";
 import { RentalAnalytics } from "@/components/RentalAnalytics";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useOwnerProfile } from "@/hooks/useOwnerProfile";
+import { Building2, Mail, MapPin, Phone, Edit, Camera } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const OwnerSettings = () => {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("profile");
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const { data: ownerProfile, isLoading: profileLoading } = useOwnerProfile();
 
   // Support deep-linking to specific tabs via URL parameter
   useEffect(() => {
@@ -21,6 +28,7 @@ const OwnerSettings = () => {
       setActiveTab(tab);
     }
   }, [searchParams]);
+
   return (
     <DashboardLayout userRole="owner">
       <div className="w-full h-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8">
@@ -44,9 +52,104 @@ const OwnerSettings = () => {
               </TabsList>
             </div>
 
-            <TabsContent value="profile">
-              <div className="p-4 sm:p-6 text-center bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 mt-4 sm:mt-6">
-                <p className="text-gray-700 text-sm sm:text-base">Profile settings will appear here</p>
+            <TabsContent value="profile" className="mt-4 sm:mt-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-4 sm:p-6">
+                {profileLoading ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="w-20 h-20 rounded-full" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-24 w-full" />
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Profile Header */}
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div
+                          className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden cursor-pointer"
+                          onClick={() => setShowProfileDialog(true)}
+                        >
+                          {ownerProfile?.profile_images?.[0] ? (
+                            <img
+                              src={ownerProfile.profile_images[0]}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Building2 className="w-10 h-10 text-primary-foreground" />
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setShowProfileDialog(true)}
+                          className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary rounded-full flex items-center justify-center shadow-lg"
+                        >
+                          <Camera className="w-4 h-4 text-primary-foreground" />
+                        </button>
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-xl font-bold text-foreground">
+                          {ownerProfile?.business_name || 'Set up your business profile'}
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                          {ownerProfile?.business_description ?
+                            ownerProfile.business_description.slice(0, 80) + (ownerProfile.business_description.length > 80 ? '...' : '')
+                            : 'Add a description to help clients learn about your business'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Business Info Cards */}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {ownerProfile?.business_location && (
+                        <Card className="bg-gray-50 border-gray-200">
+                          <CardContent className="p-4 flex items-center gap-3">
+                            <MapPin className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Location</p>
+                              <p className="text-sm font-medium">{ownerProfile.business_location}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      {ownerProfile?.contact_email && (
+                        <Card className="bg-gray-50 border-gray-200">
+                          <CardContent className="p-4 flex items-center gap-3">
+                            <Mail className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Email</p>
+                              <p className="text-sm font-medium">{ownerProfile.contact_email}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      {ownerProfile?.contact_phone && (
+                        <Card className="bg-gray-50 border-gray-200">
+                          <CardContent className="p-4 flex items-center gap-3">
+                            <Phone className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Phone</p>
+                              <p className="text-sm font-medium">{ownerProfile.contact_phone}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+
+                    {/* Edit Profile Button */}
+                    <Button
+                      onClick={() => setShowProfileDialog(true)}
+                      className="w-full sm:w-auto bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Business Profile
+                    </Button>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
@@ -89,6 +192,12 @@ const OwnerSettings = () => {
           </Tabs>
         </div>
       </div>
+
+      {/* Owner Profile Edit Dialog */}
+      <OwnerProfileDialog
+        open={showProfileDialog}
+        onOpenChange={setShowProfileDialog}
+      />
     </DashboardLayout>
   );
 };
