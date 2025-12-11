@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from '
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, RotateCcw, Sparkles, Heart } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, RotateCcw, Eye, Heart } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -183,56 +183,6 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
           {/* Bottom gradient - Lighter for better photo visibility */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
 
-          {/* Photo Info Overlays - Different info per photo */}
-          {isTop && currentImageIndex < 5 && (
-            <div className="absolute bottom-20 left-4 right-4 z-20 pointer-events-none">
-              {currentImageIndex === 0 && (
-                <div className="space-y-1">
-                  <h2 className="text-xl font-bold text-white drop-shadow-lg">{listing.title}</h2>
-                  <p className="text-primary text-base font-semibold drop-shadow-lg">${listing.price?.toLocaleString()}/mo</p>
-                  <p className="text-white/70 text-xs drop-shadow">Tap sides to browse photos</p>
-                </div>
-              )}
-              {currentImageIndex === 1 && (
-                <div className="space-y-1">
-                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">📍 Location</span>
-                  <p className="text-white text-sm font-medium drop-shadow-lg">{listing.neighborhood}, {listing.city}</p>
-                  {listing.property_type && <p className="text-white/80 text-xs drop-shadow">{listing.property_type} · {listing.square_footage} ft²</p>}
-                </div>
-              )}
-              {currentImageIndex === 2 && listing.amenities && listing.amenities.length > 0 && (
-                <div className="space-y-1.5">
-                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">✨ Amenities</span>
-                  <div className="flex flex-wrap gap-1">
-                    {listing.amenities.slice(0, 6).map((amenity, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-primary/40 backdrop-blur-sm text-white text-[10px] rounded-full capitalize">{amenity}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {currentImageIndex === 3 && (
-                <div className="space-y-1.5">
-                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">🏠 Details</span>
-                  <div className="flex flex-wrap gap-1">
-                    {listing.beds && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">🛏 {listing.beds} beds</span>}
-                    {listing.baths && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">🚿 {listing.baths} baths</span>}
-                    {listing.furnished && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">🪑 Furnished</span>}
-                    {listing.pet_friendly && <span className="px-2 py-0.5 bg-green-500/40 backdrop-blur-sm text-white text-[10px] rounded-full">🐾 Pet friendly</span>}
-                  </div>
-                </div>
-              )}
-              {currentImageIndex === 4 && (
-                <div className="space-y-1.5">
-                  <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px]">📋 Info</span>
-                  <div className="flex flex-wrap gap-1">
-                    {(listing as any).min_rental_term_months && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">Min {(listing as any).min_rental_term_months}mo</span>}
-                    {(listing as any).deposit_amount && <span className="px-2 py-0.5 bg-white/25 backdrop-blur-sm text-white text-[10px] rounded-full">${(listing as any).deposit_amount.toLocaleString()} deposit</span>}
-                    {(listing as any).has_verified_documents && <span className="px-2 py-0.5 bg-blue-500/40 backdrop-blur-sm text-white text-[10px] rounded-full">✓ Verified</span>}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
           
           {/* Verification Badge */}
           {(listing as any).has_verified_documents && (
@@ -473,7 +423,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                     className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
                     title="View Insights"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Eye className="w-5 h-5" />
                   </motion.button>
                 )}
 
