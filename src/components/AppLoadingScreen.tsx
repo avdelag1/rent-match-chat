@@ -1,71 +1,76 @@
 import { motion } from 'framer-motion';
-import { Flame } from 'lucide-react';
 
 export function AppLoadingScreen() {
   return (
     <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-      <div className="text-center space-y-6">
-        {/* Animated Logo */}
+      {/* Bouncing Realistic Flame */}
+      <motion.div
+        animate={{ 
+          y: [0, -12, 0, -6, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        className="relative"
+      >
+        <svg 
+          viewBox="0 0 64 64" 
+          className="w-24 h-24"
+          style={{ 
+            filter: 'drop-shadow(0 0 20px rgba(251, 146, 60, 0.6)) drop-shadow(0 0 40px rgba(234, 88, 12, 0.4))'
+          }}
+        >
+          <defs>
+            <linearGradient id="flameGradientMain" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#f97316" />
+              <stop offset="40%" stopColor="#ea580c" />
+              <stop offset="70%" stopColor="#dc2626" />
+              <stop offset="100%" stopColor="#b91c1c" />
+            </linearGradient>
+            <linearGradient id="flameGradientInner" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#fbbf24" />
+              <stop offset="50%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#f97316" />
+            </linearGradient>
+            <linearGradient id="flameGradientCore" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#fef3c7" />
+              <stop offset="50%" stopColor="#fcd34d" />
+              <stop offset="100%" stopColor="#fbbf24" />
+            </linearGradient>
+          </defs>
+          {/* Outer flame */}
+          <path 
+            d="M32 4C32 4 16 20 16 36C16 44.8366 23.1634 52 32 52C40.8366 52 48 44.8366 48 36C48 20 32 4 32 4Z" 
+            fill="url(#flameGradientMain)"
+          />
+          {/* Middle flame */}
+          <path 
+            d="M32 14C32 14 22 26 22 38C22 43.5228 26.4772 48 32 48C37.5228 48 42 43.5228 42 38C42 26 32 14 32 14Z" 
+            fill="url(#flameGradientInner)"
+          />
+          {/* Inner core */}
+          <path 
+            d="M32 24C32 24 27 32 27 40C27 42.7614 29.2386 45 32 45C34.7614 45 37 42.7614 37 40C37 32 32 24 32 24Z" 
+            fill="url(#flameGradientCore)"
+          />
+        </svg>
+        
+        {/* Animated glow pulse */}
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex justify-center"
-        >
-          <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg flex items-center justify-center shadow-2xl border border-white/20">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-500 flex items-center justify-center"
-            >
-              <Flame className="w-6 h-6 text-white" />
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* App Name */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-3xl font-bold text-white tracking-wider drop-shadow-lg"
-        >
-          TINDE<span className="text-red-500">R</span>ENT
-        </motion.h1>
-
-        {/* Loading Animation */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex justify-center space-x-2"
-        >
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                delay: i * 0.2
-              }}
-              className="w-2 h-2 bg-white/60 rounded-full"
-            />
-          ))}
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-white/80 text-sm"
-        >
-          Loading your experience...
-        </motion.p>
-      </div>
+          animate={{ 
+            opacity: [0.4, 0.7, 0.4],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute inset-0 bg-orange-500/20 rounded-full blur-2xl -z-10"
+        />
+      </motion.div>
     </div>
   );
 }
