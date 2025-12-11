@@ -92,9 +92,10 @@ export function PropertyImageGallery({
               <img
                 src={getFullImageUrl(images[currentIndex])}
                 alt={`${alt} ${currentIndex + 1}`}
-                className={`max-w-full max-h-full object-contain transition-transform duration-300 ${
+                className={`max-w-full max-h-full object-contain transition-transform duration-75 ${
                   isZoomed ? 'scale-150 cursor-grab' : 'cursor-zoom-in'
                 }`}
+                style={{ willChange: 'transform' }}
                 onClick={() => setIsZoomed(!isZoomed)}
                 draggable={false}
                 loading="eager"

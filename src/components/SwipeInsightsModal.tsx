@@ -59,14 +59,14 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
           <motion.div
-            initial={{ opacity: 0, y: '100%' }}
+            initial={{ opacity: 0, y: '60%' }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '100%' }}
+            exit={{ opacity: 0, y: '60%' }}
             transition={{
               type: 'spring',
-              damping: 28,
-              stiffness: 500,
-              mass: 0.5,
+              damping: 20,
+              stiffness: 800,
+              mass: 0.3,
             }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
@@ -74,12 +74,12 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
             onDragStart={() => setIsDragging(true)}
             onDragEnd={handleDragEnd}
             style={{
-              willChange: 'transform',
-              transform: 'translateZ(0)',  // GPU acceleration
+              willChange: 'transform, opacity',
+              transform: 'translateZ(0)',
               backfaceVisibility: 'hidden'
             }}
           >
-            <DialogContent className={`max-w-lg w-full max-h-[75vh] h-[70vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
+            <DialogContent className={`max-w-lg w-full max-h-[85vh] h-[80vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
               <motion.div>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -100,14 +100,14 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     </div>
                   </div>
 
-                  {/* Profile Photos Grid - Clickable */}
+                  {/* Profile Photos - Large Scrollable */}
                   {profile.profile_images && profile.profile_images.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <h4 className="font-semibold flex items-center gap-2">
                         <Users className="w-5 h-5 text-primary" />
-                        Profile Photos
+                        Profile Photos ({profile.profile_images.length})
                       </h4>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="space-y-3">
                         {profile.profile_images.map((image, index) => (
                           <button
                             key={index}
@@ -115,20 +115,24 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                               setSelectedImageIndex(index);
                               setGalleryOpen(true);
                             }}
-                            className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                            className="relative w-full aspect-[4/3] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.98] transition-all duration-75"
+                            style={{ willChange: 'transform' }}
                           >
                             <img
                               src={image}
                               alt={`${profile.name} photo ${index + 1}`}
                               className="w-full h-full object-cover"
-                              loading={index < 3 ? "eager" : "lazy"}
+                              loading={index < 2 ? "eager" : "lazy"}
                               decoding="async"
                               fetchPriority={index === 0 ? "high" : "auto"}
                             />
+                            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                              {index + 1} / {profile.profile_images.length}
+                            </div>
                           </button>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground">Click any photo to view full size</p>
+                      <p className="text-xs text-muted-foreground text-center">Tap any photo to view full size & zoom</p>
                     </div>
                   )}
 
@@ -295,35 +299,39 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     </div>
                   )}
 
-                  {/* Property Images Grid - Clickable */}
+                  {/* Property Images - Large Scrollable */}
                   {listing.images && listing.images.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <h4 className="font-semibold flex items-center gap-2">
                         <Eye className="w-5 h-5 text-primary" />
                         Property Photos ({listing.images.length})
                       </h4>
-                      <div className="grid grid-cols-3 gap-2">
-                        {listing.images.slice(0, 6).map((image, index) => (
+                      <div className="space-y-3">
+                        {listing.images.map((image, index) => (
                           <button
                             key={index}
                             onClick={() => {
                               setSelectedImageIndex(index);
                               setGalleryOpen(true);
                             }}
-                            className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                            className="relative w-full aspect-[4/3] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.98] transition-all duration-75"
+                            style={{ willChange: 'transform' }}
                           >
                             <img
                               src={image}
                               alt={`Property ${index + 1}`}
                               className="w-full h-full object-cover"
-                              loading={index < 3 ? "eager" : "lazy"}
+                              loading={index < 2 ? "eager" : "lazy"}
                               decoding="async"
                               fetchPriority={index === 0 ? "high" : "auto"}
                             />
+                            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                              {index + 1} / {listing.images.length}
+                            </div>
                           </button>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground">Tap any photo to view full size</p>
+                      <p className="text-xs text-muted-foreground text-center">Tap any photo to view full size & zoom</p>
                     </div>
                   )}
 
