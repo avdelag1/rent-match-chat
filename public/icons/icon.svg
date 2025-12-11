@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="224" fill="#000000"/>
+
+  <!-- Gradient Definition for Flame -->
+  <defs>
+    <linearGradient id="flameGradient" x1="512" y1="896" x2="512" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="50%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <linearGradient id="innerFlame" x1="512" y1="704" x2="512" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#fde047"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main Flame -->
+  <path d="M512 128C512 128 256 448 256 640C256 781.385 364.615 896 512 896C659.385 896 768 781.385 768 640C768 448 512 128 512 128Z" fill="url(#flameGradient)"/>
+
+  <!-- Inner Flame -->
+  <path d="M512 320C512 320 400 480 400 576C400 637.856 451.145 688 512 688C572.856 688 624 637.856 624 576C624 480 512 320 512 320Z" fill="url(#innerFlame)"/>
+</svg>
