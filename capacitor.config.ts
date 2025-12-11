@@ -1,36 +1,105 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.rentmatch.app',
-  appName: 'Rent Match Chat',
+  appId: 'com.tinderent.app',
+  appName: 'Tinderent',
   webDir: 'dist',
 
-  // iOS Configuration for Safe Areas
+  // Server configuration for development
+  server: {
+    // Enable HTTPS for iOS App Transport Security
+    androidScheme: 'https',
+    iosScheme: 'https',
+    // Allow navigation to external URLs
+    allowNavigation: [
+      'https://*.supabase.co',
+      'https://*.supabase.in',
+      'https://fonts.googleapis.com',
+      'https://fonts.gstatic.com',
+      'https://storage.googleapis.com'
+    ],
+  },
+
+  // iOS Configuration - Comprehensive settings for App Store
   ios: {
+    // Safe area handling
     contentInset: 'always',
+    // Allow scrolling in web view
+    allowsLinkPreview: true,
+    // Scroll behavior
+    scrollEnabled: true,
+    // Keyboard behavior
+    limitsNavigationsToAppBoundDomains: false,
+    // Enable background modes
+    backgroundColor: '#000000',
+    // Web view preferences
+    preferredContentMode: 'mobile',
+    // Handle URL schemes
+    handleApplicationNotifications: true,
   },
 
   // Android Configuration
   android: {
     allowMixedContent: true,
     captureInput: true,
+    webContentsDebuggingEnabled: false,
+    backgroundColor: '#000000',
   },
 
   // Plugin Configuration
   plugins: {
     StatusBar: {
       // Set to false to ensure status bar doesn't overlay content
-      // This is critical for safe-area-inset-top to work properly
       overlay: false,
-      // Status bar style: 'LIGHT' (light text) or 'DARK' (dark text)
-      style: 'LIGHT',
-      // Background color for Android (hex format)
-      backgroundColor: '#FF0000',
+      // Status bar style for iOS
+      style: 'DARK',
+      // Background color
+      backgroundColor: '#000000',
     },
     PushNotifications: {
       // iOS: Present notifications when app is in foreground
       presentationOptions: ['badge', 'sound', 'alert'],
     },
+    SplashScreen: {
+      // Splash screen duration in milliseconds
+      launchShowDuration: 2000,
+      // Auto hide splash screen
+      launchAutoHide: true,
+      // Background color
+      backgroundColor: '#000000',
+      // Android specific
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP',
+      // iOS specific
+      showSpinner: false,
+      iosSpinnerStyle: 'small',
+      spinnerColor: '#ff6b35',
+      // Fade out animation
+      launchFadeOutDuration: 300,
+      // Splash screen image
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+    Keyboard: {
+      // Keyboard behavior on iOS
+      resize: 'body',
+      resizeOnFullScreen: true,
+    },
+    LocalNotifications: {
+      // Small icon for Android notifications
+      smallIcon: 'ic_stat_icon_config_sample',
+      iconColor: '#ff6b35',
+    },
+    App: {
+      // URL schemes the app can open
+      iosScheme: 'tinderent',
+    },
+  },
+
+  // App URL Launcher configuration
+  appUrlOpen: {
+    // Handle deep links
+    url: 'tinderent://',
   },
 };
 
