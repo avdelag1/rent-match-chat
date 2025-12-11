@@ -120,16 +120,16 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
       style={cardStyle}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: -600, right: 600 }}
-      dragElastic={0.15}
-      dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
+      dragElastic={0.4}
+      dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
       onDragEnd={handleDragEnd}
       className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
       animate={{ x: 0, rotate: 0, scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
       transition={{
         type: "spring",
-        stiffness: 400,
-        damping: 35,
-        mass: 0.8
+        stiffness: 500,
+        damping: 30,
+        mass: 0.5
       }}
     >
       <div className="absolute inset-0 w-full h-full overflow-hidden">
