@@ -22,7 +22,7 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
   `;
 
   const dashboardLink = userRole === 'owner' ? '/owner/dashboard' : '/client/dashboard';
-  const filtersLink = userRole === 'owner' ? '/owner/filters' : '/client/filters';
+  const filtersLink = userRole === 'owner' ? '/owner/filters-explore' : '/client/dashboard'; // Clients use filter bottom sheet on dashboard
   const likesLink = userRole === 'owner' ? '/owner/liked-clients' : '/client/liked-properties';
   const profileLink = userRole === 'owner' ? '/owner/profile' : '/client/profile';
 
@@ -59,7 +59,7 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
         </NavLink>
 
         {/* Messages */}
-        <NavLink to="/messaging" className={getNavLinkClass}>
+        <NavLink to="/messages" className={getNavLinkClass}>
           <div className="relative">
             <MessageCircle className="w-6 h-6" />
             {messagesCount > 0 && (

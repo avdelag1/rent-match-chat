@@ -35,6 +35,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             size="icon"
             className="relative h-9 w-9 hover:bg-muted/50 rounded-lg transition-all duration-200"
             onClick={onNotificationsClick}
+            aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
             <Bell className="h-5 w-5 text-foreground/80" />
             {notificationCount > 0 && (
@@ -51,6 +52,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
               size="icon"
               className="h-9 w-9 hover:bg-muted/50 rounded-lg transition-all duration-200"
               onClick={onFiltersClick}
+              aria-label="Open filters"
             >
               <Filter className="h-5 w-5 text-foreground/80" />
             </Button>
@@ -62,6 +64,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             size="icon"
             className="h-9 w-9 hover:bg-muted/50 rounded-lg transition-all duration-200"
             onClick={onSettingsClick}
+            aria-label="Settings menu"
           >
             <Settings className="h-5 w-5 text-foreground/80" />
           </Button>
