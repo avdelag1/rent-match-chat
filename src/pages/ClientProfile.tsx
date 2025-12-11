@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ClientProfileDialog } from "@/components/ClientProfileDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
+import { ServiceOfferForm } from "@/components/ServiceOfferForm";
 import { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut, User, Settings, Shield, Bell, Flame,
-  MessageCircle, Camera, ChevronRight, Sparkles, Crown
+  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Briefcase
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -214,6 +215,15 @@ const ClientProfile = () => {
               </Card>
             </motion.div>
           )}
+
+          {/* Service Offering Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.22 }}
+          >
+            <ServiceOfferForm />
+          </motion.div>
 
           {/* Settings Menu */}
           <motion.div

@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2 } from 'lucide-react';
+import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 
@@ -69,10 +69,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       path: '/owner/dashboard',
     },
     {
-      id: 'liked',
-      label: 'Flames',
-      icon: Flame,
-      path: '/owner/liked-clients',
+      id: 'hire',
+      label: 'Hire',
+      icon: Briefcase,
+      path: '/owner/services',
     },
     {
       id: 'listings',

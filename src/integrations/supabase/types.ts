@@ -775,6 +775,54 @@ export type Database = {
         }
         Relationships: []
       }
+      client_services: {
+        Row: {
+          availability: string | null
+          created_at: string
+          custom_service_name: string | null
+          description: string | null
+          experience_years: number | null
+          hourly_rate: number | null
+          id: string
+          is_active: boolean | null
+          service_photos: string[] | null
+          service_type: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          custom_service_name?: string | null
+          description?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          service_photos?: string[] | null
+          service_type: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          custom_service_name?: string | null
+          description?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          service_photos?: string[] | null
+          service_type?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       communication_channels: {
         Row: {
           created_at: string | null
