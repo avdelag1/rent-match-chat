@@ -422,7 +422,7 @@ export function OwnerClientTinderCard({
       {/* Action Buttons - Hide on insights/expanded */}
       {isTop && (
         <div
-          className={`absolute bottom-[20%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 transition-all duration-300 ease-out ${
+          className={`absolute bottom-[12%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 transition-all duration-300 ease-out ${
             hideActions || isBottomSheetExpanded
               ? 'opacity-0 translate-y-12 pointer-events-none'
               : 'opacity-100 translate-y-0 pointer-events-auto'
