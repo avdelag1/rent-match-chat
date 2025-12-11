@@ -338,7 +338,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                           I agree to the{' '}
                           <a
-                            href="/terms"
+                            href="/terms-of-service"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline font-medium"
@@ -347,7 +347,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           </a>
                           {' '}and{' '}
                           <a
-                            href="/privacy"
+                            href="/privacy-policy"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline font-medium"
