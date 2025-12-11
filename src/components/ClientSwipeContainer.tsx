@@ -94,11 +94,9 @@ export function ClientSwipeContainer({
     // Record the swipe for undo functionality
     recordSwipe(currentClient.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
 
-    // Move to next card after animation with proper delay for smooth rhythm
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 300); // 300ms delay for smooth visual rhythm
+    // Move to next card immediately - no delay for instant response
+    setCurrentIndex(prev => prev + 1);
+    setSwipeDirection(null);
   }, [currentIndex, clientProfiles, swipeMutation, recordSwipe]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {

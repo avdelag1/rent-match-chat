@@ -135,11 +135,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       action: direction === 'right' ? 'like' : 'pass'
     });
 
-    // Small delay for animation smoothness, then update index
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-      setSwipeDirection(null);
-    }, 50);
+    // Instant update - no delay for real-time feel
+    setCurrentIndex(prev => prev + 1);
+    setSwipeDirection(null);
   }, [currentIndex, listings, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleButtonSwipe = (direction: 'left' | 'right') => {
