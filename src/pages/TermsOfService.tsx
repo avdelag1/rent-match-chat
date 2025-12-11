@@ -24,7 +24,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p className="mb-4">
-              By accessing or using TindeRent, you agree to be bound by these Terms of Service and
+              By accessing or using SwipeMatch, you agree to be bound by these Terms of Service and
               our Privacy Policy. If you do not agree to these terms, please do not use our service.
             </p>
           </section>
@@ -32,7 +32,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">2. Eligibility</h2>
             <p className="mb-4">
-              You must be at least 18 years old to use TindeRent. By using our service, you represent
+              You must be at least 18 years old to use SwipeMatch. By using our service, you represent
               and warrant that:
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -46,7 +46,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">3. User Accounts</h2>
             <p className="mb-4">
-              <strong>Account Creation:</strong> You must create an account to use TindeRent. You are
+              <strong>Account Creation:</strong> You must create an account to use SwipeMatch. You are
               responsible for maintaining the confidentiality of your account credentials.
             </p>
             <p className="mb-4">
@@ -120,7 +120,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">8. Intellectual Property</h2>
             <p className="mb-4">
-              All content, features, and functionality of TindeRent are owned by us and protected by
+              All content, features, and functionality of SwipeMatch are owned by us and protected by
               copyright, trademark, and other intellectual property laws.
             </p>
             <p className="mb-4">
@@ -132,7 +132,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">9. Disclaimers</h2>
             <p className="mb-4">
-              TindeRent is provided "AS IS" without warranties of any kind. We do not:
+              SwipeMatch is provided "AS IS" without warranties of any kind. We do not:
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>Guarantee property availability or accuracy of listings</li>
@@ -145,7 +145,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">10. Limitation of Liability</h2>
             <p className="mb-4">
-              To the maximum extent permitted by law, TindeRent and its affiliates shall not be liable
+              To the maximum extent permitted by law, SwipeMatch and its affiliates shall not be liable
               for any indirect, incidental, special, consequential, or punitive damages arising from
               your use of the service.
             </p>
@@ -158,7 +158,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">11. Indemnification</h2>
             <p className="mb-4">
-              You agree to indemnify and hold harmless TindeRent from any claims, damages, or expenses
+              You agree to indemnify and hold harmless SwipeMatch from any claims, damages, or expenses
               arising from your use of the service, violation of these terms, or infringement of any
               third-party rights.
             </p>
@@ -212,8 +212,8 @@ export default function TermsOfService() {
               For questions about these Terms of Service, contact us at:
             </p>
             <ul className="list-none pl-0 mb-4 space-y-2">
-              <li><strong>Email:</strong> legal@tinderent.com</li>
-              <li><strong>Support:</strong> support@tinderent.com</li>
+              <li><strong>Email:</strong> legal@swipematch.com</li>
+              <li><strong>Support:</strong> support@swipematch.com</li>
             </ul>
           </section>
 

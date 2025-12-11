@@ -195,17 +195,18 @@ function LegendaryLandingPage() {
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-12 max-w-md w-full">
 
-        {/* Title with Flame R */}
+        {/* Title with Flame H */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-6xl font-bold text-white tracking-wider drop-shadow-lg text-center flex items-center justify-center">
-            <span>TINDE</span>
-            {/* Animated Flame R - Smooth slow flame effect */}
-            <span className="relative inline-block mx-0.5">
+          <h1 className="text-6xl font-bold tracking-wider drop-shadow-lg text-center flex items-center justify-center">
+            <span className="text-white">Swipe</span>
+            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-red-500 bg-clip-text text-transparent">Matc</span>
+            {/* Animated Flame H - Smooth slow flame effect */}
+            <span className="relative inline-block">
               {/* Smooth rising heat waves */}
               {[...Array(3)].map((_, i) => (
                 <motion.span
@@ -233,7 +234,7 @@ function LegendaryLandingPage() {
                 />
               ))}
               
-              {/* Main R with smooth flickering glow */}
+              {/* Main H with smooth flickering glow */}
               <motion.span
                 className="relative"
                 style={{
@@ -256,10 +257,38 @@ function LegendaryLandingPage() {
                   ease: "easeInOut"
                 }}
               >
-                R
+                h
               </motion.span>
+              
+              {/* Flame particles rising from H */}
+              {[...Array(4)].map((_, i) => (
+                <motion.span
+                  key={`flame-particle-${i}`}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: `${3 + Math.random() * 4}px`,
+                    height: `${6 + Math.random() * 8}px`,
+                    background: `linear-gradient(to top, #f97316, #fbbf24, transparent)`,
+                    borderRadius: '50%',
+                    right: `${-2 + i * 4}px`,
+                    bottom: '70%',
+                    filter: 'blur(1px)',
+                  }}
+                  animate={{
+                    y: [-5, -20, -35],
+                    x: [0, (i - 1.5) * 3, (i - 1.5) * 5],
+                    opacity: [0.8, 0.5, 0],
+                    scale: [1, 0.7, 0.3],
+                  }}
+                  transition={{
+                    duration: 1.5 + i * 0.3,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: i * 0.4,
+                  }}
+                />
+              ))}
             </span>
-            <span>ENT</span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
             Swipe to discover your ideal property or perfect client - rent, buy & connect

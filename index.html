@@ -27,23 +27,23 @@
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     </noscript>
-    <title>Tinderent - Find Your Perfect Rental Property or Tenant</title>
-    <meta name="description" content="Discover your ideal rental property or tenant with Tinderent. Swipe through verified listings, connect with perfect matches, and find your next home or tenant effortlessly.">
-    <meta name="author" content="Tinderent" />
-    <meta name="keywords" content="rental, property, tenant, apartment, house, real estate, matching, tinder for rentals">
+    <title>SwipeMatch - Find Your Perfect Rental Property or Tenant</title>
+    <meta name="description" content="Discover your ideal rental property or tenant with SwipeMatch. Swipe through verified listings, connect with perfect matches, and find your next home or tenant effortlessly.">
+    <meta name="author" content="SwipeMatch" />
+    <meta name="keywords" content="rental, property, tenant, apartment, house, real estate, matching, swipe for rentals">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://tinderent.lovable.app/">
-    <meta property="og:title" content="Tinderent - Find Your Perfect Rental Property or Tenant">
-    <meta property="og:description" content="Discover your ideal rental property or tenant with Tinderent. Swipe through verified listings and connect with perfect matches.">
+    <meta property="og:url" content="https://swipematch.lovable.app/">
+    <meta property="og:title" content="SwipeMatch - Find Your Perfect Rental Property or Tenant">
+    <meta property="og:description" content="Discover your ideal rental property or tenant with SwipeMatch. Swipe through verified listings and connect with perfect matches.">
     <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/qyGlrqJHe9g2hyHsAc6ZZroRlyF2/social-images/social-1758515231924-ChatGPT Image Sep 21, 2025, 11_01_12 PM.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://tinderent.lovable.app/">
-    <meta property="twitter:title" content="Tinderent - Find Your Perfect Rental Property or Tenant">
-    <meta property="twitter:description" content="Discover your ideal rental property or tenant with Tinderent. Swipe through verified listings and connect with perfect matches.">
+    <meta property="twitter:url" content="https://swipematch.lovable.app/">
+    <meta property="twitter:title" content="SwipeMatch - Find Your Perfect Rental Property or Tenant">
+    <meta property="twitter:description" content="Discover your ideal rental property or tenant with SwipeMatch. Swipe through verified listings and connect with perfect matches.">
     <meta property="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/qyGlrqJHe9g2hyHsAc6ZZroRlyF2/social-images/social-1758515231924-ChatGPT Image Sep 21, 2025, 11_01_12 PM.png">
     
     <!-- PWA Support -->
@@ -53,7 +53,7 @@
     <!-- iOS/Safari PWA Support - Comprehensive Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tinderent">
+    <meta name="apple-mobile-web-app-title" content="SwipeMatch">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-touch-fullscreen" content="yes">
@@ -255,19 +255,19 @@
 
       // Force cache clear on critical updates - only clear app-related caches
       // Bump version (e.g., 1.0.3 -> 1.0.4) when breaking cache changes are needed
-      if (localStorage.getItem('tinderent_last_clear') !== '1.0.3') {
+      if (localStorage.getItem('swipematch_last_clear') !== '2.0.0') {
         console.log('Clearing app caches for fresh content...');
         if ('caches' in window) {
           caches.keys().then(names => {
             names.forEach(name => {
-              // Only delete caches with tinderent prefix to avoid affecting other origins
-              if (name.startsWith('tinderent-')) {
+              // Only delete caches with swipematch or tinderent prefix to avoid affecting other origins
+              if (name.startsWith('swipematch-') || name.startsWith('tinderent-')) {
                 caches.delete(name);
               }
             });
           });
         }
-        localStorage.setItem('tinderent_last_clear', '1.0.3');
+        localStorage.setItem('swipematch_last_clear', '2.0.0');
       }
     </script>
   </body>

@@ -19,11 +19,13 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
         {/* Logo with Modern Animation */}
         <div className="flex items-center gap-1.5 select-none">
-          <div className="bg-gradient-to-r from-red-600 to-red-500 rounded-xl p-1 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-200 hover:scale-110">
-            <Flame className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-base font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
-            TINDERENT
+          <span className="text-base font-bold">
+            <span className="text-white">Swipe</span>
+            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Matc</span>
+            <span className="relative inline-block">
+              <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">h</span>
+              <Flame className="absolute -top-1 -right-2 h-3 w-3 text-orange-500 animate-pulse" />
+            </span>
           </span>
         </div>
 

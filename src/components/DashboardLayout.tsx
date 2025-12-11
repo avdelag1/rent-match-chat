@@ -400,7 +400,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             setShowOnboarding(false);
             toast({
               title: 'Profile Complete!',
-              description: 'Welcome to TindeRent. Start exploring!',
+              description: 'Welcome to SwipeMatch. Start exploring!',
             });
           }}
         />

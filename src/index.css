@@ -178,12 +178,12 @@ body {
   margin-right: var(--safe-right);
 }
 
-/* Tinderent Design System - Theme Variables */
+/* SwipeMatch Design System - Theme Variables */
 
 @layer base {
   /* Mobile-first responsive design variables */
   :root {
-    /* TINDERENT DESIGN SYSTEM - Red Professional Theme */
+    /* SWIPEMATCH DESIGN SYSTEM - Orange/Red Professional Theme */
     --app-gradient: linear-gradient(135deg, hsl(0, 100%, 60%) 0%, hsl(0, 100%, 50%) 50%, hsl(0, 90%, 45%) 100%);
     --card-gradient: linear-gradient(145deg, hsla(0, 0%, 100%, 0.95) 0%, hsla(0, 0%, 100%, 0.90) 100%);
     --button-gradient: linear-gradient(135deg, hsl(0, 100%, 60%) 0%, hsl(0, 100%, 50%) 100%);
@@ -371,7 +371,7 @@ body {
   }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  /*  TINDERENT MATTE COLOR SYSTEM - Premium AI App Aesthetic             */
+  /*  SWIPEMATCH MATTE COLOR SYSTEM - Premium AI App Aesthetic            */
   /*  Inspired by Claude, ChatGPT, and Grok - Modern, Sophisticated        */
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 

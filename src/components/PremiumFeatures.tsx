@@ -101,7 +101,7 @@ export function PremiumFeatures({ userRole, onUpgrade }: PremiumFeaturesProps) {
         <p className="text-muted-foreground">
           {hasPremium 
             ? 'You have access to all premium features!' 
-            : `Get the most out of Tinderent with premium ${userRole} features`
+            : `Get the most out of SwipeMatch with premium ${userRole} features`
           }
         </p>
       </div>
@@ -151,7 +151,7 @@ export function PremiumFeatures({ userRole, onUpgrade }: PremiumFeaturesProps) {
             <Crown className="w-12 h-12 mx-auto mb-4 text-primary" />
             <h3 className="text-xl font-bold mb-2">Ready to Go Premium?</h3>
             <p className="text-muted-foreground mb-4">
-              Unlock all features and get 10x better results on Tinderent
+              Unlock all features and get 10x better results on SwipeMatch
             </p>
             <Button 
               size="lg"
