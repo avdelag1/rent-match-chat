@@ -215,7 +215,7 @@ export function useAccountLinking() {
       });
 
       toast({
-        title: "Welcome to Tinderent!",
+        title: "Welcome to SwipeMatch!",
         description: `Your ${oauthUser.app_metadata?.provider} account has been connected successfully.`,
       });
 

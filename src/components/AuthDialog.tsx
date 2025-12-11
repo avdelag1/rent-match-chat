@@ -188,7 +188,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 {isLogin ? 'Sign In' : 'Sign Up'} as {role}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Tinderent
+                {isLogin ? 'Sign in to your account' : 'Create a new account'} to access SwipeMatch
               </DialogDescription>
 
               {/* Back Button */}

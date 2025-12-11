@@ -75,7 +75,7 @@ export function SettingsBottomSheet({
   const ownerMenuItems: MenuItem[] = [
     {
       title: 'Liked Clients',
-      icon: Heart,
+      icon: Flame,
       path: '/owner/liked-clients',
     },
     {
@@ -201,7 +201,7 @@ export function SettingsBottomSheet({
         {/* Footer Info */}
         <div className="px-2 pt-2">
           <p className="text-xs text-muted-foreground text-center">
-            TindeRent v1.0
+            SwipeMatch v1.0
           </p>
         </div>
       </div>

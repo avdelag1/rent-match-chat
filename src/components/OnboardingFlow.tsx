@@ -51,12 +51,12 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
   const [hasChildren, setHasChildren] = useState(false);
   const [interests, setInterests] = useState<string[]>([]);
 
-  const steps = [
-    { title: 'Welcome', icon: Sparkles, description: 'Welcome to TindeRent!' },
+const steps = [
+    { title: 'Welcome', icon: Sparkles, description: 'Welcome to SwipeMatch!' },
     { title: 'Photos', icon: Camera, description: 'Add your profile photos' },
     { title: 'Basic Info', icon: User, description: 'Tell us about yourself' },
     { title: 'Demographics', icon: Globe, description: 'A bit more about you' },
-    { title: 'Interests', icon: Heart, description: 'What do you love?' },
+    { title: 'Interests', icon: Flame, description: 'What do you love?' },
     { title: 'Complete', icon: CheckCircle2, description: 'You\'re all set!' },
   ];
 
@@ -181,7 +181,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
             </div>
             <div>
               <h2 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent mb-3">
-                Welcome to TindeRent!
+                Welcome to SwipeMatch!
               </h2>
               <p className="text-lg text-white/80">
                 Let's set up your profile in just a few steps.

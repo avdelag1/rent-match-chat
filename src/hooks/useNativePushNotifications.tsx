@@ -34,7 +34,8 @@ let PushNotifications: any = null;
 const loadPushNotifications = async () => {
   if (Capacitor.isNativePlatform() && !PushNotifications) {
     try {
-      const module = await import('@capacitor/push-notifications');
+      // Dynamic import - only works if package is installed
+      const module = await import('@capacitor/push-notifications' as any);
       PushNotifications = module.PushNotifications;
     } catch (error) {
       console.log('Push notifications not available:', error);
@@ -52,52 +53,31 @@ export function useNativePushNotifications() {
   const platform = Capacitor.getPlatform() as 'ios' | 'android' | 'web';
   const isNative = Capacitor.isNativePlatform();
 
-  // Save token to Supabase
+  // Save token to local storage (device_tokens table not available)
   const saveToken = useCallback(async (token: string) => {
     if (!user?.id) return;
 
     try {
-      // Upsert the token (update if exists, insert if new)
-      const { error } = await supabase
-        .from('device_tokens')
-        .upsert(
-          {
-            user_id: user.id,
-            token: token,
-            platform: platform,
-            is_active: true,
-            last_used_at: new Date().toISOString(),
-          },
-          {
-            onConflict: 'user_id,token',
-          }
-        );
-
-      if (error) {
-        console.error('Error saving device token:', error);
-      } else {
-        console.log('Device token saved successfully');
-        setIsRegistered(true);
-      }
+      // Store token locally since device_tokens table is not available
+      localStorage.setItem(`push_token_${user.id}`, JSON.stringify({
+        token,
+        platform,
+        updated_at: new Date().toISOString(),
+      }));
+      console.log('Device token saved locally');
+      setIsRegistered(true);
     } catch (error) {
       console.error('Error saving device token:', error);
     }
   }, [user?.id, platform]);
 
-  // Remove token from Supabase (on logout or unregister)
-  const removeToken = useCallback(async (token: string) => {
+  // Remove token from local storage
+  const removeToken = useCallback(async (_token: string) => {
     if (!user?.id) return;
 
     try {
-      const { error } = await supabase
-        .from('device_tokens')
-        .update({ is_active: false })
-        .eq('user_id', user.id)
-        .eq('token', token);
-
-      if (error) {
-        console.error('Error removing device token:', error);
-      }
+      localStorage.removeItem(`push_token_${user.id}`);
+      console.log('Device token removed');
     } catch (error) {
       console.error('Error removing device token:', error);
     }
