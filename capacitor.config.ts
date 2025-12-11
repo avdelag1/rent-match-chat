@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
     captureInput: true,
   },
 
-  // StatusBar Plugin Configuration
+  // Plugin Configuration
   plugins: {
     StatusBar: {
       // Set to false to ensure status bar doesn't overlay content
@@ -26,6 +26,10 @@ const config: CapacitorConfig = {
       style: 'LIGHT',
       // Background color for Android (hex format)
       backgroundColor: '#FF0000',
+    },
+    PushNotifications: {
+      // iOS: Present notifications when app is in foreground
+      presentationOptions: ['badge', 'sound', 'alert'],
     },
   },
 };
