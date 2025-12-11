@@ -205,161 +205,89 @@ function LegendaryLandingPage() {
           <h1 className="text-6xl font-bold tracking-wider drop-shadow-lg text-center flex items-center justify-center">
             <span className="text-white">Swipe</span>
             <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-red-500 bg-clip-text text-transparent">Matc</span>
-            {/* Animated Flame H - Realistic slow fire effect */}
+            {/* Animated Flame H - Smooth slow flame effect */}
             <span className="relative inline-block">
-              {/* Base ambient glow - stable foundation */}
-              <motion.span
-                className="absolute pointer-events-none rounded-full"
-                style={{
-                  width: '40px',
-                  height: '30px',
-                  background: 'radial-gradient(ellipse at center bottom, rgba(251, 146, 60, 0.4) 0%, rgba(234, 88, 12, 0.2) 40%, transparent 70%)',
-                  left: '50%',
-                  bottom: '60%',
-                  transform: 'translateX(-50%)',
-                  filter: 'blur(10px)',
-                }}
-                animate={{
-                  opacity: [0.6, 0.8, 0.7, 0.8, 0.6],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              
-              {/* Outer flame layer - slow organic movement */}
-              <motion.span
-                className="absolute pointer-events-none"
-                style={{
-                  width: '18px',
-                  height: '28px',
-                  background: 'linear-gradient(to top, #ea580c 0%, #f97316 30%, #fb923c 60%, transparent 100%)',
-                  borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-                  left: '50%',
-                  bottom: '70%',
-                  transform: 'translateX(-50%)',
-                  filter: 'blur(3px)',
-                }}
-                animate={{
-                  scaleX: [1, 1.1, 0.95, 1.05, 1],
-                  scaleY: [1, 1.15, 1.05, 1.1, 1],
-                  y: [0, -3, -1, -4, 0],
-                  rotate: [-2, 2, -1, 3, -2],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              
-              {/* Middle flame layer */}
-              <motion.span
-                className="absolute pointer-events-none"
-                style={{
-                  width: '14px',
-                  height: '24px',
-                  background: 'linear-gradient(to top, #f97316 0%, #fb923c 40%, #fbbf24 70%, transparent 100%)',
-                  borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-                  left: '50%',
-                  bottom: '72%',
-                  transform: 'translateX(-50%)',
-                  filter: 'blur(2px)',
-                }}
-                animate={{
-                  scaleX: [1, 0.9, 1.1, 0.95, 1],
-                  scaleY: [1, 1.1, 0.95, 1.12, 1],
-                  y: [0, -2, -4, -1, 0],
-                  rotate: [1, -2, 2, -1, 1],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.2,
-                }}
-              />
-              
-              {/* Inner flame core - hottest part */}
-              <motion.span
-                className="absolute pointer-events-none"
-                style={{
-                  width: '8px',
-                  height: '16px',
-                  background: 'linear-gradient(to top, #fbbf24 0%, #fde047 50%, #fef9c3 80%, transparent 100%)',
-                  borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-                  left: '50%',
-                  bottom: '73%',
-                  transform: 'translateX(-50%)',
-                  filter: 'blur(1px)',
-                }}
-                animate={{
-                  scaleX: [1, 1.15, 0.9, 1.1, 1],
-                  scaleY: [1, 0.9, 1.1, 0.95, 1],
-                  y: [0, -1, -2, 0, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.1,
-                }}
-              />
-              
-              {/* Slow rising ember particles */}
+              {/* Smooth rising heat waves */}
               {[...Array(3)].map((_, i) => (
                 <motion.span
-                  key={`ember-${i}`}
-                  className="absolute pointer-events-none rounded-full"
+                  key={`heat-${i}`}
+                  className="absolute pointer-events-none"
                   style={{
-                    width: '3px',
-                    height: '3px',
-                    background: 'radial-gradient(circle, #fbbf24 0%, #f97316 60%, transparent 100%)',
-                    left: `calc(50% + ${(i - 1) * 6}px)`,
-                    bottom: '85%',
+                    width: '100%',
+                    height: '60%',
+                    background: `radial-gradient(ellipse at center, rgba(251, 146, 60, ${0.15 - i * 0.04}) 0%, transparent 70%)`,
+                    left: '0',
+                    bottom: '50%',
+                    filter: 'blur(8px)',
                   }}
                   animate={{
-                    y: [0, -15, -30, -40],
-                    x: [(i - 1) * 2, (i - 1) * 4, (i - 1) * 3, (i - 1) * 5],
-                    opacity: [0, 0.8, 0.5, 0],
-                    scale: [0.5, 1, 0.8, 0.3],
+                    y: [0, -15, -25, -15, 0],
+                    opacity: [0.3, 0.5, 0.3, 0.5, 0.3],
+                    scaleY: [1, 1.1, 1.2, 1.1, 1],
                   }}
                   transition={{
                     duration: 3 + i * 0.5,
                     repeat: Infinity,
-                    ease: "easeOut",
-                    delay: i * 1.2,
+                    ease: "easeInOut",
+                    delay: i * 1,
                   }}
                 />
               ))}
               
-              {/* The H letter with warm glow */}
+              {/* Main H with smooth flickering glow */}
               <motion.span
                 className="relative"
                 style={{
-                  background: 'linear-gradient(to top, #ea580c 0%, #f97316 30%, #fb923c 60%, #fbbf24 100%)',
+                  background: 'linear-gradient(to top, #f97316 0%, #ea580c 40%, #dc2626 70%, #fbbf24 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                 }}
                 animate={{
                   filter: [
-                    'drop-shadow(0 0 6px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 10px rgba(234, 88, 12, 0.3))',
-                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.6)) drop-shadow(0 -3px 12px rgba(234, 88, 12, 0.35))',
-                    'drop-shadow(0 0 7px rgba(249, 115, 22, 0.55)) drop-shadow(0 -2px 11px rgba(220, 38, 38, 0.32))',
-                    'drop-shadow(0 0 6px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 10px rgba(234, 88, 12, 0.3))',
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 12px rgba(234, 88, 12, 0.3))',
+                    'drop-shadow(0 0 12px rgba(251, 146, 60, 0.7)) drop-shadow(0 -4px 16px rgba(234, 88, 12, 0.4))',
+                    'drop-shadow(0 0 10px rgba(249, 115, 22, 0.6)) drop-shadow(0 -3px 14px rgba(220, 38, 38, 0.35))',
+                    'drop-shadow(0 0 8px rgba(251, 146, 60, 0.5)) drop-shadow(0 -2px 12px rgba(234, 88, 12, 0.3))',
                   ],
                 }}
                 transition={{
-                  duration: 4,
+                  duration: 2.5,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
               >
                 h
               </motion.span>
+              
+              {/* Flame particles rising from H */}
+              {[...Array(4)].map((_, i) => (
+                <motion.span
+                  key={`flame-particle-${i}`}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: `${3 + Math.random() * 4}px`,
+                    height: `${6 + Math.random() * 8}px`,
+                    background: `linear-gradient(to top, #f97316, #fbbf24, transparent)`,
+                    borderRadius: '50%',
+                    right: `${-2 + i * 4}px`,
+                    bottom: '70%',
+                    filter: 'blur(1px)',
+                  }}
+                  animate={{
+                    y: [-5, -20, -35],
+                    x: [0, (i - 1.5) * 3, (i - 1.5) * 5],
+                    opacity: [0.8, 0.5, 0],
+                    scale: [1, 0.7, 0.3],
+                  }}
+                  transition={{
+                    duration: 1.5 + i * 0.3,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: i * 0.4,
+                  }}
+                />
+              ))}
             </span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
