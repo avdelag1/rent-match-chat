@@ -250,7 +250,7 @@ export function ClientSwipeContainer({
   return (
     <div className="relative w-full flex flex-col items-center justify-start" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
       {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto overflow-visible mt-12 md:mt-16">
+      <div className="relative w-full h-[calc(100vh-160px)] max-w-lg mx-auto overflow-visible mt-2">
         <AnimatePresence mode="wait">
           {currentClient && (
             <motion.div
