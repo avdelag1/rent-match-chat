@@ -55,31 +55,31 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
           <motion.div
-            initial={{ opacity: 0, y: '40%' }}
+            initial={{ opacity: 0, y: '30%' }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '40%' }}
+            exit={{ opacity: 0, y: '30%' }}
             transition={{
               type: 'spring',
-              damping: 20,
-              stiffness: 800,
-              mass: 0.3,
+              damping: 28,
+              stiffness: 500,
+              mass: 0.4,
+              duration: 0.15,
             }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.4 }}
+            dragElastic={{ top: 0, bottom: 0.3 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={handleDragEnd}
+            className="will-change-transform"
             style={{
-              willChange: 'transform, opacity',
               transform: 'translateZ(0)',
-              backfaceVisibility: 'hidden'
             }}
           >
-            <DialogContent className={`max-w-lg w-full max-h-[85vh] h-[80vh] overflow-y-auto ${isDragging ? 'opacity-95' : ''}`}>
+            <DialogContent className={`max-w-lg w-full max-h-[85vh] h-[80vh] overflow-y-auto transition-opacity duration-75 ${isDragging ? 'opacity-90' : ''}`}>
               <motion.div>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -115,8 +115,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                               setSelectedImageIndex(index);
                               setGalleryOpen(true);
                             }}
-                            className="relative w-full aspect-[4/3] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.98] transition-all duration-75"
-                            style={{ willChange: 'transform' }}
+                            className="relative w-full aspect-[4/3] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.99] transition-transform duration-50"
                           >
                             <img
                               src={image}
@@ -314,8 +313,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                               setSelectedImageIndex(index);
                               setGalleryOpen(true);
                             }}
-                            className="relative w-full aspect-[4/3] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.98] transition-all duration-75"
-                            style={{ willChange: 'transform' }}
+                            className="relative w-full aspect-[4/3] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.99] transition-transform duration-50"
                           >
                             <img
                               src={image}

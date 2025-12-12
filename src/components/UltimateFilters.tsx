@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Flame, Home, Zap, Car, PawPrint, Palette, Camera, Music, Coffee, RotateCcw } from 'lucide-react';
+import { X, Flame, Home, Zap, PawPrint, Music, Coffee, RotateCcw } from 'lucide-react';
 
 interface UltimateFiltersProps {
   isOpen: boolean;
@@ -21,54 +21,52 @@ interface UltimateFiltersProps {
   currentFilters?: any;
 }
 
-// Revolutionary Filter Categories
+// Enhanced Filter Categories for Finding Ideal Listings
 const LIFESTYLE_FILTERS = {
   pets: [
-    'Small Dogs Welcome', 'Large Dogs Welcome', 'Cat Paradise', 'Multiple Pets OK',
-    'Pet Grooming Area', 'Dog Run Access', 'Pet Washing Station'
+    'Dogs Welcome', 'Cats Welcome', 'Multiple Pets OK', 'No Pet Restrictions',
+    'Pet Deposit Waived', 'Dog Park Nearby', 'Pet Washing Station'
   ],
   workspace: [
-    'Home Office Ready', 'Standing Desk Space', 'Zoom Background Wall',
-    'Fiber Internet Guaranteed', 'Dedicated Work Room', 'Coworking Nearby'
-  ],
-  creativity: [
-    'Art Studio Space', 'Music Room', 'Pottery Wheel OK', 'Dance Floor Space',
-    'Photography Lighting', 'Instrument Storage', 'Soundproofing'
+    'Home Office Ready', 'Fiber Internet', 'Dedicated Work Room',
+    'Standing Desk Space', 'Quiet Neighborhood', 'Coworking Nearby', 'Video Call Ready'
   ],
   wellness: [
-    'Meditation Corner', 'Yoga Space', 'Home Gym Setup', 'Aromatherapy OK',
-    'Salt Lamp Friendly', 'Plants Everywhere', 'Natural Light Flooding'
-  ],
-  culinary: [
-    'Gourmet Kitchen', 'Herb Garden', 'Wine Storage', 'Espresso Machine',
-    'Outdoor Grilling', 'Fermentation Space', 'Spice Cabinet Included'
+    'Gym On-site', 'Yoga Space', 'Pool Access', 'Spa/Sauna',
+    'Natural Light', 'Garden Access', 'Running Trails Nearby'
   ],
   entertainment: [
-    'Gaming Setup Ready', 'Movie Theater Vibes', 'Board Game Corner',
-    'Karaoke Machine OK', 'Reading Nook', 'Podcast Recording Space'
+    'Smart TV', 'Sound System', 'Game Room', 'Outdoor Space',
+    'BBQ Area', 'Rooftop Access', 'Beach Nearby'
+  ],
+  convenience: [
+    'In-unit Laundry', 'Dishwasher', 'Central AC', 'Modern Kitchen',
+    '24/7 Security', 'Concierge', 'Package Lockers', 'EV Charging'
   ]
 };
 
-const AESTHETIC_PREFERENCES = [
-  'Minimalist Zen', 'Maximalist Joy', 'Mid-Century Modern', 'Industrial Chic',
-  'Bohemian Rhapsody', 'Scandinavian Clean', 'Art Deco Glamour', 'Farmhouse Charm',
-  'Gothic Romance', 'Retro Vintage', 'Contemporary Glass', 'Rustic Wood'
+const PROPERTY_TYPES = [
+  'Apartment', 'House', 'Villa', 'Condo', 'Penthouse', 
+  'Studio', 'Loft', 'Townhouse', 'Duplex'
 ];
 
-const COMMUTE_REQUIREMENTS = [
-  'Google HQ < 30min', 'Apple Park < 30min', 'Meta Campus < 30min', 'Netflix < 30min',
-  'Salesforce Tower < 30min', 'Downtown < 20min', 'Airport < 45min', 'Beach < 1hr'
+const LOCATIONS = [
+  'Tulum Centro', 'Aldea Zama', 'La Veleta', 'Region 15',
+  'Holistika', 'Selva Zama', 'Beach Zone', 'Jungle'
 ];
 
-const UNUSUAL_MUST_HAVES = [
-  'Secret Room', 'Hidden Bookcase Door', 'Rooftop Access', 'Fireplace Crackling',
-  'Clawfoot Bathtub', 'Spiral Staircase', 'Exposed Brick Walls', 'Skylight Stargazing',
-  'Wine Cellar', 'Library Wall', 'Murphy Bed', 'Breakfast Nook'
+const MOVE_IN_TIMELINE = [
+  'Immediately', 'Within 1 Week', 'Within 1 Month', 
+  '1-3 Months', '3+ Months', 'Flexible'
 ];
 
-const SOCIAL_PREFERENCES = [
-  'Party Friendly', 'Quiet Sanctuary', 'Dinner Party Ready', 'Game Night Host',
-  'Book Club Meetings', 'Intimate Gatherings', 'No Overnight Guests', 'Regular Visitors Welcome'
+const LEASE_TERMS = [
+  'Monthly', '3 Months', '6 Months', '12 Months', 'Long-term', 'Flexible'
+];
+
+const MUST_HAVE_AMENITIES = [
+  'Pool', 'Gym', 'Parking', 'Furnished', 'Pet Friendly', 'AC',
+  'Balcony', 'Ocean View', 'Rooftop', 'Security', 'Elevator', 'Garden'
 ];
 
 export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, currentFilters = {} }: UltimateFiltersProps) {
@@ -78,27 +76,19 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
     bedrooms: currentFilters.bedrooms || [1, 5],
     bathrooms: currentFilters.bathrooms || [1, 3],
     squareFootage: currentFilters.squareFootage || [300, 5000],
-    listingTypes: currentFilters.listingTypes || ['rent', 'buy'],
+    listingTypes: currentFilters.listingTypes || ['rent'],
+    
+    // Property preferences
+    propertyTypes: currentFilters.propertyTypes || [],
+    locations: currentFilters.locations || [],
+    mustHaveAmenities: currentFilters.mustHaveAmenities || [],
     
     // Lifestyle
     lifestyleCategories: currentFilters.lifestyleCategories || [],
-    aesthetic: currentFilters.aesthetic || [],
-    commute: currentFilters.commute || [],
-    unusualFeatures: currentFilters.unusualFeatures || [],
-    socialStyle: currentFilters.socialStyle || [],
     
-    // Advanced
-    petDetails: currentFilters.petDetails || '',
-    workRequirements: currentFilters.workRequirements || '',
-    personalityMatch: currentFilters.personalityMatch || '',
-    dealBreakers: currentFilters.dealBreakers || '',
-    dreamScenario: currentFilters.dreamScenario || '',
-    
-    // Logistics
-    walkingScore: currentFilters.walkingScore || [70, 100],
-    schoolDistrict: currentFilters.schoolDistrict || '',
-    moveInDate: currentFilters.moveInDate || '',
-    leaseDuration: currentFilters.leaseDuration || 'flexible',
+    // Timeline
+    moveInTimeline: currentFilters.moveInTimeline || '',
+    leaseTerm: currentFilters.leaseTerm || '',
     
     // Verification
     verifiedOnly: currentFilters.verifiedOnly || false,
@@ -126,26 +116,23 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
       bedrooms: [1, 5],
       bathrooms: [1, 3],
       squareFootage: [300, 5000],
-      listingTypes: ['rent', 'buy'],
+      listingTypes: ['rent'],
+      propertyTypes: [],
+      locations: [],
+      mustHaveAmenities: [],
       lifestyleCategories: [],
-      aesthetic: [],
-      commute: [],
-      unusualFeatures: [],
-      socialStyle: [],
-      petDetails: '',
-      workRequirements: '',
-      personalityMatch: '',
-      dealBreakers: '',
-      dreamScenario: '',
-      walkingScore: [70, 100],
-      schoolDistrict: '',
-      moveInDate: '',
-      leaseDuration: 'flexible',
+      moveInTimeline: '',
+      leaseTerm: '',
       verifiedOnly: false,
       premiumOnly: false,
       virtualTourRequired: false
     });
   };
+
+  const activeFiltersCount = Object.keys(filters).filter(k => {
+    const v = filters[k as keyof typeof filters];
+    return v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0);
+  }).length;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -159,36 +146,30 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
         </DialogHeader>
 
         <Tabs defaultValue="basics" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger 
               value="basics"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white text-xs sm:text-sm"
             >
               Basics
             </TabsTrigger>
             <TabsTrigger 
+              value="amenities"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white text-xs sm:text-sm"
+            >
+              Amenities
+            </TabsTrigger>
+            <TabsTrigger 
               value="lifestyle"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white text-xs sm:text-sm"
             >
               Lifestyle
             </TabsTrigger>
             <TabsTrigger 
-              value="aesthetic"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+              value="timing"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white text-xs sm:text-sm"
             >
-              Aesthetic
-            </TabsTrigger>
-            <TabsTrigger 
-              value="logistics"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
-            >
-              Logistics
-            </TabsTrigger>
-            <TabsTrigger 
-              value="personality"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
-            >
-              Personality
+              Timing
             </TabsTrigger>
           </TabsList>
 
@@ -320,6 +301,89 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
             </div>
           </TabsContent>
 
+          {/* Amenities Tab - NEW */}
+          <TabsContent value="amenities" className="space-y-6">
+            {/* Must-Have Amenities */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  ✨ Must-Have Amenities
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {MUST_HAVE_AMENITIES.map(amenity => (
+                    <Badge
+                      key={amenity}
+                      variant={(filters.mustHaveAmenities || []).includes(amenity) ? "default" : "outline"}
+                      className="cursor-pointer transition-all duration-100 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => handleToggleArrayItem(filters.mustHaveAmenities || [], amenity, 'mustHaveAmenities')}
+                    >
+                      {amenity}
+                      {(filters.mustHaveAmenities || []).includes(amenity) && (
+                        <X className="w-3 h-3 ml-1" />
+                      )}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Property Types */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Home className="w-5 h-5" />
+                  Property Types
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {PROPERTY_TYPES.map(type => (
+                    <Badge
+                      key={type}
+                      variant={(filters.propertyTypes || []).includes(type) ? "default" : "outline"}
+                      className="cursor-pointer transition-all duration-100 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => handleToggleArrayItem(filters.propertyTypes || [], type, 'propertyTypes')}
+                    >
+                      {type}
+                      {(filters.propertyTypes || []).includes(type) && (
+                        <X className="w-3 h-3 ml-1" />
+                      )}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Locations */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  📍 Preferred Locations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {LOCATIONS.map(loc => (
+                    <Badge
+                      key={loc}
+                      variant={(filters.locations || []).includes(loc) ? "default" : "outline"}
+                      className="cursor-pointer transition-all duration-100 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => handleToggleArrayItem(filters.locations || [], loc, 'locations')}
+                    >
+                      {loc}
+                      {(filters.locations || []).includes(loc) && (
+                        <X className="w-3 h-3 ml-1" />
+                      )}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Lifestyle Tab */}
           <TabsContent value="lifestyle" className="space-y-6">
             {Object.entries(LIFESTYLE_FILTERS).map(([category, items]) => (
               <Card key={category}>
@@ -327,10 +391,9 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                   <CardTitle className="capitalize flex items-center gap-2">
                     {category === 'pets' && <PawPrint className="w-5 h-5" />}
                     {category === 'workspace' && <Zap className="w-5 h-5" />}
-                    {category === 'creativity' && <Palette className="w-5 h-5" />}
                     {category === 'wellness' && <Flame className="w-5 h-5" />}
-                    {category === 'culinary' && <Coffee className="w-5 h-5" />}
                     {category === 'entertainment' && <Music className="w-5 h-5" />}
+                    {category === 'convenience' && <Coffee className="w-5 h-5" />}
                     {category.replace(/([A-Z])/g, ' $1').trim()}
                   </CardTitle>
                 </CardHeader>
@@ -340,7 +403,7 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                       <Badge
                         key={item}
                         variant={filters.lifestyleCategories.includes(item) ? "default" : "outline"}
-                        className="cursor-pointer transition-all duration-200 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                        className="cursor-pointer transition-all duration-100 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
                         onClick={() => handleToggleArrayItem(filters.lifestyleCategories, item, 'lifestyleCategories')}
                       >
                         {item}
@@ -355,182 +418,61 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
             ))}
           </TabsContent>
 
-          <TabsContent value="aesthetic" className="space-y-6">
+          {/* Timing Tab - NEW */}
+          <TabsContent value="timing" className="space-y-6">
+            {/* Move-in Timeline */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  🎨 Design Aesthetic
+                  📅 Move-in Timeline
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {AESTHETIC_PREFERENCES.map(style => (
+                  {MOVE_IN_TIMELINE.map(timeline => (
                     <Badge
-                      key={style}
-                      variant={filters.aesthetic.includes(style) ? "default" : "outline"}
-                      className="cursor-pointer transition-all duration-200 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
-                      onClick={() => handleToggleArrayItem(filters.aesthetic, style, 'aesthetic')}
+                      key={timeline}
+                      variant={filters.moveInTimeline === timeline ? "default" : "outline"}
+                      className="cursor-pointer transition-all duration-100 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => setFilters(prev => ({ ...prev, moveInTimeline: timeline }))}
                     >
-                      {style}
-                      {filters.aesthetic.includes(style) && (
-                        <X className="w-3 h-3 ml-1" />
-                      )}
+                      {timeline}
                     </Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
+            {/* Lease Terms */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  ✨ Unusual Must-Haves
+                  📋 Lease Duration
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {UNUSUAL_MUST_HAVES.map(feature => (
+                  {LEASE_TERMS.map(term => (
                     <Badge
-                      key={feature}
-                      variant={filters.unusualFeatures.includes(feature) ? "default" : "outline"}
-                      className="cursor-pointer transition-all duration-200 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
-                      onClick={() => handleToggleArrayItem(filters.unusualFeatures, feature, 'unusualFeatures')}
+                      key={term}
+                      variant={filters.leaseTerm === term ? "default" : "outline"}
+                      className="cursor-pointer transition-all duration-100 hover:scale-105 text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => setFilters(prev => ({ ...prev, leaseTerm: term }))}
                     >
-                      {feature}
-                      {filters.unusualFeatures.includes(feature) && (
-                        <X className="w-3 h-3 ml-1" />
-                      )}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="logistics" className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    🚶 Walking Score
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Slider
-                    value={filters.walkingScore}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, walkingScore: value }))}
-                    max={100}
-                    min={0}
-                    step={5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                    <span>{filters.walkingScore[0]}/100</span>
-                    <span>{filters.walkingScore[1]}/100</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>🏫 School District</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Input
-                    placeholder="Preferred school district..."
-                    value={filters.schoolDistrict}
-                    onChange={(e) => setFilters(prev => ({ ...prev, schoolDistrict: e.target.value }))}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Car className="w-5 h-5" />
-                  Commute Requirements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {COMMUTE_REQUIREMENTS.map(commute => (
-                    <Badge
-                      key={commute}
-                      variant={filters.commute.includes(commute) ? "default" : "outline"}
-                      className="cursor-pointer transition-all duration-200 hover:scale-105"
-                      onClick={() => handleToggleArrayItem(filters.commute, commute, 'commute')}
-                    >
-                      {commute}
-                      {filters.commute.includes(commute) && (
-                        <X className="w-3 h-3 ml-1" />
-                      )}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="personality" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  🤝 Social Style
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {SOCIAL_PREFERENCES.map(style => (
-                    <Badge
-                      key={style}
-                      variant={filters.socialStyle.includes(style) ? "default" : "outline"}
-                      className="cursor-pointer transition-all duration-200 hover:scale-105"
-                      onClick={() => handleToggleArrayItem(filters.socialStyle, style, 'socialStyle')}
-                    >
-                      {style}
-                      {filters.socialStyle.includes(style) && (
-                        <X className="w-3 h-3 ml-1" />
-                      )}
+                      {term}
                     </Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>🏡 Dream Home Scenario</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Describe your perfect Saturday morning in your dream home..."
-                    value={filters.dreamScenario}
-                    onChange={(e) => setFilters(prev => ({ ...prev, dreamScenario: e.target.value }))}
-                    rows={4}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>🚫 Deal Breakers</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="What would absolutely not work for you?"
-                    value={filters.dealBreakers}
-                    onChange={(e) => setFilters(prev => ({ ...prev, dealBreakers: e.target.value }))}
-                    rows={4}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <Card>
-                <CardContent className="pt-6">
+            {/* Verification Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle>🔒 Quality Filters</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="verified"
@@ -539,11 +481,6 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     />
                     <Label htmlFor="verified">✅ Verified Only</Label>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-6">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="premium"
@@ -552,35 +489,30 @@ export function UltimateFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     />
                     <Label htmlFor="premium">💎 Premium Only</Label>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-6">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="virtualTour"
                       checked={filters.virtualTourRequired}
                       onCheckedChange={(checked) => setFilters(prev => ({ ...prev, virtualTourRequired: checked }))}
                     />
-                    <Label htmlFor="virtualTour">🎥 Virtual Tour Required</Label>
+                    <Label htmlFor="virtualTour">🎥 Virtual Tour</Label>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
         <DialogFooter className="flex gap-3 pt-6">
           <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
             <RotateCcw className="w-4 h-4" />
-            Reset All
+            Reset
           </Button>
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleApply} className="bg-gradient-to-r from-primary to-accent hover:shadow-glow">
-            Apply Filters ({Object.values(filters).flat().filter(Boolean).length} active)
+          <Button onClick={handleApply} className="bg-gradient-to-r from-primary to-accent">
+            Apply Filters ({activeFiltersCount} active)
           </Button>
         </DialogFooter>
       </DialogContent>
