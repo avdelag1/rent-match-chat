@@ -231,9 +231,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <div className="app-root bg-background">
-      <Suspense fallback={null}>
-        <NotificationSystem />
-      </Suspense>
+      <NotificationSystem />
 
       {/* Top Bar - Fixed with safe-area-top */}
       <TopBar

@@ -59,9 +59,9 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
           <motion.div
-        initial={{ opacity: 0, y: '15%' }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: '15%' }}
+            initial={{ opacity: 0, y: '30%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '30%' }}
             transition={{
               type: 'spring',
               damping: 28,

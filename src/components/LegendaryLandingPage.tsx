@@ -1,15 +1,7 @@
-import { useState, useRef, useCallback, useMemo, memo } from 'react';
+import { useState, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
-
-// Pre-computed spark configurations to avoid Math.random() in render
-const SPARK_CONFIGS = [
-  { width: 2, height: 4, color: '#ff6b35', delay: 0, duration: 18 },
-  { width: 3, height: 6, color: '#f7931e', delay: 2, duration: 20 },
-  { width: 2, height: 5, color: '#ffcc02', delay: 4, duration: 16 },
-  { width: 4, height: 7, color: '#ff4757', delay: 1, duration: 22 },
-];
 
 function LegendaryLandingPage() {
   const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' }>({
@@ -54,38 +46,97 @@ function LegendaryLandingPage() {
     }
   }, []);
 
+
   return (
-    <div 
+    <motion.div 
       ref={containerRef}
-      className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-black cursor-pointer"
+      className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800 cursor-pointer"
       onMouseMove={handleMouseMove}
       onClick={createRipple}
+      animate={{
+        background: `radial-gradient(circle at ${50 + mousePosition.x}% ${50 + mousePosition.y}%, rgb(17 17 17), rgb(0 0 0), rgb(23 23 23))`
+      }}
+      transition={{ duration: 0.3 }}
     >
-      {/* Simplified animated sparks - no Math.random() in render */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {SPARK_CONFIGS.map((config, i) => (
+      {/* Animated Fire Sparks - Reduced for performance */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 6 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full"
+            className="absolute"
             style={{
-              width: config.width,
-              height: config.height,
-              background: `linear-gradient(45deg, ${config.color}, transparent)`,
-              boxShadow: `0 0 10px ${config.color}80`,
-              left: `${20 + i * 20}%`,
-              top: '100%',
+              width: `${1 + Math.random() * 3}px`,
+              height: `${2 + Math.random() * 6}px`,
+              background: `linear-gradient(45deg, ${
+                i % 4 === 0 ? '#ff6b35' : 
+                i % 4 === 1 ? '#f7931e' : 
+                i % 4 === 2 ? '#ffcc02' :
+                '#ff4757'
+              }, transparent)`,
+              boxShadow: `0 0 ${6 + Math.random() * 12}px ${
+                i % 4 === 0 ? '#ff6b35' : 
+                i % 4 === 1 ? '#f7931e' : 
+                i % 4 === 2 ? '#ffcc02' :
+                '#ff4757'
+              }80`,
+              borderRadius: '50%',
             }}
             animate={{
-              y: [0, -800, -1600],
-              x: [0, (i % 2 === 0 ? 50 : -50), 0],
-              opacity: [0, 0.8, 0],
-              scale: [0.5, 1.2, 0.3],
+              x: [
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth
+              ],
+              y: [
+                Math.random() * window.innerHeight,
+                Math.random() * window.innerHeight - 100,
+                Math.random() * window.innerHeight,
+                Math.random() * window.innerHeight + 50
+              ],
+              scale: [0.2, 1.2, 0.4, 1.8, 0.1],
+              opacity: [0.1, 0.9, 0.3, 1, 0.2],
+              rotate: [0, 90, 180, 270, 360]
             }}
             transition={{
-              duration: config.duration,
+              duration: 15 + Math.random() * 10,
               repeat: Infinity,
-              ease: "easeOut",
-              delay: config.delay
+              ease: "easeInOut",
+              delay: Math.random() * 8
+            }}
+          />
+        ))}
+        
+        {/* Additional floating particles - Reduced for performance */}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute rounded-full"
+            style={{
+              width: `${0.5 + Math.random() * 2}px`,
+              height: `${0.5 + Math.random() * 2}px`,
+              background: `radial-gradient(circle, #ffa726, transparent)`,
+              boxShadow: `0 0 ${3 + Math.random() * 6}px #ffa726`,
+            }}
+            animate={{
+              x: [
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth
+              ],
+              y: [
+                window.innerHeight + 20,
+                Math.random() * window.innerHeight,
+                -20
+              ],
+              opacity: [0, 0.8, 0],
+              scale: [0.3, 1, 0.2]
+            }}
+            transition={{
+              duration: 25 + Math.random() * 15,
+              repeat: Infinity,
+              ease: "linear",
+              delay: Math.random() * 10
             }}
           />
         ))}
@@ -96,26 +147,26 @@ function LegendaryLandingPage() {
         {ripples.map((ripple) => (
           <motion.div
             key={ripple.id}
-            className="absolute border-2 border-orange-400/40 rounded-full pointer-events-none"
+            className="absolute border-2 border-red-400/40 rounded-full pointer-events-none"
             style={{
               left: ripple.x - 25,
               top: ripple.y - 25,
             }}
             initial={{ width: 50, height: 50, opacity: 0.8 }}
             animate={{ 
-              width: 300, 
-              height: 300, 
+              width: 400, 
+              height: 400, 
               opacity: 0,
-              x: -125,
-              y: -125
+              x: -175,
+              y: -175
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
           />
         ))}
       </AnimatePresence>
 
-      {/* SVG Filters */}
+      {/* SVG Filter for Organic Flame Effect */}
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="flameGradientR" x1="0%" y1="100%" x2="0%" y2="0%">
@@ -124,9 +175,16 @@ function LegendaryLandingPage() {
             <stop offset="70%" stopColor="#dc2626" />
             <stop offset="100%" stopColor="#fbbf24" />
           </linearGradient>
-          <filter id="sFlameGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <filter id="flameDistortion" x="-50%" y="-50%" width="200%" height="200%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="5" result="noise">
+              <animate attributeName="baseFrequency" values="0.015;0.02;0.015" dur="4s" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+          <filter id="flameGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feMerge>
+              <feMergeNode in="blur" />
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
@@ -144,88 +202,26 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-7xl md:text-8xl font-bold tracking-wider drop-shadow-lg text-center flex items-center justify-center">
-            {/* Fire S Letter */}
-            <span
-              className="relative inline-block mr-[-0.05em]"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(251, 146, 60, 0.8)) drop-shadow(0 0 20px rgba(234, 88, 12, 0.6))'
-              }}
-            >
-              <svg viewBox="0 0 60 90" className="w-[0.7em] h-[1.1em] inline-block align-baseline" style={{ marginBottom: '-0.05em' }}>
-                <defs>
-                  <linearGradient id="fireSGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stopColor="#fbbf24" />
-                    <stop offset="30%" stopColor="#f97316" />
-                    <stop offset="60%" stopColor="#ea580c" />
-                    <stop offset="100%" stopColor="#dc2626" />
-                  </linearGradient>
-                  <linearGradient id="fireSCore" x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stopColor="#fef3c7" />
-                    <stop offset="50%" stopColor="#fde047" />
-                    <stop offset="100%" stopColor="#fbbf24" />
-                  </linearGradient>
-                  <filter id="sFlameGlow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feGaussianBlur stdDeviation="1.5" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                {/* S letter shape made of fire */}
-                <motion.path
-                  d="M45 18 C45 8 35 5 28 5 C18 5 10 12 10 22 C10 32 18 36 28 40 C38 44 45 48 45 58 C45 72 35 80 25 80 C15 80 8 72 8 62"
-                  fill="none"
-                  stroke="url(#fireSGradient)"
-                  strokeWidth="12"
-                  strokeLinecap="round"
-                  filter="url(#sFlameGlow)"
-                  animate={{ strokeWidth: [12, 14, 12] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                />
-                {/* Inner bright core of S */}
-                <motion.path
-                  d="M45 18 C45 8 35 5 28 5 C18 5 10 12 10 22 C10 32 18 36 28 40 C38 44 45 48 45 58 C45 72 35 80 25 80 C15 80 8 72 8 62"
-                  fill="none"
-                  stroke="url(#fireSCore)"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  animate={{ strokeWidth: [5, 7, 5], opacity: [0.9, 1, 0.9] }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                />
-              </svg>
-              {/* Flame particles around S */}
-              {[0, 1, 2].map((i) => (
-                <motion.span
-                  key={i}
-                  className="absolute rounded-full"
-                  style={{
-                    width: '4px',
-                    height: '6px',
-                    background: 'linear-gradient(to top, #fbbf24, #f97316)',
-                    left: `${20 + i * 25}%`,
-                    bottom: '10%',
-                  }}
-                  animate={{ y: [0, -20, -40], opacity: [0, 1, 0], scale: [0.5, 1, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.4, ease: "easeOut" }}
-                />
-              ))}
-            </span>
-            {/* Rest of title with animated gradient */}
+          <h1 className="text-6xl font-bold tracking-wider drop-shadow-lg text-center">
             <motion.span
               className="inline-block"
               style={{
-                background: 'linear-gradient(90deg, #f97316 0%, #fbbf24 20%, #fff 40%, #fbbf24 60%, #f97316 80%, #fff 100%)',
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 25%, #ea580c 50%, #fbbf24 75%, #fff 100%)',
                 backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
-              animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              animate={{
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "linear"
+              }}
             >
-              wipeMatch
+              SwipeMatch
             </motion.span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
@@ -335,7 +331,7 @@ function LegendaryLandingPage() {
         onClose={closeAuthDialog}
         role={authDialog.role}
       />
-    </div>
+    </motion.div>
   );
 }
 export default memo(LegendaryLandingPage);
