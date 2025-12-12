@@ -59,19 +59,18 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
           <motion.div
-            initial={{ opacity: 0, y: '30%' }}
+            initial={{ opacity: 0, y: '25%' }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '30%' }}
+            exit={{ opacity: 0, y: '25%' }}
             transition={{
               type: 'spring',
-              damping: 28,
-              stiffness: 500,
-              mass: 0.4,
-              duration: 0.15,
+              damping: 30,
+              stiffness: 600,
+              mass: 0.3,
             }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.3 }}
+            dragElastic={{ top: 0, bottom: 0.2 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={handleDragEnd}
             className="will-change-transform"
