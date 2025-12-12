@@ -202,11 +202,95 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-7xl md:text-8xl font-bold tracking-wider drop-shadow-lg text-center">
+          <h1 className="text-7xl md:text-8xl font-bold tracking-wider drop-shadow-lg text-center flex items-center justify-center">
+            {/* Fire S Letter */}
+            <motion.span
+              className="relative inline-block mr-[-0.05em]"
+              style={{
+                filter: 'drop-shadow(0 0 8px rgba(251, 146, 60, 0.8)) drop-shadow(0 0 20px rgba(234, 88, 12, 0.6))'
+              }}
+            >
+              <svg viewBox="0 0 60 90" className="w-[0.7em] h-[1.1em] inline-block align-baseline" style={{ marginBottom: '-0.05em' }}>
+                <defs>
+                  <linearGradient id="fireSGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stopColor="#fbbf24" />
+                    <stop offset="30%" stopColor="#f97316" />
+                    <stop offset="60%" stopColor="#ea580c" />
+                    <stop offset="100%" stopColor="#dc2626" />
+                  </linearGradient>
+                  <linearGradient id="fireSCore" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stopColor="#fef3c7" />
+                    <stop offset="50%" stopColor="#fde047" />
+                    <stop offset="100%" stopColor="#fbbf24" />
+                  </linearGradient>
+                  <filter id="sFlameGlow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                {/* S letter shape made of fire */}
+                <motion.path
+                  d="M45 18 C45 8 35 5 28 5 C18 5 10 12 10 22 C10 32 18 36 28 40 C38 44 45 48 45 58 C45 72 35 80 25 80 C15 80 8 72 8 62"
+                  fill="none"
+                  stroke="url(#fireSGradient)"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  filter="url(#sFlameGlow)"
+                  animate={{
+                    strokeWidth: [12, 14, 12],
+                    filter: ['url(#sFlameGlow)', 'url(#sFlameGlow)', 'url(#sFlameGlow)']
+                  }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                />
+                {/* Inner bright core of S */}
+                <motion.path
+                  d="M45 18 C45 8 35 5 28 5 C18 5 10 12 10 22 C10 32 18 36 28 40 C38 44 45 48 45 58 C45 72 35 80 25 80 C15 80 8 72 8 62"
+                  fill="none"
+                  stroke="url(#fireSCore)"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  animate={{
+                    strokeWidth: [5, 7, 5],
+                    opacity: [0.9, 1, 0.9]
+                  }}
+                  transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+                />
+              </svg>
+              {/* Flame particles around S */}
+              {[...Array(3)].map((_, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: '4px',
+                    height: '6px',
+                    background: 'linear-gradient(to top, #fbbf24, #f97316)',
+                    left: `${20 + i * 25}%`,
+                    bottom: '10%',
+                    filter: 'blur(0.5px)'
+                  }}
+                  animate={{
+                    y: [0, -20, -40],
+                    opacity: [0, 1, 0],
+                    scale: [0.5, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: i * 0.3,
+                    ease: "easeOut"
+                  }}
+                />
+              ))}
+            </motion.span>
+            {/* Rest of title with animated gradient */}
             <motion.span
               className="inline-block"
               style={{
-                background: 'linear-gradient(90deg, #fff 0%, #f97316 25%, #ea580c 50%, #fbbf24 75%, #fff 100%)',
+                background: 'linear-gradient(90deg, #f97316 0%, #fbbf24 20%, #fff 40%, #fbbf24 60%, #f97316 80%, #fff 100%)',
                 backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -216,12 +300,12 @@ function LegendaryLandingPage() {
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
               }}
               transition={{
-                duration: 4,
+                duration: 5,
                 repeat: Infinity,
                 ease: "linear"
               }}
             >
-              SwipeMatch
+              wipeMatch
             </motion.span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
