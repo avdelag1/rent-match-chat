@@ -1,7 +1,15 @@
-import { useState, useRef, useCallback, memo } from 'react';
+import { useState, useRef, useCallback, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
+
+// Pre-computed spark configurations to avoid Math.random() in render
+const SPARK_CONFIGS = [
+  { width: 2, height: 4, color: '#ff6b35', delay: 0, duration: 18 },
+  { width: 3, height: 6, color: '#f7931e', delay: 2, duration: 20 },
+  { width: 2, height: 5, color: '#ffcc02', delay: 4, duration: 16 },
+  { width: 4, height: 7, color: '#ff4757', delay: 1, duration: 22 },
+];
 
 function LegendaryLandingPage() {
   const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' }>({
@@ -46,97 +54,38 @@ function LegendaryLandingPage() {
     }
   }, []);
 
-
   return (
-    <motion.div 
+    <div 
       ref={containerRef}
-      className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800 cursor-pointer"
+      className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden bg-black cursor-pointer"
       onMouseMove={handleMouseMove}
       onClick={createRipple}
-      animate={{
-        background: `radial-gradient(circle at ${50 + mousePosition.x}% ${50 + mousePosition.y}%, rgb(17 17 17), rgb(0 0 0), rgb(23 23 23))`
-      }}
-      transition={{ duration: 0.3 }}
     >
-      {/* Animated Fire Sparks - Reduced for performance */}
-      <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 6 }).map((_, i) => (
+      {/* Simplified animated sparks - no Math.random() in render */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {SPARK_CONFIGS.map((config, i) => (
           <motion.div
             key={i}
-            className="absolute"
-            style={{
-              width: `${1 + Math.random() * 3}px`,
-              height: `${2 + Math.random() * 6}px`,
-              background: `linear-gradient(45deg, ${
-                i % 4 === 0 ? '#ff6b35' : 
-                i % 4 === 1 ? '#f7931e' : 
-                i % 4 === 2 ? '#ffcc02' :
-                '#ff4757'
-              }, transparent)`,
-              boxShadow: `0 0 ${6 + Math.random() * 12}px ${
-                i % 4 === 0 ? '#ff6b35' : 
-                i % 4 === 1 ? '#f7931e' : 
-                i % 4 === 2 ? '#ffcc02' :
-                '#ff4757'
-              }80`,
-              borderRadius: '50%',
-            }}
-            animate={{
-              x: [
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth
-              ],
-              y: [
-                Math.random() * window.innerHeight,
-                Math.random() * window.innerHeight - 100,
-                Math.random() * window.innerHeight,
-                Math.random() * window.innerHeight + 50
-              ],
-              scale: [0.2, 1.2, 0.4, 1.8, 0.1],
-              opacity: [0.1, 0.9, 0.3, 1, 0.2],
-              rotate: [0, 90, 180, 270, 360]
-            }}
-            transition={{
-              duration: 15 + Math.random() * 10,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: Math.random() * 8
-            }}
-          />
-        ))}
-        
-        {/* Additional floating particles - Reduced for performance */}
-        {Array.from({ length: 4 }).map((_, i) => (
-          <motion.div
-            key={`particle-${i}`}
             className="absolute rounded-full"
             style={{
-              width: `${0.5 + Math.random() * 2}px`,
-              height: `${0.5 + Math.random() * 2}px`,
-              background: `radial-gradient(circle, #ffa726, transparent)`,
-              boxShadow: `0 0 ${3 + Math.random() * 6}px #ffa726`,
+              width: config.width,
+              height: config.height,
+              background: `linear-gradient(45deg, ${config.color}, transparent)`,
+              boxShadow: `0 0 10px ${config.color}80`,
+              left: `${20 + i * 20}%`,
+              top: '100%',
             }}
             animate={{
-              x: [
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth
-              ],
-              y: [
-                window.innerHeight + 20,
-                Math.random() * window.innerHeight,
-                -20
-              ],
+              y: [0, -800, -1600],
+              x: [0, (i % 2 === 0 ? 50 : -50), 0],
               opacity: [0, 0.8, 0],
-              scale: [0.3, 1, 0.2]
+              scale: [0.5, 1.2, 0.3],
             }}
             transition={{
-              duration: 25 + Math.random() * 15,
+              duration: config.duration,
               repeat: Infinity,
-              ease: "linear",
-              delay: Math.random() * 10
+              ease: "easeOut",
+              delay: config.delay
             }}
           />
         ))}
@@ -147,26 +96,26 @@ function LegendaryLandingPage() {
         {ripples.map((ripple) => (
           <motion.div
             key={ripple.id}
-            className="absolute border-2 border-red-400/40 rounded-full pointer-events-none"
+            className="absolute border-2 border-orange-400/40 rounded-full pointer-events-none"
             style={{
               left: ripple.x - 25,
               top: ripple.y - 25,
             }}
             initial={{ width: 50, height: 50, opacity: 0.8 }}
             animate={{ 
-              width: 400, 
-              height: 400, 
+              width: 300, 
+              height: 300, 
               opacity: 0,
-              x: -175,
-              y: -175
+              x: -125,
+              y: -125
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            transition={{ duration: 1, ease: "easeOut" }}
           />
         ))}
       </AnimatePresence>
 
-      {/* SVG Filter for Organic Flame Effect */}
+      {/* SVG Filters */}
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="flameGradientR" x1="0%" y1="100%" x2="0%" y2="0%">
@@ -175,16 +124,9 @@ function LegendaryLandingPage() {
             <stop offset="70%" stopColor="#dc2626" />
             <stop offset="100%" stopColor="#fbbf24" />
           </linearGradient>
-          <filter id="flameDistortion" x="-50%" y="-50%" width="200%" height="200%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="5" result="noise">
-              <animate attributeName="baseFrequency" values="0.015;0.02;0.015" dur="4s" repeatCount="indefinite" />
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-          <filter id="flameGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
+          <filter id="sFlameGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
             <feMerge>
-              <feMergeNode in="blur" />
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
@@ -393,7 +335,7 @@ function LegendaryLandingPage() {
         onClose={closeAuthDialog}
         role={authDialog.role}
       />
-    </motion.div>
+    </div>
   );
 }
 export default memo(LegendaryLandingPage);
