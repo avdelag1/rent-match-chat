@@ -4,13 +4,13 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Save } from 'lucide-react';
+import { ChevronDown, Save, Home, DollarSign, Bed, Sparkles, Users, Building, Eye, Compass, Car, RotateCcw } from 'lucide-react';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
+import { motion, AnimatePresence } from 'framer-motion';
+import { springConfigs } from '@/utils/modernAnimations';
 
 interface PropertyClientFiltersProps {
   onApply: (filters: any) => void;
@@ -18,9 +18,62 @@ interface PropertyClientFiltersProps {
   activeCount: number;
 }
 
+interface FilterSectionProps {
+  title: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}
+
+function FilterSection({ title, icon: Icon, children, defaultOpen = false }: FilterSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <motion.div
+      initial={false}
+      className="border-b border-border/50 last:border-0"
+    >
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
+        whileTap={{ scale: 0.99 }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Icon className="h-4 w-4 text-primary" />
+          </div>
+          <span className="font-medium text-foreground">{title}</span>
+        </div>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+        </motion.div>
+      </motion.button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-1 space-y-4">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export function PropertyClientFilters({ onApply, initialFilters = {}, activeCount }: PropertyClientFiltersProps) {
   const savePreferencesMutation = useSaveClientFilterPreferences();
-  
+
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [propertyTypes, setPropertyTypes] = useState<string[]>(initialFilters.property_types || []);
   const [budgetRange, setBudgetRange] = useState([initialFilters.budget_min || 500, initialFilters.budget_max || 5000]);
@@ -29,8 +82,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [amenities, setAmenities] = useState<string[]>(initialFilters.amenities || []);
   const [petFriendly, setPetFriendly] = useState(initialFilters.pet_friendly || false);
   const [furnished, setFurnished] = useState(initialFilters.furnished || false);
-
-  // New filter options
   const [squareFeetRange, setSquareFeetRange] = useState([initialFilters.square_feet_min || 0, initialFilters.square_feet_max || 5000]);
   const [yearBuiltRange, setYearBuiltRange] = useState([initialFilters.year_built_min || 1950, initialFilters.year_built_max || new Date().getFullYear()]);
   const [floorLevel, setFloorLevel] = useState<string>(initialFilters.floor_level || 'any');
@@ -38,8 +89,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [orientations, setOrientations] = useState<string[]>(initialFilters.orientations || []);
   const [hasElevator, setHasElevator] = useState(initialFilters.has_elevator || false);
   const [parkingSpots, setParkingSpots] = useState(initialFilters.parking_spots_min || 0);
-
-  // Client demographic filters
   const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
   const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
   const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
@@ -81,7 +130,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       orientations: orientations,
       has_elevator: hasElevator,
       parking_spots_min: parkingSpots,
-      // Client demographic filters
       gender_preference: genderPreference,
       nationalities,
       languages,
@@ -108,7 +156,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     setOrientations([]);
     setHasElevator(false);
     setParkingSpots(0);
-    // Clear client demographic filters
     setGenderPreference('any');
     setNationalities([]);
     setLanguages([]);
@@ -144,325 +191,356 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     }
   };
 
+  const toggleArrayItem = (array: string[], item: string, setter: (arr: string[]) => void) => {
+    if (array.includes(item)) {
+      setter(array.filter(i => i !== item));
+    } else {
+      setter([...array, item]);
+    }
+  };
+
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Property Filters</h3>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 overflow-hidden mx-4 my-4"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/30">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
+            <Home className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Property Filters</h3>
+            <p className="text-xs text-muted-foreground">Customize your client search</p>
+          </div>
+        </div>
         {activeCount > 0 && (
-          <Badge variant="default">{activeCount} Active</Badge>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={springConfigs.bouncy}
+          >
+            <Badge className="bg-primary/10 text-primary border-0 px-3">
+              {activeCount} active
+            </Badge>
+          </motion.div>
         )}
       </div>
 
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Interest Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <Select value={interestType} onValueChange={setInterestType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rent">Rent Only</SelectItem>
-              <SelectItem value="buy">Buy Only</SelectItem>
-              <SelectItem value="both">Rent or Buy</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground">Filter clients based on whether they're seeking to rent, purchase, or both</p>
-        </CollapsibleContent>
-      </Collapsible>
+      {/* Interest Type */}
+      <FilterSection title="Interest Type" icon={Home} defaultOpen>
+        <Select value={interestType} onValueChange={setInterestType}>
+          <SelectTrigger className="h-12 rounded-xl border-border/50 bg-background/50">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="rent">Rent Only</SelectItem>
+            <SelectItem value="buy">Buy Only</SelectItem>
+            <SelectItem value="both">Rent or Buy</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">Filter clients based on their rental or purchase intent</p>
+      </FilterSection>
 
-      <ClientDemographicFilters
-        genderPreference={genderPreference}
-        setGenderPreference={setGenderPreference}
-        ageRange={ageRange}
-        setAgeRange={setAgeRange}
-        relationshipStatus={relationshipStatus}
-        setRelationshipStatus={setRelationshipStatus}
-        hasPetsFilter={hasPetsFilter}
-        setHasPetsFilter={setHasPetsFilter}
-        nationalities={nationalities}
-        setNationalities={setNationalities}
-        languages={languages}
-        setLanguages={setLanguages}
-      />
+      {/* Client Demographics */}
+      <FilterSection title="Client Demographics" icon={Users} defaultOpen>
+        <ClientDemographicFilters
+          genderPreference={genderPreference}
+          setGenderPreference={setGenderPreference}
+          ageRange={ageRange}
+          setAgeRange={setAgeRange}
+          relationshipStatus={relationshipStatus}
+          setRelationshipStatus={setRelationshipStatus}
+          hasPetsFilter={hasPetsFilter}
+          setHasPetsFilter={setHasPetsFilter}
+          nationalities={nationalities}
+          setNationalities={setNationalities}
+          languages={languages}
+          setLanguages={setLanguages}
+        />
+      </FilterSection>
 
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Property Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {propertyTypeOptions.map((type) => (
-              <div key={type} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={propertyTypes.includes(type)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setPropertyTypes([...propertyTypes, type]);
-                    } else {
-                      setPropertyTypes(propertyTypes.filter(t => t !== type));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{type}</Label>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Match clients looking for specific property types</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Budget Range</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>${budgetRange[0]}</span>
-              <span>${budgetRange[1]}</span>
-            </div>
-            <Slider
-              value={budgetRange}
-              onValueChange={setBudgetRange}
-              min={0}
-              max={10000}
-              step={100}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Find clients within a specific budget range</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Requirements</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-2">
-          <div className="space-y-2">
-            <Label className="text-sm">Minimum Bedrooms: {bedrooms}</Label>
-            <Slider value={[bedrooms]} onValueChange={(v) => setBedrooms(v[0])} min={1} max={6} step={1} />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm">Minimum Bathrooms: {bathrooms}</Label>
-            <Slider value={[bathrooms]} onValueChange={(v) => setBathrooms(v[0])} min={1} max={4} step={1} />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Amenities</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {amenityOptions.map((amenity) => (
-              <div key={amenity} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={amenities.includes(amenity)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setAmenities([...amenities, amenity]);
-                    } else {
-                      setAmenities(amenities.filter(a => a !== amenity));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{amenity}</Label>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Connect with clients whose needs align with your property features</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Additional Preferences</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <Label>Pet Friendly</Label>
-            <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label>Furnished</Label>
-            <Switch checked={furnished} onCheckedChange={setFurnished} />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label>Elevator</Label>
-            <Switch checked={hasElevator} onCheckedChange={setHasElevator} />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Property Size</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{squareFeetRange[0]} sq ft</span>
-              <span>{squareFeetRange[1]} sq ft</span>
-            </div>
-            <Slider
-              value={squareFeetRange}
-              onValueChange={setSquareFeetRange}
-              min={0}
-              max={10000}
-              step={100}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Filter by square footage</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Year Built</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{yearBuiltRange[0]}</span>
-              <span>{yearBuiltRange[1]}</span>
-            </div>
-            <Slider
-              value={yearBuiltRange}
-              onValueChange={setYearBuiltRange}
-              min={1950}
-              max={new Date().getFullYear()}
-              step={5}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Filter by construction or renovation year</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Floor Level</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <Select value={floorLevel} onValueChange={setFloorLevel}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {floorLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground">Preferred floor range in building</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">View Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {viewTypeOptions.map((view) => (
-              <div key={view} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={viewTypes.includes(view)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setViewTypes([...viewTypes, view]);
-                    } else {
-                      setViewTypes(viewTypes.filter(v => v !== view));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{view}</Label>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Desired view from property</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Orientation</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {orientationOptions.map((orientation) => (
-              <div key={orientation} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={orientations.includes(orientation)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setOrientations([...orientations, orientation]);
-                    } else {
-                      setOrientations(orientations.filter(o => o !== orientation));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{orientation}</Label>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Building/unit orientation for natural light</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Parking</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <Label className="text-sm">Minimum Parking Spots: {parkingSpots}</Label>
-            <Slider
-              value={[parkingSpots]}
-              onValueChange={(v) => setParkingSpots(v[0])}
-              min={0}
-              max={5}
-              step={1}
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Required number of parking spaces</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <div className="flex flex-col gap-2 pt-4">
-        <div className="flex gap-2">
-          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+      {/* Property Type */}
+      <FilterSection title="Property Type" icon={Building}>
+        <div className="grid grid-cols-2 gap-2">
+          {propertyTypeOptions.map((type) => (
+            <motion.button
+              key={type}
+              onClick={() => toggleArrayItem(propertyTypes, type, setPropertyTypes)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`
+                p-3 rounded-xl text-sm font-medium transition-all duration-200 border
+                ${propertyTypes.includes(type)
+                  ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
+                  : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
+                }
+              `}
+            >
+              {type}
+            </motion.button>
+          ))}
         </div>
-        <Button 
-          onClick={handleSavePreferences} 
-          variant="secondary" 
-          className="w-full"
-          disabled={savePreferencesMutation.isPending}
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
-        </Button>
+      </FilterSection>
+
+      {/* Budget Range */}
+      <FilterSection title="Budget Range" icon={DollarSign} defaultOpen>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-semibold text-foreground">${budgetRange[0].toLocaleString()}</span>
+            <span className="text-muted-foreground">to</span>
+            <span className="text-lg font-semibold text-foreground">${budgetRange[1].toLocaleString()}</span>
+          </div>
+          <Slider
+            value={budgetRange}
+            onValueChange={setBudgetRange}
+            min={0}
+            max={10000}
+            step={100}
+            className="py-2"
+          />
+          <p className="text-xs text-muted-foreground">Monthly budget range for rental clients</p>
+        </div>
+      </FilterSection>
+
+      {/* Rooms */}
+      <FilterSection title="Room Requirements" icon={Bed}>
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label className="text-sm font-medium">Minimum Bedrooms</Label>
+              <span className="text-lg font-bold text-primary">{bedrooms}</span>
+            </div>
+            <Slider
+              value={[bedrooms]}
+              onValueChange={(v) => setBedrooms(v[0])}
+              min={1}
+              max={6}
+              step={1}
+              className="py-2"
+            />
+          </div>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label className="text-sm font-medium">Minimum Bathrooms</Label>
+              <span className="text-lg font-bold text-primary">{bathrooms}</span>
+            </div>
+            <Slider
+              value={[bathrooms]}
+              onValueChange={(v) => setBathrooms(v[0])}
+              min={1}
+              max={4}
+              step={1}
+              className="py-2"
+            />
+          </div>
+        </div>
+      </FilterSection>
+
+      {/* Amenities */}
+      <FilterSection title="Amenities" icon={Sparkles}>
+        <div className="grid grid-cols-2 gap-2">
+          {amenityOptions.map((amenity) => (
+            <motion.button
+              key={amenity}
+              onClick={() => toggleArrayItem(amenities, amenity, setAmenities)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`
+                p-3 rounded-xl text-sm font-medium transition-all duration-200 border
+                ${amenities.includes(amenity)
+                  ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
+                  : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
+                }
+              `}
+            >
+              {amenity}
+            </motion.button>
+          ))}
+        </div>
+      </FilterSection>
+
+      {/* Preferences */}
+      <FilterSection title="Additional Preferences" icon={Sparkles}>
+        <div className="space-y-4">
+          <motion.div
+            whileTap={{ scale: 0.99 }}
+            className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50"
+          >
+            <Label className="font-medium cursor-pointer">Pet Friendly</Label>
+            <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
+          </motion.div>
+          <motion.div
+            whileTap={{ scale: 0.99 }}
+            className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50"
+          >
+            <Label className="font-medium cursor-pointer">Furnished</Label>
+            <Switch checked={furnished} onCheckedChange={setFurnished} />
+          </motion.div>
+          <motion.div
+            whileTap={{ scale: 0.99 }}
+            className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50"
+          >
+            <Label className="font-medium cursor-pointer">Elevator Access</Label>
+            <Switch checked={hasElevator} onCheckedChange={setHasElevator} />
+          </motion.div>
+        </div>
+      </FilterSection>
+
+      {/* Property Size */}
+      <FilterSection title="Property Size" icon={Building}>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-foreground">{squareFeetRange[0].toLocaleString()} sq ft</span>
+            <span className="text-muted-foreground">to</span>
+            <span className="font-medium text-foreground">{squareFeetRange[1].toLocaleString()} sq ft</span>
+          </div>
+          <Slider
+            value={squareFeetRange}
+            onValueChange={setSquareFeetRange}
+            min={0}
+            max={10000}
+            step={100}
+            className="py-2"
+          />
+        </div>
+      </FilterSection>
+
+      {/* Year Built */}
+      <FilterSection title="Year Built" icon={Building}>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-foreground">{yearBuiltRange[0]}</span>
+            <span className="text-muted-foreground">to</span>
+            <span className="font-medium text-foreground">{yearBuiltRange[1]}</span>
+          </div>
+          <Slider
+            value={yearBuiltRange}
+            onValueChange={setYearBuiltRange}
+            min={1950}
+            max={new Date().getFullYear()}
+            step={5}
+            className="py-2"
+          />
+        </div>
+      </FilterSection>
+
+      {/* Floor Level */}
+      <FilterSection title="Floor Level" icon={Building}>
+        <Select value={floorLevel} onValueChange={setFloorLevel}>
+          <SelectTrigger className="h-12 rounded-xl border-border/50 bg-background/50">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {floorLevelOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </FilterSection>
+
+      {/* View Type */}
+      <FilterSection title="View Type" icon={Eye}>
+        <div className="grid grid-cols-2 gap-2">
+          {viewTypeOptions.map((view) => (
+            <motion.button
+              key={view}
+              onClick={() => toggleArrayItem(viewTypes, view, setViewTypes)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`
+                p-3 rounded-xl text-sm font-medium transition-all duration-200 border
+                ${viewTypes.includes(view)
+                  ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
+                  : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
+                }
+              `}
+            >
+              {view}
+            </motion.button>
+          ))}
+        </div>
+      </FilterSection>
+
+      {/* Orientation */}
+      <FilterSection title="Orientation" icon={Compass}>
+        <div className="grid grid-cols-2 gap-2">
+          {orientationOptions.map((orientation) => (
+            <motion.button
+              key={orientation}
+              onClick={() => toggleArrayItem(orientations, orientation, setOrientations)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`
+                p-3 rounded-xl text-sm font-medium transition-all duration-200 border
+                ${orientations.includes(orientation)
+                  ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
+                  : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
+                }
+              `}
+            >
+              {orientation}
+            </motion.button>
+          ))}
+        </div>
+      </FilterSection>
+
+      {/* Parking */}
+      <FilterSection title="Parking" icon={Car}>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <Label className="text-sm font-medium">Minimum Parking Spots</Label>
+            <span className="text-lg font-bold text-primary">{parkingSpots}</span>
+          </div>
+          <Slider
+            value={[parkingSpots]}
+            onValueChange={(v) => setParkingSpots(v[0])}
+            min={0}
+            max={5}
+            step={1}
+            className="py-2"
+          />
+        </div>
+      </FilterSection>
+
+      {/* Action Buttons */}
+      <div className="p-4 border-t border-border/50 bg-muted/30 space-y-3">
+        <div className="flex gap-3">
+          <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+            <Button
+              onClick={handleClear}
+              variant="outline"
+              className="w-full h-12 rounded-xl border-border/50 gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Clear All
+            </Button>
+          </motion.div>
+          <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+            <Button
+              onClick={handleApply}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary/90 shadow-lg shadow-primary/20"
+            >
+              Apply Filters
+            </Button>
+          </motion.div>
+        </div>
+        <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+          <Button
+            onClick={handleSavePreferences}
+            variant="secondary"
+            className="w-full h-12 rounded-xl gap-2"
+            disabled={savePreferencesMutation.isPending}
+          >
+            <Save className="h-4 w-4" />
+            {savePreferencesMutation.isPending ? 'Saving...' : 'Save as Preferences'}
+          </Button>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
