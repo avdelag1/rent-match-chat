@@ -202,7 +202,7 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-6xl font-bold tracking-wider drop-shadow-lg text-center">
+          <h1 className="text-7xl md:text-8xl font-bold tracking-wider drop-shadow-lg text-center">
             <motion.span
               className="inline-block"
               style={{
