@@ -204,7 +204,7 @@ function LegendaryLandingPage() {
         >
           <h1 className="text-7xl md:text-8xl font-bold tracking-wider drop-shadow-lg text-center flex items-center justify-center">
             {/* Fire S Letter */}
-            <motion.span
+            <span
               className="relative inline-block mr-[-0.05em]"
               style={{
                 filter: 'drop-shadow(0 0 8px rgba(251, 146, 60, 0.8)) drop-shadow(0 0 20px rgba(234, 88, 12, 0.6))'
@@ -239,11 +239,8 @@ function LegendaryLandingPage() {
                   strokeWidth="12"
                   strokeLinecap="round"
                   filter="url(#sFlameGlow)"
-                  animate={{
-                    strokeWidth: [12, 14, 12],
-                    filter: ['url(#sFlameGlow)', 'url(#sFlameGlow)', 'url(#sFlameGlow)']
-                  }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+                  animate={{ strokeWidth: [12, 14, 12] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 />
                 {/* Inner bright core of S */}
                 <motion.path
@@ -252,15 +249,12 @@ function LegendaryLandingPage() {
                   stroke="url(#fireSCore)"
                   strokeWidth="5"
                   strokeLinecap="round"
-                  animate={{
-                    strokeWidth: [5, 7, 5],
-                    opacity: [0.9, 1, 0.9]
-                  }}
-                  transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+                  animate={{ strokeWidth: [5, 7, 5], opacity: [0.9, 1, 0.9] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
                 />
               </svg>
               {/* Flame particles around S */}
-              {[...Array(3)].map((_, i) => (
+              {[0, 1, 2].map((i) => (
                 <motion.span
                   key={i}
                   className="absolute rounded-full"
@@ -270,22 +264,12 @@ function LegendaryLandingPage() {
                     background: 'linear-gradient(to top, #fbbf24, #f97316)',
                     left: `${20 + i * 25}%`,
                     bottom: '10%',
-                    filter: 'blur(0.5px)'
                   }}
-                  animate={{
-                    y: [0, -20, -40],
-                    opacity: [0, 1, 0],
-                    scale: [0.5, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: i * 0.3,
-                    ease: "easeOut"
-                  }}
+                  animate={{ y: [0, -20, -40], opacity: [0, 1, 0], scale: [0.5, 1, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.4, ease: "easeOut" }}
                 />
               ))}
-            </motion.span>
+            </span>
             {/* Rest of title with animated gradient */}
             <motion.span
               className="inline-block"
@@ -296,14 +280,8 @@ function LegendaryLandingPage() {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "linear"
-              }}
+              animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
             >
               wipeMatch
             </motion.span>
