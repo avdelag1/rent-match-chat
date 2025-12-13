@@ -1182,3 +1182,32 @@ a {
 .interactive-card:active {
   transform: scale(0.99) translateZ(0);
 }
+
+/* Shimmer Wave Animation - Fluid left to right wave effect */
+@keyframes shimmer-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-wave {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #ffffff 10%,
+    #f97316 25%,
+    #fbbf24 40%,
+    #ea580c 55%,
+    #ff6b35 70%,
+    #ffffff 85%,
+    #ffffff 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-wave 4s linear infinite;
+}

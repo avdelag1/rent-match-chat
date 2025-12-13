@@ -27,11 +27,11 @@ export const springConfigs = {
 
 // Easing curves matching iOS animations
 export const easings = {
-  ios: [0.25, 0.46, 0.45, 0.94],
-  iosIn: [0.42, 0, 1, 1],
-  iosOut: [0, 0, 0.58, 1],
-  bounce: [0.68, -0.55, 0.265, 1.55],
-  smooth: [0.4, 0, 0.2, 1],
+  ios: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+  iosIn: [0.42, 0, 1, 1] as [number, number, number, number],
+  iosOut: [0, 0, 0.58, 1] as [number, number, number, number],
+  bounce: [0.68, -0.55, 0.265, 1.55] as [number, number, number, number],
+  smooth: [0.4, 0, 0.2, 1] as [number, number, number, number],
 };
 
 // Page transition variants
