@@ -202,11 +202,11 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-6xl font-bold tracking-wider drop-shadow-lg text-center">
+          <h1 className="text-7xl sm:text-8xl font-black tracking-tight drop-shadow-2xl text-center">
             <motion.span
               className="inline-block"
               style={{
-                background: 'linear-gradient(90deg, #fff 0%, #f97316 25%, #ea580c 50%, #fbbf24 75%, #fff 100%)',
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
                 backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -216,7 +216,7 @@ function LegendaryLandingPage() {
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
               }}
               transition={{
-                duration: 4,
+                duration: 3,
                 repeat: Infinity,
                 ease: "linear"
               }}
@@ -248,11 +248,11 @@ function LegendaryLandingPage() {
             }}
             transition={{
               type: "spring",
-              stiffness: 140,
-              damping: 18,
-              mass: 0.8,
-              delay: 0.7,
-              bounce: 0.5
+              stiffness: 200,
+              damping: 20,
+              mass: 0.6,
+              delay: 0.3,
+              bounce: 0.4
             }}
             whileHover={{
               scale: 1.03,
@@ -288,11 +288,11 @@ function LegendaryLandingPage() {
             }}
             transition={{
               type: "spring",
-              stiffness: 140,
-              damping: 18,
-              mass: 0.8,
-              delay: 0.9,
-              bounce: 0.5
+              stiffness: 200,
+              damping: 20,
+              mass: 0.6,
+              delay: 0.45,
+              bounce: 0.4
             }}
             whileHover={{
               scale: 1.03,
