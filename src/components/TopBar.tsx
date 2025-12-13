@@ -22,7 +22,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <span
             className="text-2xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #ff6b35, #fbbf24, #ea580c, #f97316)',
+              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -34,7 +34,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <span
             className="text-xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #ff6b35, #fbbf24, #ea580c, #f97316)',
+              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',

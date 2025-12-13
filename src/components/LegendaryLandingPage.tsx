@@ -207,17 +207,17 @@ function LegendaryLandingPage() {
               className="block"
               style={{
                 fontSize: 'clamp(4.5rem, 22vw, 9rem)',
-                background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-                backgroundSize: '400% 100%',
+                background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+                backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
               animate={{
-                backgroundPosition: ['0% 50%', '100% 50%'],
+                backgroundPosition: ['200% 50%', '0% 50%'],
               }}
               transition={{
-                duration: 6,
+                duration: 8,
                 repeat: Infinity,
                 ease: "linear"
               }}
@@ -228,17 +228,17 @@ function LegendaryLandingPage() {
               className="block"
               style={{
                 fontSize: 'clamp(3.5rem, 18vw, 7rem)',
-                background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-                backgroundSize: '400% 100%',
+                background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+                backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
               animate={{
-                backgroundPosition: ['0% 50%', '100% 50%'],
+                backgroundPosition: ['200% 50%', '0% 50%'],
               }}
               transition={{
-                duration: 6,
+                duration: 8,
                 repeat: Infinity,
                 ease: "linear"
               }}
