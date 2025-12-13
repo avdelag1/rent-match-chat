@@ -203,22 +203,48 @@ function LegendaryLandingPage() {
           className="space-y-4"
         >
           <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none">
-            <span
-              className="block shimmer-wave"
+            <motion.span
+              className="block"
               style={{
-                fontSize: 'clamp(3.5rem, 16vw, 6.5rem)',
+                fontSize: 'clamp(4rem, 20vw, 8rem)',
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
+                backgroundSize: '200% 100%',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+              animate={{
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear"
               }}
             >
               Swipe
-            </span>
-            <span
-              className="block shimmer-wave"
+            </motion.span>
+            <motion.span
+              className="block"
               style={{
-                fontSize: 'clamp(2.8rem, 14vw, 5.5rem)',
+                fontSize: 'clamp(2.5rem, 13vw, 5rem)',
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
+                backgroundSize: '200% 100%',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+              animate={{
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear"
               }}
             >
               Match
-            </span>
+            </motion.span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
             Swipe to discover your ideal property or perfect client - rent, buy & connect
