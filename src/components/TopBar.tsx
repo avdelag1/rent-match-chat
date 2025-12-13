@@ -19,11 +19,11 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
         {/* Logo with animated gradient */}
         <div className="flex items-center gap-0.5 select-none">
-          <span 
+          <span
             className="text-2xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-              backgroundSize: '400% 100%',
+              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #ff6b35, #fbbf24, #ea580c, #f97316)',
+              backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -31,11 +31,11 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           >
             Swipe
           </span>
-          <span 
+          <span
             className="text-xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-              backgroundSize: '400% 100%',
+              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #ff6b35, #fbbf24, #ea580c, #f97316)',
+              backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
