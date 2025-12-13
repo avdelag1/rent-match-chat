@@ -202,9 +202,9 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="text-7xl sm:text-8xl font-black tracking-tight drop-shadow-2xl text-center">
+          <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none" style={{ fontSize: 'clamp(3rem, 15vw, 6rem)' }}>
             <motion.span
-              className="inline-block"
+              className="block"
               style={{
                 background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
                 backgroundSize: '200% 100%',
@@ -221,7 +221,27 @@ function LegendaryLandingPage() {
                 ease: "linear"
               }}
             >
-              SwipeMatch
+              Swipe
+            </motion.span>
+            <motion.span
+              className="block"
+              style={{
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
+                backgroundSize: '200% 100%',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+              animate={{
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              Match
             </motion.span>
           </h1>
           <p className="text-white/90 text-xl font-medium px-4">
