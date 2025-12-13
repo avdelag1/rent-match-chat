@@ -979,15 +979,16 @@ a {
 }
 
 .animate-gradient-shift {
-  animation: gradient-shift 300s linear infinite;
+  animation: gradient-shift 600s linear infinite !important;
   animation-play-state: running !important;
+  animation-delay: 0s !important;
   will-change: background-position;
 }
 
 /* ===== PREFERS-REDUCED-MOTION ACCESSIBILITY ===== */
 /* Reduce animation intensity for users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
+  *:not(.animate-gradient-shift),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
@@ -998,11 +999,17 @@ a {
 }
 
 /* Class-based reduced motion (set via JS in index.html) */
-.reduce-motion *,
+.reduce-motion *:not(.animate-gradient-shift),
 .reduce-motion *::before,
 .reduce-motion *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
+}
+
+/* Force gradient animation to always run */
+.animate-gradient-shift {
+  animation: gradient-shift 600s linear infinite !important;
+  animation-play-state: running !important;
 }
