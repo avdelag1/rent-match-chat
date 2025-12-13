@@ -17,11 +17,22 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
   return (
     <header className={cn('app-header bg-background/95 backdrop-blur-md', className)}>
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
-        {/* Logo - Clean without flame */}
+        {/* Logo with animated gradient */}
         <div className="flex items-center gap-1.5 select-none">
-          <span className="text-3xl font-black tracking-tight">
+          <span className="text-2xl font-black tracking-tight">
             <span className="text-foreground">Swipe</span>
-            <span className="bg-gradient-to-r from-orange-500 via-red-500 to-orange-400 bg-clip-text text-transparent">Match</span>
+          </span>
+          <span 
+            className="text-3xl font-black tracking-tight animate-gradient-shift"
+            style={{
+              background: 'linear-gradient(90deg, #f97316 0%, #ea580c 20%, #fbbf24 40%, #ff6b35 60%, #dc2626 80%, #f97316 100%)',
+              backgroundSize: '200% 100%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            Match
           </span>
         </div>
 

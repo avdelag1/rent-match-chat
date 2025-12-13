@@ -207,8 +207,8 @@ function LegendaryLandingPage() {
               className="block"
               style={{
                 fontSize: 'clamp(4rem, 20vw, 8rem)',
-                background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
-                backgroundSize: '200% 100%',
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 15%, #ea580c 30%, #fbbf24 45%, #ff6b35 60%, #dc2626 75%, #fff 100%)',
+                backgroundSize: '300% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -217,7 +217,7 @@ function LegendaryLandingPage() {
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
               }}
               transition={{
-                duration: 3,
+                duration: 2.5,
                 repeat: Infinity,
                 ease: "linear"
               }}
@@ -227,9 +227,9 @@ function LegendaryLandingPage() {
             <motion.span
               className="block"
               style={{
-                fontSize: 'clamp(2.5rem, 13vw, 5rem)',
-                background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
-                backgroundSize: '200% 100%',
+                fontSize: 'clamp(4.5rem, 22vw, 9rem)',
+                background: 'linear-gradient(90deg, #fff 0%, #f97316 15%, #ea580c 30%, #fbbf24 45%, #ff6b35 60%, #dc2626 75%, #fff 100%)',
+                backgroundSize: '300% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -238,7 +238,7 @@ function LegendaryLandingPage() {
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
               }}
               transition={{
-                duration: 3,
+                duration: 2.5,
                 repeat: Infinity,
                 ease: "linear"
               }}
