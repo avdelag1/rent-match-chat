@@ -206,18 +206,18 @@ function LegendaryLandingPage() {
             <motion.span
               className="block"
               style={{
-                fontSize: 'clamp(4rem, 20vw, 8rem)',
-                background: 'linear-gradient(90deg, #fff 0%, #f97316 15%, #ea580c 30%, #fbbf24 45%, #ff6b35 60%, #dc2626 75%, #fff 100%)',
-                backgroundSize: '300% 100%',
+                fontSize: 'clamp(4.5rem, 22vw, 9rem)',
+                background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+                backgroundSize: '400% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
               animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                backgroundPosition: ['0% 50%', '100% 50%'],
               }}
               transition={{
-                duration: 2.5,
+                duration: 6,
                 repeat: Infinity,
                 ease: "linear"
               }}
@@ -227,18 +227,18 @@ function LegendaryLandingPage() {
             <motion.span
               className="block"
               style={{
-                fontSize: 'clamp(4.5rem, 22vw, 9rem)',
-                background: 'linear-gradient(90deg, #fff 0%, #f97316 15%, #ea580c 30%, #fbbf24 45%, #ff6b35 60%, #dc2626 75%, #fff 100%)',
-                backgroundSize: '300% 100%',
+                fontSize: 'clamp(3.5rem, 18vw, 7rem)',
+                background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+                backgroundSize: '400% 100%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
               animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                backgroundPosition: ['0% 50%', '100% 50%'],
               }}
               transition={{
-                duration: 2.5,
+                duration: 6,
                 repeat: Infinity,
                 ease: "linear"
               }}
