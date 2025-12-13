@@ -1,11 +1,10 @@
-
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { AppLoadingScreen } from './AppLoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,8 +15,20 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [timedOut, setTimedOut] = useState(false);
 
-  const { data: userRole, isLoading: profileLoading } = useQuery({
+  // Timeout to prevent infinite loading - redirect to home after 10s
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn('[ProtectedRoute] Auth loading timed out');
+        setTimedOut(true);
+      }
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  const { data: userRole, isLoading: profileLoading, isError } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -35,13 +46,19 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return data?.role;
     },
     enabled: !!user,
-    retry: 3,
-    retryDelay: 500,
-    staleTime: 30 * 60 * 1000, // Cache for 30 minutes (roles rarely change)
-    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour
+    retry: 2,
+    retryDelay: 300,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 
   useEffect(() => {
+    // Handle timeout - redirect to home
+    if (timedOut && !user) {
+      navigate('/', { replace: true });
+      return;
+    }
+
     // Show loading while checking auth/role
     if (loading || profileLoading) {
       return;
@@ -53,47 +70,43 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return;
     }
 
-    if (!userRole) {
-      // Role not found after React Query retries - this shouldn't happen
-      console.error('[ProtectedRoute] ❌ User authenticated but no role found after retries');
+    // Handle query error
+    if (isError) {
+      console.error('[ProtectedRoute] Role query failed');
+      navigate('/', { replace: true });
+      return;
+    }
+
+    if (!userRole && !profileLoading) {
+      console.error('[ProtectedRoute] User authenticated but no role found');
       toast({
         title: "Account setup incomplete",
-        description: "Please refresh or contact support if this persists.",
+        description: "Please try signing in again.",
         variant: "destructive"
       });
       navigate('/', { replace: true });
       return;
     }
 
-    // CRITICAL: Check role-based access for protected routes
-    if (requiredRole && userRole !== requiredRole) {
+    // Check role-based access for protected routes
+    if (requiredRole && userRole && userRole !== requiredRole) {
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-
       toast({
         title: "Access Denied",
         description: `Redirecting to your ${userRole} dashboard.`,
         variant: "destructive"
       });
-
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, navigate, location, requiredRole]);
+  }, [user, userRole, loading, profileLoading, navigate, location, requiredRole, timedOut, isError]);
 
   if (loading || profileLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </div>
-    );
+    return <AppLoadingScreen />;
   }
 
   if (!user || (requiredRole && userRole !== requiredRole)) {
-    return null; // Will redirect via useEffect
+    return null;
   }
 
   return <>{children}</>;
 }
-
