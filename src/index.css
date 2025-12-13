@@ -979,7 +979,7 @@ a {
 }
 
 .animate-gradient-shift {
-  animation: gradient-shift 8s linear infinite;
+  animation: gradient-shift 90s linear infinite;
 }
 
 /* ===== PREFERS-REDUCED-MOTION ACCESSIBILITY ===== */
