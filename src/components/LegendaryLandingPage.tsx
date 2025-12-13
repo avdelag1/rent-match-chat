@@ -202,10 +202,11 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none" style={{ fontSize: 'clamp(3rem, 15vw, 6rem)' }}>
+          <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none">
             <motion.span
               className="block"
               style={{
+                fontSize: 'clamp(4rem, 20vw, 8rem)',
                 background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
                 backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
@@ -226,6 +227,7 @@ function LegendaryLandingPage() {
             <motion.span
               className="block"
               style={{
+                fontSize: 'clamp(2.5rem, 13vw, 5rem)',
                 background: 'linear-gradient(90deg, #fff 0%, #f97316 20%, #ea580c 40%, #fbbf24 60%, #ff6b35 80%, #fff 100%)',
                 backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
