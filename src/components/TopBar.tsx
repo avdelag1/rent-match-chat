@@ -22,8 +22,8 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <span
             className="text-2xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, #fb923c, #f59e0b, #fcd34d, #fdba74, #fca5a5, #fdba74, #fcd34d, #f59e0b, #fb923c)',
-              backgroundSize: '200% 100%',
+              background: 'linear-gradient(90deg, #fcd9b6 0%, #fde4cf 8%, #fef0e1 16%, #ffe8d6 24%, #ffd7ba 32%, #ffcba4 40%, #ffd7ba 48%, #ffe8d6 56%, #fef0e1 64%, #fde4cf 72%, #fcd9b6 80%, #fde4cf 88%, #fef0e1 100%)',
+              backgroundSize: '300% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -34,8 +34,8 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <span
             className="text-xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, #fb923c, #f59e0b, #fcd34d, #fdba74, #fca5a5, #fdba74, #fcd34d, #f59e0b, #fb923c)',
-              backgroundSize: '200% 100%',
+              background: 'linear-gradient(90deg, #fcd9b6 0%, #fde4cf 8%, #fef0e1 16%, #ffe8d6 24%, #ffd7ba 32%, #ffcba4 40%, #ffd7ba 48%, #ffe8d6 56%, #fef0e1 64%, #fde4cf 72%, #fcd9b6 80%, #fde4cf 88%, #fef0e1 100%)',
+              backgroundSize: '300% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
