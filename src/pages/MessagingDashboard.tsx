@@ -147,8 +147,10 @@ export function MessagingDashboard() {
 
       // If not found, refetch immediately to get latest data
       if (!conversation) {
-        await refetch();
-        conversation = conversations.find(c => c.id === conversationId);
+        const result = await refetch();
+        // Use fresh data from refetch result instead of stale state
+        const freshConversations = result.data || [];
+        conversation = freshConversations.find((c: { id: string }) => c.id === conversationId);
       }
 
       if (conversation) {
