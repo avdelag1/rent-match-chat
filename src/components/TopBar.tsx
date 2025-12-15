@@ -22,8 +22,8 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <span
             className="text-2xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, rgba(253,230,210,0.85) 0%, rgba(254,240,225,0.8) 10%, rgba(255,245,235,0.75) 20%, rgba(254,240,225,0.8) 30%, rgba(253,230,210,0.85) 40%, rgba(255,235,220,0.8) 50%, rgba(253,230,210,0.85) 60%, rgba(254,240,225,0.8) 70%, rgba(255,245,235,0.75) 80%, rgba(254,240,225,0.8) 90%, rgba(253,230,210,0.85) 100%)',
-              backgroundSize: '400% 100%',
+              background: 'linear-gradient(90deg, rgba(180,160,140,0.9) 0%, rgba(200,185,170,0.85) 15%, rgba(220,205,190,0.8) 30%, rgba(200,185,170,0.85) 45%, rgba(180,160,140,0.9) 50%, rgba(200,185,170,0.85) 55%, rgba(220,205,190,0.8) 70%, rgba(200,185,170,0.85) 85%, rgba(180,160,140,0.9) 100%)',
+              backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -34,8 +34,8 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           <span
             className="text-xl font-black tracking-tight animate-gradient-shift"
             style={{
-              background: 'linear-gradient(90deg, rgba(253,230,210,0.85) 0%, rgba(254,240,225,0.8) 10%, rgba(255,245,235,0.75) 20%, rgba(254,240,225,0.8) 30%, rgba(253,230,210,0.85) 40%, rgba(255,235,220,0.8) 50%, rgba(253,230,210,0.85) 60%, rgba(254,240,225,0.8) 70%, rgba(255,245,235,0.75) 80%, rgba(254,240,225,0.8) 90%, rgba(253,230,210,0.85) 100%)',
-              backgroundSize: '400% 100%',
+              background: 'linear-gradient(90deg, rgba(180,160,140,0.9) 0%, rgba(200,185,170,0.85) 15%, rgba(220,205,190,0.8) 30%, rgba(200,185,170,0.85) 45%, rgba(180,160,140,0.9) 50%, rgba(200,185,170,0.85) 55%, rgba(220,205,190,0.8) 70%, rgba(200,185,170,0.85) 85%, rgba(180,160,140,0.9) 100%)',
+              backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
