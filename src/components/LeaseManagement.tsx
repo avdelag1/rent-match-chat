@@ -6,7 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Calendar, DollarSign, User, Download, Plus, Clock, AlertCircle } from 'lucide-react';
+import { FileText, Calendar, DollarSign, User, Download, Plus, Clock, AlertCircle, Eye, Edit, Trash2, FileSignature } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 interface Lease {
   id: string;
@@ -22,6 +31,50 @@ interface Lease {
 export function LeaseManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [selectedLease, setSelectedLease] = useState<Lease | null>(null);
+
+  // Form state for creating new lease
+  const [newLease, setNewLease] = useState({
+    propertyTitle: '',
+    tenantName: '',
+    startDate: '',
+    endDate: '',
+    monthlyRent: '',
+    securityDeposit: '',
+  });
+
+  const handleCreateLease = () => {
+    if (!newLease.propertyTitle || !newLease.tenantName || !newLease.startDate || !newLease.endDate || !newLease.monthlyRent) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    toast.success("Lease created successfully!");
+    setShowCreateDialog(false);
+    setNewLease({
+      propertyTitle: '',
+      tenantName: '',
+      startDate: '',
+      endDate: '',
+      monthlyRent: '',
+      securityDeposit: '',
+    });
+  };
+
+  const handleViewDetails = (lease: Lease) => {
+    setSelectedLease(lease);
+    setShowDetailDialog(true);
+  };
+
+  const handleDownload = (lease: Lease) => {
+    toast.success(`Downloading lease document for ${lease.propertyTitle}...`);
+  };
+
+  const handleManage = (lease: Lease) => {
+    setSelectedLease(lease);
+    setShowDetailDialog(true);
+  };
 
   // Mock lease data
   const leases: Lease[] = [
@@ -100,7 +153,7 @@ export function LeaseManagement() {
           <h1 className="text-3xl font-bold text-foreground">Lease Management</h1>
           <p className="text-muted-foreground">Manage rental agreements and contracts</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
           <Plus className="w-4 h-4" />
           Create Lease
         </Button>
@@ -194,15 +247,17 @@ export function LeaseManagement() {
                       </Badge>
 
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleDownload(lease)}>
                           <Download className="w-4 h-4 mr-1" />
                           Download
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(lease)}>
+                          <Eye className="w-4 h-4 mr-1" />
                           View Details
                         </Button>
                         {lease.status === 'active' && (
-                          <Button size="sm" variant="secondary">
+                          <Button size="sm" variant="secondary" onClick={() => handleManage(lease)}>
+                            <Edit className="w-4 h-4 mr-1" />
                             Manage
                           </Button>
                         )}
@@ -248,11 +303,187 @@ export function LeaseManagement() {
         <TabsContent value="templates">
           <Card>
             <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Lease templates will appear here</p>
+              <FileSignature className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Lease Templates</h3>
+              <p className="text-muted-foreground mb-4">Use pre-made templates to create new leases quickly</p>
+              <div className="flex gap-2 justify-center">
+                <Button variant="outline">Standard Residential</Button>
+                <Button variant="outline">Commercial Lease</Button>
+                <Button variant="outline">Short-term Rental</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Create Lease Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-primary" />
+              Create New Lease
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details to create a new lease agreement.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="property">Property Title *</Label>
+              <Input
+                id="property"
+                placeholder="e.g., Modern Downtown Apartment"
+                value={newLease.propertyTitle}
+                onChange={(e) => setNewLease(prev => ({ ...prev, propertyTitle: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tenant">Tenant Name *</Label>
+              <Input
+                id="tenant"
+                placeholder="e.g., John Smith"
+                value={newLease.tenantName}
+                onChange={(e) => setNewLease(prev => ({ ...prev, tenantName: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start">Start Date *</Label>
+                <Input
+                  id="start"
+                  type="date"
+                  value={newLease.startDate}
+                  onChange={(e) => setNewLease(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end">End Date *</Label>
+                <Input
+                  id="end"
+                  type="date"
+                  value={newLease.endDate}
+                  onChange={(e) => setNewLease(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="rent">Monthly Rent *</Label>
+                <Input
+                  id="rent"
+                  type="number"
+                  placeholder="2500"
+                  value={newLease.monthlyRent}
+                  onChange={(e) => setNewLease(prev => ({ ...prev, monthlyRent: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deposit">Security Deposit</Label>
+                <Input
+                  id="deposit"
+                  type="number"
+                  placeholder="5000"
+                  value={newLease.securityDeposit}
+                  onChange={(e) => setNewLease(prev => ({ ...prev, securityDeposit: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateLease}>
+              <Plus className="w-4 h-4 mr-1" />
+              Create Lease
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lease Details Dialog */}
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Lease Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedLease && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 pb-4 border-b">
+                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedLease.propertyTitle}</h3>
+                  <Badge variant={getStatusVariant(selectedLease.status)}>
+                    {selectedLease.status.charAt(0).toUpperCase() + selectedLease.status.slice(1)}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Tenant
+                  </span>
+                  <span className="font-medium">{selectedLease.tenantName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Lease Period
+                  </span>
+                  <span className="font-medium">{selectedLease.startDate} - {selectedLease.endDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    Monthly Rent
+                  </span>
+                  <span className="font-medium">${selectedLease.monthlyRent.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Next Payment
+                  </span>
+                  <span className="font-medium">{selectedLease.nextPayment}</span>
+                </div>
+              </div>
+
+              {selectedLease.status === 'active' && (
+                <div className="pt-4 border-t space-y-2">
+                  <Label>Quick Actions</Label>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Download className="w-4 h-4 mr-1" />
+                      Download
+                    </Button>
+                    <Button variant="destructive" size="sm" className="flex-1">
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Terminate
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
