@@ -126,7 +126,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
         case 'listings':
           return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
         case 'profile':
-          return 'text-purple-500 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]';
+          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
         case 'hire':
           return 'text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]';
         default:

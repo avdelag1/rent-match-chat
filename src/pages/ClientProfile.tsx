@@ -71,7 +71,7 @@ const ClientProfile = () => {
     { icon: Settings, label: 'Preferences', action: () => navigate('/client/settings'), color: 'text-gray-500' },
     { icon: Crown, label: 'Subscription', action: () => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Shield, label: 'Security', action: () => navigate('/client/security'), color: 'text-green-500' },
-    { icon: Bell, label: 'Notifications', action: () => navigate('/notifications'), color: 'text-purple-500' },
+    { icon: Bell, label: 'Notifications', action: () => navigate('/notifications'), color: 'text-blue-500' },
   ];
 
   return (
