@@ -51,7 +51,7 @@ const OwnerProfile = () => {
     { icon: Crown, label: 'Subscription', action: () => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Settings, label: 'Settings', action: () => navigate('/owner/settings'), color: 'text-gray-500' },
     { icon: Shield, label: 'Security', action: () => navigate('/owner/security'), color: 'text-green-500' },
-    { icon: Bell, label: 'Notifications', action: () => navigate('/notifications'), color: 'text-purple-500' },
+    { icon: Bell, label: 'Notifications', action: () => navigate('/notifications'), color: 'text-blue-500' },
   ];
 
   return (
