@@ -249,29 +249,29 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Account Security</h2>
-        <p className="text-muted-foreground">Protect your account with advanced security features</p>
+        <h2 className="text-2xl font-bold text-white mb-2">Account Security</h2>
+        <p className="text-gray-400">Protect your account with advanced security features</p>
       </div>
 
       {/* Security Score */}
-      <Card className="bg-card border-border">
+      <Card className="bg-gray-700/50 border-gray-600/50">
         <CardHeader>
-          <CardTitle className="text-foreground flex items-center gap-2">
+          <CardTitle className="text-white flex items-center gap-2">
             <Shield className="w-5 h-5" />
             Security Score
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-muted-foreground">Current Score</span>
+            <span className="text-gray-400">Current Score</span>
             <span className={`text-2xl font-bold ${getScoreColor(securityScore())}`}>
               {securityScore()}/100
             </span>
           </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div 
+          <div className="w-full bg-gray-600/50 rounded-full h-2">
+            <div
               className={`h-2 rounded-full ${
-                securityScore() >= 80 ? 'bg-green-500' : 
+                securityScore() >= 80 ? 'bg-green-500' :
                 securityScore() >= 60 ? 'bg-yellow-500' : 'bg-red-500'
               }`}
               style={{ width: `${securityScore()}%` }}
@@ -281,9 +281,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       </Card>
 
       {/* Password Security */}
-      <Card className="bg-card border-border">
+      <Card className="bg-gray-700/50 border-gray-600/50">
         <CardHeader>
-          <CardTitle className="text-foreground flex items-center gap-2">
+          <CardTitle className="text-white flex items-center gap-2">
             <Lock className="w-5 h-5" />
             Password Security
           </CardTitle>
@@ -291,10 +291,10 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         <CardContent className="space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="text-foreground font-medium">Password</h4>
-              <p className="text-muted-foreground text-sm">Last changed 30 days ago</p>
+              <h4 className="text-white font-medium">Password</h4>
+              <p className="text-gray-400 text-sm">Last changed 30 days ago</p>
             </div>
-            <Button onClick={() => setShowPasswordDialog(true)} variant="outline">
+            <Button onClick={() => setShowPasswordDialog(true)} variant="outline" className="border-gray-600 hover:bg-gray-600/50">
               Change Password
             </Button>
           </div>
@@ -302,9 +302,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       </Card>
 
       {/* Two-Factor Authentication */}
-      <Card className="bg-card border-border">
+      <Card className="bg-gray-700/50 border-gray-600/50">
         <CardHeader>
-          <CardTitle className="text-foreground flex items-center gap-2">
+          <CardTitle className="text-white flex items-center gap-2">
             <Smartphone className="w-5 h-5" />
             Two-Factor Authentication
           </CardTitle>
@@ -312,8 +312,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         <CardContent>
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="text-foreground font-medium">Add an extra layer of security</h4>
-              <p className="text-muted-foreground text-sm">
+              <h4 className="text-white font-medium">Add an extra layer of security</h4>
+              <p className="text-gray-400 text-sm">
                 {twoFactorEnabled ? 'Two-factor authentication is enabled' : 'Not enabled'}
               </p>
             </div>
@@ -326,9 +326,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       </Card>
 
       {/* Login Security */}
-      <Card className="bg-card border-border">
+      <Card className="bg-gray-700/50 border-gray-600/50">
         <CardHeader>
-          <CardTitle className="text-foreground flex items-center gap-2">
+          <CardTitle className="text-white flex items-center gap-2">
             <Shield className="w-5 h-5" />
             Login Security
           </CardTitle>
@@ -336,8 +336,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         <CardContent className="space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="text-foreground font-medium">Login Alerts</h4>
-              <p className="text-muted-foreground text-sm">Get notified of new sign-ins</p>
+              <h4 className="text-white font-medium">Login Alerts</h4>
+              <p className="text-gray-400 text-sm">Get notified of new sign-ins</p>
             </div>
             <Switch
               checked={loginAlerts}
@@ -348,11 +348,11 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               disabled={loadingState || savingState}
             />
           </div>
-          
+
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="text-foreground font-medium">Session Timeout</h4>
-              <p className="text-muted-foreground text-sm">Auto logout after inactivity</p>
+              <h4 className="text-white font-medium">Session Timeout</h4>
+              <p className="text-gray-400 text-sm">Auto logout after inactivity</p>
             </div>
             <Switch
               checked={sessionTimeout}
@@ -363,11 +363,11 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               disabled={loadingState || savingState}
             />
           </div>
-          
+
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="text-foreground font-medium">Device Tracking</h4>
-              <p className="text-muted-foreground text-sm">Monitor unknown devices</p>
+              <h4 className="text-white font-medium">Device Tracking</h4>
+              <p className="text-gray-400 text-sm">Monitor unknown devices</p>
             </div>
             <Switch
               checked={deviceTracking}
@@ -382,9 +382,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       </Card>
 
       {/* Danger Zone - Delete Account */}
-      <Card className="bg-card border-destructive">
+      <Card className="bg-red-500/10 border-red-500/30">
         <CardHeader>
-          <CardTitle className="text-destructive flex items-center gap-2">
+          <CardTitle className="text-red-400 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5" />
             Danger Zone
           </CardTitle>
@@ -392,13 +392,13 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         <CardContent className="space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="text-foreground font-medium">Delete Account</h4>
-              <p className="text-muted-foreground text-sm">
+              <h4 className="text-white font-medium">Delete Account</h4>
+              <p className="text-gray-400 text-sm">
                 Permanently delete your account and all associated data
               </p>
             </div>
-            <Button 
-              onClick={() => setShowDeleteAccountDialog(true)} 
+            <Button
+              onClick={() => setShowDeleteAccountDialog(true)}
               variant="destructive"
               className="gap-2"
             >
@@ -411,9 +411,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
       {/* Password Change Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="bg-card border-border">
+        <DialogContent className="bg-gray-800 border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Change Password</DialogTitle>
+            <DialogTitle className="text-white">Change Password</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="relative">
@@ -422,7 +422,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 placeholder="Current password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="bg-background border-border text-foreground"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
               <Button
                 type="button"
@@ -432,9 +432,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 onClick={() => setShowPasswords(!showPasswords)}
               >
                 {showPasswords ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  <EyeOff className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
+                  <Eye className="h-4 w-4 text-gray-400" />
                 )}
               </Button>
             </div>
@@ -444,7 +444,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 placeholder="New password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-background border-border text-foreground"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
             <div className="relative">
@@ -453,12 +453,12 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="bg-background border-border text-foreground"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isChangingPassword}>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isChangingPassword} className="border-gray-600 hover:bg-gray-700">
               Cancel
             </Button>
             <Button onClick={handlePasswordChange} disabled={isChangingPassword}>
@@ -470,18 +470,18 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
       {/* Two-Factor Setup Dialog */}
       <Dialog open={showTwoFactorDialog} onOpenChange={setShowTwoFactorDialog}>
-        <DialogContent className="bg-card border-border">
+        <DialogContent className="bg-gray-800 border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Enable Two-Factor Authentication</DialogTitle>
+            <DialogTitle className="text-white">Enable Two-Factor Authentication</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-muted-foreground">
+            <p className="text-gray-400">
               Two-factor authentication adds an extra layer of security to your account by requiring
               a code from your phone in addition to your password.
             </p>
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <h4 className="text-foreground font-medium mb-2">Setup Steps:</h4>
-              <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+            <div className="bg-gray-700/50 p-4 rounded-lg">
+              <h4 className="text-white font-medium mb-2">Setup Steps:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-gray-400 text-sm">
                 <li>Download an authenticator app (Google Authenticator, Authy, etc.)</li>
                 <li>Scan the QR code with your authenticator app</li>
                 <li>Enter the 6-digit code to verify</li>
@@ -489,7 +489,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowTwoFactorDialog(false)}>
+            <Button variant="outline" onClick={() => setShowTwoFactorDialog(false)} className="border-gray-600 hover:bg-gray-700">
               Cancel
             </Button>
             <Button onClick={enableTwoFactor}>Enable 2FA</Button>
@@ -499,20 +499,20 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
 
       {/* Delete Account Confirmation Dialog */}
       <Dialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
-        <DialogContent className="bg-card border-destructive">
+        <DialogContent className="bg-gray-800 border-red-500/30">
           <DialogHeader>
-            <DialogTitle className="text-destructive flex items-center gap-2">
+            <DialogTitle className="text-red-400 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5" />
               Delete Account
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
+            <DialogDescription className="text-gray-400">
               This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
-              <h4 className="text-foreground font-medium mb-2">⚠️ Warning</h4>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-sm">
+            <div className="bg-red-500/10 p-4 rounded-lg border border-red-500/20">
+              <h4 className="text-white font-medium mb-2">⚠️ Warning</h4>
+              <ul className="list-disc list-inside space-y-1 text-gray-400 text-sm">
                 <li>All your {userRole === 'client' ? 'saved properties and preferences' : 'listings and client connections'} will be deleted</li>
                 <li>Your messages and conversation history will be removed</li>
                 <li>Your subscription will be cancelled immediately</li>
@@ -520,29 +520,30 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
               </ul>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">
-                Type <span className="font-bold text-destructive">DELETE</span> to confirm:
+              <label className="text-sm font-medium text-white mb-2 block">
+                Type <span className="font-bold text-red-400">DELETE</span> to confirm:
               </label>
               <Input
                 type="text"
                 placeholder="Type DELETE to confirm"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
-                className="bg-background border-border text-foreground"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setShowDeleteAccountDialog(false);
                 setDeleteConfirmText('');
               }}
+              className="border-gray-600 hover:bg-gray-700"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               variant="destructive"
               onClick={handleDeleteAccount}
               disabled={deleteConfirmText.toLowerCase() !== 'delete'}

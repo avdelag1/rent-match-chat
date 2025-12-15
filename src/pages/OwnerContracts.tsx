@@ -76,16 +76,16 @@ const OwnerContracts = () => {
               <h2 className="text-xl font-semibold text-white mb-4">Active Deals</h2>
               <div className="grid gap-4">
                 {activeDeals.map((deal) => (
-                  <Card key={deal.id} className="bg-white/10 backdrop-blur-sm border-white/20">
+                  <Card key={deal.id} className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
                         <div className="flex items-center gap-3 sm:gap-4">
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 p-2 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
                             <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                           </div>
                           <div className="min-w-0">
                             <h3 className="font-semibold text-white text-sm sm:text-base truncate">{deal.contract?.title}</h3>
-                            <p className="text-white/70 text-xs sm:text-sm">
+                            <p className="text-gray-400 text-xs sm:text-sm">
                               {deal.contract?.contract_type.replace('_', ' ').toUpperCase()}
                             </p>
                           </div>
@@ -118,11 +118,11 @@ const OwnerContracts = () => {
             <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">All Contracts</h2>
 
             {!contracts || contracts.length === 0 ? (
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
                 <CardContent className="p-6 sm:p-8 text-center">
-                  <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-white/50 mx-auto mb-4" />
+                  <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-4" />
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-2">No Contracts Yet</h3>
-                  <p className="text-white/70 mb-4 text-sm sm:text-base">
+                  <p className="text-gray-400 mb-4 text-sm sm:text-base">
                     Create your first contract to start managing rental agreements.
                   </p>
                   <Button
@@ -137,16 +137,16 @@ const OwnerContracts = () => {
             ) : (
               <div className="grid gap-3 sm:gap-4">
                 {contracts.map((contract) => (
-                  <Card key={contract.id} className="bg-white/10 backdrop-blur-sm border-white/20">
+                  <Card key={contract.id} className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
                         <div className="flex items-center gap-3 sm:gap-4">
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 p-2 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 p-2 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
                             <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="font-semibold text-white text-sm sm:text-base truncate">{contract.title}</h3>
-                            <p className="text-white/70 text-xs sm:text-sm">
+                            <p className="text-gray-400 text-xs sm:text-sm">
                               {contract.contract_type.replace('_', ' ').toUpperCase()} •
                               Created {formatDistanceToNow(new Date(contract.created_at))} ago
                             </p>
@@ -157,7 +157,7 @@ const OwnerContracts = () => {
                             {getStatusIcon(contract.status)}
                             <span className="ml-1 text-xs">{contract.status.replace('_', ' ')}</span>
                           </Badge>
-                          <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                          <Button variant="outline" size="sm" className="text-xs sm:text-sm border-gray-600 hover:bg-gray-700">
                             <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                             View
                           </Button>
