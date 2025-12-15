@@ -130,73 +130,62 @@ export function AppLoadingScreen() {
         />
       </motion.div>
 
-      {/* SwipeMatch text with visible smoke/flame effect */}
+      {/* SwipeMatch text with subtle fluid/smoke effect */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
         className="mt-6 flex items-center gap-1 relative"
       >
-        {/* SVG filters for smoke and glow effects */}
+        {/* SVG filter for fluid effect */}
         <svg className="absolute w-0 h-0">
           <defs>
-            {/* Smoke/fluid distortion filter */}
-            <filter id="smoke-text" x="-50%" y="-50%" width="200%" height="200%">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.02"
-                numOctaves="3"
+            <filter id="fluid-text" x="-20%" y="-20%" width="140%" height="140%">
+              <feTurbulence 
+                type="fractalNoise" 
+                baseFrequency="0.015" 
+                numOctaves="2" 
                 result="noise"
-                seed="5"
               >
-                <animate
-                  attributeName="baseFrequency"
-                  values="0.02;0.025;0.02"
-                  dur="4s"
+                <animate 
+                  attributeName="baseFrequency" 
+                  values="0.015;0.02;0.015" 
+                  dur="8s" 
                   repeatCount="indefinite"
                 />
               </feTurbulence>
-              <feDisplacementMap
-                in="SourceGraphic"
-                in2="noise"
-                scale="5"
-                xChannelSelector="R"
+              <feDisplacementMap 
+                in="SourceGraphic" 
+                in2="noise" 
+                scale="3" 
+                xChannelSelector="R" 
                 yChannelSelector="G"
               />
             </filter>
-            {/* Glow effect filter */}
-            <filter id="text-glow" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
         </svg>
-
+        
         <div className="relative">
-          {/* Smoke/distortion background layer */}
+          {/* Background fluid layer - very subtle */}
           <motion.span
-            className="absolute inset-0 text-2xl font-black tracking-tight opacity-50 blur-[1.5px] pointer-events-none"
+            className="absolute inset-0 text-2xl font-black tracking-tight opacity-30 blur-[1px]"
             style={{
-              background: 'linear-gradient(90deg, #f97316, #fbbf24, #ea580c, #dc2626, #f97316)',
+              background: 'linear-gradient(90deg, #f97316, #fbbf24, #ea580c, #f97316)',
               backgroundSize: '300% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'url(#smoke-text)',
+              filter: 'url(#fluid-text)',
             }}
             animate={{
               backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
             }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
           >
             Swipe
           </motion.span>
-
-          {/* Main text with glow */}
+          
+          {/* Main text with subtle movement */}
           <motion.span
             className="relative text-2xl font-black tracking-tight"
             style={{
@@ -205,7 +194,6 @@ export function AppLoadingScreen() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'url(#text-glow)',
             }}
             animate={{
               backgroundPosition: ['0% 50%', '100% 50%'],
@@ -215,37 +203,36 @@ export function AppLoadingScreen() {
             Swipe
           </motion.span>
         </div>
-
+        
         <div className="relative">
-          {/* Smoke/distortion background layer */}
+          {/* Background fluid layer - very subtle */}
           <motion.span
-            className="absolute inset-0 text-2xl font-black tracking-tight opacity-50 blur-[1.5px] pointer-events-none"
+            className="absolute inset-0 text-xl font-black tracking-tight opacity-30 blur-[1px]"
             style={{
-              background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #dc2626, #ea580c)',
+              background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #ea580c)',
               backgroundSize: '300% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'url(#smoke-text)',
+              filter: 'url(#fluid-text)',
             }}
             animate={{
               backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
             }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear", delay: 0.5 }}
           >
             Match
           </motion.span>
-
-          {/* Main text with glow */}
+          
+          {/* Main text */}
           <motion.span
-            className="relative text-2xl font-black tracking-tight"
+            className="relative text-xl font-black tracking-tight"
             style={{
               background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #ea580c)',
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'url(#text-glow)',
             }}
             animate={{
               backgroundPosition: ['0% 50%', '100% 50%'],

@@ -202,33 +202,9 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-4"
         >
-          <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none relative">
-            {/* Smoke/glow background layer for Swipe */}
+          <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none">
             <motion.span
-              className="block absolute inset-0 opacity-60 blur-[2px] pointer-events-none"
-              style={{
-                fontSize: 'clamp(4.5rem, 22vw, 9rem)',
-                background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-                backgroundSize: '300% 100%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'url(#flameDistortion)',
-              }}
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              Swipe
-            </motion.span>
-            {/* Main Swipe text */}
-            <motion.span
-              className="block relative"
+              className="block"
               style={{
                 fontSize: 'clamp(4.5rem, 22vw, 9rem)',
                 background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
@@ -236,7 +212,6 @@ function LegendaryLandingPage() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                filter: 'url(#flameGlow)',
               }}
               animate={{
                 backgroundPosition: ['200% 50%', '0% 50%'],
@@ -249,33 +224,8 @@ function LegendaryLandingPage() {
             >
               Swipe
             </motion.span>
-            {/* Smoke/glow background layer for Match */}
             <motion.span
-              className="block absolute opacity-60 blur-[2px] pointer-events-none"
-              style={{
-                fontSize: 'clamp(3.5rem, 18vw, 7rem)',
-                background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #ff6b35, #dc2626, #ea580c)',
-                backgroundSize: '300% 100%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'url(#flameDistortion)',
-              }}
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.3
-              }}
-            >
-              Match
-            </motion.span>
-            {/* Main Match text */}
-            <motion.span
-              className="block relative"
+              className="block"
               style={{
                 fontSize: 'clamp(3.5rem, 18vw, 7rem)',
                 background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
@@ -283,7 +233,6 @@ function LegendaryLandingPage() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                filter: 'url(#flameGlow)',
               }}
               animate={{
                 backgroundPosition: ['200% 50%', '0% 50%'],
