@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
@@ -111,52 +112,112 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
+  // Beautiful gradient colors for active states
+  const getIconStyles = (item: NavItem, active: boolean) => {
+    if (active) {
+      switch (item.id) {
+        case 'browse':
+          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
+        case 'likes':
+        case 'liked':
+          return 'text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]';
+        case 'messages':
+          return 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]';
+        case 'listings':
+          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
+        case 'profile':
+          return 'text-purple-500 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]';
+        case 'hire':
+          return 'text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]';
+        default:
+          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
+      }
+    }
+    return 'text-gray-400';
+  };
+
   return (
     <nav className="app-bottom-bar pointer-events-none px-3">
-      <div className="flex items-center justify-center gap-4 px-4 py-2.5 pointer-events-auto bg-background/90 backdrop-blur-xl rounded-2xl border border-border/30 shadow-2xl mx-auto max-w-fit">
-        {navItems.map((item) => {
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ 
+          type: 'spring', 
+          stiffness: 400, 
+          damping: 30,
+          delay: 0.1 
+        }}
+        className="flex items-center justify-center gap-2 px-4 py-3 pointer-events-auto bg-background/80 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] mx-auto max-w-fit"
+      >
+        {navItems.map((item, index) => {
           const Icon = item.icon;
           const active = isActive(item);
 
-          // Color scheme based on item - just icons, no circles
-          const getIconColor = () => {
-            if (active) {
-              if (item.id === 'browse') return 'text-red-500';
-              if (item.id === 'likes' || item.id === 'liked') return 'text-orange-500';
-              if (item.id === 'messages') return 'text-blue-500';
-              if (item.id === 'listings') return 'text-red-500';
-              if (item.id === 'profile') return 'text-red-500';
-              return 'text-red-500';
-            }
-            return 'text-gray-500';
-          };
-
           return (
-            <button
+            <motion.button
               key={item.id}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ 
+                type: 'spring',
+                stiffness: 500,
+                damping: 25,
+                delay: 0.15 + index * 0.05
+              }}
               onClick={() => handleNavClick(item)}
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
               className={cn(
-                'relative transition-all duration-200 select-none touch-manipulation flex items-center justify-center p-2 rounded-xl',
-                'active:scale-90 hover:scale-110',
-                active && 'bg-white/10 backdrop-blur-sm',
-                getIconColor()
+                'relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl',
+                active && 'bg-white/10',
+                getIconStyles(item, active)
               )}
             >
-              {/* Notification Badge - Dot Style */}
-              {item.badge && item.badge > 0 && (
-                <span
-                  className={cn(
-                    "absolute -top-0.5 -right-0.5 rounded-full h-3 w-3 flex items-center justify-center shadow-lg",
-                    item.id === 'messages' ? 'bg-blue-500' : 'bg-orange-500'
-                  )}
-                />
-              )}
+              {/* Animated glow ring for active state */}
+              <AnimatePresence>
+                {active && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 1.2, opacity: 0 }}
+                    className="absolute inset-0 rounded-2xl bg-current opacity-10"
+                  />
+                )}
+              </AnimatePresence>
 
-              <Icon className={cn('h-6 w-6', item.isCenter && 'h-7 w-7')} strokeWidth={active ? 2.5 : 2} />
-            </button>
+              {/* Notification Badge - Animated dot */}
+              <AnimatePresence>
+                {item.badge && item.badge > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className={cn(
+                      "absolute -top-0.5 -right-0.5 rounded-full h-3.5 w-3.5 flex items-center justify-center shadow-lg ring-2 ring-background",
+                      item.id === 'messages' ? 'bg-blue-500' : 'bg-orange-500'
+                    )}
+                  >
+                    <motion.span
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-full h-full rounded-full bg-current opacity-50"
+                    />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+
+              <Icon 
+                className={cn(
+                  'h-6 w-6 transition-all duration-200',
+                  item.isCenter && 'h-7 w-7',
+                  active && 'scale-110'
+                )} 
+                strokeWidth={active ? 2.5 : 2} 
+              />
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
     </nav>
   );
 }

@@ -252,37 +252,39 @@ function LegendaryLandingPage() {
         </motion.div>
 
         {/* Buttons Container with Smooth Entrance Effects */}
-        <div className="space-y-6 mt-16">
+        <div className="space-y-5 mt-16">
           
           {/* I'm a Client Button - Slides in from LEFT with elastic bounce */}
           <motion.button
             onClick={() => openAuthDialog('client')}
-            className="w-full py-6 px-8 bg-gradient-to-r from-red-400 to-red-500 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+            className="w-full py-5 px-8 bg-gradient-to-r from-red-500/90 to-orange-500/90 text-white font-bold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(239,68,68,0.4)] backdrop-blur-sm border border-white/20 relative overflow-hidden group"
             initial={{
               opacity: 0,
-              x: -300,
-              scale: 0.8
+              x: -200,
+              scale: 0.8,
+              rotateY: -15,
             }}
             animate={{
               opacity: 1,
               x: 0,
-              scale: 1
+              scale: 1,
+              rotateY: 0,
             }}
             transition={{
               type: "spring",
-              stiffness: 200,
+              stiffness: 150,
               damping: 20,
-              mass: 0.6,
-              delay: 0.3,
-              bounce: 0.4
+              mass: 0.8,
+              delay: 0.4,
             }}
             whileHover={{
               scale: 1.03,
-              y: -3,
+              y: -4,
+              boxShadow: '0 16px 48px rgba(239,68,68,0.5)',
               transition: {
                 type: "spring",
                 stiffness: 400,
-                damping: 10
+                damping: 15
               }
             }}
             whileTap={{
@@ -290,39 +292,47 @@ function LegendaryLandingPage() {
               transition: { duration: 0.1 }
             }}
           >
-            <Users className="w-6 h-6" />
-            <span>I'm a Client</span>
+            {/* Shine effect */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
+              animate={{ x: ['100%', '-100%'] }}
+              transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+            />
+            <Users className="w-6 h-6 relative z-10" />
+            <span className="relative z-10">I'm a Client</span>
           </motion.button>
 
           {/* I'm an Owner Button - Slides in from RIGHT with elastic bounce */}
           <motion.button
             onClick={() => openAuthDialog('owner')}
-            className="w-full py-6 px-8 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+            className="w-full py-5 px-8 bg-gradient-to-r from-orange-500/90 to-red-600/90 text-white font-bold text-xl rounded-2xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(249,115,22,0.4)] backdrop-blur-sm border border-white/20 relative overflow-hidden group"
             initial={{
               opacity: 0,
-              x: 300,
-              scale: 0.8
+              x: 200,
+              scale: 0.8,
+              rotateY: 15,
             }}
             animate={{
               opacity: 1,
               x: 0,
-              scale: 1
+              scale: 1,
+              rotateY: 0,
             }}
             transition={{
               type: "spring",
-              stiffness: 200,
+              stiffness: 150,
               damping: 20,
-              mass: 0.6,
-              delay: 0.45,
-              bounce: 0.4
+              mass: 0.8,
+              delay: 0.55,
             }}
             whileHover={{
               scale: 1.03,
-              y: -3,
+              y: -4,
+              boxShadow: '0 16px 48px rgba(249,115,22,0.5)',
               transition: {
                 type: "spring",
                 stiffness: 400,
-                damping: 10
+                damping: 15
               }
             }}
             whileTap={{
@@ -330,17 +340,23 @@ function LegendaryLandingPage() {
               transition: { duration: 0.1 }
             }}
           >
-            <Flame className="w-6 h-6" />
-            <span>I'm an Owner</span>
+            {/* Shine effect */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
+              animate={{ x: ['100%', '-100%'] }}
+              transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, delay: 0.5 }}
+            />
+            <Flame className="w-6 h-6 relative z-10" />
+            <span className="relative z-10">I'm an Owner</span>
           </motion.button>
         </div>
 
         {/* Subtitle */}
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 1.2 }}
-          className="text-white/90 text-lg mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.0 }}
+          className="text-white/70 text-base mt-10"
         >
           Choose your role to get started
         </motion.p>
