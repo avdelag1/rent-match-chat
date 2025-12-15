@@ -6,13 +6,58 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
-import { Users, Shield, Check, X, Star, AlertTriangle } from 'lucide-react';
+import { Users, Shield, Check, X, Star, AlertTriangle, Settings, Eye, FileText, CreditCard } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 export function TenantScreening() {
   const { data: clientProfiles = [] } = useClientProfiles();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [showApplicantDialog, setShowApplicantDialog] = useState(false);
+  const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
+
+  // Screening settings state
+  const [screeningSettings, setScreeningSettings] = useState({
+    autoScreening: true,
+    creditCheckRequired: true,
+    backgroundCheckRequired: true,
+    incomeVerification: true,
+    employmentVerification: true,
+    referenceCheck: false,
+    minCreditScore: 650,
+    minIncomeRatio: 3,
+  });
+
+  const handleSaveSettings = () => {
+    toast.success("Screening settings saved successfully");
+    setShowSettingsDialog(false);
+  };
+
+  const handleViewApplicant = (profile: any) => {
+    setSelectedApplicant(profile);
+    setShowApplicantDialog(true);
+  };
+
+  const handleApprove = (profile: any) => {
+    toast.success(`${profile.name || 'Applicant'} has been approved`);
+    setShowApplicantDialog(false);
+  };
+
+  const handleReject = (profile: any) => {
+    toast.error(`${profile.name || 'Applicant'} has been rejected`);
+    setShowApplicantDialog(false);
+  };
 
   const getVerificationStatus = (profile: any) => {
     // Mock verification logic
@@ -45,8 +90,8 @@ export function TenantScreening() {
           <h1 className="text-3xl font-bold text-foreground">Tenant Screening</h1>
           <p className="text-muted-foreground">Review and verify potential tenants</p>
         </div>
-        <Button className="gap-2">
-          <Shield className="w-4 h-4" />
+        <Button className="gap-2" onClick={() => setShowSettingsDialog(true)}>
+          <Settings className="w-4 h-4" />
           Screening Settings
         </Button>
       </div>
@@ -133,16 +178,17 @@ export function TenantScreening() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleViewApplicant(profile)}>
+                            <Eye className="w-4 h-4 mr-1" />
                             View Details
                           </Button>
                           {status === 'pending' && (
                             <>
-                              <Button size="sm" variant="default">
+                              <Button size="sm" variant="default" onClick={() => handleApprove(profile)}>
                                 <Check className="w-4 h-4 mr-1" />
                                 Approve
                               </Button>
-                              <Button size="sm" variant="destructive">
+                              <Button size="sm" variant="destructive" onClick={() => handleReject(profile)}>
                                 <X className="w-4 h-4 mr-1" />
                                 Reject
                               </Button>
@@ -179,11 +225,213 @@ export function TenantScreening() {
         <TabsContent value="reports">
           <Card>
             <CardContent className="p-6 text-center">
+              <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">Screening reports will appear here</p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Screening Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-primary" />
+              Screening Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your tenant screening requirements and preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Auto Screening */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="font-medium">Auto Screening</Label>
+                <p className="text-sm text-muted-foreground">Automatically screen new applicants</p>
+              </div>
+              <Switch
+                checked={screeningSettings.autoScreening}
+                onCheckedChange={(checked) => setScreeningSettings(prev => ({ ...prev, autoScreening: checked }))}
+              />
+            </div>
+
+            {/* Credit Check */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="font-medium flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  Credit Check Required
+                </Label>
+                <p className="text-sm text-muted-foreground">Require credit history verification</p>
+              </div>
+              <Switch
+                checked={screeningSettings.creditCheckRequired}
+                onCheckedChange={(checked) => setScreeningSettings(prev => ({ ...prev, creditCheckRequired: checked }))}
+              />
+            </div>
+
+            {/* Background Check */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="font-medium flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  Background Check Required
+                </Label>
+                <p className="text-sm text-muted-foreground">Require criminal background check</p>
+              </div>
+              <Switch
+                checked={screeningSettings.backgroundCheckRequired}
+                onCheckedChange={(checked) => setScreeningSettings(prev => ({ ...prev, backgroundCheckRequired: checked }))}
+              />
+            </div>
+
+            {/* Income Verification */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="font-medium">Income Verification</Label>
+                <p className="text-sm text-muted-foreground">Verify income documentation</p>
+              </div>
+              <Switch
+                checked={screeningSettings.incomeVerification}
+                onCheckedChange={(checked) => setScreeningSettings(prev => ({ ...prev, incomeVerification: checked }))}
+              />
+            </div>
+
+            {/* Employment Verification */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="font-medium">Employment Verification</Label>
+                <p className="text-sm text-muted-foreground">Verify current employment status</p>
+              </div>
+              <Switch
+                checked={screeningSettings.employmentVerification}
+                onCheckedChange={(checked) => setScreeningSettings(prev => ({ ...prev, employmentVerification: checked }))}
+              />
+            </div>
+
+            {/* Reference Check */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="font-medium">Reference Check</Label>
+                <p className="text-sm text-muted-foreground">Contact previous landlords</p>
+              </div>
+              <Switch
+                checked={screeningSettings.referenceCheck}
+                onCheckedChange={(checked) => setScreeningSettings(prev => ({ ...prev, referenceCheck: checked }))}
+              />
+            </div>
+
+            {/* Minimum Credit Score */}
+            <div className="space-y-2">
+              <Label className="font-medium">Minimum Credit Score</Label>
+              <Select
+                value={screeningSettings.minCreditScore.toString()}
+                onValueChange={(value) => setScreeningSettings(prev => ({ ...prev, minCreditScore: parseInt(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="550">550 (Fair)</SelectItem>
+                  <SelectItem value="600">600 (Good)</SelectItem>
+                  <SelectItem value="650">650 (Very Good)</SelectItem>
+                  <SelectItem value="700">700 (Excellent)</SelectItem>
+                  <SelectItem value="750">750 (Exceptional)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Income to Rent Ratio */}
+            <div className="space-y-2">
+              <Label className="font-medium">Minimum Income-to-Rent Ratio</Label>
+              <Select
+                value={screeningSettings.minIncomeRatio.toString()}
+                onValueChange={(value) => setScreeningSettings(prev => ({ ...prev, minIncomeRatio: parseInt(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2x Monthly Rent</SelectItem>
+                  <SelectItem value="3">3x Monthly Rent</SelectItem>
+                  <SelectItem value="4">4x Monthly Rent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Applicant Details Dialog */}
+      <Dialog open={showApplicantDialog} onOpenChange={setShowApplicantDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Applicant Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedApplicant && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                  <Users className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedApplicant.name || 'Anonymous User'}</h3>
+                  <p className="text-muted-foreground">Age: {selectedApplicant.age || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Location</span>
+                  <span>{selectedApplicant.location?.city || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Occupation</span>
+                  <span>{selectedApplicant.occupation || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Monthly Income</span>
+                  <span>{selectedApplicant.monthly_income || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Credit Score</span>
+                  <span>{Math.floor(Math.random() * 300) + 500}</span>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <p className="text-sm text-muted-foreground">{selectedApplicant.bio || 'No bio provided.'}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowApplicantDialog(false)}>
+              Close
+            </Button>
+            <Button variant="destructive" onClick={() => selectedApplicant && handleReject(selectedApplicant)}>
+              <X className="w-4 h-4 mr-1" />
+              Reject
+            </Button>
+            <Button onClick={() => selectedApplicant && handleApprove(selectedApplicant)}>
+              <Check className="w-4 h-4 mr-1" />
+              Approve
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

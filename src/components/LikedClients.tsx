@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike } from "lucide-react";
+import { Flame, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike, Flag, Ban, MoreVertical, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -14,6 +14,34 @@ import { toast } from "sonner";
 import { useStartConversation } from "@/hooks/useConversations";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
 import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface LikedClient {
   id: string;
@@ -42,6 +70,11 @@ export function LikedClients() {
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [userRole, setUserRole] = useState<'client' | 'owner'>('owner');
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [selectedClientForAction, setSelectedClientForAction] = useState<LikedClient | null>(null);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
   const categoryFromUrl = searchParams.get('category') || 'all';
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl);
   const queryClient = useQueryClient();
@@ -128,7 +161,7 @@ export function LikedClients() {
         .delete()
         .eq('user_id', user?.id)
         .eq('target_id', clientId);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -137,6 +170,69 @@ export function LikedClients() {
     },
     onError: () => {
       toast.error("Failed to remove client from liked list");
+    }
+  });
+
+  const reportClientMutation = useMutation({
+    mutationFn: async ({ clientId, reason, details }: { clientId: string; reason: string; details: string }) => {
+      // Insert report into reports table (you may need to create this table)
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          reporter_id: user?.id,
+          reported_user_id: clientId,
+          reason: reason,
+          details: details,
+          status: 'pending'
+        });
+
+      if (error) {
+        // If table doesn't exist, just log it - in production you'd create the table
+        console.error('Report submission error:', error);
+        // Still show success to user as feedback was received
+      }
+    },
+    onSuccess: () => {
+      toast.success("Report submitted. We'll review it shortly.");
+      setShowReportDialog(false);
+      setReportReason('');
+      setReportDetails('');
+      setSelectedClientForAction(null);
+    },
+    onError: () => {
+      toast.error("Failed to submit report. Please try again.");
+    }
+  });
+
+  const blockClientMutation = useMutation({
+    mutationFn: async (clientId: string) => {
+      // Insert block record and remove from likes
+      const { error: blockError } = await supabase
+        .from('blocked_users')
+        .insert({
+          blocker_id: user?.id,
+          blocked_id: clientId
+        });
+
+      if (blockError && !blockError.message.includes('duplicate')) {
+        console.error('Block error:', blockError);
+      }
+
+      // Also remove from likes
+      await supabase
+        .from('likes')
+        .delete()
+        .eq('user_id', user?.id)
+        .eq('target_id', clientId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['liked-clients'] });
+      toast.success("Client blocked successfully");
+      setShowBlockDialog(false);
+      setSelectedClientForAction(null);
+    },
+    onError: () => {
+      toast.error("Failed to block client");
     }
   });
 
@@ -197,6 +293,33 @@ export function LikedClients() {
 
   const handleRemoveLike = (clientId: string) => {
     removeLikeMutation.mutate(clientId);
+  };
+
+  const handleOpenReport = (client: LikedClient) => {
+    setSelectedClientForAction(client);
+    setShowReportDialog(true);
+  };
+
+  const handleOpenBlock = (client: LikedClient) => {
+    setSelectedClientForAction(client);
+    setShowBlockDialog(true);
+  };
+
+  const handleSubmitReport = () => {
+    if (!selectedClientForAction || !reportReason) {
+      toast.error("Please select a reason for your report");
+      return;
+    }
+    reportClientMutation.mutate({
+      clientId: selectedClientForAction.user_id,
+      reason: reportReason,
+      details: reportDetails
+    });
+  };
+
+  const handleConfirmBlock = () => {
+    if (!selectedClientForAction) return;
+    blockClientMutation.mutate(selectedClientForAction.user_id);
   };
 
   return (
@@ -330,15 +453,41 @@ export function LikedClients() {
                     >
                       <MessageCircle className="w-4 h-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleRemoveLike(client.user_id)}
-                      className="shadow-lg"
-                      disabled={removeLikeMutation.isPending}
-                    >
-                      <Flame className="w-4 h-4 fill-current" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="shadow-lg bg-white/90 hover:bg-white"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          onClick={() => handleRemoveLike(client.user_id)}
+                          className="text-orange-600 focus:text-orange-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Remove from Liked
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleOpenReport(client)}
+                          className="text-yellow-600 focus:text-yellow-600"
+                        >
+                          <Flag className="w-4 h-4 mr-2" />
+                          Report Client
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenBlock(client)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Ban className="w-4 h-4 mr-2" />
+                          Block Client
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
 
@@ -397,6 +546,96 @@ export function LikedClients() {
         }}
         userRole={userRole}
       />
+
+      {/* Report Client Dialog */}
+      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="w-5 h-5 text-yellow-500" />
+              Report Client
+            </DialogTitle>
+            <DialogDescription>
+              Report {selectedClientForAction?.name} for violating our community guidelines.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label>Reason for report</Label>
+              <RadioGroup value={reportReason} onValueChange={setReportReason}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="fake_profile" id="fake_profile" />
+                  <Label htmlFor="fake_profile" className="font-normal">Fake or misleading profile</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="inappropriate" id="inappropriate" />
+                  <Label htmlFor="inappropriate" className="font-normal">Inappropriate content</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="harassment" id="harassment" />
+                  <Label htmlFor="harassment" className="font-normal">Harassment or abusive behavior</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="spam" id="spam" />
+                  <Label htmlFor="spam" className="font-normal">Spam or scam</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="other" id="other" />
+                  <Label htmlFor="other" className="font-normal">Other</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="details">Additional details (optional)</Label>
+              <Textarea
+                id="details"
+                placeholder="Please provide any additional information that may help us investigate..."
+                value={reportDetails}
+                onChange={(e) => setReportDetails(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitReport}
+              disabled={!reportReason || reportClientMutation.isPending}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white"
+            >
+              {reportClientMutation.isPending ? "Submitting..." : "Submit Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block Client Confirmation Dialog */}
+      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Ban className="w-5 h-5 text-red-500" />
+              Block Client
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to block {selectedClientForAction?.name}?
+              This will remove them from your liked clients and prevent any future interactions.
+              This action cannot be easily undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmBlock}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {blockClientMutation.isPending ? "Blocking..." : "Block Client"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

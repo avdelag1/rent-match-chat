@@ -1,9 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, Palette, Sparkles } from 'lucide-react';
+import { Check, Palette, Sparkles, Eye } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface ThemeOption {
   id: 'grey-matte' | 'black-matte' | 'white-matte' | 'red-matte';
@@ -72,13 +74,21 @@ interface ThemeSelectorProps {
 export function ThemeSelector({ compact = false, showTitle = true }: ThemeSelectorProps) {
   const { theme, setTheme } = useTheme();
 
+  const handleThemeChange = (newTheme: 'grey-matte' | 'black-matte' | 'white-matte' | 'red-matte') => {
+    setTheme(newTheme);
+    const themeName = themeOptions.find(t => t.id === newTheme)?.name || newTheme;
+    toast.success(`Theme changed to ${themeName}`, {
+      description: "Your preference has been saved"
+    });
+  };
+
   if (compact) {
     return (
       <div className="flex gap-2 p-2 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50">
         {themeOptions.map((option) => (
           <motion.button
             key={option.id}
-            onClick={() => setTheme(option.id)}
+            onClick={() => handleThemeChange(option.id)}
             className={`
               relative px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200
               ${theme === option.id
@@ -131,7 +141,7 @@ export function ThemeSelector({ compact = false, showTitle = true }: ThemeSelect
               className="relative"
             >
               <button
-                onClick={() => setTheme(option.id)}
+                onClick={() => handleThemeChange(option.id)}
                 className={`
                   w-full p-5 rounded-xl border-2 transition-all duration-300 text-left
                   relative overflow-hidden group
@@ -205,7 +215,57 @@ export function ThemeSelector({ compact = false, showTitle = true }: ThemeSelect
           ))}
         </div>
 
+        {/* Live Preview Section */}
         <div className="pt-4 border-t border-border/50">
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Live Preview
+            </h4>
+            <div
+              className="rounded-lg p-4 border transition-all duration-300"
+              style={{
+                backgroundColor: themeOptions.find(t => t.id === theme)?.colors.primary,
+                borderColor: themeOptions.find(t => t.id === theme)?.colors.accent,
+              }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: themeOptions.find(t => t.id === theme)?.colors.accent }}
+                  />
+                  <div>
+                    <div
+                      className="h-3 w-20 rounded"
+                      style={{ backgroundColor: themeOptions.find(t => t.id === theme)?.colors.secondary }}
+                    />
+                    <div
+                      className="h-2 w-14 rounded mt-1 opacity-60"
+                      style={{ backgroundColor: themeOptions.find(t => t.id === theme)?.colors.secondary }}
+                    />
+                  </div>
+                </div>
+                <div
+                  className="px-3 py-1 rounded-full text-xs font-medium text-white"
+                  style={{ backgroundColor: themeOptions.find(t => t.id === theme)?.colors.accent }}
+                >
+                  Active
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div
+                  className="flex-1 h-2 rounded"
+                  style={{ backgroundColor: themeOptions.find(t => t.id === theme)?.colors.secondary }}
+                />
+                <div
+                  className="w-8 h-2 rounded"
+                  style={{ backgroundColor: themeOptions.find(t => t.id === theme)?.colors.accent }}
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Sparkles className="w-4 h-4" />
             <p>
