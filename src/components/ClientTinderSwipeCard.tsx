@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from 'framer-motion';
 import { MapPin, CheckCircle, Flag, X, RotateCcw, Eye, Flame } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -33,7 +33,15 @@ export function ClientTinderSwipeCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+  const [screenWidth, setScreenWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 400);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Update screenWidth on window resize for responsive swipe overlays
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -93,8 +101,6 @@ export function ClientTinderSwipeCard({
     // Snap back with nice spring animation
     triggerHaptic('light');
   }, [onSwipe]);
-
-  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
   // Calculate overlay opacity based on drag distance
   const rightOverlayOpacity = useTransform(x, [0, screenWidth * 0.35], [0, 1]);

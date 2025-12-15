@@ -26,18 +26,18 @@ interface MessagingInterfaceProps {
   onBack: () => void;
 }
 
-// Memoized message component to prevent unnecessary re-renders
+// Memoized message component with modern bubble design
 const MessageBubble = memo(({ message, isMyMessage }: { message: any; isMyMessage: boolean }) => (
-  <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
+  <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} group`}>
     <div
-      className={`max-w-[75%] p-3 rounded-lg ${
+      className={`max-w-[80%] px-4 py-2.5 ${
         isMyMessage
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-muted'
+          ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-2xl rounded-br-md shadow-md'
+          : 'bg-muted/80 backdrop-blur-sm rounded-2xl rounded-bl-md border border-border/50'
       }`}
     >
-      <p className="text-sm break-words whitespace-pre-wrap">{message.message_text}</p>
-      <p className={`text-xs mt-1.5 opacity-70`}>
+      <p className="text-sm break-words whitespace-pre-wrap leading-relaxed">{message.message_text}</p>
+      <p className={`text-[10px] mt-1 ${isMyMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'} opacity-0 group-hover:opacity-100 transition-opacity`}>
         {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
       </p>
     </div>
@@ -164,43 +164,55 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   }
 
   return (
-    <Card className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b shrink-0 bg-background/95">
-        <Button variant="ghost" size="sm" onClick={onBack} className="shrink-0">
+    <Card className="flex-1 flex flex-col h-full overflow-hidden border-0 shadow-xl">
+      {/* Modern Header with gradient */}
+      <div className="flex items-center gap-3 p-4 border-b shrink-0 bg-gradient-to-r from-background via-background to-muted/30 backdrop-blur-xl">
+        <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0 rounded-full hover:bg-muted/80 w-9 h-9">
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div className="relative">
-          <Avatar className="w-10 h-10 shrink-0">
+          <Avatar className="w-11 h-11 shrink-0 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
             <AvatarImage src={otherUser.avatar_url} />
-            <AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-primary-foreground font-bold">
               {otherUser.full_name?.charAt(0) || '?'}
             </AvatarFallback>
           </Avatar>
+          {/* Online indicator */}
+          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-base truncate">{otherUser.full_name}</h3>
-          <Badge variant="secondary" className="text-xs">
-            {otherUser.role === 'client' ? 'Client' : 'Owner'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 bg-primary/10 text-primary border-primary/20">
+              {otherUser.role === 'client' ? '🏠 Client' : '🔑 Owner'}
+            </Badge>
+            <span className="text-[10px] text-green-500 font-medium">● Online</span>
+          </div>
         </div>
       </div>
 
-      {/* Connection Status */}
+      {/* Cool Connection Status */}
       {showConnecting && (
-        <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-950 border-b border-yellow-200 dark:border-yellow-800 text-center">
-          <p className="text-xs text-yellow-800 dark:text-yellow-200">
-            🔄 Connecting to chat...
+        <div className="px-4 py-2 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-b border-amber-500/20 text-center backdrop-blur-sm">
+          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            Connecting to chat...
           </p>
         </div>
       )}
 
       {/* Messages */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-background to-muted/10">
         {messages.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-sm text-muted-foreground">
-              No messages yet. Start the conversation!
+          <div className="flex flex-col items-center justify-center h-full py-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4">
+              <Send className="w-7 h-7 text-primary/60" />
+            </div>
+            <p className="text-sm font-medium text-foreground mb-1">
+              Start the conversation
+            </p>
+            <p className="text-xs text-muted-foreground max-w-[200px]">
+              Say hello to {otherUser.full_name?.split(' ')[0] || 'your match'}! 👋
             </p>
           </div>
         ) : (
@@ -212,16 +224,17 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
             />
           ))
         )}
-        {/* Typing indicator */}
+        {/* Cool Typing indicator */}
         {typingUsers.length > 0 && (
-          <div className="flex justify-start">
-            <div className="bg-muted p-3 rounded-lg">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+          <div className="flex justify-start items-end gap-2">
+            <div className="px-4 py-3 bg-muted/60 backdrop-blur-sm rounded-2xl rounded-bl-md border border-border/30">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
             </div>
+            <span className="text-[10px] text-muted-foreground mb-1">typing...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -258,38 +271,49 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         </div>
       )}
 
-      {/* Input */}
-      <form onSubmit={handleSendMessage} className="p-4 border-t shrink-0 bg-background/95">
+      {/* Modern Input Area */}
+      <form onSubmit={handleSendMessage} className="p-3 border-t shrink-0 bg-gradient-to-t from-muted/30 to-background">
         <div className="flex gap-2 items-end">
-          <Input
-            value={newMessage}
-            onChange={(e) => {
-              setNewMessage(e.target.value);
-              if (e.target.value.trim()) {
-                startTyping(); // Trigger typing indicator
-              } else {
-                stopTyping();
-              }
-            }}
-            placeholder={isAtLimit ? "Monthly limit reached" : "Type a message..."}
-            className="flex-1 text-sm min-h-[44px]"
-            disabled={sendMessage.isPending || isAtLimit}
-            maxLength={1000}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage(e as any);
-              }
-            }}
-          />
+          <div className="flex-1 relative">
+            <Input
+              value={newMessage}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                if (e.target.value.trim()) {
+                  startTyping();
+                } else {
+                  stopTyping();
+                }
+              }}
+              placeholder={isAtLimit ? "Monthly limit reached" : "Type a message..."}
+              className="flex-1 text-sm min-h-[48px] pr-4 rounded-2xl border-muted-foreground/20 bg-muted/50 focus:bg-background focus:border-primary/50 transition-all"
+              disabled={sendMessage.isPending || isAtLimit}
+              maxLength={1000}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e as any);
+                }
+              }}
+            />
+            {newMessage.length > 800 && (
+              <span className="absolute right-3 bottom-1 text-[10px] text-muted-foreground">
+                {1000 - newMessage.length}
+              </span>
+            )}
+          </div>
           <Button
             type="submit"
             disabled={!newMessage.trim() || sendMessage.isPending || isAtLimit}
-            size="sm"
-            className="shrink-0 h-[44px] w-[44px] rounded-lg"
+            size="icon"
+            className={`shrink-0 h-12 w-12 rounded-full shadow-lg transition-all ${
+              newMessage.trim() && !isAtLimit
+                ? 'bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 scale-100'
+                : 'bg-muted scale-95'
+            }`}
             title={isAtLimit ? "Monthly message limit reached" : "Send message"}
           >
-            <Send className="w-4 h-4" />
+            <Send className={`w-5 h-5 transition-transform ${newMessage.trim() ? 'translate-x-0.5' : ''}`} />
           </Button>
         </div>
       </form>

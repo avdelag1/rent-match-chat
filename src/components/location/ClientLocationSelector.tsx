@@ -347,7 +347,7 @@ export function ClientLocationSelector({
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="Enter your address (e.g., 123 Main St, New York, NY)"
                   className="bg-background border-border text-foreground"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
                 <Button
                   onClick={handleSearch}
