@@ -4,7 +4,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { PhotoUploadManager } from '@/components/PhotoUploadManager';
 import { useOwnerProfile, useSaveOwnerProfile } from '@/hooks/useOwnerProfile';
@@ -23,7 +22,6 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
   const saveMutation = useSaveOwnerProfile();
 
   const [businessName, setBusinessName] = useState<string>('');
-  const [businessDescription, setBusinessDescription] = useState<string>('');
   const [businessLocation, setBusinessLocation] = useState<string>('');
   const [contactEmail, setContactEmail] = useState<string>('');
   const [contactPhone, setContactPhone] = useState<string>('');
@@ -32,7 +30,6 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
   useEffect(() => {
     if (!data) return;
     setBusinessName(data.business_name ?? '');
-    setBusinessDescription(data.business_description ?? '');
     setBusinessLocation(data.business_location ?? '');
     setContactEmail(data.contact_email ?? '');
     setContactPhone(data.contact_phone ?? '');
@@ -68,7 +65,6 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
   const handleSave = async () => {
     const payload = {
       business_name: businessName || null,
-      business_description: businessDescription || null,
       business_location: businessLocation || null,
       contact_email: contactEmail || null,
       contact_phone: contactPhone || null,
@@ -81,11 +77,10 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
   };
 
   const completionPercentage = Math.round(
-    ((businessName ? 30 : 0) +
-     (businessDescription ? 20 : 0) +
-     (businessLocation ? 20 : 0) +
-     (contactEmail ? 15 : 0) +
-     (profileImages.length > 0 ? 15 : 0))
+    ((businessName ? 35 : 0) +
+     (businessLocation ? 25 : 0) +
+     (contactEmail ? 20 : 0) +
+     (profileImages.length > 0 ? 20 : 0))
   );
 
   return (
@@ -136,18 +131,6 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="Your property business name"
                   className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="business_description" className="text-white/90 text-sm sm:text-base">Business Description</Label>
-                <Textarea
-                  id="business_description"
-                  value={businessDescription}
-                  onChange={(e) => setBusinessDescription(e.target.value)}
-                  placeholder="Tell clients about your properties and services..."
-                  rows={4}
-                  className="text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
 

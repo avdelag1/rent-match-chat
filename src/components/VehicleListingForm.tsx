@@ -2,7 +2,6 @@ import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,7 +11,6 @@ import { toast } from '@/hooks/use-toast';
 export interface VehicleFormData {
   id?: string;
   title: string;
-  description?: string;
   vehicle_type?: string;
   body_type?: string;
   mode: 'sale' | 'rent' | 'both';
@@ -217,17 +215,6 @@ export function VehicleListingForm({ onDataChange, initialData }: VehicleListing
               id="city"
               {...register('city', { required: true })}
               placeholder="e.g. Tulum, Playa del Carmen"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              {...register('description')}
-              onChange={(e) => onDataChange({ ...formData, description: e.target.value })}
-              placeholder="Describe your vehicle's condition, maintenance history, special features, etc."
-              rows={4}
             />
           </div>
         </CardContent>
