@@ -33,7 +33,7 @@ export function AppLoadingScreen() {
         />
       </div>
 
-      {/* Animated Flame */}
+      {/* Animated Flame - Clean version without sparks */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ 
@@ -117,32 +117,6 @@ export function AppLoadingScreen() {
             }}
             transition={{ duration: 0.3, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
           />
-          
-          {/* Sparks */}
-          {[
-            { cx: 32, cy: 45, r: 1.5, delay: 0 },
-            { cx: 48, cy: 48, r: 1.2, delay: 0.3 },
-            { cx: 40, cy: 40, r: 1, delay: 0.5 },
-          ].map((spark, i) => (
-            <motion.circle
-              key={i}
-              cx={spark.cx}
-              cy={spark.cy}
-              r={spark.r}
-              fill={i === 2 ? '#ffffff' : '#fef3c7'}
-              animate={{
-                cy: [spark.cy, spark.cy - 20, spark.cy - 30],
-                opacity: [1, 0.5, 0],
-                scale: [1, 0.5, 0]
-              }}
-              transition={{
-                duration: 0.7 + i * 0.1,
-                repeat: Infinity,
-                ease: "easeOut",
-                delay: spark.delay
-              }}
-            />
-          ))}
         </svg>
         
         {/* Glow pulse */}
@@ -156,37 +130,118 @@ export function AppLoadingScreen() {
         />
       </motion.div>
 
-      {/* SwipeMatch text */}
+      {/* SwipeMatch text with subtle fluid/smoke effect */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="mt-6 flex items-center gap-1"
+        className="mt-6 flex items-center gap-1 relative"
       >
-        <span
-          className="text-2xl font-black tracking-tight"
-          style={{
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24)',
-            backgroundSize: '200% 100%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          Swipe
-        </span>
-        <span
-          className="text-xl font-black tracking-tight"
-          style={{
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24)',
-            backgroundSize: '200% 100%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          Match
-        </span>
+        {/* SVG filter for fluid effect */}
+        <svg className="absolute w-0 h-0">
+          <defs>
+            <filter id="fluid-text" x="-20%" y="-20%" width="140%" height="140%">
+              <feTurbulence 
+                type="fractalNoise" 
+                baseFrequency="0.015" 
+                numOctaves="2" 
+                result="noise"
+              >
+                <animate 
+                  attributeName="baseFrequency" 
+                  values="0.015;0.02;0.015" 
+                  dur="8s" 
+                  repeatCount="indefinite"
+                />
+              </feTurbulence>
+              <feDisplacementMap 
+                in="SourceGraphic" 
+                in2="noise" 
+                scale="3" 
+                xChannelSelector="R" 
+                yChannelSelector="G"
+              />
+            </filter>
+          </defs>
+        </svg>
+        
+        <div className="relative">
+          {/* Background fluid layer - very subtle */}
+          <motion.span
+            className="absolute inset-0 text-2xl font-black tracking-tight opacity-30 blur-[1px]"
+            style={{
+              background: 'linear-gradient(90deg, #f97316, #fbbf24, #ea580c, #f97316)',
+              backgroundSize: '300% 100%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'url(#fluid-text)',
+            }}
+            animate={{
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          >
+            Swipe
+          </motion.span>
+          
+          {/* Main text with subtle movement */}
+          <motion.span
+            className="relative text-2xl font-black tracking-tight"
+            style={{
+              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #f97316)',
+              backgroundSize: '200% 100%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+            animate={{
+              backgroundPosition: ['0% 50%', '100% 50%'],
+            }}
+            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          >
+            Swipe
+          </motion.span>
+        </div>
+        
+        <div className="relative">
+          {/* Background fluid layer - very subtle */}
+          <motion.span
+            className="absolute inset-0 text-xl font-black tracking-tight opacity-30 blur-[1px]"
+            style={{
+              background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #ea580c)',
+              backgroundSize: '300% 100%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'url(#fluid-text)',
+            }}
+            animate={{
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "linear", delay: 0.5 }}
+          >
+            Match
+          </motion.span>
+          
+          {/* Main text */}
+          <motion.span
+            className="relative text-xl font-black tracking-tight"
+            style={{
+              background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #ea580c)',
+              backgroundSize: '200% 100%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+            animate={{
+              backgroundPosition: ['0% 50%', '100% 50%'],
+            }}
+            transition={{ duration: 6, repeat: Infinity, ease: "linear", delay: 0.3 }}
+          >
+            Match
+          </motion.span>
+        </div>
       </motion.div>
 
       {/* Loading indicator */}
