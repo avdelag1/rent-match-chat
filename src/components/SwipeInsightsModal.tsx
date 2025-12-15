@@ -88,25 +88,124 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               </DialogHeader>
 
               {isClientProfile && profile ? (
-                // RENTER/CLIENT PROFILE INSIGHTS
-                <div className="mt-6 space-y-6">
-                  {/* Profile Summary */}
-                  <div className="p-4 bg-muted/50 rounded-xl">
-                    <h3 className="text-lg font-semibold mb-2">{profile.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      <span>{profile.city || 'Location not specified'}</span>
+                // RENTER/CLIENT PROFILE INSIGHTS - Info First Design
+                <div className="mt-4 space-y-5">
+                  {/* Hero Profile Card */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/10 p-5 border border-primary/20">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-full blur-2xl" />
+                    <div className="relative">
+                      <div className="flex items-center gap-4 mb-4">
+                        {/* Small Avatar */}
+                        {profile.avatar_url && (
+                          <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-primary/30 ring-offset-2 ring-offset-background">
+                            <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold">{profile.name}</h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>{profile.city || 'Location flexible'}</span>
+                            {profile.age && <span>• {profile.age} yrs</span>}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Budget Badge */}
+                      {profile.budget_max && (
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full">
+                          <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          <span className="font-bold text-green-600 dark:text-green-400">
+                            ${profile.budget_max.toLocaleString()}/mo
+                          </span>
+                          <span className="text-xs text-muted-foreground">budget</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Profile Photos - Large Scrollable */}
+                  {/* Quick Stats Row */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-center p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-xl border border-yellow-500/20">
+                      <div className="text-2xl mb-1">⭐</div>
+                      <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{Math.floor(Math.random() * 20) + 80}%</div>
+                      <div className="text-[10px] text-muted-foreground">Profile Score</div>
+                    </div>
+                    <div className="text-center p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-xl border border-blue-500/20">
+                      <div className="text-2xl mb-1">⚡</div>
+                      <div className="text-lg font-bold text-blue-600 dark:text-blue-400">2-4h</div>
+                      <div className="text-[10px] text-muted-foreground">Response</div>
+                    </div>
+                    <div className="text-center p-3 bg-gradient-to-br from-red-500/10 to-pink-500/5 rounded-xl border border-red-500/20">
+                      <div className="text-2xl mb-1">🔥</div>
+                      <div className="text-lg font-bold text-red-600 dark:text-red-400">{Math.floor(Math.random() * 10) + 5}</div>
+                      <div className="text-[10px] text-muted-foreground">Interested</div>
+                    </div>
+                  </div>
+
+                  {/* Interests & Lifestyle */}
+                  {profile.interests && profile.interests.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <span className="text-lg">✨</span> Interests & Lifestyle
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {profile.interests.slice(0, 8).map((interest, idx) => (
+                          <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-xs bg-primary/10 hover:bg-primary/20 border-primary/20 transition-colors">
+                            {interest}
+                          </Badge>
+                        ))}
+                        {profile.interests.length > 8 && (
+                          <Badge variant="outline" className="px-3 py-1.5 text-xs">
+                            +{profile.interests.length - 8} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Verification Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    {profile.verified && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/15 rounded-full border border-green-500/30">
+                        <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                        <span className="text-xs font-medium text-green-600 dark:text-green-400">ID Verified</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/15 rounded-full border border-blue-500/30">
+                      <Shield className="w-3.5 h-3.5 text-blue-500" />
+                      <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Background Check</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/15 rounded-full border border-purple-500/30">
+                      <Star className="w-3.5 h-3.5 text-purple-500" />
+                      <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Top Renter</span>
+                    </div>
+                  </div>
+
+                  {/* Match Reasons - Compact */}
+                  {profile.matchReasons && profile.matchReasons.length > 0 && (
+                    <div className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
+                      <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                        <span className="text-lg">💚</span> Why They Match
+                      </h4>
+                      <div className="space-y-2">
+                        {profile.matchReasons.slice(0, 3).map((reason, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{reason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Profile Photos - Now at the bottom with horizontal scroll */}
                   {profile.profile_images && profile.profile_images.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="font-semibold flex items-center gap-2">
-                        <Users className="w-5 h-5 text-primary" />
-                        Profile Photos ({profile.profile_images.length})
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <span className="text-lg">📸</span> Photos ({profile.profile_images.length})
                       </h4>
-                      <div className="space-y-3">
+                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory scrollbar-hide">
                         {profile.profile_images.map((image, index) => (
                           <button
                             key={index}
@@ -114,7 +213,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                               setSelectedImageIndex(index);
                               setGalleryOpen(true);
                             }}
-                            className="relative w-full aspect-[4/3] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.99] transition-transform duration-50"
+                            className="relative flex-shrink-0 w-40 aspect-[3/4] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.98] transition-all snap-start shadow-lg"
                           >
                             <img
                               src={image}
@@ -122,118 +221,15 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                               className="w-full h-full object-cover"
                               loading={index < 2 ? "eager" : "lazy"}
                               decoding="async"
-                              fetchPriority={index === 0 ? "high" : "auto"}
                             />
-                            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                              {index + 1} / {profile.profile_images.length}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                            <div className="absolute bottom-2 left-2 text-white text-xs font-medium">
+                              {index + 1}/{profile.profile_images.length}
                             </div>
                           </button>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground text-center">Tap any photo to view full size & zoom</p>
-                    </div>
-                  )}
-
-                  {/* Application Quality Score */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <Star className="w-5 h-5 text-yellow-500" />
-                      Application Quality
-                    </h4>
-                    <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Profile Completeness</span>
-                        <Badge className="bg-green-500/20 text-green-700 dark:text-green-400">
-                          {Math.floor(Math.random() * 20) + 80}%
-                        </Badge>
-                      </div>
-                      <div className="w-full bg-muted/30 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-yellow-500 to-amber-500 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${Math.floor(Math.random() * 20) + 80}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Response Rate */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-blue-500" />
-                      Response Time
-                    </h4>
-                    <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 rounded-xl">
-                      <p className="text-sm text-muted-foreground">
-                        Typically responds within <span className="font-semibold text-foreground">2-4 hours</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Competition Level */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-red-500" />
-                      Competition Level
-                    </h4>
-                    <div className="p-4 bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/20 dark:to-red-950/20 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">
-                            {Math.floor(Math.random() * 10) + 5} other owners interested
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Act fast to secure this tenant
-                          </p>
-                        </div>
-                        <Badge className="bg-red-500/20 text-red-700 dark:text-red-400">
-                          🔥 High Interest
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Verification Status */}
-                  <div className="space-y-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-green-500" />
-                      Verification Status
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-muted/50 rounded-xl">
-                        <div className="flex items-center gap-2 mb-1">
-                          {profile.verified ? (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
-                          )}
-                          <span className="text-sm font-medium">ID Verified</span>
-                        </div>
-                      </div>
-                      <div className="p-3 bg-muted/50 rounded-xl">
-                        <div className="flex items-center gap-2 mb-1">
-                          {Math.random() > 0.5 ? (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
-                          )}
-                          <span className="text-sm font-medium">Income</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Match Reasons */}
-                  {profile.matchReasons && profile.matchReasons.length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="font-semibold">Why This Renter Matches</h4>
-                      <div className="space-y-2">
-                        {profile.matchReasons.map((reason, idx) => (
-                          <div key={idx} className="flex items-start gap-2 p-3 bg-muted/50 rounded-xl">
-                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm">{reason}</span>
-                          </div>
-                        ))}
-                      </div>
+                      <p className="text-xs text-muted-foreground text-center">← Swipe to see more • Tap to zoom</p>
                     </div>
                   )}
                 </div>
