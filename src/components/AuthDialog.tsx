@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Eye, EyeOff, Flame, Mail, Lock, User, ArrowLeft, Loader } from 'lucide-react';
+import {
+  Eye, EyeOff, Flame, Mail, Lock, User, ArrowLeft, Loader,
+  Home, Building2, Check, X, Shield, Sparkles
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +24,25 @@ interface AuthDialogProps {
 
 const getStorageKey = (role: 'client' | 'owner', field: string) => `auth_${role}_${field}`;
 
+// Password strength checker
+const checkPasswordStrength = (password: string) => {
+  const checks = {
+    length: password.length >= 8,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+  };
+
+  const score = Object.values(checks).filter(Boolean).length;
+
+  return {
+    checks,
+    score,
+    label: score <= 1 ? 'Weak' : score === 2 ? 'Fair' : score === 3 ? 'Good' : 'Strong',
+    color: score <= 1 ? 'bg-red-500' : score === 2 ? 'bg-orange-500' : score === 3 ? 'bg-yellow-500' : 'bg-green-500',
+  };
+};
+
 export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -33,13 +56,46 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const { signIn, signUp, signInWithOAuth } = useAuth();
 
   // Check if running on a native platform (iOS/Android)
-  // Hide Google OAuth on native platforms to prevent external browser redirects
   const isNativePlatform = Capacitor.isNativePlatform();
+
+  // Role-specific theming
+  const roleTheme = useMemo(() => ({
+    client: {
+      gradient: 'from-red-500 via-rose-500 to-pink-500',
+      gradientBg: 'from-gray-900 via-red-950/30 to-gray-900',
+      accent: 'text-rose-400',
+      accentBg: 'bg-rose-500/20',
+      border: 'border-rose-500/30',
+      ring: 'ring-rose-500/50',
+      glow: 'shadow-[0_0_60px_rgba(244,63,94,0.3)]',
+      icon: Home,
+      title: 'Client',
+      description: 'Find your perfect rental property',
+      buttonGlow: 'hover:shadow-[0_8px_32px_rgba(244,63,94,0.4)]',
+    },
+    owner: {
+      gradient: 'from-orange-500 via-amber-500 to-yellow-500',
+      gradientBg: 'from-gray-900 via-orange-950/30 to-gray-900',
+      accent: 'text-amber-400',
+      accentBg: 'bg-amber-500/20',
+      border: 'border-amber-500/30',
+      ring: 'ring-amber-500/50',
+      glow: 'shadow-[0_0_60px_rgba(251,146,60,0.3)]',
+      icon: Building2,
+      title: 'Property Owner',
+      description: 'List and manage your properties',
+      buttonGlow: 'hover:shadow-[0_8px_32px_rgba(251,146,60,0.4)]',
+    },
+  }), []);
+
+  const theme = roleTheme[role];
+  const RoleIcon = theme.icon;
+
+  const passwordStrength = useMemo(() => checkPasswordStrength(password), [password]);
 
   // Reset form state when role changes and load remembered credentials
   useEffect(() => {
     if (isOpen) {
-      // Load remembered email for this role (never store passwords!)
       const rememberedEmail = localStorage.getItem(getStorageKey(role, 'email')) || '';
       const hasRemembered = !!rememberedEmail;
 
@@ -106,11 +162,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         const validated = loginSchema.parse({ email, password });
         const { error } = await signIn(validated.email, validated.password, role);
         if (!error) {
-          // Store only email if remember me is checked (never store passwords!)
           if (rememberMe) {
             localStorage.setItem(getStorageKey(role, 'email'), validated.email);
           } else {
-            // Clear stored email if remember me is unchecked
             localStorage.removeItem(getStorageKey(role, 'email'));
           }
           onClose();
@@ -118,7 +172,6 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           throw error;
         }
       } else {
-        // Check if user agreed to terms during signup
         if (!agreeToTerms) {
           toast({
             title: "Terms Required",
@@ -132,7 +185,6 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         const validated = signupSchema.parse({ name, email, password });
         const { error } = await signUp(validated.email, validated.password, role, validated.name);
         if (!error) {
-          // Clear stored credentials after successful signup
           localStorage.removeItem(getStorageKey(role, 'email'));
           localStorage.removeItem(getStorageKey(role, 'password'));
           onClose();
@@ -168,22 +220,65 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       const { error } = await signInWithOAuth(provider, role);
 
       if (error) throw error;
-
-      // Don't close dialog - let OAuth redirect handle page flow
-      // Supabase will redirect to Google, then back to the app
     } catch (error: any) {
       console.error(`OAuth error for ${provider}:`, error);
-      setIsLoading(false); // Only reset loading on error
+      setIsLoading(false);
     }
   };
+
+  // Floating fire particles component
+  const FireParticles = () => (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{
+            width: `${2 + Math.random() * 4}px`,
+            height: `${4 + Math.random() * 8}px`,
+            background: `linear-gradient(45deg, ${
+              role === 'client'
+                ? i % 3 === 0 ? '#f43f5e' : i % 3 === 1 ? '#fb7185' : '#fda4af'
+                : i % 3 === 0 ? '#f97316' : i % 3 === 1 ? '#fbbf24' : '#fcd34d'
+            }, transparent)`,
+            boxShadow: `0 0 ${8 + Math.random() * 16}px ${
+              role === 'client' ? '#f43f5e' : '#f97316'
+            }60`,
+            borderRadius: '50%',
+            left: `${Math.random() * 100}%`,
+            bottom: '-10px',
+          }}
+          animate={{
+            y: [0, -(window.innerHeight * 0.8 + Math.random() * 200)],
+            x: [0, (Math.random() - 0.5) * 100],
+            opacity: [0, 0.8, 0.6, 0],
+            scale: [0.3, 1, 0.8, 0.2],
+          }}
+          transition={{
+            duration: 8 + Math.random() * 6,
+            repeat: Infinity,
+            ease: "easeOut",
+            delay: Math.random() * 4,
+          }}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <DialogPrimitive.Root open={isOpen} onOpenChange={onClose}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gradient-to-br from-background via-background to-muted/20">
-          <div className="min-h-full flex items-center justify-center p-4 sm:p-6">
-            <div className="w-full max-w-md">
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gradient-to-br ${theme.gradientBg}`}>
+          <FireParticles />
+
+          <div className="min-h-full flex items-center justify-center p-4 sm:p-6 relative z-10">
+            <motion.div
+              className="w-full max-w-md"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
               <DialogTitle className="sr-only">
                 {isLogin ? 'Sign In' : 'Sign Up'} as {role}
               </DialogTitle>
@@ -192,60 +287,108 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               </DialogDescription>
 
               {/* Back Button */}
-              <button
+              <motion.button
                 onClick={onClose}
-                className="mb-8 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+                className="mb-6 flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
+                whileHover={{ x: -4 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
                 <span className="text-sm font-medium">Back</span>
-              </button>
+              </motion.button>
+
+              {/* Role Badge */}
+              <motion.div
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${theme.accentBg} ${theme.border} border mb-6`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <RoleIcon className={`w-4 h-4 ${theme.accent}`} />
+                <span className={`text-sm font-semibold ${theme.accent}`}>{theme.title}</span>
+              </motion.div>
 
               {/* Logo and Header */}
-              <div className="text-center mb-10">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mb-4 shadow-lg">
-                  <Flame className="w-8 h-8 text-primary-foreground" />
-                </div>
-                <h2 className="text-3xl font-bold text-foreground mb-2">
+              <motion.div
+                className="text-center mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+              >
+                <motion.div
+                  className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${theme.gradient} rounded-3xl mb-5 ${theme.glow}`}
+                  animate={{
+                    boxShadow: [
+                      `0 0 40px ${role === 'client' ? 'rgba(244,63,94,0.3)' : 'rgba(251,146,60,0.3)'}`,
+                      `0 0 60px ${role === 'client' ? 'rgba(244,63,94,0.5)' : 'rgba(251,146,60,0.5)'}`,
+                      `0 0 40px ${role === 'client' ? 'rgba(244,63,94,0.3)' : 'rgba(251,146,60,0.3)'}`,
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      rotate: [0, 5, -5, 0],
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Flame className="w-10 h-10 text-white drop-shadow-lg" />
+                  </motion.div>
+                </motion.div>
+
+                <h2 className="text-3xl font-bold text-white mb-2">
                   {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
                 </h2>
-                <p className="text-muted-foreground">
-                  {isForgotPassword 
-                    ? 'Enter your email to receive a reset link' 
-                    : `${isLogin ? 'Sign in' : 'Sign up'} to continue as ${role}`
+                <p className="text-white/60">
+                  {isForgotPassword
+                    ? 'Enter your email to receive a reset link'
+                    : theme.description
                   }
                 </p>
-              </div>
+              </motion.div>
 
               {/* Main Card */}
-              <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-xl">
+              <motion.div
+                className={`bg-white/5 backdrop-blur-2xl border ${theme.border} rounded-3xl p-8 ${theme.glow}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
                 {!isForgotPassword && !isNativePlatform && (
                   <>
-                    {/* Google OAuth Button - Hidden on native mobile apps */}
-                    <Button
-                      type="button"
-                      onClick={(e) => handleOAuthSignIn(e, 'google')}
-                      disabled={isLoading}
-                      variant="outline"
-                      className="w-full h-12 border-2 font-medium text-base hover:bg-accent transition-all"
+                    {/* Google OAuth Button */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25 }}
                     >
-                      {isLoading ? (
-                        <>
-                          <Loader className="w-5 h-5 mr-3 animate-spin" />
-                          Connecting to Google...
-                        </>
-                      ) : (
-                        <>
-                          <FaGoogle className="w-5 h-5 mr-3 text-red-500" />
-                          Continue with Google
-                        </>
-                      )}
-                    </Button>
+                      <Button
+                        type="button"
+                        onClick={(e) => handleOAuthSignIn(e, 'google')}
+                        disabled={isLoading}
+                        variant="outline"
+                        className={`w-full h-14 border-2 border-white/20 bg-white/5 backdrop-blur-xl font-semibold text-base text-white hover:bg-white/10 hover:border-white/30 transition-all ${theme.buttonGlow}`}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader className="w-5 h-5 mr-3 animate-spin" />
+                            Connecting to Google...
+                          </>
+                        ) : (
+                          <>
+                            <FaGoogle className="w-5 h-5 mr-3 text-white" />
+                            Continue with Google
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
 
                     {/* Divider */}
                     <div className="relative flex items-center my-8">
-                      <div className="flex-grow border-t border-border"></div>
-                      <span className="flex-shrink mx-4 text-muted-foreground text-sm">or</span>
-                      <div className="flex-grow border-t border-border"></div>
+                      <div className="flex-grow border-t border-white/20"></div>
+                      <span className="flex-shrink mx-4 text-white/40 text-sm font-medium">or continue with email</span>
+                      <div className="flex-grow border-t border-white/20"></div>
                     </div>
                   </>
                 )}
@@ -253,153 +396,280 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Name Field (Sign Up Only) */}
-                  {!isLogin && !isForgotPassword && (
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-medium text-foreground">
-                        Full Name
-                      </Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="name"
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required
-                          className="pl-11 h-12 text-base"
-                          placeholder="John Doe"
-                        />
-                      </div>
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {!isLogin && !isForgotPassword && (
+                      <motion.div
+                        className="space-y-2"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Label htmlFor="name" className="text-sm font-medium text-white/80">
+                          Full Name
+                        </Label>
+                        <div className="relative group">
+                          <User className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:${theme.accent} transition-colors`} />
+                          <Input
+                            id="name"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            className={`pl-12 h-14 text-base bg-white/5 border-white/20 text-white placeholder:text-white/30 focus:border-${role === 'client' ? 'rose' : 'amber'}-500/50 focus:${theme.ring}`}
+                            placeholder="John Doe"
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Email Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                  <motion.div
+                    className="space-y-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <Label htmlFor="email" className="text-sm font-medium text-white/80">
                       Email
                     </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-white/70 transition-colors" />
                       <Input
                         id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="pl-11 h-12 text-base"
+                        className="pl-12 h-14 text-base bg-white/5 border-white/20 text-white placeholder:text-white/30"
                         placeholder="you@example.com"
                       />
                     </div>
-                  </div>
+                  </motion.div>
 
                   {/* Password Field */}
-                  {!isForgotPassword && (
-                    <div className="space-y-2">
-                      <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                        Password
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="password"
-                          type={showPassword ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          className="pl-11 pr-11 h-12 text-base"
-                          placeholder="••••••••"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                      {!isLogin && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Must be 8+ characters with uppercase, lowercase, and number
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {!isForgotPassword && (
+                      <motion.div
+                        className="space-y-2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ delay: 0.35 }}
+                      >
+                        <Label htmlFor="password" className="text-sm font-medium text-white/80">
+                          Password
+                        </Label>
+                        <div className="relative group">
+                          <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-white/70 transition-colors" />
+                          <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="pl-12 pr-12 h-14 text-base bg-white/5 border-white/20 text-white placeholder:text-white/30"
+                            placeholder="••••••••"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                          >
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          </button>
+                        </div>
+
+                        {/* Password Strength Indicator (Sign Up Only) */}
+                        {!isLogin && password && (
+                          <motion.div
+                            className="space-y-3 pt-2"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          >
+                            {/* Strength Bar */}
+                            <div className="flex items-center gap-3">
+                              <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                <motion.div
+                                  className={`h-full ${passwordStrength.color} rounded-full`}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${(passwordStrength.score / 4) * 100}%` }}
+                                  transition={{ duration: 0.3 }}
+                                />
+                              </div>
+                              <span className={`text-xs font-medium ${
+                                passwordStrength.score <= 1 ? 'text-red-400' :
+                                passwordStrength.score === 2 ? 'text-orange-400' :
+                                passwordStrength.score === 3 ? 'text-yellow-400' : 'text-green-400'
+                              }`}>
+                                {passwordStrength.label}
+                              </span>
+                            </div>
+
+                            {/* Requirements Checklist */}
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { key: 'length', label: '8+ characters' },
+                                { key: 'lowercase', label: 'Lowercase' },
+                                { key: 'uppercase', label: 'Uppercase' },
+                                { key: 'number', label: 'Number' },
+                              ].map(({ key, label }) => (
+                                <div
+                                  key={key}
+                                  className={`flex items-center gap-2 text-xs ${
+                                    passwordStrength.checks[key as keyof typeof passwordStrength.checks]
+                                      ? 'text-green-400'
+                                      : 'text-white/40'
+                                  }`}
+                                >
+                                  {passwordStrength.checks[key as keyof typeof passwordStrength.checks] ? (
+                                    <Check className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <X className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>{label}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Terms and Conditions (Sign Up Only) */}
-                  {!isLogin && !isForgotPassword && (
-                    <div className="space-y-3 pt-2">
-                      <label className="flex items-start gap-3 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={agreeToTerms}
-                          onChange={(e) => setAgreeToTerms(e.target.checked)}
-                          className="w-5 h-5 rounded border-input text-primary focus:ring-primary mt-0.5 flex-shrink-0"
-                        />
-                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                          I agree to the{' '}
-                          <a
-                            href="/terms-of-service"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline font-medium"
-                          >
-                            terms and conditions
-                          </a>
-                          {' '}and{' '}
-                          <a
-                            href="/privacy-policy"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline font-medium"
-                          >
-                            privacy policy
-                          </a>
-                        </span>
-                      </label>
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {!isLogin && !isForgotPassword && (
+                      <motion.div
+                        className="space-y-3 pt-2"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                          <div className="relative mt-0.5">
+                            <input
+                              type="checkbox"
+                              checked={agreeToTerms}
+                              onChange={(e) => setAgreeToTerms(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className={`w-5 h-5 rounded-md border-2 border-white/30 bg-white/5 peer-checked:bg-gradient-to-br peer-checked:${theme.gradient} peer-checked:border-transparent transition-all flex items-center justify-center`}>
+                              {agreeToTerms && <Check className="w-3.5 h-3.5 text-white" />}
+                            </div>
+                          </div>
+                          <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors leading-relaxed">
+                            I agree to the{' '}
+                            <a
+                              href="/terms-of-service"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`${theme.accent} hover:underline font-medium`}
+                            >
+                              Terms of Service
+                            </a>
+                            {' '}and{' '}
+                            <a
+                              href="/privacy-policy"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`${theme.accent} hover:underline font-medium`}
+                            >
+                              Privacy Policy
+                            </a>
+                          </span>
+                        </label>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Remember Me & Forgot Password */}
                   {isLogin && !isForgotPassword && (
-                    <div className="flex items-center justify-between">
+                    <motion.div
+                      className="flex items-center justify-between"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                    >
                       <label className="flex items-center gap-2 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={rememberMe}
-                          onChange={(e) => setRememberMe(e.target.checked)}
-                          className="w-4 h-4 rounded border-input text-primary focus:ring-primary"
-                        />
-                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Remember me</span>
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className={`w-4 h-4 rounded border-2 border-white/30 bg-white/5 peer-checked:bg-gradient-to-br peer-checked:${theme.gradient} peer-checked:border-transparent transition-all flex items-center justify-center`}>
+                            {rememberMe && <Check className="w-2.5 h-2.5 text-white" />}
+                          </div>
+                        </div>
+                        <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">Remember me</span>
                       </label>
                       <button
                         type="button"
                         onClick={() => setIsForgotPassword(true)}
-                        className="text-sm text-primary hover:underline font-medium"
+                        className={`text-sm ${theme.accent} hover:underline font-medium`}
                       >
                         Forgot password?
                       </button>
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all mt-6"
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.45 }}
                   >
-                    {isLoading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                        Please wait...
-                      </>
-                    ) : (
-                      <span>{isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}</span>
-                    )}
-                  </Button>
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className={`w-full h-14 text-base font-bold bg-gradient-to-r ${theme.gradient} text-white shadow-lg ${theme.buttonGlow} transition-all mt-4 relative overflow-hidden group`}
+                    >
+                      {/* Shimmer effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
+                        animate={{ x: ['100%', '-100%'] }}
+                        transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1 }}
+                      />
+
+                      {isLoading ? (
+                        <>
+                          <Loader className="w-5 h-5 mr-2 animate-spin" />
+                          Please wait...
+                        </>
+                      ) : (
+                        <span className="flex items-center gap-2 relative z-10">
+                          {isForgotPassword ? (
+                            <>
+                              <Mail className="w-5 h-5" />
+                              Send Reset Link
+                            </>
+                          ) : isLogin ? (
+                            <>
+                              <Shield className="w-5 h-5" />
+                              Sign In
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-5 h-5" />
+                              Create Account
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </Button>
+                  </motion.div>
                 </form>
 
                 {/* Toggle Sign In/Up */}
-                <div className="text-center mt-6">
+                <motion.div
+                  className="text-center mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
                   {isForgotPassword ? (
                     <button
                       type="button"
@@ -407,33 +677,44 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         setIsForgotPassword(false);
                         setEmail('');
                       }}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-sm text-white/60 hover:text-white transition-colors flex items-center gap-2 mx-auto"
                     >
-                      ← Back to Sign In
+                      <ArrowLeft className="w-4 h-4" />
+                      Back to Sign In
                     </button>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-white/60">
                       {isLogin ? "Don't have an account? " : "Already have an account? "}
                       <button
                         type="button"
                         onClick={() => {
                           setIsLogin(!isLogin);
-                          // Clear form fields when toggling between login/signup
                           setEmail('');
                           setPassword('');
                           setName('');
                           setShowPassword(false);
                           setAgreeToTerms(false);
                         }}
-                        className="text-primary hover:underline font-semibold"
+                        className={`${theme.accent} hover:underline font-semibold`}
                       >
                         {isLogin ? 'Sign Up' : 'Sign In'}
                       </button>
                     </p>
                   )}
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              </motion.div>
+
+              {/* Security Notice */}
+              <motion.div
+                className="flex items-center justify-center gap-2 mt-6 text-white/40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Shield className="w-4 h-4" />
+                <span className="text-xs">Secured with industry-standard encryption</span>
+              </motion.div>
+            </motion.div>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
