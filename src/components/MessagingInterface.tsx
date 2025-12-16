@@ -39,16 +39,16 @@ const getBubbleColors = (otherUserRole: string, isMyMessage: boolean) => {
 
   // Sent messages - different colors based on who you're talking to
   if (otherUserRole === 'owner') {
-    // Talking to Owner - Blue gradient (iMessage style)
+    // Talking to Owner - Orange-Red gradient (vibrant)
     return {
-      background: 'bg-gradient-to-br from-[#007AFF] to-[#0056CC]',
+      background: 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]',
       text: 'text-white',
       timestamp: 'text-white/60'
     };
   } else {
-    // Talking to Client - Green gradient (SMS style)
+    // Talking to Client - Blue gradient (iMessage style)
     return {
-      background: 'bg-gradient-to-br from-[#34C759] to-[#28A745]',
+      background: 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]',
       text: 'text-white',
       timestamp: 'text-white/60'
     };
@@ -220,8 +220,8 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
               <AvatarImage src={otherUser.avatar_url} />
               <AvatarFallback className={`font-semibold text-white ${
                 otherUser.role === 'owner'
-                  ? 'bg-gradient-to-br from-[#007AFF] to-[#0056CC]'
-                  : 'bg-gradient-to-br from-[#34C759] to-[#28A745]'
+                  ? 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]'
+                  : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]'
               }`}>
                 {otherUser.full_name?.charAt(0) || '?'}
               </AvatarFallback>
@@ -235,8 +235,8 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
               variant="secondary"
               className={`text-[10px] px-2 py-0 h-4 border-0 ${
                 otherUser.role === 'owner'
-                  ? 'bg-[#007AFF]/20 text-[#007AFF]'
-                  : 'bg-[#34C759]/20 text-[#34C759]'
+                  ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                  : 'bg-[#007AFF]/20 text-[#007AFF]'
               }`}
             >
               {otherUser.role === 'client' ? 'Client' : 'Owner'}
@@ -267,11 +267,11 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
           <div className="flex flex-col items-center justify-center h-full py-12 text-center">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
               otherUser.role === 'owner'
-                ? 'bg-[#007AFF]/20'
-                : 'bg-[#34C759]/20'
+                ? 'bg-[#FF6B35]/20'
+                : 'bg-[#007AFF]/20'
             }`}>
               <Send className={`w-7 h-7 ${
-                otherUser.role === 'owner' ? 'text-[#007AFF]' : 'text-[#34C759]'
+                otherUser.role === 'owner' ? 'text-[#FF6B35]' : 'text-[#007AFF]'
               }`} />
             </div>
             <p className="text-sm font-medium text-white mb-1">
@@ -376,8 +376,8 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
             className={`shrink-0 h-9 w-9 rounded-full transition-all border-0 ${
               newMessage.trim() && !isAtLimit
                 ? otherUser.role === 'owner'
-                  ? 'bg-[#007AFF] hover:bg-[#0056CC]'
-                  : 'bg-[#34C759] hover:bg-[#28A745]'
+                  ? 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E] hover:from-[#FF5722] hover:to-[#E68A00]'
+                  : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6] hover:from-[#0056CC] hover:to-[#4A45B5]'
                 : 'bg-[#3A3A3C] opacity-50'
             }`}
             title={isAtLimit ? "Monthly message limit reached" : "Send message"}
