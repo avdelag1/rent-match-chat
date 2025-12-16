@@ -65,7 +65,8 @@ const steps = [
   const handleImageUpload = async (file: File): Promise<string> => {
     try {
       const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const uniqueId = crypto.randomUUID();
+      const fileName = `${uniqueId}.${fileExt}`;
       const filePath = `${user?.id}/${fileName}`;
 
       const { data, error } = await supabase.storage
