@@ -75,16 +75,9 @@ export function ServiceProviderCard({ service, onContact }: ServiceProviderCardP
           </div>
 
           {/* Service Title */}
-          <h4 className="font-medium text-foreground mb-2 line-clamp-2">
+          <h4 className="font-medium text-foreground mb-3 line-clamp-2">
             {service.title}
           </h4>
-
-          {/* Description */}
-          {service.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-              {service.description}
-            </p>
-          )}
 
           {/* Stats */}
           <div className="flex flex-wrap gap-2 mb-4">

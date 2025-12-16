@@ -112,28 +112,48 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // Beautiful gradient colors for active states
-  const getIconStyles = (item: NavItem, active: boolean) => {
-    if (active) {
-      switch (item.id) {
-        case 'browse':
-          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
-        case 'likes':
-        case 'liked':
-          return 'text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]';
-        case 'messages':
-          return 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]';
-        case 'listings':
-          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
-        case 'profile':
-          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
-        case 'hire':
-          return 'text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]';
-        default:
-          return 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
-      }
+  // Get icon color class only (for the Icon component)
+  const getIconColorClass = (item: NavItem, active: boolean) => {
+    if (!active) return 'text-gray-400';
+
+    switch (item.id) {
+      case 'browse':
+        return 'text-red-500';
+      case 'likes':
+      case 'liked':
+        return 'text-orange-500';
+      case 'messages':
+        return 'text-blue-500';
+      case 'listings':
+        return 'text-red-500';
+      case 'profile':
+        return 'text-red-500';
+      case 'hire':
+        return 'text-emerald-500';
+      default:
+        return 'text-red-500';
     }
-    return 'text-gray-400';
+  };
+
+  // Get glow background class for the active ring (explicit colors, not bg-current)
+  const getGlowBgClass = (item: NavItem) => {
+    switch (item.id) {
+      case 'browse':
+        return 'bg-red-500';
+      case 'likes':
+      case 'liked':
+        return 'bg-orange-500';
+      case 'messages':
+        return 'bg-blue-500';
+      case 'listings':
+        return 'bg-red-500';
+      case 'profile':
+        return 'bg-red-500';
+      case 'hire':
+        return 'bg-emerald-500';
+      default:
+        return 'bg-red-500';
+    }
   };
 
   return (
@@ -169,8 +189,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               whileTap={{ scale: 0.9 }}
               className={cn(
                 'relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl',
-                active && 'bg-white/10',
-                getIconStyles(item, active)
+                active && 'bg-white/10'
               )}
             >
               {/* Animated glow ring for active state */}
@@ -180,7 +199,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 1.2, opacity: 0 }}
-                    className="absolute inset-0 rounded-2xl bg-current opacity-10"
+                    className={cn("absolute inset-0 rounded-2xl opacity-10", getGlowBgClass(item))}
                   />
                 )}
               </AnimatePresence>
@@ -206,13 +225,14 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 )}
               </AnimatePresence>
 
-              <Icon 
+              <Icon
                 className={cn(
                   'h-6 w-6 transition-all duration-200',
                   item.isCenter && 'h-7 w-7',
-                  active && 'scale-110'
-                )} 
-                strokeWidth={active ? 2.5 : 2} 
+                  active && 'scale-110',
+                  getIconColorClass(item, active)
+                )}
+                strokeWidth={active ? 2.5 : 2}
               />
             </motion.button>
           );

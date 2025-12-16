@@ -29,7 +29,6 @@ export default function OwnerServicesDiscovery() {
     const profile = service.profiles as any;
     return (
       service.title.toLowerCase().includes(query) ||
-      service.description?.toLowerCase().includes(query) ||
       profile?.full_name?.toLowerCase().includes(query) ||
       profile?.city?.toLowerCase().includes(query)
     );

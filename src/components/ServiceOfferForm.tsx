@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useClientService, SERVICE_TYPES, ServiceType } from '@/hooks/useClientService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -20,7 +19,6 @@ export function ServiceOfferForm() {
     service_type: '' as ServiceType | '',
     custom_service_name: '',
     title: '',
-    description: '',
     hourly_rate: '',
     experience_years: '',
     availability: '',
@@ -34,7 +32,6 @@ export function ServiceOfferForm() {
         service_type: service.service_type,
         custom_service_name: service.custom_service_name || '',
         title: service.title,
-        description: service.description || '',
         hourly_rate: service.hourly_rate?.toString() || '',
         experience_years: service.experience_years?.toString() || '',
         availability: service.availability || '',
@@ -46,12 +43,11 @@ export function ServiceOfferForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     upsertService.mutate({
       service_type: formData.service_type as ServiceType,
       custom_service_name: formData.service_type === 'other' ? formData.custom_service_name : undefined,
       title: formData.title,
-      description: formData.description || undefined,
       hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : undefined,
       experience_years: formData.experience_years ? parseInt(formData.experience_years) : undefined,
       availability: formData.availability || undefined,
@@ -67,7 +63,6 @@ export function ServiceOfferForm() {
         service_type: '',
         custom_service_name: '',
         title: '',
-        description: '',
         hourly_rate: '',
         experience_years: '',
         availability: '',
@@ -176,17 +171,6 @@ export function ServiceOfferForm() {
                 placeholder={selectedServiceInfo ? `e.g., Professional ${selectedServiceInfo.label}` : "e.g., Experienced Nanny"}
                 className="bg-background/50"
                 required
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Description</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your service, skills, and what makes you stand out..."
-                className="bg-background/50 min-h-[100px]"
               />
             </div>
 
