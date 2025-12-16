@@ -89,7 +89,8 @@ export function LegalDocumentsDialog({ open, onOpenChange }: LegalDocumentsDialo
       if (!user.user) throw new Error('Not authenticated');
 
       const fileExt = file.name.split('.').pop() || 'pdf';
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const uniqueId = crypto.randomUUID();
+      const fileName = `${uniqueId}.${fileExt}`;
       const filePath = `${user.user.id}/${fileName}`;
 
       // Upload file to storage

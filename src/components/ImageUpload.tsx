@@ -35,9 +35,10 @@ export function ImageUpload({
         throw new Error(validation.error);
       }
 
-      // Generate unique filename
+      // Generate unique filename using crypto for security
       const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `${folder}/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const uniqueId = crypto.randomUUID();
+      const fileName = `${folder}/${uniqueId}.${fileExt}`;
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
