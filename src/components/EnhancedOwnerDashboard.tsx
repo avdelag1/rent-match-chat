@@ -1,38 +1,18 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
-import { PremiumSubscriptionManager } from '@/components/PremiumSubscriptionManager';
-import { SupportButton } from '@/components/SupportButton';
-
 import { MatchCelebration } from '@/components/MatchCelebration';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { NotificationBar } from '@/components/NotificationBar';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
-import { useUserSubscription } from '@/hooks/useSubscription';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { NotificationSystem } from '@/components/NotificationSystem';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Users, 
-  Home, 
-  Zap, 
-  TrendingUp, 
-  Star, 
-  Filter,
-  MessageCircle,
-  Settings,
-  Crown,
-  Eye,
-  Plus,
-  RefreshCw,
-  MapPin
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+import { RefreshCw } from 'lucide-react';
 
 interface EnhancedOwnerDashboardProps {
   onClientInsights?: (clientId: string) => void;
@@ -52,7 +32,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   
   const navigate = useNavigate();
   const { data: clientProfiles = [], isLoading, error, refetch } = useSmartClientMatching();
-  const { data: subscription } = useUserSubscription();
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
   
   // Initialize notifications
@@ -111,16 +90,8 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
     }
   };
 
-  const handleMatchCelebration = (clientProfile: any, ownerProfile: any) => {
-    setMatchCelebration({
-      isOpen: true,
-      clientProfile,
-      ownerProfile
-    });
-  };
-
   const handleStartConversation = () => {
-    // Navigate to messaging or implement conversation start
+    navigate('/messages');
   };
 
   const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
@@ -128,29 +99,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   };
 
   const selectedClient = clientProfiles.find(c => c.user_id === selectedClientId);
-  const hasPremium = subscription?.is_active;
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.4
-      }
-    }
-  };
 
   return (
     <DashboardLayout userRole="owner">
