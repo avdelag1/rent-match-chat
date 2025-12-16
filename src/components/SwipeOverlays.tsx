@@ -1,5 +1,4 @@
 import { MotionValue, useTransform, motion } from 'framer-motion';
-import { Flame, X, Star } from 'lucide-react';
 
 interface SwipeOverlaysProps {
   x: MotionValue<number>;
@@ -16,18 +15,18 @@ export function SwipeOverlays({ x }: SwipeOverlaysProps) {
 
   return (
     <>
-      {/* Like Overlay (Right Swipe) - ENHANCED GREEN with Emoji */}
+      {/* Like Overlay (Right Swipe) - GREEN LIKED */}
       <motion.div
         style={{ opacity: likeOpacity }}
         className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/50 via-amber-500/40 to-red-500/50 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/50 via-emerald-500/40 to-green-600/50 backdrop-blur-sm" />
         <motion.div
           className="relative transform -rotate-12"
           style={{ scale: likeScale }}
         >
-          <span className="text-8xl font-black text-white drop-shadow-[0_8px_40px_rgba(249,115,22,1)] tracking-wider" style={{ textShadow: '0 0 20px rgba(249,115,22,0.8), 0 0 40px rgba(249,115,22,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
-            FLAME
+          <span className="text-8xl font-black text-white drop-shadow-[0_8px_40px_rgba(34,197,94,1)] tracking-wider" style={{ textShadow: '0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
+            LIKED
           </span>
         </motion.div>
       </motion.div>
