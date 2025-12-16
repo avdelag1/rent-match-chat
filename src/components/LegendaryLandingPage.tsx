@@ -319,7 +319,7 @@ function LegendaryLandingPage() {
             onClick={() => openAuthDialog('client')}
             onMouseEnter={() => setHoveredButton('client')}
             onMouseLeave={() => setHoveredButton(null)}
-            className="w-full py-3 px-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group"
+            className="w-full py-2.5 px-5 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-sm sm:text-base rounded-lg flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group"
             initial={{
               opacity: 0,
               x: -150,
@@ -337,12 +337,12 @@ function LegendaryLandingPage() {
               delay: 0.5,
             }}
             whileHover={{
-              scale: 1.03,
-              y: -4,
-              boxShadow: '0 16px 48px rgba(244,63,94,0.45)',
+              scale: 1.02,
+              y: -3,
+              boxShadow: '0 12px 32px rgba(244,63,94,0.4)',
             }}
             whileTap={{
-              scale: 0.97,
+              scale: 0.98,
             }}
           >
             {/* Animated background gradient on hover */}
@@ -360,8 +360,8 @@ function LegendaryLandingPage() {
               transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2 }}
             />
 
-            <Home className="w-5 h-5 relative z-10" />
-            <span className="relative z-10">I'm Looking for a Place</span>
+            <Home className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">I'm a Client</span>
             <motion.div
               className="relative z-10"
               animate={{ x: hoveredButton === 'client' ? 3 : 0 }}
@@ -376,7 +376,7 @@ function LegendaryLandingPage() {
             onClick={() => openAuthDialog('owner')}
             onMouseEnter={() => setHoveredButton('owner')}
             onMouseLeave={() => setHoveredButton(null)}
-            className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group"
+            className="w-full py-2.5 px-5 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-sm sm:text-base rounded-lg flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group"
             initial={{
               opacity: 0,
               x: 150,
@@ -394,12 +394,12 @@ function LegendaryLandingPage() {
               delay: 0.65,
             }}
             whileHover={{
-              scale: 1.03,
-              y: -4,
-              boxShadow: '0 16px 48px rgba(249,115,22,0.45)',
+              scale: 1.02,
+              y: -3,
+              boxShadow: '0 12px 32px rgba(249,115,22,0.4)',
             }}
             whileTap={{
-              scale: 0.97,
+              scale: 0.98,
             }}
           >
             {/* Animated background gradient on hover */}
@@ -417,8 +417,8 @@ function LegendaryLandingPage() {
               transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2, delay: 0.5 }}
             />
 
-            <Building2 className="w-5 h-5 relative z-10" />
-            <span className="relative z-10">I'm a Property Owner</span>
+            <Building2 className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">I'm an Owner</span>
             <motion.div
               className="relative z-10"
               animate={{ x: hoveredButton === 'owner' ? 3 : 0 }}
@@ -438,7 +438,7 @@ function LegendaryLandingPage() {
         >
           {/* Role selector hint */}
           <p className="text-white/50 text-sm">
-            Choose your role to get started
+            Find your perfect deal and start chatting
           </p>
 
           {/* Features badges */}
@@ -448,14 +448,14 @@ function LegendaryLandingPage() {
               whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
             >
               <Sparkles className="w-4 h-4 text-amber-400" />
-              <span className="text-white/70 text-xs font-medium">Smart Matching</span>
+              <span className="text-white/70 text-xs font-medium">Perfect Deals</span>
             </motion.div>
             <motion.div
               className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10"
               whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
             >
               <Shield className="w-4 h-4 text-green-400" />
-              <span className="text-white/70 text-xs font-medium">Verified Users</span>
+              <span className="text-white/70 text-xs font-medium">Secure Chat</span>
             </motion.div>
             <motion.div
               className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10"
