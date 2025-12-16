@@ -406,14 +406,14 @@ function LegendaryLandingPage() {
             backgroundColor: 'rgba(255,255,255,0.1)'
           }}>
               <Sparkles className="w-4 h-4 text-amber-400" />
-              <span className="text-white/70 text-xs font-medium">Smart Matching</span>
+              <span className="text-white/70 text-xs font-medium">Perfect Deals</span>
             </motion.div>
             <motion.div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10" whileHover={{
             scale: 1.05,
             backgroundColor: 'rgba(255,255,255,0.1)'
           }}>
               <Shield className="w-4 h-4 text-green-400" />
-              <span className="text-white/70 text-xs font-medium">Verified Users</span>
+              <span className="text-white/70 text-xs font-medium">Secure Chat</span>
             </motion.div>
             <motion.div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10" whileHover={{
             scale: 1.05,
