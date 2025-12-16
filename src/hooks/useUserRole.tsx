@@ -20,12 +20,4 @@ export function useUserRole(userId: string | undefined) {
   });
 }
 
-export async function getUserRole(userId: string): Promise<'client' | 'owner' | 'admin' | null> {
-  const { data } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .maybeSingle();
-  
-  return data?.role as 'client' | 'owner' | 'admin' | null;
-}
+// Note: For standalone getUserRole function, use the one from '@/utils/roleValidation'
