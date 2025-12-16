@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, AlertCircle, Zap } from 'lucide-react';
+import { ArrowLeft, Send, AlertCircle, Zap, ChevronLeft } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
 import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
@@ -26,23 +26,56 @@ interface MessagingInterfaceProps {
   onBack: () => void;
 }
 
-// Memoized message component with modern bubble design
-const MessageBubble = memo(({ message, isMyMessage }: { message: any; isMyMessage: boolean }) => (
-  <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} group`}>
-    <div
-      className={`max-w-[80%] px-4 py-2.5 ${
-        isMyMessage
-          ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-2xl rounded-br-md shadow-md'
-          : 'bg-muted/80 backdrop-blur-sm rounded-2xl rounded-bl-md border border-border/50'
-      }`}
-    >
-      <p className="text-sm break-words whitespace-pre-wrap leading-relaxed">{message.message_text}</p>
-      <p className={`text-[10px] mt-1 ${isMyMessage ? 'text-primary-foreground/60' : 'text-muted-foreground'} opacity-0 group-hover:opacity-100 transition-opacity`}>
-        {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
-      </p>
+// iOS-style message bubble colors based on conversation type
+const getBubbleColors = (otherUserRole: string, isMyMessage: boolean) => {
+  if (!isMyMessage) {
+    // Received messages - always gray/muted
+    return {
+      background: 'bg-[#3A3A3C]',
+      text: 'text-white',
+      timestamp: 'text-white/50'
+    };
+  }
+
+  // Sent messages - different colors based on who you're talking to
+  if (otherUserRole === 'owner') {
+    // Talking to Owner - Blue gradient (iMessage style)
+    return {
+      background: 'bg-gradient-to-br from-[#007AFF] to-[#0056CC]',
+      text: 'text-white',
+      timestamp: 'text-white/60'
+    };
+  } else {
+    // Talking to Client - Green gradient (SMS style)
+    return {
+      background: 'bg-gradient-to-br from-[#34C759] to-[#28A745]',
+      text: 'text-white',
+      timestamp: 'text-white/60'
+    };
+  }
+};
+
+// Memoized iOS-style message bubble component
+const MessageBubble = memo(({ message, isMyMessage, otherUserRole }: { message: any; isMyMessage: boolean; otherUserRole: string }) => {
+  const colors = getBubbleColors(otherUserRole, isMyMessage);
+
+  return (
+    <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} mb-1`}>
+      <div
+        className={`max-w-[75%] px-4 py-2.5 ${colors.background} ${colors.text} ${
+          isMyMessage
+            ? 'rounded-[20px] rounded-br-[6px]'
+            : 'rounded-[20px] rounded-bl-[6px]'
+        } shadow-sm`}
+      >
+        <p className="text-[15px] break-words whitespace-pre-wrap leading-[1.35]">{message.message_text}</p>
+        <p className={`text-[10px] mt-1 ${colors.timestamp} text-right`}>
+          {formatDistanceToNow(new Date(message.created_at), { addSuffix: false })}
+        </p>
+      </div>
     </div>
-  </div>
-));
+  );
+});
 
 MessageBubble.displayName = 'MessageBubble';
 
@@ -155,105 +188,139 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
 
   if (isLoading) {
     return (
-      <Card className="flex-1 flex items-center justify-center">
+      <Card className="flex-1 flex items-center justify-center border-0 shadow-none bg-[#1C1C1E]">
         <div className="text-center">
-          <p className="text-muted-foreground">Loading conversation...</p>
+          <div className="flex items-center justify-center gap-1 mb-3">
+            <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+            <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+            <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+          </div>
+          <p className="text-[#8E8E93] text-sm">Loading conversation...</p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="flex-1 flex flex-col h-full overflow-hidden border-0 shadow-xl">
-      {/* Modern Header with gradient */}
-      <div className="flex items-center gap-3 p-4 border-b shrink-0 bg-gradient-to-r from-background via-background to-muted/30 backdrop-blur-xl">
-        <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0 rounded-full hover:bg-muted/80 w-9 h-9">
-          <ArrowLeft className="w-4 h-4" />
+    <Card className="flex-1 flex flex-col h-full overflow-hidden border-0 shadow-none bg-[#1C1C1E]">
+      {/* iOS-style Header */}
+      <div className="flex items-center gap-2 px-3 py-3 border-b border-[#38383A] shrink-0 bg-[#1C1C1E]/95 backdrop-blur-xl">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="shrink-0 text-[#007AFF] hover:bg-transparent hover:text-[#0056CC] px-1 -ml-1"
+        >
+          <ChevronLeft className="w-6 h-6" />
+          <span className="text-[17px] font-normal">Back</span>
         </Button>
-        <div className="relative">
-          <Avatar className="w-11 h-11 shrink-0 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
-            <AvatarImage src={otherUser.avatar_url} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-primary-foreground font-bold">
-              {otherUser.full_name?.charAt(0) || '?'}
-            </AvatarFallback>
-          </Avatar>
-          {/* Online indicator */}
-          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-base truncate">{otherUser.full_name}</h3>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 bg-primary/10 text-primary border-primary/20">
-              {otherUser.role === 'client' ? '🏠 Client' : '🔑 Owner'}
+        <div className="flex-1 flex flex-col items-center min-w-0">
+          <div className="relative">
+            <Avatar className="w-10 h-10 shrink-0">
+              <AvatarImage src={otherUser.avatar_url} />
+              <AvatarFallback className={`font-semibold text-white ${
+                otherUser.role === 'owner'
+                  ? 'bg-gradient-to-br from-[#007AFF] to-[#0056CC]'
+                  : 'bg-gradient-to-br from-[#34C759] to-[#28A745]'
+              }`}>
+                {otherUser.full_name?.charAt(0) || '?'}
+              </AvatarFallback>
+            </Avatar>
+            {/* Online indicator */}
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#34C759] rounded-full border-2 border-[#1C1C1E]" />
+          </div>
+          <h3 className="font-semibold text-[15px] text-white mt-1 truncate">{otherUser.full_name}</h3>
+          <div className="flex items-center gap-1.5">
+            <Badge
+              variant="secondary"
+              className={`text-[10px] px-2 py-0 h-4 border-0 ${
+                otherUser.role === 'owner'
+                  ? 'bg-[#007AFF]/20 text-[#007AFF]'
+                  : 'bg-[#34C759]/20 text-[#34C759]'
+              }`}
+            >
+              {otherUser.role === 'client' ? 'Client' : 'Owner'}
             </Badge>
-            <span className="text-[10px] text-green-500 font-medium">● Online</span>
+            <span className="text-[10px] text-[#34C759] font-medium flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-[#34C759] rounded-full"></span>
+              Online
+            </span>
           </div>
         </div>
+        {/* Spacer to center the profile */}
+        <div className="w-16"></div>
       </div>
 
-      {/* Cool Connection Status */}
+      {/* iOS-style Connection Status */}
       {showConnecting && (
-        <div className="px-4 py-2 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-b border-amber-500/20 text-center backdrop-blur-sm">
-          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+        <div className="px-4 py-2 bg-[#2C2C2E] border-b border-[#38383A] text-center">
+          <p className="text-xs text-[#FF9F0A] flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 bg-[#FF9F0A] rounded-full animate-pulse" />
             Connecting to chat...
           </p>
         </div>
       )}
 
-      {/* Messages */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-background to-muted/10">
+      {/* Messages - iOS-style */}
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-3 bg-[#000000]">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4">
-              <Send className="w-7 h-7 text-primary/60" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+              otherUser.role === 'owner'
+                ? 'bg-[#007AFF]/20'
+                : 'bg-[#34C759]/20'
+            }`}>
+              <Send className={`w-7 h-7 ${
+                otherUser.role === 'owner' ? 'text-[#007AFF]' : 'text-[#34C759]'
+              }`} />
             </div>
-            <p className="text-sm font-medium text-foreground mb-1">
+            <p className="text-sm font-medium text-white mb-1">
               Start the conversation
             </p>
-            <p className="text-xs text-muted-foreground max-w-[200px]">
-              Say hello to {otherUser.full_name?.split(' ')[0] || 'your match'}! 👋
+            <p className="text-xs text-[#8E8E93] max-w-[200px]">
+              Say hello to {otherUser.full_name?.split(' ')[0] || 'your match'}!
             </p>
           </div>
         ) : (
-          messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isMyMessage={message.sender_id === user?.id}
-            />
-          ))
+          <div className="space-y-1">
+            {messages.map((message) => (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                isMyMessage={message.sender_id === user?.id}
+                otherUserRole={otherUser.role}
+              />
+            ))}
+          </div>
         )}
-        {/* Cool Typing indicator */}
+        {/* iOS-style Typing indicator */}
         {typingUsers.length > 0 && (
-          <div className="flex justify-start items-end gap-2">
-            <div className="px-4 py-3 bg-muted/60 backdrop-blur-sm rounded-2xl rounded-bl-md border border-border/30">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+          <div className="flex justify-start items-end gap-2 mt-1">
+            <div className="px-4 py-3 bg-[#3A3A3C] rounded-[20px] rounded-bl-[6px]">
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
             </div>
-            <span className="text-[10px] text-muted-foreground mb-1">typing...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Limit Warning with Upgrade Button */}
+      {/* iOS-style Limit Warning */}
       {hasMonthlyLimit && isAtLimit && (
-        <div className="px-4 py-3 bg-red-50 dark:bg-red-950 border-t border-red-200 dark:border-red-800">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="px-4 py-3 bg-[#2C2C2E] border-t border-[#38383A]">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-[#FF453A] flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-medium text-sm text-red-700 dark:text-red-300">Monthly message limit reached</p>
-              <p className="text-xs opacity-80 text-red-600 dark:text-red-400 mt-0.5">Upgrade to continue messaging</p>
+              <p className="font-medium text-sm text-[#FF453A]">Monthly limit reached</p>
+              <p className="text-xs text-[#8E8E93] mt-0.5">Upgrade to continue messaging</p>
             </div>
             <Button
               size="sm"
-              variant="destructive"
               onClick={() => setShowUpgradeDialog(true)}
-              className="shrink-0"
+              className="shrink-0 bg-[#007AFF] hover:bg-[#0056CC] text-white border-0 rounded-full px-4"
             >
               Upgrade
             </Button>
@@ -261,18 +328,18 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         </div>
       )}
 
-      {/* Limit Info */}
+      {/* iOS-style Limit Info */}
       {hasMonthlyLimit && !isAtLimit && (
-        <div className="px-4 py-2 bg-blue-50 dark:bg-blue-950 border-t border-blue-200 dark:border-blue-800 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300">
-            <Zap className="w-3 h-3" />
-            <span>{messagesRemaining} messages remaining this month</span>
+        <div className="px-4 py-2 bg-[#2C2C2E] border-t border-[#38383A] flex items-center justify-center">
+          <div className="flex items-center gap-2 text-xs text-[#8E8E93]">
+            <Zap className="w-3 h-3 text-[#FF9F0A]" />
+            <span>{messagesRemaining} messages remaining</span>
           </div>
         </div>
       )}
 
-      {/* Modern Input Area */}
-      <form onSubmit={handleSendMessage} className="p-3 border-t shrink-0 bg-gradient-to-t from-muted/30 to-background">
+      {/* iOS-style Input Area */}
+      <form onSubmit={handleSendMessage} className="px-3 py-2 border-t border-[#38383A] shrink-0 bg-[#1C1C1E]">
         <div className="flex gap-2 items-end">
           <div className="flex-1 relative">
             <Input
@@ -285,8 +352,8 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
                   stopTyping();
                 }
               }}
-              placeholder={isAtLimit ? "Monthly limit reached" : "Type a message..."}
-              className="flex-1 text-sm min-h-[48px] pr-4 rounded-2xl border-muted-foreground/20 bg-muted/50 focus:bg-background focus:border-primary/50 transition-all"
+              placeholder={isAtLimit ? "Monthly limit reached" : "iMessage"}
+              className="flex-1 text-[15px] min-h-[36px] px-4 py-2 rounded-full border-[#38383A] bg-[#2C2C2E] text-white placeholder:text-[#8E8E93] focus:border-[#48484A] focus:ring-0 focus:ring-offset-0 transition-all"
               disabled={sendMessage.isPending || isAtLimit}
               maxLength={1000}
               onKeyDown={(e) => {
@@ -297,7 +364,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
               }}
             />
             {newMessage.length > 800 && (
-              <span className="absolute right-3 bottom-1 text-[10px] text-muted-foreground">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[#8E8E93]">
                 {1000 - newMessage.length}
               </span>
             )}
@@ -306,14 +373,16 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
             type="submit"
             disabled={!newMessage.trim() || sendMessage.isPending || isAtLimit}
             size="icon"
-            className={`shrink-0 h-12 w-12 rounded-full shadow-lg transition-all ${
+            className={`shrink-0 h-9 w-9 rounded-full transition-all border-0 ${
               newMessage.trim() && !isAtLimit
-                ? 'bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 scale-100'
-                : 'bg-muted scale-95'
+                ? otherUser.role === 'owner'
+                  ? 'bg-[#007AFF] hover:bg-[#0056CC]'
+                  : 'bg-[#34C759] hover:bg-[#28A745]'
+                : 'bg-[#3A3A3C] opacity-50'
             }`}
             title={isAtLimit ? "Monthly message limit reached" : "Send message"}
           >
-            <Send className={`w-5 h-5 transition-transform ${newMessage.trim() ? 'translate-x-0.5' : ''}`} />
+            <Send className="w-4 h-4 text-white" />
           </Button>
         </div>
       </form>
