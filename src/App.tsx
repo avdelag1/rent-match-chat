@@ -28,15 +28,11 @@ const ClientProfile = lazy(() => import("./pages/ClientProfile"));
 const ClientSettings = lazy(() => import("./pages/ClientSettings"));
 const ClientLikedProperties = lazy(() => import("./pages/ClientLikedProperties"));
 const ClientSavedSearches = lazy(() => import("./pages/ClientSavedSearches"));
-const ClientMatchHistory = lazy(() => import("./pages/ClientMatchHistory"));
-const ClientActivityFeed = lazy(() => import("./pages/ClientActivityFeed"));
 const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
 const EnhancedOwnerDashboard = lazy(() => import("./components/EnhancedOwnerDashboard"));
 const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
 const OwnerSettings = lazy(() => import("./pages/OwnerSettings"));
 const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
-const OwnerMatchHistory = lazy(() => import("./pages/OwnerMatchHistory"));
-const OwnerActivityFeed = lazy(() => import("./pages/OwnerActivityFeed"));
 const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
 const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })));
 const OwnerProperties = lazy(() => import("./pages/OwnerProperties"));
@@ -135,34 +131,16 @@ const App = () => (
                       } 
                     />
 
-                    <Route 
-                      path="/client/saved-searches" 
+                    <Route
+                      path="/client/saved-searches"
                       element={
                         <ProtectedRoute requiredRole="client">
                           <ClientSavedSearches />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
 
-                    <Route 
-                      path="/client/match-history" 
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientMatchHistory />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/client/activity-feed" 
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientActivityFeed />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
+                    <Route
                       path="/client/security" 
                       element={
                         <ProtectedRoute requiredRole="client">
@@ -297,34 +275,16 @@ const App = () => (
                       }
                     />
 
-                    <Route 
-                      path="/owner/saved-searches" 
+                    <Route
+                      path="/owner/saved-searches"
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerSavedSearches />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
 
-                    <Route 
-                      path="/owner/match-history" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerMatchHistory />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/activity-feed" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerActivityFeed />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
+                    <Route
                       path="/owner/security" 
                       element={
                         <ProtectedRoute requiredRole="owner">
