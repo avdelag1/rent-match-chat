@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { DigitalSignaturePad } from '@/components/DigitalSignaturePad';
 import { useSignContract } from '@/hooks/useContracts';
 import { FileText, Download } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ContractSigningDialogProps {
   contractId: string;
@@ -47,7 +48,7 @@ export const ContractSigningDialog: React.FC<ContractSigningDialogProps> = ({
 
   const handleSign = async () => {
     if (!signatureData) {
-      alert('Please provide your signature first');
+      toast.error('Please provide your signature first');
       return;
     }
 
@@ -83,7 +84,7 @@ export const ContractSigningDialog: React.FC<ContractSigningDialogProps> = ({
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading contract:', error);
-      alert('Failed to download contract');
+      toast.error('Failed to download contract');
     }
   };
 

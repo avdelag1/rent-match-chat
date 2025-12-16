@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Plus, Users, MessageSquare, Flame, BarChart3,
-  Settings, FileText, Star, TrendingUp, Bell
+  Plus, Users, MessageSquare, Flame,
+  Settings, FileText, Bell
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,15 +22,13 @@ interface QuickAction {
 interface OwnerQuickActionsProps {
   unreadMessages?: number;
   newLikes?: number;
-  pendingMatches?: number;
   className?: string;
 }
 
-export function OwnerQuickActions({ 
-  unreadMessages = 0, 
-  newLikes = 0, 
-  pendingMatches = 0,
-  className 
+export function OwnerQuickActions({
+  unreadMessages = 0,
+  newLikes = 0,
+  className
 }: OwnerQuickActionsProps) {
   const navigate = useNavigate();
 
@@ -71,29 +69,12 @@ export function OwnerQuickActions({
       gradient: 'from-amber-500/20 via-amber-500/10 to-transparent',
     },
     {
-      id: 'matches',
-      name: 'Matches',
-      description: 'View your successful matches',
-      icon: <Star className="w-6 h-6" />,
-      route: '/owner/match-history',
-      gradient: 'from-yellow-500/20 via-yellow-500/10 to-transparent',
-      badge: pendingMatches > 0 ? pendingMatches : undefined,
-    },
-    {
       id: 'contracts',
       name: 'Contracts',
       description: 'Manage rental agreements',
       icon: <FileText className="w-6 h-6" />,
       route: '/owner/contracts',
       gradient: 'from-purple-500/20 via-purple-500/10 to-transparent',
-    },
-    {
-      id: 'activity',
-      name: 'Activity',
-      description: 'See recent activity on your listings',
-      icon: <TrendingUp className="w-6 h-6" />,
-      route: '/owner/activity-feed',
-      gradient: 'from-green-500/20 via-green-500/10 to-transparent',
     },
     {
       id: 'notifications',

@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Download, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DigitalSignaturePadProps {
   onSignatureCapture: (signatureData: string, signatureType: 'drawn' | 'typed' | 'uploaded') => void;
@@ -126,7 +127,7 @@ export const DigitalSignaturePad: React.FC<DigitalSignaturePadProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
+      toast.error('Please upload an image file');
       return;
     }
 
