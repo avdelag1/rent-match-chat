@@ -286,7 +286,7 @@ function LegendaryLandingPage() {
             scale: 1.05,
             backgroundColor: 'rgba(255,255,255,0.1)'
           }}>
-              <Sparkles className="w-4 h-4 text-yellow-400" />
+              <Sparkles className="w-4 h-4 text-blue-400" />
               <span className="text-white/70 text-xs font-medium">Perfect Deals</span>
             </motion.div>
             <motion.div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10" whileHover={{
