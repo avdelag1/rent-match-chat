@@ -89,51 +89,12 @@ const ResetPassword = () => {
     }
   };
 
-  // Floating fire particles component
-  const FireParticles = () => (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute"
-          style={{
-            width: `${2 + Math.random() * 4}px`,
-            height: `${4 + Math.random() * 8}px`,
-            background: `linear-gradient(45deg, ${
-              i % 3 === 0 ? '#f97316' : i % 3 === 1 ? '#fbbf24' : '#ea580c'
-            }, transparent)`,
-            boxShadow: `0 0 ${8 + Math.random() * 16}px ${
-              i % 3 === 0 ? '#f97316' : '#fbbf24'
-            }60`,
-            borderRadius: '50%',
-            left: `${Math.random() * 100}%`,
-            bottom: '-10px',
-          }}
-          animate={{
-            y: [0, -(window.innerHeight * 0.8 + Math.random() * 200)],
-            x: [0, (Math.random() - 0.5) * 100],
-            opacity: [0, 0.8, 0.6, 0],
-            scale: [0.3, 1, 0.8, 0.2],
-          }}
-          transition={{
-            duration: 8 + Math.random() * 6,
-            repeat: Infinity,
-            ease: "easeOut",
-            delay: Math.random() * 4,
-          }}
-        />
-      ))}
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 p-4 relative overflow-hidden">
-      <FireParticles />
-
       {/* Ambient glow effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
       </div>
 
       <motion.div

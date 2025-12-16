@@ -18,14 +18,14 @@ export function AppLoadingScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gradient-to-br from-orange-950 via-red-900 to-orange-950 flex flex-col items-center justify-center z-50"
+      className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 flex flex-col items-center justify-center z-50"
     >
       {/* Brand Name */}
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-5xl font-black tracking-tight bg-gradient-to-r from-orange-300 via-orange-400 to-red-400 bg-clip-text text-transparent mb-8"
+        className="text-5xl font-black tracking-tight text-gray-900 mb-8"
       >
         SwipeMatch
       </motion.h1>
@@ -40,10 +40,10 @@ export function AppLoadingScreen() {
         {/* Circular spinner */}
         <div className="relative w-12 h-12">
           <motion.div
-            className="absolute inset-0 rounded-full border-4 border-orange-500/30"
+            className="absolute inset-0 rounded-full border-4 border-gray-200"
           />
           <motion.div
-            className="absolute inset-0 rounded-full border-4 border-transparent border-t-orange-400"
+            className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500"
             animate={{ rotate: 360 }}
             transition={{
               duration: 1,
@@ -55,7 +55,7 @@ export function AppLoadingScreen() {
 
         {/* Loading text with animated dots */}
         <div className="flex items-center gap-1">
-          <span className="text-sm text-orange-200/80 font-medium">Loading</span>
+          <span className="text-sm text-gray-600 font-medium">Loading</span>
           {[0, 1, 2].map((i) => (
             <motion.span
               key={i}
@@ -67,7 +67,7 @@ export function AppLoadingScreen() {
                 repeat: Infinity,
                 delay: i * 0.2,
               }}
-              className="text-orange-300 text-sm"
+              className="text-gray-600 text-sm"
             >
               .
             </motion.span>
@@ -83,7 +83,7 @@ export function AppLoadingScreen() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleRefresh}
-          className="mt-10 px-6 py-3 text-sm text-orange-100 bg-orange-500/20 hover:bg-orange-500/30 rounded-xl transition-all duration-200 backdrop-blur-sm border border-orange-400/30"
+          className="mt-10 px-6 py-3 text-sm text-gray-700 bg-white hover:bg-gray-50 rounded-xl transition-all duration-200 shadow-md border border-gray-200"
         >
           Taking too long? Tap to refresh
         </motion.button>

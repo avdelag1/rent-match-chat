@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Building2, Home, Sparkles, Shield, ArrowRight } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
+
 function LegendaryLandingPage() {
   const [authDialog, setAuthDialog] = useState<{
     isOpen: boolean;
@@ -21,18 +22,21 @@ function LegendaryLandingPage() {
   });
   const [hoveredButton, setHoveredButton] = useState<'client' | 'owner' | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
   const openAuthDialog = (role: 'client' | 'owner') => {
     setAuthDialog({
       isOpen: true,
       role
     });
   };
+
   const closeAuthDialog = () => {
     setAuthDialog({
       isOpen: false,
       role: 'client'
     });
   };
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -42,6 +46,7 @@ function LegendaryLandingPage() {
       });
     }
   }, []);
+
   const createRipple = useCallback((e: React.MouseEvent) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -57,101 +62,6 @@ function LegendaryLandingPage() {
     }
   }, []);
 
-  // Realistic fire embers rising from ground
-  const FireParticles = () => {
-    // Pre-calculated values for consistent renders
-    const embers = Array.from({
-      length: 25
-    }, (_, i) => ({
-      id: i,
-      size: 1.5 + i % 5 * 1.2,
-      left: i * 4.2 % 100,
-      color: i % 5 === 0 ? '#ff4500' : i % 5 === 1 ? '#ff6b35' : i % 5 === 2 ? '#ff8c42' : i % 5 === 3 ? '#ffa756' : '#ffb86c',
-      duration: 8 + i % 7 * 2,
-      delay: i * 0.4 % 5,
-      drift: (i % 11 - 5) * 25,
-      glowSize: 4 + i % 4 * 3
-    }));
-    const orbs = Array.from({
-      length: 10
-    }, (_, i) => ({
-      id: i,
-      size: 40 + i % 5 * 30,
-      left: i * 10 % 100,
-      startY: 70 + i % 3 * 10,
-      color: i % 4 === 0 ? 'rgba(255,69,0,0.15)' : i % 4 === 1 ? 'rgba(255,107,53,0.12)' : i % 4 === 2 ? 'rgba(255,140,66,0.1)' : 'rgba(255,167,86,0.08)',
-      innerColor: i % 4 === 0 ? 'rgba(255,120,50,0.25)' : i % 4 === 1 ? 'rgba(255,150,80,0.2)' : i % 4 === 2 ? 'rgba(255,180,100,0.15)' : 'rgba(255,200,120,0.12)',
-      duration: 12 + i % 5 * 4,
-      delay: i * 0.8 % 4,
-      drift: (i % 7 - 3) * 40
-    }));
-    return <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Ground glow effect */}
-        <motion.div className="absolute bottom-0 left-0 right-0 h-32" style={{
-        background: 'linear-gradient(to top, rgba(255,69,0,0.08), rgba(255,107,53,0.04), transparent)'
-      }} animate={{
-        opacity: [0.6, 1, 0.6]
-      }} transition={{
-        duration: 3,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }} />
-
-        {/* Rising embers from ground */}
-        {embers.map(ember => <motion.div key={`ember-${ember.id}`} className="absolute" style={{
-        width: `${ember.size}px`,
-        height: `${ember.size * 1.5}px`,
-        background: `radial-gradient(ellipse at center, ${ember.color}, ${ember.color}80 40%, transparent 70%)`,
-        boxShadow: `0 0 ${ember.glowSize}px ${ember.color}90, 0 0 ${ember.glowSize * 2}px ${ember.color}50`,
-        borderRadius: '50% 50% 50% 50%',
-        left: `${ember.left}%`,
-        bottom: '0px'
-      }} animate={{
-        y: [0, -window.innerHeight * 0.9],
-        x: [0, ember.drift, ember.drift * 0.5],
-        opacity: [0, 0.9, 0.8, 0.5, 0],
-        scale: [0.3, 1, 0.9, 0.6, 0.2]
-      }} transition={{
-        duration: ember.duration,
-        repeat: Infinity,
-        ease: [0.25, 0.1, 0.25, 1],
-        delay: ember.delay
-      }} />)}
-
-        {/* Floating fire orbs rising from bottom */}
-        {orbs.map(orb => <motion.div key={`orb-${orb.id}`} className="absolute rounded-full" style={{
-        width: `${orb.size}px`,
-        height: `${orb.size}px`,
-        background: `radial-gradient(circle at 30% 30%, ${orb.innerColor}, ${orb.color} 50%, transparent 70%)`,
-        filter: 'blur(8px)',
-        left: `${orb.left}%`,
-        bottom: '0%'
-      }} animate={{
-        y: [0, -window.innerHeight * 1.1],
-        x: [0, orb.drift, orb.drift * 0.3],
-        opacity: [0, 0.7, 0.5, 0.3, 0],
-        scale: [0.5, 1.2, 1, 0.8, 0.4]
-      }} transition={{
-        duration: orb.duration,
-        repeat: Infinity,
-        ease: "easeOut",
-        delay: orb.delay
-      }} />)}
-
-        {/* Subtle heat distortion waves */}
-        <motion.div className="absolute bottom-0 left-0 right-0 h-48" style={{
-        background: 'linear-gradient(to top, rgba(255,100,50,0.03), transparent)',
-        filter: 'blur(20px)'
-      }} animate={{
-        scaleY: [1, 1.1, 1],
-        opacity: [0.5, 0.8, 0.5]
-      }} transition={{
-        duration: 4,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }} />
-      </div>;
-  };
   return <motion.div ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" onMouseMove={handleMouseMove} onClick={createRipple} animate={{
     background: `radial-gradient(circle at ${50 + mousePosition.x}% ${50 + mousePosition.y}%, rgb(17 17 17), rgb(3 3 3), rgb(10 10 10))`
   }} transition={{
@@ -160,7 +70,7 @@ function LegendaryLandingPage() {
       {/* Animated mesh gradient background */}
       <div className="absolute inset-0 opacity-30">
         <motion.div className="absolute inset-0" style={{
-        background: 'radial-gradient(ellipse at 20% 30%, rgba(249, 115, 22, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(239, 68, 68, 0.1) 0%, transparent 50%)'
+        background: 'radial-gradient(ellipse at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%)'
       }} animate={{
         opacity: [0.3, 0.5, 0.3]
       }} transition={{
@@ -169,12 +79,9 @@ function LegendaryLandingPage() {
       }} />
       </div>
 
-      {/* Fire Particles */}
-      <FireParticles />
-
       {/* Ripple Effects */}
       <AnimatePresence>
-        {ripples.map(ripple => <motion.div key={ripple.id} className="absolute border-2 border-orange-400/30 rounded-full pointer-events-none" style={{
+        {ripples.map(ripple => <motion.div key={ripple.id} className="absolute border-2 border-blue-400/30 rounded-full pointer-events-none" style={{
         left: ripple.x - 25,
         top: ripple.y - 25
       }} initial={{
@@ -195,32 +102,6 @@ function LegendaryLandingPage() {
       }} />)}
       </AnimatePresence>
 
-      {/* SVG Filter for Organic Flame Effect */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <linearGradient id="flameGradientR" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="40%" stopColor="#ea580c" />
-            <stop offset="70%" stopColor="#dc2626" />
-            <stop offset="100%" stopColor="#fbbf24" />
-          </linearGradient>
-          <filter id="flameDistortion" x="-50%" y="-50%" width="200%" height="200%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="5" result="noise">
-              <animate attributeName="baseFrequency" values="0.015;0.02;0.015" dur="4s" repeatCount="indefinite" />
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-          <filter id="flameGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
-
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-10 max-w-lg w-full">
 
@@ -238,7 +119,7 @@ function LegendaryLandingPage() {
           <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none">
             <motion.span className="block" style={{
             fontSize: 'clamp(4rem, 20vw, 8rem)',
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6, #8b5cf6, #ec4899, #3b82f6)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -254,7 +135,7 @@ function LegendaryLandingPage() {
             </motion.span>
             <motion.span className="block" style={{
             fontSize: 'clamp(3rem, 16vw, 6rem)',
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6, #8b5cf6, #ec4899, #3b82f6)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -284,7 +165,7 @@ function LegendaryLandingPage() {
         <div className="space-y-3 mt-12">
 
           {/* I'm a Client Button */}
-          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-3 px-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(59,130,246,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: -150,
           scale: 0.9
@@ -300,12 +181,12 @@ function LegendaryLandingPage() {
         }} whileHover={{
           scale: 1.03,
           y: -4,
-          boxShadow: '0 16px 48px rgba(244,63,94,0.45)'
+          boxShadow: '0 16px 48px rgba(59,130,246,0.45)'
         }} whileTap={{
           scale: 0.97
         }}>
             {/* Animated background gradient on hover */}
-            <motion.div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-red-500 to-pink-600" initial={{
+            <motion.div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-blue-500 to-teal-600" initial={{
             opacity: 0
           }} animate={{
             opacity: hoveredButton === 'client' ? 1 : 0
@@ -334,7 +215,7 @@ function LegendaryLandingPage() {
           </motion.button>
 
           {/* I'm an Owner Button */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-3 px-6 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(139,92,246,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: 150,
           scale: 0.9
@@ -350,12 +231,12 @@ function LegendaryLandingPage() {
         }} whileHover={{
           scale: 1.03,
           y: -4,
-          boxShadow: '0 16px 48px rgba(249,115,22,0.45)'
+          boxShadow: '0 16px 48px rgba(139,92,246,0.45)'
         }} whileTap={{
           scale: 0.97
         }}>
             {/* Animated background gradient on hover */}
-            <motion.div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-600" initial={{
+            <motion.div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-500 to-rose-600" initial={{
             opacity: 0
           }} animate={{
             opacity: hoveredButton === 'owner' ? 1 : 0
@@ -405,7 +286,7 @@ function LegendaryLandingPage() {
             scale: 1.05,
             backgroundColor: 'rgba(255,255,255,0.1)'
           }}>
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Sparkles className="w-4 h-4 text-yellow-400" />
               <span className="text-white/70 text-xs font-medium">Perfect Deals</span>
             </motion.div>
             <motion.div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10" whileHover={{

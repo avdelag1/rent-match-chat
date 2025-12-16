@@ -135,83 +135,40 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%);
           z-index: 9999;
         }
-        .flame-container {
-          width: 80px;
-          height: 100px;
-          animation: flame-bounce 1.5s ease-in-out infinite;
-          filter: drop-shadow(0 0 30px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 60px rgba(255, 69, 0, 0.5));
-        }
-        @keyframes flame-bounce {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-8px) scale(1.02); }
-        }
         .loading-text {
-          margin-top: 24px;
+          margin-bottom: 32px;
           font-family: 'Poppins', system-ui, sans-serif;
-          font-size: 28px;
+          font-size: 32px;
           font-weight: 800;
-          background: linear-gradient(90deg, #ff6b35, #ff4500, #ff6b35);
-          background-size: 200% 100%;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: gradient-shift 3s ease-in-out infinite;
+          color: #1f2937;
+          letter-spacing: -0.5px;
         }
-        @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .loading-dots {
-          display: flex;
-          gap: 8px;
-          margin-top: 20px;
-        }
-        .loading-dot {
-          width: 8px;
-          height: 8px;
+        .spinner {
+          width: 48px;
+          height: 48px;
+          border: 4px solid #e5e7eb;
+          border-top-color: #3b82f6;
           border-radius: 50%;
-          background: #ff6b35;
-          animation: dot-pulse 1s ease-in-out infinite;
+          animation: spin 0.8s linear infinite;
         }
-        .loading-dot:nth-child(2) { animation-delay: 0.15s; }
-        .loading-dot:nth-child(3) { animation-delay: 0.3s; }
-        @keyframes dot-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.4; }
-          50% { transform: scale(1.3); opacity: 1; }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .loading-subtext {
+          margin-top: 24px;
+          font-family: system-ui, sans-serif;
+          font-size: 14px;
+          color: #6b7280;
+          font-weight: 500;
         }
       </style>
       <div id="app-loading-screen">
-        <div class="flame-container">
-          <!-- Tinder-style flame - iconic asymmetric shape -->
-          <svg viewBox="0 0 64 80" width="100%" height="100%">
-            <defs>
-              <linearGradient id="tinderFlame" x1="0%" y1="100%" x2="50%" y2="0%">
-                <stop offset="0%" stop-color="#FF6B35"/>
-                <stop offset="40%" stop-color="#FF4500"/>
-                <stop offset="70%" stop-color="#FF3D00"/>
-                <stop offset="100%" stop-color="#E64A19"/>
-              </linearGradient>
-              <linearGradient id="tinderInner" x1="0%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stop-color="#FFAB40"/>
-                <stop offset="60%" stop-color="#FF9100"/>
-                <stop offset="100%" stop-color="#FF6D00"/>
-              </linearGradient>
-            </defs>
-            <!-- Main flame body - Tinder iconic shape -->
-            <path d="M32 2C32 2 12 24 12 48C12 62 20 74 32 74C44 74 52 62 52 48C52 40 48 32 44 26C44 26 46 34 42 42C38 50 32 46 32 38C32 30 40 22 40 22C40 22 32 28 28 36C24 44 28 52 32 52C36 52 38 48 38 44C38 38 32 32 32 32" fill="url(#tinderFlame)"/>
-            <!-- Inner glow -->
-            <ellipse cx="32" cy="54" rx="12" ry="14" fill="url(#tinderInner)" opacity="0.8"/>
-          </svg>
-        </div>
         <span class="loading-text">SwipeMatch</span>
-        <div class="loading-dots">
-          <div class="loading-dot"></div>
-          <div class="loading-dot"></div>
-          <div class="loading-dot"></div>
-        </div>
+        <div class="spinner"></div>
+        <span class="loading-subtext">Loading your experience...</span>
       </div>
     </div>
     
