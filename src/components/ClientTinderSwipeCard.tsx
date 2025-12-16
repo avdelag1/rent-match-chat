@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from 'framer-motion';
-import { MapPin, CheckCircle, Flag, X, RotateCcw, Eye, Flame } from 'lucide-react';
+import { MapPin, CheckCircle, Flag, X, RotateCcw, Eye, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { ReportDialog } from '@/components/ReportDialog';
@@ -473,10 +473,10 @@ export function ClientTinderSwipeCard({
                   e.stopPropagation();
                   onSwipe('right');
                 }}
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
-                title="Flame"
+                className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="Like"
               >
-                <Flame className="w-7 h-7" fill="currentColor" />
+                <Heart className="w-7 h-7" fill="currentColor" />
               </motion.button>
             </div>
           </div>
