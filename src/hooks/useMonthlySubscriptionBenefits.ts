@@ -13,9 +13,24 @@ export function useMonthlySubscriptionBenefits() {
   const { user } = useAuth();
   const messageActivations = useMessageActivations();
 
+  // Extract subscription details (moved before query to use in messageLimit calculation)
+  const pkg = subscription?.subscription_packages;
+  const planName = pkg?.name || 'free';
+  const tier = pkg?.tier || 'free';
+  const isMonthly = subscription?.subscription_packages?.package_category?.includes('monthly');
+
+  // Define message limits per tier (moved before query that uses it)
+  // Note: These limits should match the subscription_packages table in the database
+  const messageLimit = tier === 'unlimited' ? 30  // Unlimited tier: 30 messages/month
+    : tier === 'premium_plus' ? 20  // Premium Plus tier: 20 messages/month
+    : tier === 'premium' ? 12  // Premium tier: 12 messages/month
+    : tier === 'basic' ? 6  // Basic tier: 6 messages/month
+    : tier === 'pay_per_use' ? 0  // Pay-per-use: no monthly limit
+    : 0;
+
   // Fetch monthly message usage
   const { data: monthlyUsage } = useQuery({
-    queryKey: ['monthly-message-usage', user?.id],
+    queryKey: ['monthly-message-usage', user?.id, messageLimit],
     queryFn: async () => {
       if (!user?.id) return { used: 0, limit: 0 };
 
@@ -38,21 +53,6 @@ export function useMonthlySubscriptionBenefits() {
     },
     enabled: !!user?.id && !!subscription?.is_active,
   });
-
-  // Extract subscription details
-  const pkg = subscription?.subscription_packages;
-  const planName = pkg?.name || 'free';
-  const tier = pkg?.tier || 'free';
-  const isMonthly = subscription?.subscription_packages?.package_category?.includes('monthly');
-
-  // Define message limits per tier
-  // Note: These limits should match the subscription_packages table in the database
-  const messageLimit = tier === 'unlimited' ? 30  // Unlimited tier: 30 messages/month
-    : tier === 'premium_plus' ? 20  // Premium Plus tier: 20 messages/month
-    : tier === 'premium' ? 12  // Premium tier: 12 messages/month
-    : tier === 'basic' ? 6  // Basic tier: 6 messages/month
-    : tier === 'pay_per_use' ? 0  // Pay-per-use: no monthly limit
-    : 0;
 
   // Define visibility ranking (lower = more visible)
   const visibilityRank = tier === 'unlimited' ? 1
