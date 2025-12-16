@@ -175,8 +175,8 @@ export function LikedClients() {
 
   const reportClientMutation = useMutation({
     mutationFn: async ({ clientId, reason, details }: { clientId: string; reason: string; details: string }) => {
-      // Insert report into reports table (you may need to create this table)
-      const { error } = await supabase
+      // Insert report into reports table (table may need to be created)
+      const { error } = await (supabase as any)
         .from('reports')
         .insert({
           reporter_id: user?.id,
@@ -189,7 +189,6 @@ export function LikedClients() {
       if (error) {
         // If table doesn't exist, just log it - in production you'd create the table
         console.error('Report submission error:', error);
-        // Still show success to user as feedback was received
       }
     },
     onSuccess: () => {
@@ -206,8 +205,8 @@ export function LikedClients() {
 
   const blockClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
-      // Insert block record and remove from likes
-      const { error: blockError } = await supabase
+      // Insert block record and remove from likes (table may need to be created)
+      const { error: blockError } = await (supabase as any)
         .from('blocked_users')
         .insert({
           blocker_id: user?.id,
@@ -413,7 +412,7 @@ export function LikedClients() {
             </p>
             {!searchTerm && (
               <Button 
-                onClick={() => window.location.href = '/owner/dashboard'}
+                onClick={() => navigate('/owner/dashboard')}
                 className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-sm sm:text-base"
               >
                 Browse Clients

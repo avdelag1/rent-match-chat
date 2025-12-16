@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { BottomSheet } from './BottomSheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -38,6 +39,7 @@ export function SettingsBottomSheet({
   userRole,
   onMenuItemClick
 }: SettingsBottomSheetProps) {
+  const navigate = useNavigate();
 
   const clientMenuItems: MenuItem[] = [
     {
@@ -111,7 +113,7 @@ export function SettingsBottomSheet({
     if (item.action) {
       onMenuItemClick(item.action);
     } else if (item.path) {
-      window.location.href = item.path;
+      navigate(item.path);
     }
     onClose();
   };
