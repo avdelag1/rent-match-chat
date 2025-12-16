@@ -222,7 +222,7 @@ function LegendaryLandingPage() {
       </svg>
 
       {/* Main Content */}
-      <div className="relative z-10 text-center space-y-10 max-w-lg w-full">
+      <div className="relative z-10 text-center space-y-8 max-w-2xl w-full px-4">
 
         {/* Title */}
         <motion.div initial={{
@@ -281,10 +281,10 @@ function LegendaryLandingPage() {
         </motion.div>
 
         {/* Buttons Container with Enhanced Effects */}
-        <div className="space-y-3 mt-12">
+        <div className="space-y-2 mt-8">
 
           {/* I'm a Client Button */}
-          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-2.5 px-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-2 px-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: -150,
           scale: 0.9
@@ -334,7 +334,7 @@ function LegendaryLandingPage() {
           </motion.button>
 
           {/* I'm an Owner Button */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-2.5 px-6 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-2 px-6 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: 150,
           scale: 0.9
@@ -395,31 +395,31 @@ function LegendaryLandingPage() {
       }} transition={{
         duration: 0.5,
         delay: 1.0
-      }} className="pt-8 space-y-4 border-0 border-none rounded-none">
+      }} className="pt-4 space-y-2 border-0 border-none rounded-none">
           {/* Role selector hint */}
-          
+
 
           {/* Features badges */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <motion.div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10" whileHover={{
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
+            <motion.div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10" whileHover={{
             scale: 1.05,
             backgroundColor: 'rgba(255,255,255,0.1)'
           }}>
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-white/70 text-xs font-medium">Perfect Deals</span>
             </motion.div>
-            <motion.div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10" whileHover={{
+            <motion.div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10" whileHover={{
             scale: 1.05,
             backgroundColor: 'rgba(255,255,255,0.1)'
           }}>
-              <Shield className="w-4 h-4 text-green-400" />
+              <Shield className="w-3.5 h-3.5 text-green-400" />
               <span className="text-white/70 text-xs font-medium">Secure Chat</span>
             </motion.div>
-            <motion.div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10" whileHover={{
+            <motion.div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10" whileHover={{
             scale: 1.05,
             backgroundColor: 'rgba(255,255,255,0.1)'
           }}>
-              <Users className="w-4 h-4 text-blue-400" />
+              <Users className="w-3.5 h-3.5 text-blue-400" />
               <span className="text-white/70 text-xs font-medium">Instant Connect</span>
             </motion.div>
           </div>
