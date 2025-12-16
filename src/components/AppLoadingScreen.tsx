@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 export function AppLoadingScreen() {
   const [showRefresh, setShowRefresh] = useState(false);
 
-  // Show refresh option after 8 seconds if still loading
   useEffect(() => {
     const timer = setTimeout(() => setShowRefresh(true), 8000);
     return () => clearTimeout(timer);
@@ -19,21 +18,21 @@ export function AppLoadingScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gradient-to-br from-black via-gray-950 to-black flex flex-col items-center justify-center z-50"
+      className="fixed inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] flex flex-col items-center justify-center z-50"
     >
-      {/* Subtle background glow */}
+      {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.2, 0.1],
+            scale: [1, 1.3, 1],
+            opacity: [0.15, 0.3, 0.15],
           }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl"
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#ff6b35]/30 rounded-full blur-[80px]"
         />
       </div>
 
-      {/* Animated Flame - Clean version without sparks */}
+      {/* Tinder-style Flame */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ 
@@ -42,214 +41,83 @@ export function AppLoadingScreen() {
           y: [0, -8, 0],
         }}
         transition={{
-          scale: { duration: 0.5, ease: "easeOut" },
-          opacity: { duration: 0.5, ease: "easeOut" },
-          y: { duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }
+          scale: { duration: 0.4, ease: "easeOut" },
+          opacity: { duration: 0.4, ease: "easeOut" },
+          y: { duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }
         }}
         className="relative"
+        style={{ 
+          filter: 'drop-shadow(0 0 30px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 60px rgba(255, 69, 0, 0.5))'
+        }}
       >
-        <svg 
-          viewBox="0 0 80 100" 
-          className="w-20 h-24"
-          style={{ 
-            filter: 'drop-shadow(0 0 25px rgba(251, 146, 60, 0.7)) drop-shadow(0 0 50px rgba(234, 88, 12, 0.5))'
-          }}
-        >
+        <svg viewBox="0 0 64 80" className="w-20 h-24">
           <defs>
-            <linearGradient id="flameOuter" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#f97316" />
-              <stop offset="30%" stopColor="#ea580c" />
-              <stop offset="60%" stopColor="#dc2626" />
-              <stop offset="100%" stopColor="#991b1b" />
+            <linearGradient id="tinderFlameMain" x1="0%" y1="100%" x2="50%" y2="0%">
+              <stop offset="0%" stopColor="#FF6B35"/>
+              <stop offset="40%" stopColor="#FF4500"/>
+              <stop offset="70%" stopColor="#FF3D00"/>
+              <stop offset="100%" stopColor="#E64A19"/>
             </linearGradient>
-            <linearGradient id="flameMiddle" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#fbbf24" />
-              <stop offset="40%" stopColor="#f59e0b" />
-              <stop offset="80%" stopColor="#f97316" />
-              <stop offset="100%" stopColor="#ea580c" />
-            </linearGradient>
-            <linearGradient id="flameCore" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#fef9c3" />
-              <stop offset="40%" stopColor="#fde047" />
-              <stop offset="80%" stopColor="#fbbf24" />
-              <stop offset="100%" stopColor="#f59e0b" />
+            <linearGradient id="tinderFlameInner" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#FFAB40"/>
+              <stop offset="60%" stopColor="#FF9100"/>
+              <stop offset="100%" stopColor="#FF6D00"/>
             </linearGradient>
           </defs>
-          
-          {/* Outer flame */}
+          {/* Main flame - Tinder iconic shape */}
           <motion.path 
-            d="M40 5 C40 5 18 30 18 55 C18 72 27 85 40 85 C53 85 62 72 62 55 C62 30 40 5 40 5 Z"
-            fill="url(#flameOuter)"
+            d="M32 2C32 2 12 24 12 48C12 62 20 74 32 74C44 74 52 62 52 48C52 40 48 32 44 26C44 26 46 34 42 42C38 50 32 46 32 38C32 30 40 22 40 22C40 22 32 28 28 36C24 44 28 52 32 52C36 52 38 48 38 44C38 38 32 32 32 32"
+            fill="url(#tinderFlameMain)"
             animate={{
               d: [
-                "M40 5 C40 5 18 30 18 55 C18 72 27 85 40 85 C53 85 62 72 62 55 C62 30 40 5 40 5 Z",
-                "M40 8 C40 8 20 32 20 55 C20 70 28 83 40 83 C52 83 60 70 60 55 C60 32 40 8 40 8 Z",
-                "M40 5 C40 5 18 30 18 55 C18 72 27 85 40 85 C53 85 62 72 62 55 C62 30 40 5 40 5 Z",
+                "M32 2C32 2 12 24 12 48C12 62 20 74 32 74C44 74 52 62 52 48C52 40 48 32 44 26C44 26 46 34 42 42C38 50 32 46 32 38C32 30 40 22 40 22C40 22 32 28 28 36C24 44 28 52 32 52C36 52 38 48 38 44C38 38 32 32 32 32",
+                "M32 4C32 4 14 25 14 48C14 61 21 72 32 72C43 72 50 61 50 48C50 41 47 33 43 28C43 28 45 35 41 42C37 49 32 45 32 39C32 32 39 24 39 24C39 24 32 29 29 36C26 43 29 51 32 51C35 51 37 47 37 44C37 39 32 34 32 34",
+                "M32 2C32 2 12 24 12 48C12 62 20 74 32 74C44 74 52 62 52 48C52 40 48 32 44 26C44 26 46 34 42 42C38 50 32 46 32 38C32 30 40 22 40 22C40 22 32 28 28 36C24 44 28 52 32 52C36 52 38 48 38 44C38 38 32 32 32 32"
               ]
             }}
-            transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
           />
-          
-          {/* Middle flame */}
-          <motion.path 
-            d="M40 18 C40 18 26 38 26 56 C26 68 32 76 40 76 C48 76 54 68 54 56 C54 38 40 18 40 18 Z"
-            fill="url(#flameMiddle)"
+          {/* Inner glow */}
+          <motion.ellipse 
+            cx="32" 
+            cy="54" 
+            rx="12" 
+            ry="14" 
+            fill="url(#tinderFlameInner)" 
+            opacity="0.8"
             animate={{
-              d: [
-                "M40 18 C40 18 26 38 26 56 C26 68 32 76 40 76 C48 76 54 68 54 56 C54 38 40 18 40 18 Z",
-                "M40 20 C40 20 28 40 28 57 C28 67 33 74 40 74 C47 74 52 67 52 57 C52 40 40 20 40 20 Z",
-                "M40 18 C40 18 26 38 26 56 C26 68 32 76 40 76 C48 76 54 68 54 56 C54 38 40 18 40 18 Z",
-              ]
+              rx: [12, 10, 12],
+              ry: [14, 12, 14],
             }}
-            transition={{ duration: 0.35, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
-          />
-          
-          {/* Inner core */}
-          <motion.path 
-            d="M40 32 C40 32 33 45 33 58 C33 65 36 70 40 70 C44 70 47 65 47 58 C47 45 40 32 40 32 Z"
-            fill="url(#flameCore)"
-            animate={{
-              d: [
-                "M40 32 C40 32 33 45 33 58 C33 65 36 70 40 70 C44 70 47 65 47 58 C47 45 40 32 40 32 Z",
-                "M40 35 C40 35 34 47 34 58 C34 64 37 68 40 68 C43 68 46 64 46 58 C46 47 40 35 40 35 Z",
-                "M40 32 C40 32 33 45 33 58 C33 65 36 70 40 70 C44 70 47 65 47 58 C47 45 40 32 40 32 Z",
-              ]
-            }}
-            transition={{ duration: 0.3, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+            transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
           />
         </svg>
-        
-        {/* Glow pulse */}
-        <motion.div
-          animate={{ 
-            opacity: [0.3, 0.5, 0.3],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 -inset-6 bg-orange-500/20 rounded-full blur-2xl -z-10"
-        />
       </motion.div>
 
-      {/* SwipeMatch text with subtle fluid/smoke effect */}
-      <motion.div
+      {/* SwipeMatch text */}
+      <motion.span
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="mt-6 flex items-center gap-1 relative"
+        transition={{ delay: 0.2, duration: 0.4 }}
+        className="mt-6 text-3xl font-extrabold tracking-tight"
+        style={{
+          background: 'linear-gradient(90deg, #ff6b35, #ff4500, #ff6b35)',
+          backgroundSize: '200% 100%',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          animation: 'gradient-shift 3s ease-in-out infinite',
+        }}
       >
-        {/* SVG filter for fluid effect */}
-        <svg className="absolute w-0 h-0">
-          <defs>
-            <filter id="fluid-text" x="-20%" y="-20%" width="140%" height="140%">
-              <feTurbulence 
-                type="fractalNoise" 
-                baseFrequency="0.015" 
-                numOctaves="2" 
-                result="noise"
-              >
-                <animate 
-                  attributeName="baseFrequency" 
-                  values="0.015;0.02;0.015" 
-                  dur="8s" 
-                  repeatCount="indefinite"
-                />
-              </feTurbulence>
-              <feDisplacementMap 
-                in="SourceGraphic" 
-                in2="noise" 
-                scale="3" 
-                xChannelSelector="R" 
-                yChannelSelector="G"
-              />
-            </filter>
-          </defs>
-        </svg>
-        
-        <div className="relative">
-          {/* Background fluid layer - very subtle */}
-          <motion.span
-            className="absolute inset-0 text-2xl font-black tracking-tight opacity-30 blur-[1px]"
-            style={{
-              background: 'linear-gradient(90deg, #f97316, #fbbf24, #ea580c, #f97316)',
-              backgroundSize: '300% 100%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'url(#fluid-text)',
-            }}
-            animate={{
-              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          >
-            Swipe
-          </motion.span>
-          
-          {/* Main text with subtle movement */}
-          <motion.span
-            className="relative text-2xl font-black tracking-tight"
-            style={{
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #f97316)',
-              backgroundSize: '200% 100%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-            animate={{
-              backgroundPosition: ['0% 50%', '100% 50%'],
-            }}
-            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-          >
-            Swipe
-          </motion.span>
-        </div>
-        
-        <div className="relative">
-          {/* Background fluid layer - very subtle */}
-          <motion.span
-            className="absolute inset-0 text-xl font-black tracking-tight opacity-30 blur-[1px]"
-            style={{
-              background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #ea580c)',
-              backgroundSize: '300% 100%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'url(#fluid-text)',
-            }}
-            animate={{
-              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "linear", delay: 0.5 }}
-          >
-            Match
-          </motion.span>
-          
-          {/* Main text */}
-          <motion.span
-            className="relative text-xl font-black tracking-tight"
-            style={{
-              background: 'linear-gradient(90deg, #ea580c, #f97316, #fbbf24, #ea580c)',
-              backgroundSize: '200% 100%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-            animate={{
-              backgroundPosition: ['0% 50%', '100% 50%'],
-            }}
-            transition={{ duration: 6, repeat: Infinity, ease: "linear", delay: 0.3 }}
-          >
-            Match
-          </motion.span>
-        </div>
-      </motion.div>
+        SwipeMatch
+      </motion.span>
 
-      {/* Loading indicator */}
+      {/* Loading dots */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 flex items-center gap-2"
+        transition={{ delay: 0.4 }}
+        className="mt-5 flex items-center gap-2"
       >
         {[0, 1, 2].map((i) => (
           <motion.div
@@ -259,11 +127,11 @@ export function AppLoadingScreen() {
               opacity: [0.4, 1, 0.4],
             }}
             transition={{
-              duration: 0.8,
+              duration: 1,
               repeat: Infinity,
               delay: i * 0.15,
             }}
-            className="w-2 h-2 rounded-full bg-orange-500"
+            className="w-2 h-2 rounded-full bg-[#ff6b35]"
           />
         ))}
       </motion.div>
@@ -281,6 +149,13 @@ export function AppLoadingScreen() {
           Taking too long? Tap to refresh
         </motion.button>
       )}
+
+      <style>{`
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+      `}</style>
     </motion.div>
   );
 }
