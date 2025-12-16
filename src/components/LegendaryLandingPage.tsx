@@ -276,7 +276,7 @@ function LegendaryLandingPage() {
         }} transition={{
           delay: 0.4
         }}>
-            Swipe to discover your ideal property or perfect client — rent, buy & connect
+            Swipe and find your perfect deal
           </motion.p>
         </motion.div>
 
@@ -284,7 +284,7 @@ function LegendaryLandingPage() {
         <div className="space-y-3 mt-12">
 
           {/* I'm a Client Button */}
-          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-3 px-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-2.5 px-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: -150,
           scale: 0.9
@@ -323,7 +323,7 @@ function LegendaryLandingPage() {
           }} />
 
             <Home className="w-5 h-5 relative z-10" />
-            <span className="relative z-10">I'm Looking for a Place</span>
+            <span className="relative z-10">I'm a Client</span>
             <motion.div className="relative z-10" animate={{
             x: hoveredButton === 'client' ? 3 : 0
           }} transition={{
@@ -334,7 +334,7 @@ function LegendaryLandingPage() {
           </motion.button>
 
           {/* I'm an Owner Button */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full py-2.5 px-6 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-base sm:text-lg rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: 150,
           scale: 0.9
@@ -374,7 +374,7 @@ function LegendaryLandingPage() {
           }} />
 
             <Building2 className="w-5 h-5 relative z-10" />
-            <span className="relative z-10">I'm a Property Owner</span>
+            <span className="relative z-10">I'm an Owner</span>
             <motion.div className="relative z-10" animate={{
             x: hoveredButton === 'owner' ? 3 : 0
           }} transition={{
