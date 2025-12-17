@@ -55,8 +55,23 @@ const getBubbleColors = (otherUserRole: string, isMyMessage: boolean) => {
   }
 };
 
+interface MessageType {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  message_text: string;
+  message_type: string;
+  created_at: string;
+  is_read?: boolean;
+  sender?: {
+    id: string;
+    full_name: string;
+    avatar_url?: string;
+  };
+}
+
 // Memoized iOS-style message bubble component
-const MessageBubble = memo(({ message, isMyMessage, otherUserRole }: { message: any; isMyMessage: boolean; otherUserRole: string }) => {
+const MessageBubble = memo(({ message, isMyMessage, otherUserRole }: { message: MessageType; isMyMessage: boolean; otherUserRole: string }) => {
   const colors = getBubbleColors(otherUserRole, isMyMessage);
 
   return (
@@ -159,27 +174,32 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         conversationId,
         message: messageText
       });
-    } catch (error: any) {
-      console.error('Failed to send message:', error);
+    } catch (error: unknown) {
+      const err = error as { message?: string; code?: string };
+      if (import.meta.env.DEV) {
+        console.error('Failed to send message:', error);
+      }
 
       // Provide more helpful error messages for debugging
-      const errorMessage = error?.message || 'Unknown error occurred';
-      const errorDetails = {
-        message: errorMessage,
-        code: error?.code,
-        conversationId,
-        timestamp: new Date().toISOString()
-      };
+      const errorMessage = err?.message || 'Unknown error occurred';
 
-      console.error('Send error details:', errorDetails);
+      if (import.meta.env.DEV) {
+        const errorDetails = {
+          message: errorMessage,
+          code: err?.code,
+          conversationId,
+          timestamp: new Date().toISOString()
+        };
+        console.error('Send error details:', errorDetails);
 
-      // Help identify common issues
-      if (errorMessage.includes('message_text')) {
-        console.error('❌ Database schema issue detected - message_text column may not exist');
-      } else if (errorMessage.includes('receiver_id')) {
-        console.error('❌ Conversation error - receiver_id could not be determined');
-      } else if (errorMessage.includes('RLS') || errorMessage.includes('policy')) {
-        console.error('❌ Permission error - Row Level Security policy may be blocking the insert');
+        // Help identify common issues
+        if (errorMessage.includes('message_text')) {
+          console.error('❌ Database schema issue detected - message_text column may not exist');
+        } else if (errorMessage.includes('receiver_id')) {
+          console.error('❌ Conversation error - receiver_id could not be determined');
+        } else if (errorMessage.includes('RLS') || errorMessage.includes('policy')) {
+          console.error('❌ Permission error - Row Level Security policy may be blocking the insert');
+        }
       }
 
       setNewMessage(messageText); // Restore message on error
