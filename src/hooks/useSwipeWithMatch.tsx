@@ -30,6 +30,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       }
 
       // Use atomic upsert to prevent race conditions
+      // onConflict on user_id,target_id ensures only ONE swipe per user-target pair
       const { data: like, error: likeError } = await supabase
         .from('likes')
         .upsert({
@@ -37,7 +38,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           target_id: targetId,
           direction
         }, {
-          onConflict: 'user_id,target_id,direction',
+          onConflict: 'user_id,target_id',
           ignoreDuplicates: false
         })
         .select()

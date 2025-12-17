@@ -25,6 +25,7 @@ export function useSwipe() {
       }
 
       // Use atomic upsert to prevent race conditions
+      // onConflict on user_id,target_id ensures only ONE swipe per user-target pair
       const { data: likeData, error } = await supabase
         .from('likes')
         .upsert({
@@ -32,7 +33,7 @@ export function useSwipe() {
           target_id: targetId,
           direction: direction
         }, {
-          onConflict: 'user_id,target_id,direction',
+          onConflict: 'user_id,target_id',
           ignoreDuplicates: false
         })
         .select();

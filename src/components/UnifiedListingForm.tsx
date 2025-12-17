@@ -208,11 +208,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }
 
       if (editingId) {
-        
-        if (!editingId) {
-          throw new Error('Listing ID is missing. Cannot update.');
-        }
-        
         // Optimistically update the cache
         queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           if (!oldData) return oldData;
