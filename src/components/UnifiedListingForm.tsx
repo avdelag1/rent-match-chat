@@ -222,9 +222,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           });
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase
           .from('listings')
-          .update(listingData)
+          .update(listingData as any)
           .eq('id', editingId)
           .select()
           .single();
@@ -232,9 +233,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         if (error) throw error;
         return data;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase
           .from('listings')
-          .insert(listingData)
+          .insert(listingData as any)
           .select()
           .single();
 
@@ -393,8 +395,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     }
     
     // Validate title for contact info
-    if (formData.title) {
-      const titleError = validateNoContactInfo(formData.title);
+    if (formData.title && typeof formData.title === 'string') {
+      const titleError = validateNoContactInfo(formData.title as string);
       if (titleError) {
         toast({
           title: "Invalid Title",
@@ -442,7 +444,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         });
         return;
       }
-      if (!formData.beds || formData.beds < 0) {
+      if (!formData.beds || (formData.beds as number) < 0) {
         toast({
           title: "Bedrooms Required",
           description: "Please enter the number of bedrooms.",
@@ -450,7 +452,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         });
         return;
       }
-      if (!formData.baths || formData.baths < 0) {
+      if (!formData.baths || (formData.baths as number) < 0) {
         toast({
           title: "Bathrooms Required",
           description: "Please enter the number of bathrooms.",
@@ -503,28 +505,28 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           {selectedCategory === 'yacht' && (
             <YachtListingForm 
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as YachtFormData}
+              initialData={formData as unknown as YachtFormData}
             />
           )}
 
           {selectedCategory === 'motorcycle' && (
             <MotorcycleListingForm 
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as MotorcycleFormData}
+              initialData={formData as unknown as MotorcycleFormData}
             />
           )}
 
           {selectedCategory === 'bicycle' && (
             <BicycleListingForm
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as BicycleFormData}
+              initialData={formData as unknown as BicycleFormData}
             />
           )}
 
           {selectedCategory === 'vehicle' && (
             <VehicleListingForm
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as VehicleFormData}
+              initialData={formData as unknown as VehicleFormData}
             />
           )}
 
