@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,20 @@ export function SwipeCard({
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [tapFlash, setTapFlash] = useState<'left' | 'right' | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const tapFlashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const snapBackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (tapFlashTimeoutRef.current) {
+        clearTimeout(tapFlashTimeoutRef.current);
+      }
+      if (snapBackTimeoutRef.current) {
+        clearTimeout(snapBackTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isTop) return;
@@ -40,9 +54,12 @@ export function SwipeCard({
       const clickX = e.clientX - rect.left;
       const side = clickX < rect.width / 2 ? 'left' : 'right';
       setTapFlash(side);
-      setTimeout(() => setTapFlash(null), 160);
+      if (tapFlashTimeoutRef.current) {
+        clearTimeout(tapFlashTimeoutRef.current);
+      }
+      tapFlashTimeoutRef.current = setTimeout(() => setTapFlash(null), 160);
     }
-    
+
     setIsDragging(true);
     setStartPos({ x: e.clientX, y: e.clientY });
   };
@@ -70,7 +87,10 @@ export function SwipeCard({
       if (card) {
         card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
         card.style.transform = 'translate(0px, 0px) rotate(0deg)';
-        setTimeout(() => {
+        if (snapBackTimeoutRef.current) {
+          clearTimeout(snapBackTimeoutRef.current);
+        }
+        snapBackTimeoutRef.current = setTimeout(() => {
           card.style.transition = '';
           card.style.transform = ''; // Clear inline transform to let React state control
         }, 300);
@@ -83,16 +103,19 @@ export function SwipeCard({
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!isTop) return;
     const touch = e.touches[0];
-    
+
     // Tap flash
     const rect = cardRef.current?.getBoundingClientRect();
     if (rect) {
       const clickX = touch.clientX - rect.left;
       const side = clickX < rect.width / 2 ? 'left' : 'right';
       setTapFlash(side);
-      setTimeout(() => setTapFlash(null), 160);
+      if (tapFlashTimeoutRef.current) {
+        clearTimeout(tapFlashTimeoutRef.current);
+      }
+      tapFlashTimeoutRef.current = setTimeout(() => setTapFlash(null), 160);
     }
-    
+
     setIsDragging(true);
     setStartPos({ x: touch.clientX, y: touch.clientY });
   };
@@ -121,7 +144,10 @@ export function SwipeCard({
       if (card) {
         card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
         card.style.transform = 'translate(0px, 0px) rotate(0deg)';
-        setTimeout(() => {
+        if (snapBackTimeoutRef.current) {
+          clearTimeout(snapBackTimeoutRef.current);
+        }
+        snapBackTimeoutRef.current = setTimeout(() => {
           card.style.transition = '';
           card.style.transform = ''; // Clear inline transform to let React state control
         }, 300);

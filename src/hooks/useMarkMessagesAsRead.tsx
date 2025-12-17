@@ -17,9 +17,8 @@ export function useMarkMessagesAsRead(conversationId: string, isActive: boolean)
         .neq('sender_id', user.id)
         .eq('is_read', false);
 
-      if (error) {
+      if (error && import.meta.env.DEV) {
         console.error('[MarkAsRead] Error:', error);
-      } else {
       }
     };
 
@@ -45,9 +44,12 @@ export function useMarkMessagesAsRead(conversationId: string, isActive: boolean)
               .update({ is_read: true })
               .eq('id', payload.new.id)
               .then(({ error }) => {
-                if (error) {
+                if (error && import.meta.env.DEV) {
                   console.error('[MarkAsRead] Error marking new message as read:', error);
                 }
+              })
+              .catch(() => {
+                // Non-critical error - message may still be marked as read
               });
           }
         }
