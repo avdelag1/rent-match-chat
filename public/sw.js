@@ -1,5 +1,5 @@
 // Dynamic cache versioning - automatically updated on each build
-const CACHE_VERSION = `tinderent-v${Date.now()}`;
+const CACHE_VERSION = `swipematch-v${Date.now()}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
@@ -109,7 +109,7 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             // Only delete caches that belong to this app and are not the current ones
-            if (cacheName.startsWith('tinderent-') && 
+            if (cacheName.startsWith('swipematch-') && 
                 cacheName !== STATIC_CACHE && 
                 cacheName !== DYNAMIC_CACHE) {
               console.log('[SW] Deleting old cache:', cacheName);

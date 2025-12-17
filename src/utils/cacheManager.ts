@@ -55,7 +55,7 @@ export function setupUpdateChecker(): () => void {
 // Force clear cache and version check
 export function forceClearVersion(): void {
   const currentVersion = Date.now().toString();
-  localStorage.setItem('tinderent_last_clear', currentVersion);
+  localStorage.setItem('swipematch_last_clear', currentVersion);
   clearAllCaches();
 }
 
