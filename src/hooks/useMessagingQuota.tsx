@@ -78,23 +78,39 @@ export function useMessagingQuota() {
       }
       
       if (!conversations || conversations.length === 0) return 0;
-      
-      // For each conversation, check if THIS user sent the first message
+
+      // Batch query: Get first messages of all conversations in one query
+      // using a subquery approach with DISTINCT ON
+      const conversationIds = conversations.map(c => c.id);
+
+      const { data: firstMessages, error: msgError } = await supabase
+        .from('conversation_messages')
+        .select('conversation_id, sender_id, created_at')
+        .in('conversation_id', conversationIds)
+        .order('conversation_id')
+        .order('created_at', { ascending: true });
+
+      if (msgError) {
+        console.error('Error fetching first messages:', msgError);
+        return 0;
+      }
+
+      // Group by conversation_id and get the first message for each
+      const firstMessageByConversation = new Map<string, string>();
+      for (const msg of firstMessages || []) {
+        if (!firstMessageByConversation.has(msg.conversation_id)) {
+          firstMessageByConversation.set(msg.conversation_id, msg.sender_id);
+        }
+      }
+
+      // Count how many conversations this user started
       let count = 0;
-      for (const conv of conversations) {
-        const { data: firstMessage } = await supabase
-          .from('conversation_messages')
-          .select('sender_id')
-          .eq('conversation_id', conv.id)
-          .order('created_at', { ascending: true })
-          .limit(1)
-          .maybeSingle();
-        
-        if (firstMessage?.sender_id === user.id) {
+      for (const [_convId, senderId] of firstMessageByConversation) {
+        if (senderId === user.id) {
           count++;
         }
       }
-      
+
       return count;
     },
     enabled: !!user,

@@ -212,8 +212,8 @@ export default function TermsOfService() {
               For questions about these Terms of Service, contact us at:
             </p>
             <ul className="list-none pl-0 mb-4 space-y-2">
-              <li><strong>Email:</strong> legal@swipematch.com</li>
-              <li><strong>Support:</strong> support@swipematch.com</li>
+              <li><strong>Email:</strong> legal@tinderent.com</li>
+              <li><strong>Support:</strong> support@tinderent.com</li>
             </ul>
           </section>
 

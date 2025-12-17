@@ -30,21 +30,22 @@ export function useNotifications() {
           // Only show notifications for messages not sent by current user
           if (newMessage.sender_id !== user.id) {
             // Get conversation details to check if current user is involved
-            const { data: conversation } = await supabase
+            const { data: conversation, error: convError } = await supabase
               .from('conversations')
               .select('*')
               .eq('id', newMessage.conversation_id)
-              .single();
+              .maybeSingle();
 
-            if (conversation && 
-                (conversation.client_id === user.id || conversation.owner_id === user.id)) {
-              
+            if (convError || !conversation) return;
+
+            if (conversation.client_id === user.id || conversation.owner_id === user.id) {
+
               // Get sender info
               const { data: senderProfile } = await supabase
                 .from('profiles')
                 .select('full_name, avatar_url')
                 .eq('id', newMessage.sender_id)
-                .single();
+                .maybeSingle();
 
               const senderName = senderProfile?.full_name || 'Someone';
               

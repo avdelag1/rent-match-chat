@@ -267,7 +267,11 @@ export function useSwipe() {
             }
           }
         } catch (matchError) {
-          // Match detection errors don't fail the entire swipe
+          // Match detection errors are non-critical - the swipe itself was successful
+          // User can still see matches via the matches page even if notification fails
+          if (import.meta.env.DEV) {
+            console.warn('[useSwipe] Match detection error (non-critical):', matchError);
+          }
         }
       }
 
@@ -279,11 +283,12 @@ export function useSwipe() {
 
       if (isLike) {
         // Only invalidate like-related queries on like swipes
+        // Note: Fire-and-forget - cache invalidation errors are non-critical
         Promise.all([
           queryClient.invalidateQueries({ queryKey: ['likes'] }),
           queryClient.invalidateQueries({ queryKey: [variables.targetType === 'listing' ? 'liked-properties' : 'liked-clients'] }),
           queryClient.invalidateQueries({ queryKey: ['matches'] }),
-        ]);
+        ]).catch(() => { /* Cache invalidation errors are non-critical */ });
       }
       // Skip invalidations on dislike - no UI changes needed
     },
