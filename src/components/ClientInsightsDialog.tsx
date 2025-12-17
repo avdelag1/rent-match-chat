@@ -9,7 +9,7 @@ import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
-import { useState, useMemo, memo } from 'react';
+import { useState, memo } from 'react';
 
 // Tag categories for organized display
 const PROPERTY_TAGS = [
@@ -440,7 +440,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
             <div>
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
-                Why Owners Recommend This Client
+                Profile Highlights
               </h4>
               <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 p-4 rounded-lg border border-green-500/20 space-y-3">
                 {recommendationScore >= 4 && (
@@ -448,14 +448,6 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                     <Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
                     <p className="text-sm">
                       <span className="font-semibold">Highly Engaged Profile:</span> Complete profile with detailed preferences
-                    </p>
-                  </div>
-                )}
-                {clientStats.responseRate >= 80 && (
-                  <div className="flex items-start gap-2">
-                    <MessageCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                    <p className="text-sm">
-                      <span className="font-semibold">Excellent Communication:</span> Responds quickly and professionally
                     </p>
                   </div>
                 )}
@@ -467,11 +459,11 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                     </p>
                   </div>
                 )}
-                {clientStats.ownerLikes > 30 && (
+                {(profile.profile_images?.length || 0) > 2 && (
                   <div className="flex items-start gap-2">
-                    <Award className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <Eye className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
                     <p className="text-sm">
-                      <span className="font-semibold">Popular with Owners:</span> Many owners are interested in connecting
+                      <span className="font-semibold">Verified Photos:</span> Multiple profile photos uploaded
                     </p>
                   </div>
                 )}

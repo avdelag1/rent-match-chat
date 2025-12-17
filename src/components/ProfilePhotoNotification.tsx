@@ -36,9 +36,9 @@ export function ProfilePhotoNotification({ hasPhotos, userRole }: ProfilePhotoNo
 
   const handleUploadClick = () => {
     if (userRole === 'client') {
-      navigate('/client-profile');
+      navigate('/client/profile');
     } else {
-      navigate('/owner-profile');
+      navigate('/owner/profile');
     }
   };
 

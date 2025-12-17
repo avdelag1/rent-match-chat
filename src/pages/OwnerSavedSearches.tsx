@@ -16,7 +16,7 @@ const OwnerSavedSearches = () => {
       title: "Filter Applied",
       description: "Navigating to client discovery with your filter...",
     });
-    navigate('/owner/client-discovery');
+    navigate('/owner/dashboard');
   };
 
   return (
@@ -30,7 +30,7 @@ const OwnerSavedSearches = () => {
             </div>
             <div className="flex gap-2">
               <Button
-                onClick={() => navigate('/owner/client-discovery')}
+                onClick={() => navigate('/owner/dashboard')}
                 variant="outline"
                 size="sm"
                 className="bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs sm:text-sm"
