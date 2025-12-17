@@ -32,10 +32,8 @@ async function initializeStatusBar() {
       // Optional: Set status bar background color (Android only)
       // This should match your app's header background
       await StatusBar.setBackgroundColor({ color: '#FF0000' });
-
-      console.log('✅ StatusBar initialized successfully');
     } catch (error) {
-      console.warn('⚠️ StatusBar initialization failed:', error);
+      // StatusBar initialization errors are non-critical
     }
   }
 }

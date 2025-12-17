@@ -42,7 +42,8 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
       if (!user.data.user) throw new Error('Not authenticated');
 
       const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const uniqueId = crypto.randomUUID();
+      const fileName = `${uniqueId}.${fileExt}`;
       const filePath = `${user.data.user.id}/${fileName}`;
 
       const { data, error } = await supabase.storage

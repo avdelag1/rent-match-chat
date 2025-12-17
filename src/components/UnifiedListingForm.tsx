@@ -19,10 +19,20 @@ import { VehicleListingForm, VehicleFormData } from './VehicleListingForm';
 import { PropertyListingForm } from './PropertyListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
 
+interface EditingListing {
+  id?: string;
+  category?: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle';
+  mode?: 'rent' | 'sale';
+  images?: string[];
+  latitude?: number;
+  longitude?: number;
+  [key: string]: unknown;
+}
+
 interface UnifiedListingFormProps {
   isOpen: boolean;
   onClose: () => void;
-  editingProperty?: any;
+  editingProperty?: EditingListing;
 }
 
 export function UnifiedListingForm({ isOpen, onClose, editingProperty }: UnifiedListingFormProps) {
@@ -32,7 +42,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   // Note: location is only used for non-property listings (yachts, motorcycles, etc.)
   // Properties use country/city/neighborhood instead of exact GPS coordinates for privacy
   const [location, setLocation] = useState<{ lat?: number; lng?: number }>({});
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const queryClient = useQueryClient();
@@ -80,7 +90,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }
 
       // Map form data to database columns based on category
-      const listingData: any = {
+      const listingData: Record<string, unknown> = {
         owner_id: user.user.id,
         category: selectedCategory,
         mode: selectedMode,
@@ -204,16 +214,18 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         }
         
         // Optimistically update the cache
-        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+        queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           if (!oldData) return oldData;
-          return oldData.map(item => 
-            item.id === editingId ? { ...item, ...listingData } : item
-          );
+          return oldData.map((item: unknown) => {
+            const listing = item as { id: string };
+            return listing.id === editingId ? { ...listing, ...listingData } : item;
+          });
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase
           .from('listings')
-          .update(listingData)
+          .update(listingData as any)
           .eq('id', editingId)
           .select()
           .single();
@@ -221,16 +233,17 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         if (error) throw error;
         return data;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase
           .from('listings')
-          .insert(listingData)
+          .insert(listingData as any)
           .select()
           .single();
 
         if (error) throw error;
         
         // Optimistically add to cache
-        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+        queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           return oldData ? [data, ...oldData] : [data];
         });
         
@@ -248,7 +261,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       // Revert optimistic update on error
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
@@ -271,7 +284,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   const uploadImageToStorage = async (file: File, userId: string): Promise<string> => {
     const fileExt = file.name.split('.').pop() || 'jpg';
-    const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const uniqueId = crypto.randomUUID();
+    const fileName = `${userId}/${uniqueId}.${fileExt}`;
 
     const { error } = await supabase.storage
       .from('listing-images')
@@ -352,10 +366,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             title: `✓ ${i + 1}/${files.length}`,
             description: `${file.name} uploaded`,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const err = error as { message?: string };
           toast({
             title: "Upload Failed",
-            description: `${file.name}: ${error.message}`,
+            description: `${file.name}: ${err?.message || 'Unknown error'}`,
             variant: "destructive"
           });
         }
@@ -380,8 +395,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     }
     
     // Validate title for contact info
-    if (formData.title) {
-      const titleError = validateNoContactInfo(formData.title);
+    if (formData.title && typeof formData.title === 'string') {
+      const titleError = validateNoContactInfo(formData.title as string);
       if (titleError) {
         toast({
           title: "Invalid Title",
@@ -429,7 +444,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         });
         return;
       }
-      if (!formData.beds || formData.beds < 0) {
+      if (!formData.beds || (formData.beds as number) < 0) {
         toast({
           title: "Bedrooms Required",
           description: "Please enter the number of bedrooms.",
@@ -437,7 +452,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         });
         return;
       }
-      if (!formData.baths || formData.baths < 0) {
+      if (!formData.baths || (formData.baths as number) < 0) {
         toast({
           title: "Bathrooms Required",
           description: "Please enter the number of bathrooms.",
@@ -490,28 +505,28 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           {selectedCategory === 'yacht' && (
             <YachtListingForm 
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as YachtFormData}
+              initialData={formData as unknown as YachtFormData}
             />
           )}
 
           {selectedCategory === 'motorcycle' && (
             <MotorcycleListingForm 
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as MotorcycleFormData}
+              initialData={formData as unknown as MotorcycleFormData}
             />
           )}
 
           {selectedCategory === 'bicycle' && (
             <BicycleListingForm
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as BicycleFormData}
+              initialData={formData as unknown as BicycleFormData}
             />
           )}
 
           {selectedCategory === 'vehicle' && (
             <VehicleListingForm
               onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as VehicleFormData}
+              initialData={formData as unknown as VehicleFormData}
             />
           )}
 

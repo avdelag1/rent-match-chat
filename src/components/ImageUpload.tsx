@@ -35,9 +35,10 @@ export function ImageUpload({
         throw new Error(validation.error);
       }
 
-      // Generate unique filename
+      // Generate unique filename using crypto for security
       const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `${folder}/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const uniqueId = crypto.randomUUID();
+      const fileName = `${folder}/${uniqueId}.${fileExt}`;
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
@@ -83,9 +84,13 @@ export function ImageUpload({
     setUploading(true);
 
     try {
+      // Use Promise.allSettled to handle partial failures gracefully
       const uploadPromises = filesToUpload.map(file => uploadImage(file));
-      const results = await Promise.all(uploadPromises);
-      const successfulUploads = results.filter((url): url is string => url !== null);
+      const results = await Promise.allSettled(uploadPromises);
+      const successfulUploads = results
+        .filter((result): result is PromiseFulfilledResult<string | null> => result.status === 'fulfilled')
+        .map(result => result.value)
+        .filter((url): url is string => url !== null);
 
       if (successfulUploads.length > 0) {
         onImagesChange([...images, ...successfulUploads]);

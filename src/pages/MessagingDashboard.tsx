@@ -294,109 +294,132 @@ export function MessagingDashboard() {
 
   return (
     <DashboardLayout userRole={userRole}>
-      <div className="w-full h-full overflow-y-auto pb-24">
-        <div className="w-full max-w-4xl mx-auto p-2 sm:p-4">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div>
-                <h1 className="text-xl sm:text-3xl font-bold">Messages</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Stay connected with your matches</p>
-              </div>
-            </div>
-            {stats && (
-              <Card className="px-3 py-2 sm:px-4">
-                <div className="text-center">
-                  <p className="text-xs sm:text-sm font-medium">Conversations This Week</p>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.conversationsUsed}/{stats.isPremium ? '∞' : 5} used
+      <div className="w-full h-full overflow-y-auto pb-24 bg-[#000000]">
+        <div className="w-full max-w-4xl mx-auto p-3 sm:p-4">
+          {/* Vibrant Header */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">Messages</h1>
+              {stats && (
+                <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[#FF6B35]/20 to-[#F7931E]/20 border border-[#FF6B35]/30">
+                  <p className="text-xs font-medium text-[#FF6B35]">
+                    {stats.conversationsUsed}/{stats.isPremium ? '∞' : 5} this week
                   </p>
                 </div>
-              </Card>
-            )}
+              )}
+            </div>
+            <p className="text-sm text-[#8E8E93]">Stay connected with your matches</p>
           </div>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 gap-6">
-            {/* Conversations List */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  Conversations
-                </CardTitle>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search conversations..."
-                    className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+          {/* Conversations Section */}
+          <div className="rounded-2xl bg-[#1C1C1E] overflow-hidden">
+            {/* Section Header with Search */}
+            <div className="p-4 border-b border-[#38383A]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#007AFF] to-[#5856D6] flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-white" />
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[60vh] sm:h-[500px]">
-                  {isLoading ? (
-                    <div className="p-8 text-center">
-                      <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
-                      <p className="text-muted-foreground">Loading conversations...</p>
-                    </div>
-                  ) : filteredConversations.length > 0 ? (
-                    filteredConversations.map((conversation) => (
-                      <div
-                        key={conversation.id}
-                        className="p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => setSelectedConversationId(conversation.id)}
-                      >
-                        <div className="flex items-start gap-3">
-                          <Avatar className="w-12 h-12">
+                <h2 className="text-lg font-semibold text-white">Conversations</h2>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#8E8E93]" />
+                <Input
+                  placeholder="Search conversations..."
+                  className="pl-10 bg-[#2C2C2E] border-[#38383A] text-white placeholder:text-[#8E8E93] rounded-xl focus:border-[#007AFF] focus:ring-0"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Conversations List */}
+            <ScrollArea className="h-[60vh] sm:h-[500px]">
+              {isLoading ? (
+                <div className="p-8 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#007AFF]/20 to-[#5856D6]/20 flex items-center justify-center">
+                    <MessageCircle className="w-8 h-8 text-[#007AFF] animate-pulse" />
+                  </div>
+                  <p className="text-[#8E8E93]">Loading conversations...</p>
+                </div>
+              ) : filteredConversations.length > 0 ? (
+                filteredConversations.map((conversation, index) => {
+                  const isOwner = conversation.other_user?.role === 'owner';
+                  return (
+                    <div
+                      key={conversation.id}
+                      className="p-4 border-b border-[#38383A] cursor-pointer hover:bg-[#2C2C2E] transition-all duration-200 active:scale-[0.98]"
+                      onClick={() => setSelectedConversationId(conversation.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Avatar with colored ring */}
+                        <div className="relative">
+                          <Avatar className={`w-14 h-14 ring-2 ring-offset-2 ring-offset-[#1C1C1E] ${
+                            isOwner ? 'ring-[#FF6B35]' : 'ring-[#007AFF]'
+                          }`}>
                             <AvatarImage src={conversation.other_user?.avatar_url} />
-                            <AvatarFallback>
+                            <AvatarFallback className={`text-lg font-semibold text-white ${
+                              isOwner
+                                ? 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]'
+                                : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]'
+                            }`}>
                               {conversation.other_user?.full_name?.charAt(0) || '?'}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h3 className="font-semibold truncate">
-                                {conversation.other_user?.full_name || 'Unknown User'}
-                              </h3>
-                              <span className="text-xs text-muted-foreground">
-                                {conversation.last_message_at
-                                  ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
-                                  : 'No messages'
-                                }
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <p className="text-sm text-muted-foreground truncate">
-                                {conversation.last_message?.message_text || 'Start a conversation...'}
-                              </p>
-                            </div>
-                            <Badge
-                              variant={conversation.other_user?.role === 'client' ? 'default' : 'secondary'}
-                              className="mt-2"
-                            >
-                              {conversation.other_user?.role === 'client' ? 'Client' : 'Property Owner'}
-                            </Badge>
+                          {/* Online indicator */}
+                          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[#34C759] rounded-full border-2 border-[#1C1C1E]" />
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <h3 className="font-semibold text-white truncate text-[15px]">
+                              {conversation.other_user?.full_name || 'Unknown User'}
+                            </h3>
+                            <span className="text-xs text-[#8E8E93] ml-2 shrink-0">
+                              {conversation.last_message_at
+                                ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: false })
+                                : ''
+                              }
+                            </span>
                           </div>
+                          <p className="text-sm text-[#8E8E93] truncate mb-2">
+                            {conversation.last_message?.message_text || 'Start a conversation...'}
+                          </p>
+                          <Badge
+                            className={`text-[10px] px-2 py-0.5 border-0 ${
+                              isOwner
+                                ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                                : 'bg-[#007AFF]/20 text-[#007AFF]'
+                            }`}
+                          >
+                            {isOwner ? 'Property Owner' : 'Client'}
+                          </Badge>
+                        </div>
+
+                        {/* Chevron */}
+                        <div className="text-[#48484A]">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-8 text-center">
-                      <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">
-                        {searchQuery ? 'No conversations found' : 'No conversations yet'}
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {searchQuery ? 'Try a different search term' : 'Start matching to begin conversations!'}
-                      </p>
                     </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                  );
+                })
+              ) : (
+                <div className="p-12 text-center">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#FF6B35]/20 to-[#F7931E]/20 flex items-center justify-center">
+                    <MessageCircle className="w-10 h-10 text-[#FF6B35]" />
+                  </div>
+                  <p className="text-white font-medium mb-1">
+                    {searchQuery ? 'No conversations found' : 'No conversations yet'}
+                  </p>
+                  <p className="text-sm text-[#8E8E93]">
+                    {searchQuery ? 'Try a different search term' : 'Start matching to begin conversations!'}
+                  </p>
+                </div>
+              )}
+            </ScrollArea>
           </div>
         </div>
       </div>

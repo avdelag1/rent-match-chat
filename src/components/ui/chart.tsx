@@ -2,6 +2,7 @@ import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
+import { VALIDATION } from "@/constants/app"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
@@ -74,6 +75,12 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // Sanitize color values to prevent CSS injection
+  const sanitizeColor = (color: string | undefined): string => {
+    if (!color) return '';
+    return VALIDATION.COLOR_REGEX.test(color) ? color : '';
+  };
+
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -86,8 +93,10 @@ ${colorConfig
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    const sanitized = sanitizeColor(color);
+    return sanitized ? `  --color-${key}: ${sanitized};` : null
   })
+  .filter((line): line is string => line !== null)
   .join("\n")}
 }
 `

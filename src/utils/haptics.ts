@@ -28,6 +28,7 @@ export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | '
     try {
       (window as any).Haptics.impact({ style: type });
     } catch (e) {
+      console.error('iOS haptics error:', e);
     }
   }
 };

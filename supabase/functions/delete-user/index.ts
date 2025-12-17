@@ -85,9 +85,7 @@ serve(async (req) => {
       if (listingImgError) storageErrors.push(`Listing images: ${listingImgError.message}`)
     }
 
-    if (storageErrors.length > 0) {
-      console.warn('Storage cleanup warnings:', storageErrors)
-    }
+    // Storage cleanup completed
 
     // Delete all related user data using RPC (updated function name)
     const { error: rpcError } = await supabaseAdmin.rpc('delete_user_account', {

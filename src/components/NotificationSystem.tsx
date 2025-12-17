@@ -13,15 +13,19 @@ export function NotificationSystem() {
 
     // Request notification permission if not already granted
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          toast({
-            title: "🔔 Notifications Enabled",
-            description: "You'll now receive real-time message notifications!",
-            duration: 3000,
-          });
-        }
-      });
+      Notification.requestPermission()
+        .then(permission => {
+          if (permission === 'granted') {
+            toast({
+              title: "🔔 Notifications Enabled",
+              description: "You'll now receive real-time message notifications!",
+              duration: 3000,
+            });
+          }
+        })
+        .catch(() => {
+          // Notification permission request failed - non-critical
+        });
     }
 
     // Subscribe to new messages for real-time notifications
@@ -35,84 +39,91 @@ export function NotificationSystem() {
           table: 'conversation_messages',
         },
         async (payload) => {
-          const newMessage = payload.new;
-          
-          // Only show notifications for messages not sent by current user
-          if (newMessage.sender_id !== user.id) {
-            // Check if current user is part of this conversation
-            const { data: conversation } = await supabase
-              .from('conversations')
-              .select('client_id, owner_id')
-              .eq('id', newMessage.conversation_id)
-              .single();
+          try {
+            const newMessage = payload.new;
 
-            if (conversation && 
-                (conversation.client_id === user.id || conversation.owner_id === user.id)) {
-              
-              // Get sender info
-              const { data: senderProfile } = await supabase
-                .from('profiles')
-                .select('full_name, avatar_url')
-                .eq('id', newMessage.sender_id)
+            // Only show notifications for messages not sent by current user
+            if (newMessage.sender_id !== user.id) {
+              // Check if current user is part of this conversation
+              const { data: conversation } = await supabase
+                .from('conversations')
+                .select('client_id, owner_id')
+                .eq('id', newMessage.conversation_id)
                 .single();
 
-              const { data: senderRoleData } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', newMessage.sender_id)
-                .maybeSingle();
+              if (conversation &&
+                  (conversation.client_id === user.id || conversation.owner_id === user.id)) {
 
-              const senderName = senderProfile?.full_name || 'Someone';
-              const senderRole = senderRoleData?.role === 'client' ? 'Client' : 'Property Owner';
-              
-              // Show toast notification  
-              const messageText = newMessage.message_text || '';
-              toast({
-                title: `💬 New Message from ${senderRole}`,
-                description: `${senderName}: ${messageText.slice(0, 60)}${messageText.length > 60 ? '...' : ''}`,
-                duration: 3000,
-              });
+                // Get sender info
+                const { data: senderProfile } = await supabase
+                  .from('profiles')
+                  .select('full_name, avatar_url')
+                  .eq('id', newMessage.sender_id)
+                  .single();
 
-              // Save to notifications table
-              await supabase.from('notifications').insert([{
-                id: crypto.randomUUID(),
-                user_id: user.id,
-                type: 'message',
-                message: `${senderName}: ${messageText.slice(0, 100)}${messageText.length > 100 ? '...' : ''}`,
-                read: false
-              }]);
+                const { data: senderRoleData } = await supabase
+                  .from('user_roles')
+                  .select('role')
+                  .eq('user_id', newMessage.sender_id)
+                  .maybeSingle();
 
-              // Show browser notification if permission granted
-              if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-                const messageText = newMessage.message_text || 'New message';
-                const notification = new Notification(`New message from ${senderName}`, {
-                  body: messageText.slice(0, 100),
-                  icon: senderProfile?.avatar_url || '/placeholder.svg',
-                  tag: `message-${newMessage.id}`,
-                  badge: '/favicon.ico',
-                  requireInteraction: false,
+                const senderName = senderProfile?.full_name || 'Someone';
+                const senderRole = senderRoleData?.role === 'client' ? 'Client' : 'Property Owner';
+
+                // Show toast notification
+                const messageText = newMessage.message_text || '';
+                toast({
+                  title: `💬 New Message from ${senderRole}`,
+                  description: `${senderName}: ${messageText.slice(0, 60)}${messageText.length > 60 ? '...' : ''}`,
+                  duration: 3000,
                 });
 
-                // Auto-close notification after 3 seconds
-                setTimeout(() => notification.close(), 3000);
+                // Save to notifications table (non-blocking)
+                supabase.from('notifications').insert([{
+                  id: crypto.randomUUID(),
+                  user_id: user.id,
+                  type: 'message',
+                  message: `${senderName}: ${messageText.slice(0, 100)}${messageText.length > 100 ? '...' : ''}`,
+                  read: false
+                }]).then(() => {}, () => {});
 
-                // Handle notification click
-                notification.onclick = () => {
-                  window.focus();
-                  notification.close();
-                  // Navigate to messages if not already there
-                  if (!window.location.pathname.includes('/messages')) {
-                    window.location.href = '/messages';
-                  }
-                };
+                // Show browser notification if permission granted
+                if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                  const notificationText = newMessage.message_text || 'New message';
+                  const notification = new Notification(`New message from ${senderName}`, {
+                    body: notificationText.slice(0, 100),
+                    icon: senderProfile?.avatar_url || '/placeholder.svg',
+                    tag: `message-${newMessage.id}`,
+                    badge: '/favicon.ico',
+                    requireInteraction: false,
+                  });
+
+                  // Auto-close notification after 3 seconds
+                  setTimeout(() => notification.close(), 3000);
+
+                  // Handle notification click
+                  notification.onclick = () => {
+                    window.focus();
+                    notification.close();
+                    // Navigate to messages if not already there
+                    if (!window.location.pathname.includes('/messages')) {
+                      window.location.href = '/messages';
+                    }
+                  };
+                }
+
+                // Invalidate relevant queries to update UI
+                queryClient.invalidateQueries({ queryKey: ['conversations'] });
+                queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
+                queryClient.invalidateQueries({
+                  queryKey: ['conversation-messages', newMessage.conversation_id]
+                });
               }
-
-              // Invalidate relevant queries to update UI
-              queryClient.invalidateQueries({ queryKey: ['conversations'] });
-              queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
-              queryClient.invalidateQueries({ 
-                queryKey: ['conversation-messages', newMessage.conversation_id] 
-              });
+            }
+          } catch (error) {
+            // Notification handling error - non-critical, don't break the app
+            if (import.meta.env.DEV) {
+              console.error('[NotificationSystem] Error handling message notification:', error);
             }
           }
         }
@@ -130,52 +141,59 @@ export function NotificationSystem() {
           table: 'likes',
         },
         async (payload) => {
-          const newLike = payload.new;
-          
-          // Only show notifications for likes received (not given)
-          if (newLike.target_id === user.id && newLike.user_id !== user.id) {
-            // Get liker info
-            const { data: likerProfile } = await supabase
-              .from('profiles')
-              .select('full_name, avatar_url')
-              .eq('id', newLike.user_id)
-              .single();
+          try {
+            const newLike = payload.new;
 
-            const { data: likerRoleData } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', newLike.user_id)
-              .maybeSingle();
+            // Only show notifications for likes received (not given)
+            if (newLike.target_id === user.id && newLike.user_id !== user.id) {
+              // Get liker info
+              const { data: likerProfile } = await supabase
+                .from('profiles')
+                .select('full_name, avatar_url')
+                .eq('id', newLike.user_id)
+                .single();
 
-            const likerName = likerProfile?.full_name || 'Someone';
-            const likerRole = likerRoleData?.role === 'client' ? 'Client' : 'Property Owner';
-            
-            // Show toast notification
-            toast({
-              title: `🔥 New Flame from ${likerRole}`,
-              description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
-              duration: 3000,
-            });
+              const { data: likerRoleData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', newLike.user_id)
+                .maybeSingle();
 
-            // Save to notifications table
-            await supabase.from('notifications').insert([{
-              id: crypto.randomUUID(),
-              user_id: user.id,
-              type: 'like',
-              message: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
-              read: false
-            }]);
+              const likerName = likerProfile?.full_name || 'Someone';
+              const likerRole = likerRoleData?.role === 'client' ? 'Client' : 'Property Owner';
 
-            // Show browser notification
-            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-              const notification = new Notification(`New like from ${likerName}`, {
-                body: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
-                icon: likerProfile?.avatar_url || '/placeholder.svg',
-                tag: `like-${newLike.id}`,
-                badge: '/favicon.ico',
+              // Show toast notification
+              toast({
+                title: `🔥 New Flame from ${likerRole}`,
+                description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
+                duration: 3000,
               });
 
-              setTimeout(() => notification.close(), 3000);
+              // Save to notifications table (non-blocking)
+              supabase.from('notifications').insert([{
+                id: crypto.randomUUID(),
+                user_id: user.id,
+                type: 'like',
+                message: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
+                read: false
+              }]).then(() => {}, () => {});
+
+              // Show browser notification
+              if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                const notification = new Notification(`New like from ${likerName}`, {
+                  body: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
+                  icon: likerProfile?.avatar_url || '/placeholder.svg',
+                  tag: `like-${newLike.id}`,
+                  badge: '/favicon.ico',
+                });
+
+                setTimeout(() => notification.close(), 3000);
+              }
+            }
+          } catch (error) {
+            // Like notification handling error - non-critical
+            if (import.meta.env.DEV) {
+              console.error('[NotificationSystem] Error handling like notification:', error);
             }
           }
         }

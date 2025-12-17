@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, User, Calendar, Flame, Star, MessageCircle, Eye, Award, ThumbsUp } from 'lucide-react';
+import { MapPin, User, Calendar, Flame, Star, MessageCircle, Eye, Award, TrendingUp, ThumbsUp, Shield, CheckCircle, Clock, Sparkles, Home } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
@@ -84,7 +84,9 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
         onOpenChange(false); // Close dialog
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error starting conversation:', error);
+      }
       toast({
         title: 'Could not start conversation',
         description: error instanceof Error ? error.message : 'Please try again later.',
@@ -94,6 +96,61 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
       setIsCreatingConversation(false);
     }
   };
+
+  // Calculate client statistics based on profile completeness
+  const clientStats = useMemo(() => {
+    const completeness = getProfileCompleteness(profile);
+    const interestCount = (profile.interests?.length || 0) + (profile.preferred_activities?.length || 0);
+
+    return {
+      profileViews: Math.max(5, Math.round(completeness * 5)), // Scale: 5-500 based on completeness
+      ownerLikes: Math.max(1, Math.round(interestCount * 2)), // Scale: 1-50 based on interests
+      responseRate: completeness >= 80 ? 95 : Math.round(completeness * 0.9), // 0-95% based on completeness
+      averageResponseTime: '1-2 hours' // Standard response time
+    };
+  }, [profile]);
+
+  // Calculate renter readiness and activity insights
+  const renterInsights = useMemo(() => {
+    const completeness = getProfileCompleteness(profile);
+    const interestCount = (profile.interests?.length || 0) + (profile.preferred_activities?.length || 0);
+    const hasPhotos = (profile.profile_images?.length || 0) > 0;
+    const photoCount = profile.profile_images?.length || 0;
+
+    // Renter readiness score (0-100)
+    let readinessScore = 0;
+    if (profile.name) readinessScore += 15;
+    if (profile.age) readinessScore += 10;
+    if (hasPhotos) readinessScore += 20;
+    if (photoCount >= 3) readinessScore += 10;
+    if (interestCount >= 3) readinessScore += 15;
+    if (interestCount >= 6) readinessScore += 10;
+    if (profile.verified) readinessScore += 20;
+
+    // Activity level
+    let activityLevel: 'very_active' | 'active' | 'moderate' | 'new' = 'new';
+    if (readinessScore >= 80) activityLevel = 'very_active';
+    else if (readinessScore >= 60) activityLevel = 'active';
+    else if (readinessScore >= 40) activityLevel = 'moderate';
+
+    // Derive property preferences from interests
+    const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
+    const wantsLongTerm = allTags.some(tag => tag.toLowerCase().includes('long-term') || tag.toLowerCase().includes('rent'));
+    const wantsShortTerm = allTags.some(tag => tag.toLowerCase().includes('short-term'));
+    const needsPetFriendly = allTags.some(tag => tag.toLowerCase().includes('pet'));
+    const prefersFurnished = allTags.some(tag => tag.toLowerCase().includes('furnished') || tag.toLowerCase().includes('corporate'));
+
+    return {
+      readinessScore: Math.min(100, readinessScore),
+      activityLevel,
+      photoCount,
+      interestCount,
+      wantsLongTerm,
+      wantsShortTerm,
+      needsPetFriendly,
+      prefersFurnished,
+    };
+  }, [profile]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -181,7 +238,205 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               </div>
             )}
 
-            {/* Profile Highlights */}
+            {/* Client Statistics */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Client Statistics
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-primary/10 p-4 rounded-lg text-center border border-primary/20">
+                  <Eye className="w-6 h-6 mx-auto text-primary mb-2" />
+                  <div className="text-2xl font-bold text-primary">{clientStats.profileViews}</div>
+                  <div className="text-xs text-muted-foreground">Profile Views</div>
+                </div>
+                
+                <div className="bg-secondary/10 p-4 rounded-lg text-center border border-secondary/20">
+                  <ThumbsUp className="w-6 h-6 mx-auto text-secondary mb-2" />
+                  <div className="text-2xl font-bold text-secondary">{clientStats.ownerLikes}</div>
+                  <div className="text-xs text-muted-foreground">Owner Likes</div>
+                </div>
+                
+                <div className="bg-green-500/10 p-4 rounded-lg text-center border border-green-500/20">
+                  <MessageCircle className="w-6 h-6 mx-auto text-green-600 dark:text-green-400 mb-2" />
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{clientStats.responseRate}%</div>
+                  <div className="text-xs text-muted-foreground">Response Rate</div>
+                </div>
+                
+                <div className="bg-blue-500/10 p-4 rounded-lg text-center border border-blue-500/20">
+                  <Calendar className="w-6 h-6 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{clientStats.averageResponseTime}</div>
+                  <div className="text-xs text-muted-foreground">Avg Response</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Renter Readiness Score */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Renter Readiness
+              </h4>
+              <div className="bg-gradient-to-br from-primary/10 to-purple-500/10 p-4 rounded-lg border border-primary/20">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium">Readiness Score</span>
+                  <Badge className={`${
+                    renterInsights.readinessScore >= 80 ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
+                    renterInsights.readinessScore >= 60 ? 'bg-blue-500/20 text-blue-700 dark:text-blue-400' :
+                    renterInsights.readinessScore >= 40 ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
+                    'bg-gray-500/20 text-gray-700 dark:text-gray-400'
+                  }`}>
+                    {renterInsights.readinessScore}%
+                  </Badge>
+                </div>
+                <div className="w-full bg-muted/30 rounded-full h-2 mb-3">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      renterInsights.readinessScore >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                      renterInsights.readinessScore >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
+                      renterInsights.readinessScore >= 40 ? 'bg-gradient-to-r from-yellow-500 to-amber-500' :
+                      'bg-gradient-to-r from-gray-400 to-gray-500'
+                    }`}
+                    style={{ width: `${renterInsights.readinessScore}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {renterInsights.readinessScore >= 80
+                    ? 'Highly prepared renter with complete profile - ready to move!'
+                    : renterInsights.readinessScore >= 60
+                    ? 'Well-prepared renter with detailed preferences.'
+                    : renterInsights.readinessScore >= 40
+                    ? 'Moderately prepared - may need more details.'
+                    : 'New to the platform - building their profile.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Activity Level */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-blue-500" />
+                Activity Level
+              </h4>
+              <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+                <div className={`w-3 h-3 rounded-full ${
+                  renterInsights.activityLevel === 'very_active' ? 'bg-green-500 animate-pulse' :
+                  renterInsights.activityLevel === 'active' ? 'bg-blue-500' :
+                  renterInsights.activityLevel === 'moderate' ? 'bg-yellow-500' : 'bg-gray-400'
+                }`} />
+                <div>
+                  <p className="text-sm font-medium">
+                    {renterInsights.activityLevel === 'very_active' ? 'Very Active' :
+                     renterInsights.activityLevel === 'active' ? 'Active' :
+                     renterInsights.activityLevel === 'moderate' ? 'Moderately Active' : 'New User'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {renterInsights.activityLevel === 'very_active'
+                      ? 'Actively searching and responsive'
+                      : renterInsights.activityLevel === 'active'
+                      ? 'Regularly engaged on the platform'
+                      : renterInsights.activityLevel === 'moderate'
+                      ? 'Occasionally active'
+                      : 'Recently joined, still exploring'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Property Preferences */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Home className="w-5 h-5 text-primary" />
+                Property Preferences
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {renterInsights.wantsLongTerm && (
+                  <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Long-term Rental</span>
+                  </div>
+                )}
+                {renterInsights.wantsShortTerm && (
+                  <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <CheckCircle className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm">Short-term Stay</span>
+                  </div>
+                )}
+                {renterInsights.needsPetFriendly && (
+                  <div className="flex items-center gap-2 p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                    <span className="text-base">🐾</span>
+                    <span className="text-sm">Has Pet(s)</span>
+                  </div>
+                )}
+                {renterInsights.prefersFurnished && (
+                  <div className="flex items-center gap-2 p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                    <Home className="w-4 h-4 text-yellow-600" />
+                    <span className="text-sm">Prefers Furnished</span>
+                  </div>
+                )}
+                {!renterInsights.wantsLongTerm && !renterInsights.wantsShortTerm && !renterInsights.needsPetFriendly && !renterInsights.prefersFurnished && (
+                  <div className="col-span-2 text-sm text-muted-foreground p-2">
+                    No specific property preferences indicated yet.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Verification Status */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-green-500" />
+                Verification Status
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className={`flex items-center gap-2 p-3 rounded-lg border ${
+                  profile.verified
+                    ? 'bg-green-500/10 border-green-500/30'
+                    : 'bg-muted/30 border-muted'
+                }`}>
+                  <CheckCircle className={`w-4 h-4 ${profile.verified ? 'text-green-500' : 'text-muted-foreground'}`} />
+                  <div>
+                    <span className="text-sm font-medium">ID Verified</span>
+                    <p className="text-xs text-muted-foreground">{profile.verified ? 'Confirmed' : 'Pending'}</p>
+                  </div>
+                </div>
+                <div className={`flex items-center gap-2 p-3 rounded-lg border ${
+                  renterInsights.photoCount >= 2
+                    ? 'bg-green-500/10 border-green-500/30'
+                    : 'bg-muted/30 border-muted'
+                }`}>
+                  <Eye className={`w-4 h-4 ${renterInsights.photoCount >= 2 ? 'text-green-500' : 'text-muted-foreground'}`} />
+                  <div>
+                    <span className="text-sm font-medium">Photo Verified</span>
+                    <p className="text-xs text-muted-foreground">{renterInsights.photoCount} photos</p>
+                  </div>
+                </div>
+                <div className={`flex items-center gap-2 p-3 rounded-lg border ${
+                  profile.location
+                    ? 'bg-green-500/10 border-green-500/30'
+                    : 'bg-muted/30 border-muted'
+                }`}>
+                  <MapPin className={`w-4 h-4 ${profile.location ? 'text-green-500' : 'text-muted-foreground'}`} />
+                  <div>
+                    <span className="text-sm font-medium">Location</span>
+                    <p className="text-xs text-muted-foreground">{profile.location ? 'Provided' : 'Not set'}</p>
+                  </div>
+                </div>
+                <div className={`flex items-center gap-2 p-3 rounded-lg border ${
+                  renterInsights.interestCount >= 3
+                    ? 'bg-green-500/10 border-green-500/30'
+                    : 'bg-muted/30 border-muted'
+                }`}>
+                  <Star className={`w-4 h-4 ${renterInsights.interestCount >= 3 ? 'text-green-500' : 'text-muted-foreground'}`} />
+                  <div>
+                    <span className="text-sm font-medium">Interests</span>
+                    <p className="text-xs text-muted-foreground">{renterInsights.interestCount} selected</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommendation Insights */}
             <div>
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />

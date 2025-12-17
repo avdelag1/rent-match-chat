@@ -75,6 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Use Promise instead of setTimeout to avoid stale closure
             handleOAuthUserSetupOnly(session.user).catch(err => {
               console.error('[Auth] OAuth setup failed:', err);
+              toast({
+                title: 'Profile Setup Failed',
+                description: 'Failed to complete your profile setup. Please try signing in again.',
+                variant: 'destructive',
+              });
             });
           }
         }
