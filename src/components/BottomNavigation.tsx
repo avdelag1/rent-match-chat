@@ -114,24 +114,49 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   // Get icon color class only (for the Icon component)
   const getIconColorClass = (item: NavItem, active: boolean) => {
-    if (!active) return 'text-gray-400';
+    if (!active) return 'text-gray-500';
 
     switch (item.id) {
       case 'browse':
-        return 'text-red-500';
+        return 'text-red-400';
       case 'likes':
       case 'liked':
-        return 'text-orange-500';
+        return 'text-orange-400';
       case 'messages':
-        return 'text-blue-500';
+        return 'text-blue-400';
       case 'listings':
-        return 'text-red-500';
+        return 'text-red-400';
       case 'profile':
-        return 'text-red-500';
+        return 'text-red-400';
       case 'hire':
-        return 'text-emerald-500';
+        return 'text-emerald-400';
+      case 'filter':
+        return 'text-purple-400';
       default:
-        return 'text-red-500';
+        return 'text-red-400';
+    }
+  };
+
+  // Get indicator dot color for active state
+  const getIndicatorColorClass = (item: NavItem) => {
+    switch (item.id) {
+      case 'browse':
+        return 'bg-red-400';
+      case 'likes':
+      case 'liked':
+        return 'bg-orange-400';
+      case 'messages':
+        return 'bg-blue-400';
+      case 'listings':
+        return 'bg-red-400';
+      case 'profile':
+        return 'bg-red-400';
+      case 'hire':
+        return 'bg-emerald-400';
+      case 'filter':
+        return 'bg-purple-400';
+      default:
+        return 'bg-red-400';
     }
   };
 
@@ -139,20 +164,22 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   const getGlowBgClass = (item: NavItem) => {
     switch (item.id) {
       case 'browse':
-        return 'bg-red-500';
+        return 'bg-red-400';
       case 'likes':
       case 'liked':
-        return 'bg-orange-500';
+        return 'bg-orange-400';
       case 'messages':
-        return 'bg-blue-500';
+        return 'bg-blue-400';
       case 'listings':
-        return 'bg-red-500';
+        return 'bg-red-400';
       case 'profile':
-        return 'bg-red-500';
+        return 'bg-red-400';
       case 'hire':
-        return 'bg-emerald-500';
+        return 'bg-emerald-400';
+      case 'filter':
+        return 'bg-purple-400';
       default:
-        return 'bg-red-500';
+        return 'bg-red-400';
     }
   };
 
@@ -199,7 +226,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 1.2, opacity: 0 }}
-                    className={cn("absolute inset-0 rounded-2xl opacity-10", getGlowBgClass(item))}
+                    className={cn("absolute inset-0 rounded-2xl opacity-20", getGlowBgClass(item))}
                   />
                 )}
               </AnimatePresence>
@@ -225,15 +252,32 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 )}
               </AnimatePresence>
 
-              <Icon
-                className={cn(
-                  'h-6 w-6 transition-all duration-200',
-                  item.isCenter && 'h-7 w-7',
-                  active && 'scale-110',
-                  getIconColorClass(item, active)
-                )}
-                strokeWidth={active ? 2.5 : 2}
-              />
+              <div className="flex flex-col items-center">
+                <Icon
+                  className={cn(
+                    'h-6 w-6 transition-all duration-200',
+                    item.isCenter && 'h-7 w-7',
+                    active && 'scale-110 drop-shadow-[0_0_8px_currentColor]',
+                    getIconColorClass(item, active)
+                  )}
+                  strokeWidth={active ? 2.5 : 2}
+                />
+
+                {/* Active indicator dot */}
+                <AnimatePresence>
+                  {active && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full mt-1.5 shadow-lg",
+                        getIndicatorColorClass(item)
+                      )}
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.button>
           );
         })}
