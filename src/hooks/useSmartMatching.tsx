@@ -41,6 +41,24 @@ export interface MatchedClientProfile {
   budget?: { min?: number; max?: number };
 }
 
+// Filters that can be applied to client profiles
+export interface ClientFilters {
+  budgetRange?: [number, number];
+  ageRange?: [number, number];
+  genders?: string[];
+  hasPets?: boolean;
+  smoking?: boolean;
+  partyFriendly?: boolean;
+  interests?: string[];
+  lifestyleTags?: string[];
+  verified?: boolean;
+  // Category-specific
+  motoTypes?: string[];
+  bicycleTypes?: string[];
+  yachtTypes?: string[];
+  vehicleTypes?: string[];
+}
+
 // Calculate match percentage between client preferences and listing
 function calculateListingMatch(preferences: ClientFilterPreferences, listing: Listing): {
   percentage: number;
@@ -698,10 +716,11 @@ export function useSmartClientMatching(
   category?: 'property' | 'moto' | 'bicycle' | 'yacht',
   page: number = 0,
   pageSize: number = 10,
-  includeRecentLikes: boolean = false
+  includeRecentLikes: boolean = false,
+  filters?: ClientFilters
 ) {
   return useQuery<MatchedClientProfile[]>({
-    queryKey: ['smart-clients', category, page, includeRecentLikes],
+    queryKey: ['smart-clients', category, page, includeRecentLikes, filters],
     queryFn: async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
@@ -709,26 +728,36 @@ export function useSmartClientMatching(
           return [] as MatchedClientProfile[];
         }
 
-        // When not explicitly including recent likes, temporarily hide
-        // profiles liked in the last 7 days using profile_views table
-        const likedProfileIds = new Set<string>();
+        // Fetch ALL swiped profiles from likes table (permanent exclusion)
+        // This ensures profiles that have been swiped never show again
+        const swipedProfileIds = new Set<string>();
 
+        const { data: swipedProfiles, error: swipesError } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.user.id);
+
+        if (!swipesError && swipedProfiles) {
+          for (const row of swipedProfiles) {
+            if (row.target_id) {
+              swipedProfileIds.add(row.target_id);
+            }
+          }
+        }
+
+        // Also check profile_views for any passes that might not be in likes table
         if (!includeRecentLikes) {
-          const sevenDaysAgo = new Date();
-          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-          const { data: recentLikes, error: likesError } = await supabase
+          const { data: viewedProfiles, error: viewsError } = await supabase
             .from('profile_views')
-            .select('viewed_profile_id, created_at')
+            .select('viewed_profile_id')
             .eq('user_id', user.user.id)
             .eq('view_type', 'profile')
-            .eq('action', 'like')
-            .gte('created_at', sevenDaysAgo.toISOString());
+            .in('action', ['like', 'pass']);
 
-          if (!likesError && recentLikes) {
-            for (const row of recentLikes as any[]) {
+          if (!viewsError && viewedProfiles) {
+            for (const row of viewedProfiles as any[]) {
               if (row.viewed_profile_id) {
-                likedProfileIds.add(row.viewed_profile_id as string);
+                swipedProfileIds.add(row.viewed_profile_id as string);
               }
             }
           }
@@ -758,9 +787,9 @@ export function useSmartClientMatching(
           return [] as MatchedClientProfile[];
         }
 
-        // Map profiles with placeholder images - filter out excluded profiles
-        const filteredProfiles = (profiles as any[])
-          .filter(profile => !likedProfileIds.has(profile.id))
+        // Map profiles with placeholder images - filter out already-swiped profiles
+        let filteredProfiles = (profiles as any[])
+          .filter(profile => !swipedProfileIds.has(profile.id))
           .map(profile => ({
             ...profile,
             images: profile.images && profile.images.length > 0
@@ -768,9 +797,84 @@ export function useSmartClientMatching(
               : ['/placeholder-avatar.svg']
           }));
 
-        // Calculate match scores - SIMPLIFIED: Give everyone 70% match for now
+        // Apply client filters if provided
+        if (filters) {
+          filteredProfiles = filteredProfiles.filter(profile => {
+            // Budget range filter
+            if (filters.budgetRange) {
+              const clientBudget = profile.budget_max || profile.monthly_income || 0;
+              if (clientBudget < filters.budgetRange[0] || clientBudget > filters.budgetRange[1]) {
+                return false;
+              }
+            }
+
+            // Age range filter
+            if (filters.ageRange && profile.age) {
+              if (profile.age < filters.ageRange[0] || profile.age > filters.ageRange[1]) {
+                return false;
+              }
+            }
+
+            // Gender filter
+            if (filters.genders && filters.genders.length > 0 && profile.gender) {
+              if (!filters.genders.includes(profile.gender.toLowerCase())) {
+                return false;
+              }
+            }
+
+            // Pet friendly filter
+            if (filters.hasPets !== undefined && profile.has_pets !== undefined) {
+              if (filters.hasPets !== profile.has_pets) {
+                return false;
+              }
+            }
+
+            // Smoking filter
+            if (filters.smoking !== undefined && profile.smoking !== undefined) {
+              if (filters.smoking !== profile.smoking) {
+                return false;
+              }
+            }
+
+            // Party friendly filter
+            if (filters.partyFriendly !== undefined && profile.party_friendly !== undefined) {
+              if (filters.partyFriendly !== profile.party_friendly) {
+                return false;
+              }
+            }
+
+            // Verified filter
+            if (filters.verified && !profile.verified) {
+              return false;
+            }
+
+            return true;
+          });
+        }
+
+        // Calculate match scores based on profile completeness and preferences
         const matchedClients: MatchedClientProfile[] = filteredProfiles.map(profile => {
-          const match = { percentage: 70, reasons: ['Showing all profiles'], incompatible: [] as string[] };
+          const matchReasons: string[] = [];
+          let baseScore = 50; // Start with base score
+
+          // Add points for profile completeness
+          if (profile.full_name) baseScore += 5;
+          if (profile.age) baseScore += 5;
+          if (profile.city) baseScore += 5;
+          if (profile.interests?.length > 0) baseScore += 10;
+          if (profile.verified) baseScore += 15;
+          if (profile.images?.length > 0) baseScore += 10;
+
+          // Build match reasons
+          if (profile.verified) matchReasons.push('Verified profile');
+          if (profile.interests?.length > 0) matchReasons.push(`${profile.interests.length} interests`);
+          if (profile.city) matchReasons.push(`Located in ${profile.city}`);
+
+          const match = {
+            percentage: Math.min(100, baseScore),
+            reasons: matchReasons.length > 0 ? matchReasons : ['Profile available'],
+            incompatible: [] as string[]
+          };
 
           return {
             id: Math.floor(Math.random() * 1000000),

@@ -57,14 +57,23 @@ export function useSwipeUndo() {
       }
       if (!user) throw new Error('User not authenticated');
 
-      // Remove the last swipe from the database
+      // Remove the last swipe from the likes table
       const { error } = await supabase
-        .from('swipes')
+        .from('likes')
         .delete()
         .match({
           user_id: user.id,
           target_id: lastSwipe.targetId,
-          target_type: lastSwipe.targetType,
+        });
+
+      // Also remove from profile_views for consistent state
+      await supabase
+        .from('profile_views')
+        .delete()
+        .match({
+          user_id: user.id,
+          viewed_profile_id: lastSwipe.targetId,
+          view_type: lastSwipe.targetType,
         });
 
       if (error) throw error;
@@ -77,8 +86,10 @@ export function useSwipeUndo() {
       
       // Invalidate and refetch relevant queries
       queryClient.invalidateQueries({ queryKey: ['listings'] });
+      queryClient.invalidateQueries({ queryKey: ['smart-listings'] });
+      queryClient.invalidateQueries({ queryKey: ['smart-clients'] });
       queryClient.invalidateQueries({ queryKey: ['swiped-listings'] });
-      queryClient.invalidateQueries({ queryKey: ['client-profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['likes'] });
       queryClient.invalidateQueries({ queryKey: ['swipe-analytics'] });
       
       toast({

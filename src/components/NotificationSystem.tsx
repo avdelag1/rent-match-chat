@@ -45,21 +45,25 @@ export function NotificationSystem() {
             // Only show notifications for messages not sent by current user
             if (newMessage.sender_id !== user.id) {
               // Check if current user is part of this conversation
-              const { data: conversation } = await supabase
+              const { data: conversation, error: convError } = await supabase
                 .from('conversations')
                 .select('client_id, owner_id')
                 .eq('id', newMessage.conversation_id)
-                .single();
+                .maybeSingle();
 
-              if (conversation &&
-                  (conversation.client_id === user.id || conversation.owner_id === user.id)) {
+              if (convError || !conversation) {
+                // Conversation not found or error - skip notification
+                return;
+              }
+
+              if (conversation.client_id === user.id || conversation.owner_id === user.id) {
 
                 // Get sender info
                 const { data: senderProfile } = await supabase
                   .from('profiles')
                   .select('full_name, avatar_url')
                   .eq('id', newMessage.sender_id)
-                  .single();
+                  .maybeSingle();
 
                 const { data: senderRoleData } = await supabase
                   .from('user_roles')
@@ -78,14 +82,17 @@ export function NotificationSystem() {
                   duration: 3000,
                 });
 
-                // Save to notifications table (non-blocking)
+                // Save to notifications table (non-blocking, errors are non-critical)
                 supabase.from('notifications').insert([{
                   id: crypto.randomUUID(),
                   user_id: user.id,
                   type: 'message',
                   message: `${senderName}: ${messageText.slice(0, 100)}${messageText.length > 100 ? '...' : ''}`,
                   read: false
-                }]).then(() => {}, () => {});
+                }]).then(
+                  () => { /* Notification saved successfully */ },
+                  () => { /* Notification save failed - non-critical, user still sees toast */ }
+                );
 
                 // Show browser notification if permission granted
                 if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
@@ -151,7 +158,7 @@ export function NotificationSystem() {
                 .from('profiles')
                 .select('full_name, avatar_url')
                 .eq('id', newLike.user_id)
-                .single();
+                .maybeSingle();
 
               const { data: likerRoleData } = await supabase
                 .from('user_roles')
@@ -169,14 +176,17 @@ export function NotificationSystem() {
                 duration: 3000,
               });
 
-              // Save to notifications table (non-blocking)
+              // Save to notifications table (non-blocking, errors are non-critical)
               supabase.from('notifications').insert([{
                 id: crypto.randomUUID(),
                 user_id: user.id,
                 type: 'like',
                 message: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
                 read: false
-              }]).then(() => {}, () => {});
+              }]).then(
+                () => { /* Notification saved successfully */ },
+                () => { /* Notification save failed - non-critical, user still sees toast */ }
+              );
 
               // Show browser notification
               if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {

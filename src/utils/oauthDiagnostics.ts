@@ -85,7 +85,7 @@ export async function diagnoseOAuthSetup(): Promise<OAuthDiagnostics> {
         if (googleError.message?.includes('not enabled') || googleError.message?.includes('Provider not enabled')) {
           diagnostics.errors.push('Google OAuth provider is not enabled in Supabase dashboard');
           diagnostics.recommendations.push(
-            'Enable Google OAuth in Supabase: https://supabase.com/dashboard/project/vplgtcguxujxwrgguxqq/auth/providers'
+            'Enable Google OAuth in Supabase dashboard under Authentication > Providers'
           );
         } else if (googleError.message?.includes('credentials')) {
           diagnostics.googleEnabled = true;
@@ -118,7 +118,7 @@ export async function diagnoseOAuthSetup(): Promise<OAuthDiagnostics> {
         if (facebookError.message?.includes('not enabled') || facebookError.message?.includes('Provider not enabled')) {
           diagnostics.errors.push('Facebook OAuth provider is not enabled in Supabase dashboard');
           diagnostics.recommendations.push(
-            'Enable Facebook OAuth in Supabase: https://supabase.com/dashboard/project/vplgtcguxujxwrgguxqq/auth/providers'
+            'Enable Facebook OAuth in Supabase dashboard under Authentication > Providers'
           );
         } else if (facebookError.message?.includes('credentials')) {
           diagnostics.facebookEnabled = true;
@@ -168,29 +168,11 @@ export async function diagnoseOAuthSetup(): Promise<OAuthDiagnostics> {
  * Run OAuth diagnostics and display results in console
  */
 export async function runOAuthDiagnostics() {
-
   const results = await diagnoseOAuthSetup();
 
 
-
-
-
-  if (results.errors.length > 0) {
-    results.errors.forEach((error, idx) => {
-    });
-  }
-
-  if (results.warnings.length > 0) {
-    results.warnings.forEach((warning, idx) => {
-    });
-  }
-
-  if (results.recommendations.length > 0) {
-    results.recommendations.forEach((rec, idx) => {
-    });
-  }
-
-
+  // Results contain errors, warnings, and recommendations arrays
+  // that can be inspected programmatically
   return results;
 }
 

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, Crown, Zap, Star } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { STORAGE } from '@/constants/app';
 
 interface SubscriptionPackagesProps {
   isOpen?: boolean;
@@ -145,7 +146,7 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
   const handleSubscribe = (plan: Plan) => {
     // Store selected plan locally (can persist to Supabase upon your approval)
     const selection = { role: userRole, planId: plan.id, name: plan.name, price: plan.price, at: new Date().toISOString() };
-    localStorage.setItem('swipematch_selected_plan', JSON.stringify(selection));
+    localStorage.setItem(STORAGE.SELECTED_PLAN_KEY, JSON.stringify(selection));
 
     // Open PayPal in a new tab
     window.open(plan.paypalUrl, '_blank');
@@ -224,7 +225,7 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
 
           <div className="text-center text-xs sm:text-sm text-muted-foreground mt-6 sm:mt-8 space-y-1 pb-2 sm:pb-4">
             <p>✓ Cancel anytime · Secure payments powered by PayPal</p>
-            <p>Questions? Contact support at <span className="text-primary">help@swipematch.com</span></p>
+            <p>Questions? Contact support at <span className="text-primary">support@tinderent.com</span></p>
           </div>
         </ScrollArea>
       </DialogContent>

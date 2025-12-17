@@ -116,7 +116,7 @@ export function useRealtimeChat(conversationId: string) {
             .from('profiles')
             .select('id, full_name, avatar_url')
             .eq('id', newMessage.sender_id)
-            .single();
+            .maybeSingle();
 
           const completeMessage = {
             ...newMessage,
