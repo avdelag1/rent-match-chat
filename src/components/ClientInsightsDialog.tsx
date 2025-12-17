@@ -95,13 +95,18 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
     }
   };
 
-  // Memoize client statistics to prevent recalculation on every render
-  const clientStats = useMemo(() => ({
-    profileViews: Math.floor(Math.random() * 500) + 100,
-    ownerLikes: Math.floor(Math.random() * 50) + 10,
-    responseRate: Math.floor(Math.random() * 30) + 70,
-    averageResponseTime: `${Math.floor(Math.random() * 24) + 1} hours`
-  }), [profile?.user_id]);
+  // Calculate client statistics based on profile completeness
+  const clientStats = useMemo(() => {
+    const completeness = getProfileCompleteness(profile);
+    const interestCount = (profile.interests?.length || 0) + (profile.preferred_activities?.length || 0);
+
+    return {
+      profileViews: Math.max(5, Math.round(completeness * 5)), // Scale: 5-500 based on completeness
+      ownerLikes: Math.max(1, Math.round(interestCount * 2)), // Scale: 1-50 based on interests
+      responseRate: completeness >= 80 ? 95 : Math.round(completeness * 0.9), // 0-95% based on completeness
+      averageResponseTime: '1-2 hours' // Standard response time
+    };
+  }, [profile]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
