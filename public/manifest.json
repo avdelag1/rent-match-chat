@@ -78,7 +78,7 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Tinderent on desktop"
+      "label": "SwipeMatch on desktop"
     }
   ],
   "shortcuts": [
@@ -122,7 +122,7 @@
   "related_applications": [
     {
       "platform": "itunes",
-      "url": "https://apps.apple.com/app/tinderent/id1234567890"
+      "url": "https://apps.apple.com/app/swipematch/id1234567890"
     }
   ],
   "launch_handler": {
