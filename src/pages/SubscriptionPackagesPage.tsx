@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { formatPriceMXN } from "@/utils/subscriptionPricing";
 import { toast } from "@/hooks/use-toast";
+import { STORAGE } from "@/constants/app";
 
 // Premium plans for owners
 const ownerPremiumPlans = [
@@ -257,7 +258,7 @@ export default function SubscriptionPackagesPage() {
   const packagesUI = convertPackages(messagePackages);
 
   const handleMessagePurchase = (pkg: any) => {
-    localStorage.setItem('pendingActivationPurchase', JSON.stringify({
+    localStorage.setItem(STORAGE.PENDING_ACTIVATION_KEY, JSON.stringify({
       packageId: pkg.id,
       activations: pkg.activations,
       price: pkg.price,
@@ -271,7 +272,7 @@ export default function SubscriptionPackagesPage() {
   };
 
   const handlePremiumPurchase = (plan: typeof premiumPlans[0]) => {
-    localStorage.setItem('tinderent_selected_plan', JSON.stringify({
+    localStorage.setItem(STORAGE.SELECTED_PLAN_KEY, JSON.stringify({
       role: userRole,
       planId: plan.id,
       name: plan.name,

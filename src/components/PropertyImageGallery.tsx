@@ -29,9 +29,9 @@ export function PropertyImageGallery({
     const nextIndex = (currentIndex + 1) % images.length;
     const prevIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
 
-    // Prefetch next and previous images
-    preloadImage(getFullImageUrl(images[nextIndex])).catch(() => {});
-    preloadImage(getFullImageUrl(images[prevIndex])).catch(() => {});
+    // Prefetch next and previous images (failures are intentionally silent - preloading is best-effort)
+    preloadImage(getFullImageUrl(images[nextIndex])).catch(() => { /* Preload failure is non-critical */ });
+    preloadImage(getFullImageUrl(images[prevIndex])).catch(() => { /* Preload failure is non-critical */ });
   }, [currentIndex, images, isOpen]);
 
   if (!images || images.length === 0) return null;

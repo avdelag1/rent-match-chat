@@ -69,9 +69,17 @@ export const STORAGE = {
   WEB_VITALS_KEY: 'webVitals',
   USER_PREFERENCES_KEY: 'userPreferences',
   SEARCH_HISTORY_KEY: 'searchHistory',
+  SELECTED_PLAN_KEY: 'tinderent_selected_plan',
+  PENDING_ACTIVATION_KEY: 'pendingActivationPurchase',
 
   // localStorage limits
   MAX_HISTORY_ITEMS: 50,
+} as const;
+
+// Image placeholders
+export const PLACEHOLDERS = {
+  IMAGE: '/placeholder.svg',
+  AVATAR: '/placeholder-avatar.svg',
 } as const;
 
 // Message configuration

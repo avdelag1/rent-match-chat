@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { STORAGE } from '@/constants/app';
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -16,7 +17,7 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     const processPayment = async () => {
-      const pendingPurchase = localStorage.getItem('tinderent_selected_plan') || localStorage.getItem('pendingActivationPurchase');
+      const pendingPurchase = localStorage.getItem(STORAGE.SELECTED_PLAN_KEY) || localStorage.getItem(STORAGE.PENDING_ACTIVATION_KEY);
       if (!pendingPurchase) {
         toast.error('No pending purchase found');
         navigate('/subscription-packages');
@@ -148,8 +149,8 @@ export default function PaymentSuccess() {
         });
 
         // Clear storage
-        localStorage.removeItem('tinderent_selected_plan');
-        localStorage.removeItem('pendingActivationPurchase');
+        localStorage.removeItem(STORAGE.SELECTED_PLAN_KEY);
+        localStorage.removeItem(STORAGE.PENDING_ACTIVATION_KEY);
         setProcessing(false);
 
         setTimeout(() => {

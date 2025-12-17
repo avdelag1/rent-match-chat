@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { STORAGE } from "@/constants/app";
 
 type MessagePackage = {
   id: number;
@@ -135,7 +136,7 @@ export function MessageActivationPackages({
 
   const handlePurchase = (pkg: MessagePackage) => {
     // Store selection for post-payment processing
-    localStorage.setItem('pendingActivationPurchase', JSON.stringify({
+    localStorage.setItem(STORAGE.PENDING_ACTIVATION_KEY, JSON.stringify({
       packageId: pkg.id,
       activations: pkg.activations,
       price: pkg.price,
