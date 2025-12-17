@@ -24,11 +24,11 @@ const SUPABASE_URL = 'https://vplgtcguxujxwrgguxqq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwbGd0Y2d1eHVqeHdyZ2d1eHFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDI5MDIsImV4cCI6MjA2MzU3ODkwMn0.-TzSQ-nDho4J6TftVF4RNjbhr5cKbknQxxUT-AaSIJU';
 
 const log = {
-  info: (msg) => console.log(`${colors.blue}ℹ ${msg}${colors.reset}`),
-  success: (msg) => console.log(`${colors.green}✓ ${msg}${colors.reset}`),
-  error: (msg) => console.log(`${colors.red}✗ ${msg}${colors.reset}`),
-  warning: (msg) => console.log(`${colors.yellow}⚠ ${msg}${colors.reset}`),
-  step: (num, msg) => console.log(`\n${colors.yellow}Step ${num}: ${msg}${colors.reset}`),
+  info: (msg) => {},
+  success: (msg) => {},
+  error: (msg) => {},
+  warning: (msg) => {},
+  step: (num, msg) => {},
 };
 
 async function sleep(ms) {
@@ -115,36 +115,7 @@ async function runMigrations() {
 }
 
 function printWebDashboardInstructions() {
-  console.log(`
-${colors.yellow}${'='.repeat(60)}${colors.reset}
-${colors.yellow}📋 Using Supabase Web Dashboard Instead${colors.reset}
-${colors.yellow}${'='.repeat(60)}${colors.reset}
-
-Since CLI installation is restricted, please use the web dashboard:
-
-${colors.blue}1. Go to Supabase Dashboard:${colors.reset}
-   https://app.supabase.com/project/vplgtcguxujxwrgguxqq/sql/new
-
-${colors.blue}2. Run each migration file in order:${colors.reset}
-   a) SUPABASE_MIGRATION_STEP1.sql
-   b) SUPABASE_MIGRATION_STEP2.sql
-   c) SUPABASE_MIGRATION_STEP3.sql
-
-${colors.blue}3. For each file:${colors.reset}
-   - Click "New Query"
-   - Copy content from file
-   - Paste into SQL editor
-   - Click "Run" button
-   - Wait for green checkmark ✓
-
-${colors.blue}4. Verify with:${colors.reset}
-   - Run SUPABASE_VERIFY_STEP1.sql
-   - Run SUPABASE_VERIFY_STEP2.sql
-
-${colors.green}See SUPABASE_DEPLOYMENT_GUIDE.md for full instructions${colors.reset}
-
-${colors.yellow}${'='.repeat(60)}${colors.reset}
-`);
+  // Web dashboard instructions for migration deployment
 }
 
 // Run if executed directly

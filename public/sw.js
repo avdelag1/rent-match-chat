@@ -26,13 +26,11 @@ self.addEventListener('message', (event) => {
 
 // Install service worker with immediate activation
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing new version:', CACHE_VERSION);
   self.skipWaiting(); // Force immediate activation
   
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log('[SW] Caching static assets');
         return cache.addAll(urlsToCache.map(url => 
           new Request(url, { cache: 'reload' })
         ));
@@ -97,8 +95,6 @@ self.addEventListener('fetch', (event) => {
 
 // Activate service worker and clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating new version:', CACHE_VERSION);
-  
   event.waitUntil(
     Promise.all([
       // Take control of all clients immediately
@@ -109,10 +105,9 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             // Only delete caches that belong to this app and are not the current ones
-            if (cacheName.startsWith('swipematch-') && 
-                cacheName !== STATIC_CACHE && 
+            if (cacheName.startsWith('swipematch-') &&
+                cacheName !== STATIC_CACHE &&
                 cacheName !== DYNAMIC_CACHE) {
-              console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })

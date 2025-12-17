@@ -93,6 +93,7 @@ export function SwipeActionButtons({
           <button
             onClick={() => handleAction(onUndo, 'light')}
             disabled={!canUndo || disabled}
+            aria-label="Undo last swipe"
             className={`
               h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full transition-colors duration-200
               ${canUndo && !disabled
@@ -117,6 +118,7 @@ export function SwipeActionButtons({
           <button
             onClick={() => handleAction(onPass, 'warning')}
             disabled={disabled}
+            aria-label="Pass on this option"
             className={`
               h-14 w-14 sm:h-16 sm:w-16 flex items-center justify-center rounded-full transition-colors duration-200
               ${!disabled
@@ -141,6 +143,7 @@ export function SwipeActionButtons({
           <button
             onClick={() => handleAction(onInfo, 'light')}
             disabled={disabled}
+            aria-label="View profile details"
             className={`
               h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-full transition-colors duration-200
               ${!disabled
@@ -165,6 +168,7 @@ export function SwipeActionButtons({
           <button
             onClick={() => handleAction(onLike, 'success')}
             disabled={disabled}
+            aria-label="Like this option"
             className={`
               h-14 w-14 sm:h-16 sm:w-16 flex items-center justify-center rounded-full transition-colors duration-200
               ${!disabled
