@@ -50,7 +50,9 @@ export function useConversations() {
           .order('last_message_at', { ascending: false, nullsFirst: false });
 
         if (error) {
-          console.error('[useConversations] Error loading conversations:', error);
+          if (import.meta.env.DEV) {
+            console.error('[useConversations] Error loading conversations:', error);
+          }
           // Gracefully handle auth errors
           if (error.code === '42501' || error.code === 'PGRST301') {
             return [];
@@ -82,7 +84,19 @@ export function useConversations() {
         });
 
         // Transform data to include other_user and last_message
-        const conversationsWithProfiles = data.map((conversation: any) => {
+        type ConversationRow = {
+          id: string;
+          client_id: string;
+          owner_id: string;
+          listing_id?: string;
+          last_message_at?: string;
+          status: string;
+          created_at: string;
+          updated_at: string;
+          client_profile: { id: string; full_name: string; avatar_url?: string } | null;
+          owner_profile: { id: string; full_name: string; avatar_url?: string } | null;
+        };
+        const conversationsWithProfiles = data.map((conversation: ConversationRow) => {
           const isClient = conversation.client_id === user.id;
           const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
           // Determine role based on which side of the conversation the other user is
@@ -108,13 +122,15 @@ export function useConversations() {
         });
 
         return conversationsWithProfiles;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as { message?: string };
         // Better error handling with user-friendly messages
-        console.error('[useConversations] Error fetching conversations:', error.message);
-
+        if (import.meta.env.DEV) {
+          console.error('[useConversations] Error fetching conversations:', err?.message);
+        }
 
         // For temporary auth issues, return empty array to avoid blocking UI
-        if (error.message?.includes('JWT') || error.message?.includes('auth')) {
+        if (err?.message?.includes('JWT') || err?.message?.includes('auth')) {
           return [];
         }
 
@@ -202,7 +218,9 @@ export function useStartConversation() {
         .or(`and(client_id.eq.${user.id},owner_id.eq.${otherUserId}),and(client_id.eq.${otherUserId},owner_id.eq.${user.id})`);
 
       if (existingError) {
-        console.error('Error checking existing conversations:', existingError);
+        if (import.meta.env.DEV) {
+          console.error('Error checking existing conversations:', existingError);
+        }
         throw new Error('Failed to check existing conversations');
       }
 
@@ -365,7 +383,7 @@ export function useSendMessage() {
       };
 
       // Immediately add optimistic message to UI
-      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: any) => {
+      queryClient.setQueryData(['conversation-messages', conversationId], (oldData: unknown[] | undefined) => {
         if (!oldData) return [optimisticMessage];
         return [...oldData, optimisticMessage];
       });
@@ -409,14 +427,15 @@ export function useSendMessage() {
     },
     onSuccess: (data, variables) => {
       // Replace optimistic message with real message
-      queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
+      queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: unknown[] | undefined) => {
         if (!oldData) return [data];
-        
-        return oldData.map((msg: any) => 
-          msg.id.toString().startsWith('temp-') && msg.message_text === data.message_text
+
+        return oldData.map((item: unknown) => {
+          const msg = item as { id: string; message_text: string };
+          return msg.id.toString().startsWith('temp-') && msg.message_text === data.message_text
             ? data
-            : msg
-        );
+            : msg;
+        });
       });
       
       // Invalidate conversations to update last message
@@ -425,9 +444,12 @@ export function useSendMessage() {
     },
     onError: (error: Error, variables) => {
       // Remove optimistic message on error
-      queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: any) => {
+      queryClient.setQueryData(['conversation-messages', variables.conversationId], (oldData: unknown[] | undefined) => {
         if (!oldData) return [];
-        return oldData.filter((msg: any) => !msg.id.toString().startsWith('temp-'));
+        return oldData.filter((item: unknown) => {
+          const msg = item as { id: string };
+          return !msg.id.toString().startsWith('temp-');
+        });
       });
       
       toast({

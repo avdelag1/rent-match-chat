@@ -19,10 +19,20 @@ import { VehicleListingForm, VehicleFormData } from './VehicleListingForm';
 import { PropertyListingForm } from './PropertyListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
 
+interface EditingListing {
+  id?: string;
+  category?: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle';
+  mode?: 'rent' | 'sale';
+  images?: string[];
+  latitude?: number;
+  longitude?: number;
+  [key: string]: unknown;
+}
+
 interface UnifiedListingFormProps {
   isOpen: boolean;
   onClose: () => void;
-  editingProperty?: any;
+  editingProperty?: EditingListing;
 }
 
 export function UnifiedListingForm({ isOpen, onClose, editingProperty }: UnifiedListingFormProps) {
@@ -32,7 +42,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   // Note: location is only used for non-property listings (yachts, motorcycles, etc.)
   // Properties use country/city/neighborhood instead of exact GPS coordinates for privacy
   const [location, setLocation] = useState<{ lat?: number; lng?: number }>({});
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const queryClient = useQueryClient();
@@ -80,7 +90,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }
 
       // Map form data to database columns based on category
-      const listingData: any = {
+      const listingData: Record<string, unknown> = {
         owner_id: user.user.id,
         category: selectedCategory,
         mode: selectedMode,
@@ -204,11 +214,12 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         }
         
         // Optimistically update the cache
-        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+        queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           if (!oldData) return oldData;
-          return oldData.map(item => 
-            item.id === editingId ? { ...item, ...listingData } : item
-          );
+          return oldData.map((item: unknown) => {
+            const listing = item as { id: string };
+            return listing.id === editingId ? { ...listing, ...listingData } : item;
+          });
         });
 
         const { data, error } = await supabase
@@ -230,7 +241,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         if (error) throw error;
         
         // Optimistically add to cache
-        queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
+        queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           return oldData ? [data, ...oldData] : [data];
         });
         
@@ -248,7 +259,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       // Revert optimistic update on error
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
@@ -353,10 +364,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             title: `✓ ${i + 1}/${files.length}`,
             description: `${file.name} uploaded`,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const err = error as { message?: string };
           toast({
             title: "Upload Failed",
-            description: `${file.name}: ${error.message}`,
+            description: `${file.name}: ${err?.message || 'Unknown error'}`,
             variant: "destructive"
           });
         }

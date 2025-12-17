@@ -3,9 +3,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
 
+export interface ExistingProfile {
+  id: string;
+  email: string;
+  full_name?: string;
+  avatar_url?: string;
+  role?: 'client' | 'owner';
+  created_at: string;
+}
+
 export interface AccountLinkingResult {
   success: boolean;
-  existingProfile?: any;
+  existingProfile?: ExistingProfile;
   isNewAccount?: boolean;
   roleConflict?: boolean;
   suggestedRole?: 'client' | 'owner';
@@ -14,7 +23,7 @@ export interface AccountLinkingResult {
 export function useAccountLinking() {
   const [isLinking, setIsLinking] = useState(false);
 
-  const checkExistingAccount = async (email: string): Promise<{ profile: any; hasConflict: boolean }> => {
+  const checkExistingAccount = async (email: string): Promise<{ profile: ExistingProfile | null; hasConflict: boolean }> => {
     try {
       // Check if there's an existing profile with this email
       const { data: existingProfile, error } = await supabase
@@ -24,7 +33,9 @@ export function useAccountLinking() {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error checking existing account:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error checking existing account:', error);
+        }
         return { profile: null, hasConflict: false };
       }
 
@@ -44,14 +55,16 @@ export function useAccountLinking() {
         hasConflict: false // We'll determine this in the linking logic
       };
     } catch (error) {
-      console.error('Error in checkExistingAccount:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error in checkExistingAccount:', error);
+      }
       return { profile: null, hasConflict: false };
     }
   };
 
   const linkOAuthToExistingAccount = async (
-    oauthUser: User, 
-    existingProfile: any, 
+    oauthUser: User,
+    existingProfile: ExistingProfile,
     requestedRole: 'client' | 'owner'
   ): Promise<AccountLinkingResult> => {
     setIsLinking(true);
@@ -90,7 +103,7 @@ export function useAccountLinking() {
       });
 
       // Update existing profile with any new OAuth data if needed
-      const profileUpdate: any = {
+      const profileUpdate: Record<string, unknown> = {
         updated_at: new Date().toISOString()
       };
 
@@ -128,7 +141,9 @@ export function useAccountLinking() {
           }
         }]);
       } catch (auditError) {
-        console.error('Audit log failed:', auditError);
+        if (import.meta.env.DEV) {
+          console.error('Audit log failed:', auditError);
+        }
       }
 
       toast({
@@ -145,7 +160,9 @@ export function useAccountLinking() {
       };
 
     } catch (error) {
-      console.error('Error linking OAuth to existing account:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error linking OAuth to existing account:', error);
+      }
       toast({
         title: "Account Linking Failed",
         description: "Failed to link your account. Please try signing in with your original credentials.",
@@ -185,7 +202,9 @@ export function useAccountLinking() {
         .single();
 
       if (error) {
-        console.error('Error creating OAuth profile:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error creating OAuth profile:', error);
+        }
         throw error;
       }
 
@@ -201,7 +220,9 @@ export function useAccountLinking() {
         });
 
       if (roleError) {
-        console.error('Error creating role:', roleError);
+        if (import.meta.env.DEV) {
+          console.error('Error creating role:', roleError);
+        }
         throw roleError;
       }
 
@@ -227,7 +248,9 @@ export function useAccountLinking() {
       };
 
     } catch (error) {
-      console.error('Error creating OAuth profile:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error creating OAuth profile:', error);
+      }
       toast({
         title: "Account Creation Failed", 
         description: "Failed to create your profile. Please try again.",

@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ClientTinderSwipeCard } from './ClientTinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { MatchCelebration } from './MatchCelebration';
-import { useSmartClientMatching } from '@/hooks/useSmartMatching';
+import { useSmartClientMatching, MatchedClientProfile } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
@@ -24,9 +24,9 @@ interface ClientTinderSwipeContainerProps {
   onClientTap?: (clientId: string) => void;
   onInsights?: (clientId: string) => void;
   onMessageClick?: (clientId: string) => void;
-  profiles?: any[];
+  profiles?: MatchedClientProfile[];
   isLoading?: boolean;
-  error?: any;
+  error?: Error | null;
 }
 
 export function ClientTinderSwipeContainer({
@@ -40,19 +40,20 @@ export function ClientTinderSwipeContainer({
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [page, setPage] = useState(0);
-  const [allProfiles, setAllProfiles] = useState<any[]>([]);
+  const [allProfiles, setAllProfiles] = useState<MatchedClientProfile[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [loadingTimeoutExceeded, setLoadingTimeoutExceeded] = useState(false);
   const [includeRecentLikes, setIncludeRecentLikes] = useState(false);
-  const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set()); // Track swiped profiles
+  // Use array instead of Set for React state serialization compatibility
+  const [swipedIds, setSwipedIds] = useState<string[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Match celebration state
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
-    clientProfile?: any;
-    ownerProfile?: any;
+    clientProfile?: MatchedClientProfile;
+    ownerProfile?: MatchedClientProfile;
   }>({ isOpen: false });
 
   // Fetch profiles with pagination
@@ -62,8 +63,9 @@ export function ClientTinderSwipeContainer({
   const profiles = useMemo(() => {
     let baseProfiles = externalProfiles || allProfiles;
     // Filter out any profiles that have been swiped in this session
-    if (swipedIds.size > 0) {
-      baseProfiles = baseProfiles.filter(p => !swipedIds.has(p.user_id));
+    if (swipedIds.length > 0) {
+      const swipedIdSet = new Set(swipedIds);
+      baseProfiles = baseProfiles.filter(p => !swipedIdSet.has(p.user_id));
     }
     return baseProfiles;
   }, [externalProfiles, allProfiles, swipedIds]);
@@ -136,8 +138,8 @@ export function ClientTinderSwipeContainer({
     if (direction === 'right') triggerHaptic('success');
     else triggerHaptic('light');
 
-    // Immediately add to swiped IDs to prevent re-showing
-    setSwipedIds(prev => new Set(prev).add(currentProfile.user_id));
+    // Immediately add to swiped IDs to prevent re-showing (using array for state serialization)
+    setSwipedIds(prev => prev.includes(currentProfile.user_id) ? prev : [...prev, currentProfile.user_id]);
 
     // Record swipe
     swipeMutation.mutate({
@@ -184,7 +186,7 @@ export function ClientTinderSwipeContainer({
     // Reset all state for fresh start
     setIncludeRecentLikes(true); // Manual refresh should bring back even recently liked profiles
     setCurrentIndex(0);
-    setSwipedIds(new Set()); // Clear swiped IDs to show fresh profiles
+    setSwipedIds([]); // Clear swiped IDs to show fresh profiles
     setPage(0);
     setAllProfiles([]);
 
@@ -229,8 +231,9 @@ export function ClientTinderSwipeContainer({
         await new Promise(resolve => setTimeout(resolve, 500));
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
-    } catch (error: any) {
-      if (error?.message === 'QUOTA_EXCEEDED') {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      if (err?.message === 'QUOTA_EXCEEDED') {
         setUpgradeReason('You\'ve reached your conversation limit. Upgrade to continue:');
         setShowUpgradeDialog(true);
         toast.dismiss('conv');

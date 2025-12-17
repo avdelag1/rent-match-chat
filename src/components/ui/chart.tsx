@@ -96,6 +96,7 @@ ${colorConfig
     const sanitized = sanitizeColor(color);
     return sanitized ? `  --color-${key}: ${sanitized};` : null
   })
+  .filter((line): line is string => line !== null)
   .join("\n")}
 }
 `
