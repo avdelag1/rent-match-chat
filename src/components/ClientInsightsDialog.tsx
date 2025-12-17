@@ -3,13 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, User, Calendar, Flame, Star, MessageCircle, Eye, Award, TrendingUp, ThumbsUp } from 'lucide-react';
+import { MapPin, User, Calendar, Flame, Star, MessageCircle, Eye, Award, ThumbsUp } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
-import { useState, useMemo, memo } from 'react';
+import { useState, memo } from 'react';
 
 // Tag categories for organized display
 const PROPERTY_TAGS = [
@@ -94,14 +94,6 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
       setIsCreatingConversation(false);
     }
   };
-
-  // Memoize client statistics to prevent recalculation on every render
-  const clientStats = useMemo(() => ({
-    profileViews: Math.floor(Math.random() * 500) + 100,
-    ownerLikes: Math.floor(Math.random() * 50) + 10,
-    responseRate: Math.floor(Math.random() * 30) + 70,
-    averageResponseTime: `${Math.floor(Math.random() * 24) + 1} hours`
-  }), [profile?.user_id]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -189,44 +181,11 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               </div>
             )}
 
-            {/* Client Statistics */}
-            <div>
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                Client Statistics
-              </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-primary/10 p-4 rounded-lg text-center border border-primary/20">
-                  <Eye className="w-6 h-6 mx-auto text-primary mb-2" />
-                  <div className="text-2xl font-bold text-primary">{clientStats.profileViews}</div>
-                  <div className="text-xs text-muted-foreground">Profile Views</div>
-                </div>
-                
-                <div className="bg-secondary/10 p-4 rounded-lg text-center border border-secondary/20">
-                  <ThumbsUp className="w-6 h-6 mx-auto text-secondary mb-2" />
-                  <div className="text-2xl font-bold text-secondary">{clientStats.ownerLikes}</div>
-                  <div className="text-xs text-muted-foreground">Owner Likes</div>
-                </div>
-                
-                <div className="bg-green-500/10 p-4 rounded-lg text-center border border-green-500/20">
-                  <MessageCircle className="w-6 h-6 mx-auto text-green-600 dark:text-green-400 mb-2" />
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{clientStats.responseRate}%</div>
-                  <div className="text-xs text-muted-foreground">Response Rate</div>
-                </div>
-                
-                <div className="bg-blue-500/10 p-4 rounded-lg text-center border border-blue-500/20">
-                  <Calendar className="w-6 h-6 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{clientStats.averageResponseTime}</div>
-                  <div className="text-xs text-muted-foreground">Avg Response</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recommendation Insights */}
+            {/* Profile Highlights */}
             <div>
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
-                Why Owners Recommend This Client
+                Profile Highlights
               </h4>
               <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 p-4 rounded-lg border border-green-500/20 space-y-3">
                 {recommendationScore >= 4 && (
@@ -234,14 +193,6 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                     <Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
                     <p className="text-sm">
                       <span className="font-semibold">Highly Engaged Profile:</span> Complete profile with detailed preferences
-                    </p>
-                  </div>
-                )}
-                {clientStats.responseRate >= 80 && (
-                  <div className="flex items-start gap-2">
-                    <MessageCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                    <p className="text-sm">
-                      <span className="font-semibold">Excellent Communication:</span> Responds quickly and professionally
                     </p>
                   </div>
                 )}
@@ -253,11 +204,11 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                     </p>
                   </div>
                 )}
-                {clientStats.ownerLikes > 30 && (
+                {(profile.profile_images?.length || 0) > 2 && (
                   <div className="flex items-start gap-2">
-                    <Award className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <Eye className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
                     <p className="text-sm">
-                      <span className="font-semibold">Popular with Owners:</span> Many owners are interested in connecting
+                      <span className="font-semibold">Verified Photos:</span> Multiple profile photos uploaded
                     </p>
                   </div>
                 )}

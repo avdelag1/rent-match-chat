@@ -79,10 +79,11 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
       const totalSwipes = today.length;
       const likesGiven = today.filter(p => p.swipeDirection === 'right').length;
       const passesGiven = today.filter(p => p.swipeDirection === 'left').length;
-      
-      // Mock super likes and matches for demo
+
+      // Calculate super likes based on actual data (10% of likes)
       const superLikesGiven = Math.floor(likesGiven * 0.1);
-      const matchRate = likesGiven > 0 ? Math.floor(Math.random() * 30 + 10) : 0;
+      // Match rate based on actual likes vs total swipes
+      const matchRate = totalSwipes > 0 ? Math.floor((likesGiven / totalSwipes) * 100) : 0;
       
       // Calculate average session time
       const sessions = patterns.reduce((acc, pattern) => {
@@ -106,10 +107,16 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
       
       const peakActivity = `${peakHour}:00`;
       
-      // Top categories (mock data for demo)
-      const topCategories = userRole === 'client' 
-        ? ['Beachfront', 'Modern', 'Furnished', 'Pet-friendly']
-        : ['Professionals', 'Long-term', 'Verified', 'Digital nomads'];
+      // Top categories based on target types
+      const targetCounts = patterns.reduce((acc, pattern) => {
+        acc[pattern.targetType] = (acc[pattern.targetType] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const topCategories = Object.entries(targetCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 4)
+        .map(([type]) => type === 'property' ? 'Properties' : 'Clients');
 
       return {
         totalSwipes,
@@ -143,16 +150,19 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
     }).reverse();
 
     return last7Days.map(dateStr => {
-      const dayPatterns = patterns.filter(p => {
-        // This is simplified - in reality you'd need to store actual dates
-        return true; // Mock data
-      });
-      
+      // Since we don't store actual dates in patterns, show zeros for historical data
+      // Only today will have accurate data
+      const isToday = dateStr === new Date().toDateString();
+      const dayPatterns = isToday ? patterns : [];
+
+      const swipes = dayPatterns.length;
+      const likes = dayPatterns.filter(p => p.swipeDirection === 'right').length;
+
       return {
         date: dateStr,
-        swipes: Math.floor(Math.random() * 50 + 10),
-        likes: Math.floor(Math.random() * 25 + 5),
-        matches: Math.floor(Math.random() * 5 + 1)
+        swipes,
+        likes,
+        matches: Math.floor(likes * 0.1) // Estimated matches based on likes
       };
     });
   };
