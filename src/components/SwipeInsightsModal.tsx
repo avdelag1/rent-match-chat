@@ -469,10 +469,20 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   </h4>
                   <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 rounded-xl">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                      <div className={`w-3 h-3 rounded-full ${listing.status === 'available' ? 'bg-green-500 animate-pulse' : listing.status === 'pending' ? 'bg-yellow-500' : 'bg-gray-400'}`} />
                       <div>
-                        <p className="text-sm font-medium">Currently Available</p>
-                        <p className="text-xs text-muted-foreground">Last updated 2 hours ago</p>
+                        <p className="text-sm font-medium">
+                          {listing.status === 'available' ? 'Currently Available' :
+                           listing.status === 'pending' ? 'Application Pending' :
+                           listing.status === 'rented' ? 'Currently Rented' : 'Status Unknown'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {listing.updated_at
+                            ? `Last updated ${getTimeAgo(new Date(listing.updated_at))}`
+                            : listing.created_at
+                              ? `Listed ${getTimeAgo(new Date(listing.created_at))}`
+                              : 'Recently listed'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -507,4 +517,19 @@ function StatCard({ label, value, icon }: { label: string; value: number; icon: 
       <div className="text-xs text-muted-foreground">{label}</div>
     </div>
   );
+}
+
+function getTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) !== 1 ? 's' : ''} ago`;
+  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) !== 1 ? 's' : ''} ago`;
 }
