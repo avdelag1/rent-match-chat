@@ -51,7 +51,7 @@ export function useAccountLinking() {
         .maybeSingle();
 
       return { 
-        profile: { ...existingProfile, role: roleData?.role }, 
+        profile: { ...existingProfile, role: roleData?.role as 'client' | 'owner' | undefined }, 
         hasConflict: false // We'll determine this in the linking logic
       };
     } catch (error) {
@@ -242,7 +242,7 @@ export function useAccountLinking() {
 
       return {
         success: true,
-        existingProfile: newProfile,
+        existingProfile: { ...newProfile, role } as ExistingProfile,
         isNewAccount: true,
         roleConflict: false
       };

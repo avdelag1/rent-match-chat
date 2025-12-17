@@ -47,8 +47,7 @@ export function useMarkMessagesAsRead(conversationId: string, isActive: boolean)
                 if (error && import.meta.env.DEV) {
                   console.error('[MarkAsRead] Error marking new message as read:', error);
                 }
-              })
-              .catch(() => {
+              }, () => {
                 // Non-critical error - message may still be marked as read
               });
           }

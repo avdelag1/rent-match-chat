@@ -33,7 +33,7 @@ function reportMetric(metric: VitalMetric) {
   const vitals = getStorageJSON<VitalMetric[]>(STORAGE.WEB_VITALS_KEY, []);
   vitals.push({
     ...metric,
-    timestamp: new Date().toISOString()
+    timestamp: Date.now()
   });
   // Keep only last MAX_WEB_VITALS_STORED metrics
   if (vitals.length > LIMITS.MAX_WEB_VITALS_STORED) {

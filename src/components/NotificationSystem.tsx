@@ -85,7 +85,7 @@ export function NotificationSystem() {
                   type: 'message',
                   message: `${senderName}: ${messageText.slice(0, 100)}${messageText.length > 100 ? '...' : ''}`,
                   read: false
-                }]).then(() => {}).catch(() => {});
+                }]).then(() => {}, () => {});
 
                 // Show browser notification if permission granted
                 if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
@@ -176,7 +176,7 @@ export function NotificationSystem() {
                 type: 'like',
                 message: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
                 read: false
-              }]).then(() => {}).catch(() => {});
+              }]).then(() => {}, () => {});
 
               // Show browser notification
               if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {

@@ -18,61 +18,43 @@ export function AppLoadingScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gradient-to-br from-orange-950 via-red-900 to-orange-950 flex flex-col items-center justify-center z-50"
+      className="fixed inset-0 bg-background flex flex-col items-center justify-center z-50"
     >
       {/* Brand Name */}
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-5xl font-black tracking-tight bg-gradient-to-r from-orange-300 via-orange-400 to-red-400 bg-clip-text text-transparent mb-8"
+        className="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-orange-500 to-red-500 bg-clip-text text-transparent mb-12"
       >
         SwipeMatch
       </motion.h1>
 
-      {/* Loading Spinner */}
+      {/* Modern spinner */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="flex flex-col items-center gap-4"
+        className="flex flex-col items-center gap-6"
       >
-        {/* Circular spinner */}
-        <div className="relative w-12 h-12">
+        {/* Clean circular spinner */}
+        <div className="relative w-10 h-10">
           <motion.div
-            className="absolute inset-0 rounded-full border-4 border-orange-500/30"
+            className="absolute inset-0 rounded-full border-2 border-muted"
           />
           <motion.div
-            className="absolute inset-0 rounded-full border-4 border-transparent border-t-orange-400"
+            className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
             animate={{ rotate: 360 }}
             transition={{
-              duration: 1,
+              duration: 0.8,
               repeat: Infinity,
               ease: "linear"
             }}
           />
         </div>
 
-        {/* Loading text with animated dots */}
-        <div className="flex items-center gap-1">
-          <span className="text-sm text-orange-200/80 font-medium">Loading</span>
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              animate={{
-                opacity: [0.3, 1, 0.3],
-              }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
-                delay: i * 0.2,
-              }}
-              className="text-orange-300 text-sm"
-            >
-              .
-            </motion.span>
-          ))}
-        </div>
+        {/* Simple loading text */}
+        <span className="text-sm text-muted-foreground">Loading...</span>
       </motion.div>
 
       {/* Refresh button */}
@@ -80,10 +62,10 @@ export function AppLoadingScreen() {
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleRefresh}
-          className="mt-10 px-6 py-3 text-sm text-orange-100 bg-orange-500/20 hover:bg-orange-500/30 rounded-xl transition-all duration-200 backdrop-blur-sm border border-orange-400/30"
+          className="mt-12 px-6 py-2.5 text-sm text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors"
         >
           Taking too long? Tap to refresh
         </motion.button>
