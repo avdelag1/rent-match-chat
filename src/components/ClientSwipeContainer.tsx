@@ -117,10 +117,11 @@ export function ClientSwipeContainer({
   };
 
   const handleRefresh = useCallback(async () => {
-    setIncludeRecentLikes(true); // Manual refresh should show even liked profiles again
+    // Keep includeRecentLikes as false - we don't want to show already-liked profiles
+    setIncludeRecentLikes(false);
     setCurrentIndex(0);
     await refetch();
-    sonnerToast.success('All profiles reloaded');
+    sonnerToast.success('New profiles loaded');
   }, [refetch]);
 
   const handleInsights = (clientId: string) => {
