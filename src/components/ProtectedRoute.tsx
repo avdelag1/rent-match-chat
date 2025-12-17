@@ -21,7 +21,6 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (loading) {
-        console.warn('[ProtectedRoute] Auth loading timed out');
         setTimedOut(true);
       }
     }, 10000);

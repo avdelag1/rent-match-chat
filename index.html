@@ -221,9 +221,8 @@
         window.addEventListener('load', async () => {
           try {
             const registration = await navigator.serviceWorker.register('/sw.js');
-            console.log('SW registered: ', registration);
           } catch (error) {
-            console.log('SW registration failed: ', error);
+            // SW registration failed
           }
         });
       }
@@ -231,7 +230,6 @@
       // Force cache clear on critical updates - only clear app-related caches
       // Bump version (e.g., 1.0.3 -> 1.0.4) when breaking cache changes are needed
       if (localStorage.getItem('swipematch_last_clear') !== '2.0.0') {
-        console.log('Clearing app caches for fresh content...');
         if ('caches' in window) {
           caches.keys().then(names => {
             names.forEach(name => {

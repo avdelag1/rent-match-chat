@@ -38,7 +38,7 @@ const loadPushNotifications = async () => {
       const module = await import('@capacitor/push-notifications' as any);
       PushNotifications = module.PushNotifications;
     } catch (error) {
-      console.log('Push notifications not available:', error);
+      // Push notifications not available
     }
   }
   return PushNotifications;
@@ -64,7 +64,6 @@ export function useNativePushNotifications() {
         platform,
         updated_at: new Date().toISOString(),
       }));
-      console.log('Device token saved locally');
       setIsRegistered(true);
     } catch (error) {
       console.error('Error saving device token:', error);
@@ -77,7 +76,6 @@ export function useNativePushNotifications() {
 
     try {
       localStorage.removeItem(`push_token_${user.id}`);
-      console.log('Device token removed');
     } catch (error) {
       console.error('Error removing device token:', error);
     }
@@ -87,7 +85,6 @@ export function useNativePushNotifications() {
   const registerForPush = useCallback(async () => {
     const PN = await loadPushNotifications();
     if (!PN) {
-      console.log('Push notifications not available on this platform');
       return false;
     }
 
@@ -101,12 +98,10 @@ export function useNativePushNotifications() {
         setPermissionStatus(requestResult.receive);
 
         if (requestResult.receive !== 'granted') {
-          console.log('Push notification permission denied');
           return false;
         }
       } else if (permResult.receive === 'denied') {
         setPermissionStatus('denied');
-        console.log('Push notification permission previously denied');
         return false;
       } else {
         setPermissionStatus('granted');
@@ -135,7 +130,6 @@ export function useNativePushNotifications() {
       const registrationListener = await PN.addListener(
         'registration',
         (token: PushNotificationToken) => {
-          console.log('Push registration success, token:', token.value);
           saveToken(token.value);
         }
       );
@@ -154,7 +148,6 @@ export function useNativePushNotifications() {
       const receivedListener = await PN.addListener(
         'pushNotificationReceived',
         (notification: PushNotificationSchema) => {
-          console.log('Push notification received:', notification);
           // The notification will show automatically on iOS/Android
           // You can also show a local notification or toast here
         }
@@ -165,8 +158,6 @@ export function useNativePushNotifications() {
       const actionListener = await PN.addListener(
         'pushNotificationActionPerformed',
         (action: ActionPerformed) => {
-          console.log('Push notification action performed:', action);
-
           // Handle navigation based on notification data
           const data = action.notification.data;
           if (data?.link_url) {

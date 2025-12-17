@@ -4,6 +4,9 @@
  * Reports to analytics/logging service
  */
 
+import { STORAGE, LIMITS } from '@/constants/app';
+import { getStorageJSON, setStorageJSON, removeStorageItem } from '@/utils/storage';
+
 export interface VitalMetric {
   name: 'LCP' | 'FID' | 'CLS' | 'TTFB';
   value: number;
@@ -27,20 +30,16 @@ function reportMetric(metric: VitalMetric) {
   // Example: Sentry.captureMessage(`Web Vital: ${metric.name}`, 'info', { metric })
 
   // Store in localStorage for debugging
-  try {
-    const vitals = JSON.parse(localStorage.getItem('webVitals') || '[]');
-    vitals.push({
-      ...metric,
-      timestamp: new Date().toISOString()
-    });
-    // Keep only last 50 metrics
-    if (vitals.length > 50) {
-      vitals.shift();
-    }
-    localStorage.setItem('webVitals', JSON.stringify(vitals));
-  } catch (e) {
-    // Silent fail
+  const vitals = getStorageJSON<VitalMetric[]>(STORAGE.WEB_VITALS_KEY, []);
+  vitals.push({
+    ...metric,
+    timestamp: new Date().toISOString()
+  });
+  // Keep only last MAX_WEB_VITALS_STORED metrics
+  if (vitals.length > LIMITS.MAX_WEB_VITALS_STORED) {
+    vitals.shift();
   }
+  setStorageJSON(STORAGE.WEB_VITALS_KEY, vitals);
 }
 
 /**
@@ -108,6 +107,7 @@ export function monitorLCP() {
   try {
     observer.observe({ entryTypes: ['largest-contentful-paint'] });
   } catch (e) {
+    console.error('LCP monitoring error:', e);
   }
 }
 
@@ -140,6 +140,7 @@ export function monitorFID() {
   try {
     observer.observe({ entryTypes: ['first-input'] });
   } catch (e) {
+    console.error('FID monitoring error:', e);
   }
 }
 
@@ -172,6 +173,7 @@ export function monitorCLS() {
   try {
     observer.observe({ entryTypes: ['layout-shift'] });
   } catch (e) {
+    console.error('CLS monitoring error:', e);
   }
 }
 
@@ -193,16 +195,12 @@ export function initWebVitalsMonitoring() {
  * Get all recorded Web Vitals from localStorage
  */
 export function getRecordedVitals(): VitalMetric[] {
-  try {
-    return JSON.parse(localStorage.getItem('webVitals') || '[]');
-  } catch {
-    return [];
-  }
+  return getStorageJSON<VitalMetric[]>(STORAGE.WEB_VITALS_KEY, []);
 }
 
 /**
  * Clear recorded Web Vitals
  */
 export function clearRecordedVitals() {
-  localStorage.removeItem('webVitals');
+  removeStorageItem(STORAGE.WEB_VITALS_KEY);
 }
