@@ -84,12 +84,16 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
         let preferredListingTypes = ['rent']; // Default to rent
         
         if (user.user) {
-          const { data: preferences } = await supabase
+          const { data: preferences, error: prefError } = await supabase
             .from('client_filter_preferences')
             .select('preferred_listing_types')
             .eq('user_id', user.user.id)
             .maybeSingle();
-          
+
+          if (prefError) {
+            console.error('Error fetching filter preferences:', prefError);
+          }
+
           if (preferences?.preferred_listing_types?.length) {
             preferredListingTypes = preferences.preferred_listing_types;
           }
@@ -106,9 +110,9 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
           query = query.in('listing_type', preferredListingTypes);
         }
 
-        // Exclude swiped properties
+        // Exclude swiped properties - use array directly for parameterized query
         if (excludeSwipedIds.length > 0) {
-          query = query.not('id', 'in', `(${excludeSwipedIds.join(',')})`);
+          query = query.not('id', 'in', `(${excludeSwipedIds.map(id => `"${id}"`).join(',')})`);
         }
 
         query = query.limit(20);
@@ -148,13 +152,14 @@ export function useOwnerListings() {
           .select('*')
           .eq('owner_id', user.user.id)
           .eq('is_active', true)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(100); // Prevent loading too many listings at once
 
         if (error) {
           console.error('Owner listings query error:', error);
           throw error;
         }
-        
+
         return (listings as Listing[]) || [];
       } catch (error) {
         console.error('Error in useOwnerListings:', error);

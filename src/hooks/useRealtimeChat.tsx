@@ -110,13 +110,17 @@ export function useRealtimeChat(conversationId: string) {
         },
         async (payload) => {
           const newMessage = payload.new;
-          
+
           // Get sender details
-          const { data: senderProfile } = await supabase
+          const { data: senderProfile, error: profileError } = await supabase
             .from('profiles')
             .select('id, full_name, avatar_url')
             .eq('id', newMessage.sender_id)
             .maybeSingle();
+
+          if (profileError) {
+            console.error('Error fetching sender profile in realtime:', profileError);
+          }
 
           const completeMessage = {
             ...newMessage,

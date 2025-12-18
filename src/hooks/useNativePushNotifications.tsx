@@ -120,7 +120,7 @@ export function useNativePushNotifications() {
   useEffect(() => {
     if (!isNative || !user?.id) return;
 
-    let cleanupFunctions: (() => void)[] = [];
+    const cleanupFunctions: (() => void)[] = [];
 
     const setupListeners = async () => {
       const PN = await loadPushNotifications();

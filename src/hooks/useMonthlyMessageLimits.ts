@@ -33,11 +33,12 @@ export function useMonthlyMessageLimits() {
 
       if (error) {
         console.error('Error fetching message count:', error);
+        // Be conservative on error - deny messaging to prevent abuse
         return {
-          used: 0,
+          used: benefits.messageLimit,
           limit: benefits.messageLimit,
-          remaining: benefits.messageLimit,
-          canSend: true,
+          remaining: 0,
+          canSend: false,
         };
       }
 

@@ -247,9 +247,10 @@ export function ClientTinderSwipeCard({
                 setReportDialogOpen(true);
               }}
               className="absolute top-3 right-4 z-30 p-1 text-red-500 hover:text-red-600 opacity-80 hover:opacity-100 transition-all active:scale-90"
+              aria-label={`Report ${profile.name}`}
               title="Report User"
             >
-              <Flag className="w-5 h-5" />
+              <Flag className="w-5 h-5" aria-hidden="true" />
             </button>
           )}
 
@@ -427,8 +428,9 @@ export function ClientTinderSwipeCard({
                   }}
                   className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
                   title="Undo"
+                  aria-label="Undo last swipe"
                 >
-                  <RotateCcw className="w-5 h-5" />
+                  <RotateCcw className="w-5 h-5" aria-hidden="true" />
                 </motion.button>
               )}
 
@@ -443,8 +445,9 @@ export function ClientTinderSwipeCard({
                 }}
                 className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
                 title="Dislike"
+                aria-label={`Pass on ${profile.name}`}
               >
-                <X className="w-7 h-7" strokeWidth={3} />
+                <X className="w-7 h-7" strokeWidth={3} aria-hidden="true" />
               </motion.button>
 
               {/* Insights Button */}
@@ -459,8 +462,9 @@ export function ClientTinderSwipeCard({
                   }}
                   className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
                   title="View Insights"
+                  aria-label={`View insights for ${profile.name}`}
                 >
-                  <Eye className="w-5 h-5" />
+                  <Eye className="w-5 h-5" aria-hidden="true" />
                 </motion.button>
               )}
 
@@ -475,8 +479,9 @@ export function ClientTinderSwipeCard({
                 }}
                 className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
                 title="Like"
+                aria-label={`Like ${profile.name}`}
               >
-                <Heart className="w-7 h-7" fill="currentColor" />
+                <Heart className="w-7 h-7" fill="currentColor" aria-hidden="true" />
               </motion.button>
             </div>
           </div>
