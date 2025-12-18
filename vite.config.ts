@@ -60,20 +60,59 @@ export default defineConfig(({ mode }) => ({
     reportCompressedSize: true,
     // Explicit cssCodeSplit for clarity (defaults to true)
     cssCodeSplit: true,
+    // Target modern browsers for smaller bundles (removes polyfills)
+    target: 'es2020',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'react-router': ['react-router-dom'],
-          'react-query': ['@tanstack/react-query'],
-          'supabase': ['@supabase/supabase-js'],
-          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast'],
-          'motion': ['framer-motion']
+        // Use content hashes for long-term caching
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks(id) {
+          // Core React runtime - loaded on every page
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'react-vendor';
+          }
+          // React Router - loaded on every page
+          if (id.includes('node_modules/react-router')) {
+            return 'react-router';
+          }
+          // React Query - loaded for data fetching pages
+          if (id.includes('node_modules/@tanstack/react-query')) {
+            return 'react-query';
+          }
+          // Supabase client - loaded for authenticated pages
+          if (id.includes('node_modules/@supabase')) {
+            return 'supabase';
+          }
+          // Framer Motion - loaded for animated pages
+          if (id.includes('node_modules/framer-motion')) {
+            return 'motion';
+          }
+          // Radix UI components - split by component for better tree-shaking
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'ui-radix';
+          }
+          // Zod validation - loaded for form pages
+          if (id.includes('node_modules/zod')) {
+            return 'validation';
+          }
+          // React Hook Form - loaded for form pages
+          if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform')) {
+            return 'forms';
+          }
+          // Other vendor chunks
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         }
+      },
+      // Enable tree shaking
+      treeshake: {
+        moduleSideEffects: 'no-external',
+        propertyReadSideEffects: false
       }
     },
     chunkSizeWarningLimit: 1000,
-    // TODO: Add rollup-plugin-visualizer for bundle analysis when needed
-    // import { visualizer } from 'rollup-plugin-visualizer'; and add to plugins
   },
 }));
