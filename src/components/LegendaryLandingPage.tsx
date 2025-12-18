@@ -238,12 +238,16 @@ function LegendaryLandingPage() {
           <h1 className="font-black drop-shadow-2xl text-center leading-none">
             <motion.span className="block" style={{
             fontSize: 'clamp(4rem, 20vw, 8rem)',
+            fontWeight: 900,
             letterSpacing: '0.02em',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            backgroundClip: 'text',
+            WebkitTextStroke: '2px rgba(249, 115, 22, 0.3)',
+            textShadow: '0 0 40px rgba(249, 115, 22, 0.5), 0 0 80px rgba(234, 88, 12, 0.3), 0 4px 20px rgba(0, 0, 0, 0.5)',
+            filter: 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.4))'
           }} animate={{
             backgroundPosition: ['200% 50%', '0% 50%']
           }} transition={{
@@ -255,12 +259,16 @@ function LegendaryLandingPage() {
             </motion.span>
             <motion.span className="block -mt-3 sm:-mt-4" style={{
             fontSize: 'clamp(3rem, 16vw, 6rem)',
+            fontWeight: 900,
             letterSpacing: '0.02em',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            backgroundClip: 'text',
+            WebkitTextStroke: '2px rgba(249, 115, 22, 0.3)',
+            textShadow: '0 0 40px rgba(249, 115, 22, 0.5), 0 0 80px rgba(234, 88, 12, 0.3), 0 4px 20px rgba(0, 0, 0, 0.5)',
+            filter: 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.4))'
           }} animate={{
             backgroundPosition: ['200% 50%', '0% 50%']
           }} transition={{
@@ -288,7 +296,7 @@ function LegendaryLandingPage() {
           {/* I'm a Client Button */}
           <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
-          x: -150,
+          x: 150,
           scale: 0.9
         }} animate={{
           opacity: 1,
@@ -296,8 +304,9 @@ function LegendaryLandingPage() {
           scale: 1
         }} transition={{
           type: "spring",
-          stiffness: 120,
-          damping: 18,
+          stiffness: 100,
+          damping: 12,
+          mass: 0.8,
           delay: 0.5
         }} whileHover={{
           scale: 1.03,
@@ -338,7 +347,7 @@ function LegendaryLandingPage() {
           {/* I'm an Owner Button */}
           <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
-          x: 150,
+          x: -150,
           scale: 0.9
         }} animate={{
           opacity: 1,
@@ -346,8 +355,9 @@ function LegendaryLandingPage() {
           scale: 1
         }} transition={{
           type: "spring",
-          stiffness: 120,
-          damping: 18,
+          stiffness: 100,
+          damping: 12,
+          mass: 0.8,
           delay: 0.65
         }} whileHover={{
           scale: 1.03,

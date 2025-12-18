@@ -97,7 +97,7 @@ export function ClientSwipeContainer({
     // Move to next card immediately - no delay for instant response
     setCurrentIndex(prev => prev + 1);
     setSwipeDirection(null);
-  }, [currentIndex, clientProfiles, swipeMutation, recordSwipe]);
+  }, [currentIndex, clientProfiles, swipeMutation, recordSwipe, recordProfileView]);
 
   const handleSuperLike = useCallback(async (targetId: string, targetType: string) => {
     swipeMutation.mutate({
