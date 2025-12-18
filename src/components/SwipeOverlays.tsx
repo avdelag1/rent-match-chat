@@ -1,17 +1,19 @@
 import { MotionValue, useTransform, motion } from 'framer-motion';
+import { memo } from 'react';
 
 interface SwipeOverlaysProps {
   x: MotionValue<number>;
 }
 
-export function SwipeOverlays({ x }: SwipeOverlaysProps) {
-  // Calculate opacity based on drag distance - much more responsive
+export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysProps) {
+  // Optimized: Calculate opacity and scale directly from x in single transforms
+  // Avoids chained transforms which reduce performance
   const likeOpacity = useTransform(x, [0, 100], [0, 1]);
   const passOpacity = useTransform(x, [-100, 0], [1, 0]);
 
-  // Scale animations for emojis and text
-  const likeScale = useTransform(likeOpacity, [0, 1], [0.8, 1.1]);
-  const passScale = useTransform(passOpacity, [0, 1], [0.8, 1.1]);
+  // Direct scale calculation from x instead of chaining from opacity
+  const likeScale = useTransform(x, [0, 100], [0.8, 1.1]);
+  const passScale = useTransform(x, [-100, 0], [1.1, 0.8]);
 
   return (
     <>
@@ -48,4 +50,4 @@ export function SwipeOverlays({ x }: SwipeOverlaysProps) {
       </motion.div>
     </>
   );
-}
+});

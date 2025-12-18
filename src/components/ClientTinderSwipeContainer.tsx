@@ -94,8 +94,6 @@ export function ClientTinderSwipeContainer({
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
-        if (import.meta.env.DEV) {
-        }
         setLoadingTimeoutExceeded(true);
       }, 5000); // 5 second timeout
       return () => clearTimeout(timeout);
@@ -110,8 +108,6 @@ export function ClientTinderSwipeContainer({
       setAllProfiles(prev => {
         const existingIds = new Set(prev.map(p => p.user_id));
         const newProfiles = internalProfiles.filter(p => !existingIds.has(p.user_id));
-        if (import.meta.env.DEV) {
-        }
         return [...prev, ...newProfiles];
       });
     }
@@ -121,8 +117,6 @@ export function ClientTinderSwipeContainer({
   useEffect(() => {
     const remainingCards = profiles.length - currentIndex;
     if (remainingCards <= 3 && !isLoading && !externalProfiles) {
-      if (import.meta.env.DEV) {
-      }
       setPage(prev => prev + 1);
     }
   }, [currentIndex, profiles.length, isLoading, externalProfiles]);

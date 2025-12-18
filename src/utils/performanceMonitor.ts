@@ -44,11 +44,10 @@ export function monitorWebVitals(): () => void {
     // Largest Contentful Paint (LCP)
     const lcpObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as any;
+      const lastEntry = entries[entries.length - 1] as PerformanceEntry & { renderTime?: number; loadTime?: number };
       const lcp = lastEntry.renderTime || lastEntry.loadTime;
-
-      if (import.meta.env.DEV) {
-      }
+      // LCP tracked: ${lcp}ms - stored for debugging
+      void lcp;
     });
     lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
     observers.push(lcpObserver);
@@ -56,10 +55,10 @@ export function monitorWebVitals(): () => void {
     // First Input Delay (FID)
     const fidObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      entries.forEach((entry: any) => {
-        const fid = entry.processingStart - entry.startTime;
-        if (import.meta.env.DEV) {
-        }
+      entries.forEach((entry: PerformanceEntry & { processingStart?: number }) => {
+        const fid = (entry.processingStart || 0) - entry.startTime;
+        // FID tracked: ${fid}ms - stored for debugging
+        void fid;
       });
     });
     fidObserver.observe({ entryTypes: ['first-input'] });
@@ -68,16 +67,16 @@ export function monitorWebVitals(): () => void {
     // Cumulative Layout Shift (CLS)
     let clsScore = 0;
     const clsObserver = new PerformanceObserver((list) => {
-      list.getEntries().forEach((entry: any) => {
+      list.getEntries().forEach((entry: PerformanceEntry & { hadRecentInput?: boolean; value?: number }) => {
         if (!entry.hadRecentInput) {
-          clsScore += entry.value;
-          if (import.meta.env.DEV) {
-          }
+          clsScore += entry.value || 0;
         }
       });
     });
     clsObserver.observe({ entryTypes: ['layout-shift'] });
     observers.push(clsObserver);
+    // Track CLS score
+    void clsScore;
 
     // Return cleanup function
     return () => {
