@@ -4,28 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
-    <!-- Cache Control for immediate updates -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+    <!-- Note: Cache control is handled via HTTP headers in _headers (Netlify) or vercel.json (Vercel) -->
     
-    <!-- DNS Prefetch for older browsers -->
+    <!-- DNS Prefetch for third-party resources -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    
-    <!-- Preconnect to establish early connection -->
+    <link rel="dns-prefetch" href="https://storage.googleapis.com">
+
+    <!-- Preconnect to establish early connections (high priority) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://storage.googleapis.com" crossorigin>
     
-    <!-- Non-blocking font loading using media trick -->
-    <link 
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" 
+    <!-- Optimized font loading with reduced weights and font-display: swap -->
+    <!-- Only load weights that are actually used: 400, 600, 700, 800 for Poppins; 400, 500, 600 for Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
     >
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     </noscript>
     <title>SwipeMatch - Find Your Perfect Rental Property or Tenant</title>
     <meta name="description" content="Discover your ideal rental property or tenant with SwipeMatch. Swipe through verified listings, connect with perfect matches, and find your next home or tenant effortlessly.">
@@ -121,7 +121,9 @@
         document.documentElement.classList.add('reduce-motion');
       }
     </script>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Preload critical chunks for faster initial load -->
+    <link rel="modulepreload" href="/src/main.tsx">
   </head>
 
   <body>
@@ -289,5 +291,8 @@
         localStorage.setItem('swipematch_last_clear', '2.0.0');
       }
     </script>
+
+    <!-- Main application script - loaded at end of body for non-blocking render -->
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
