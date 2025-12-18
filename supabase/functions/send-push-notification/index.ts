@@ -212,7 +212,7 @@ serve(async (req) => {
 
     // Send to all devices
     let successCount = 0
-    let failedTokenIds: string[] = []
+    const failedTokenIds: string[] = []
 
     for (const deviceToken of tokens) {
       try {

@@ -94,6 +94,6 @@ export const MESSAGING = {
 export const VALIDATION = {
   COLOR_REGEX: /^(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\)|[a-zA-Z]+)$/,
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PHONE_REGEX: /^[\d\s\-\+\(\)]+$/,
+  PHONE_REGEX: /^[\d\s\-+()]+$/,
   URL_REGEX: /^https?:\/\/.+/,
 } as const;
