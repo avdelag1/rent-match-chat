@@ -284,7 +284,7 @@ function LegendaryLandingPage() {
         <div className="space-y-2 mt-8">
 
           {/* I'm a Client Button */}
-          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-lg mx-auto py-2 px-10 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: -150,
           scale: 0.9
@@ -334,7 +334,7 @@ function LegendaryLandingPage() {
           </motion.button>
 
           {/* I'm an Owner Button */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-lg mx-auto py-2 px-10 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: 150,
           scale: 0.9

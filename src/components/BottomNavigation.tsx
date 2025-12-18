@@ -160,28 +160,6 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     }
   };
 
-  // Get glow background class for the active ring (explicit colors, not bg-current)
-  const getGlowBgClass = (item: NavItem) => {
-    switch (item.id) {
-      case 'browse':
-        return 'bg-red-400';
-      case 'likes':
-      case 'liked':
-        return 'bg-orange-400';
-      case 'messages':
-        return 'bg-blue-400';
-      case 'listings':
-        return 'bg-red-400';
-      case 'profile':
-        return 'bg-red-400';
-      case 'hire':
-        return 'bg-emerald-400';
-      case 'filter':
-        return 'bg-purple-400';
-      default:
-        return 'bg-red-400';
-    }
-  };
 
   return (
     <nav className="app-bottom-bar pointer-events-none px-3">
@@ -212,25 +190,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 delay: 0.15 + index * 0.05
               }}
               onClick={() => handleNavClick(item)}
-              whileHover={{ scale: 1.15 }}
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className={cn(
-                'relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl',
-                active && 'bg-white/10'
-              )}
+              className="relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl"
             >
-              {/* Animated glow ring for active state */}
-              <AnimatePresence>
-                {active && (
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 1.2, opacity: 0 }}
-                    className={cn("absolute inset-0 rounded-2xl opacity-20", getGlowBgClass(item))}
-                  />
-                )}
-              </AnimatePresence>
-
               {/* Notification Badge - Animated dot */}
               <AnimatePresence>
                 {item.badge && item.badge > 0 && (
@@ -257,21 +220,20 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                   className={cn(
                     'h-6 w-6 transition-all duration-200',
                     item.isCenter && 'h-7 w-7',
-                    active && 'scale-110 drop-shadow-[0_0_8px_currentColor]',
                     getIconColorClass(item, active)
                   )}
                   strokeWidth={active ? 2.5 : 2}
                 />
 
-                {/* Active indicator dot */}
+                {/* Active indicator - subtle underline */}
                 <AnimatePresence>
                   {active && (
                     <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      exit={{ scaleX: 0, opacity: 0 }}
                       className={cn(
-                        "w-1.5 h-1.5 rounded-full mt-1.5 shadow-lg",
+                        "w-4 h-0.5 rounded-full mt-1",
                         getIndicatorColorClass(item)
                       )}
                     />

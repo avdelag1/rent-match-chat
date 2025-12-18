@@ -68,6 +68,10 @@ export interface Listing {
   // Additional details
   description_short?: string;
   description_full?: string;
+  
+  // Timestamps
+  updated_at?: string;
+  created_at?: string;
 }
 
 export function useListings(excludeSwipedIds: string[] = [], options: { enabled?: boolean } = {}) {
