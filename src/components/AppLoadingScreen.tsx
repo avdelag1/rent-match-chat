@@ -14,18 +14,21 @@ export function AppLoadingScreen() {
     window.location.reload();
   };
 
-  // Animated fire particles
+  // Animated fire particles (reduced count for better performance)
   const FireParticles = () => {
-    const particles = Array.from({ length: 12 }, (_, i) => ({
+    const particles = Array.from({ length: 8 }, (_, i) => ({
       id: i,
       size: 2 + (i % 3) * 1.5,
-      delay: i * 0.3,
+      delay: i * 0.4,
       duration: 2 + (i % 3) * 0.5,
       x: (i % 5 - 2) * 40,
     }));
 
     return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{
+        willChange: 'transform',
+        contain: 'layout style paint'
+      }}>
         {particles.map((particle) => (
           <motion.div
             key={particle.id}
@@ -36,6 +39,7 @@ export function AppLoadingScreen() {
               background: `radial-gradient(circle, #ff6b35, #f97316, transparent)`,
               borderRadius: '50%',
               boxShadow: `0 0 ${particle.size * 2}px #ff6b35`,
+              willChange: 'transform, opacity',
             }}
             animate={{
               y: [-400, -100],
@@ -61,6 +65,10 @@ export function AppLoadingScreen() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex flex-col items-center justify-center z-50 overflow-hidden"
+      style={{
+        willChange: 'opacity',
+        contain: 'layout style paint'
+      }}
     >
       {/* Animated mesh gradient background */}
       <div className="absolute inset-0 opacity-30">

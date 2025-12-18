@@ -59,9 +59,9 @@ function LegendaryLandingPage() {
 
   // Realistic fire embers rising from ground
   const FireParticles = () => {
-    // Pre-calculated values for consistent renders
+    // Pre-calculated values for consistent renders (reduced for better mobile performance)
     const embers = Array.from({
-      length: 25
+      length: 18
     }, (_, i) => ({
       id: i,
       size: 1.5 + i % 5 * 1.2,
@@ -73,7 +73,7 @@ function LegendaryLandingPage() {
       glowSize: 4 + i % 4 * 3
     }));
     const orbs = Array.from({
-      length: 10
+      length: 6
     }, (_, i) => ({
       id: i,
       size: 40 + i % 5 * 30,
@@ -85,7 +85,10 @@ function LegendaryLandingPage() {
       delay: i * 0.8 % 4,
       drift: (i % 7 - 3) * 40
     }));
-    return <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    return <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{
+      willChange: 'transform',
+      contain: 'layout style paint'
+    }}>
         {/* Ground glow effect */}
         <motion.div className="absolute bottom-0 left-0 right-0 h-32" style={{
         background: 'linear-gradient(to top, rgba(255,69,0,0.08), rgba(255,107,53,0.04), transparent)'
@@ -152,7 +155,10 @@ function LegendaryLandingPage() {
       }} />
       </div>;
   };
-  return <motion.div ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" onMouseMove={handleMouseMove} onClick={createRipple} animate={{
+  return <motion.div ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" style={{
+    willChange: 'background',
+    contain: 'paint'
+  }} onMouseMove={handleMouseMove} onClick={createRipple} animate={{
     background: `radial-gradient(circle at ${50 + mousePosition.x}% ${50 + mousePosition.y}%, rgb(17 17 17), rgb(3 3 3), rgb(10 10 10))`
   }} transition={{
     duration: 0.3
