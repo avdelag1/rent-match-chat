@@ -241,19 +241,17 @@ function LegendaryLandingPage() {
         duration: 0.6,
         delay: 0.2
       }} className="space-y-4">
-          <h1 className="font-black drop-shadow-2xl text-center leading-none">
+          <h1 className="font-black text-center leading-none" style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}>
             <motion.span className="block" style={{
             fontSize: 'clamp(4rem, 20vw, 8rem)',
             fontWeight: 900,
-            letterSpacing: '0.02em',
+            letterSpacing: '-0.02em',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-            WebkitTextStroke: '2px rgba(249, 115, 22, 0.3)',
-            textShadow: '0 0 40px rgba(249, 115, 22, 0.5), 0 0 80px rgba(234, 88, 12, 0.3), 0 4px 20px rgba(0, 0, 0, 0.5)',
-            filter: 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.4))'
+            filter: 'drop-shadow(0 2px 10px rgba(249, 115, 22, 0.35))'
           }} animate={{
             backgroundPosition: ['200% 50%', '0% 50%']
           }} transition={{
@@ -266,15 +264,13 @@ function LegendaryLandingPage() {
             <motion.span className="block -mt-3 sm:-mt-4" style={{
             fontSize: 'clamp(3rem, 16vw, 6rem)',
             fontWeight: 900,
-            letterSpacing: '0.02em',
+            letterSpacing: '-0.02em',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-            WebkitTextStroke: '2px rgba(249, 115, 22, 0.3)',
-            textShadow: '0 0 40px rgba(249, 115, 22, 0.5), 0 0 80px rgba(234, 88, 12, 0.3), 0 4px 20px rgba(0, 0, 0, 0.5)',
-            filter: 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.4))'
+            filter: 'drop-shadow(0 2px 10px rgba(249, 115, 22, 0.35))'
           }} animate={{
             backgroundPosition: ['200% 50%', '0% 50%']
           }} transition={{

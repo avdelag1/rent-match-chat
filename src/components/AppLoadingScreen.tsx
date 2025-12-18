@@ -97,21 +97,19 @@ export function AppLoadingScreen() {
         transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
         className="relative z-10 mb-16"
       >
-        <h1 className="font-black text-center leading-none">
+        <h1 className="font-black text-center leading-none" style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}>
           <motion.span
             className="block"
             style={{
-              fontSize: 'clamp(3rem, 12vw, 5rem)',
+              fontSize: 'clamp(3.5rem, 14vw, 6rem)',
               fontWeight: 900,
-              letterSpacing: '0.02em',
+              letterSpacing: '-0.02em',
               background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              WebkitTextStroke: '1.5px rgba(249, 115, 22, 0.3)',
-              textShadow: '0 0 30px rgba(249, 115, 22, 0.5), 0 0 60px rgba(234, 88, 12, 0.3)',
-              filter: 'drop-shadow(0 0 15px rgba(249, 115, 22, 0.4))',
+              filter: 'drop-shadow(0 2px 8px rgba(249, 115, 22, 0.3))',
             }}
             animate={{
               backgroundPosition: ['200% 50%', '0% 50%'],
@@ -125,19 +123,17 @@ export function AppLoadingScreen() {
             Swipe
           </motion.span>
           <motion.span
-            className="block -mt-2"
+            className="block -mt-3"
             style={{
-              fontSize: 'clamp(2.5rem, 10vw, 4rem)',
+              fontSize: 'clamp(3rem, 12vw, 5rem)',
               fontWeight: 900,
-              letterSpacing: '0.02em',
+              letterSpacing: '-0.02em',
               background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              WebkitTextStroke: '1.5px rgba(249, 115, 22, 0.3)',
-              textShadow: '0 0 30px rgba(249, 115, 22, 0.5), 0 0 60px rgba(234, 88, 12, 0.3)',
-              filter: 'drop-shadow(0 0 15px rgba(249, 115, 22, 0.4))',
+              filter: 'drop-shadow(0 2px 8px rgba(249, 115, 22, 0.3))',
             }}
             animate={{
               backgroundPosition: ['200% 50%', '0% 50%'],

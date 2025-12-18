@@ -5,20 +5,29 @@ import './index.css'
 import './styles/responsive.css'
 import { ErrorBoundaryWrapper } from './components/ErrorBoundaryWrapper'
 
-// Remove static loading screen immediately before React renders
-const loadingScreen = document.getElementById('app-loading-screen');
-if (loadingScreen) {
-  loadingScreen.remove();
-}
-
 // Render React app immediately - fastest possible FCP
-createRoot(document.getElementById("root")!).render(
+const root = createRoot(document.getElementById("root")!);
+root.render(
   <StrictMode>
     <ErrorBoundaryWrapper>
       <App />
     </ErrorBoundaryWrapper>
   </StrictMode>
 );
+
+// Remove static loading screen AFTER React has rendered
+// Use requestAnimationFrame to ensure DOM has updated
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    const loadingScreen = document.getElementById('app-loading-screen');
+    if (loadingScreen) {
+      // Fade out the loading screen smoothly
+      loadingScreen.style.transition = 'opacity 0.3s ease-out';
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => loadingScreen.remove(), 300);
+    }
+  });
+});
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // DEFERRED INITIALIZATION
