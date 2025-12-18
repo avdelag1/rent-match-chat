@@ -34,9 +34,14 @@ const NotFound = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 overflow-hidden relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 overflow-hidden relative" style={{
+      contain: 'layout style paint'
+    }}>
       {/* Animated background */}
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 opacity-20" style={{
+        willChange: 'opacity',
+        contain: 'layout style paint'
+      }}>
         <motion.div
           className="absolute inset-0"
           style={{
