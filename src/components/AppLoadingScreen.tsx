@@ -109,9 +109,7 @@ export function AppLoadingScreen() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              WebkitTextStroke: '2px rgba(249, 115, 22, 0.4)',
-              textShadow: '0 0 40px rgba(249, 115, 22, 0.6), 0 0 80px rgba(234, 88, 12, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4)',
-              filter: 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.5))',
+              filter: 'drop-shadow(0 2px 8px rgba(249, 115, 22, 0.3))',
             }}
             animate={{
               backgroundPosition: ['200% 50%', '0% 50%'],
@@ -135,9 +133,7 @@ export function AppLoadingScreen() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              WebkitTextStroke: '2px rgba(249, 115, 22, 0.4)',
-              textShadow: '0 0 40px rgba(249, 115, 22, 0.6), 0 0 80px rgba(234, 88, 12, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4)',
-              filter: 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.5))',
+              filter: 'drop-shadow(0 2px 8px rgba(249, 115, 22, 0.3))',
             }}
             animate={{
               backgroundPosition: ['200% 50%', '0% 50%'],
