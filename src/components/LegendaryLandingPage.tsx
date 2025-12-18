@@ -347,7 +347,7 @@ function LegendaryLandingPage() {
           </motion.button>
 
           {/* I'm an Owner Button */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
           opacity: 0,
           x: -150,
           scale: 0.9
@@ -369,7 +369,7 @@ function LegendaryLandingPage() {
           scale: 0.97
         }}>
             {/* Animated background gradient on hover */}
-            <motion.div className="absolute inset-0 bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-600" initial={{
+            <motion.div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-orange-600" initial={{
             opacity: 0
           }} animate={{
             opacity: hoveredButton === 'owner' ? 1 : 0
