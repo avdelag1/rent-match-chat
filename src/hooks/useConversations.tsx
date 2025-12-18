@@ -69,11 +69,15 @@ export function useConversations() {
         if (conversationIds.length === 0) return [];
 
         // OPTIMIZED: Single query for all last messages instead of N queries
-        const { data: messagesData } = await supabase
+        const { data: messagesData, error: messagesError } = await supabase
           .from('conversation_messages')
           .select('conversation_id, message_text, created_at, sender_id')
           .in('conversation_id', conversationIds)
           .order('created_at', { ascending: false });
+
+        if (messagesError) {
+          console.error('Error fetching conversation messages:', messagesError);
+        }
 
         // Create a map of conversation_id to last message
         const lastMessagesMap = new Map();
@@ -320,10 +324,14 @@ export function useStartConversation() {
       }
 
       // Update conversation last_message_at
-      await supabase
+      const { error: updateError } = await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
+
+      if (updateError) {
+        console.error('Error updating conversation timestamp:', updateError);
+      }
 
       return { conversationId, message };
     },
@@ -418,10 +426,14 @@ export function useSendMessage() {
       }
 
       // Update conversation last_message_at
-      await supabase
+      const { error: updateTimestampError } = await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
+
+      if (updateTimestampError) {
+        console.error('Error updating conversation timestamp:', updateTimestampError);
+      }
 
       return data;
     },

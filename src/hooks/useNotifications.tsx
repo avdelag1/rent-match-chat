@@ -36,16 +36,24 @@ export function useNotifications() {
               .eq('id', newMessage.conversation_id)
               .maybeSingle();
 
-            if (convError || !conversation) return;
+            if (convError) {
+              console.error('Error fetching conversation for notification:', convError);
+              return;
+            }
+            if (!conversation) return;
 
             if (conversation.client_id === user.id || conversation.owner_id === user.id) {
 
               // Get sender info
-              const { data: senderProfile } = await supabase
+              const { data: senderProfile, error: profileError } = await supabase
                 .from('profiles')
                 .select('full_name, avatar_url')
                 .eq('id', newMessage.sender_id)
                 .maybeSingle();
+
+              if (profileError) {
+                console.error('Error fetching sender profile for notification:', profileError);
+              }
 
               const senderName = senderProfile?.full_name || 'Someone';
               
