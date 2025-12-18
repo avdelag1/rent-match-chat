@@ -1,15 +1,19 @@
-# Cache static assets with content hashes for 1 year
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# SWIPEMATCH CACHE HEADERS - Optimized for Performance
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Static assets with content hashes - cache for 1 year
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Cache fonts for 1 year
+# Fonts - cache for 1 year (immutable)
 /*.woff2
   Cache-Control: public, max-age=31536000, immutable
 
 /*.woff
   Cache-Control: public, max-age=31536000, immutable
 
-# Cache images for 1 year
+# Images - cache for 1 year (immutable)
 /*.png
   Cache-Control: public, max-age=31536000, immutable
 
@@ -25,27 +29,48 @@
 /*.webp
   Cache-Control: public, max-age=31536000, immutable
 
+/*.avif
+  Cache-Control: public, max-age=31536000, immutable
+
 /*.ico
   Cache-Control: public, max-age=31536000, immutable
 
-# Cache JS/CSS with content hashes for 1 year
+# PWA Icons and Splash screens - cache for 1 year
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/splash/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# JS/CSS with content hashes - cache for 1 year
 /*.js
   Cache-Control: public, max-age=31536000, immutable
 
 /*.css
   Cache-Control: public, max-age=31536000, immutable
 
-# Service worker should not be cached
+# Service worker - never cache
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 
-# HTML files - no cache to ensure fresh content
+# HTML - no cache to ensure fresh content on deploy
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate
 
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
 
-# Manifest should be cached but revalidated
+# Root path - no cache
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Manifest - cache 1 day with stale-while-revalidate
 /manifest.json
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# Security headers for all routes
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin

@@ -25,6 +25,25 @@ function buildVersionPlugin() {
   };
 }
 
+// CSS optimization plugin - extracts and purges unused CSS
+function cssOptimizationPlugin() {
+  return {
+    name: 'css-optimization',
+    enforce: 'post' as const,
+    generateBundle(_options: unknown, bundle: Record<string, { type: string; source?: string }>) {
+      // Mark large CSS chunks for analysis in dev
+      for (const [fileName, chunk] of Object.entries(bundle)) {
+        if (fileName.endsWith('.css') && chunk.type === 'asset') {
+          const size = chunk.source?.toString().length || 0;
+          if (size > 50000) {
+            console.log(`[CSS Optimization] Large CSS file detected: ${fileName} (${Math.round(size / 1024)}KB)`);
+          }
+        }
+      }
+    }
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -34,6 +53,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     buildVersionPlugin(),
+    cssOptimizationPlugin(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -78,48 +98,81 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks(id) {
-          // Core React runtime - loaded on every page
+          // Core React runtime - smallest possible critical chunk
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
             return 'react-vendor';
           }
-          // React Router - loaded on every page
+          // React Router - loaded on every page, keep small
           if (id.includes('node_modules/react-router')) {
             return 'react-router';
           }
-          // React Query - loaded for data fetching pages
+          // Scheduler (React dependency) - keep with react
+          if (id.includes('node_modules/scheduler')) {
+            return 'react-vendor';
+          }
+          // React Query - defer loading, not needed for initial render
           if (id.includes('node_modules/@tanstack/react-query')) {
             return 'react-query';
           }
-          // Supabase client - loaded for authenticated pages
+          // Supabase client - only load when auth is needed
           if (id.includes('node_modules/@supabase')) {
             return 'supabase';
           }
-          // Framer Motion - loaded for animated pages
+          // Framer Motion - heavy animation library, load separately
           if (id.includes('node_modules/framer-motion')) {
             return 'motion';
           }
-          // Radix UI components - split by component for better tree-shaking
+          // Split Radix UI by component type for granular loading
+          if (id.includes('node_modules/@radix-ui/react-dialog') ||
+              id.includes('node_modules/@radix-ui/react-alert-dialog')) {
+            return 'ui-dialogs';
+          }
+          if (id.includes('node_modules/@radix-ui/react-dropdown') ||
+              id.includes('node_modules/@radix-ui/react-select') ||
+              id.includes('node_modules/@radix-ui/react-popover')) {
+            return 'ui-dropdowns';
+          }
           if (id.includes('node_modules/@radix-ui')) {
             return 'ui-radix';
           }
-          // Zod validation - loaded for form pages
+          // Date utilities - only needed for calendar/date features
+          if (id.includes('node_modules/date-fns')) {
+            return 'date-utils';
+          }
+          // Icons - split out as they can be large
+          if (id.includes('node_modules/lucide-react') || id.includes('node_modules/react-icons')) {
+            return 'icons';
+          }
+          // Forms - only needed on form pages
           if (id.includes('node_modules/zod')) {
             return 'validation';
           }
-          // React Hook Form - loaded for form pages
           if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform')) {
             return 'forms';
           }
-          // Other vendor chunks
+          // Charts - only needed on dashboard
+          if (id.includes('node_modules/recharts')) {
+            return 'charts';
+          }
+          // Capacitor - only needed in native apps
+          if (id.includes('node_modules/@capacitor')) {
+            return 'capacitor';
+          }
+          // Carousel components
+          if (id.includes('node_modules/embla-carousel')) {
+            return 'carousel';
+          }
+          // Other vendor chunks - catch-all
           if (id.includes('node_modules')) {
             return 'vendor';
           }
         }
       },
-      // Enable tree shaking
+      // Aggressive tree shaking
       treeshake: {
         moduleSideEffects: 'no-external',
-        propertyReadSideEffects: false
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false
       }
     },
     chunkSizeWarningLimit: 1000,

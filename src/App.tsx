@@ -1,9 +1,6 @@
 import { lazy, Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -12,11 +9,18 @@ import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
-import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import Index from "./pages/Index";
-import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+
+// Lazy load non-critical UI components
+const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
+const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
+const PerformanceMonitor = lazy(() => import("@/components/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
+
+// Lazy load pages that are not immediately needed
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Legal pages
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -91,11 +95,14 @@ const App = () => (
           <ThemeProvider>
             <NotificationWrapper>
               <AppLayout>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <Suspense fallback={<AppLoadingScreen />}>
-                    <Routes>
+                <Suspense fallback={null}>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                  </TooltipProvider>
+                </Suspense>
+                <Suspense fallback={<AppLoadingScreen />}>
+                  <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
                         <Index />
@@ -356,16 +363,17 @@ const App = () => (
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </TooltipProvider>
+                  </Routes>
+                </Suspense>
               </AppLayout>
             </NotificationWrapper>
           </ThemeProvider>
           </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>
-      <PerformanceMonitor />
+      <Suspense fallback={null}>
+        <PerformanceMonitor />
+      </Suspense>
     </QueryClientProvider>
   </GlobalErrorBoundary>
 );
