@@ -235,9 +235,10 @@ function LegendaryLandingPage() {
         duration: 0.6,
         delay: 0.2
       }} className="space-y-4">
-          <h1 className="font-black tracking-tight drop-shadow-2xl text-center leading-none">
+          <h1 className="font-black drop-shadow-2xl text-center leading-none">
             <motion.span className="block" style={{
             fontSize: 'clamp(4rem, 20vw, 8rem)',
+            letterSpacing: '0.02em',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
@@ -252,8 +253,9 @@ function LegendaryLandingPage() {
           }}>
               Swipe
             </motion.span>
-            <motion.span className="block" style={{
+            <motion.span className="block -mt-3 sm:-mt-4" style={{
             fontSize: 'clamp(3rem, 16vw, 6rem)',
+            letterSpacing: '0.02em',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
