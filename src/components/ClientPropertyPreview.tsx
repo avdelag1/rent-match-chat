@@ -66,7 +66,8 @@ export function ClientPropertyPreview({
           text: `Check out this amazing property: ${property.title}`,
           url: window.location.href,
         });
-      } catch (error) {
+      } catch {
+        // User cancelled share or share failed - ignore silently
       }
     } else {
       // Fallback: copy to clipboard

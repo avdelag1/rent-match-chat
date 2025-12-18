@@ -21,9 +21,8 @@ export interface VitalMetric {
  * In production, send to your analytics service (Sentry, DataDog, etc.)
  */
 function reportMetric(metric: VitalMetric) {
-  // Development logging
-  if (import.meta.env.DEV) {
-  }
+  // Metric captured and ready for analytics
+  void metric.name;
 
   // Send to analytics service
   // Example: sendToAnalytics(metric)
@@ -185,9 +184,7 @@ export function initWebVitalsMonitoring() {
     monitorLCP();
     monitorFID();
     monitorCLS();
-
-    if (import.meta.env.DEV) {
-    }
+    // Web Vitals monitoring initialized
   }
 }
 

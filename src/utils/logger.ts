@@ -28,30 +28,38 @@ class Logger {
   /**
    * Log general debug messages (only in development)
    */
-  log(...args: any[]): void {
+  log(...args: unknown[]): void {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
+      console.log(...args);
     }
   }
 
   /**
    * Log informational messages (only in development)
    */
-  info(...args: any[]): void {
+  info(...args: unknown[]): void {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
+      console.info(...args);
     }
   }
 
   /**
    * Log debug messages with context (only in development)
    */
-  debug(message: string, data?: any, options?: LoggerOptions): void {
+  debug(message: string, data?: unknown, options?: LoggerOptions): void {
     if (isDevelopment) {
       const formatted = options?.timestamp
         ? this.formatMessage('debug', message, options.context)
         : message;
 
       if (data) {
+        // eslint-disable-next-line no-console
+        console.debug(formatted, data);
       } else {
+        // eslint-disable-next-line no-console
+        console.debug(formatted);
       }
     }
   }
@@ -60,8 +68,10 @@ class Logger {
    * Log warning messages (only in development)
    * Warnings should be reviewed but don't break functionality
    */
-  warn(...args: any[]): void {
+  warn(...args: unknown[]): void {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
+      console.warn(...args);
     }
   }
 

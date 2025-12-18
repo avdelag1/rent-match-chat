@@ -98,12 +98,11 @@ export function createTouchHandler(
 // Performance monitoring
 export function measurePerformance(name: string) {
   const start = performance.now();
-  
+
   return {
     end: () => {
       const duration = performance.now() - start;
-      if (import.meta.env.DEV) {
-      }
+      // Performance measurement complete - duration available for debugging
       return duration;
     }
   };

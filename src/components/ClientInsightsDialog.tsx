@@ -52,6 +52,65 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  // Calculate client statistics based on profile completeness
+  // Must be called before any early returns to follow React hooks rules
+  const clientStats = useMemo(() => {
+    if (!profile) return null;
+    const completeness = getProfileCompleteness(profile);
+    const interestCount = (profile.interests?.length || 0) + (profile.preferred_activities?.length || 0);
+
+    return {
+      profileViews: Math.max(5, Math.round(completeness * 5)), // Scale: 5-500 based on completeness
+      ownerLikes: Math.max(1, Math.round(interestCount * 2)), // Scale: 1-50 based on interests
+      responseRate: completeness >= 80 ? 95 : Math.round(completeness * 0.9), // 0-95% based on completeness
+      averageResponseTime: '1-2 hours' // Standard response time
+    };
+  }, [profile]);
+
+  // Calculate renter readiness and activity insights
+  const renterInsights = useMemo(() => {
+    if (!profile) return null;
+    const completeness = getProfileCompleteness(profile);
+    const interestCount = (profile.interests?.length || 0) + (profile.preferred_activities?.length || 0);
+    const hasPhotos = (profile.profile_images?.length || 0) > 0;
+    const photoCount = profile.profile_images?.length || 0;
+
+    // Renter readiness score (0-100)
+    let readinessScore = 0;
+    if (profile.name) readinessScore += 15;
+    if (profile.age) readinessScore += 10;
+    if (hasPhotos) readinessScore += 20;
+    if (photoCount >= 3) readinessScore += 10;
+    if (interestCount >= 3) readinessScore += 15;
+    if (interestCount >= 6) readinessScore += 10;
+    if (profile.verified) readinessScore += 20;
+
+    // Activity level
+    let activityLevel: 'very_active' | 'active' | 'moderate' | 'new' = 'new';
+    if (readinessScore >= 80) activityLevel = 'very_active';
+    else if (readinessScore >= 60) activityLevel = 'active';
+    else if (readinessScore >= 40) activityLevel = 'moderate';
+
+    // Derive property preferences from interests
+    const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
+    const wantsLongTerm = allTags.some(tag => tag.toLowerCase().includes('long-term') || tag.toLowerCase().includes('rent'));
+    const wantsShortTerm = allTags.some(tag => tag.toLowerCase().includes('short-term'));
+    const needsPetFriendly = allTags.some(tag => tag.toLowerCase().includes('pet'));
+    const prefersFurnished = allTags.some(tag => tag.toLowerCase().includes('furnished') || tag.toLowerCase().includes('corporate'));
+
+    return {
+      readinessScore: Math.min(100, readinessScore),
+      activityLevel,
+      photoCount,
+      interestCount,
+      wantsLongTerm,
+      wantsShortTerm,
+      needsPetFriendly,
+      prefersFurnished,
+    };
+  }, [profile]);
+
+  // Early return after all hooks
   if (!profile) return null;
 
   const handleImageClick = (index: number) => {
@@ -96,61 +155,6 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
       setIsCreatingConversation(false);
     }
   };
-
-  // Calculate client statistics based on profile completeness
-  const clientStats = useMemo(() => {
-    const completeness = getProfileCompleteness(profile);
-    const interestCount = (profile.interests?.length || 0) + (profile.preferred_activities?.length || 0);
-
-    return {
-      profileViews: Math.max(5, Math.round(completeness * 5)), // Scale: 5-500 based on completeness
-      ownerLikes: Math.max(1, Math.round(interestCount * 2)), // Scale: 1-50 based on interests
-      responseRate: completeness >= 80 ? 95 : Math.round(completeness * 0.9), // 0-95% based on completeness
-      averageResponseTime: '1-2 hours' // Standard response time
-    };
-  }, [profile]);
-
-  // Calculate renter readiness and activity insights
-  const renterInsights = useMemo(() => {
-    const completeness = getProfileCompleteness(profile);
-    const interestCount = (profile.interests?.length || 0) + (profile.preferred_activities?.length || 0);
-    const hasPhotos = (profile.profile_images?.length || 0) > 0;
-    const photoCount = profile.profile_images?.length || 0;
-
-    // Renter readiness score (0-100)
-    let readinessScore = 0;
-    if (profile.name) readinessScore += 15;
-    if (profile.age) readinessScore += 10;
-    if (hasPhotos) readinessScore += 20;
-    if (photoCount >= 3) readinessScore += 10;
-    if (interestCount >= 3) readinessScore += 15;
-    if (interestCount >= 6) readinessScore += 10;
-    if (profile.verified) readinessScore += 20;
-
-    // Activity level
-    let activityLevel: 'very_active' | 'active' | 'moderate' | 'new' = 'new';
-    if (readinessScore >= 80) activityLevel = 'very_active';
-    else if (readinessScore >= 60) activityLevel = 'active';
-    else if (readinessScore >= 40) activityLevel = 'moderate';
-
-    // Derive property preferences from interests
-    const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
-    const wantsLongTerm = allTags.some(tag => tag.toLowerCase().includes('long-term') || tag.toLowerCase().includes('rent'));
-    const wantsShortTerm = allTags.some(tag => tag.toLowerCase().includes('short-term'));
-    const needsPetFriendly = allTags.some(tag => tag.toLowerCase().includes('pet'));
-    const prefersFurnished = allTags.some(tag => tag.toLowerCase().includes('furnished') || tag.toLowerCase().includes('corporate'));
-
-    return {
-      readinessScore: Math.min(100, readinessScore),
-      activityLevel,
-      photoCount,
-      interestCount,
-      wantsLongTerm,
-      wantsShortTerm,
-      needsPetFriendly,
-      prefersFurnished,
-    };
-  }, [profile]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
