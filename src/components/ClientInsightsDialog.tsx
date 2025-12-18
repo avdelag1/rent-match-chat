@@ -9,7 +9,7 @@ import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
-import { useState, memo } from 'react';
+import { useState, memo, useMemo } from 'react';
 
 // Tag categories for organized display
 const PROPERTY_TAGS = [
