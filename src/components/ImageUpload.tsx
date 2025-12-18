@@ -122,7 +122,7 @@ export function ImageUpload({
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
-  }, [images, maxImages]);
+  }, [handleFiles]);
 
   const removeImage = async (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
