@@ -44,7 +44,14 @@ export default defineConfig(({ mode }) => ({
     dedupe: ['react', 'react-dom'], // Prevent duplicate React instances
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@tanstack/react-query'],
+    include: [
+      'react',
+      'react-dom',
+      '@tanstack/react-query',
+      'framer-motion',
+      'lucide-react'
+    ],
+    exclude: ['@capacitor/core', '@capacitor/app'],
   },
   esbuild: {
     drop: mode === 'production' ? ['console', 'debugger'] : [],
@@ -62,6 +69,8 @@ export default defineConfig(({ mode }) => ({
     cssCodeSplit: true,
     // Target modern browsers for smaller bundles (removes polyfills)
     target: 'es2020',
+    // Optimize CSS for production
+    cssMinify: mode === 'production' ? 'esbuild' : false,
     rollupOptions: {
       output: {
         // Use content hashes for long-term caching
