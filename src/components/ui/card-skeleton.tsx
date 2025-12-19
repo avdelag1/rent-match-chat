@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 interface CardSkeletonProps {
   className?: string;
   variant?: 'default' | 'property' | 'profile' | 'compact';
+  style?: React.CSSProperties;
 }
 
 /**
@@ -17,11 +18,12 @@ interface CardSkeletonProps {
  */
 export const CardSkeleton = memo(function CardSkeleton({
   className,
-  variant = 'default'
+  variant = 'default',
+  style
 }: CardSkeletonProps) {
   if (variant === 'compact') {
     return (
-      <div className={cn('bg-card rounded-xl p-4 border border-border', className)}>
+      <div className={cn('bg-card rounded-xl p-4 border border-border', className)} style={style}>
         <div className="flex items-center gap-3">
           <div className="skeleton skeleton-avatar w-10 h-10 shrink-0" />
           <div className="flex-1 space-y-2">
@@ -35,7 +37,7 @@ export const CardSkeleton = memo(function CardSkeleton({
 
   if (variant === 'profile') {
     return (
-      <div className={cn('bg-card rounded-2xl overflow-hidden border border-border', className)}>
+      <div className={cn('bg-card rounded-2xl overflow-hidden border border-border', className)} style={style}>
         {/* Avatar area */}
         <div className="skeleton h-48 w-full" />
         <div className="p-4 space-y-3">
@@ -59,7 +61,7 @@ export const CardSkeleton = memo(function CardSkeleton({
 
   if (variant === 'property') {
     return (
-      <div className={cn('bg-card rounded-2xl overflow-hidden border border-border', className)}>
+      <div className={cn('bg-card rounded-2xl overflow-hidden border border-border', className)} style={style}>
         {/* Image */}
         <div className="skeleton skeleton-image aspect-[4/3]" />
         <div className="p-4 space-y-3">
@@ -88,7 +90,7 @@ export const CardSkeleton = memo(function CardSkeleton({
 
   // Default variant
   return (
-    <div className={cn('bg-card rounded-xl overflow-hidden border border-border', className)}>
+    <div className={cn('bg-card rounded-xl overflow-hidden border border-border', className)} style={style}>
       <div className="skeleton skeleton-image aspect-video" />
       <div className="p-4 space-y-3">
         <div className="skeleton skeleton-text w-3/4 h-5" />

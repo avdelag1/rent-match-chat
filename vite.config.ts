@@ -26,15 +26,16 @@ function buildVersionPlugin() {
 }
 
 // CSS optimization plugin - extracts and purges unused CSS
-function cssOptimizationPlugin() {
+function cssOptimizationPlugin(): import('vite').Plugin {
   return {
     name: 'css-optimization',
-    enforce: 'post' as const,
-    generateBundle(_options: unknown, bundle: Record<string, { type: string; source?: string }>) {
+    enforce: 'post',
+    generateBundle(_options, bundle) {
       // Mark large CSS chunks for analysis in dev
       for (const [fileName, chunk] of Object.entries(bundle)) {
         if (fileName.endsWith('.css') && chunk.type === 'asset') {
-          const size = chunk.source?.toString().length || 0;
+          const source = 'source' in chunk ? chunk.source : undefined;
+          const size = typeof source === 'string' ? source.length : 0;
           if (size > 50000) {
             console.log(`[CSS Optimization] Large CSS file detected: ${fileName} (${Math.round(size / 1024)}KB)`);
           }
