@@ -47,13 +47,8 @@ const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
 const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/PaymentCancel"));
-const OwnerPropertyClientDiscovery = lazy(() => import("./pages/OwnerPropertyClientDiscovery"));
-const OwnerMotoClientDiscovery = lazy(() => import("./pages/OwnerMotoClientDiscovery"));
-const OwnerBicycleClientDiscovery = lazy(() => import("./pages/OwnerBicycleClientDiscovery"));
-const OwnerYachtClientDiscovery = lazy(() => import("./pages/OwnerYachtClientDiscovery"));
-const OwnerVehicleClientDiscovery = lazy(() => import("./pages/OwnerVehicleClientDiscovery"));
+const OwnerClientDiscovery = lazy(() => import("./pages/OwnerClientDiscovery"));
 const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
-const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
 const OwnerServicesDiscovery = lazy(() => import("./pages/OwnerServicesDiscovery"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 
@@ -218,47 +213,11 @@ const App = () => (
                       } 
                     />
 
-                    <Route 
-                      path="/owner/clients/property" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerPropertyClientDiscovery />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    <Route 
-                      path="/owner/clients/moto" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerMotoClientDiscovery />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    <Route 
-                      path="/owner/clients/bicycle" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerBicycleClientDiscovery />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
                     <Route
-                      path="/owner/clients/yacht"
+                      path="/owner/clients/:category"
                       element={
                         <ProtectedRoute requiredRole="owner">
-                          <OwnerYachtClientDiscovery />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    <Route
-                      path="/owner/clients/vehicle"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerVehicleClientDiscovery />
+                          <OwnerClientDiscovery />
                         </ProtectedRoute>
                       }
                     />
@@ -270,15 +229,6 @@ const App = () => (
                           <OwnerViewClientProfile />
                         </ProtectedRoute>
                       } 
-                    />
-
-                    <Route
-                      path="/owner/filters-explore"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerFiltersExplore />
-                        </ProtectedRoute>
-                      }
                     />
 
                     <Route
