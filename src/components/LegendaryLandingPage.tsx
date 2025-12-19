@@ -295,33 +295,36 @@ function LegendaryLandingPage() {
         {/* Buttons Container with Enhanced Effects */}
         <div className="space-y-2 mt-8">
 
-          {/* I'm a Client Button */}
-          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.4)] backdrop-blur-sm border border-white/30 relative overflow-hidden group" style={{
-            background: 'linear-gradient(90deg, #ff8c42, #ff6b35, #f97316, #ea580c, #ff8c42)'
+          {/* I'm a Client Button - Vibrant Cyan to Electric Blue */}
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
+            background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1, #8b5cf6)'
           }} initial={{
           opacity: 0,
-          x: 150,
-          scale: 0.9
+          x: 300,
+          scale: 0.8,
+          rotate: 5
         }} animate={{
           opacity: 1,
           x: 0,
-          scale: 1
+          scale: 1,
+          rotate: 0
         }} transition={{
           type: "spring",
-          stiffness: 100,
-          damping: 12,
-          mass: 0.8,
-          delay: 0.5
+          stiffness: 200,
+          damping: 8,
+          mass: 0.6,
+          delay: 0.4,
+          velocity: 2
         }} whileHover={{
-          scale: 1.03,
-          y: -4,
-          boxShadow: '0 16px 48px rgba(249,115,22,0.5)'
+          scale: 1.05,
+          y: -6,
+          boxShadow: '0 20px 60px rgba(6,182,212,0.6), 0 0 30px rgba(99,102,241,0.4)'
         }} whileTap={{
-          scale: 0.97
+          scale: 0.95
         }}>
-            {/* Animated background gradient on hover */}
+            {/* Animated shimmer background on hover */}
             <motion.div className="absolute inset-0" style={{
-              background: 'linear-gradient(90deg, #ffa756, #ff8c42, #ff6b35, #f97316, #ffa756)'
+              background: 'linear-gradient(135deg, #22d3ee, #38bdf8, #60a5fa, #818cf8, #a78bfa)'
             }} initial={{
             opacity: 0
           }} animate={{
@@ -330,64 +333,86 @@ function LegendaryLandingPage() {
             duration: 0.3
           }} />
 
-            {/* Shiny reflection effect */}
+            {/* Rainbow shiny reflection effect */}
             <motion.div className="absolute inset-0 overflow-hidden">
               <motion.div
-                className="absolute inset-y-0 w-32"
+                className="absolute inset-y-0 w-40"
                 style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.7), rgba(255,255,255,0.5), transparent)',
-                  filter: 'blur(1px)'
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.8), rgba(255,255,255,0.3), transparent)',
+                  filter: 'blur(2px)'
                 }}
                 animate={{
-                  x: ['-150%', '450%']
+                  x: ['-200%', '500%']
                 }}
                 transition={{
-                  duration: 1.5,
+                  duration: 2,
                   repeat: Infinity,
-                  repeatDelay: 4,
+                  repeatDelay: 3,
                   ease: 'easeInOut'
                 }}
               />
             </motion.div>
 
+            {/* Particle sparkle effect */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 40%)'
+              }}
+              animate={{
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+
             <Home className="w-5 h-5 relative z-10" />
-            <span className="relative z-10">I'm a Client</span>
+            <span className="relative z-10 drop-shadow-lg">I'm a Client</span>
             <motion.div className="relative z-10" animate={{
-            x: hoveredButton === 'client' ? 3 : 0
+            x: hoveredButton === 'client' ? 5 : 0,
+            scale: hoveredButton === 'client' ? 1.2 : 1
           }} transition={{
-            duration: 0.2
+            type: "spring",
+            stiffness: 300,
+            damping: 10
           }}>
               <ArrowRight className="w-4 h-4" />
             </motion.div>
           </motion.button>
 
-          {/* I'm an Owner Button */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(234,88,12,0.4)] backdrop-blur-sm border border-white/30 relative overflow-hidden group" style={{
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #dc2626, #ea580c, #f97316)'
+          {/* I'm an Owner Button - Vibrant Magenta to Gold */}
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
+            background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7, #8b5cf6)'
           }} initial={{
           opacity: 0,
-          x: -150,
-          scale: 0.9
+          x: -300,
+          scale: 0.8,
+          rotate: -5
         }} animate={{
           opacity: 1,
           x: 0,
-          scale: 1
+          scale: 1,
+          rotate: 0
         }} transition={{
           type: "spring",
-          stiffness: 100,
-          damping: 12,
-          mass: 0.8,
-          delay: 0.65
+          stiffness: 200,
+          damping: 8,
+          mass: 0.6,
+          delay: 0.55,
+          velocity: 2
         }} whileHover={{
-          scale: 1.03,
-          y: -4,
-          boxShadow: '0 16px 48px rgba(234,88,12,0.5)'
+          scale: 1.05,
+          y: -6,
+          boxShadow: '0 20px 60px rgba(236,72,153,0.6), 0 0 30px rgba(168,85,247,0.4)'
         }} whileTap={{
-          scale: 0.97
+          scale: 0.95
         }}>
-            {/* Animated background gradient on hover */}
+            {/* Animated shimmer background on hover */}
             <motion.div className="absolute inset-0" style={{
-              background: 'linear-gradient(90deg, #ff8c42, #f97316, #ea580c, #f97316, #ff8c42)'
+              background: 'linear-gradient(135deg, #fb7185, #f472b6, #e879f9, #c084fc, #a78bfa)'
             }} initial={{
             opacity: 0
           }} animate={{
@@ -396,33 +421,53 @@ function LegendaryLandingPage() {
             duration: 0.3
           }} />
 
-            {/* Shiny reflection effect */}
+            {/* Rainbow shiny reflection effect */}
             <motion.div className="absolute inset-0 overflow-hidden">
               <motion.div
-                className="absolute inset-y-0 w-32"
+                className="absolute inset-y-0 w-40"
                 style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.7), rgba(255,255,255,0.5), transparent)',
-                  filter: 'blur(1px)'
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.8), rgba(255,255,255,0.3), transparent)',
+                  filter: 'blur(2px)'
                 }}
                 animate={{
-                  x: ['-150%', '450%']
+                  x: ['-200%', '500%']
                 }}
                 transition={{
-                  duration: 1.5,
+                  duration: 2,
                   repeat: Infinity,
-                  repeatDelay: 4,
+                  repeatDelay: 3,
                   ease: 'easeInOut',
-                  delay: 2
+                  delay: 1.5
                 }}
               />
             </motion.div>
 
+            {/* Particle sparkle effect */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.2) 0%, transparent 40%)'
+              }}
+              animate={{
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5
+              }}
+            />
+
             <Building2 className="w-5 h-5 relative z-10" />
-            <span className="relative z-10">I'm an Owner</span>
+            <span className="relative z-10 drop-shadow-lg">I'm an Owner</span>
             <motion.div className="relative z-10" animate={{
-            x: hoveredButton === 'owner' ? 3 : 0
+            x: hoveredButton === 'owner' ? 5 : 0,
+            scale: hoveredButton === 'owner' ? 1.2 : 1
           }} transition={{
-            duration: 0.2
+            type: "spring",
+            stiffness: 300,
+            damping: 10
           }}>
               <ArrowRight className="w-4 h-4" />
             </motion.div>
