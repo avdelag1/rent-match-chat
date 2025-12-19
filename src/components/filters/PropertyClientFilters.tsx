@@ -7,10 +7,22 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Save } from 'lucide-react';
+import {
+  ChevronDown,
+  Save,
+  Home,
+  DollarSign,
+  Bed,
+  Users,
+  Sparkles,
+  Building,
+  Car,
+  Globe,
+  RotateCcw
+} from 'lucide-react';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
-import { ClientDemographicFilters } from './ClientDemographicFilters';
+import { cn } from '@/lib/utils';
 
 interface PropertyClientFiltersProps {
   onApply: (filters: any) => void;
@@ -18,9 +30,44 @@ interface PropertyClientFiltersProps {
   activeCount: number;
 }
 
+interface FilterSectionProps {
+  icon: React.ReactNode;
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+  badge?: string;
+}
+
+function FilterSection({ icon, title, defaultOpen = false, children, badge }: FilterSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger className="flex items-center justify-between w-full p-3 hover:bg-accent rounded-lg transition-all group">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+            {icon}
+          </div>
+          <span className="font-medium text-sm">{title}</span>
+          {badge && (
+            <Badge variant="secondary" className="text-xs">{badge}</Badge>
+          )}
+        </div>
+        <ChevronDown className={cn(
+          "h-4 w-4 text-muted-foreground transition-transform duration-200",
+          isOpen && "rotate-180"
+        )} />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-3 pb-4 px-3 space-y-4 animate-in slide-in-from-top-2 duration-200">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 export function PropertyClientFilters({ onApply, initialFilters = {}, activeCount }: PropertyClientFiltersProps) {
   const savePreferencesMutation = useSaveClientFilterPreferences();
-  
+
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [propertyTypes, setPropertyTypes] = useState<string[]>(initialFilters.property_types || []);
   const [budgetRange, setBudgetRange] = useState([initialFilters.budget_min || 500, initialFilters.budget_max || 5000]);
@@ -29,36 +76,50 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [amenities, setAmenities] = useState<string[]>(initialFilters.amenities || []);
   const [petFriendly, setPetFriendly] = useState(initialFilters.pet_friendly || false);
   const [furnished, setFurnished] = useState(initialFilters.furnished || false);
-
-  // New filter options
-  const [squareFeetRange, setSquareFeetRange] = useState([initialFilters.square_feet_min || 0, initialFilters.square_feet_max || 5000]);
-  const [yearBuiltRange, setYearBuiltRange] = useState([initialFilters.year_built_min || 1950, initialFilters.year_built_max || new Date().getFullYear()]);
-  const [floorLevel, setFloorLevel] = useState<string>(initialFilters.floor_level || 'any');
-  const [viewTypes, setViewTypes] = useState<string[]>(initialFilters.view_types || []);
-  const [orientations, setOrientations] = useState<string[]>(initialFilters.orientations || []);
   const [hasElevator, setHasElevator] = useState(initialFilters.has_elevator || false);
   const [parkingSpots, setParkingSpots] = useState(initialFilters.parking_spots_min || 0);
 
   // Client demographic filters
   const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
-  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
-  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
+  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
   const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
   const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
-  const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
+  const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
+  const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
 
-  const propertyTypeOptions = ['Apartment', 'House', 'Studio', 'Villa', 'Commercial', 'Land'];
-  const amenityOptions = ['Pool', 'Parking', 'Gym', 'Security', 'Garden', 'Balcony'];
-  const viewTypeOptions = ['Ocean', 'City', 'Garden', 'Mountain', 'Street', 'Pool'];
-  const orientationOptions = ['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest'];
-  const floorLevelOptions = [
-    { value: 'any', label: 'Any Floor' },
-    { value: 'ground', label: 'Ground Floor' },
-    { value: 'low', label: 'Low (1-3)' },
-    { value: 'mid', label: 'Mid (4-7)' },
-    { value: 'high', label: 'High (8+)' },
-    { value: 'penthouse', label: 'Penthouse' }
+  const propertyTypeOptions = [
+    { value: 'Apartment', label: 'Apartment', icon: '🏢' },
+    { value: 'House', label: 'House', icon: '🏠' },
+    { value: 'Studio', label: 'Studio', icon: '🏨' },
+    { value: 'Villa', label: 'Villa', icon: '🏡' },
+    { value: 'Commercial', label: 'Commercial', icon: '🏪' },
+    { value: 'Land', label: 'Land', icon: '🌳' }
   ];
+
+  const amenityOptions = [
+    { value: 'Pool', label: 'Pool', icon: '🏊' },
+    { value: 'Parking', label: 'Parking', icon: '🚗' },
+    { value: 'Gym', label: 'Gym', icon: '💪' },
+    { value: 'Security', label: 'Security', icon: '🔒' },
+    { value: 'Garden', label: 'Garden', icon: '🌿' },
+    { value: 'Balcony', label: 'Balcony', icon: '🏞️' }
+  ];
+
+  const genderOptions = [
+    { value: 'any', label: 'Any Gender' },
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+    { value: 'non-binary', label: 'Non-Binary' }
+  ];
+
+  const relationshipStatusOptions = [
+    { value: 'Single', label: 'Single', icon: '👤' },
+    { value: 'Couple', label: 'Couple', icon: '👫' },
+    { value: 'Family with Children', label: 'Family', icon: '👨‍👩‍👧' },
+    { value: 'Group/Roommates', label: 'Roommates', icon: '👥' }
+  ];
+
+  const languageOptions = ['English', 'Spanish', 'French', 'German', 'Portuguese', 'Mandarin', 'Japanese', 'Arabic'];
 
   const handleApply = () => {
     onApply({
@@ -72,16 +133,8 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       amenities,
       pet_friendly: petFriendly,
       furnished,
-      square_feet_min: squareFeetRange[0],
-      square_feet_max: squareFeetRange[1],
-      year_built_min: yearBuiltRange[0],
-      year_built_max: yearBuiltRange[1],
-      floor_level: floorLevel,
-      view_types: viewTypes,
-      orientations: orientations,
       has_elevator: hasElevator,
       parking_spots_min: parkingSpots,
-      // Client demographic filters
       gender_preference: genderPreference,
       nationalities,
       languages,
@@ -101,14 +154,8 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     setAmenities([]);
     setPetFriendly(false);
     setFurnished(false);
-    setSquareFeetRange([0, 5000]);
-    setYearBuiltRange([1950, new Date().getFullYear()]);
-    setFloorLevel('any');
-    setViewTypes([]);
-    setOrientations([]);
     setHasElevator(false);
     setParkingSpots(0);
-    // Clear client demographic filters
     setGenderPreference('any');
     setNationalities([]);
     setLanguages([]);
@@ -133,309 +180,212 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       });
       toast({
         title: 'Preferences saved!',
-        description: 'Your property filter preferences have been saved successfully.',
+        description: 'Your filter preferences have been saved.',
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to save preferences. Please try again.',
+        description: 'Failed to save preferences.',
         variant: 'destructive',
       });
     }
   };
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Property Filters</h3>
+    <div className="space-y-1">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-primary text-primary-foreground">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="font-semibold">Filters</h3>
+            <p className="text-xs text-muted-foreground">Find your ideal clients</p>
+          </div>
+        </div>
         {activeCount > 0 && (
-          <Badge variant="default">{activeCount} Active</Badge>
+          <Badge className="bg-primary">{activeCount}</Badge>
         )}
       </div>
 
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Interest Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <Select value={interestType} onValueChange={setInterestType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rent">Rent Only</SelectItem>
-              <SelectItem value="buy">Buy Only</SelectItem>
-              <SelectItem value="both">Rent or Buy</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground">Filter clients based on whether they're seeking to rent, purchase, or both</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <ClientDemographicFilters
-        genderPreference={genderPreference}
-        setGenderPreference={setGenderPreference}
-        ageRange={ageRange}
-        setAgeRange={setAgeRange}
-        relationshipStatus={relationshipStatus}
-        setRelationshipStatus={setRelationshipStatus}
-        hasPetsFilter={hasPetsFilter}
-        setHasPetsFilter={setHasPetsFilter}
-        nationalities={nationalities}
-        setNationalities={setNationalities}
-        languages={languages}
-        setLanguages={setLanguages}
-      />
-
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Property Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {propertyTypeOptions.map((type) => (
-              <div key={type} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={propertyTypes.includes(type)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setPropertyTypes([...propertyTypes, type]);
-                    } else {
-                      setPropertyTypes(propertyTypes.filter(t => t !== type));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{type}</Label>
-              </div>
+      <div className="p-2 space-y-1 max-h-[calc(100vh-300px)] overflow-y-auto">
+        {/* Interest Type - Quick Select */}
+        <div className="p-3 bg-muted/30 rounded-lg space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Looking to</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {['rent', 'buy', 'both'].map((type) => (
+              <Button
+                key={type}
+                variant={interestType === type ? 'default' : 'outline'}
+                size="sm"
+                className="h-9 text-xs capitalize"
+                onClick={() => setInterestType(type)}
+              >
+                {type === 'both' ? 'Either' : type}
+              </Button>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Match clients looking for specific property types</p>
-        </CollapsibleContent>
-      </Collapsible>
+        </div>
 
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Budget Range</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>${budgetRange[0]}</span>
-              <span>${budgetRange[1]}</span>
+        {/* Property Type */}
+        <FilterSection
+          icon={<Home className="h-4 w-4" />}
+          title="Property Type"
+          defaultOpen
+          badge={propertyTypes.length > 0 ? `${propertyTypes.length}` : undefined}
+        >
+          <div className="grid grid-cols-2 gap-2">
+            {propertyTypeOptions.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => {
+                  if (propertyTypes.includes(type.value)) {
+                    setPropertyTypes(propertyTypes.filter(t => t !== type.value));
+                  } else {
+                    setPropertyTypes([...propertyTypes, type.value]);
+                  }
+                }}
+                className={cn(
+                  "flex items-center gap-2 p-2.5 rounded-lg border text-sm transition-all",
+                  propertyTypes.includes(type.value)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-accent border-border"
+                )}
+              >
+                <span>{type.icon}</span>
+                <span>{type.label}</span>
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+
+        {/* Budget */}
+        <FilterSection
+          icon={<DollarSign className="h-4 w-4" />}
+          title="Budget Range"
+          defaultOpen
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-center">
+                <span className="text-2xl font-bold text-primary">${budgetRange[0].toLocaleString()}</span>
+                <p className="text-xs text-muted-foreground">Min</p>
+              </div>
+              <div className="text-muted-foreground">—</div>
+              <div className="text-center">
+                <span className="text-2xl font-bold text-primary">${budgetRange[1].toLocaleString()}</span>
+                <p className="text-xs text-muted-foreground">Max</p>
+              </div>
             </div>
             <Slider
               value={budgetRange}
               onValueChange={setBudgetRange}
               min={0}
-              max={10000}
+              max={15000}
               step={100}
               className="w-full"
             />
           </div>
-          <p className="text-sm text-muted-foreground">Find clients within a specific budget range</p>
-        </CollapsibleContent>
-      </Collapsible>
+        </FilterSection>
 
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Requirements</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-2">
-          <div className="space-y-2">
-            <Label className="text-sm">Minimum Bedrooms: {bedrooms}</Label>
-            <Slider value={[bedrooms]} onValueChange={(v) => setBedrooms(v[0])} min={1} max={6} step={1} />
+        {/* Bedrooms & Bathrooms */}
+        <FilterSection icon={<Bed className="h-4 w-4" />} title="Rooms">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-sm">Bedrooms</Label>
+                <Badge variant="outline">{bedrooms}+</Badge>
+              </div>
+              <Slider
+                value={[bedrooms]}
+                onValueChange={(v) => setBedrooms(v[0])}
+                min={1}
+                max={6}
+                step={1}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-sm">Bathrooms</Label>
+                <Badge variant="outline">{bathrooms}+</Badge>
+              </div>
+              <Slider
+                value={[bathrooms]}
+                onValueChange={(v) => setBathrooms(v[0])}
+                min={1}
+                max={4}
+                step={1}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label className="text-sm">Minimum Bathrooms: {bathrooms}</Label>
-            <Slider value={[bathrooms]} onValueChange={(v) => setBathrooms(v[0])} min={1} max={4} step={1} />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+        </FilterSection>
 
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Amenities</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
+        {/* Amenities */}
+        <FilterSection
+          icon={<Sparkles className="h-4 w-4" />}
+          title="Amenities"
+          badge={amenities.length > 0 ? `${amenities.length}` : undefined}
+        >
           <div className="grid grid-cols-2 gap-2">
             {amenityOptions.map((amenity) => (
-              <div key={amenity} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={amenities.includes(amenity)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setAmenities([...amenities, amenity]);
-                    } else {
-                      setAmenities(amenities.filter(a => a !== amenity));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{amenity}</Label>
-              </div>
+              <button
+                key={amenity.value}
+                onClick={() => {
+                  if (amenities.includes(amenity.value)) {
+                    setAmenities(amenities.filter(a => a !== amenity.value));
+                  } else {
+                    setAmenities([...amenities, amenity.value]);
+                  }
+                }}
+                className={cn(
+                  "flex items-center gap-2 p-2.5 rounded-lg border text-sm transition-all",
+                  amenities.includes(amenity.value)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-accent border-border"
+                )}
+              >
+                <span>{amenity.icon}</span>
+                <span>{amenity.label}</span>
+              </button>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Connect with clients whose needs align with your property features</p>
-        </CollapsibleContent>
-      </Collapsible>
+        </FilterSection>
 
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Additional Preferences</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <Label>Pet Friendly</Label>
-            <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label>Furnished</Label>
-            <Switch checked={furnished} onCheckedChange={setFurnished} />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label>Elevator</Label>
-            <Switch checked={hasElevator} onCheckedChange={setHasElevator} />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Property Size</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{squareFeetRange[0]} sq ft</span>
-              <span>{squareFeetRange[1]} sq ft</span>
+        {/* Preferences */}
+        <FilterSection icon={<Building className="h-4 w-4" />} title="Preferences">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-accent transition-colors">
+              <div className="flex items-center gap-2">
+                <span>🐕</span>
+                <Label className="text-sm cursor-pointer">Pet Friendly</Label>
+              </div>
+              <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
             </div>
-            <Slider
-              value={squareFeetRange}
-              onValueChange={setSquareFeetRange}
-              min={0}
-              max={10000}
-              step={100}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Filter by square footage</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Year Built</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{yearBuiltRange[0]}</span>
-              <span>{yearBuiltRange[1]}</span>
+            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-accent transition-colors">
+              <div className="flex items-center gap-2">
+                <span>🛋️</span>
+                <Label className="text-sm cursor-pointer">Furnished</Label>
+              </div>
+              <Switch checked={furnished} onCheckedChange={setFurnished} />
             </div>
-            <Slider
-              value={yearBuiltRange}
-              onValueChange={setYearBuiltRange}
-              min={1950}
-              max={new Date().getFullYear()}
-              step={5}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Filter by construction or renovation year</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Floor Level</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <Select value={floorLevel} onValueChange={setFloorLevel}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {floorLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground">Preferred floor range in building</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">View Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {viewTypeOptions.map((view) => (
-              <div key={view} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={viewTypes.includes(view)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setViewTypes([...viewTypes, view]);
-                    } else {
-                      setViewTypes(viewTypes.filter(v => v !== view));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{view}</Label>
+            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-accent transition-colors">
+              <div className="flex items-center gap-2">
+                <span>🛗</span>
+                <Label className="text-sm cursor-pointer">Elevator</Label>
               </div>
-            ))}
+              <Switch checked={hasElevator} onCheckedChange={setHasElevator} />
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">Desired view from property</p>
-        </CollapsibleContent>
-      </Collapsible>
+        </FilterSection>
 
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Orientation</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {orientationOptions.map((orientation) => (
-              <div key={orientation} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={orientations.includes(orientation)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setOrientations([...orientations, orientation]);
-                    } else {
-                      setOrientations(orientations.filter(o => o !== orientation));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{orientation}</Label>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Building/unit orientation for natural light</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Parking</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
+        {/* Parking */}
+        <FilterSection icon={<Car className="h-4 w-4" />} title="Parking">
           <div className="space-y-2">
-            <Label className="text-sm">Minimum Parking Spots: {parkingSpots}</Label>
+            <div className="flex justify-between items-center">
+              <Label className="text-sm">Parking Spots</Label>
+              <Badge variant="outline">{parkingSpots}+</Badge>
+            </div>
             <Slider
               value={[parkingSpots]}
               onValueChange={(v) => setParkingSpots(v[0])}
@@ -444,23 +394,144 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
               step={1}
             />
           </div>
-          <p className="text-sm text-muted-foreground">Required number of parking spaces</p>
-        </CollapsibleContent>
-      </Collapsible>
+        </FilterSection>
 
-      <div className="flex flex-col gap-2 pt-4">
+        {/* Client Demographics */}
+        <FilterSection icon={<Users className="h-4 w-4" />} title="Client Profile">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm">Gender</Label>
+              <Select value={genderPreference} onValueChange={setGenderPreference}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {genderOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-sm">Age Range</Label>
+                <span className="text-xs text-muted-foreground">{ageRange[0]} - {ageRange[1]}</span>
+              </div>
+              <Slider
+                value={ageRange}
+                onValueChange={setAgeRange}
+                min={18}
+                max={80}
+                step={1}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">Living Situation</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {relationshipStatusOptions.map((status) => (
+                  <button
+                    key={status.value}
+                    onClick={() => {
+                      if (relationshipStatus.includes(status.value)) {
+                        setRelationshipStatus(relationshipStatus.filter(s => s !== status.value));
+                      } else {
+                        setRelationshipStatus([...relationshipStatus, status.value]);
+                      }
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded-lg border text-xs transition-all",
+                      relationshipStatus.includes(status.value)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background hover:bg-accent border-border"
+                    )}
+                  >
+                    <span>{status.icon}</span>
+                    <span>{status.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">Pet Ownership</Label>
+              <Select value={hasPetsFilter} onValueChange={setHasPetsFilter}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="with_pets">Has Pets</SelectItem>
+                  <SelectItem value="no_pets">No Pets</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </FilterSection>
+
+        {/* Languages */}
+        <FilterSection
+          icon={<Globe className="h-4 w-4" />}
+          title="Languages"
+          badge={languages.length > 0 ? `${languages.length}` : undefined}
+        >
+          <div className="flex flex-wrap gap-2">
+            {languageOptions.map((language) => (
+              <button
+                key={language}
+                onClick={() => {
+                  if (languages.includes(language)) {
+                    setLanguages(languages.filter(l => l !== language));
+                  } else {
+                    setLanguages([...languages, language]);
+                  }
+                }}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                  languages.includes(language)
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-accent"
+                )}
+              >
+                {language}
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="sticky bottom-0 p-4 bg-background border-t space-y-2">
         <div className="flex gap-2">
-          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+          <Button
+            onClick={handleClear}
+            variant="outline"
+            className="flex-1"
+            size="sm"
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Clear
+          </Button>
+          <Button
+            onClick={handleApply}
+            className="flex-1"
+            size="sm"
+          >
+            Apply Filters
+          </Button>
         </div>
-        <Button 
-          onClick={handleSavePreferences} 
-          variant="secondary" 
-          className="w-full"
+        <Button
+          onClick={handleSavePreferences}
+          variant="ghost"
+          className="w-full text-xs"
+          size="sm"
           disabled={savePreferencesMutation.isPending}
         >
-          <Save className="h-4 w-4 mr-2" />
-          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
+          <Save className="h-3 w-3 mr-2" />
+          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as Preferences'}
         </Button>
       </div>
     </div>

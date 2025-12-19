@@ -16,7 +16,7 @@ export function BottomNav({ active, userRole }: BottomNavProps) {
   const { unreadCount: messagesCount } = useUnreadMessageCount();
 
   const dashboardLink = userRole === 'owner' ? '/owner/dashboard' : '/client/dashboard';
-  const filtersLink = userRole === 'owner' ? '/owner/filters-explore' : '/client/dashboard';
+  const filtersLink = userRole === 'owner' ? '/owner/clients/property' : '/client/dashboard';
   const likesLink = userRole === 'owner' ? '/owner/liked-clients' : '/client/liked-properties';
   const profileLink = userRole === 'owner' ? '/owner/profile' : '/client/profile';
 
