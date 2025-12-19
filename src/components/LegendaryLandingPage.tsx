@@ -296,7 +296,9 @@ function LegendaryLandingPage() {
         <div className="space-y-2 mt-8">
 
           {/* I'm a Client Button */}
-          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(244,63,94,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.4)] backdrop-blur-sm border border-white/30 relative overflow-hidden group" style={{
+            background: 'linear-gradient(90deg, #ff8c42, #ff6b35, #f97316, #ea580c, #ff8c42)'
+          }} initial={{
           opacity: 0,
           x: 150,
           scale: 0.9
@@ -313,12 +315,14 @@ function LegendaryLandingPage() {
         }} whileHover={{
           scale: 1.03,
           y: -4,
-          boxShadow: '0 16px 48px rgba(244,63,94,0.45)'
+          boxShadow: '0 16px 48px rgba(249,115,22,0.5)'
         }} whileTap={{
           scale: 0.97
         }}>
             {/* Animated background gradient on hover */}
-            <motion.div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-red-500 to-pink-600" initial={{
+            <motion.div className="absolute inset-0" style={{
+              background: 'linear-gradient(90deg, #ffa756, #ff8c42, #ff6b35, #f97316, #ffa756)'
+            }} initial={{
             opacity: 0
           }} animate={{
             opacity: hoveredButton === 'client' ? 1 : 0
@@ -326,14 +330,25 @@ function LegendaryLandingPage() {
             duration: 0.3
           }} />
 
-            {/* Shine effect */}
-            <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full" animate={{
-            x: ['100%', '-100%']
-          }} transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            repeatDelay: 2
-          }} />
+            {/* Shiny reflection effect */}
+            <motion.div className="absolute inset-0 overflow-hidden">
+              <motion.div
+                className="absolute inset-y-0 w-32"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.7), rgba(255,255,255,0.5), transparent)',
+                  filter: 'blur(1px)'
+                }}
+                animate={{
+                  x: ['-150%', '450%']
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatDelay: 4,
+                  ease: 'easeInOut'
+                }}
+              />
+            </motion.div>
 
             <Home className="w-5 h-5 relative z-10" />
             <span className="relative z-10">I'm a Client</span>
@@ -347,7 +362,9 @@ function LegendaryLandingPage() {
           </motion.button>
 
           {/* I'm an Owner Button */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(249,115,22,0.3)] backdrop-blur-sm border border-white/20 relative overflow-hidden group" initial={{
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_6px_24px_rgba(234,88,12,0.4)] backdrop-blur-sm border border-white/30 relative overflow-hidden group" style={{
+            background: 'linear-gradient(90deg, #f97316, #ea580c, #dc2626, #ea580c, #f97316)'
+          }} initial={{
           opacity: 0,
           x: -150,
           scale: 0.9
@@ -364,12 +381,14 @@ function LegendaryLandingPage() {
         }} whileHover={{
           scale: 1.03,
           y: -4,
-          boxShadow: '0 16px 48px rgba(249,115,22,0.45)'
+          boxShadow: '0 16px 48px rgba(234,88,12,0.5)'
         }} whileTap={{
           scale: 0.97
         }}>
             {/* Animated background gradient on hover */}
-            <motion.div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-orange-600" initial={{
+            <motion.div className="absolute inset-0" style={{
+              background: 'linear-gradient(90deg, #ff8c42, #f97316, #ea580c, #f97316, #ff8c42)'
+            }} initial={{
             opacity: 0
           }} animate={{
             opacity: hoveredButton === 'owner' ? 1 : 0
@@ -377,15 +396,26 @@ function LegendaryLandingPage() {
             duration: 0.3
           }} />
 
-            {/* Shine effect */}
-            <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full" animate={{
-            x: ['100%', '-100%']
-          }} transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            repeatDelay: 2,
-            delay: 0.5
-          }} />
+            {/* Shiny reflection effect */}
+            <motion.div className="absolute inset-0 overflow-hidden">
+              <motion.div
+                className="absolute inset-y-0 w-32"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.7), rgba(255,255,255,0.5), transparent)',
+                  filter: 'blur(1px)'
+                }}
+                animate={{
+                  x: ['-150%', '450%']
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatDelay: 4,
+                  ease: 'easeInOut',
+                  delay: 2
+                }}
+              />
+            </motion.div>
 
             <Building2 className="w-5 h-5 relative z-10" />
             <span className="relative z-10">I'm an Owner</span>
