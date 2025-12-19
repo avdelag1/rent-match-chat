@@ -295,14 +295,14 @@ function LegendaryLandingPage() {
         {/* Buttons Container with Enhanced Effects */}
         <div className="space-y-2 mt-8">
 
-          {/* I'm a Client Button - Vibrant Cyan to Electric Blue */}
-          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
-            background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1, #8b5cf6)'
+          {/* I'm a Client Button - Orange Red Fire */}
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(249,115,22,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
+            background: 'linear-gradient(135deg, #ff4500, #f97316, #ea580c, #dc2626, #ff6b35)'
           }} initial={{
           opacity: 0,
-          x: 300,
+          x: -300,
           scale: 0.8,
-          rotate: 5
+          rotate: -5
         }} animate={{
           opacity: 1,
           x: 0,
@@ -318,13 +318,13 @@ function LegendaryLandingPage() {
         }} whileHover={{
           scale: 1.05,
           y: -6,
-          boxShadow: '0 20px 60px rgba(6,182,212,0.6), 0 0 30px rgba(99,102,241,0.4)'
+          boxShadow: '0 20px 60px rgba(249,115,22,0.6), 0 0 30px rgba(220,38,38,0.4)'
         }} whileTap={{
           scale: 0.95
         }}>
             {/* Animated shimmer background on hover */}
             <motion.div className="absolute inset-0" style={{
-              background: 'linear-gradient(135deg, #22d3ee, #38bdf8, #60a5fa, #818cf8, #a78bfa)'
+              background: 'linear-gradient(135deg, #ff6b35, #fb923c, #f97316, #ea580c, #dc2626)'
             }} initial={{
             opacity: 0
           }} animate={{
@@ -383,9 +383,9 @@ function LegendaryLandingPage() {
             </motion.div>
           </motion.button>
 
-          {/* I'm an Owner Button - Vibrant Magenta to Gold */}
-          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
-            background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7, #8b5cf6)'
+          {/* I'm an Owner Button - Orange Red Fire */}
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-xl mx-auto py-1.5 px-14 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(249,115,22,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
+            background: 'linear-gradient(135deg, #ff4500, #f97316, #ea580c, #dc2626, #ff6b35)'
           }} initial={{
           opacity: 0,
           x: -300,
@@ -406,13 +406,13 @@ function LegendaryLandingPage() {
         }} whileHover={{
           scale: 1.05,
           y: -6,
-          boxShadow: '0 20px 60px rgba(236,72,153,0.6), 0 0 30px rgba(168,85,247,0.4)'
+          boxShadow: '0 20px 60px rgba(249,115,22,0.6), 0 0 30px rgba(220,38,38,0.4)'
         }} whileTap={{
           scale: 0.95
         }}>
             {/* Animated shimmer background on hover */}
             <motion.div className="absolute inset-0" style={{
-              background: 'linear-gradient(135deg, #fb7185, #f472b6, #e879f9, #c084fc, #a78bfa)'
+              background: 'linear-gradient(135deg, #ff6b35, #fb923c, #f97316, #ea580c, #dc2626)'
             }} initial={{
             opacity: 0
           }} animate={{
