@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -330,62 +331,51 @@ export default function NotificationsPage() {
 
   return (
     <DashboardLayout userRole={(userRole === 'admin' ? 'owner' : userRole) || 'client'}>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header */}
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-lg">
-                <Bell className="w-8 h-8 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Notifications</h1>
-                <p className="text-muted-foreground">
-                  {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={markAllAsRead}
-                  className="gap-2"
-                >
-                  <CheckCheck className="w-4 h-4" />
-                  <span className="hidden sm:inline">Mark all read</span>
-                </Button>
-              )}
-              
-              {notifications.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="w-5 h-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
-                      onClick={() => {
-                        setNotificationToDelete(null);
-                        setDeleteDialogOpen(true);
-                      }}
-                      className="text-destructive focus:text-destructive"
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 pb-24 overflow-y-auto">
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Header */}
+            <PageHeader 
+              title="Notifications"
+              subtitle={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
+              actions={
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={markAllAsRead}
+                      className="gap-2"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete all notifications
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </motion.div>
+                      <CheckCheck className="w-4 h-4" />
+                      <span className="hidden sm:inline">Mark all read</span>
+                    </Button>
+                  )}
+                  
+                  {notifications.length > 0 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="w-5 h-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setNotificationToDelete(null);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete all notifications
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              }
+            />
 
           {/* Filter Tabs */}
           <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full">
@@ -534,6 +524,7 @@ export default function NotificationsPage() {
               )}
             </TabsContent>
           </Tabs>
+          </div>
         </div>
       </div>
 
