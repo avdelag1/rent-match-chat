@@ -57,6 +57,11 @@ const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
 const OwnerServicesDiscovery = lazy(() => import("./pages/OwnerServicesDiscovery"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 
+// Camera pages
+const ClientSelfieCamera = lazy(() => import("./pages/ClientSelfieCamera"));
+const OwnerListingCamera = lazy(() => import("./pages/OwnerListingCamera"));
+const OwnerProfileCamera = lazy(() => import("./pages/OwnerProfileCamera"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -156,15 +161,25 @@ const App = () => (
                     />
 
                     <Route
-                      path="/client/security" 
+                      path="/client/security"
                       element={
                         <ProtectedRoute requiredRole="client">
                           <ClientSecurity />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
-                    
-                    <Route 
+
+                    {/* Client Camera */}
+                    <Route
+                      path="/client/camera"
+                      element={
+                        <ProtectedRoute requiredRole="client">
+                          <ClientSelfieCamera />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
                       path="/owner/dashboard" 
                       element={
                         <ProtectedRoute requiredRole="owner">
@@ -300,15 +315,34 @@ const App = () => (
                     />
 
                     <Route
-                      path="/owner/security" 
+                      path="/owner/security"
                       element={
                         <ProtectedRoute requiredRole="owner">
                           <OwnerSecurity />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
 
-                    <Route 
+                    {/* Owner Camera Routes */}
+                    <Route
+                      path="/owner/camera"
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <OwnerProfileCamera />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/owner/camera/listing"
+                      element={
+                        <ProtectedRoute requiredRole="owner">
+                          <OwnerListingCamera />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
                       path="/messages" 
                       element={
                         <ProtectedRoute>

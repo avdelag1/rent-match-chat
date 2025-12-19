@@ -1,9 +1,9 @@
-
 import { useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Image, Star } from 'lucide-react';
+import { Upload, X, Image, Star, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
 
@@ -13,17 +13,42 @@ interface PhotoUploadManagerProps {
   onPhotosChange: (photos: string[]) => void;
   uploadType: 'property' | 'profile';
   onUpload?: (file: File) => Promise<string>; // Returns URL
+  listingId?: string;
+  showCameraButton?: boolean;
 }
 
-export function PhotoUploadManager({ 
-  maxPhotos, 
-  currentPhotos, 
-  onPhotosChange, 
+export function PhotoUploadManager({
+  maxPhotos,
+  currentPhotos,
+  onPhotosChange,
   uploadType,
-  onUpload 
+  onUpload,
+  listingId,
+  showCameraButton = true,
 }: PhotoUploadManagerProps) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleOpenCamera = () => {
+    if (uploadType === 'property') {
+      navigate('/owner/camera/listing', {
+        state: {
+          returnPath: location.pathname,
+          listingId,
+          existingPhotos: currentPhotos,
+          maxPhotos,
+        },
+      });
+    } else {
+      // For profile photos
+      const isOwner = location.pathname.includes('/owner');
+      navigate(isOwner ? '/owner/camera' : '/client/camera', {
+        state: { returnPath: location.pathname },
+      });
+    }
+  };
 
   const handleFileSelect = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -200,13 +225,29 @@ export function PhotoUploadManager({
                     Tap to browse • JPG, PNG, WebP, GIF • Max {formatFileSize(FILE_SIZE_LIMITS.IMAGE_MAX_SIZE)}
                   </p>
                 </div>
-                <Button 
-                  type="button"
-                  disabled={uploading}
-                  className="h-10 sm:h-11 px-6 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
-                >
-                  {uploading ? 'Uploading...' : currentPhotos.length === 0 ? 'Select Photos' : `Add More (${maxPhotos - currentPhotos.length} left)`}
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                  {showCameraButton && (
+                    <Button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenCamera();
+                      }}
+                      className="h-10 sm:h-11 px-6 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      Take Photo
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    disabled={uploading}
+                    className="h-10 sm:h-11 px-6 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
+                  >
+                    <Image className="w-4 h-4 mr-2" />
+                    {uploading ? 'Uploading...' : currentPhotos.length === 0 ? 'Choose Photos' : `Add More (${maxPhotos - currentPhotos.length} left)`}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
