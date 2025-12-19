@@ -237,7 +237,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
-        onFiltersClick={() => navigate('/owner/clients/property')}
+        onFiltersClick={() => navigate('/owner/filters-explore')}
         showFilters={userRole === 'owner'}
       />
 
