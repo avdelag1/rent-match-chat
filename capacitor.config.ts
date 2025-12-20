@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.swipes.app',
-  appName: 'Swipes',
+  appName: 'ZWIPESS',
   webDir: 'dist',
 
   // Server configuration for development

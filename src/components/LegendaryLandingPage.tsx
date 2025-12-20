@@ -259,26 +259,7 @@ function LegendaryLandingPage() {
             repeat: Infinity,
             ease: "linear"
           }}>
-              Swipe
-            </motion.span>
-            <motion.span className="block -mt-3 sm:-mt-4" style={{
-            fontSize: 'clamp(3rem, 16vw, 6rem)',
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-            backgroundSize: '200% 100%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            filter: 'drop-shadow(0 2px 10px rgba(249, 115, 22, 0.35))'
-          }} animate={{
-            backgroundPosition: ['200% 50%', '0% 50%']
-          }} transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "linear"
-          }}>
-              Match
+              ZWIPESS
             </motion.span>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
