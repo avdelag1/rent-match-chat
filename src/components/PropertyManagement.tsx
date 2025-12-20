@@ -11,11 +11,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon, Share2 } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { OwnerListingsStats } from '@/components/OwnerListingsStats';
+import { ShareDialog } from '@/components/ShareDialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -55,6 +56,8 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProperty, setEditingProperty] = useState<any>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [sharingListing, setSharingListing] = useState<any>(null);
   const queryClient = useQueryClient();
 
   // Auto-open form when category is provided via URL params
@@ -108,6 +111,11 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const handleViewProperty = (listing: any) => {
     setViewingProperty(listing);
     setShowPreview(true);
+  };
+
+  const handleShareListing = (listing: any) => {
+    setSharingListing(listing);
+    setShowShareDialog(true);
   };
 
   const handleClosePreview = () => {
@@ -502,15 +510,24 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="grid grid-cols-3 gap-2 pt-1">
+                          <div className="grid grid-cols-4 gap-2 pt-1">
                             <Button
                               variant="outline"
                               size="sm"
                               className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs h-8"
                               onClick={() => handleViewProperty(listing)}
                             >
-                              <Eye className="w-3.5 h-3.5 mr-1" />
+                              <Eye className="w-3.5 h-3.5 sm:mr-1" />
                               <span className="hidden sm:inline">View</span>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs h-8"
+                              onClick={() => handleShareListing(listing)}
+                            >
+                              <Share2 className="w-3.5 h-3.5 sm:mr-1" />
+                              <span className="hidden sm:inline">Share</span>
                             </Button>
                             <Button
                               variant="outline"
@@ -518,7 +535,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                               className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs h-8"
                               onClick={() => handleEditProperty(listing)}
                             >
-                              <Edit className="w-3.5 h-3.5 mr-1" />
+                              <Edit className="w-3.5 h-3.5 sm:mr-1" />
                               <span className="hidden sm:inline">Edit</span>
                             </Button>
                             <AlertDialog>
@@ -528,7 +545,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                                   size="sm"
                                   className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/30 text-xs h-8"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                  <Trash2 className="w-3.5 h-3.5 sm:mr-1" />
                                   <span className="hidden sm:inline">Del</span>
                                 </Button>
                               </AlertDialogTrigger>
@@ -625,6 +642,18 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
             setEditingProperty(null);
           }}
           editingProperty={editingProperty}
+        />
+
+        {/* Share Listing Dialog */}
+        <ShareDialog
+          open={showShareDialog}
+          onOpenChange={(open) => {
+            setShowShareDialog(open);
+            if (!open) setSharingListing(null);
+          }}
+          listingId={sharingListing?.id}
+          title={sharingListing?.title || 'Listing'}
+          description={`Check out this ${sharingListing?.category || 'property'} on SwipeMatch: ${sharingListing?.title}${sharingListing?.price ? ` - $${sharingListing.price.toLocaleString()}` : ''}`}
         />
       </div>
     </div>

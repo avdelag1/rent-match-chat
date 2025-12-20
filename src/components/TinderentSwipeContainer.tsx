@@ -437,24 +437,23 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               initial={{ scale: 1, y: 0, opacity: 1 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{
-                x: swipeDirection === 'right' ? 600 : swipeDirection === 'left' ? -600 : 0,
+                x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
                 y: 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 30 : swipeDirection === 'left' ? -30 : 0,
-                scale: 0.85,
+                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
+                scale: 0.9,
                 transition: {
                   type: "spring",
-                  stiffness: 300,
-                  damping: 25,
-                  mass: 0.8,
-                  duration: 0.3
+                  stiffness: 600,
+                  damping: 30,
+                  mass: 0.4
                 }
               }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 1
+                stiffness: 600,
+                damping: 35,
+                mass: 0.4
               }}
               className="w-full h-full absolute inset-0"
               style={{ willChange: 'transform, opacity', zIndex: 1 }}
