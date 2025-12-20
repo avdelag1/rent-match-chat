@@ -62,6 +62,10 @@ const ClientSelfieCamera = lazy(() => import("./pages/ClientSelfieCamera"));
 const OwnerListingCamera = lazy(() => import("./pages/OwnerListingCamera"));
 const OwnerProfileCamera = lazy(() => import("./pages/OwnerProfileCamera"));
 
+// Public preview pages (shareable links)
+const PublicProfilePreview = lazy(() => import("./pages/PublicProfilePreview"));
+const PublicListingPreview = lazy(() => import("./pages/PublicListingPreview"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -394,6 +398,10 @@ const App = () => (
                     {/* Legal Pages - Public Access */}
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="/terms-of-service" element={<TermsOfService />} />
+
+                    {/* Public Preview Pages - Shareable Links */}
+                    <Route path="/profile/:id" element={<PublicProfilePreview />} />
+                    <Route path="/listing/:id" element={<PublicListingPreview />} />
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

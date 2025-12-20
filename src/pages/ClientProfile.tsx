@@ -9,12 +9,13 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut, User, Settings, Shield, Bell, Flame,
-  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Briefcase
+  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Briefcase, Share2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { ShareDialog } from "@/components/ShareDialog";
 
 const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
@@ -22,6 +23,7 @@ const ClientProfile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const { data: profile, isLoading } = useClientProfile();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -68,6 +70,7 @@ const ClientProfile = () => {
 
   const menuItems = [
     { icon: User, label: 'Edit Profile', action: () => setShowEditDialog(true), color: 'text-blue-500' },
+    { icon: Share2, label: 'Share Profile', action: () => setShowShareDialog(true), color: 'text-purple-500' },
     { icon: Settings, label: 'Preferences', action: () => navigate('/client/settings'), color: 'text-gray-500' },
     { icon: Crown, label: 'Subscription', action: () => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Shield, label: 'Security', action: () => navigate('/client/security'), color: 'text-green-500' },
@@ -279,6 +282,14 @@ const ClientProfile = () => {
         isOpen={showPhotoPreview}
         onClose={() => setShowPhotoPreview(false)}
         initialIndex={selectedPhotoIndex}
+      />
+
+      <ShareDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        profileId={user?.id}
+        title={profile?.name || 'My Profile'}
+        description={`Check out ${profile?.name || 'this profile'} on SwipeMatch! See their interests, lifestyle, and more.`}
       />
     </DashboardLayout>
   );
