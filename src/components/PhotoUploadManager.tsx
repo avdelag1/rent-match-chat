@@ -64,44 +64,96 @@ export function PhotoUploadManager({
     }
 
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
-    
+
     setUploading(true);
     try {
-      const newUrls: string[] = [];
-      
-      for (const file of filesToUpload) {
-        // Use centralized validation
-        const validation = validateImageFile(file);
-        if (!validation.isValid) {
+      // Validate all files first
+      const validatedFiles = filesToUpload.map(file => ({
+        file,
+        validation: validateImageFile(file)
+      }));
+
+      // Show validation errors
+      const invalidFiles = validatedFiles.filter(f => !f.validation.isValid);
+      if (invalidFiles.length > 0) {
+        invalidFiles.forEach(({ file, validation }) => {
           toast({
             title: "Invalid File",
             description: `${file.name}: ${validation.error}`,
             variant: "destructive"
           });
-          continue;
-        }
-
-        if (onUpload) {
-          const url = await onUpload(file);
-          newUrls.push(url);
-        } else {
-          // Fallback: create object URL for demo
-          const url = URL.createObjectURL(file);
-          newUrls.push(url);
-        }
+        });
       }
 
-      const updatedPhotos = [...currentPhotos, ...newUrls];
-      onPhotosChange(updatedPhotos);
+      // Upload valid files in parallel with Promise.allSettled
+      const validFiles = validatedFiles.filter(f => f.validation.isValid);
+      if (validFiles.length === 0) {
+        return;
+      }
 
-      toast({
-        title: "Photos Uploaded",
-        description: `${newUrls.length} photo(s) uploaded successfully!`
+      const uploadPromises = validFiles.map(async ({ file }) => {
+        if (onUpload) {
+          // Add timeout to prevent hanging uploads
+          const uploadWithTimeout = Promise.race([
+            onUpload(file),
+            new Promise<string>((_, reject) =>
+              setTimeout(() => reject(new Error('Upload timeout')), 30000)
+            )
+          ]);
+          return uploadWithTimeout;
+        } else {
+          // Fallback: create object URL for demo
+          return URL.createObjectURL(file);
+        }
       });
+
+      const results = await Promise.allSettled(uploadPromises);
+
+      // Collect successfully uploaded URLs
+      const newUrls: string[] = [];
+      let successCount = 0;
+      let failCount = 0;
+
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          newUrls.push(result.value);
+          successCount++;
+        } else {
+          failCount++;
+          console.error(`Failed to upload ${validFiles[index].file.name}:`, result.reason);
+        }
+      });
+
+      // Update photos with successfully uploaded ones
+      if (newUrls.length > 0) {
+        const updatedPhotos = [...currentPhotos, ...newUrls];
+        onPhotosChange(updatedPhotos);
+      }
+
+      // Show appropriate success/error message
+      if (successCount > 0 && failCount === 0) {
+        toast({
+          title: "Photos Uploaded",
+          description: `${successCount} photo(s) uploaded successfully!`
+        });
+      } else if (successCount > 0 && failCount > 0) {
+        toast({
+          title: "Partial Upload",
+          description: `${successCount} photo(s) uploaded, ${failCount} failed. Please retry failed uploads.`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Upload Failed",
+          description: "All photos failed to upload. Please check your connection and try again.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
+      console.error('Upload error:', error);
       toast({
-        title: "Upload Failed",
-        description: "Some photos failed to upload. Please try again.",
+        title: "Upload Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {
