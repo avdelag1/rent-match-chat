@@ -1,13 +1,14 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Save } from 'lucide-react';
+import { ChevronDown, Save, Home, DollarSign, Bed, Bath, Sparkles, PawPrint, Sofa, Building2, Eye, Compass, Car } from 'lucide-react';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
@@ -29,8 +30,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [amenities, setAmenities] = useState<string[]>(initialFilters.amenities || []);
   const [petFriendly, setPetFriendly] = useState(initialFilters.pet_friendly || false);
   const [furnished, setFurnished] = useState(initialFilters.furnished || false);
-
-  // New filter options
   const [squareFeetRange, setSquareFeetRange] = useState([initialFilters.square_feet_min || 0, initialFilters.square_feet_max || 5000]);
   const [yearBuiltRange, setYearBuiltRange] = useState([initialFilters.year_built_min || 1950, initialFilters.year_built_max || new Date().getFullYear()]);
   const [floorLevel, setFloorLevel] = useState<string>(initialFilters.floor_level || 'any');
@@ -38,8 +37,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [orientations, setOrientations] = useState<string[]>(initialFilters.orientations || []);
   const [hasElevator, setHasElevator] = useState(initialFilters.has_elevator || false);
   const [parkingSpots, setParkingSpots] = useState(initialFilters.parking_spots_min || 0);
-
-  // Client demographic filters
   const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
   const [nationalities, setNationalities] = useState<string[]>(initialFilters.nationalities || []);
   const [languages, setLanguages] = useState<string[]>(initialFilters.languages || []);
@@ -81,7 +78,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       orientations: orientations,
       has_elevator: hasElevator,
       parking_spots_min: parkingSpots,
-      // Client demographic filters
       gender_preference: genderPreference,
       nationalities,
       languages,
@@ -108,7 +104,6 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     setOrientations([]);
     setHasElevator(false);
     setParkingSpots(0);
-    // Clear client demographic filters
     setGenderPreference('any');
     setNationalities([]);
     setLanguages([]);
@@ -133,334 +128,363 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
       });
       toast({
         title: 'Preferences saved!',
-        description: 'Your property filter preferences have been saved successfully.',
+        description: 'Your property filter preferences have been saved.',
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to save preferences. Please try again.',
+        description: 'Failed to save preferences.',
         variant: 'destructive',
       });
     }
   };
 
+  const toggleItem = (arr: string[], item: string, setter: (val: string[]) => void) => {
+    if (arr.includes(item)) {
+      setter(arr.filter(i => i !== item));
+    } else {
+      setter([...arr, item]);
+    }
+  };
+
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Property Filters</h3>
-        {activeCount > 0 && (
-          <Badge variant="default">{activeCount} Active</Badge>
-        )}
-      </div>
-
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Interest Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <Select value={interestType} onValueChange={setInterestType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rent">Rent Only</SelectItem>
-              <SelectItem value="buy">Buy Only</SelectItem>
-              <SelectItem value="both">Rent or Buy</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground">Filter clients based on whether they're seeking to rent, purchase, or both</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <ClientDemographicFilters
-        genderPreference={genderPreference}
-        setGenderPreference={setGenderPreference}
-        ageRange={ageRange}
-        setAgeRange={setAgeRange}
-        relationshipStatus={relationshipStatus}
-        setRelationshipStatus={setRelationshipStatus}
-        hasPetsFilter={hasPetsFilter}
-        setHasPetsFilter={setHasPetsFilter}
-        nationalities={nationalities}
-        setNationalities={setNationalities}
-        languages={languages}
-        setLanguages={setLanguages}
-      />
-
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Property Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {propertyTypeOptions.map((type) => (
-              <div key={type} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={propertyTypes.includes(type)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setPropertyTypes([...propertyTypes, type]);
-                    } else {
-                      setPropertyTypes(propertyTypes.filter(t => t !== type));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{type}</Label>
-              </div>
+    <div className="space-y-4">
+      {/* Interest Type Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Home className="w-4 h-4 text-primary" />
+            Interest Type
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-2">
+            {['rent', 'buy', 'both'].map((type) => (
+              <motion.button
+                key={type}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setInterestType(type)}
+                className={`py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  interestType === type
+                    ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                {type === 'rent' ? '🏠 Rent' : type === 'buy' ? '💰 Buy' : '✨ Both'}
+              </motion.button>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Match clients looking for specific property types</p>
-        </CollapsibleContent>
-      </Collapsible>
+        </CardContent>
+      </Card>
 
-      <Collapsible defaultOpen className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Budget Range</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
+      {/* Client Demographics */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="w-4 h-4 text-primary" />
+                Client Profile
+              </CardTitle>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0">
+              <ClientDemographicFilters
+                genderPreference={genderPreference}
+                setGenderPreference={setGenderPreference}
+                ageRange={ageRange}
+                setAgeRange={setAgeRange}
+                relationshipStatus={relationshipStatus}
+                setRelationshipStatus={setRelationshipStatus}
+                hasPetsFilter={hasPetsFilter}
+                setHasPetsFilter={setHasPetsFilter}
+                nationalities={nationalities}
+                setNationalities={setNationalities}
+                languages={languages}
+                setLanguages={setLanguages}
+              />
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
+
+      {/* Budget Range Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <DollarSign className="w-4 h-4 text-primary" />
+            Budget Range
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between text-sm font-medium">
+            <span className="text-primary">${budgetRange[0].toLocaleString()}</span>
+            <span className="text-primary">${budgetRange[1].toLocaleString()}/mo</span>
+          </div>
+          <Slider
+            value={budgetRange}
+            onValueChange={setBudgetRange}
+            min={0}
+            max={10000}
+            step={100}
+            className="w-full"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Property Types Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Building2 className="w-4 h-4 text-primary" />
+            Property Type
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {propertyTypeOptions.map((type) => (
+              <Badge
+                key={type}
+                variant={propertyTypes.includes(type) ? "default" : "outline"}
+                className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  propertyTypes.includes(type)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => toggleItem(propertyTypes, type, setPropertyTypes)}
+              >
+                {type}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Requirements Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Bed className="w-4 h-4 text-primary" />
+            Requirements
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>${budgetRange[0]}</span>
-              <span>${budgetRange[1]}</span>
+              <Label>Bedrooms</Label>
+              <span className="font-medium text-primary">{bedrooms}+</span>
             </div>
-            <Slider
-              value={budgetRange}
-              onValueChange={setBudgetRange}
-              min={0}
-              max={10000}
-              step={100}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Find clients within a specific budget range</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Requirements</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-2">
-          <div className="space-y-2">
-            <Label className="text-sm">Minimum Bedrooms: {bedrooms}</Label>
             <Slider value={[bedrooms]} onValueChange={(v) => setBedrooms(v[0])} min={1} max={6} step={1} />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm">Minimum Bathrooms: {bathrooms}</Label>
+            <div className="flex justify-between text-sm">
+              <Label>Bathrooms</Label>
+              <span className="font-medium text-primary">{bathrooms}+</span>
+            </div>
             <Slider value={[bathrooms]} onValueChange={(v) => setBathrooms(v[0])} min={1} max={4} step={1} />
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+        </CardContent>
+      </Card>
 
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Amenities</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {amenityOptions.map((amenity) => (
-              <div key={amenity} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={amenities.includes(amenity)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setAmenities([...amenities, amenity]);
-                    } else {
-                      setAmenities(amenities.filter(a => a !== amenity));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{amenity}</Label>
+      {/* Amenities Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="w-4 h-4 text-primary" />
+                Amenities
+              </CardTitle>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-2">
+                {amenityOptions.map((amenity) => (
+                  <Badge
+                    key={amenity}
+                    variant={amenities.includes(amenity) ? "default" : "outline"}
+                    className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      amenities.includes(amenity)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-muted'
+                    }`}
+                    onClick={() => toggleItem(amenities, amenity, setAmenities)}
+                  >
+                    {amenity}
+                  </Badge>
+                ))}
               </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Connect with clients whose needs align with your property features</p>
-        </CollapsibleContent>
-      </Collapsible>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Additional Preferences</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <Label>Pet Friendly</Label>
-            <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label>Furnished</Label>
-            <Switch checked={furnished} onCheckedChange={setFurnished} />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label>Elevator</Label>
-            <Switch checked={hasElevator} onCheckedChange={setHasElevator} />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Property Size</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{squareFeetRange[0]} sq ft</span>
-              <span>{squareFeetRange[1]} sq ft</span>
-            </div>
-            <Slider
-              value={squareFeetRange}
-              onValueChange={setSquareFeetRange}
-              min={0}
-              max={10000}
-              step={100}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Filter by square footage</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Year Built</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{yearBuiltRange[0]}</span>
-              <span>{yearBuiltRange[1]}</span>
-            </div>
-            <Slider
-              value={yearBuiltRange}
-              onValueChange={setYearBuiltRange}
-              min={1950}
-              max={new Date().getFullYear()}
-              step={5}
-              className="w-full"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Filter by construction or renovation year</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Floor Level</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <Select value={floorLevel} onValueChange={setFloorLevel}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {floorLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground">Preferred floor range in building</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">View Type</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {viewTypeOptions.map((view) => (
-              <div key={view} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={viewTypes.includes(view)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setViewTypes([...viewTypes, view]);
-                    } else {
-                      setViewTypes(viewTypes.filter(v => v !== view));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{view}</Label>
+      {/* Preferences Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sofa className="w-4 h-4 text-primary" />
+                Preferences
+              </CardTitle>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 space-y-4">
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <PawPrint className="w-4 h-4 text-muted-foreground" />
+                  <Label>Pet Friendly</Label>
+                </div>
+                <Switch checked={petFriendly} onCheckedChange={setPetFriendly} />
               </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Desired view from property</p>
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Orientation</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="grid grid-cols-2 gap-2">
-            {orientationOptions.map((orientation) => (
-              <div key={orientation} className="flex items-center space-x-2">
-                <Checkbox
-                  checked={orientations.includes(orientation)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setOrientations([...orientations, orientation]);
-                    } else {
-                      setOrientations(orientations.filter(o => o !== orientation));
-                    }
-                  }}
-                />
-                <Label className="text-sm">{orientation}</Label>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <Sofa className="w-4 h-4 text-muted-foreground" />
+                  <Label>Furnished</Label>
+                </div>
+                <Switch checked={furnished} onCheckedChange={setFurnished} />
               </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">Building/unit orientation for natural light</p>
-        </CollapsibleContent>
-      </Collapsible>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-muted-foreground" />
+                  <Label>Elevator</Label>
+                </div>
+                <Switch checked={hasElevator} onCheckedChange={setHasElevator} />
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-      <Collapsible className="space-y-2">
-        <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Parking</Label>
-          <ChevronDown className="h-4 w-4" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <Label className="text-sm">Minimum Parking Spots: {parkingSpots}</Label>
-            <Slider
-              value={[parkingSpots]}
-              onValueChange={(v) => setParkingSpots(v[0])}
-              min={0}
-              max={5}
-              step={1}
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">Required number of parking spaces</p>
-        </CollapsibleContent>
-      </Collapsible>
+      {/* View & Location Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Eye className="w-4 h-4 text-primary" />
+                View & Location
+              </CardTitle>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Floor Level</Label>
+                <Select value={floorLevel} onValueChange={setFloorLevel}>
+                  <SelectTrigger className="bg-background/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {floorLevelOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">View Type</Label>
+                <div className="flex flex-wrap gap-2">
+                  {viewTypeOptions.map((view) => (
+                    <Badge
+                      key={view}
+                      variant={viewTypes.includes(view) ? "default" : "outline"}
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                        viewTypes.includes(view)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => toggleItem(viewTypes, view, setViewTypes)}
+                    >
+                      {view}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Orientation</Label>
+                <div className="flex flex-wrap gap-2">
+                  {orientationOptions.map((o) => (
+                    <Badge
+                      key={o}
+                      variant={orientations.includes(o) ? "default" : "outline"}
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                        orientations.includes(o)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => toggleItem(orientations, o, setOrientations)}
+                    >
+                      {o}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
 
-      <div className="flex flex-col gap-2 pt-4">
-        <div className="flex gap-2">
-          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
+      {/* Parking Card */}
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Car className="w-4 h-4 text-primary" />
+                Parking
+              </CardTitle>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0 space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Label>Minimum Parking Spots</Label>
+                  <span className="font-medium text-primary">{parkingSpots}</span>
+                </div>
+                <Slider
+                  value={[parkingSpots]}
+                  onValueChange={(v) => setParkingSpots(v[0])}
+                  min={0}
+                  max={5}
+                  step={1}
+                />
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col gap-3 pt-4">
+        <div className="flex gap-3">
+          <Button onClick={handleClear} variant="outline" className="flex-1 rounded-xl">
+            Clear All
+          </Button>
+          <Button onClick={handleApply} className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/80">
+            Apply
+          </Button>
         </div>
         <Button 
           onClick={handleSavePreferences} 
           variant="secondary" 
-          className="w-full"
+          className="w-full rounded-xl"
           disabled={savePreferencesMutation.isPending}
         >
           <Save className="h-4 w-4 mr-2" />
-          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
+          {savePreferencesMutation.isPending ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
     </div>

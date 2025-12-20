@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.tinderent.app',
-  appName: 'Tinderent',
+  appId: 'com.swipes.app',
+  appName: 'Swipes',
   webDir: 'dist',
 
   // Server configuration for development
@@ -38,12 +38,16 @@ const config: CapacitorConfig = {
     handleApplicationNotifications: true,
   },
 
-  // Android Configuration
+  // Android Configuration - Fixed for Play Store compatibility
   android: {
-    allowMixedContent: true,
+    allowMixedContent: false,
     captureInput: true,
     webContentsDebuggingEnabled: false,
     backgroundColor: '#000000',
+    // Use default user agent to avoid security flags
+    overrideUserAgent: undefined,
+    // Disable appendUserAgent to avoid detection issues
+    appendUserAgent: undefined,
   },
 
   // Plugin Configuration
@@ -92,14 +96,14 @@ const config: CapacitorConfig = {
     },
     App: {
       // URL schemes the app can open
-      iosScheme: 'tinderent',
+      iosScheme: 'swipes',
     },
   },
 
   // App URL Launcher configuration
   appUrlOpen: {
     // Handle deep links
-    url: 'tinderent://',
+    url: 'swipes://',
   },
 };
 

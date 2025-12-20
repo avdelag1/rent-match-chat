@@ -69,7 +69,7 @@ export const STORAGE = {
   WEB_VITALS_KEY: 'webVitals',
   USER_PREFERENCES_KEY: 'userPreferences',
   SEARCH_HISTORY_KEY: 'searchHistory',
-  SELECTED_PLAN_KEY: 'tinderent_selected_plan',
+  SELECTED_PLAN_KEY: 'swipes_selected_plan',
   PENDING_ACTIVATION_KEY: 'pendingActivationPurchase',
 
   // localStorage limits

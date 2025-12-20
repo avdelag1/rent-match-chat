@@ -1,6 +1,6 @@
 {
-  "name": "SwipeMatch - Find Your Perfect Rental",
-  "short_name": "SwipeMatch",
+  "name": "Swipes - Find Your Perfect Rental",
+  "short_name": "Swipes",
   "description": "Find your perfect rental property or tenant with ease. Swipe through properties and connect with the right matches.",
   "start_url": "/",
   "scope": "/",
@@ -11,7 +11,7 @@
   "orientation": "portrait-primary",
   "lang": "en",
   "dir": "ltr",
-  "id": "com.swipematch.app",
+  "id": "com.swipes.app",
   "prefer_related_applications": false,
   "icons": [
     {
@@ -78,7 +78,7 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "SwipeMatch on desktop"
+      "label": "Swipes on desktop"
     }
   ],
   "shortcuts": [
@@ -122,7 +122,7 @@
   "related_applications": [
     {
       "platform": "itunes",
-      "url": "https://apps.apple.com/app/swipematch/id1234567890"
+      "url": "https://apps.apple.com/app/swipes/id1234567890"
     }
   ],
   "launch_handler": {

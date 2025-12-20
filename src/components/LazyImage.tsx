@@ -69,7 +69,7 @@ export function LazyImage({
         src={blurUrl}
         alt=""
         className={cn(
-          'absolute inset-0 w-full h-full transition-opacity duration-300',
+          'absolute inset-0 w-full h-full transition-opacity duration-75',
           isLoaded ? 'opacity-0' : 'opacity-100'
         )}
         style={{ objectFit }}
@@ -83,7 +83,7 @@ export function LazyImage({
         alt={alt}
         loading={loading}
         className={cn(
-          'w-full h-full transition-opacity duration-300',
+          'w-full h-full transition-opacity duration-75',
           isLoaded && !error ? 'opacity-100' : 'opacity-0'
         )}
         style={{ objectFit }}
