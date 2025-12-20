@@ -71,9 +71,23 @@ const steps = [
 
       const { data, error } = await supabase.storage
         .from('profile-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase upload error:', error);
+        // Provide more helpful error messages
+        if (error.message.includes('size')) {
+          throw new Error('Image file is too large. Please use a smaller image (max 10MB).');
+        } else if (error.message.includes('type')) {
+          throw new Error('Invalid image format. Please use JPG, PNG, WebP, or GIF.');
+        } else if (error.message.includes('policy')) {
+          throw new Error('Permission denied. Please try logging out and back in.');
+        }
+        throw new Error(`Upload failed: ${error.message}`);
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('profile-images')
