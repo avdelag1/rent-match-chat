@@ -115,7 +115,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               transform: 'translateZ(0)',
             }}
           >
-            <DialogContent className={`max-w-lg w-full max-h-[85vh] h-[80vh] overflow-y-auto transition-opacity duration-75 ${isDragging ? 'opacity-90' : ''}`}>
+            <DialogContent className={`max-w-lg w-full max-h-[92vh] overflow-y-auto transition-opacity duration-75 ${isDragging ? 'opacity-90' : ''} sm:top-[2vh]`}>
               <motion.div>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -272,23 +272,27 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                 </div>
               ) : listing ? (
                 // PROPERTY LISTING INSIGHTS (Original)
-                <div className="mt-6 space-y-6">
-                  {/* Property Summary with Full Description */}
-                  <div className="p-4 bg-muted/50 rounded-xl">
-                    <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                <div className="mt-4 space-y-5">
+                  {/* Property Title & Location - Compact */}
+                  <div>
+                    <h3 className="text-xl font-bold mb-1">{listing.title}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4" />
                       <span>{listing.neighborhood}, {listing.city}</span>
                     </div>
-                    {listing.description && (
-                      <div className="mt-3">
-                        <h4 className="font-semibold text-sm mb-2">Full Description</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                          {listing.description}
-                        </p>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Full Description - FIRST - Most Important */}
+                  {listing.description && (
+                    <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                      <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
+                        <span className="text-lg">📝</span> About This Property
+                      </h4>
+                      <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                        {listing.description}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Price & Key Details */}
                   <div className="grid grid-cols-2 gap-3">
@@ -318,10 +322,12 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     )}
                   </div>
 
-                  {/* Amenities - Moved up */}
+                  {/* Amenities */}
                   {listing.amenities && listing.amenities.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="font-semibold">Amenities Included</h4>
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <span className="text-lg">✨</span> Amenities Included
+                      </h4>
                       <div className="grid grid-cols-2 gap-2">
                         {listing.amenities.map((amenity, idx) => (
                           <div key={idx} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
@@ -333,7 +339,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     </div>
                   )}
 
-                  {/* Property Images - Large Scrollable */}
+                  {/* Property Images - Moved to bottom for better description visibility */}
                   {listing.images && listing.images.length > 0 && (
                     <div className="space-y-3">
                       <h4 className="font-semibold flex items-center gap-2">
