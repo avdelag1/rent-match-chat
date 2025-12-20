@@ -106,13 +106,14 @@ export function useSwipedClientProfiles() {
       if (!user) return [];
 
       try {
-        const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+        // Only exclude profiles swiped within the last 1 day (reset after next day)
+        const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
         const { data: likes, error } = await supabase
           .from('likes')
           .select('target_id')
           .eq('user_id', user.id)
-          .gte('created_at', fiveDaysAgo);
+          .gte('created_at', oneDayAgo);
 
         if (error) {
           console.error('Error fetching owner swipes:', error);

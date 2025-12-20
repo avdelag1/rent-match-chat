@@ -242,12 +242,13 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch ALL swiped listings (both left and right) to exclude them
-        // This prevents cards from reappearing after sign in
+        // Fetch swiped listings from the last 1 day (cards reset after next day)
+        const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
         const { data: swipedListings, error: swipesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id);
+          .eq('user_id', user.user.id)
+          .gte('created_at', oneDayAgo);
 
         // If likes table has permission issues, just continue without filtering
         const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
@@ -728,14 +729,15 @@ export function useSmartClientMatching(
           return [] as MatchedClientProfile[];
         }
 
-        // Fetch ALL swiped profiles from likes table (permanent exclusion)
-        // This ensures profiles that have been swiped never show again
+        // Fetch swiped profiles from the last 1 day (cards reset after next day)
+        const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
         const swipedProfileIds = new Set<string>();
 
         const { data: swipedProfiles, error: swipesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id);
+          .eq('user_id', user.user.id)
+          .gte('created_at', oneDayAgo);
 
         if (!swipesError && swipedProfiles) {
           for (const row of swipedProfiles) {
@@ -745,14 +747,15 @@ export function useSmartClientMatching(
           }
         }
 
-        // Also check profile_views for any passes that might not be in likes table
+        // Also check profile_views for any passes that might not be in likes table (last 1 day)
         if (!includeRecentLikes) {
           const { data: viewedProfiles, error: viewsError } = await supabase
             .from('profile_views')
             .select('viewed_profile_id')
             .eq('user_id', user.user.id)
             .eq('view_type', 'profile')
-            .in('action', ['like', 'pass']);
+            .in('action', ['like', 'pass'])
+            .gte('created_at', oneDayAgo);
 
           if (!viewsError && viewedProfiles) {
             for (const row of viewedProfiles as any[]) {
