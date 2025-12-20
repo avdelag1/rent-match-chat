@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { CameraDirection } from '@capacitor/camera';
 import { useCamera, CapturedPhoto } from '@/hooks/useCamera';
 import { Button } from '@/components/ui/button';
@@ -10,22 +9,33 @@ import {
   RefreshCw,
   Sparkles,
   Timer,
-  Layout,
   SlidersHorizontal,
-  Link2,
   ChevronDown,
   Check,
   Image,
   Trash2,
   Camera,
-  FlipHorizontal,
   Zap,
-  Sun,
-  Moon,
   Grid3X3,
-  Focus,
+  Edit3,
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { CameraSettingsPanel } from '@/components/CameraSettingsPanel';
+import { CameraFiltersPanel } from '@/components/CameraFiltersPanel';
+import { PhotoEditor } from '@/components/PhotoEditor';
+import {
+  FilterType,
+  CAMERA_FILTERS,
+  CameraSettings,
+  DEFAULT_CAMERA_SETTINGS,
+  PortraitModeConfig,
+  DEFAULT_PORTRAIT_CONFIG,
+  NightModeConfig,
+  DEFAULT_NIGHT_CONFIG,
+  getNightModeCssFilter,
+  adjustmentsToCssFilter,
+  QUALITY_SETTINGS,
+} from '@/utils/cameraFilters';
 
 interface CameraCaptureProps {
   mode: 'selfie' | 'listing';
@@ -44,8 +54,8 @@ export function CameraCapture({
   onCancel,
   title,
 }: CameraCaptureProps) {
-  const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isStreamActive, setIsStreamActive] = useState(false);
   const [photoMode, setPhotoMode] = useState<PhotoMode>('PHOTO');
   const [showGrid, setShowGrid] = useState(false);
@@ -54,6 +64,16 @@ export function CameraCapture({
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState<number | null>(null);
+
+  // New feature states
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false);
+  const [showFiltersPanel, setShowFiltersPanel] = useState(false);
+  const [showPhotoEditor, setShowPhotoEditor] = useState(false);
+  const [editingPhotoIndex, setEditingPhotoIndex] = useState<number | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('none');
+  const [cameraSettings, setCameraSettings] = useState<CameraSettings>(DEFAULT_CAMERA_SETTINGS);
+  const [portraitConfig, setPortraitConfig] = useState<PortraitModeConfig>(DEFAULT_PORTRAIT_CONFIG);
+  const [nightConfig, setNightConfig] = useState<NightModeConfig>(DEFAULT_NIGHT_CONFIG);
 
   const {
     isCapturing,
@@ -68,18 +88,53 @@ export function CameraCapture({
     capture,
     pickFromGallery,
     flipCamera,
+    addPhoto,
+    updatePhoto,
     removePhoto,
     clearPhotos,
     cleanup,
   } = useCamera({
     mode,
-    onCapture: (photo) => {
-      toast({
-        title: 'Photo Captured!',
-        description: `${capturedPhotos.length + 1}/${maxPhotos} photos taken`,
-      });
-    },
   });
+
+  // Handle photo mode changes
+  useEffect(() => {
+    if (photoMode === 'PORTRAIT') {
+      setPortraitConfig(prev => ({ ...prev, enabled: true }));
+      setNightConfig(prev => ({ ...prev, enabled: false }));
+    } else if (photoMode === 'NIGHT') {
+      setNightConfig(prev => ({ ...prev, enabled: true }));
+      setPortraitConfig(prev => ({ ...prev, enabled: false }));
+    } else {
+      setPortraitConfig(prev => ({ ...prev, enabled: false }));
+      setNightConfig(prev => ({ ...prev, enabled: false }));
+    }
+  }, [photoMode]);
+
+  // Get combined preview filter CSS
+  const getPreviewFilter = useCallback(() => {
+    let filters: string[] = [];
+
+    // Apply selected filter
+    if (selectedFilter !== 'none') {
+      filters.push(CAMERA_FILTERS[selectedFilter].cssFilter);
+    }
+
+    // Apply night mode filter
+    if (nightConfig.enabled) {
+      const nightFilter = getNightModeCssFilter(nightConfig);
+      if (nightFilter !== 'none') {
+        filters.push(nightFilter);
+      }
+    }
+
+    // Apply portrait mode visual indicator (subtle vignette)
+    if (portraitConfig.enabled) {
+      filters.push('brightness(1.02)');
+    }
+
+    return filters.length > 0 ? filters.join(' ') : 'none';
+  }, [selectedFilter, nightConfig, portraitConfig]);
 
   // Initialize camera
   useEffect(() => {
@@ -110,7 +165,119 @@ export function CameraCapture({
     }
   }, [currentDirection]);
 
-  // Handle timer countdown
+  // Custom capture with filters applied
+  const captureWithEffects = useCallback(async () => {
+    if (!videoRef.current) {
+      return await capture();
+    }
+
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return await capture();
+
+    // Use quality settings for dimensions
+    const qualityConfig = QUALITY_SETTINGS[cameraSettings.quality];
+    const width = mode === 'listing' ? qualityConfig.width : Math.min(qualityConfig.width, 1080);
+    const height = mode === 'listing' ? qualityConfig.height : Math.min(qualityConfig.height, 1080);
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // Calculate crop to maintain aspect ratio
+    const videoAspect = video.videoWidth / video.videoHeight;
+    const targetAspect = width / height;
+
+    let sx = 0, sy = 0, sw = video.videoWidth, sh = video.videoHeight;
+
+    if (videoAspect > targetAspect) {
+      sw = video.videoHeight * targetAspect;
+      sx = (video.videoWidth - sw) / 2;
+    } else {
+      sh = video.videoWidth / targetAspect;
+      sy = (video.videoHeight - sh) / 2;
+    }
+
+    // Build filter string
+    let filterString = '';
+
+    if (selectedFilter !== 'none') {
+      filterString = CAMERA_FILTERS[selectedFilter].cssFilter;
+    }
+
+    if (nightConfig.enabled) {
+      const nightFilter = getNightModeCssFilter(nightConfig);
+      if (nightFilter !== 'none') {
+        filterString = filterString ? `${filterString} ${nightFilter}` : nightFilter;
+      }
+    }
+
+    // Apply HDR simulation if enabled
+    if (cameraSettings.hdr) {
+      const hdrFilter = 'contrast(1.05) saturate(1.1)';
+      filterString = filterString ? `${filterString} ${hdrFilter}` : hdrFilter;
+    }
+
+    // Apply filter to canvas
+    if (filterString) {
+      ctx.filter = filterString;
+    }
+
+    // Mirror front camera if setting enabled
+    const shouldMirror = currentDirection === CameraDirection.Front && cameraSettings.mirror;
+    if (shouldMirror) {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+
+    // Draw video frame
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, width, height);
+
+    // Reset filter for additional effects
+    ctx.filter = 'none';
+
+    // Apply portrait mode blur effect (simulated vignette focus)
+    if (portraitConfig.enabled) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      // Create a subtle radial gradient to simulate depth-of-field
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2,
+        (canvas.width * portraitConfig.focusAreaSize / 100) / 2,
+        canvas.width / 2, canvas.height / 2,
+        Math.max(canvas.width, canvas.height) * 0.7
+      );
+
+      gradient.addColorStop(0, 'rgba(0,0,0,0)');
+      gradient.addColorStop(0.7, 'rgba(0,0,0,0)');
+      gradient.addColorStop(1, `rgba(0,0,0,${portraitConfig.blurIntensity / 100 * 0.3})`);
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    const quality = qualityConfig.jpegQuality;
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+    const capturedPhoto: CapturedPhoto = {
+      dataUrl,
+      format: 'jpeg',
+      saved: false,
+      timestamp: Date.now(),
+    };
+
+    return capturedPhoto;
+  }, [
+    capture,
+    selectedFilter,
+    nightConfig,
+    portraitConfig,
+    cameraSettings,
+    currentDirection,
+    mode,
+  ]);
+
+  // Handle timer countdown and capture
   const handleCapture = useCallback(async () => {
     if (capturedPhotos.length >= maxPhotos) {
       toast({
@@ -130,8 +297,24 @@ export function CameraCapture({
       setCountdown(null);
     }
 
-    await capture();
-  }, [timerSeconds, capturedPhotos.length, maxPhotos, capture]);
+    // Simulate flash effect
+    if (flashMode === 'on' || (flashMode === 'auto' && nightConfig.enabled)) {
+      const flashOverlay = document.createElement('div');
+      flashOverlay.className = 'fixed inset-0 bg-white z-[100] pointer-events-none';
+      document.body.appendChild(flashOverlay);
+      setTimeout(() => flashOverlay.remove(), 100);
+    }
+
+    const photo = await captureWithEffects();
+    if (photo) {
+      // Add photo to the captured photos array
+      addPhoto(photo);
+      toast({
+        title: 'Photo Captured!',
+        description: `${capturedPhotos.length + 1}/${maxPhotos} photos taken`,
+      });
+    }
+  }, [timerSeconds, capturedPhotos.length, maxPhotos, captureWithEffects, flashMode, nightConfig.enabled, addPhoto]);
 
   // Handle complete
   const handleComplete = () => {
@@ -167,6 +350,30 @@ export function CameraCapture({
     setTimerSeconds(timers[(currentIndex + 1) % timers.length]);
   };
 
+  // Open photo editor
+  const handleEditPhoto = (index: number) => {
+    setEditingPhotoIndex(index);
+    setShowPhotoEditor(true);
+    setShowPreview(false);
+  };
+
+  // Save edited photo
+  const handleSaveEditedPhoto = (editedDataUrl: string) => {
+    if (editingPhotoIndex !== null && capturedPhotos[editingPhotoIndex]) {
+      // Update the photo in the array using the hook's updatePhoto method
+      updatePhoto(editingPhotoIndex, {
+        ...capturedPhotos[editingPhotoIndex],
+        dataUrl: editedDataUrl,
+      });
+      toast({
+        title: 'Photo Edited!',
+        description: 'Your changes have been applied.',
+      });
+    }
+    setShowPhotoEditor(false);
+    setEditingPhotoIndex(null);
+  };
+
   // Photo modes
   const photoModes: PhotoMode[] = ['PHOTO', 'PORTRAIT', 'NIGHT'];
 
@@ -188,20 +395,51 @@ export function CameraCapture({
     );
   }
 
+  // Show photo editor
+  if (showPhotoEditor && editingPhotoIndex !== null && capturedPhotos[editingPhotoIndex]) {
+    return (
+      <PhotoEditor
+        imageDataUrl={capturedPhotos[editingPhotoIndex].dataUrl}
+        onSave={handleSaveEditedPhoto}
+        onCancel={() => {
+          setShowPhotoEditor(false);
+          setEditingPhotoIndex(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
       {/* Camera Preview / Video */}
       <div className="relative flex-1 overflow-hidden">
-        {/* Video Stream */}
+        {/* Video Stream with Filters */}
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className={`absolute inset-0 w-full h-full object-cover ${
-            currentDirection === CameraDirection.Front ? 'scale-x-[-1]' : ''
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-200 ${
+            currentDirection === CameraDirection.Front && cameraSettings.mirror ? 'scale-x-[-1]' : ''
           }`}
+          style={{ filter: getPreviewFilter() }}
         />
+
+        {/* Hidden canvas for capture */}
+        <canvas ref={canvasRef} className="hidden" />
+
+        {/* Portrait Mode Focus Indicator */}
+        {portraitConfig.enabled && (
+          <div className="absolute inset-0 pointer-events-none">
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-white/40 rounded-full"
+              style={{
+                width: `${portraitConfig.focusAreaSize}%`,
+                height: `${portraitConfig.focusAreaSize}%`,
+              }}
+            />
+          </div>
+        )}
 
         {/* Grid Overlay */}
         {showGrid && (
@@ -252,18 +490,28 @@ export function CameraCapture({
                 <span className="text-white font-medium">
                   Photo {selectedPreviewIndex + 1} of {capturedPhotos.length}
                 </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    removePhoto(selectedPreviewIndex);
-                    setShowPreview(false);
-                    setSelectedPreviewIndex(null);
-                  }}
-                  className="text-red-500"
-                >
-                  <Trash2 className="w-6 h-6" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEditPhoto(selectedPreviewIndex)}
+                    className="text-white"
+                  >
+                    <Edit3 className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      removePhoto(selectedPreviewIndex);
+                      setShowPreview(false);
+                      setSelectedPreviewIndex(null);
+                    }}
+                    className="text-red-500"
+                  >
+                    <Trash2 className="w-6 h-6" />
+                  </Button>
+                </div>
               </div>
               <div className="flex-1 flex items-center justify-center p-4">
                 <img
@@ -298,6 +546,18 @@ export function CameraCapture({
             {capturedPhotos.length}/{maxPhotos}
           </Badge>
         </div>
+
+        {/* Active Filter/Mode Indicator */}
+        {(selectedFilter !== 'none' || portraitConfig.enabled || nightConfig.enabled) && (
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20">
+            <Badge className="bg-black/50 text-white border-0 px-3 py-1.5 text-xs">
+              {portraitConfig.enabled && 'Portrait'}
+              {nightConfig.enabled && 'Night Mode'}
+              {selectedFilter !== 'none' && !portraitConfig.enabled && !nightConfig.enabled &&
+                CAMERA_FILTERS[selectedFilter].name}
+            </Badge>
+          </div>
+        )}
 
         {/* Right Side Controls */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
@@ -347,10 +607,15 @@ export function CameraCapture({
             <Grid3X3 className="w-6 h-6" />
           </motion.button>
 
-          {/* Effects (decorative) */}
+          {/* Effects/Filters */}
           <motion.button
             whileTap={{ scale: 0.9 }}
-            className="w-12 h-12 rounded-full bg-black/30 flex items-center justify-center text-white"
+            onClick={() => setShowFiltersPanel(true)}
+            className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${
+              selectedFilter !== 'none' || portraitConfig.enabled || nightConfig.enabled
+                ? 'bg-red-500/50'
+                : 'bg-black/30'
+            }`}
           >
             <Sparkles className="w-6 h-6" />
           </motion.button>
@@ -358,6 +623,7 @@ export function CameraCapture({
           {/* Settings */}
           <motion.button
             whileTap={{ scale: 0.9 }}
+            onClick={() => setShowSettingsPanel(true)}
             className="w-12 h-12 rounded-full bg-black/30 flex items-center justify-center text-white"
           >
             <SlidersHorizontal className="w-6 h-6" />
@@ -366,10 +632,12 @@ export function CameraCapture({
           <ChevronDown className="w-6 h-6 text-white/50 mx-auto" />
         </div>
 
-        {/* Focus indicator (decorative) */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="w-20 h-20 border-2 border-white/30 rounded-lg" />
-        </div>
+        {/* Focus indicator */}
+        {!portraitConfig.enabled && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="w-20 h-20 border-2 border-white/30 rounded-lg" />
+          </div>
+        )}
       </div>
 
       {/* Bottom Controls */}
@@ -431,7 +699,10 @@ export function CameraCapture({
             className="relative w-20 h-20 flex items-center justify-center"
           >
             {/* Outer ring */}
-            <div className="absolute inset-0 rounded-full border-4 border-white" />
+            <div className={`absolute inset-0 rounded-full border-4 ${
+              photoMode === 'PORTRAIT' ? 'border-pink-400' :
+              photoMode === 'NIGHT' ? 'border-indigo-400' : 'border-white'
+            }`} />
 
             {/* Inner button */}
             <motion.div
@@ -439,7 +710,11 @@ export function CameraCapture({
                 scale: isCapturing ? 0.8 : 1,
               }}
               className={`w-16 h-16 rounded-full ${
-                mode === 'selfie'
+                photoMode === 'PORTRAIT'
+                  ? 'bg-gradient-to-br from-pink-500 to-purple-500'
+                  : photoMode === 'NIGHT'
+                  ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                  : mode === 'selfie'
                   ? 'bg-gradient-to-br from-pink-500 to-red-500'
                   : 'bg-gradient-to-br from-red-500 to-orange-500'
               }`}
@@ -476,7 +751,11 @@ export function CameraCapture({
             onClick={handleComplete}
             disabled={capturedPhotos.length === 0}
             className={`flex-1 h-12 ${
-              mode === 'selfie'
+              photoMode === 'PORTRAIT'
+                ? 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600'
+                : photoMode === 'NIGHT'
+                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
+                : mode === 'selfie'
                 ? 'bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600'
                 : 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600'
             } text-white border-0`}
@@ -488,11 +767,46 @@ export function CameraCapture({
 
         {/* Tips */}
         <p className="text-center text-white/40 text-xs mt-4 px-6">
-          {mode === 'selfie'
+          {photoMode === 'PORTRAIT'
+            ? 'Portrait mode adds a professional background blur effect'
+            : photoMode === 'NIGHT'
+            ? 'Night mode enhances photos in low-light conditions'
+            : mode === 'selfie'
             ? 'Take a clear selfie with good lighting for your profile'
             : 'Capture multiple angles of your listing for better visibility'}
         </p>
       </div>
+
+      {/* Settings Panel */}
+      <CameraSettingsPanel
+        isOpen={showSettingsPanel}
+        onClose={() => setShowSettingsPanel(false)}
+        settings={cameraSettings}
+        onSettingsChange={setCameraSettings}
+      />
+
+      {/* Filters Panel */}
+      <CameraFiltersPanel
+        isOpen={showFiltersPanel}
+        onClose={() => setShowFiltersPanel(false)}
+        selectedFilter={selectedFilter}
+        onFilterChange={setSelectedFilter}
+        portraitConfig={portraitConfig}
+        onPortraitConfigChange={(config) => {
+          setPortraitConfig(config);
+          if (config.enabled) {
+            setPhotoMode('PORTRAIT');
+          }
+        }}
+        nightConfig={nightConfig}
+        onNightConfigChange={(config) => {
+          setNightConfig(config);
+          if (config.enabled) {
+            setPhotoMode('NIGHT');
+          }
+        }}
+        previewImageUrl={capturedPhotos[0]?.dataUrl}
+      />
     </div>
   );
 }

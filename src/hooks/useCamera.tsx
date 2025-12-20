@@ -398,6 +398,23 @@ export function useCamera(options: UseCameraOptions) {
     }
   }, [isNative, captureNative, captureFromStream]);
 
+  // Add a photo directly (used for custom capture with effects)
+  const addPhoto = useCallback((photo: CapturedPhoto) => {
+    setCapturedPhotos(prev => [...prev, photo]);
+    onCapture?.(photo);
+  }, [onCapture]);
+
+  // Update a photo at a specific index (used for editing)
+  const updatePhoto = useCallback((index: number, photo: CapturedPhoto) => {
+    setCapturedPhotos(prev => {
+      const updated = [...prev];
+      if (index >= 0 && index < updated.length) {
+        updated[index] = photo;
+      }
+      return updated;
+    });
+  }, []);
+
   // Remove a captured photo
   const removePhoto = useCallback((index: number) => {
     setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
@@ -438,6 +455,8 @@ export function useCamera(options: UseCameraOptions) {
     flipCamera,
 
     // Photo management
+    addPhoto,
+    updatePhoto,
     removePhoto,
     clearPhotos,
     cleanup,
