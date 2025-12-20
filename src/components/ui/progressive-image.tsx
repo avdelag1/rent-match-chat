@@ -32,7 +32,7 @@ export const ProgressiveImage = ({
       alt={alt}
       src={imgSrc}
       className={cn(
-        'transition-all duration-500',
+        'transition-all duration-100',
         isLoaded ? 'progressive-image' : 'blur-sm',
         className
       )}
