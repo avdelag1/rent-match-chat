@@ -114,50 +114,33 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] h-[85vh] flex flex-col p-0">
+      <DialogContent className="sm:max-w-2xl max-h-[92vh] flex flex-col p-0 sm:top-[2vh]">
         <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle>Property Insights</DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="flex-1 h-full">
-          <div className="space-y-6 py-4 px-6 pb-8">
-            {/* Property Images Grid - Clickable */}
-            {listing.images && listing.images.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-semibold text-sm text-muted-foreground">Property Photos</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {listing.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setSelectedImageIndex(index);
-                        setGalleryOpen(true);
-                      }}
-                      className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                    >
-                      <img
-                        src={image}
-                        alt={`Property ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        loading={index < 3 ? "eager" : "lazy"}
-                        decoding="async"
-                        fetchPriority={index === 0 ? "high" : "auto"}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">Click any photo to view full size</p>
-              </div>
-            )}
-
-            {/* Basic Info */}
+          <div className="space-y-5 py-4 px-6 pb-8">
+            {/* Basic Info - Compact */}
             <div>
               <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
-              <div className="flex items-center gap-2 text-muted-foreground mb-4">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="w-4 h-4" />
                 <span>{listing.address}, {listing.neighborhood}, {listing.city}</span>
               </div>
             </div>
+
+            {/* Description - FIRST - Most Important */}
+            {listing.description && (
+              <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
+                  <span className="text-lg">📝</span> About This Property
+                </h4>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {listing.description}
+                </p>
+              </div>
+            )}
 
             {/* Property Details */}
             <div className="grid grid-cols-2 gap-4">
@@ -195,14 +178,6 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
                 <Badge variant="outline">{listing.status}</Badge>
               </div>
             </div>
-
-            {/* Description */}
-            {listing.description && (
-              <div>
-                <h4 className="font-semibold mb-2">Description</h4>
-                <p className="text-muted-foreground">{listing.description}</p>
-              </div>
-            )}
 
             {/* Amenities */}
             {listing.amenities && listing.amenities.length > 0 && (
@@ -393,6 +368,37 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Property Images Grid - Moved to Bottom */}
+            {listing.images && listing.images.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <span className="text-lg">📸</span> Property Photos ({listing.images.length})
+                </h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {listing.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        setGalleryOpen(true);
+                      }}
+                      className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                    >
+                      <img
+                        src={image}
+                        alt={`Property ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index === 0 ? "high" : "auto"}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground text-center">Tap any photo to view full size</p>
               </div>
             )}
           </div>
