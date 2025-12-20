@@ -273,17 +273,20 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               ) : listing ? (
                 // PROPERTY LISTING INSIGHTS (Original)
                 <div className="mt-6 space-y-6">
-                  {/* Property Summary with Description */}
+                  {/* Property Summary with Full Description */}
                   <div className="p-4 bg-muted/50 rounded-xl">
                     <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                       <MapPin className="w-4 h-4" />
                       <span>{listing.neighborhood}, {listing.city}</span>
                     </div>
                     {listing.description && (
-                      <p className="text-sm text-muted-foreground mt-3 line-clamp-3">
-                        {listing.description}
-                      </p>
+                      <div className="mt-3">
+                        <h4 className="font-semibold text-sm mb-2">Full Description</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                          {listing.description}
+                        </p>
+                      </div>
                     )}
                   </div>
 
