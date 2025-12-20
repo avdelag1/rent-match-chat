@@ -243,9 +243,11 @@ function LegendaryLandingPage() {
       }} className="space-y-4">
           <h1 className="font-black text-center leading-none" style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}>
             <motion.span className="block" style={{
-            fontSize: 'clamp(4rem, 20vw, 8rem)',
+            fontSize: 'clamp(2.5rem, 13vw, 7rem)',
             fontWeight: 900,
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.03em',
+            width: '100%',
+            textAlign: 'center',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
