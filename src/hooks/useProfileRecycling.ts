@@ -51,7 +51,7 @@ export function useRecordProfileView() {
   });
 }
 
-// Get permanently excluded profiles (disliked/passed) - unless listing was updated after swipe
+// Get excluded profiles (disliked/passed within last 1 day) - resets after next day
 export function usePermanentlyExcludedProfiles(viewType: 'profile' | 'listing' = 'profile') {
   return useQuery({
     queryKey: ['permanently-excluded', viewType],
@@ -59,13 +59,15 @@ export function usePermanentlyExcludedProfiles(viewType: 'profile' | 'listing' =
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return [];
 
-      // Get ALL passed/disliked cards (no time limit)
+      // Get passed/disliked cards from last 1 day (reset after next day)
+      const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
       const { data: passedCards, error } = await supabase
         .from('profile_views')
         .select('viewed_profile_id, created_at')
         .eq('user_id', user.user.id)
         .eq('view_type', viewType)
-        .eq('action', 'pass');
+        .eq('action', 'pass')
+        .gte('created_at', oneDayAgo);
 
       if (error) {
         console.error('Error fetching permanently excluded profiles:', error);
@@ -115,7 +117,7 @@ export function usePermanentlyExcludedProfiles(viewType: 'profile' | 'listing' =
   });
 }
 
-// Get temporarily excluded profiles (liked in last 7 days)
+// Get temporarily excluded profiles (liked in last 1 day - reset after next day)
 export function useTemporarilyExcludedProfiles(viewType: 'profile' | 'listing' = 'profile') {
   return useQuery({
     queryKey: ['temp-excluded-likes', viewType],
@@ -123,8 +125,7 @@ export function useTemporarilyExcludedProfiles(viewType: 'profile' | 'listing' =
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return [];
 
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
       const { data, error } = await supabase
         .from('profile_views')
@@ -132,7 +133,7 @@ export function useTemporarilyExcludedProfiles(viewType: 'profile' | 'listing' =
         .eq('user_id', user.user.id)
         .eq('view_type', viewType)
         .eq('action', 'like')
-        .gte('created_at', sevenDaysAgo.toISOString());
+        .gte('created_at', oneDayAgo);
 
       if (error) {
         console.error('Error fetching temporarily excluded profiles:', error);
@@ -185,7 +186,7 @@ export function useUserSwipePatterns(viewType: 'profile' | 'listing' = 'profile'
   });
 }
 
-// Get recycled profiles (seen more than 7 days ago)
+// Get recycled profiles (seen more than 1 day ago - available after next day)
 export function useRecycledProfiles(viewType: 'profile' | 'listing' = 'profile') {
   return useQuery({
     queryKey: ['recycled-profiles', viewType],
@@ -193,15 +194,14 @@ export function useRecycledProfiles(viewType: 'profile' | 'listing' = 'profile')
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return [];
 
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
       const { data, error } = await supabase
         .from('profile_views')
         .select('viewed_profile_id, action, created_at')
         .eq('user_id', user.user.id)
         .eq('view_type', viewType)
-        .lt('created_at', sevenDaysAgo.toISOString());
+        .lt('created_at', oneDayAgo);
 
       if (error) {
         console.error('Error fetching recycled profiles:', error);
