@@ -20,7 +20,6 @@ function LegendaryLandingPage() {
     y: 0
   });
   const [hoveredButton, setHoveredButton] = useState<'client' | 'owner' | null>(null);
-  const [titleShine, setTitleShine] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const openAuthDialog = (role: 'client' | 'owner') => {
     setAuthDialog({
@@ -58,104 +57,6 @@ function LegendaryLandingPage() {
     }
   }, []);
 
-  // Realistic fire embers rising from ground
-  const FireParticles = () => {
-    // Pre-calculated values for consistent renders (reduced for better mobile performance)
-    const embers = Array.from({
-      length: 18
-    }, (_, i) => ({
-      id: i,
-      size: 1.5 + i % 5 * 1.2,
-      left: i * 4.2 % 100,
-      color: i % 5 === 0 ? '#ff4500' : i % 5 === 1 ? '#ff6b35' : i % 5 === 2 ? '#ff8c42' : i % 5 === 3 ? '#ffa756' : '#ffb86c',
-      duration: 8 + i % 7 * 2,
-      delay: i * 0.4 % 5,
-      drift: (i % 11 - 5) * 25,
-      glowSize: 4 + i % 4 * 3
-    }));
-    const orbs = Array.from({
-      length: 6
-    }, (_, i) => ({
-      id: i,
-      size: 40 + i % 5 * 30,
-      left: i * 10 % 100,
-      startY: 70 + i % 3 * 10,
-      color: i % 4 === 0 ? 'rgba(255,69,0,0.15)' : i % 4 === 1 ? 'rgba(255,107,53,0.12)' : i % 4 === 2 ? 'rgba(255,140,66,0.1)' : 'rgba(255,167,86,0.08)',
-      innerColor: i % 4 === 0 ? 'rgba(255,120,50,0.25)' : i % 4 === 1 ? 'rgba(255,150,80,0.2)' : i % 4 === 2 ? 'rgba(255,180,100,0.15)' : 'rgba(255,200,120,0.12)',
-      duration: 12 + i % 5 * 4,
-      delay: i * 0.8 % 4,
-      drift: (i % 7 - 3) * 40
-    }));
-    return <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{
-      willChange: 'transform',
-      contain: 'layout style paint'
-    }}>
-        {/* Ground glow effect */}
-        <motion.div className="absolute bottom-0 left-0 right-0 h-32" style={{
-        background: 'linear-gradient(to top, rgba(255,69,0,0.08), rgba(255,107,53,0.04), transparent)'
-      }} animate={{
-        opacity: [0.6, 1, 0.6]
-      }} transition={{
-        duration: 3,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }} />
-
-        {/* Rising embers from ground */}
-        {embers.map(ember => <motion.div key={`ember-${ember.id}`} className="absolute" style={{
-        width: `${ember.size}px`,
-        height: `${ember.size * 1.5}px`,
-        background: `radial-gradient(ellipse at center, ${ember.color}, ${ember.color}80 40%, transparent 70%)`,
-        boxShadow: `0 0 ${ember.glowSize}px ${ember.color}90, 0 0 ${ember.glowSize * 2}px ${ember.color}50`,
-        borderRadius: '50% 50% 50% 50%',
-        left: `${ember.left}%`,
-        bottom: '0px'
-      }} animate={{
-        y: [0, -window.innerHeight * 0.9],
-        x: [0, ember.drift, ember.drift * 0.5],
-        opacity: [0, 0.9, 0.8, 0.5, 0],
-        scale: [0.3, 1, 0.9, 0.6, 0.2]
-      }} transition={{
-        duration: ember.duration,
-        repeat: Infinity,
-        ease: [0.25, 0.1, 0.25, 1],
-        delay: ember.delay
-      }} />)}
-
-        {/* Floating fire orbs rising from bottom */}
-        {orbs.map(orb => <motion.div key={`orb-${orb.id}`} className="absolute rounded-full" style={{
-        width: `${orb.size}px`,
-        height: `${orb.size}px`,
-        background: `radial-gradient(circle at 30% 30%, ${orb.innerColor}, ${orb.color} 50%, transparent 70%)`,
-        filter: 'blur(8px)',
-        left: `${orb.left}%`,
-        bottom: '0%'
-      }} animate={{
-        y: [0, -window.innerHeight * 1.1],
-        x: [0, orb.drift, orb.drift * 0.3],
-        opacity: [0, 0.7, 0.5, 0.3, 0],
-        scale: [0.5, 1.2, 1, 0.8, 0.4]
-      }} transition={{
-        duration: orb.duration,
-        repeat: Infinity,
-        ease: "easeOut",
-        delay: orb.delay
-      }} />)}
-
-        {/* Subtle heat distortion waves */}
-        <motion.div className="absolute bottom-0 left-0 right-0 h-48" style={{
-        background: 'linear-gradient(to top, rgba(255,100,50,0.03), transparent)',
-        filter: 'blur(20px)'
-      }} animate={{
-        scaleY: [1, 1.1, 1],
-        opacity: [0.5, 0.8, 0.5]
-      }} transition={{
-        duration: 4,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }} />
-      </div>;
-  };
   return <motion.div ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" style={{
     willChange: 'background',
     contain: 'paint'
@@ -175,9 +76,6 @@ function LegendaryLandingPage() {
         repeat: Infinity
       }} />
       </div>
-
-      {/* Fire Particles */}
-      <FireParticles />
 
       {/* Ripple Effects */}
       <AnimatePresence>
@@ -243,13 +141,8 @@ function LegendaryLandingPage() {
         delay: 0.2
       }} className="space-y-4">
           <h1
-            className="font-black text-center leading-none relative cursor-pointer"
+            className="font-black text-center leading-none relative overflow-hidden"
             style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setTitleShine(true);
-              setTimeout(() => setTitleShine(false), 800);
-            }}
           >
             <motion.span className="block relative" style={{
             fontSize: 'clamp(4.5rem, 20vw, 12rem)',
@@ -271,45 +164,26 @@ function LegendaryLandingPage() {
             ease: "linear"
           }}>
               ZWIPESS
-              {/* Shine overlay effect */}
-              <AnimatePresence>
-                {titleShine && (
-                  <motion.span
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.9) 55%, rgba(255,255,255,0) 80%, transparent 100%)',
-                      WebkitBackgroundClip: 'text',
-                      backgroundClip: 'text',
-                    }}
-                    initial={{ x: '-150%' }}
-                    animate={{ x: '150%' }}
-                    exit={{ opacity: 0 }}
-                    transition={{
-                      duration: 0.7,
-                      ease: [0.25, 0.1, 0.25, 1]
-                    }}
-                  />
-                )}
-              </AnimatePresence>
             </motion.span>
-            {/* Glow burst effect on tap */}
-            <AnimatePresence>
-              {titleShine && (
-                <motion.div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(circle at center, rgba(255,200,100,0.6) 0%, rgba(255,150,50,0.3) 30%, transparent 70%)',
-                    filter: 'blur(20px)',
-                  }}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: [0, 1, 0], scale: [0.5, 1.5, 2] }}
-                  transition={{
-                    duration: 0.8,
-                    ease: "easeOut"
-                  }}
-                />
-              )}
-            </AnimatePresence>
+            {/* Rainbow shiny reflection effect - same as buttons */}
+            <motion.div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <motion.div
+                className="absolute inset-y-0 w-32 sm:w-40"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.8), rgba(255,255,255,0.3), transparent)',
+                  filter: 'blur(3px)'
+                }}
+                animate={{
+                  x: ['-200%', '500%']
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  repeatDelay: 2,
+                  ease: 'easeInOut'
+                }}
+              />
+            </motion.div>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
