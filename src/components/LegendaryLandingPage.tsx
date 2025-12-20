@@ -252,7 +252,7 @@ function LegendaryLandingPage() {
             }}
           >
             <motion.span className="block relative" style={{
-            fontSize: 'clamp(2.5rem, 13vw, 7rem)',
+            fontSize: 'clamp(3.5rem, 16vw, 9rem)',
             fontWeight: 900,
             letterSpacing: '-0.03em',
             width: '100%',
