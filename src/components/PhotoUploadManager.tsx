@@ -65,31 +65,34 @@ export function PhotoUploadManager({
 
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
 
+    // Validate all files first (before setting uploading state)
+    const validatedFiles = filesToUpload.map(file => ({
+      file,
+      validation: validateImageFile(file)
+    }));
+
+    // Show validation errors
+    const invalidFiles = validatedFiles.filter(f => !f.validation.isValid);
+    if (invalidFiles.length > 0) {
+      invalidFiles.forEach(({ file, validation }) => {
+        toast({
+          title: "Invalid File",
+          description: `${file.name}: ${validation.error}`,
+          variant: "destructive"
+        });
+      });
+    }
+
+    // Get valid files
+    const validFiles = validatedFiles.filter(f => f.validation.isValid);
+    if (validFiles.length === 0) {
+      // Don't start upload if no valid files
+      return;
+    }
+
+    // Now set uploading state only for valid files
     setUploading(true);
     try {
-      // Validate all files first
-      const validatedFiles = filesToUpload.map(file => ({
-        file,
-        validation: validateImageFile(file)
-      }));
-
-      // Show validation errors
-      const invalidFiles = validatedFiles.filter(f => !f.validation.isValid);
-      if (invalidFiles.length > 0) {
-        invalidFiles.forEach(({ file, validation }) => {
-          toast({
-            title: "Invalid File",
-            description: `${file.name}: ${validation.error}`,
-            variant: "destructive"
-          });
-        });
-      }
-
-      // Upload valid files in parallel with Promise.allSettled
-      const validFiles = validatedFiles.filter(f => f.validation.isValid);
-      if (validFiles.length === 0) {
-        return;
-      }
 
       const uploadPromises = validFiles.map(async ({ file }) => {
         if (onUpload) {
