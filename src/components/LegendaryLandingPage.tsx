@@ -20,6 +20,7 @@ function LegendaryLandingPage() {
     y: 0
   });
   const [hoveredButton, setHoveredButton] = useState<'client' | 'owner' | null>(null);
+  const [titleShine, setTitleShine] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const openAuthDialog = (role: 'client' | 'owner') => {
     setAuthDialog({
@@ -241,11 +242,21 @@ function LegendaryLandingPage() {
         duration: 0.6,
         delay: 0.2
       }} className="space-y-4">
-          <h1 className="font-black text-center leading-none" style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}>
-            <motion.span className="block" style={{
-            fontSize: 'clamp(4rem, 20vw, 8rem)',
+          <h1
+            className="font-black text-center leading-none relative cursor-pointer"
+            style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setTitleShine(true);
+              setTimeout(() => setTitleShine(false), 800);
+            }}
+          >
+            <motion.span className="block relative" style={{
+            fontSize: 'clamp(2.5rem, 13vw, 7rem)',
             fontWeight: 900,
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.03em',
+            width: '100%',
+            textAlign: 'center',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
@@ -260,7 +271,45 @@ function LegendaryLandingPage() {
             ease: "linear"
           }}>
               ZWIPESS
+              {/* Shine overlay effect */}
+              <AnimatePresence>
+                {titleShine && (
+                  <motion.span
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.9) 55%, rgba(255,255,255,0) 80%, transparent 100%)',
+                      WebkitBackgroundClip: 'text',
+                      backgroundClip: 'text',
+                    }}
+                    initial={{ x: '-150%' }}
+                    animate={{ x: '150%' }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      duration: 0.7,
+                      ease: [0.25, 0.1, 0.25, 1]
+                    }}
+                  />
+                )}
+              </AnimatePresence>
             </motion.span>
+            {/* Glow burst effect on tap */}
+            <AnimatePresence>
+              {titleShine && (
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(circle at center, rgba(255,200,100,0.6) 0%, rgba(255,150,50,0.3) 30%, transparent 70%)',
+                    filter: 'blur(20px)',
+                  }}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: [0, 1, 0], scale: [0.5, 1.5, 2] }}
+                  transition={{
+                    duration: 0.8,
+                    ease: "easeOut"
+                  }}
+                />
+              )}
+            </AnimatePresence>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
