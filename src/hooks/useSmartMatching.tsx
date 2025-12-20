@@ -242,13 +242,11 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch swiped listings from the last 1 day (cards reset after next day)
-        const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+        // Fetch ALL swiped listings permanently - only show new listings user hasn't seen
         const { data: swipedListings, error: swipesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id)
-          .gte('created_at', oneDayAgo);
+          .eq('user_id', user.user.id);
 
         // If likes table has permission issues, just continue without filtering
         const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
@@ -729,15 +727,13 @@ export function useSmartClientMatching(
           return [] as MatchedClientProfile[];
         }
 
-        // Fetch swiped profiles from the last 1 day (cards reset after next day)
-        const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+        // Fetch ALL swiped profiles permanently - only show new profiles user hasn't seen
         const swipedProfileIds = new Set<string>();
 
         const { data: swipedProfiles, error: swipesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id)
-          .gte('created_at', oneDayAgo);
+          .eq('user_id', user.user.id);
 
         if (!swipesError && swipedProfiles) {
           for (const row of swipedProfiles) {
@@ -747,15 +743,14 @@ export function useSmartClientMatching(
           }
         }
 
-        // Also check profile_views for any passes that might not be in likes table (last 1 day)
+        // Also check profile_views for any passes permanently
         if (!includeRecentLikes) {
           const { data: viewedProfiles, error: viewsError } = await supabase
             .from('profile_views')
             .select('viewed_profile_id')
             .eq('user_id', user.user.id)
             .eq('view_type', 'profile')
-            .in('action', ['like', 'pass'])
-            .gte('created_at', oneDayAgo);
+            .in('action', ['like', 'pass']);
 
           if (!viewsError && viewedProfiles) {
             for (const row of viewedProfiles as any[]) {

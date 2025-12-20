@@ -46,14 +46,14 @@ export function ClientTinderSwipeCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Tinder-like rotation - more dramatic and responsive
-  const rotate = useTransform(x, [-400, -150, 0, 150, 400], [-20, -10, 0, 10, 20]);
+  // Ultra-responsive rotation - immediate visual feedback
+  const rotate = useTransform(x, [-300, -100, 0, 100, 300], [-25, -12, 0, 12, 25]);
 
-  // Scale effect - slight zoom on drag
-  const scale = useTransform(x, [-300, 0, 300], [0.98, 1, 0.98]);
+  // Scale effect - subtle for smooth feel
+  const scale = useTransform(x, [-200, 0, 200], [0.95, 1, 0.95]);
 
-  // Opacity for card exit effect
-  const opacity = useTransform(x, [-400, -200, 0, 200, 400], [0.3, 0.85, 1, 0.85, 0.3]);
+  // Opacity for card exit effect - faster fade
+  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.4, 0.9, 1, 0.9, 0.4]);
 
   const images = useMemo(() =>
     profile.profile_images && profile.profile_images.length > 0
@@ -83,23 +83,21 @@ export function ClientTinderSwipeCard({
     }
   }, [images.length]);
 
-  // Tinder-like drag handling with improved physics
+  // Ultra-responsive drag handling - instant feel like real touch
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
-    // More flexible thresholds for natural feel
-    const swipeThresholdX = 80; // Slightly lower for better responsiveness
-    const velocityThreshold = 300; // Snap swipe with lower velocity
+    const swipeThresholdX = 60; // Lower threshold for easier swipes
+    const velocityThreshold = 200; // Very responsive to quick flicks
 
-    // Check for swipes (left/right only) - more flexible
-    if (Math.abs(offset.x) > swipeThresholdX || Math.abs(velocity.x) > velocityThreshold) {
-      const direction = offset.x > 0 ? 'right' : 'left';
+    // Prioritize velocity for snappy feel
+    if (Math.abs(velocity.x) > velocityThreshold || Math.abs(offset.x) > swipeThresholdX) {
+      const direction = offset.x > 0 || velocity.x > velocityThreshold ? 'right' : 'left';
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
       onSwipe(direction);
       return;
     }
 
-    // Snap back with nice spring animation
-    triggerHaptic('light');
+    // Snap back - no haptic for smooth experience
   }, [onSwipe]);
 
   // Calculate overlay opacity based on drag distance
@@ -128,17 +126,18 @@ export function ClientTinderSwipeCard({
        ref={cardRef}
        style={cardStyle}
        drag={isTop ? "x" : false}
-       dragConstraints={{ left: -600, right: 600 }}
-       dragElastic={0.15}
-       dragTransition={{ bounceStiffness: 300, bounceDamping: 25 }}
+       dragConstraints={{ left: -400, right: 400 }}
+       dragElastic={0.08}
+       dragMomentum={true}
+       dragTransition={{ bounceStiffness: 800, bounceDamping: 35, power: 0.3 }}
        onDragEnd={handleDragEnd}
        className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
        animate={{ x: 0, y: 0, rotate: 0, scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0 }}
        transition={{
          type: "spring",
-         stiffness: 400,
+         stiffness: 800,
          damping: 35,
-         mass: 0.8
+         mass: 0.3
        }}
      >
       <div className="absolute inset-0 w-full h-full overflow-hidden">
