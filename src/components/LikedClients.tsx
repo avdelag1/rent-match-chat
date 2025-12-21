@@ -446,6 +446,13 @@ export function LikedClients() {
                   <div className="absolute top-3 right-3 flex gap-2">
                     <Button
                       size="sm"
+                      onClick={() => navigate(`/client-profile/${client.user_id}`)}
+                      className="bg-purple-500 hover:bg-purple-600 text-white shadow-lg"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
                       onClick={() => handleMessage(client)}
                       className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
                       disabled={isCreatingConversation}
