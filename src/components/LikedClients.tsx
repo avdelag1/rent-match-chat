@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike, Flag, Ban, MoreVertical, Trash2 } from "lucide-react";
+import { Flame, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike, Flag, Ban, MoreVertical, Trash2, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
