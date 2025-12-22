@@ -101,7 +101,7 @@ export function AppLoadingScreen() {
           <motion.span
             className="block"
             style={{
-              fontSize: 'clamp(3.5rem, 14vw, 6rem)',
+              fontSize: 'clamp(4rem, 16vw, 7rem)',
               fontWeight: 900,
               letterSpacing: '-0.02em',
               background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
@@ -120,7 +120,7 @@ export function AppLoadingScreen() {
               ease: "linear",
             }}
           >
-            Zwipes
+            ZWIPES
           </motion.span>
         </h1>
       </motion.div>
