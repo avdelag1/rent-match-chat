@@ -163,7 +163,7 @@ function LegendaryLandingPage() {
             repeat: Infinity,
             ease: "linear"
           }}>
-              ZWIPESS
+              Zwipes
             </motion.span>
             {/* Rainbow shiny reflection effect - same as buttons */}
             <motion.div className="absolute inset-0 overflow-hidden pointer-events-none">

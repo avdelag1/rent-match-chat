@@ -36,33 +36,33 @@ const Index = () => {
       return data?.role;
     },
     enabled: !!user,
-    retry: 2,
-    retryDelay: 500,
+    retry: 3, // Increased from 2 to 3 for better reliability on new signups
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s, 3s
     staleTime: 60000, // Increased from 5s to 60s - user roles don't change frequently
     gcTime: 300000, // Cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus
     refetchOnMount: false, // Don't refetch on component mount if data is fresh
   });
 
-  // Add timeout fallback - if query takes too long, force refetch
+  // Add timeout fallback - if query takes too long, force refetch with faster timeout
   useEffect(() => {
     if (user && profileLoading) {
       const timeout = setTimeout(() => {
-        logger.log('[Index] Query taking too long, forcing refetch...');
+        logger.log('[Index] Query taking too long (2s), forcing faster refetch...');
         refetch();
-      }, 5000); // Increase from 3s to 5s for new users
+      }, 2000); // Reduced from 5s to 2s for faster feedback
 
       return () => clearTimeout(timeout);
     }
   }, [user, profileLoading, refetch]);
 
-  // Add timeout to prevent infinite loading - show landing page after 10 seconds
+  // Add timeout to prevent infinite loading - show landing page after 6 seconds
   useEffect(() => {
     if (user && (profileLoading || !userRole)) {
       const timeout = setTimeout(() => {
-        logger.log('[Index] Loading timeout reached, showing fallback...');
+        logger.log('[Index] Loading timeout reached (6s), showing fallback...');
         setLoadingTimeout(true);
-      }, 10000); // 10 second timeout
+      }, 6000); // Reduced from 10s to 6s for faster feedback on timeout
 
       return () => clearTimeout(timeout);
     }
@@ -88,14 +88,14 @@ const Index = () => {
 
         // Don't show error immediately after signup - give cache more time
         const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
-        if (userAge > 15000) { // Increase from 10s to 15s for new users
+        if (userAge > 20000) { // Give new users up to 20s for profile setup
           toast({
             title: "Account Setup Issue",
             description: "Taking longer than expected. Please refresh the page.",
             variant: "destructive"
           });
         } else {
-          logger.log('[Index] New user detected, waiting for profile setup...');
+          logger.log('[Index] New user detected (age: ' + userAge + 'ms), waiting for profile setup...');
         }
         return;
       }
@@ -111,9 +111,9 @@ const Index = () => {
         logger.error('[Index] ❌ No role found for authenticated user:', user.email);
         const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
 
-        // For brand new users, be more patient
-        if (userAge < 15000) {
-          logger.log('[Index] Brand new user, waiting for role creation...');
+        // For brand new users, be more patient (up to 20s)
+        if (userAge < 20000) {
+          logger.log('[Index] Brand new user (age: ' + userAge + 'ms), waiting for role creation...');
           return;
         }
 
