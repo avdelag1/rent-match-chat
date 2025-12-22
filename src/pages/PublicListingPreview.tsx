@@ -135,7 +135,7 @@ export default function PublicListingPreview() {
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-bold text-white">Zwipes</span>
+            <span className="font-bold text-white">Swipes</span>
           </div>
           {!user && (
             <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function PublicListingPreview() {
                 Interested in this {getCategoryLabel(category)}?
               </h3>
               <p className="text-gray-300 text-sm max-w-md mx-auto">
-                Join Zwipes to contact the owner, schedule viewings, and find your perfect match.
+                Join Swipes to contact the owner, schedule viewings, and find your perfect match.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
@@ -466,7 +466,7 @@ export default function PublicListingPreview() {
 
           {/* Footer */}
           <div className="text-center text-xs text-gray-500 pt-4">
-            <p>Zwipes - Find Your Perfect Match</p>
+            <p>Swipes - Find Your Perfect Match</p>
           </div>
         </motion.div>
       </div>

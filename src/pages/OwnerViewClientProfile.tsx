@@ -41,9 +41,10 @@ export default function OwnerViewClientProfile() {
         .from('profiles')
         .select('*')
         .eq('id', clientId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!profileData) throw new Error('Profile not found');
 
       // TRY to get updated photos from client_profiles table (newer source)
       const { data: clientProfile } = await supabase

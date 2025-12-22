@@ -81,7 +81,7 @@ export function useNotificationSystem() {
             .from('profiles')
             .select('full_name, avatar_url')
             .eq('id', swipe.user_id)
-            .single();
+            .maybeSingle();
 
           const { data: swiperRoleData } = await supabase
             .from('user_roles')
@@ -131,7 +131,7 @@ export function useNotificationSystem() {
             .from('conversations')
             .select('*')
             .eq('id', message.conversation_id)
-            .single();
+            .maybeSingle();
 
           if (conversation && 
               (conversation.client_id === user.id || conversation.owner_id === user.id)) {
@@ -141,7 +141,7 @@ export function useNotificationSystem() {
               .from('profiles')
               .select('full_name, avatar_url')
               .eq('id', message.sender_id)
-              .single();
+              .maybeSingle();
 
             if (senderProfile) {
               const notification: Notification = {
@@ -187,7 +187,7 @@ export function useNotificationSystem() {
               .from('profiles')
               .select('full_name, avatar_url')
               .eq('id', otherUserId)
-              .single();
+              .maybeSingle();
 
             if (otherProfile) {
               const notification: Notification = {

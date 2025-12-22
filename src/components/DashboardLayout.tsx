@@ -400,7 +400,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             setShowOnboarding(false);
             toast({
               title: 'Profile Complete!',
-              description: 'Welcome to Zwipes. Start exploring!',
+              description: 'Welcome to Swipes. Start exploring!',
             });
           }}
         />
