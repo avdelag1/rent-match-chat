@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useRef, useCallback } from 'react';
+import { logger } from '@/utils/prodLogger';
 
 export function useUnreadLikes() {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ export function useUnreadLikes() {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       const userRole = (profile as any)?.role;
       if (!userRole) return { count: 0 };
@@ -44,7 +45,7 @@ export function useUnreadLikes() {
           .eq('direction', 'right');
 
         if (error) {
-          console.error('Error fetching unread likes for owner:', error);
+          logger.error('Error fetching unread likes for owner:', error);
           return { count: 0 };
         }
 
@@ -58,7 +59,7 @@ export function useUnreadLikes() {
           .eq('direction', 'right');
 
         if (error) {
-          console.error('Error fetching unread likes for client:', error);
+          logger.error('Error fetching unread likes for client:', error);
           return { count: 0 };
         }
 

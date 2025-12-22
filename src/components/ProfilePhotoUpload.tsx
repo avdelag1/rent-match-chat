@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,7 +35,7 @@ export function ProfilePhotoUpload({
   const location = useLocation();
 
   // Fetch current photo from profiles table on mount
-  useState(() => {
+  useEffect(() => {
     const fetchPhoto = async () => {
       if (!user) return;
       
@@ -43,7 +43,7 @@ export function ProfilePhotoUpload({
         .from('profiles')
         .select('avatar_url, profile_photo_url')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (data && !error) {
         const url = data.avatar_url || data.profile_photo_url;
@@ -55,7 +55,7 @@ export function ProfilePhotoUpload({
     };
     
     fetchPhoto();
-  });
+  }, [user, onPhotoUpdate]);
 
   const sizeClasses = {
     sm: 'w-8 h-8',

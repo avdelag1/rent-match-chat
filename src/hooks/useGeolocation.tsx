@@ -36,7 +36,7 @@ export function useGeolocation() {
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
         {
           headers: {
-            'User-Agent': 'Zwipes App',
+            'User-Agent': 'Swipes App',
           },
         }
       );

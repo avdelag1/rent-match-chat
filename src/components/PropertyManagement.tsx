@@ -653,7 +653,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
           }}
           listingId={sharingListing?.id}
           title={sharingListing?.title || 'Listing'}
-          description={`Check out this ${sharingListing?.category || 'property'} on Zwipes: ${sharingListing?.title}${sharingListing?.price ? ` - $${sharingListing.price.toLocaleString()}` : ''}`}
+          description={`Check out this ${sharingListing?.category || 'property'} on Swipes: ${sharingListing?.title}${sharingListing?.price ? ` - $${sharingListing.price.toLocaleString()}` : ''}`}
         />
       </div>
     </div>
