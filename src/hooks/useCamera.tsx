@@ -33,10 +33,10 @@ export interface UseCameraOptions {
   onError?: (error: Error) => void;
 }
 
-// Optimized settings for different use cases
+// Optimized settings for different use cases - maximum quality like native camera
 const getOptimalSettings = (mode: UseCameraOptions['mode']): Partial<CameraSettings> => {
   const baseSettings = {
-    quality: 90,
+    quality: 100, // Maximum quality
     allowEditing: true,
     resultType: CameraResultType.DataUrl,
     correctOrientation: true,
@@ -49,9 +49,9 @@ const getOptimalSettings = (mode: UseCameraOptions['mode']): Partial<CameraSetti
         ...baseSettings,
         direction: CameraDirection.Front,
         source: CameraSource.Camera,
-        quality: 92,
-        width: 1080,
-        height: 1080,
+        quality: 100, // Maximum quality for selfies
+        width: 2160, // Higher resolution for better quality
+        height: 2160,
         promptLabelHeader: 'Profile Photo',
         promptLabelPhoto: 'Take a Selfie',
         promptLabelPicture: 'Choose from Gallery',
@@ -61,9 +61,9 @@ const getOptimalSettings = (mode: UseCameraOptions['mode']): Partial<CameraSetti
         ...baseSettings,
         direction: CameraDirection.Rear,
         source: CameraSource.Camera,
-        quality: 95,
-        width: 1920,
-        height: 1080,
+        quality: 100, // Maximum quality for listings
+        width: 3840, // 4K width for best quality
+        height: 2160,
         promptLabelHeader: 'Listing Photo',
         promptLabelPhoto: 'Take Photo',
         promptLabelPicture: 'Choose from Gallery',
@@ -74,9 +74,9 @@ const getOptimalSettings = (mode: UseCameraOptions['mode']): Partial<CameraSetti
         ...baseSettings,
         direction: CameraDirection.Rear,
         source: CameraSource.Prompt,
-        quality: 90,
-        width: 1600,
-        height: 1200,
+        quality: 100,
+        width: 2560,
+        height: 1920,
         promptLabelHeader: 'Photo',
         promptLabelPhoto: 'Camera',
         promptLabelPicture: 'Gallery',
@@ -155,23 +155,47 @@ export function useCamera(options: UseCameraOptions) {
     }
   }, [isNative, checkPermissions]);
 
-  // Start camera stream (web only)
-  const startStream = useCallback(async (video: HTMLVideoElement) => {
+  // Start camera stream (web only) - optimized for maximum quality
+  const startStream = useCallback(async (video: HTMLVideoElement, direction?: CameraDirection) => {
     try {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
 
+      const facingMode = (direction || currentDirection) === CameraDirection.Front ? 'user' : 'environment';
+
+      // Request the highest quality camera settings available
       const constraints: MediaStreamConstraints = {
         video: {
-          facingMode: currentDirection === CameraDirection.Front ? 'user' : 'environment',
-          width: { ideal: mode === 'listing' ? 1920 : 1080 },
-          height: { ideal: mode === 'listing' ? 1080 : 1080 },
+          facingMode: { exact: facingMode },
+          // Request 4K resolution, browser will fallback to best available
+          width: { ideal: 3840, min: 1280 },
+          height: { ideal: 2160, min: 720 },
+          // High frame rate for smooth preview
+          frameRate: { ideal: 30, min: 15 },
+          // Request advanced features for better quality
+          aspectRatio: mode === 'listing' ? { ideal: 16/9 } : { ideal: 1 },
         },
         audio: false,
       };
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch {
+        // Fallback without exact facingMode constraint if device doesn't support it
+        const fallbackConstraints: MediaStreamConstraints = {
+          video: {
+            facingMode: facingMode,
+            width: { ideal: 1920, min: 1280 },
+            height: { ideal: 1080, min: 720 },
+            frameRate: { ideal: 30 },
+          },
+          audio: false,
+        };
+        stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+      }
+
       streamRef.current = stream;
       videoRef.current = video;
       video.srcObject = stream;
@@ -203,9 +227,9 @@ export function useCamera(options: UseCameraOptions) {
       : CameraDirection.Front;
     setCurrentDirection(newDirection);
 
-    // Restart stream with new direction if active
+    // Restart stream with new direction if active - pass the new direction explicitly
     if (videoRef.current && streamRef.current) {
-      await startStream(videoRef.current);
+      await startStream(videoRef.current, newDirection);
     }
   }, [currentDirection, startStream]);
 

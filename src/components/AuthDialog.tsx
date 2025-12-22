@@ -283,7 +283,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 {isLogin ? 'Sign In' : 'Sign Up'} as {role}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Swipes
+                {isLogin ? 'Sign in to your account' : 'Create a new account'} to access Zwipes
               </DialogDescription>
 
               {/* Back Button */}

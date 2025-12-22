@@ -39,7 +39,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
               backgroundClip: 'text',
             }}
           >
-            Swipes
+            Zwipes
           </span>
         </motion.div>
 
