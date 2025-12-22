@@ -165,25 +165,6 @@ function LegendaryLandingPage() {
           }}>
               Zwipes
             </motion.span>
-            {/* Rainbow shiny reflection effect - same as buttons */}
-            <motion.div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <motion.div
-                className="absolute inset-y-0 w-32 sm:w-40"
-                style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.8), rgba(255,255,255,0.3), transparent)',
-                  filter: 'blur(3px)'
-                }}
-                animate={{
-                  x: ['-200%', '500%']
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  repeatDelay: 2,
-                  ease: 'easeInOut'
-                }}
-              />
-            </motion.div>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0

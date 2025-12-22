@@ -39,7 +39,7 @@ export function ShareDialog({
   const createShare = useCreateShare();
 
   const shareUrl = generateShareUrl({ listingId, profileId });
-  const shareText = description || `Check out ${title} on SwipeMatch!`;
+  const shareText = description || `Check out ${title} on Zwipes!`;
 
   const handleCopyLink = async () => {
     const success = await copyToClipboard(shareUrl);

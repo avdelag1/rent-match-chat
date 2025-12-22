@@ -186,7 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // If user is immediately available (some auth providers), create profile
       if (data.user && !data.user.email_confirmed_at) {
         toast({
-          title: "Welcome to SwipeMatch!",
+          title: "Welcome to Zwipes!",
           description: "Please check your email to verify your account.",
         });
       } else if (data.user) {
@@ -217,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Note: Cache invalidation moved to useProfileSetup after role creation completes
         
         toast({
-          title: "Welcome to SwipeMatch!",
+          title: "Welcome to Zwipes!",
           description: "Redirecting to your dashboard...",
         });
       }
