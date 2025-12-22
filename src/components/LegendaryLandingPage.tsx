@@ -145,7 +145,7 @@ function LegendaryLandingPage() {
             style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
           >
             <motion.span className="block relative" style={{
-            fontSize: 'clamp(2rem, 10vw, 4.5rem)',
+            fontSize: 'clamp(3rem, 16vw, 6rem)',
             fontWeight: 900,
             letterSpacing: '-0.03em',
             width: '100%',
@@ -163,7 +163,7 @@ function LegendaryLandingPage() {
             repeat: Infinity,
             ease: "linear"
           }}>
-              Zwipes
+              ZWIPES
             </motion.span>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
