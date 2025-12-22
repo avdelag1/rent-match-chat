@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect, memo, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, AlertCircle, Zap, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Send, AlertCircle, Zap, ChevronLeft, Eye } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
 import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
@@ -98,6 +99,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
   const [newMessage, setNewMessage] = useState('');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: messages = [], isLoading } = useConversationMessages(conversationId);
   const sendMessage = useSendMessage();
   const queryClient = useQueryClient();
@@ -267,8 +269,15 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
             </span>
           </div>
         </div>
-        {/* Spacer to center the profile */}
-        <div className="w-16"></div>
+        {/* Profile View Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(`/${otherUser.role}-profile/${otherUser.id}`)}
+          className="shrink-0 text-[#007AFF] hover:bg-[#38383A] px-2"
+        >
+          <Eye className="w-5 h-5" />
+        </Button>
       </div>
 
       {/* iOS-style Connection Status */}
