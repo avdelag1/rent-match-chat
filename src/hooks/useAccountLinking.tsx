@@ -236,7 +236,7 @@ export function useAccountLinking() {
       });
 
       toast({
-        title: "Welcome to SwipeMatch!",
+        title: "Welcome to Zwipes!",
         description: `Your ${oauthUser.app_metadata?.provider} account has been connected successfully.`,
       });
 

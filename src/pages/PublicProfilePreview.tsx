@@ -103,7 +103,7 @@ export default function PublicProfilePreview() {
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            <span className="font-bold text-white">SwipeMatch</span>
+            <span className="font-bold text-white">Zwipes</span>
           </div>
           {!user && (
             <div className="flex items-center gap-2">
@@ -272,7 +272,7 @@ export default function PublicProfilePreview() {
                 Ready to Connect?
               </h3>
               <p className="text-gray-300 text-sm max-w-md mx-auto">
-                Join SwipeMatch to view full profiles, match with compatible users, and start meaningful conversations.
+                Join Zwipes to view full profiles, match with compatible users, and start meaningful conversations.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
@@ -299,7 +299,7 @@ export default function PublicProfilePreview() {
 
           {/* Footer */}
           <div className="text-center text-xs text-gray-500 pt-4">
-            <p>SwipeMatch - Find Your Perfect Match</p>
+            <p>Zwipes - Find Your Perfect Match</p>
           </div>
         </motion.div>
       </div>
