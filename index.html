@@ -4,13 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- Critical: Preconnect before any other requests for maximum performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Critical: Preconnect with high priority for maximum performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://vplgtcguxujxwrgguxqq.supabase.co" crossorigin>
 
-    <!-- DNS Prefetch for resources that may be needed later -->
+    <!-- DNS Prefetch + Preconnect for faster third-party connections -->
     <link rel="dns-prefetch" href="https://storage.googleapis.com">
+    <link rel="preconnect" href="https://storage.googleapis.com" crossorigin>
+
+    <!-- Prioritize font loading - reduce font rendering delay -->
+    <link rel="preload" as="font" href="https://fonts.gstatic.com/s/poppins/v21/pxiGyp8kv8JHgFVrJJnecmNE.woff2" crossorigin>
+    <link rel="preload" as="font" href="https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KSvqNyU.woff2" crossorigin>
 
     <!-- Inline critical font-face declarations for instant text rendering -->
     <style>
@@ -35,12 +40,14 @@
       }
     </style>
 
-    <!-- Load fonts asynchronously with resource hints -->
+    <!-- Load fonts asynchronously with resource hints - optimized for Core Web Vitals -->
     <link
       rel="preload"
       as="style"
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
       onload="this.onload=null;this.rel='stylesheet'"
+      media="print"
+      onload="this.media='all'"
     >
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

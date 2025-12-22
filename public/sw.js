@@ -78,14 +78,39 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response;
         }
-        
+
         return fetch(request)
           .then(response => {
-            // Cache successful responses
+            // Cache successful responses (200 status code)
             if (response.status === 200) {
               const responseClone = response.clone();
+
+              // Add cache control headers for optimal caching
+              const newHeaders = new Headers(responseClone.headers);
+
+              // Different cache durations based on asset type
+              if (request.url.includes('/assets/')) {
+                // Hashed assets can be cached indefinitely (1 year)
+                newHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+              } else if (request.destination === 'style' || request.destination === 'script') {
+                // Unhashed CSS/JS: cache for 30 days
+                newHeaders.set('Cache-Control', 'public, max-age=2592000');
+              } else if (request.destination === 'image') {
+                // Images: cache for 30 days
+                newHeaders.set('Cache-Control', 'public, max-age=2592000');
+              } else {
+                // Other assets: cache for 7 days
+                newHeaders.set('Cache-Control', 'public, max-age=604800');
+              }
+
+              const newResponse = new Response(responseClone.body, {
+                status: responseClone.status,
+                statusText: responseClone.statusText,
+                headers: newHeaders
+              });
+
               caches.open(DYNAMIC_CACHE)
-                .then(cache => cache.put(request, responseClone));
+                .then(cache => cache.put(request, newResponse));
             }
             return response;
           });

@@ -5,10 +5,22 @@ import tailwindcssAnimate from "tailwindcss-animate";
 export default {
 	darkMode: ["class"],
 	content: [
+		"./index.html",
+		"./src/**/*.{ts,tsx}",
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
-		"./src/**/*.{ts,tsx}",
+	],
+	// Safelist for dynamically applied classes
+	safelist: [
+		// Theme classes
+		'dark',
+		'amber',
+		'red',
+		'grey-matte',
+		'black-matte',
+		'white-matte',
+		'red-matte',
 	],
 	prefix: "",
 	theme: {

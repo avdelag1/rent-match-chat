@@ -76,14 +76,37 @@ export default defineConfig(({ mode }) => ({
   },
   esbuild: {
     drop: mode === 'production' ? ['console', 'debugger'] : [],
+    // More aggressive minification options
+    minifyIdentifiers: mode === 'production',
+    minifySyntax: mode === 'production',
+    minifyWhitespace: mode === 'production',
   },
   build: {
     sourcemap: false, // Disable sourcemaps in production
-    // esbuild is ~2x faster than terser; terser produces slightly smaller bundles but slower builds
-    // Using esbuild for production for faster CI; switch to 'terser' if bundle size is critical
-    minify: mode === 'production' ? 'esbuild' : 'terser',
-    // Inline assets smaller than 4KB to reduce HTTP requests
-    assetsInlineLimit: 4096,
+    // Use terser for production for smaller bundles (slightly slower build but better compression)
+    minify: mode === 'production' ? 'terser' : false,
+    // Terser options for aggressive minification
+    terserOptions: mode === 'production' ? {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        passes: 2, // Run compression multiple passes for better results
+        pure_getters: true,
+        pure_funcs: ['console.log', 'console.debug'],
+        unsafe: true,
+        unsafe_methods: true,
+      },
+      mangle: {
+        properties: {
+          regex: /^_/,
+        },
+      },
+      format: {
+        comments: false,
+      },
+    } : undefined,
+    // Inline assets smaller than 8KB to reduce HTTP requests (was 4KB)
+    assetsInlineLimit: 8192,
     // Report compressed (gzip) sizes in build output
     reportCompressedSize: true,
     // Explicit cssCodeSplit for clarity (defaults to true)
@@ -169,13 +192,15 @@ export default defineConfig(({ mode }) => ({
           }
         }
       },
-      // Aggressive tree shaking
+      // Aggressive tree shaking for maximum bundle size reduction
       treeshake: {
         moduleSideEffects: 'no-external',
         propertyReadSideEffects: false,
-        tryCatchDeoptimization: false
-      }
+        tryCatchDeoptimization: false,
+        preset: 'safest', // Keep safest preset to avoid runtime issues
+      },
     },
-    chunkSizeWarningLimit: 1000,
+    // Warn on chunks larger than 500KB instead of 1000KB for mobile optimization
+    chunkSizeWarningLimit: 500,
   },
 }));
