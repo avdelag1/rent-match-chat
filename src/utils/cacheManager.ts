@@ -1,14 +1,19 @@
 // Cache management utilities for immediate updates
 
 export function clearAllCaches(): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if ('caches' in window) {
-      caches.keys().then(names => {
-        Promise.all(names.map(name => caches.delete(name)))
-          .then(() => {
-            resolve();
-          });
-      });
+      caches.keys()
+        .then(names => {
+          return Promise.all(names.map(name => caches.delete(name)));
+        })
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          console.error('Failed to clear caches:', error);
+          resolve(); // Resolve anyway to not block app flow
+        });
     } else {
       resolve();
     }
