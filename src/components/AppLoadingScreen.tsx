@@ -120,7 +120,7 @@ export function AppLoadingScreen() {
               ease: "linear",
             }}
           >
-            Swipes
+            Zwipes
           </motion.span>
         </h1>
       </motion.div>

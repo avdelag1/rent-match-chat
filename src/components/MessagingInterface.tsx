@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, AlertCircle, Zap, ChevronLeft, Eye } from 'lucide-react';
+import { ArrowLeft, Send, AlertCircle, Zap, ChevronLeft, User } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
 import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
@@ -273,10 +273,20 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(`/${otherUser.role}-profile/${otherUser.id}`)}
-          className="shrink-0 text-[#007AFF] hover:bg-[#38383A] px-2"
+          onClick={() => {
+            // Route correctly based on the other user's role
+            if (otherUser.role === 'client') {
+              // Owner viewing client profile
+              navigate(`/owner/view-client/${otherUser.id}`);
+            } else {
+              // Client viewing owner profile - use public preview
+              navigate(`/profile/${otherUser.id}`);
+            }
+          }}
+          className="shrink-0 text-[#007AFF] hover:bg-[#38383A] px-2 flex items-center gap-1"
         >
-          <Eye className="w-5 h-5" />
+          <User className="w-4 h-4" />
+          <span className="text-xs font-medium">Profile</span>
         </Button>
       </div>
 

@@ -163,7 +163,7 @@ function LegendaryLandingPage() {
             repeat: Infinity,
             ease: "linear"
           }}>
-              Swipes
+              Zwipes
             </motion.span>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{

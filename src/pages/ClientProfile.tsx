@@ -289,7 +289,7 @@ const ClientProfile = () => {
         onOpenChange={setShowShareDialog}
         profileId={user?.id}
         title={profile?.name || 'My Profile'}
-        description={`Check out ${profile?.name || 'this profile'} on Swipes! See their interests, lifestyle, and more.`}
+        description={`Check out ${profile?.name || 'this profile'} on Zwipes! See their interests, lifestyle, and more.`}
       />
     </DashboardLayout>
   );

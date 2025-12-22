@@ -1,7 +1,7 @@
 {
   "name": "ZWIPESS - Find Your Perfect Rental",
   "short_name": "ZWIPESS",
-  "description": "Find your perfect rental property or tenant with ease. Swipe through properties and connect with the right matches.",
+  "description": "Find your perfect rental property or tenant with ease. Swipe through properties and connect with the right matches. Zwipes makes matching easy.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -78,7 +78,7 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Swipes on desktop"
+      "label": "Zwipes on desktop"
     }
   ],
   "shortcuts": [
