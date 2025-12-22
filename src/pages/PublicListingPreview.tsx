@@ -42,8 +42,14 @@ export default function PublicListingPreview() {
     queryKey: ['listing-view', id],
     queryFn: async () => {
       if (!id) return null;
-      // Try to increment views
-      await supabase.rpc('increment_listing_views', { listing_id: id }).catch(() => {});
+      try {
+        await supabase
+          .from('listings')
+          .update({ view_count: (listing?.view_count || 0) + 1 })
+          .eq('id', id);
+      } catch (e) {
+        // Silently fail - view count is not critical
+      }
       return true;
     },
     enabled: !!id && !!listing,
@@ -201,7 +207,7 @@ export default function PublicListingPreview() {
                   {(category === 'yacht' || category === 'motorcycle' || category === 'bicycle' || category === 'vehicle') && (
                     <div className="text-gray-400">
                       {listing.brand || listing.vehicle_brand} {listing.model || listing.vehicle_model}
-                      {(listing.year || listing.vehicle_year) && ` • ${listing.year || listing.vehicle_year}`}
+                      {listing.year && ` • ${listing.year}`}
                     </div>
                   )}
                 </div>
@@ -374,7 +380,7 @@ export default function PublicListingPreview() {
                 </div>
                 <div className="text-center p-2 bg-gray-700/20 rounded-lg">
                   <Flame className="w-4 h-4 mx-auto text-gray-400 mb-1" />
-                  <div className="text-lg font-bold text-white">{listing.like_count || listing.likes || 0}</div>
+                  <div className="text-lg font-bold text-white">{listing.likes || 0}</div>
                   <div className="text-xs text-gray-400">Likes</div>
                 </div>
                 <div className="text-center p-2 bg-gray-700/20 rounded-lg">
