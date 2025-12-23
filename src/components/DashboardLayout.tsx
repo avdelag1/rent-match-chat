@@ -396,12 +396,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <Suspense fallback={null}>
         <OnboardingFlow
           open={showOnboarding}
-          onComplete={() => {
-            setShowOnboarding(false);
-            toast({
-              title: 'Profile Complete!',
-              description: 'Welcome to Zwipes. Start exploring!',
-            });
+            onComplete={() => {
+              setShowOnboarding(false);
+              toast({
+                title: 'Profile Complete!',
+                description: 'Welcome to Swipes. Start exploring!',
+              });
           }}
         />
       </Suspense>
