@@ -43,9 +43,6 @@ export const COMPONENT_IMPORTS = {
   // Dashboard components that use recharts
   dashboard: async () => import('../components/EnhancedOwnerDashboard'),
 
-  // Carousel components
-  carousel: async () => import('../components/Carousel'),
-
   // Date picker related
   datePicker: async () => import('../components/ui/calendar'),
 } as const;
@@ -61,7 +58,7 @@ export const ROUTE_PRELOADS = [
 
   // Medium priority - preload during idle
   () => import('../pages/ClientProfile'),
-  () => import('../pages/OwnerDashboard'),
+  () => import('../components/EnhancedOwnerDashboard'),
   () => import('../pages/MessagingDashboard'),
 ] as const;
 
@@ -71,7 +68,7 @@ export const ROUTE_PRELOADS = [
  */
 export const HOVER_PRELOADS = {
   '/client/dashboard': () => import('../pages/ClientDashboard'),
-  '/owner/dashboard': () => import('../pages/EnhancedOwnerDashboard'),
+  '/owner/dashboard': () => import('../components/EnhancedOwnerDashboard'),
   '/client/profile': () => import('../pages/ClientProfile'),
   '/messaging': () => import('../pages/MessagingDashboard'),
 } as const;

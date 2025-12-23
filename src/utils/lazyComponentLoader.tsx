@@ -4,26 +4,36 @@
  * Reduces initial bundle size by deferring non-critical components
  */
 
-import { lazy, Suspense, ReactNode, ComponentType } from 'react';
+import { lazy, Suspense, ReactNode, ComponentType, LazyExoticComponent } from 'react';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyProps = any;
 
 /**
  * Create a lazy-loaded component with a fallback
  * @param importFn - The dynamic import function
  * @param fallback - Optional loading fallback component
  */
-export function createLazyComponent<P = {}>(
-  importFn: () => Promise<{ default: ComponentType<P> }>,
+export function createLazyComponent(
+  importFn: () => Promise<{ default: ComponentType<AnyProps> }>,
   fallback?: ReactNode
-) {
+): {
+  Component: LazyExoticComponent<ComponentType<AnyProps>>;
+  Wrapper: ComponentType<AnyProps>;
+} {
   const Component = lazy(importFn);
 
-  return {
-    Component,
-    Wrapper: (props: P) => (
+  function Wrapper(props: AnyProps) {
+    return (
       <Suspense fallback={fallback || null}>
         <Component {...props} />
       </Suspense>
-    ),
+    );
+  }
+
+  return {
+    Component,
+    Wrapper,
   };
 }
 
@@ -31,7 +41,7 @@ export function createLazyComponent<P = {}>(
  * Preload a lazy component to avoid waterfall requests
  */
 export function preloadComponent(
-  importFn: () => Promise<any>
+  importFn: () => Promise<unknown>
 ): void {
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
@@ -52,7 +62,7 @@ export function preloadComponent(
  * Preload multiple components during idle time
  */
 export function preloadComponents(
-  importFns: Array<() => Promise<any>>
+  importFns: Array<() => Promise<unknown>>
 ): void {
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
@@ -78,8 +88,8 @@ export function preloadComponents(
  * Preload components when user hovers over navigation links
  */
 export function createHoverPreloader(
-  importFn: () => Promise<any>
-): (event: React.MouseEvent) => void {
+  importFn: () => Promise<unknown>
+): () => void {
   let preloaded = false;
 
   return () => {
@@ -99,23 +109,17 @@ export function createHoverPreloader(
 export const lazyLoadedComponents = {
   // Charts - only load when Dashboard is accessed
   EnhancedOwnerDashboard: lazy(() =>
-    import('../components/EnhancedOwnerDashboard').then(m => ({
-      default: m.EnhancedOwnerDashboard,
-    }))
+    import('../components/EnhancedOwnerDashboard')
   ),
 
   // Date-based components - only load when needed
   ClientSavedSearches: lazy(() =>
-    import('../pages/ClientSavedSearches').then(m => ({
-      default: m.default,
-    }))
+    import('../pages/ClientSavedSearches')
   ),
 
   // Carousel-heavy components
   OwnerNewListing: lazy(() =>
-    import('../pages/OwnerNewListing').then(m => ({
-      default: m.default,
-    }))
+    import('../pages/OwnerNewListing')
   ),
 };
 
