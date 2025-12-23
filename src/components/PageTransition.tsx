@@ -7,25 +7,16 @@ interface PageTransitionProps {
   variant?: 'default' | 'slide' | 'scale' | 'fade' | 'slideUp' | 'morphIn';
 }
 
-// Default page transition - ultra smooth with subtle depth
+// Default page transition - simplified for reliability
 const defaultVariants = {
   initial: {
     opacity: 0,
-    y: 16,
-    scale: 0.97,
-    filter: 'blur(4px)',
   },
   in: {
     opacity: 1,
-    y: 0,
-    scale: 1,
-    filter: 'blur(0px)',
   },
   out: {
     opacity: 0,
-    y: -12,
-    scale: 0.98,
-    filter: 'blur(2px)',
   },
 };
 
@@ -152,14 +143,8 @@ export function PageTransition({ children, className = '', variant = 'default' }
       animate="in"
       exit="out"
       variants={variants}
-      transition={pageTransition}
-      className={`will-change-transform w-full h-full ${className}`}
-      style={{
-        transform: 'translateZ(0)',
-        backfaceVisibility: 'hidden',
-        WebkitBackfaceVisibility: 'hidden',
-        perspective: 1000,
-      }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      className={`w-full h-full ${className}`}
     >
       {children}
     </motion.div>
