@@ -1,5 +1,5 @@
 import { PageTransition } from '@/components/PageTransition';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { PropertyClientFilters } from '@/components/filters/PropertyClientFilter
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Search, Filter, MessageCircle, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useSmartClientMatching } from '@/hooks/useSmartMatching';
+import { useSmartClientMatching, ClientFilters } from '@/hooks/useSmartMatching';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast as sonnerToast } from 'sonner';
 
@@ -19,7 +19,68 @@ export default function OwnerPropertyClientDiscovery() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const { data: clients = [], refetch } = useSmartClientMatching('property');
+
+  // Convert filters from PropertyClientFilters format to ClientFilters format
+  const clientFilters: ClientFilters | undefined = useMemo(() => {
+    if (Object.keys(filters).length === 0) return undefined;
+
+    const mapped: ClientFilters = {};
+
+    // Budget range
+    if (filters.budget_min !== undefined || filters.budget_max !== undefined) {
+      mapped.budgetRange = [
+        filters.budget_min ?? 0,
+        filters.budget_max ?? 100000
+      ];
+    }
+
+    // Age range
+    if (filters.age_min !== undefined || filters.age_max !== undefined) {
+      mapped.ageRange = [
+        filters.age_min ?? 18,
+        filters.age_max ?? 100
+      ];
+    }
+
+    // Gender preference
+    if (filters.gender_preference && filters.gender_preference !== 'any') {
+      mapped.genders = [filters.gender_preference];
+    }
+
+    // Pet filter
+    if (filters.has_pets_filter && filters.has_pets_filter !== 'any') {
+      mapped.hasPets = filters.has_pets_filter === 'yes';
+    }
+
+    // Verified filter
+    if (filters.verified) {
+      mapped.verified = true;
+    }
+
+    // Nationalities filter
+    if (filters.nationalities && filters.nationalities.length > 0) {
+      mapped.nationalities = filters.nationalities;
+    }
+
+    // Languages filter
+    if (filters.languages && filters.languages.length > 0) {
+      mapped.languages = filters.languages;
+    }
+
+    // Relationship status filter
+    if (filters.relationship_status && filters.relationship_status.length > 0) {
+      mapped.relationshipStatus = filters.relationship_status;
+    }
+
+    // Property types filter (for property-seeking clients)
+    if (filters.property_types && filters.property_types.length > 0) {
+      mapped.propertyTypes = filters.property_types;
+    }
+
+    return Object.keys(mapped).length > 0 ? mapped : undefined;
+  }, [filters]);
+
+  const { data: clients = [], refetch } = useSmartClientMatching('property', 0, 10, false, clientFilters);
   const startConversation = useStartConversation();
 
   const filteredClients = (clients || []).filter(client =>
@@ -33,7 +94,7 @@ export default function OwnerPropertyClientDiscovery() {
 
   const handleApplyFilters = (newFilters: any) => {
     setFilters(newFilters);
-    refetch();
+    // No need to manually refetch - the query will auto-update when filters change
   };
 
   const handleConnect = async (clientId: string) => {
