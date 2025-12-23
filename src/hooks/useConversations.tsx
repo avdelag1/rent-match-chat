@@ -25,6 +25,16 @@ interface Conversation {
     created_at: string;
     sender_id: string;
   };
+  listing?: {
+    id: string;
+    title: string;
+    price?: number;
+    images?: string[];
+    category?: string;
+    mode?: string;
+    address?: string;
+    city?: string;
+  };
 }
 
 export function useConversations() {
@@ -44,7 +54,8 @@ export function useConversations() {
           .select(`
             *,
             client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
-            owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url)
+            owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
+            listing:listings!conversations_listing_id_fkey(id, title, price, images, category, mode, address, city)
           `)
           .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
           .order('last_message_at', { ascending: false, nullsFirst: false });
@@ -87,7 +98,7 @@ export function useConversations() {
           }
         });
 
-        // Transform data to include other_user and last_message
+        // Transform data to include other_user, last_message, and listing
         type ConversationRow = {
           id: string;
           client_id: string;
@@ -99,6 +110,7 @@ export function useConversations() {
           updated_at: string;
           client_profile: { id: string; full_name: string; avatar_url?: string } | null;
           owner_profile: { id: string; full_name: string; avatar_url?: string } | null;
+          listing: { id: string; title: string; price?: number; images?: string[]; category?: string; mode?: string; address?: string; city?: string } | null;
         };
         const conversationsWithProfiles = data.map((conversation: ConversationRow) => {
           const isClient = conversation.client_id === user.id;
@@ -121,7 +133,8 @@ export function useConversations() {
               avatar_url: otherUserProfile.avatar_url,
               role: otherUserRole || 'client'
             } : undefined,
-            last_message: lastMessagesMap.get(conversation.id)
+            last_message: lastMessagesMap.get(conversation.id),
+            listing: conversation.listing || undefined
           };
         });
 

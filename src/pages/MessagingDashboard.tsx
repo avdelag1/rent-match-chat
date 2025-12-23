@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MessageCircle, Search, Plus } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Search, Plus, Home, Bike, Ship, Car } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
@@ -263,6 +263,8 @@ export function MessagingDashboard() {
               <MessagingInterface
                 conversationId={selectedConversationId}
                 otherUser={conversation.other_user}
+                listing={conversation.listing}
+                currentUserRole={userRole}
                 onBack={() => {
                   setSelectedConversationId(null);
                   setDirectConversationId(null);
@@ -344,15 +346,27 @@ export function MessagingDashboard() {
               ) : filteredConversations.length > 0 ? (
                 filteredConversations.map((conversation, index) => {
                   const isOwner = conversation.other_user?.role === 'owner';
+                  const listing = conversation.listing;
+
+                  const getCategoryIcon = (category?: string) => {
+                    switch (category) {
+                      case 'yacht': return <Ship className="w-3 h-3" />;
+                      case 'motorcycle': return <Car className="w-3 h-3" />;
+                      case 'bicycle': return <Bike className="w-3 h-3" />;
+                      case 'vehicle': return <Car className="w-3 h-3" />;
+                      default: return <Home className="w-3 h-3" />;
+                    }
+                  };
+
                   return (
                     <div
                       key={conversation.id}
                       className="p-4 border-b border-[#38383A] cursor-pointer hover:bg-[#2C2C2E] transition-all duration-200 active:scale-[0.98]"
                       onClick={() => setSelectedConversationId(conversation.id)}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-start gap-3">
                         {/* Avatar with colored ring */}
-                        <div className="relative">
+                        <div className="relative shrink-0">
                           <Avatar className={`w-14 h-14 ring-2 ring-offset-2 ring-offset-[#1C1C1E] ${
                             isOwner ? 'ring-[#FF6B35]' : 'ring-[#007AFF]'
                           }`}>
@@ -385,22 +399,38 @@ export function MessagingDashboard() {
                           <p className="text-sm text-[#8E8E93] truncate mb-2">
                             {conversation.last_message?.message_text || 'Start a conversation...'}
                           </p>
-                          <Badge
-                            className={`text-[10px] px-2 py-0.5 border-0 ${
-                              isOwner
-                                ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
-                                : 'bg-[#007AFF]/20 text-[#007AFF]'
-                            }`}
-                          >
-                            {isOwner ? 'Property Owner' : 'Client'}
-                          </Badge>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge
+                              className={`text-[10px] px-2 py-0.5 border-0 ${
+                                isOwner
+                                  ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                                  : 'bg-[#007AFF]/20 text-[#007AFF]'
+                              }`}
+                            >
+                              {isOwner ? 'Property Owner' : 'Client'}
+                            </Badge>
+                            {/* Show listing info if available */}
+                            {listing && userRole === 'client' && (
+                              <Badge className="text-[10px] px-2 py-0.5 border-0 bg-[#34C759]/20 text-[#34C759] flex items-center gap-1">
+                                {getCategoryIcon(listing.category)}
+                                <span className="truncate max-w-[100px]">{listing.title}</span>
+                              </Badge>
+                            )}
+                          </div>
                         </div>
 
-                        {/* Chevron */}
-                        <div className="text-[#48484A]">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
+                        {/* Right side with price or chevron */}
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          {listing && userRole === 'client' && listing.price && (
+                            <span className="text-sm font-semibold text-[#34C759]">
+                              ${listing.price.toLocaleString()}
+                            </span>
+                          )}
+                          <div className="text-[#48484A]">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                     </div>
