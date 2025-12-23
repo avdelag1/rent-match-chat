@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, AlertCircle, Zap, ChevronLeft, User } from 'lucide-react';
+import { ArrowLeft, Send, AlertCircle, Zap, ChevronLeft, User, Home, Info, ChevronRight } from 'lucide-react';
 import { useConversationMessages, useSendMessage } from '@/hooks/useConversations';
 import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
@@ -15,6 +15,7 @@ import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { useQueryClient } from '@tanstack/react-query';
 import { MessageActivationPackages } from '@/components/MessageActivationPackages';
 import { SubscriptionPackages } from '@/components/SubscriptionPackages';
+import { ChatPreviewSheet } from '@/components/ChatPreviewSheet';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -24,6 +25,17 @@ interface MessagingInterfaceProps {
     avatar_url?: string;
     role: string;
   };
+  listing?: {
+    id: string;
+    title: string;
+    price?: number;
+    images?: string[];
+    category?: string;
+    mode?: string;
+    address?: string;
+    city?: string;
+  };
+  currentUserRole?: 'client' | 'owner';
   onBack: () => void;
 }
 
@@ -95,9 +107,10 @@ const MessageBubble = memo(({ message, isMyMessage, otherUserRole }: { message: 
 
 MessageBubble.displayName = 'MessageBubble';
 
-export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: MessagingInterfaceProps) => {
+export const MessagingInterface = memo(({ conversationId, otherUser, listing, currentUserRole = 'client', onBack }: MessagingInterfaceProps) => {
   const [newMessage, setNewMessage] = useState('');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showPreviewSheet, setShowPreviewSheet] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: messages = [], isLoading } = useConversationMessages(conversationId);
@@ -225,69 +238,100 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
 
   return (
     <Card className="flex-1 flex flex-col h-full overflow-hidden border-0 shadow-none bg-[#1C1C1E]">
-      {/* iOS-style Header */}
-      <div className="flex items-center gap-2 px-3 py-3 border-b border-[#38383A] shrink-0 bg-[#1C1C1E]/95 backdrop-blur-xl">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onBack}
-          className="shrink-0 text-[#007AFF] hover:bg-transparent hover:text-[#0056CC] px-1 -ml-1"
-        >
-          <ChevronLeft className="w-6 h-6" />
-          <span className="text-[17px] font-normal">Back</span>
-        </Button>
-        <div className="flex-1 flex flex-col items-center min-w-0">
-          <div className="relative">
-            <Avatar className="w-10 h-10 shrink-0">
-              <AvatarImage src={otherUser.avatar_url} />
-              <AvatarFallback className={`font-semibold text-white ${
-                otherUser.role === 'owner'
-                  ? 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]'
-                  : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]'
-              }`}>
-                {otherUser.full_name?.charAt(0) || '?'}
-              </AvatarFallback>
-            </Avatar>
-            {/* Online indicator */}
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#34C759] rounded-full border-2 border-[#1C1C1E]" />
-          </div>
-          <h3 className="font-semibold text-[15px] text-white mt-1 truncate">{otherUser.full_name}</h3>
-          <div className="flex items-center gap-1.5">
-            <Badge
-              variant="secondary"
-              className={`text-[10px] px-2 py-0 h-4 border-0 ${
-                otherUser.role === 'owner'
-                  ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
-                  : 'bg-[#007AFF]/20 text-[#007AFF]'
-              }`}
-            >
-              {otherUser.role === 'client' ? 'Client' : 'Owner'}
-            </Badge>
-            <span className="text-[10px] text-[#34C759] font-medium flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-[#34C759] rounded-full"></span>
-              Online
-            </span>
-          </div>
+      {/* iOS-style Header - Modernized */}
+      <div className="border-b border-[#38383A] shrink-0 bg-[#1C1C1E]/95 backdrop-blur-xl">
+        {/* Main Header Row */}
+        <div className="flex items-center gap-2 px-3 py-2.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="shrink-0 text-[#007AFF] hover:bg-transparent hover:text-[#0056CC] px-1 -ml-1"
+          >
+            <ChevronLeft className="w-6 h-6" />
+            <span className="text-[17px] font-normal hidden sm:inline">Back</span>
+          </Button>
+
+          {/* Clickable Center Section */}
+          <button
+            onClick={() => setShowPreviewSheet(true)}
+            className="flex-1 flex items-center justify-center gap-3 min-w-0 py-1 hover:bg-[#2C2C2E]/50 rounded-xl transition-colors active:scale-[0.98]"
+          >
+            <div className="relative shrink-0">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={otherUser.avatar_url} />
+                <AvatarFallback className={`font-semibold text-white ${
+                  otherUser.role === 'owner'
+                    ? 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]'
+                    : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]'
+                }`}>
+                  {otherUser.full_name?.charAt(0) || '?'}
+                </AvatarFallback>
+              </Avatar>
+              {/* Online indicator */}
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#34C759] rounded-full border-2 border-[#1C1C1E]" />
+            </div>
+            <div className="flex flex-col items-start min-w-0">
+              <h3 className="font-semibold text-[15px] text-white truncate max-w-[150px] sm:max-w-[200px]">
+                {otherUser.full_name}
+              </h3>
+              <div className="flex items-center gap-1.5">
+                <Badge
+                  variant="secondary"
+                  className={`text-[10px] px-1.5 py-0 h-4 border-0 ${
+                    otherUser.role === 'owner'
+                      ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                      : 'bg-[#007AFF]/20 text-[#007AFF]'
+                  }`}
+                >
+                  {otherUser.role === 'client' ? 'Client' : 'Owner'}
+                </Badge>
+                <span className="text-[10px] text-[#34C759] font-medium flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-[#34C759] rounded-full"></span>
+                  Online
+                </span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#48484A] shrink-0" />
+          </button>
+
+          {/* Quick Action Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowPreviewSheet(true)}
+            className="shrink-0 w-9 h-9 rounded-full bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#8E8E93]"
+          >
+            <Info className="w-4 h-4" />
+          </Button>
         </div>
-        {/* Profile View Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            // Route correctly based on the other user's role
-            if (otherUser.role === 'client') {
-              // Owner viewing client profile
-              navigate(`/owner/view-client/${otherUser.id}`);
-            } else {
-              // Client viewing owner profile - use public preview
-              navigate(`/profile/${otherUser.id}`);
-            }
-          }}
-          className="shrink-0 text-[#007AFF] hover:bg-[#38383A] px-2 flex items-center gap-1"
-        >
-          <User className="w-4 h-4" />
-          <span className="text-xs font-medium">Profile</span>
-        </Button>
+
+        {/* Listing Context Bar - Shows when there's a listing attached */}
+        {listing && currentUserRole === 'client' && (
+          <button
+            onClick={() => setShowPreviewSheet(true)}
+            className="w-full px-4 py-2 bg-[#2C2C2E]/50 flex items-center gap-3 hover:bg-[#2C2C2E] transition-colors"
+          >
+            <div className="w-8 h-8 rounded-lg bg-[#FF6B35]/20 flex items-center justify-center shrink-0">
+              <Home className="w-4 h-4 text-[#FF6B35]" />
+            </div>
+            <div className="flex-1 text-left min-w-0">
+              <p className="text-xs text-[#8E8E93]">Chatting about</p>
+              <p className="text-sm text-white font-medium truncate">{listing.title}</p>
+            </div>
+            <div className="text-right shrink-0">
+              {listing.price && (
+                <p className="text-sm font-semibold text-[#34C759]">
+                  ${listing.price.toLocaleString()}
+                  <span className="text-[10px] text-[#8E8E93] font-normal">
+                    {listing.mode === 'rent' ? '/mo' : ''}
+                  </span>
+                </p>
+              )}
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#48484A] shrink-0" />
+          </button>
+        )}
       </div>
 
       {/* iOS-style Connection Status */}
@@ -431,6 +475,15 @@ export const MessagingInterface = memo(({ conversationId, otherUser, onBack }: M
         isOpen={showUpgradeDialog}
         onClose={() => setShowUpgradeDialog(false)}
         userRole={otherUser.role === 'client' ? 'owner' : 'client'}
+      />
+
+      {/* Profile/Listing Preview Sheet */}
+      <ChatPreviewSheet
+        isOpen={showPreviewSheet}
+        onClose={() => setShowPreviewSheet(false)}
+        otherUser={otherUser}
+        listing={listing}
+        currentUserRole={currentUserRole}
       />
     </Card>
   );
