@@ -5,6 +5,16 @@ import { Listing } from './useListings';
 import { ClientFilterPreferences } from './useClientFilterPreferences';
 import { useVisibilityRanking } from './useVisibilityRanking';
 
+// Fisher-Yates shuffle algorithm for randomizing array order
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export interface MatchedListing extends Listing {
   matchPercentage: number;
   matchReasons: string[];
@@ -425,18 +435,44 @@ export function useSmartListingMatching(
             // Same tier: sort by match percentage
             return b.matchPercentage - a.matchPercentage;
           });
-        
+
+        // Randomize the order to prevent users from seeing the same cards in the same order
+        // Group by premium tier and shuffle within each tier to maintain premium advantage
+        const tierGroups: Record<string, MatchedListing[]> = {
+          unlimited: [],
+          premium_plus: [],
+          premium: [],
+          basic: [],
+          free: []
+        };
+
+        sortedListings.forEach(listing => {
+          const tier = (listing as any)._premiumTier || 'free';
+          if (!tierGroups[tier]) tierGroups[tier] = [];
+          tierGroups[tier].push(listing);
+        });
+
+        // Shuffle each tier group and concatenate
+        const randomizedListings = [
+          ...shuffleArray(tierGroups.unlimited),
+          ...shuffleArray(tierGroups.premium_plus),
+          ...shuffleArray(tierGroups.premium),
+          ...shuffleArray(tierGroups.basic),
+          ...shuffleArray(tierGroups.free)
+        ];
+
         // Fallback: if no matches found but we have listings, show them all with default score
-        if (sortedListings.length === 0 && filteredListings.length > 0) {
-          return filteredListings.map(listing => ({
+        if (randomizedListings.length === 0 && filteredListings.length > 0) {
+          const fallbackListings = filteredListings.map(listing => ({
             ...listing as Listing,
             matchPercentage: 20,
             matchReasons: ['General listing'],
             incompatibleReasons: []
           }));
+          return shuffleArray(fallbackListings);
         }
 
-        return sortedListings;
+        return randomizedListings;
       } catch (error) {
         console.error('Error in smart listing matching:', error);
         return [];
@@ -875,7 +911,7 @@ export function useSmartClientMatching(
           };
 
           return {
-            id: Math.floor(Math.random() * 1000000),
+            id: profile.id, // Use stable user ID instead of random number
             user_id: profile.id,
             name: profile.full_name || 'Anonymous',
             age: profile.age || 0,
@@ -900,7 +936,11 @@ export function useSmartClientMatching(
         // Sort by match percentage
         const sortedClients = matchedClients.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
-        return sortedClients;
+        // Randomize the order to prevent users from seeing the same cards in the same order
+        // This keeps engagement high and prevents boredom from seeing the same sequence
+        const randomizedClients = shuffleArray(sortedClients);
+
+        return randomizedClients;
       } catch (error) {
         console.error('[useSmartClientMatching] Error loading client profiles', error);
         return [] as MatchedClientProfile[];
