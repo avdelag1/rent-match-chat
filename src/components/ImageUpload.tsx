@@ -27,7 +27,7 @@ export function ImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadImage = useCallback(async (file: File): Promise<string | null> => {
     try {
       // Validate file using centralized validation
       const validation = validateImageFile(file);
@@ -56,18 +56,19 @@ export function ImageUpload({
         .getPublicUrl(data.path);
 
       return publicUrl;
-    } catch (error: any) {
-      console.error('Image upload error:', error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error('Image upload error:', err);
       toast({
         title: 'Upload failed',
-        description: error.message || 'Failed to upload image',
+        description: err.message || 'Failed to upload image',
         variant: 'destructive'
       });
       return null;
     }
-  };
+  }, [bucket, folder, toast]);
 
-  const handleFiles = async (files: FileList | null) => {
+  const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const remaining = maxImages - images.length;
@@ -102,7 +103,7 @@ export function ImageUpload({
     } finally {
       setUploading(false);
     }
-  };
+  }, [images, maxImages, onImagesChange, toast, uploadImage]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
