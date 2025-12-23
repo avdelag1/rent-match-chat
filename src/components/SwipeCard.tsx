@@ -81,6 +81,7 @@ export function SwipeCard({
     // Only swipe if dragged enough (prevent ghost taps)
     if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
+      setDragOffset({ x: 0, y: 0 });
     } else if (dragDistance > 10) {
       // Only animate snap-back for movements larger than 10px (prevents gravity effect on light taps)
       const card = cardRef.current;
@@ -93,11 +94,13 @@ export function SwipeCard({
         snapBackTimeoutRef.current = setTimeout(() => {
           card.style.transition = '';
           card.style.transform = ''; // Clear inline transform to let React state control
+          setDragOffset({ x: 0, y: 0 }); // Reset state AFTER animation completes
         }, 300);
       }
+    } else {
+      // For very small movements, reset immediately
+      setDragOffset({ x: 0, y: 0 });
     }
-
-    setDragOffset({ x: 0, y: 0 });
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -138,6 +141,7 @@ export function SwipeCard({
     // Only swipe if dragged enough (prevent ghost taps)
     if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
+      setDragOffset({ x: 0, y: 0 });
     } else if (dragDistance > 10) {
       // Only animate snap-back for movements larger than 10px (prevents gravity effect on light taps)
       const card = cardRef.current;
@@ -150,11 +154,13 @@ export function SwipeCard({
         snapBackTimeoutRef.current = setTimeout(() => {
           card.style.transition = '';
           card.style.transform = ''; // Clear inline transform to let React state control
+          setDragOffset({ x: 0, y: 0 }); // Reset state AFTER animation completes
         }, 300);
       }
+    } else {
+      // For very small movements, reset immediately
+      setDragOffset({ x: 0, y: 0 });
     }
-
-    setDragOffset({ x: 0, y: 0 });
   };
 
   const rotation = dragOffset.x * 0.1;
