@@ -62,11 +62,16 @@ export interface ClientFilters {
   interests?: string[];
   lifestyleTags?: string[];
   verified?: boolean;
+  // Additional demographic filters
+  nationalities?: string[];
+  languages?: string[];
+  relationshipStatus?: string[];
   // Category-specific
   motoTypes?: string[];
   bicycleTypes?: string[];
   yachtTypes?: string[];
   vehicleTypes?: string[];
+  propertyTypes?: string[]; // For property-seeking clients
 }
 
 // Calculate match percentage between client preferences and listing
@@ -880,6 +885,50 @@ export function useSmartClientMatching(
             // Verified filter
             if (filters.verified && !profile.verified) {
               return false;
+            }
+
+            // Nationalities filter
+            if (filters.nationalities && filters.nationalities.length > 0 && profile.nationality) {
+              if (!filters.nationalities.includes(profile.nationality)) {
+                return false;
+              }
+            }
+
+            // Languages filter (client must speak at least one of the required languages)
+            if (filters.languages && filters.languages.length > 0 && profile.languages) {
+              const hasMatchingLanguage = filters.languages.some(lang =>
+                profile.languages.includes(lang)
+              );
+              if (!hasMatchingLanguage) {
+                return false;
+              }
+            }
+
+            // Relationship status filter
+            if (filters.relationshipStatus && filters.relationshipStatus.length > 0 && profile.relationship_status) {
+              if (!filters.relationshipStatus.includes(profile.relationship_status)) {
+                return false;
+              }
+            }
+
+            // Interests filter (client must have at least one matching interest)
+            if (filters.interests && filters.interests.length > 0 && profile.interests) {
+              const hasMatchingInterest = filters.interests.some(interest =>
+                profile.interests.includes(interest)
+              );
+              if (!hasMatchingInterest) {
+                return false;
+              }
+            }
+
+            // Lifestyle tags filter (client must have at least one matching tag)
+            if (filters.lifestyleTags && filters.lifestyleTags.length > 0 && profile.lifestyle_tags) {
+              const hasMatchingTag = filters.lifestyleTags.some(tag =>
+                profile.lifestyle_tags.includes(tag)
+              );
+              if (!hasMatchingTag) {
+                return false;
+              }
             }
 
             return true;
