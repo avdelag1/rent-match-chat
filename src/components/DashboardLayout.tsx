@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 // New Mobile Navigation Components
 import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
-import { FilterBottomSheet } from '@/components/FilterBottomSheet'
+import { AdvancedFilters } from '@/components/AdvancedFilters'
 import { SettingsBottomSheet } from '@/components/SettingsBottomSheet'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
@@ -196,15 +196,28 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [])
 
   const handleApplyFilters = useCallback((filters: any) => {
-    setAppliedFilters(filters);
+    // Convert AdvancedFilters format to ListingFilters format
+    const convertedFilters: any = {
+      ...filters,
+      propertyType: filters.propertyTypes, // propertyTypes -> propertyType
+      listingType: filters.listingTypes?.length === 1 ? filters.listingTypes[0] :
+                   filters.listingTypes?.includes('rent') && filters.listingTypes?.includes('buy') ? 'both' :
+                   filters.listingTypes?.[0] || 'rent',
+      petFriendly: filters.petFriendly === 'yes' || filters.petFriendly === true,
+      furnished: filters.furnished === 'yes' || filters.furnished === true,
+      verified: filters.verified || false,
+      premiumOnly: filters.premiumOnly || false,
+    };
+
+    setAppliedFilters(convertedFilters);
 
     // Count active filters for user feedback
     let activeFilterCount = 0;
-    if (filters.propertyType?.length) activeFilterCount += filters.propertyType.length;
-    if (filters.bedrooms?.length) activeFilterCount += filters.bedrooms.length;
-    if (filters.bathrooms?.length) activeFilterCount += filters.bathrooms.length;
-    if (filters.amenities?.length) activeFilterCount += filters.amenities.length;
-    if (filters.priceRange) activeFilterCount += 1;
+    if (convertedFilters.propertyType?.length) activeFilterCount += convertedFilters.propertyType.length;
+    if (convertedFilters.bedrooms?.length) activeFilterCount += convertedFilters.bedrooms.length;
+    if (convertedFilters.bathrooms?.length) activeFilterCount += convertedFilters.bathrooms.length;
+    if (convertedFilters.amenities?.length) activeFilterCount += convertedFilters.amenities.length;
+    if (convertedFilters.priceRange) activeFilterCount += 1;
 
     toast({
       title: '✨ Filters Applied',
@@ -237,8 +250,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
-        onFiltersClick={() => navigate('/owner/filters-explore')}
-        showFilters={userRole === 'owner'}
+        onFiltersClick={userRole === 'owner' ? () => navigate('/owner/filters-explore') : handleFiltersClick}
+        showFilters={true}
       />
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
@@ -262,12 +275,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         onListingsClick={handleListingsClick}
       />
 
-      {/* Filter Bottom Sheet */}
-      <FilterBottomSheet
+      {/* Advanced Filters Dialog */}
+      <AdvancedFilters
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
-        onApply={handleApplyFilters}
+        onApplyFilters={handleApplyFilters}
         userRole={userRole}
+        currentFilters={appliedFilters}
       />
 
       {/* Settings/More Menu Bottom Sheet */}

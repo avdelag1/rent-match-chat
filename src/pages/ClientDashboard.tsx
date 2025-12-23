@@ -3,13 +3,15 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { useListings } from '@/hooks/useListings';
+import { ListingFilters } from '@/hooks/useSmartMatching';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
+  filters?: ListingFilters; // Filters passed from DashboardLayout
 }
 
-export default function ClientDashboard({ onPropertyInsights, onMessageClick }: ClientDashboardProps) {
+export default function ClientDashboard({ onPropertyInsights, onMessageClick, filters }: ClientDashboardProps) {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const { data: listings = [] } = useListings([]);
@@ -20,7 +22,7 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick }: 
     onPropertyInsights?.(listingId);
   }, [onPropertyInsights]);
 
-  const selectedListing = useMemo(() => 
+  const selectedListing = useMemo(() =>
     listings.find(l => l.id === selectedListingId) || null,
     [listings, selectedListingId]
   );
@@ -31,6 +33,7 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick }: 
         onListingTap={handleListingTap}
         onInsights={handleListingTap}
         onMessageClick={onMessageClick}
+        filters={filters}
       />
 
       <PropertyInsightsDialog
