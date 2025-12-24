@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown,
   Heart,
-  Share2,
   Moon,
   Volume2,
   VolumeX,
@@ -11,20 +10,12 @@ import {
   SkipForward,
   Play,
   Pause,
-  Palette,
   ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
-import { RadioSkinMinimal } from './skins/RadioSkinMinimal';
-import { RadioSkinIPod } from './skins/RadioSkinIPod';
-import { RadioSkinWalkman } from './skins/RadioSkinWalkman';
-import { RadioSkinDJ } from './skins/RadioSkinDJ';
-import { RadioSkinGameBoy } from './skins/RadioSkinGameBoy';
-import { RadioSkinVintage } from './skins/RadioSkinVintage';
-import { RadioSkinAppleGlass } from './skins/RadioSkinAppleGlass';
 
 export const RadioPlayer: React.FC = () => {
   const {
@@ -33,7 +24,6 @@ export const RadioPlayer: React.FC = () => {
     isLoading,
     volume,
     isMuted,
-    currentSkin,
     sleepTimer,
     togglePlayPause,
     setVolume,
@@ -42,45 +32,15 @@ export const RadioPlayer: React.FC = () => {
     isFavorite,
     collapsePlayer,
     getRemainingTime,
-    setSkin
   } = useRadioPlayer();
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [showSkinSelector, setShowSkinSelector] = useState(false);
 
   if (!currentStation) return null;
 
   const isFav = isFavorite(currentStation.id);
   const remainingTime = getRemainingTime();
   const remainingMinutes = Math.ceil(remainingTime / 60000);
-
-  // Render the appropriate skin
-  const renderSkin = () => {
-    const skinProps = {
-      station: currentStation,
-      isPlaying,
-      isLoading,
-      onPlayPause: togglePlayPause,
-    };
-
-    switch (currentSkin) {
-      case 'ipod-classic':
-        return <RadioSkinIPod {...skinProps} />;
-      case 'walkman':
-        return <RadioSkinWalkman {...skinProps} />;
-      case 'dj-controller':
-        return <RadioSkinDJ {...skinProps} />;
-      case 'gameboy':
-        return <RadioSkinGameBoy {...skinProps} />;
-      case 'vintage-radio':
-        return <RadioSkinVintage {...skinProps} />;
-      case 'apple-glass':
-        return <RadioSkinAppleGlass {...skinProps} />;
-      case 'minimal':
-      default:
-        return <RadioSkinMinimal {...skinProps} />;
-    }
-  };
 
   return (
     <motion.div
@@ -120,61 +80,62 @@ export const RadioPlayer: React.FC = () => {
           )}
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowSkinSelector(!showSkinSelector)}
-          className={cn("w-10 h-10", showSkinSelector && "text-primary")}
-        >
-          <Palette className="w-5 h-5" />
-        </Button>
+        <div className="w-10" /> {/* Spacer for balanced header */}
       </header>
 
-      {/* Skin Selector Overlay */}
-      <AnimatePresence>
-        {showSkinSelector && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-24 left-4 right-4 z-20 bg-card/95 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-border/50"
-          >
-            <h3 className="font-semibold text-sm mb-3">Player Skins</h3>
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { id: 'minimal', name: 'Minimal', emoji: '🎵' },
-                { id: 'ipod-classic', name: 'iPod', emoji: '📱' },
-                { id: 'walkman', name: 'Walkman', emoji: '📼' },
-                { id: 'dj-controller', name: 'DJ', emoji: '🎛️' },
-                { id: 'gameboy', name: 'GameBoy', emoji: '🎮' },
-                { id: 'vintage-radio', name: 'Vintage', emoji: '📻' },
-                { id: 'apple-glass', name: 'Glass', emoji: '✨' },
-              ].map((skin) => (
-                <button
-                  key={skin.id}
-                  onClick={() => {
-                    setSkin(skin.id as any);
-                    setShowSkinSelector(false);
-                  }}
-                  className={cn(
-                    "flex flex-col items-center p-2 rounded-xl transition-all",
-                    currentSkin === skin.id
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary/50 hover:bg-secondary"
-                  )}
-                >
-                  <span className="text-xl">{skin.emoji}</span>
-                  <span className="text-[10px] mt-1">{skin.name}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content - Skin */}
+      {/* Main Content - Album Art */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
-        {renderSkin()}
+        <div className="w-full max-w-[280px] flex flex-col items-center">
+          {/* Album Art */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', damping: 20 }}
+            className="relative w-64 h-64 rounded-3xl overflow-hidden shadow-2xl"
+          >
+            <img
+              src={currentStation.artwork}
+              alt={currentStation.name}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Playing Animation Overlay */}
+            {isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex gap-1">
+                  {[...Array(4)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1 bg-white/80 rounded-full"
+                      animate={{ height: [20, 40, 20] }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Infinity,
+                        delay: i * 0.15,
+                        ease: 'easeInOut'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Loading Overlay */}
+            {isLoading && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </motion.div>
+
+          {/* Vinyl effect decoration */}
+          <motion.div
+            animate={{ rotate: isPlaying ? 360 : 0 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            className="absolute w-72 h-72 rounded-full border border-white/5 -z-10"
+            style={{ top: '50%', transform: 'translateY(-50%)' }}
+          />
+        </div>
       </main>
 
       {/* Bottom Controls */}

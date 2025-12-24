@@ -17,7 +17,6 @@ import { RadioStationCard } from '@/components/radio/RadioStationCard';
 import { RadioGenreSection } from '@/components/radio/RadioGenreSection';
 import { RadioPlayer } from '@/components/radio/RadioPlayer';
 import { RadioMiniPlayer } from '@/components/radio/RadioMiniPlayer';
-import { RadioSkinSelector } from '@/components/radio/RadioSkinSelector';
 import { RadioSleepTimer } from '@/components/radio/RadioSleepTimer';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +63,6 @@ const RadioPage: React.FC = () => {
     if (viewMode === 'settings') {
       return (
         <div className="space-y-6 pb-32">
-          <RadioSkinSelector />
           <RadioSleepTimer />
         </div>
       );
