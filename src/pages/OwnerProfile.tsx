@@ -7,9 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
-import { 
+import {
   User, Mail, Calendar, Building2, Eye, MessageCircle,
-  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera
+  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera, Radio
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -48,6 +48,7 @@ const OwnerProfile = () => {
   const menuItems = [
     { icon: User, label: 'Edit Profile', action: () => setShowEditDialog(true), color: 'text-blue-500' },
     { icon: Building2, label: 'Manage Listings', action: () => navigate('/owner/properties'), color: 'text-primary' },
+    { icon: Radio, label: 'Radio', action: () => navigate('/radio'), color: 'text-cyan-500' },
     { icon: Crown, label: 'Subscription', action: () => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Settings, label: 'Settings', action: () => navigate('/owner/settings'), color: 'text-gray-500' },
     { icon: Shield, label: 'Security', action: () => navigate('/owner/security'), color: 'text-green-500' },

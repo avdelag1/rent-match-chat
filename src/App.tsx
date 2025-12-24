@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { RadioPlayerProvider } from "@/hooks/useRadioPlayer";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
@@ -66,6 +67,9 @@ const OwnerProfileCamera = lazy(() => import("./pages/OwnerProfileCamera"));
 const PublicProfilePreview = lazy(() => import("./pages/PublicProfilePreview"));
 const PublicListingPreview = lazy(() => import("./pages/PublicListingPreview"));
 
+// Radio page (accessible to both roles)
+const RadioPage = lazy(() => import("./pages/RadioPage"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -102,6 +106,7 @@ const App = () => (
         <ErrorBoundary>
           <AuthProvider>
           <ThemeProvider>
+            <RadioPlayerProvider>
             <NotificationWrapper>
               <AppLayout>
                 <Suspense fallback={null}>
@@ -386,13 +391,23 @@ const App = () => (
                     <Route path="/payment/cancel" element={<PaymentCancel />} />
 
                     {/* Notifications Page - Both Roles */}
-                    <Route 
-                      path="/notifications" 
+                    <Route
+                      path="/notifications"
                       element={
                         <ProtectedRoute>
                           <NotificationsPage />
                         </ProtectedRoute>
-                      } 
+                      }
+                    />
+
+                    {/* Radio Page - Both Roles */}
+                    <Route
+                      path="/radio"
+                      element={
+                        <ProtectedRoute>
+                          <RadioPage />
+                        </ProtectedRoute>
+                      }
                     />
 
                     {/* Legal Pages - Public Access */}
@@ -409,6 +424,7 @@ const App = () => (
                 </Suspense>
               </AppLayout>
             </NotificationWrapper>
+            </RadioPlayerProvider>
           </ThemeProvider>
           </AuthProvider>
         </ErrorBoundary>
