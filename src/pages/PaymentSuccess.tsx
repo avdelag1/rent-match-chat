@@ -1,26 +1,100 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Loader2, Gift, Zap } from 'lucide-react';
+import { CheckCircle, Loader2, Gift, Zap, Crown, MessageCircle, FileText, Home, Star, Sparkles, ArrowRight, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { STORAGE } from '@/constants/app';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Confetti particle component
+const ConfettiParticle = ({ delay, color }: { delay: number; color: string }) => {
+  const randomX = Math.random() * 100;
+  const randomRotation = Math.random() * 360;
+  const randomDuration = 2 + Math.random() * 2;
+
+  return (
+    <motion.div
+      className="absolute w-3 h-3 rounded-sm"
+      style={{
+        backgroundColor: color,
+        left: `${randomX}%`,
+        top: '-20px',
+      }}
+      initial={{ y: 0, rotate: 0, opacity: 1 }}
+      animate={{
+        y: '100vh',
+        rotate: randomRotation + 360,
+        opacity: [1, 1, 0],
+      }}
+      transition={{
+        duration: randomDuration,
+        delay,
+        ease: 'easeIn',
+      }}
+    />
+  );
+};
+
+// Confetti container
+const Confetti = ({ isActive }: { isActive: boolean }) => {
+  const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
+  const particles = Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    delay: Math.random() * 2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+  }));
+
+  if (!isActive) return null;
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+      {particles.map((particle) => (
+        <ConfettiParticle key={particle.id} delay={particle.delay} color={particle.color} />
+      ))}
+    </div>
+  );
+};
+
+interface PurchaseDetails {
+  packageName: string;
+  tier: string;
+  messageActivations: number;
+  legalDocuments: number;
+  maxListings: number;
+  isMonthly: boolean;
+  role: 'client' | 'owner';
+  price?: number;
+  durationDays?: number;
+  visibilityBoost?: number;
+  priorityMatching?: boolean;
+}
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [processing, setProcessing] = useState(true);
-  const [purchaseDetails, setPurchaseDetails] = useState<any>(null);
+  const [purchaseDetails, setPurchaseDetails] = useState<PurchaseDetails | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+  const [error, setError] = useState<string | null>(null);
+
+  const goToDashboard = useCallback(() => {
+    const role = purchaseDetails?.role || 'client';
+    navigate(`/${role}/dashboard`);
+  }, [navigate, purchaseDetails]);
 
   useEffect(() => {
     const processPayment = async () => {
       const pendingPurchase = localStorage.getItem(STORAGE.SELECTED_PLAN_KEY) || localStorage.getItem(STORAGE.PENDING_ACTIVATION_KEY);
+
       if (!pendingPurchase) {
-        toast.error('No pending purchase found');
-        navigate('/subscription-packages');
+        setError('No pending purchase found. If you completed a payment, please contact support.');
+        setProcessing(false);
         return;
       }
 
@@ -42,7 +116,11 @@ export default function PaymentSuccess() {
           pkg = await mapMonthlyPlanToPackage(purchase.planId);
         }
 
-        if (!pkg) throw new Error('Package not found');
+        if (!pkg) {
+          setError('Package not found. Please contact support.');
+          setProcessing(false);
+          return;
+        }
 
         const role = pkg.package_category?.includes('client') ? 'client' : 'owner';
         const isMonthly = pkg.package_category?.includes('monthly');
@@ -111,10 +189,6 @@ export default function PaymentSuccess() {
                 reset_date: nextMonth.toISOString().split('T')[0],
               });
           }
-
-          toast.success(`Welcome to ${pkg.name}! 🎉`, {
-            description: 'Your premium benefits are now active! You can now enjoy all the features of your plan.'
-          });
         } else if (isPayPerUse) {
           // Create pay-per-use activations
           const expiresAt = new Date();
@@ -132,10 +206,6 @@ export default function PaymentSuccess() {
             });
 
           if (activError) throw activError;
-
-          toast.success(`${pkg.message_activations} Message Activations Added! 🎉`, {
-            description: `Valid for ${pkg.duration_days || 30} days. Start conversations with your matches now!`
-          });
         }
 
         setPurchaseDetails({
@@ -145,20 +215,25 @@ export default function PaymentSuccess() {
           legalDocuments: pkg.legal_documents_included || 0,
           maxListings: pkg.max_listings || 0,
           isMonthly,
-          role,
+          role: role as 'client' | 'owner',
+          price: pkg.price,
+          durationDays: pkg.duration_days,
+          visibilityBoost: pkg.visibility_boost,
+          priorityMatching: pkg.priority_matching,
         });
 
         // Clear storage
         localStorage.removeItem(STORAGE.SELECTED_PLAN_KEY);
         localStorage.removeItem(STORAGE.PENDING_ACTIVATION_KEY);
         setProcessing(false);
+        setShowConfetti(true);
 
-        setTimeout(() => {
-          navigate(`/${role}/dashboard`);
-        }, 3000);
+        // Stop confetti after 4 seconds
+        setTimeout(() => setShowConfetti(false), 4000);
+
       } catch (error) {
         console.error('Payment processing error:', error);
-        toast.error('Failed to process payment. Please contact support.');
+        setError('Failed to process payment. Please contact support with your PayPal receipt.');
         setProcessing(false);
       }
     };
@@ -166,7 +241,17 @@ export default function PaymentSuccess() {
     if (user) {
       processPayment();
     }
-  }, [searchParams, navigate, user]);
+  }, [searchParams, user]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!processing && purchaseDetails && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0 && purchaseDetails) {
+      goToDashboard();
+    }
+  }, [countdown, processing, purchaseDetails, goToDashboard]);
 
   const mapMonthlyPlanToPackage = async (planId: string) => {
     // Map old plan IDs to new package names
@@ -192,66 +277,285 @@ export default function PaymentSuccess() {
     return data;
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      {processing ? (
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-foreground">Processing your payment...</p>
-          <p className="text-sm text-muted-foreground mt-2">Please wait while we activate your benefits</p>
-        </div>
-      ) : purchaseDetails ? (
-        <Card className="max-w-md w-full border-green-500/50 bg-green-500/5">
+  // Get tier-specific styling
+  const getTierStyles = (tier: string) => {
+    switch (tier) {
+      case 'unlimited':
+        return {
+          gradient: 'from-blue-500 via-cyan-500 to-teal-500',
+          glow: 'shadow-2xl shadow-blue-500/30',
+          badge: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+          icon: Crown,
+        };
+      case 'premium-max':
+      case 'premium_plus':
+        return {
+          gradient: 'from-purple-500 via-pink-500 to-rose-500',
+          glow: 'shadow-2xl shadow-purple-500/30',
+          badge: 'bg-gradient-to-r from-purple-500 to-pink-500',
+          icon: Star,
+        };
+      default:
+        return {
+          gradient: 'from-green-500 via-emerald-500 to-teal-500',
+          glow: 'shadow-2xl shadow-green-500/30',
+          badge: 'bg-gradient-to-r from-green-500 to-emerald-500',
+          icon: Zap,
+        };
+    }
+  };
+
+  // Processing state
+  if (processing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center space-y-6"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          >
+            <Loader2 className="w-16 h-16 mx-auto text-primary" />
+          </motion.div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">Processing Your Payment</h2>
+            <p className="text-muted-foreground">Please wait while we activate your benefits...</p>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Shield className="w-4 h-4 text-green-500" />
+            <span>Secure payment verified by PayPal</span>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 p-4">
+        <Card className="max-w-md w-full border-destructive/50">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 p-3 rounded-full bg-green-500/20">
-              <Gift className="w-8 h-8 text-green-500" />
-            </div>
-            <CardTitle className="text-2xl text-green-600">Payment Successful!</CardTitle>
+            <CardTitle className="text-xl text-destructive">Payment Issue</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="p-3 bg-background rounded-lg border border-green-500/20">
-                <h3 className="font-semibold text-lg">{purchaseDetails.packageName}</h3>
-                <Badge variant="outline" className="mt-2">
-                  {purchaseDetails.isMonthly ? '📅 Monthly' : '⏰ Pay-Per-Use'}
-                </Badge>
-              </div>
-
-              <div className="space-y-2 text-sm">
-                {purchaseDetails.messageActivations > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-accent" />
-                    <span>{purchaseDetails.messageActivations} message activations {purchaseDetails.isMonthly ? 'per month' : ''}</span>
-                  </div>
-                )}
-                {purchaseDetails.legalDocuments > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Gift className="w-4 h-4 text-accent" />
-                    <span>{purchaseDetails.legalDocuments} legal documents included</span>
-                  </div>
-                )}
-                {purchaseDetails.maxListings > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Gift className="w-4 h-4 text-accent" />
-                    <span>Up to {purchaseDetails.maxListings} property listings</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="text-center space-y-1 text-sm text-muted-foreground">
-              <p>✓ Your benefits are now active!</p>
-              <p>✓ Redirecting to dashboard...</p>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">{error}</p>
+            <div className="flex flex-col gap-2">
+              <Button onClick={() => navigate('/subscription-packages')} variant="outline">
+                Try Again
+              </Button>
+              <Button onClick={() => navigate('/client/dashboard')} variant="ghost">
+                Go to Dashboard
+              </Button>
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <div className="text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      )}
+      </div>
+    );
+  }
+
+  // Success state with congratulations
+  if (purchaseDetails) {
+    const styles = getTierStyles(purchaseDetails.tier);
+    const TierIcon = styles.icon;
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 p-4 overflow-hidden">
+        <Confetti isActive={showConfetti} />
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="w-full max-w-lg"
+        >
+          <Card className={`relative overflow-hidden border-2 border-green-500/50 ${styles.glow}`}>
+            {/* Animated gradient background */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-5`} />
+
+            <CardHeader className="text-center relative z-10 pb-2">
+              {/* Success icon with animation */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.2 }}
+                className="mx-auto mb-4"
+              >
+                <div className={`p-4 rounded-full bg-gradient-to-br ${styles.gradient}`}>
+                  <CheckCircle className="w-12 h-12 text-white" />
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                  Congratulations!
+                </CardTitle>
+                <p className="text-lg text-muted-foreground mt-2">Your payment was successful</p>
+              </motion.div>
+            </CardHeader>
+
+            <CardContent className="space-y-6 relative z-10">
+              {/* Package details */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="p-4 rounded-xl bg-card border border-border"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`p-2 rounded-lg ${styles.badge}`}>
+                    <TierIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">{purchaseDetails.packageName}</h3>
+                    <Badge variant="outline" className="mt-1">
+                      {purchaseDetails.isMonthly ? 'Monthly Subscription' : 'Pay-Per-Use'}
+                    </Badge>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Benefits list */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="space-y-3"
+              >
+                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  Your Benefits Are Now Active
+                </h4>
+
+                <div className="grid gap-2">
+                  {purchaseDetails.messageActivations > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20"
+                    >
+                      <MessageCircle className="w-5 h-5 text-green-500" />
+                      <span className="text-foreground font-medium">
+                        {purchaseDetails.messageActivations} Message Activations
+                        {purchaseDetails.isMonthly && ' per month'}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {purchaseDetails.legalDocuments > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.7 }}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20"
+                    >
+                      <FileText className="w-5 h-5 text-blue-500" />
+                      <span className="text-foreground font-medium">
+                        {purchaseDetails.legalDocuments} Legal Documents included
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {purchaseDetails.maxListings > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.8 }}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20"
+                    >
+                      <Home className="w-5 h-5 text-purple-500" />
+                      <span className="text-foreground font-medium">
+                        Up to {purchaseDetails.maxListings} Property Listings
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {purchaseDetails.visibilityBoost && purchaseDetails.visibilityBoost > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.9 }}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20"
+                    >
+                      <Star className="w-5 h-5 text-amber-500" />
+                      <span className="text-foreground font-medium">
+                        {Math.round(purchaseDetails.visibilityBoost * 100)}% Visibility Boost
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {purchaseDetails.priorityMatching && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 1.0 }}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20"
+                    >
+                      <Crown className="w-5 h-5 text-cyan-500" />
+                      <span className="text-foreground font-medium">
+                        Priority Matching Enabled
+                      </span>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Call to action */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.1 }}
+                className="space-y-3 pt-2"
+              >
+                <Button
+                  onClick={goToDashboard}
+                  className={`w-full h-12 font-semibold text-base bg-gradient-to-r ${styles.gradient} hover:opacity-90 transition-opacity`}
+                >
+                  Start Using Your Benefits
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+
+                <p className="text-center text-sm text-muted-foreground">
+                  Redirecting to dashboard in {countdown} seconds...
+                </p>
+              </motion.div>
+
+              {/* Receipt note */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2 }}
+                className="text-center text-xs text-muted-foreground pt-2 border-t border-border"
+              >
+                <p>A receipt has been sent to your PayPal email address.</p>
+                <p className="mt-1">Need help? Contact support@rentmatch.com</p>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Fallback
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="text-center">
+        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
+        <p className="text-muted-foreground mb-4">Redirecting to dashboard...</p>
+        <Button onClick={() => navigate('/client/dashboard')}>
+          Go to Dashboard
+        </Button>
+      </div>
     </div>
   );
 }
