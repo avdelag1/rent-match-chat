@@ -40,8 +40,8 @@ export function ClientPropertyPreview({
     
     setIsLiked(true);
     toast({
-      title: "Property Flamed! 🔥",
-      description: "This property has been added to your flames list.",
+      title: "Property Liked!",
+      description: "This property has been added to your liked list.",
       duration: 3000,
     });
   };
@@ -301,12 +301,12 @@ export function ClientPropertyPreview({
               {isLiked ? (
                 <>
                   <Flame className="w-5 h-5 fill-current" />
-                  Flamed!
+                  Liked!
                 </>
               ) : (
                 <>
                   <Flame className="w-5 h-5" />
-                  Flame It
+                  Like It
                 </>
               )}
             </Button>
