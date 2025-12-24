@@ -180,9 +180,74 @@ export function useConversations() {
     return null;
   };
 
+  // Fetch a single conversation directly by ID (when not in cache)
+  const fetchSingleConversation = async (conversationId: string): Promise<Conversation | null> => {
+    if (!user?.id) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select(`
+          *,
+          client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
+          owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
+          listing:listings!conversations_listing_id_fkey(id, title, price, images, category, mode, address, city)
+        `)
+        .eq('id', conversationId)
+        .single();
+
+      if (error || !data) {
+        if (import.meta.env.DEV) {
+          console.error('[useConversations] Error fetching single conversation:', error);
+        }
+        return null;
+      }
+
+      // Get last message for this conversation
+      const { data: messagesData } = await supabase
+        .from('conversation_messages')
+        .select('conversation_id, message_text, created_at, sender_id')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      const lastMessage = messagesData?.[0];
+
+      // Transform data
+      const isClient = data.client_id === user.id;
+      const otherUserProfile = isClient ? data.owner_profile : data.client_profile;
+      const otherUserRole = isClient ? 'owner' : 'client';
+
+      return {
+        id: data.id,
+        client_id: data.client_id,
+        owner_id: data.owner_id,
+        listing_id: data.listing_id,
+        last_message_at: data.last_message_at,
+        status: data.status,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        other_user: otherUserProfile ? {
+          id: otherUserProfile.id,
+          full_name: otherUserProfile.full_name,
+          avatar_url: otherUserProfile.avatar_url,
+          role: otherUserRole
+        } : undefined,
+        last_message: lastMessage,
+        listing: data.listing || undefined
+      };
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('[useConversations] Error fetching single conversation:', error);
+      }
+      return null;
+    }
+  };
+
   return {
     ...query,
-    ensureConversationInCache
+    ensureConversationInCache,
+    fetchSingleConversation
   };
 }
 

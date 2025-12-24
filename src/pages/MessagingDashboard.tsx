@@ -30,7 +30,13 @@ export function MessagingDashboard() {
   const [directConversationId, setDirectConversationId] = useState<string | null>(null);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
-  const { data: conversations = [], isLoading, refetch, ensureConversationInCache } = useConversations();
+  const { data: conversations = [], isLoading, refetch, ensureConversationInCache, fetchSingleConversation } = useConversations();
+  // State to store a directly fetched conversation (when not in cache)
+  const [directlyFetchedConversation, setDirectlyFetchedConversation] = useState<{
+    id: string;
+    other_user?: { id: string; full_name: string; avatar_url?: string; role: string };
+    listing?: { id: string; title: string; price?: number; images?: string[]; category?: string; mode?: string; address?: string; city?: string };
+  } | null>(null);
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
   const { totalActivations, canSendMessage } = useMessageActivations();
@@ -140,6 +146,7 @@ export function MessagingDashboard() {
 
   const handleDirectOpenConversation = async (conversationId: string) => {
     setIsStartingConversation(true);
+    setDirectlyFetchedConversation(null); // Reset any previously fetched conversation
 
     try {
       // Try to find conversation in current list
@@ -161,10 +168,26 @@ export function MessagingDashboard() {
           description: 'You can now send messages!',
         });
       } else {
-        // Even if we don't find it in the list, try to open it directly
-        // The MessagingInterface will handle fetching the messages
-        setSelectedConversationId(conversationId);
-        setSearchParams({});
+        // Conversation not in cache - fetch it directly from database
+        const fetchedConversation = await fetchSingleConversation(conversationId);
+
+        if (fetchedConversation && fetchedConversation.other_user) {
+          setDirectlyFetchedConversation(fetchedConversation);
+          setSelectedConversationId(conversationId);
+          setSearchParams({});
+          toast({
+            title: '✅ Conversation opened',
+            description: 'You can now send messages!',
+          });
+        } else {
+          // Still couldn't find it - show error
+          toast({
+            title: '❌ Could not open conversation',
+            description: 'The conversation may not exist. Try refreshing the page.',
+            variant: 'destructive',
+          });
+          setSearchParams({});
+        }
       }
     } catch (error) {
       console.error('[MessagingDashboard] Error opening conversation:', error);
@@ -252,22 +275,27 @@ export function MessagingDashboard() {
 
   if (selectedConversationId) {
     // If we have a selected conversation ID, show the messaging interface
-    // If it's not in the full list yet, the MessagingInterface will handle fetching it
-    const conversation = conversations.find(c => c.id === selectedConversationId);
+    // Use either the cached conversation or the directly fetched one
+    const conversation = conversations.find(c => c.id === selectedConversationId) || directlyFetchedConversation;
+
+    // Get the other user from either source
+    const otherUser = conversation?.other_user;
+    const listing = conversation?.listing;
 
     return (
       <DashboardLayout userRole={userRole}>
         <div className="h-full flex flex-col overflow-hidden">
           <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col min-h-0">
-            {conversation?.other_user ? (
+            {otherUser ? (
               <MessagingInterface
                 conversationId={selectedConversationId}
-                otherUser={conversation.other_user}
-                listing={conversation.listing}
+                otherUser={otherUser}
+                listing={listing}
                 currentUserRole={userRole}
                 onBack={() => {
                   setSelectedConversationId(null);
                   setDirectConversationId(null);
+                  setDirectlyFetchedConversation(null);
                 }}
               />
             ) : (
@@ -280,6 +308,7 @@ export function MessagingDashboard() {
                   onClick={() => {
                     setSelectedConversationId(null);
                     setDirectConversationId(null);
+                    setDirectlyFetchedConversation(null);
                   }}
                   className="mt-4"
                 >
