@@ -19,6 +19,7 @@ export function useLikedProperties() {
         .order('created_at', { ascending: false });
 
       if (likesError) {
+        console.error('[useLikedProperties] Error fetching likes:', likesError);
         throw likesError;
       }
 
@@ -31,6 +32,7 @@ export function useLikedProperties() {
           .order('created_at', { ascending: false });
 
         if (swipesError) {
+          console.error('[useLikedProperties] Error fetching swipes:', swipesError);
           throw swipesError;
         }
 
@@ -44,6 +46,7 @@ export function useLikedProperties() {
             .eq('is_active', true);
 
           if (listingsError) {
+            console.error('[useLikedProperties] Error fetching listings from swipes:', listingsError);
             throw listingsError;
           }
 
@@ -63,12 +66,14 @@ export function useLikedProperties() {
         .eq('is_active', true);
 
       if (listingsError) {
+        console.error('[useLikedProperties] Error fetching listings:', listingsError);
         throw listingsError;
       }
-      
+
       return (listings || []) as Listing[];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (replaces deprecated cacheTime)
+    staleTime: 30000, // Cache for 30 seconds
+    gcTime: 60000, // 1 minute
+    refetchInterval: 15000, // Refetch every 15 seconds for faster updates
   });
 }

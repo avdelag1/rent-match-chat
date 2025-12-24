@@ -100,28 +100,62 @@ export function LikedClients() {
         .from('likes')
         .select('target_id, created_at')
         .eq('user_id', user.id)
-        .eq('direction', 'right');
+        .eq('direction', 'right')
+        .order('created_at', { ascending: false });
 
-      if (likesError) throw likesError;
+      if (likesError) {
+        console.error('[LikedClients] Error fetching likes:', likesError);
+        throw likesError;
+      }
       if (!likes || likes.length === 0) return [];
 
-      // Get the profiles for those users, filtering to only clients using JOIN
-      const { data: profiles, error: profilesError } = await supabase
+      const targetIds = likes.map(like => like.target_id);
+
+      // First try with inner join to get only clients
+      let profiles: any[] = [];
+      const { data: clientProfiles, error: clientProfilesError } = await supabase
         .from('profiles')
         .select(`
           *,
           user_roles!inner(role)
         `)
-        .in('id', likes.map(like => like.target_id))
+        .in('id', targetIds)
         .eq('user_roles.role', 'client');
 
-      if (profilesError) throw profilesError;
-      if (!profiles) return [];
+      if (!clientProfilesError && clientProfiles && clientProfiles.length > 0) {
+        profiles = clientProfiles;
+      } else {
+        // Fallback: Get all profiles and filter by checking if they're NOT owners
+        // This handles cases where user_roles entry might be missing
+        const { data: allProfiles, error: allProfilesError } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', targetIds);
 
-      const filteredProfiles = profiles;
+        if (allProfilesError) {
+          console.error('[LikedClients] Error fetching profiles:', allProfilesError);
+          throw allProfilesError;
+        }
 
-      // Return ONLY the filtered client profiles, not all profiles
-      const likedClientsList = filteredProfiles.map(profile => {
+        if (allProfiles && allProfiles.length > 0) {
+          // Check which ones are owners to exclude them
+          const { data: ownerRoles } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .in('user_id', targetIds)
+            .eq('role', 'owner');
+
+          const ownerIds = new Set((ownerRoles || []).map(r => r.user_id));
+
+          // Filter out owners - keep everyone else (clients or users without role)
+          profiles = allProfiles.filter(p => !ownerIds.has(p.id));
+        }
+      }
+
+      if (!profiles || profiles.length === 0) return [];
+
+      // Return the client profiles with like data
+      const likedClientsList = profiles.map(profile => {
         const like = likes.find(l => l.target_id === profile.id);
         return {
           id: profile.id,
@@ -150,8 +184,8 @@ export function LikedClients() {
       return deduplicatedClients;
     },
     enabled: !!user?.id,
-    staleTime: 60000, // Cache for 1 minute to prevent constant refetches
-    refetchInterval: 30000, // Refetch every 30 seconds for profile updates
+    staleTime: 30000, // Cache for 30 seconds
+    refetchInterval: 15000, // Refetch every 15 seconds for faster updates
   });
 
   const removeLikeMutation = useMutation({
@@ -335,8 +369,8 @@ export function LikedClients() {
                 <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Flamed Clients</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Manage your flamed client profiles and start conversations</p>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Liked Clients</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Manage your liked client profiles and start conversations</p>
               </div>
             </div>
           </div>
@@ -406,7 +440,7 @@ export function LikedClients() {
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-muted flex items-center justify-center">
               <Flame className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-muted-foreground" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">No Flamed Clients Yet</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">No Liked Clients Yet</h2>
             <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 px-4">
               {searchTerm ? 'No clients match your search.' : 'Start browsing client profiles and like the ones you\'re interested in working with'}
             </p>
@@ -532,7 +566,7 @@ export function LikedClients() {
                   
                   <div className="pt-3 border-t">
                     <p className="text-xs text-muted-foreground">
-                      Flamed on {new Date(client.liked_at).toLocaleDateString()}
+                      Liked on {new Date(client.liked_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
