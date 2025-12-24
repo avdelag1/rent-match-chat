@@ -25,24 +25,26 @@ const amenities = ['pool', 'gym', 'parking', 'wifi', 'security', 'pet-friendly',
 const lifestyleTags = ['student', 'professional', 'family', 'digital-nomad', 'couple', 'quiet', 'social', 'pet-lover', 'non-smoker'];
 const locationRadii = [1, 5, 10, 20, 50];
 
-export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, currentFilters = {} }: AdvancedFiltersProps) {
+export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, currentFilters }: AdvancedFiltersProps) {
   const { saveListingTypes } = useAutoSaveListingTypes();
+  const safeCurrentFilters = currentFilters ?? {};
+
   const [filters, setFilters] = useState({
-    priceRange: currentFilters.priceRange || [0, 100000],
-    propertyTypes: currentFilters.propertyTypes || [],
-    listingTypes: currentFilters.listingTypes || ['rent', 'buy'],
-    bedrooms: currentFilters.bedrooms || [1, 10],
-    bathrooms: currentFilters.bathrooms || [1, 5],
-    amenities: currentFilters.amenities || [],
-    locationRadius: currentFilters.locationRadius || 10,
-    furnished: currentFilters.furnished || 'any',
-    petFriendly: currentFilters.petFriendly || 'any',
-    availableFrom: currentFilters.availableFrom || '',
-    rentalDuration: currentFilters.rentalDuration || 'any',
-    lifestyleTags: currentFilters.lifestyleTags || [],
-    verified: currentFilters.verified || false,
-    premiumOnly: currentFilters.premiumOnly || false,
-    ...currentFilters
+    ...safeCurrentFilters,
+    priceRange: safeCurrentFilters.priceRange ?? [0, 100000],
+    propertyTypes: safeCurrentFilters.propertyTypes ?? [],
+    listingTypes: safeCurrentFilters.listingTypes ?? ['rent', 'buy'],
+    bedrooms: safeCurrentFilters.bedrooms ?? [1, 10],
+    bathrooms: safeCurrentFilters.bathrooms ?? [1, 5],
+    amenities: safeCurrentFilters.amenities ?? [],
+    locationRadius: safeCurrentFilters.locationRadius ?? 10,
+    furnished: safeCurrentFilters.furnished ?? 'any',
+    petFriendly: safeCurrentFilters.petFriendly ?? 'any',
+    availableFrom: safeCurrentFilters.availableFrom ?? '',
+    rentalDuration: safeCurrentFilters.rentalDuration ?? 'any',
+    lifestyleTags: safeCurrentFilters.lifestyleTags ?? [],
+    verified: safeCurrentFilters.verified ?? false,
+    premiumOnly: safeCurrentFilters.premiumOnly ?? false,
   });
 
   const handleToggleArrayItem = (array: string[], item: string, key: string) => {
