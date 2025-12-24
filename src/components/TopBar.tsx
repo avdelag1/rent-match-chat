@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings, Filter } from 'lucide-react';
+import { Bell, Settings, Filter, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
+import { useNavigate } from 'react-router-dom';
 
 interface TopBarProps {
   onNotificationsClick?: () => void;
@@ -14,6 +15,7 @@ interface TopBarProps {
 
 export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
+  const navigate = useNavigate();
 
   return (
     <motion.header 
@@ -95,6 +97,23 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Radio */}
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.17, type: 'spring', stiffness: 500 }}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
+              onClick={() => navigate('/radio')}
+              aria-label="Radio"
+            >
+              <Radio className="h-5 w-5 text-foreground/80" />
+            </Button>
+          </motion.div>
 
           {/* Settings */}
           <motion.div
