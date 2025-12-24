@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -8,7 +8,7 @@ export interface SavedFilter {
   name: string;
   category: string;
   mode: string;
-  filters: any;
+  filters: Record<string, unknown>;
   is_active?: boolean;
   listing_types?: string[];
   client_types?: string[];
@@ -34,11 +34,7 @@ export function useSavedFilters() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadSavedFilters();
-  }, []);
-
-  const loadSavedFilters = async () => {
+  const loadSavedFilters = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -53,7 +49,7 @@ export function useSavedFilters() {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      
+
       if (data) {
         setSavedFilters(data);
         const active = data.find(f => f.is_active);
@@ -69,7 +65,11 @@ export function useSavedFilters() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadSavedFilters();
+  }, [loadSavedFilters]);
 
   const saveFilter = async (filter: SavedFilter) => {
     try {
@@ -159,11 +159,12 @@ export function useSavedFilters() {
       }
 
       await loadSavedFilters();
-    } catch (error: any) {
-      console.error('Error saving filter:', error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error('Error saving filter:', err);
       toast({
         title: "Error",
-        description: error.message || "Failed to save filter",
+        description: err.message || "Failed to save filter",
         variant: "destructive"
       });
     }

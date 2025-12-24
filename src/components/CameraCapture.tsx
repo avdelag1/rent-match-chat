@@ -113,7 +113,7 @@ export function CameraCapture({
 
   // Get combined preview filter CSS
   const getPreviewFilter = useCallback(() => {
-    let filters: string[] = [];
+    const filters: string[] = [];
 
     // Apply selected filter
     if (selectedFilter !== 'none') {
