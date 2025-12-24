@@ -9,7 +9,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut, User, Settings, Shield, Bell, Flame,
-  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Briefcase, Share2, ArrowLeft
+  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Briefcase, Share2, Radio
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -71,6 +71,7 @@ const ClientProfile = () => {
   const menuItems = [
     { icon: User, label: 'Edit Profile', action: () => setShowEditDialog(true), color: 'text-blue-500' },
     { icon: Share2, label: 'Share Profile', action: () => setShowShareDialog(true), color: 'text-purple-500' },
+    { icon: Radio, label: 'Radio', action: () => navigate('/radio'), color: 'text-cyan-500' },
     { icon: Settings, label: 'Preferences', action: () => navigate('/client/settings'), color: 'text-gray-500' },
     { icon: Crown, label: 'Subscription', action: () => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Shield, label: 'Security', action: () => navigate('/client/security'), color: 'text-green-500' },
