@@ -281,7 +281,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         onClose={() => setShowFilters(false)}
         onApplyFilters={handleApplyFilters}
         userRole={userRole}
-        currentFilters={appliedFilters}
+        currentFilters={appliedFilters ?? {}}
       />
 
       {/* Settings/More Menu Bottom Sheet */}
@@ -414,7 +414,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               setShowOnboarding(false);
               toast({
                 title: 'Profile Complete!',
-                description: 'Welcome to Swipes. Start exploring!',
+                description: 'Welcome to SWIPESS. Start exploring!',
               });
           }}
         />

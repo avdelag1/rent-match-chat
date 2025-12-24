@@ -1,36 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import type { Database, Json } from '@/integrations/supabase/types';
 
-export interface SavedFilter {
-  id?: string;
-  user_id?: string;
+export type SavedFilterRow = Database['public']['Tables']['saved_filters']['Row'];
+
+export interface SavedFilterInput {
   name: string;
   category: string;
   mode: string;
-  filters: Record<string, unknown>;
-  is_active?: boolean;
-  listing_types?: string[];
-  client_types?: string[];
-  min_budget?: number;
-  max_budget?: number;
-  min_age?: number;
-  max_age?: number;
-  lifestyle_tags?: string[];
-  preferred_occupations?: string[];
-  allows_pets?: boolean;
-  allows_smoking?: boolean;
-  allows_parties?: boolean;
-  requires_employment_proof?: boolean;
-  requires_references?: boolean;
-  min_monthly_income?: number;
-  created_at?: string;
-  updated_at?: string;
+  filters: Json;
+  is_active?: boolean | null;
+  listing_types?: string[] | null;
+  client_types?: string[] | null;
+  min_budget?: number | null;
+  max_budget?: number | null;
+  min_age?: number | null;
+  max_age?: number | null;
+  lifestyle_tags?: string[] | null;
+  preferred_occupations?: string[] | null;
+  allows_pets?: boolean | null;
+  allows_smoking?: boolean | null;
+  allows_parties?: boolean | null;
+  requires_employment_proof?: boolean | null;
+  requires_references?: boolean | null;
+  min_monthly_income?: number | null;
 }
 
 export function useSavedFilters() {
-  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
-  const [activeFilter, setActiveFilter] = useState<SavedFilter | null>(null);
+  const [savedFilters, setSavedFilters] = useState<SavedFilterRow[]>([]);
+  const [activeFilter, setActiveFilter] = useState<SavedFilterRow | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -52,15 +51,15 @@ export function useSavedFilters() {
 
       if (data) {
         setSavedFilters(data);
-        const active = data.find(f => f.is_active);
+        const active = data.find(f => Boolean(f.is_active));
         setActiveFilter(active || null);
       }
     } catch (error) {
       console.error('Error loading saved filters:', error);
       toast({
-        title: "Error",
-        description: "Failed to load saved filters",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load saved filters',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -71,14 +70,14 @@ export function useSavedFilters() {
     loadSavedFilters();
   }, [loadSavedFilters]);
 
-  const saveFilter = async (filter: SavedFilter) => {
+  const saveFilter = async (filter: SavedFilterInput) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
-          title: "Error",
-          description: "You must be logged in to save filters",
-          variant: "destructive"
+          title: 'Error',
+          description: 'You must be logged in to save filters',
+          variant: 'destructive',
         });
         return;
       }
@@ -113,47 +112,49 @@ export function useSavedFilters() {
             requires_employment_proof: filter.requires_employment_proof,
             requires_references: filter.requires_references,
             min_monthly_income: filter.min_monthly_income,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id);
 
         if (error) throw error;
-        
+
         toast({
-          title: "Filter Updated",
+          title: 'Filter Updated',
           description: `"${filter.name}" has been updated successfully`,
         });
       } else {
         // Create new filter
         const { error } = await supabase
           .from('saved_filters')
-          .insert({
-            user_id: user.id,
-            name: filter.name,
-            category: filter.category,
-            mode: filter.mode,
-            filters: filter.filters,
-            listing_types: filter.listing_types,
-            client_types: filter.client_types,
-            min_budget: filter.min_budget,
-            max_budget: filter.max_budget,
-            min_age: filter.min_age,
-            max_age: filter.max_age,
-            lifestyle_tags: filter.lifestyle_tags,
-            preferred_occupations: filter.preferred_occupations,
-            allows_pets: filter.allows_pets,
-            allows_smoking: filter.allows_smoking,
-            allows_parties: filter.allows_parties,
-            requires_employment_proof: filter.requires_employment_proof,
-            requires_references: filter.requires_references,
-            min_monthly_income: filter.min_monthly_income,
-            is_active: false
-          });
+          .insert([
+            {
+              user_id: user.id,
+              name: filter.name,
+              category: filter.category,
+              mode: filter.mode,
+              filters: filter.filters,
+              listing_types: filter.listing_types,
+              client_types: filter.client_types,
+              min_budget: filter.min_budget,
+              max_budget: filter.max_budget,
+              min_age: filter.min_age,
+              max_age: filter.max_age,
+              lifestyle_tags: filter.lifestyle_tags,
+              preferred_occupations: filter.preferred_occupations,
+              allows_pets: filter.allows_pets,
+              allows_smoking: filter.allows_smoking,
+              allows_parties: filter.allows_parties,
+              requires_employment_proof: filter.requires_employment_proof,
+              requires_references: filter.requires_references,
+              min_monthly_income: filter.min_monthly_income,
+              is_active: false,
+            },
+          ]);
 
         if (error) throw error;
-        
+
         toast({
-          title: "Filter Saved",
+          title: 'Filter Saved',
           description: `"${filter.name}" has been saved successfully`,
         });
       }
@@ -163,9 +164,9 @@ export function useSavedFilters() {
       const err = error as Error;
       console.error('Error saving filter:', err);
       toast({
-        title: "Error",
-        description: err.message || "Failed to save filter",
-        variant: "destructive"
+        title: 'Error',
+        description: err.message || 'Failed to save filter',
+        variant: 'destructive',
       });
     }
   };
@@ -180,17 +181,17 @@ export function useSavedFilters() {
       if (error) throw error;
 
       toast({
-        title: "Filter Deleted",
-        description: "Your saved filter has been deleted",
+        title: 'Filter Deleted',
+        description: 'Your saved filter has been deleted',
       });
 
       await loadSavedFilters();
     } catch (error) {
       console.error('Error deleting filter:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete filter",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to delete filter',
+        variant: 'destructive',
       });
     }
   };
@@ -237,17 +238,17 @@ export function useSavedFilters() {
       }
 
       toast({
-        title: "Filter Activated",
-        description: "This filter is now active for client discovery",
+        title: 'Filter Activated',
+        description: 'This filter is now active for client discovery',
       });
 
       await loadSavedFilters();
     } catch (error) {
       console.error('Error setting active filter:', error);
       toast({
-        title: "Error",
-        description: "Failed to activate filter",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to activate filter',
+        variant: 'destructive',
       });
     }
   };
@@ -268,6 +269,6 @@ export function useSavedFilters() {
     deleteFilter,
     setAsActive,
     applyFilter,
-    loadSavedFilters
+    loadSavedFilters,
   };
 }
