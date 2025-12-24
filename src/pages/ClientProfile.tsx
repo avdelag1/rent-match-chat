@@ -9,7 +9,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut, User, Settings, Shield, Bell, Flame,
-  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Briefcase, Share2
+  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Briefcase, Share2, ArrowLeft
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -86,6 +86,17 @@ const ClientProfile = () => {
         transition={{ duration: 0.2 }}
       >
         <div className="max-w-lg mx-auto space-y-4">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="mb-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+
           {/* Profile Header */}
           <motion.div
             className="flex items-center gap-4"
@@ -94,7 +105,7 @@ const ClientProfile = () => {
             transition={fastSpring}
           >
             <div className="relative">
-              <div 
+              <div
                 className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden cursor-pointer"
                 onClick={() => profile?.profile_images?.length ? handlePhotoClick(0) : setShowEditDialog(true)}
               >

@@ -7,9 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
-import { 
+import {
   User, Mail, Calendar, Building2, Eye, MessageCircle,
-  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera
+  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera, ArrowLeft
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -63,6 +63,17 @@ const OwnerProfile = () => {
         transition={{ duration: 0.2 }}
       >
         <div className="max-w-lg mx-auto space-y-4">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="mb-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+
           {/* Profile Header */}
           <motion.div
             className="flex items-center gap-4"
