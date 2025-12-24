@@ -480,8 +480,8 @@ export function LikedClients() {
                   <div className="absolute top-3 right-3 flex gap-2">
                     <Button
                       size="sm"
-                      onClick={() => navigate(`/client-profile/${client.user_id}`)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white shadow-lg"
+                      onClick={() => navigate(`/owner/view-client/${client.user_id}`)}
+                      className="bg-primary/90 hover:bg-primary text-white shadow-lg"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -498,32 +498,32 @@ export function LikedClients() {
                         <Button
                           size="sm"
                           variant="secondary"
-                          className="shadow-lg bg-white/90 hover:bg-white"
+                          className="shadow-lg bg-slate-700/90 hover:bg-slate-600 text-white"
                         >
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuContent align="end" className="w-48 bg-slate-800 border-slate-700">
                         <DropdownMenuItem
                           onClick={() => handleRemoveLike(client.user_id)}
-                          className="text-orange-600 focus:text-orange-600"
+                          className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white cursor-pointer"
                         >
-                          <Trash2 className="w-4 h-4 mr-2" />
+                          <Trash2 className="w-4 h-4 mr-2 text-orange-400" />
                           Remove from Liked
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator className="bg-slate-700" />
                         <DropdownMenuItem
                           onClick={() => handleOpenReport(client)}
-                          className="text-yellow-600 focus:text-yellow-600"
+                          className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white cursor-pointer"
                         >
-                          <Flag className="w-4 h-4 mr-2" />
+                          <Flag className="w-4 h-4 mr-2 text-yellow-400" />
                           Report Client
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleOpenBlock(client)}
-                          className="text-red-600 focus:text-red-600"
+                          className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white cursor-pointer"
                         >
-                          <Ban className="w-4 h-4 mr-2" />
+                          <Ban className="w-4 h-4 mr-2 text-red-400" />
                           Block Client
                         </DropdownMenuItem>
                       </DropdownMenuContent>
