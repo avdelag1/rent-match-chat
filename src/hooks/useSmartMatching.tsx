@@ -238,13 +238,14 @@ export interface ListingFilters {
 }
 
 export function useSmartListingMatching(
-  excludeSwipedIds: string[] = [], 
+  excludeSwipedIds: string[] = [],
   filters?: ListingFilters,
   page: number = 0,
-  pageSize: number = 10
+  pageSize: number = 10,
+  isRefreshMode: boolean = false // When true, show disliked items within cooldown
 ) {
   return useQuery({
-    queryKey: ['smart-listings', filters, page], // Include page in query key
+    queryKey: ['smart-listings', filters, page, isRefreshMode], // Include refresh mode in query key
     queryFn: async () => {
       try {
         // Get current user's preferences
@@ -257,14 +258,59 @@ export function useSmartListingMatching(
           .eq('user_id', user.user.id)
           .maybeSingle();
 
-        // Fetch ALL swiped listings permanently - only show new listings user hasn't seen
-        const { data: swipedListings, error: swipesError } = await supabase
+        // Fetch liked items (right swipes) - these are NEVER shown again
+        const { data: likedListings, error: likesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id);
+          .eq('user_id', user.user.id)
+          .eq('direction', 'right');
 
-        // If likes table has permission issues, just continue without filtering
-        const swipedListingIds = new Set(!swipesError ? (swipedListings?.map(like => like.target_id) || []) : []);
+        const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
+
+        // Fetch dislikes with cooldown status
+        const { data: dislikes, error: dislikesError } = await supabase
+          .from('dislikes')
+          .select('target_id, cooldown_until')
+          .eq('user_id', user.user.id)
+          .eq('target_type', 'listing');
+
+        // Categorize dislikes
+        const permanentlyHiddenIds = new Set<string>();
+        const refreshableDislikeIds = new Set<string>();
+
+        if (!dislikesError && dislikes) {
+          const now = new Date();
+          for (const dislike of dislikes) {
+            const cooldownUntil = new Date(dislike.cooldown_until);
+            if (cooldownUntil < now) {
+              // Cooldown passed - permanently hidden
+              permanentlyHiddenIds.add(dislike.target_id);
+            } else {
+              // Still within cooldown - can be shown on refresh
+              refreshableDislikeIds.add(dislike.target_id);
+            }
+          }
+        }
+
+        // Build set of IDs to exclude based on mode
+        const swipedListingIds = new Set<string>();
+
+        // Always exclude liked items
+        for (const id of likedIds) {
+          swipedListingIds.add(id);
+        }
+
+        // Always exclude permanently hidden items
+        for (const id of permanentlyHiddenIds) {
+          swipedListingIds.add(id);
+        }
+
+        // In normal mode (not refresh), also exclude refreshable dislikes
+        if (!isRefreshMode) {
+          for (const id of refreshableDislikeIds) {
+            swipedListingIds.add(id);
+          }
+        }
 
         // Build query with filters and subscription data for premium prioritization
         let query = supabase
@@ -756,11 +802,11 @@ export function useSmartClientMatching(
   category?: 'property' | 'moto' | 'bicycle' | 'yacht',
   page: number = 0,
   pageSize: number = 10,
-  includeRecentLikes: boolean = false,
+  isRefreshMode: boolean = false, // When true, show disliked profiles within cooldown
   filters?: ClientFilters
 ) {
   return useQuery<MatchedClientProfile[]>({
-    queryKey: ['smart-clients', category, page, includeRecentLikes, filters],
+    queryKey: ['smart-clients', category, page, isRefreshMode, filters],
     queryFn: async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
@@ -768,37 +814,64 @@ export function useSmartClientMatching(
           return [] as MatchedClientProfile[];
         }
 
-        // Fetch ALL swiped profiles permanently - only show new profiles user hasn't seen
-        const swipedProfileIds = new Set<string>();
-
-        const { data: swipedProfiles, error: swipesError } = await supabase
+        // Fetch liked profiles (right swipes) - these are NEVER shown again
+        const { data: likedProfiles, error: likesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id);
+          .eq('user_id', user.user.id)
+          .eq('direction', 'right');
 
-        if (!swipesError && swipedProfiles) {
-          for (const row of swipedProfiles) {
+        const likedIds = new Set<string>();
+        if (!likesError && likedProfiles) {
+          for (const row of likedProfiles) {
             if (row.target_id) {
-              swipedProfileIds.add(row.target_id);
+              likedIds.add(row.target_id);
             }
           }
         }
 
-        // Also check profile_views for any passes permanently
-        if (!includeRecentLikes) {
-          const { data: viewedProfiles, error: viewsError } = await supabase
-            .from('profile_views')
-            .select('viewed_profile_id')
-            .eq('user_id', user.user.id)
-            .eq('view_type', 'profile')
-            .in('action', ['like', 'pass']);
+        // Fetch dislikes with cooldown status
+        const { data: dislikes, error: dislikesError } = await supabase
+          .from('dislikes')
+          .select('target_id, cooldown_until')
+          .eq('user_id', user.user.id)
+          .eq('target_type', 'profile');
 
-          if (!viewsError && viewedProfiles) {
-            for (const row of viewedProfiles as any[]) {
-              if (row.viewed_profile_id) {
-                swipedProfileIds.add(row.viewed_profile_id as string);
-              }
+        // Categorize dislikes
+        const permanentlyHiddenIds = new Set<string>();
+        const refreshableDislikeIds = new Set<string>();
+
+        if (!dislikesError && dislikes) {
+          const now = new Date();
+          for (const dislike of dislikes) {
+            const cooldownUntil = new Date(dislike.cooldown_until);
+            if (cooldownUntil < now) {
+              // Cooldown passed - permanently hidden
+              permanentlyHiddenIds.add(dislike.target_id);
+            } else {
+              // Still within cooldown - can be shown on refresh
+              refreshableDislikeIds.add(dislike.target_id);
             }
+          }
+        }
+
+        // Build set of IDs to exclude based on mode
+        const swipedProfileIds = new Set<string>();
+
+        // Always exclude liked profiles
+        for (const id of likedIds) {
+          swipedProfileIds.add(id);
+        }
+
+        // Always exclude permanently hidden profiles
+        for (const id of permanentlyHiddenIds) {
+          swipedProfileIds.add(id);
+        }
+
+        // In normal mode (not refresh), also exclude refreshable dislikes
+        if (!isRefreshMode) {
+          for (const id of refreshableDislikeIds) {
+            swipedProfileIds.add(id);
           }
         }
 

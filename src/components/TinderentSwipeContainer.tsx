@@ -40,19 +40,21 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
   const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set()); // Track swiped listings
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRefreshMode, setIsRefreshMode] = useState(false); // When true, show disliked listings within cooldown
 
   // Fetch guards to prevent infinite loops
   const isFetchingMore = useRef(false);
   const lastFetchedPage = useRef(-1);
 
   // Get listings with filters applied and pagination
+  // isRefreshMode = true shows disliked listings within 3-day cooldown, but never liked listings
   const {
     data: smartListings = [],
     isLoading: smartLoading,
     error: smartError,
     isRefetching: smartRefetching,
     refetch: refetchSmart
-  } = useSmartListingMatching([], filters, page, 10);
+  } = useSmartListingMatching([], filters, page, 10, isRefreshMode);
   
   const { 
     data: regularListings = [], 
@@ -146,19 +148,24 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setIsRefreshMode(true); // Enable refresh mode to show disliked listings within cooldown
     triggerHaptic('medium');
 
-    // Reset all state for fresh start
+    // Reset state for refresh
+    // NOTE: isRefreshMode = true will:
+    // - Show disliked listings still within 3-day cooldown (random order)
+    // - NEVER show liked listings (they stay saved forever)
+    // - NEVER show listings past 3-day cooldown (permanently hidden)
     setCurrentIndex(0);
-    setSwipedIds(new Set()); // Clear swiped IDs to show fresh listings
+    setSwipedIds(new Set()); // Clear session swiped IDs
     setAllListings([]);
     setPage(0);
 
     try {
       await refetch();
       toast({
-        title: 'Fresh Properties Loaded',
-        description: 'Swipe to find your perfect match!',
+        title: 'Properties Refreshed',
+        description: 'Showing properties you passed on. Liked ones stay saved!',
       });
     } catch (error) {
       toast({

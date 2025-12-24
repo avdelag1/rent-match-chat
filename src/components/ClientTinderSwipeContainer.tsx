@@ -57,6 +57,7 @@ export function ClientTinderSwipeContainer({
   }>({ isOpen: false });
 
   // Fetch profiles with pagination
+  // isRefreshMode = true shows disliked profiles within 3-day cooldown, but never liked profiles
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, error: internalError } = useSmartClientMatching(undefined, page, 10, includeRecentLikes);
 
   // Filter out swiped profiles
@@ -177,16 +178,20 @@ export function ClientTinderSwipeContainer({
     setIsRefreshing(true);
     triggerHaptic('medium');
 
-    // Reset all state for fresh start
-    setIncludeRecentLikes(true); // Manual refresh should bring back even recently liked profiles
+    // Reset state for refresh
+    // NOTE: includeRecentLikes (now isRefreshMode) = true will:
+    // - Show disliked profiles still within 3-day cooldown (random order)
+    // - NEVER show liked profiles (they stay hidden forever)
+    // - NEVER show profiles past 3-day cooldown (permanently hidden)
+    setIncludeRecentLikes(true);
     setCurrentIndex(0);
-    setSwipedIds([]); // Clear swiped IDs to show fresh profiles
+    setSwipedIds([]); // Clear session swiped IDs
     setPage(0);
     setAllProfiles([]);
 
     try {
       await refetch();
-      toast.success('Fresh Profiles Loaded', { description: 'Swipe to find your perfect client!' });
+      toast.success('Profiles Refreshed', { description: 'Showing profiles you passed on. Liked profiles stay matched!' });
     } catch (error) {
       toast.error('Refresh Failed', { description: 'Please try again.' });
     } finally {
