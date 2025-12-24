@@ -19,6 +19,7 @@ import { RadioPlayer } from '@/components/radio/RadioPlayer';
 import { RadioMiniPlayer } from '@/components/radio/RadioMiniPlayer';
 import { RadioSleepTimer } from '@/components/radio/RadioSleepTimer';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 type ViewMode = 'browse' | 'favorites' | 'recent' | 'search' | 'settings';
 
@@ -26,6 +27,7 @@ const RadioPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('browse');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const navigate = useNavigate();
   const {
     currentStation,
     isPlayerExpanded,
@@ -242,6 +244,14 @@ const RadioPage: React.FC = () => {
             {/* Title Row */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate(-1)}
+                  className="shrink-0"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
                   <Radio className="w-5 h-5 text-white" />
                 </div>
