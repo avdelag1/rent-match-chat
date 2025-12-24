@@ -19,32 +19,38 @@ export default function OwnerViewClientProfile() {
   const [isCreatingConversation, setIsCreatingConversation] = useReactState(false);
   const startConversation = useStartConversation();
 
-  const { data: client, isLoading } = useQuery({
+  const { data: client, isLoading, error } = useQuery({
     queryKey: ['client-profile', clientId],
     queryFn: async () => {
-      // First check if this user is a client (not admin or owner)
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', clientId)
-        .maybeSingle();
+      if (!clientId) throw new Error('No client ID provided');
 
-      if (roleError) throw roleError;
-
-      // Only allow viewing client profiles
-      if (!roleData || roleData.role !== 'client') {
-        throw new Error('Profile not found or not accessible');
-      }
-
-      // Fetch from profiles table
-      const { data: profileData, error } = await supabase
+      // Fetch profile first - this is the main data source
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', clientId)
         .maybeSingle();
 
-      if (error) throw error;
-      if (!profileData) throw new Error('Profile not found');
+      if (profileError) {
+        console.error('[OwnerViewClientProfile] Profile fetch error:', profileError);
+        throw profileError;
+      }
+
+      if (!profileData) {
+        throw new Error('Profile not found');
+      }
+
+      // Check role - but be lenient (allow viewing if user is NOT an owner)
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', clientId)
+        .maybeSingle();
+
+      // Only block if explicitly an owner (allow null/undefined roles or client role)
+      if (roleData?.role === 'owner') {
+        throw new Error('Cannot view owner profiles from this page');
+      }
 
       // TRY to get updated photos from client_profiles table (newer source)
       const { data: clientProfile } = await supabase
@@ -58,8 +64,14 @@ export default function OwnerViewClientProfile() {
         profileData.images = clientProfile.profile_images;
       }
 
+      // Merge name/age/bio from client_profiles if available
+      if (clientProfile?.name) profileData.full_name = clientProfile.name;
+      if (clientProfile?.age) profileData.age = clientProfile.age;
+      if (clientProfile?.bio) profileData.bio = clientProfile.bio;
+
       return profileData;
     },
+    enabled: !!clientId,
   });
 
   // Fetch client's filter preferences

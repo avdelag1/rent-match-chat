@@ -481,14 +481,14 @@ export function LikedClients() {
                     <Button
                       size="sm"
                       onClick={() => navigate(`/owner/view-client/${client.user_id}`)}
-                      className="bg-primary/90 hover:bg-primary text-white shadow-lg"
+                      className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg border-0"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => handleMessage(client)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg border-0"
                       disabled={isCreatingConversation}
                     >
                       <MessageCircle className="w-4 h-4" />
@@ -497,34 +497,36 @@ export function LikedClients() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           size="sm"
-                          variant="secondary"
-                          className="shadow-lg bg-slate-700/90 hover:bg-slate-600 text-white"
+                          className="bg-gray-800 hover:bg-gray-700 text-white shadow-lg border-0"
                         >
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 bg-slate-800 border-slate-700">
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-52 bg-gray-900 border border-gray-700 shadow-xl rounded-xl p-1"
+                      >
                         <DropdownMenuItem
                           onClick={() => handleRemoveLike(client.user_id)}
-                          className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white cursor-pointer"
+                          className="flex items-center gap-3 px-3 py-2.5 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                         >
-                          <Trash2 className="w-4 h-4 mr-2 text-orange-400" />
-                          Remove from Liked
+                          <Trash2 className="w-4 h-4 text-orange-500" />
+                          <span className="font-medium">Remove from Liked</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-slate-700" />
+                        <DropdownMenuSeparator className="my-1 bg-gray-700" />
                         <DropdownMenuItem
                           onClick={() => handleOpenReport(client)}
-                          className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white cursor-pointer"
+                          className="flex items-center gap-3 px-3 py-2.5 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                         >
-                          <Flag className="w-4 h-4 mr-2 text-yellow-400" />
-                          Report Client
+                          <Flag className="w-4 h-4 text-yellow-500" />
+                          <span className="font-medium">Report Client</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleOpenBlock(client)}
-                          className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white cursor-pointer"
+                          className="flex items-center gap-3 px-3 py-2.5 text-white hover:bg-gray-800 focus:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                         >
-                          <Ban className="w-4 h-4 mr-2 text-red-400" />
-                          Block Client
+                          <Ban className="w-4 h-4 text-red-500" />
+                          <span className="font-medium">Block Client</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
