@@ -12,6 +12,23 @@ import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferenc
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
 
+// Predefined budget ranges for bicycles (rent)
+const BICYCLE_RENT_BUDGET_RANGES = [
+  { value: '10-25', label: '$10 - $25/day', min: 10, max: 25 },
+  { value: '25-50', label: '$25 - $50/day', min: 25, max: 50 },
+  { value: '50-100', label: '$50 - $100/day', min: 50, max: 100 },
+  { value: '100+', label: '$100+/day', min: 100, max: 500 },
+];
+
+// Predefined budget ranges for bicycles (buy)
+const BICYCLE_BUY_BUDGET_RANGES = [
+  { value: '200-500', label: '$200 - $500', min: 200, max: 500 },
+  { value: '500-1000', label: '$500 - $1K', min: 500, max: 1000 },
+  { value: '1000-2500', label: '$1K - $2.5K', min: 1000, max: 2500 },
+  { value: '2500-5000', label: '$2.5K - $5K', min: 2500, max: 5000 },
+  { value: '5000+', label: '$5K+', min: 5000, max: 50000 },
+];
+
 interface BicycleClientFiltersProps {
   onApply: (filters: any) => void;
   initialFilters?: any;
@@ -20,7 +37,7 @@ interface BicycleClientFiltersProps {
 
 export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount }: BicycleClientFiltersProps) {
   const savePreferencesMutation = useSaveClientFilterPreferences();
-  
+
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [bicycleTypes, setBicycleTypes] = useState<string[]>(initialFilters.bicycle_types || []);
   const [frameSize, setFrameSize] = useState(initialFilters.frame_size || 'any');
@@ -28,8 +45,8 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
   const [accessories, setAccessories] = useState<string[]>(initialFilters.accessories_needed || []);
   const [fitnessLevel, setFitnessLevel] = useState(initialFilters.fitness_level || 'any');
 
-  // New filter options
-  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 5000]);
+  // Budget with predefined ranges
+  const [selectedBudgetRange, setSelectedBudgetRange] = useState<string>(initialFilters.selected_budget_range || '');
   const [condition, setCondition] = useState(initialFilters.condition || 'any');
   const [wheelSizes, setWheelSizes] = useState<string[]>(initialFilters.wheel_sizes || []);
   const [suspensionType, setSuspensionType] = useState(initialFilters.suspension_type || 'any');
@@ -38,6 +55,18 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
   const [batteryRange, setBatteryRange] = useState(initialFilters.battery_range_min || 0);
   const [yearRange, setYearRange] = useState([initialFilters.year_min || 2010, initialFilters.year_max || new Date().getFullYear()]);
   const [isElectricOnly, setIsElectricOnly] = useState(initialFilters.is_electric_only || false);
+
+  // Get budget ranges based on interest type
+  const getBudgetRanges = () => {
+    if (interestType === 'buy') return BICYCLE_BUY_BUDGET_RANGES;
+    return BICYCLE_RENT_BUDGET_RANGES;
+  };
+
+  const getBudgetValues = () => {
+    const ranges = getBudgetRanges();
+    const selected = ranges.find(r => r.value === selectedBudgetRange);
+    return selected ? { min: selected.min, max: selected.max } : { min: undefined, max: undefined };
+  };
 
   // Client demographic filters
   const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
@@ -74,6 +103,7 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
   ];
 
   const handleApply = () => {
+    const budgetValues = getBudgetValues();
     onApply({
       category: 'bicycle',
       interest_type: interestType,
@@ -82,8 +112,9 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
       terrain_preference: terrainPreference,
       accessories_needed: accessories,
       fitness_level: fitnessLevel,
-      price_min: priceRange[0],
-      price_max: priceRange[1],
+      selected_budget_range: selectedBudgetRange,
+      price_min: budgetValues.min,
+      price_max: budgetValues.max,
       condition: condition,
       wheel_sizes: wheelSizes,
       suspension_type: suspensionType,
@@ -112,7 +143,7 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
     setTerrainPreference([]);
     setAccessories([]);
     setFitnessLevel('any');
-    setPriceRange([0, 5000]);
+    setSelectedBudgetRange('');
     setCondition('any');
     setWheelSizes([]);
     setSuspensionType('any');
@@ -133,11 +164,12 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
 
   const handleSavePreferences = async () => {
     try {
+      const budgetValues = getBudgetValues();
       await savePreferencesMutation.mutateAsync({
         interested_in_bicycles: true,
         bicycle_types: bicycleTypes.length > 0 ? bicycleTypes : null,
-        bicycle_price_min: priceRange[0],
-        bicycle_price_max: priceRange[1],
+        bicycle_price_min: budgetValues.min,
+        bicycle_price_max: budgetValues.max,
         bicycle_wheel_sizes: wheelSizes.length > 0 ? wheelSizes : null,
         bicycle_suspension_type: suspensionType !== 'any' ? [suspensionType] : null,
         bicycle_material: material !== 'any' ? [material] : null,
@@ -331,25 +363,26 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Price Range</Label>
+          <Label className="font-medium">Budget Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>${priceRange[0]}</span>
-              <span>${priceRange[1]}</span>
-            </div>
-            <Slider
-              value={priceRange}
-              onValueChange={setPriceRange}
-              min={0}
-              max={10000}
-              step={50}
-              className="w-full"
-            />
+          <div className="flex flex-wrap gap-2">
+            {getBudgetRanges().map((range) => (
+              <Badge
+                key={range.value}
+                variant={selectedBudgetRange === range.value ? "default" : "outline"}
+                className={`cursor-pointer transition-all duration-200 hover:scale-105 py-2 px-3 ${
+                  selectedBudgetRange === range.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setSelectedBudgetRange(selectedBudgetRange === range.value ? '' : range.value)}
+              >
+                {range.label}
+              </Badge>
+            ))}
           </div>
-          <p className="text-sm text-muted-foreground">Set budget range for bicycle purchase or rental</p>
         </CollapsibleContent>
       </Collapsible>
 

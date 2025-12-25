@@ -12,6 +12,24 @@ import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferenc
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
 
+// Predefined budget ranges for yachts (charter/rent)
+const YACHT_RENT_BUDGET_RANGES = [
+  { value: '1000-5000', label: '$1K - $5K/day', min: 1000, max: 5000 },
+  { value: '5000-10000', label: '$5K - $10K/day', min: 5000, max: 10000 },
+  { value: '10000-25000', label: '$10K - $25K/day', min: 10000, max: 25000 },
+  { value: '25000-50000', label: '$25K - $50K/day', min: 25000, max: 50000 },
+  { value: '50000+', label: '$50K+/day', min: 50000, max: 500000 },
+];
+
+// Predefined budget ranges for yachts (purchase)
+const YACHT_BUY_BUDGET_RANGES = [
+  { value: '100000-500000', label: '$100K - $500K', min: 100000, max: 500000 },
+  { value: '500000-1000000', label: '$500K - $1M', min: 500000, max: 1000000 },
+  { value: '1000000-5000000', label: '$1M - $5M', min: 1000000, max: 5000000 },
+  { value: '5000000-10000000', label: '$5M - $10M', min: 5000000, max: 10000000 },
+  { value: '10000000+', label: '$10M+', min: 10000000, max: 500000000 },
+];
+
 interface YachtClientFiltersProps {
   onApply: (filters: any) => void;
   initialFilters?: any;
@@ -20,7 +38,7 @@ interface YachtClientFiltersProps {
 
 export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }: YachtClientFiltersProps) {
   const savePreferencesMutation = useSaveClientFilterPreferences();
-  
+
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [yachtTypes, setYachtTypes] = useState<string[]>(initialFilters.yacht_types || []);
   const [sizeRange, setSizeRange] = useState([initialFilters.yacht_size_min || 20, initialFilters.yacht_size_max || 200]);
@@ -28,8 +46,8 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
   const [durationPreference, setDurationPreference] = useState(initialFilters.duration_preference || 'any');
   const [amenities, setAmenities] = useState<string[]>(initialFilters.amenities || []);
 
-  // New filter options
-  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 1000000]);
+  // Budget with predefined ranges
+  const [selectedBudgetRange, setSelectedBudgetRange] = useState<string>(initialFilters.selected_budget_range || '');
   const [yearRange, setYearRange] = useState([initialFilters.year_min || 1990, initialFilters.year_max || new Date().getFullYear()]);
   const [guestCapacity, setGuestCapacity] = useState(initialFilters.guest_capacity_min || 1);
   const [cabinCount, setCabinCount] = useState(initialFilters.cabin_count_min || 1);
@@ -42,6 +60,18 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
   const [waterActivities, setWaterActivities] = useState<string[]>(initialFilters.water_activities || []);
   const [navigationEquipment, setNavigationEquipment] = useState<string[]>(initialFilters.navigation_equipment || []);
   const [hasStabilizers, setHasStabilizers] = useState(initialFilters.has_stabilizers || false);
+
+  // Get budget ranges based on interest type
+  const getBudgetRanges = () => {
+    if (interestType === 'buy') return YACHT_BUY_BUDGET_RANGES;
+    return YACHT_RENT_BUDGET_RANGES;
+  };
+
+  const getBudgetValues = () => {
+    const ranges = getBudgetRanges();
+    const selected = ranges.find(r => r.value === selectedBudgetRange);
+    return selected ? { min: selected.min, max: selected.max } : { min: undefined, max: undefined };
+  };
 
   // Client demographic filters
   const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
@@ -74,6 +104,7 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
   const navigationEquipmentOptions = ['GPS', 'Radar', 'Autopilot', 'Chart Plotter', 'VHF Radio', 'AIS'];
 
   const handleApply = () => {
+    const budgetValues = getBudgetValues();
     onApply({
       category: 'yacht',
       interest_type: interestType,
@@ -83,8 +114,9 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
       crew_requirements: crewRequirements,
       duration_preference: durationPreference,
       amenities,
-      price_min: priceRange[0],
-      price_max: priceRange[1],
+      selected_budget_range: selectedBudgetRange,
+      price_min: budgetValues.min,
+      price_max: budgetValues.max,
       year_min: yearRange[0],
       year_max: yearRange[1],
       guest_capacity_min: guestCapacity,
@@ -118,7 +150,7 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
     setCrewRequirements('any');
     setDurationPreference('any');
     setAmenities([]);
-    setPriceRange([0, 1000000]);
+    setSelectedBudgetRange('');
     setYearRange([1990, new Date().getFullYear()]);
     setGuestCapacity(1);
     setCabinCount(1);
@@ -143,13 +175,14 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
 
   const handleSavePreferences = async () => {
     try {
+      const budgetValues = getBudgetValues();
       await savePreferencesMutation.mutateAsync({
         interested_in_yachts: true,
         yacht_types: yachtTypes.length > 0 ? yachtTypes : null,
         yacht_length_min: sizeRange[0],
         yacht_length_max: sizeRange[1],
-        yacht_price_min: priceRange[0],
-        yacht_price_max: priceRange[1],
+        yacht_price_min: budgetValues.min,
+        yacht_price_max: budgetValues.max,
         yacht_year_min: yearRange[0],
         yacht_guest_capacity_min: guestCapacity,
         yacht_cabin_count_min: cabinCount,
@@ -344,25 +377,26 @@ export function YachtClientFilters({ onApply, initialFilters = {}, activeCount }
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Price Range</Label>
+          <Label className="font-medium">Budget Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>${(priceRange[0] / 1000).toFixed(0)}K</span>
-              <span>${(priceRange[1] / 1000).toFixed(0)}K</span>
-            </div>
-            <Slider
-              value={priceRange}
-              onValueChange={setPriceRange}
-              min={0}
-              max={5000000}
-              step={10000}
-              className="w-full"
-            />
+          <div className="flex flex-wrap gap-2">
+            {getBudgetRanges().map((range) => (
+              <Badge
+                key={range.value}
+                variant={selectedBudgetRange === range.value ? "default" : "outline"}
+                className={`cursor-pointer transition-all duration-200 hover:scale-105 py-2 px-3 ${
+                  selectedBudgetRange === range.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setSelectedBudgetRange(selectedBudgetRange === range.value ? '' : range.value)}
+              >
+                {range.label}
+              </Badge>
+            ))}
           </div>
-          <p className="text-sm text-muted-foreground">Charter rate or purchase price range</p>
         </CollapsibleContent>
       </Collapsible>
 

@@ -8,10 +8,35 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Save, Home, DollarSign, Bed, Bath, Sparkles, PawPrint, Sofa, Building2, Eye, Compass, Car } from 'lucide-react';
+import { ChevronDown, Save, Home, DollarSign, Bed, Bath, Sparkles, PawPrint, Sofa, Building2, Eye, Compass, Car, Calendar } from 'lucide-react';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
+
+// Predefined budget ranges for rent properties (minimum 3 months, max 1 year deals)
+const RENT_BUDGET_RANGES = [
+  { value: '250-500', label: '$250 - $500/mo', min: 250, max: 500 },
+  { value: '500-1000', label: '$500 - $1,000/mo', min: 500, max: 1000 },
+  { value: '1000-3000', label: '$1,000 - $3,000/mo', min: 1000, max: 3000 },
+  { value: '3000-5000', label: '$3,000 - $5,000/mo', min: 3000, max: 5000 },
+  { value: '5000+', label: '$5,000+/mo', min: 5000, max: 50000 },
+];
+
+// Predefined budget ranges for buying properties
+const BUY_BUDGET_RANGES = [
+  { value: '50000-100000', label: '$50K - $100K', min: 50000, max: 100000 },
+  { value: '100000-250000', label: '$100K - $250K', min: 100000, max: 250000 },
+  { value: '250000-500000', label: '$250K - $500K', min: 250000, max: 500000 },
+  { value: '500000-1000000', label: '$500K - $1M', min: 500000, max: 1000000 },
+  { value: '1000000+', label: '$1M+', min: 1000000, max: 50000000 },
+];
+
+// Rental duration options
+const RENTAL_DURATION_OPTIONS = [
+  { value: '3-6', label: '3 - 6 months', minMonths: 3, maxMonths: 6 },
+  { value: '6-12', label: '6 - 12 months', minMonths: 6, maxMonths: 12 },
+  { value: '12+', label: '12+ months', minMonths: 12, maxMonths: 24 },
+];
 
 interface PropertyClientFiltersProps {
   onApply: (filters: any) => void;
@@ -21,10 +46,11 @@ interface PropertyClientFiltersProps {
 
 export function PropertyClientFilters({ onApply, initialFilters = {}, activeCount }: PropertyClientFiltersProps) {
   const savePreferencesMutation = useSaveClientFilterPreferences();
-  
+
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [propertyTypes, setPropertyTypes] = useState<string[]>(initialFilters.property_types || []);
-  const [budgetRange, setBudgetRange] = useState([initialFilters.budget_min || 500, initialFilters.budget_max || 5000]);
+  const [selectedBudgetRange, setSelectedBudgetRange] = useState<string>(initialFilters.selected_budget_range || '');
+  const [rentalDuration, setRentalDuration] = useState<string>(initialFilters.rental_duration || '');
   const [bedrooms, setBedrooms] = useState(initialFilters.bedrooms_min || 1);
   const [bathrooms, setBathrooms] = useState(initialFilters.bathrooms_min || 1);
   const [amenities, setAmenities] = useState<string[]>(initialFilters.amenities || []);
@@ -44,6 +70,25 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
   const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
+  // Get the appropriate budget ranges based on interest type
+  const getBudgetRanges = () => {
+    if (interestType === 'buy') return BUY_BUDGET_RANGES;
+    return RENT_BUDGET_RANGES;
+  };
+
+  // Get budget min/max from selected range
+  const getBudgetValues = () => {
+    const ranges = getBudgetRanges();
+    const selected = ranges.find(r => r.value === selectedBudgetRange);
+    return selected ? { min: selected.min, max: selected.max } : { min: undefined, max: undefined };
+  };
+
+  // Get rental duration values
+  const getRentalDurationValues = () => {
+    const selected = RENTAL_DURATION_OPTIONS.find(r => r.value === rentalDuration);
+    return selected ? { minMonths: selected.minMonths, maxMonths: selected.maxMonths } : { minMonths: undefined, maxMonths: undefined };
+  };
+
   const propertyTypeOptions = ['Apartment', 'House', 'Studio', 'Villa', 'Commercial', 'Land'];
   const amenityOptions = ['Pool', 'Parking', 'Gym', 'Security', 'Garden', 'Balcony'];
   const viewTypeOptions = ['Ocean', 'City', 'Garden', 'Mountain', 'Street', 'Pool'];
@@ -58,12 +103,19 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   ];
 
   const handleApply = () => {
+    const budgetValues = getBudgetValues();
+    const durationValues = getRentalDurationValues();
+
     onApply({
       category: 'property',
       interest_type: interestType,
       property_types: propertyTypes,
-      budget_min: budgetRange[0],
-      budget_max: budgetRange[1],
+      selected_budget_range: selectedBudgetRange,
+      budget_min: budgetValues.min,
+      budget_max: budgetValues.max,
+      rental_duration: rentalDuration,
+      rental_min_months: durationValues.minMonths,
+      rental_max_months: durationValues.maxMonths,
       bedrooms_min: bedrooms,
       bathrooms_min: bathrooms,
       amenities,
@@ -91,7 +143,8 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
   const handleClear = () => {
     setInterestType('both');
     setPropertyTypes([]);
-    setBudgetRange([500, 5000]);
+    setSelectedBudgetRange('');
+    setRentalDuration('');
     setBedrooms(1);
     setBathrooms(1);
     setAmenities([]);
@@ -115,10 +168,11 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
 
   const handleSavePreferences = async () => {
     try {
+      const budgetValues = getBudgetValues();
       await savePreferencesMutation.mutateAsync({
         interested_in_properties: true,
-        min_price: budgetRange[0],
-        max_price: budgetRange[1],
+        min_price: budgetValues.min,
+        max_price: budgetValues.max,
         min_bedrooms: bedrooms,
         min_bathrooms: bathrooms,
         property_types: propertyTypes.length > 0 ? propertyTypes : null,
@@ -218,21 +272,55 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
             Budget Range
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between text-sm font-medium">
-            <span className="text-primary">${budgetRange[0].toLocaleString()}</span>
-            <span className="text-primary">${budgetRange[1].toLocaleString()}/mo</span>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {getBudgetRanges().map((range) => (
+              <motion.button
+                key={range.value}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedBudgetRange(selectedBudgetRange === range.value ? '' : range.value)}
+                className={`py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  selectedBudgetRange === range.value
+                    ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                {range.label}
+              </motion.button>
+            ))}
           </div>
-          <Slider
-            value={budgetRange}
-            onValueChange={setBudgetRange}
-            min={0}
-            max={10000}
-            step={100}
-            className="w-full"
-          />
         </CardContent>
       </Card>
+
+      {/* Rental Duration Card - Only shown for rent */}
+      {(interestType === 'rent' || interestType === 'both') && (
+        <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="w-4 h-4 text-primary" />
+              Rental Duration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {RENTAL_DURATION_OPTIONS.map((option) => (
+                <motion.button
+                  key={option.value}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setRentalDuration(rentalDuration === option.value ? '' : option.value)}
+                  className={`py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    rentalDuration === option.value
+                      ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20'
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  {option.label}
+                </motion.button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Property Types Card */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">

@@ -12,6 +12,24 @@ import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferenc
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
 
+// Predefined budget ranges for vehicles (rent)
+const VEHICLE_RENT_BUDGET_RANGES = [
+  { value: '30-75', label: '$30 - $75/day', min: 30, max: 75 },
+  { value: '75-150', label: '$75 - $150/day', min: 75, max: 150 },
+  { value: '150-300', label: '$150 - $300/day', min: 150, max: 300 },
+  { value: '300-500', label: '$300 - $500/day', min: 300, max: 500 },
+  { value: '500+', label: '$500+/day', min: 500, max: 5000 },
+];
+
+// Predefined budget ranges for vehicles (buy)
+const VEHICLE_BUY_BUDGET_RANGES = [
+  { value: '5000-15000', label: '$5K - $15K', min: 5000, max: 15000 },
+  { value: '15000-30000', label: '$15K - $30K', min: 15000, max: 30000 },
+  { value: '30000-50000', label: '$30K - $50K', min: 30000, max: 50000 },
+  { value: '50000-100000', label: '$50K - $100K', min: 50000, max: 100000 },
+  { value: '100000+', label: '$100K+', min: 100000, max: 1000000 },
+];
+
 interface VehicleClientFiltersProps {
   onApply: (filters: any) => void;
   initialFilters?: any;
@@ -26,10 +44,22 @@ export function VehicleClientFilters({ onApply, initialFilters = {}, activeCount
   const [bodyTypes, setBodyTypes] = useState<string[]>(initialFilters.body_types || []);
   const [driveTypes, setDriveTypes] = useState<string[]>(initialFilters.drive_types || []);
 
-  // Price and basic filters
-  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 500000]);
+  // Budget with predefined ranges
+  const [selectedBudgetRange, setSelectedBudgetRange] = useState<string>(initialFilters.selected_budget_range || '');
   const [yearRange, setYearRange] = useState([initialFilters.year_min || 2010, initialFilters.year_max || new Date().getFullYear()]);
   const [mileageRange, setMileageRange] = useState([initialFilters.mileage_min || 0, initialFilters.mileage_max || 200000]);
+
+  // Get budget ranges based on interest type
+  const getBudgetRanges = () => {
+    if (interestType === 'buy') return VEHICLE_BUY_BUDGET_RANGES;
+    return VEHICLE_RENT_BUDGET_RANGES;
+  };
+
+  const getBudgetValues = () => {
+    const ranges = getBudgetRanges();
+    const selected = ranges.find(r => r.value === selectedBudgetRange);
+    return selected ? { min: selected.min, max: selected.max } : { min: undefined, max: undefined };
+  };
 
   // Engine and fuel
   const [transmission, setTransmission] = useState(initialFilters.transmission || 'any');
@@ -135,14 +165,16 @@ export function VehicleClientFilters({ onApply, initialFilters = {}, activeCount
   };
 
   const handleApply = () => {
+    const budgetValues = getBudgetValues();
     onApply({
       category: 'vehicle',
       interest_type: interestType,
       vehicle_types: vehicleTypes,
       body_types: bodyTypes,
       drive_types: driveTypes,
-      price_min: priceRange[0],
-      price_max: priceRange[1],
+      selected_budget_range: selectedBudgetRange,
+      price_min: budgetValues.min,
+      price_max: budgetValues.max,
       year_min: yearRange[0],
       year_max: yearRange[1],
       mileage_min: mileageRange[0],
@@ -171,7 +203,7 @@ export function VehicleClientFilters({ onApply, initialFilters = {}, activeCount
     setVehicleTypes([]);
     setBodyTypes([]);
     setDriveTypes([]);
-    setPriceRange([0, 500000]);
+    setSelectedBudgetRange('');
     setYearRange([2010, new Date().getFullYear()]);
     setMileageRange([0, 200000]);
     setTransmission('any');
@@ -194,14 +226,15 @@ export function VehicleClientFilters({ onApply, initialFilters = {}, activeCount
 
   const handleSavePreferences = async () => {
     try {
+      const budgetValues = getBudgetValues();
       await savePreferencesMutation.mutateAsync({
         vehicle_types: vehicleTypes.length > 0 ? vehicleTypes : null,
         vehicle_body_types: bodyTypes.length > 0 ? bodyTypes : null,
         vehicle_drive_types: driveTypes.length > 0 ? driveTypes : null,
         vehicle_year_min: yearRange[0],
         vehicle_year_max: yearRange[1],
-        vehicle_price_min: priceRange[0],
-        vehicle_price_max: priceRange[1],
+        vehicle_price_min: budgetValues.min,
+        vehicle_price_max: budgetValues.max,
         vehicle_mileage_max: mileageRange[1],
         vehicle_transmission: transmission !== 'any' ? [transmission] : null,
         vehicle_fuel_types: fuelTypes.length > 0 ? fuelTypes : null,
@@ -296,23 +329,25 @@ export function VehicleClientFilters({ onApply, initialFilters = {}, activeCount
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Price Range (MXN)</Label>
+          <Label className="font-medium">Budget Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2 pt-2">
-          <div className="px-2">
-            <div className="flex justify-between text-sm mb-2">
-              <span>${priceRange[0].toLocaleString()}</span>
-              <span>${priceRange[1].toLocaleString()}</span>
-            </div>
-            <Slider
-              min={0}
-              max={500000}
-              step={5000}
-              value={priceRange}
-              onValueChange={setPriceRange}
-              className="w-full"
-            />
+          <div className="flex flex-wrap gap-2">
+            {getBudgetRanges().map((range) => (
+              <Badge
+                key={range.value}
+                variant={selectedBudgetRange === range.value ? "default" : "outline"}
+                className={`cursor-pointer transition-all duration-200 hover:scale-105 py-2 px-3 ${
+                  selectedBudgetRange === range.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setSelectedBudgetRange(selectedBudgetRange === range.value ? '' : range.value)}
+              >
+                {range.label}
+              </Badge>
+            ))}
           </div>
         </CollapsibleContent>
       </Collapsible>
