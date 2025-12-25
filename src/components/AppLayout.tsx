@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
 import { SkipToMainContent, useFocusManagement } from './AccessibilityHelpers';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useOfflineDetection } from '@/hooks/useOfflineDetection';
@@ -96,7 +96,8 @@ function getTransitionVariant(fromPath: string, toPath: string) {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
-  const [prevLocation, setPrevLocation] = useState(location.pathname);
+  const prevLocationRef = useRef(location.pathname);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Initialize app features
   useKeyboardShortcuts();
@@ -115,24 +116,37 @@ export function AppLayout({ children }: AppLayoutProps) {
   });
 
   // Get dynamic transition variant based on navigation direction
-  const transitionVariant = useMemo(
-    () => getTransitionVariant(prevLocation, location.pathname),
-    [prevLocation, location.pathname]
-  );
-
-  // Update previous location after transition
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setPrevLocation(location.pathname);
-    }, 50);
-    return () => clearTimeout(timer);
+  // Use ref to get prev location synchronously before it updates
+  const transitionVariant = useMemo(() => {
+    const variant = getTransitionVariant(prevLocationRef.current, location.pathname);
+    return variant;
   }, [location.pathname]);
+
+  // Update previous location synchronously using useLayoutEffect
+  // This ensures the ref is updated before the next render calculation
+  useLayoutEffect(() => {
+    // Mark as transitioning to prevent glitches
+    setIsTransitioning(true);
+
+    // Update ref after a brief delay to allow transition calculation
+    const timer = requestAnimationFrame(() => {
+      prevLocationRef.current = location.pathname;
+      // End transition after animation settles
+      setTimeout(() => setIsTransitioning(false), 300);
+    });
+
+    return () => cancelAnimationFrame(timer);
+  }, [location.pathname]);
+
+  // Combine swipe opacity with transition - only apply swipe during active swipe
+  // This prevents flash when swipe completes and page transitions
+  const combinedOpacity = isTransitioning ? 1 : swipeOpacity;
 
   return (
     <div className="min-h-screen w-full bg-background">
       <SkipToMainContent />
       <main id="main-content" tabIndex={-1} className="outline-none w-full min-h-screen">
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={location.pathname}
             initial={transitionVariant.initial}
@@ -141,9 +155,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             transition={springConfigs.ultraSmooth}
             className="w-full min-h-screen overflow-x-hidden"
             style={{
-              x: swipeX,
-              opacity: swipeOpacity,
+              // Only apply swipe x when not transitioning to prevent conflicts
+              x: isTransitioning ? 0 : swipeX,
+              opacity: combinedOpacity,
             }}
+            // Optimize for GPU-accelerated animations
+            layout={false}
           >
             {children}
           </motion.div>
