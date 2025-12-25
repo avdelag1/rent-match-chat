@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Radio,
   Play,
@@ -16,30 +16,37 @@ import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-// Get saved position from localStorage
-const getSavedPosition = () => {
+const BUBBLE_SIZE = 64;
+const MARGIN = 16;
+
+// Get saved position from localStorage (absolute left/top values)
+const getSavedPosition = (): { left: number; top: number } => {
   try {
-    const saved = localStorage.getItem('radioBubblePosition');
+    const saved = localStorage.getItem('radioBubblePositionV2');
     if (saved) {
       const pos = JSON.parse(saved);
       // Validate position is within viewport
-      const maxX = window.innerWidth - 70;
-      const maxY = window.innerHeight - 150;
+      const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
+      const maxTop = window.innerHeight - BUBBLE_SIZE - MARGIN;
       return {
-        x: Math.min(Math.max(pos.x || 0, 0), maxX),
-        y: Math.min(Math.max(pos.y || 0, 0), maxY),
+        left: Math.min(Math.max(pos.left ?? maxLeft, MARGIN), maxLeft),
+        top: Math.min(Math.max(pos.top ?? 100, MARGIN + 60), maxTop),
       };
     }
   } catch (e) {
     // Ignore errors
   }
-  return { x: 0, y: 0 };
+  // Default position: top-right corner
+  return {
+    left: window.innerWidth - BUBBLE_SIZE - MARGIN,
+    top: 100,
+  };
 };
 
 // Save position to localStorage
-const savePosition = (x: number, y: number) => {
+const savePosition = (left: number, top: number) => {
   try {
-    localStorage.setItem('radioBubblePosition', JSON.stringify({ x, y }));
+    localStorage.setItem('radioBubblePositionV2', JSON.stringify({ left, top }));
   } catch (e) {
     // Ignore errors
   }
@@ -47,9 +54,12 @@ const savePosition = (x: number, y: number) => {
 
 export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState(getSavedPosition);
-  const dragStartTime = useRef<number>(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
+  const dragStartTimeRef = useRef<number>(0);
+  const hasDraggedRef = useRef(false);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -65,114 +75,142 @@ export const RadioBubble: React.FC = () => {
     expandPlayer,
   } = useRadioPlayer();
 
-  // Pages where the bubble should NOT appear
-  const hiddenPaths = [
-    '/client/dashboard',
-    '/owner/dashboard',
-    '/', // Main landing page
-    '/radio', // Radio page - has its own players
-  ];
+  // Handle viewport resize
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition(prev => {
+        const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
+        const maxTop = window.innerHeight - BUBBLE_SIZE - MARGIN;
+        return {
+          left: Math.min(Math.max(prev.left, MARGIN), maxLeft),
+          top: Math.min(Math.max(prev.top, MARGIN + 60), maxTop),
+        };
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  // Check if current path should hide the bubble
-  const shouldHide = hiddenPaths.some(path => location.pathname === path);
+  // Clamp position within viewport
+  const clampPosition = useCallback((left: number, top: number) => {
+    const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
+    const maxTop = window.innerHeight - BUBBLE_SIZE - MARGIN;
+    return {
+      left: Math.min(Math.max(left, MARGIN), maxLeft),
+      top: Math.min(Math.max(top, MARGIN + 60), maxTop),
+    };
+  }, []);
 
-  // Don't show bubble if no station is selected or on hidden pages
-  if (!currentStation || shouldHide) return null;
+  // Unified pointer handlers for both mouse and touch
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (isExpanded) return;
+    
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      left: position.left,
+      top: position.top,
+    };
+    dragStartTimeRef.current = Date.now();
+    hasDraggedRef.current = false;
+    setIsDragging(true);
+  }, [isExpanded, position]);
 
-  const handleBubbleClick = () => {
-    // Only expand if not dragging (check if drag lasted less than 200ms)
-    const dragDuration = Date.now() - dragStartTime.current;
-    if (!isDragging && dragDuration < 200) {
-      if (isExpanded) {
-        expandPlayer();
-      } else {
-        setIsExpanded(true);
-      }
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragStartRef.current || isExpanded) return;
+    
+    const deltaX = e.clientX - dragStartRef.current.x;
+    const deltaY = e.clientY - dragStartRef.current.y;
+    
+    // Only count as drag if moved more than 5px
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      hasDraggedRef.current = true;
     }
-  };
+    
+    const newPos = clampPosition(
+      dragStartRef.current.left + deltaX,
+      dragStartRef.current.top + deltaY
+    );
+    setPosition(newPos);
+  }, [isExpanded, clampPosition]);
 
-  const handleGoToRadio = (e?: React.MouseEvent | React.TouchEvent) => {
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (!dragStartRef.current) return;
+    
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    
+    const dragDuration = Date.now() - dragStartTimeRef.current;
+    const wasDragged = hasDraggedRef.current;
+    
+    // Save final position
+    savePosition(position.left, position.top);
+    
+    // If it was a tap (short duration, no significant movement), expand
+    if (!wasDragged && dragDuration < 300) {
+      setIsExpanded(true);
+    }
+    
+    dragStartRef.current = null;
+    setIsDragging(false);
+  }, [position]);
+
+  const handleGoToRadio = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     setIsExpanded(false);
-    setTimeout(() => {
-      navigate('/radio');
-    }, 0);
-  };
+    navigate('/radio');
+  }, [navigate]);
 
-  const handleDragStart = () => {
-    dragStartTime.current = Date.now();
-    setIsDragging(true);
-  };
+  // Pages where the bubble should NOT appear
+  const hiddenPaths = [
+    '/client/dashboard',
+    '/owner/dashboard',
+    '/',
+    '/radio',
+  ];
 
-  const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    setPosition(prev => ({
-      x: prev.x + info.delta.x,
-      y: prev.y + info.delta.y,
-    }));
-  };
+  const shouldHide = hiddenPaths.some(path => location.pathname === path);
 
-  const handleDragEnd = () => {
-    // Save the new position
-    savePosition(position.x, position.y);
-    // Small delay to prevent click from firing
-    setTimeout(() => setIsDragging(false), 150);
-  };
-
-  // Calculate bounds
-  const bounds = {
-    left: -position.x,
-    right: window.innerWidth - 70 - position.x,
-    top: -position.y + 60,
-    bottom: window.innerHeight - 150 - position.y,
-  };
+  if (!currentStation || shouldHide) return null;
 
   return (
     <>
-      {/* Backdrop when expanded - subtle blur */}
+      {/* Backdrop when expanded */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/10 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"
             onClick={() => setIsExpanded(false)}
           />
         )}
       </AnimatePresence>
 
-      {/* Floating Bubble */}
+      {/* Floating Bubble - Uses absolute left/top positioning */}
       <motion.div
         className={cn(
           "fixed z-[70]",
-          isExpanded ? "" : "cursor-grab active:cursor-grabbing",
-          isDragging && "cursor-grabbing"
+          !isExpanded && "touch-none",
+          isDragging ? "cursor-grabbing" : "cursor-grab"
         )}
         style={{
-          bottom: isExpanded ? 96 : undefined,
-          right: isExpanded ? 16 : undefined,
-          top: isExpanded ? undefined : 'auto',
-          left: isExpanded ? undefined : 'auto',
-          x: isExpanded ? 0 : position.x,
-          y: isExpanded ? 0 : position.y,
-          position: 'fixed',
-          ...(isExpanded ? {} : { bottom: 96, right: 16 }),
+          left: isExpanded ? position.left - 104 : position.left, // Center expanded card on bubble
+          top: isExpanded ? position.top + BUBBLE_SIZE + 8 : position.top,
+          width: isExpanded ? 272 : BUBBLE_SIZE,
+          height: isExpanded ? 'auto' : BUBBLE_SIZE,
         }}
         initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        animate={{ 
+          scale: isDragging ? 1.1 : 1, 
+          opacity: 1,
+        }}
         exit={{ scale: 0, opacity: 0 }}
-        drag={!isExpanded}
-        dragConstraints={bounds}
-        dragElastic={0.05}
-        dragMomentum={false}
-        dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        whileDrag={{ scale: 1.1, zIndex: 100 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       >
         <AnimatePresence mode="wait">
           {isExpanded ? (
@@ -183,7 +221,7 @@ export const RadioBubble: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-72 bg-background/70 backdrop-blur-2xl rounded-2xl shadow-xl border border-white/10 overflow-hidden"
+              className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden"
             >
               {/* Header with artwork */}
               <div className="relative h-24 overflow-hidden">
@@ -292,41 +330,28 @@ export const RadioBubble: React.FC = () => {
               </div>
             </motion.div>
           ) : (
-            // Collapsed Bubble View - Touch-friendly draggable
+            // Collapsed Bubble View - Draggable with pointer events
             <motion.div
               key="collapsed"
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleBubbleClick}
-              onTouchEnd={(e) => {
-                // Handle tap on touch devices
-                if (!isDragging) {
-                  const dragDuration = Date.now() - dragStartTime.current;
-                  if (dragDuration < 200) {
-                    e.preventDefault();
-                    setIsExpanded(true);
-                  }
-                }
-              }}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
               className={cn(
                 "relative w-16 h-16 rounded-full flex items-center justify-center",
-                "bg-black/40 backdrop-blur-xl",
+                "bg-black/50 backdrop-blur-xl",
                 "border-2 border-white/30",
                 "shadow-xl shadow-black/30",
                 "select-none"
               )}
-              style={{ touchAction: 'none' }}
             >
-              {/* Album art background with more transparency */}
+              {/* Album art background */}
               <div
                 className="absolute inset-2 rounded-full bg-cover bg-center opacity-70"
                 style={{ backgroundImage: `url(${currentStation.artwork})` }}
               />
 
-              {/* Subtle glass overlay */}
+              {/* Glass overlay */}
               <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/20 to-black/30" />
 
               {/* Icon overlay */}
@@ -355,13 +380,10 @@ export const RadioBubble: React.FC = () => {
                 )}
               </div>
 
-              {/* Live indicator - more visible */}
+              {/* Live indicator */}
               {currentStation.isLive && isPlaying && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white/50 animate-pulse" />
               )}
-
-              {/* Drag hint ring */}
-              <div className="absolute inset-0 rounded-full border-2 border-dashed border-white/0 transition-all duration-200 group-active:border-white/30" />
             </motion.div>
           )}
         </AnimatePresence>
