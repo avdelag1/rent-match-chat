@@ -82,8 +82,12 @@ export function useSwipeBack(options: {
           stiffness: 300,
           damping: 30,
         }).then(() => {
-          navigate(-1);
+          // Reset x BEFORE navigation to prevent flash on new page
           x.set(0);
+          // Small delay to ensure reset is applied before navigation
+          requestAnimationFrame(() => {
+            navigate(-1);
+          });
         });
       } else {
         // Snap back to original position
