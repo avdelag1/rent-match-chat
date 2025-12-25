@@ -5,3 +5,4 @@ export { RadioPlayerSkinned } from './RadioPlayerSkinned';
 export { RadioMiniPlayer } from './RadioMiniPlayer';
 export { RadioSleepTimer } from './RadioSleepTimer';
 export { RadioSkinSelector } from './RadioSkinSelector';
+export { RadioBubble } from './RadioBubble';
