@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   Radio,
   Play,
@@ -11,7 +11,6 @@ import {
   ChevronUp,
   Volume2,
   VolumeX,
-  GripVertical,
 } from 'lucide-react';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
@@ -22,7 +21,14 @@ const getSavedPosition = () => {
   try {
     const saved = localStorage.getItem('radioBubblePosition');
     if (saved) {
-      return JSON.parse(saved);
+      const pos = JSON.parse(saved);
+      // Validate position is within viewport
+      const maxX = window.innerWidth - 70;
+      const maxY = window.innerHeight - 150;
+      return {
+        x: Math.min(Math.max(pos.x || 0, 0), maxX),
+        y: Math.min(Math.max(pos.y || 0, 0), maxY),
+      };
     }
   } catch (e) {
     // Ignore errors
@@ -43,7 +49,7 @@ export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState(getSavedPosition);
-  const constraintsRef = useRef<HTMLDivElement>(null);
+  const dragStartTime = useRef<number>(0);
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -73,8 +79,9 @@ export const RadioBubble: React.FC = () => {
   if (!currentStation || shouldHide) return null;
 
   const handleBubbleClick = () => {
-    // Only expand if not dragging
-    if (!isDragging) {
+    // Only expand if not dragging (check if drag lasted less than 200ms)
+    const dragDuration = Date.now() - dragStartTime.current;
+    if (!isDragging && dragDuration < 200) {
       if (isExpanded) {
         expandPlayer();
       } else {
@@ -83,34 +90,46 @@ export const RadioBubble: React.FC = () => {
     }
   };
 
-  const handleGoToRadio = (e?: React.MouseEvent) => {
+  const handleGoToRadio = (e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     setIsExpanded(false);
-    // Use setTimeout to ensure state updates before navigation
     setTimeout(() => {
       navigate('/radio');
     }, 0);
   };
 
-  const handleDragEnd = (_: any, info: { point: { x: number; y: number } }) => {
+  const handleDragStart = () => {
+    dragStartTime.current = Date.now();
+    setIsDragging(true);
+  };
+
+  const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setPosition(prev => ({
+      x: prev.x + info.delta.x,
+      y: prev.y + info.delta.y,
+    }));
+  };
+
+  const handleDragEnd = () => {
     // Save the new position
-    savePosition(info.point.x, info.point.y);
+    savePosition(position.x, position.y);
     // Small delay to prevent click from firing
-    setTimeout(() => setIsDragging(false), 100);
+    setTimeout(() => setIsDragging(false), 150);
+  };
+
+  // Calculate bounds
+  const bounds = {
+    left: -position.x,
+    right: window.innerWidth - 70 - position.x,
+    top: -position.y + 60,
+    bottom: window.innerHeight - 150 - position.y,
   };
 
   return (
     <>
-      {/* Full screen drag constraints container */}
-      <div 
-        ref={constraintsRef} 
-        className="fixed inset-0 pointer-events-none z-[65]"
-        style={{ top: 60, bottom: 80, left: 10, right: 10 }}
-      />
-
       {/* Backdrop when expanded - subtle blur */}
       <AnimatePresence>
         {isExpanded && (
@@ -127,21 +146,33 @@ export const RadioBubble: React.FC = () => {
       {/* Floating Bubble */}
       <motion.div
         className={cn(
-          "fixed z-[70] touch-none",
-          isExpanded ? "bottom-24 right-4" : "",
+          "fixed z-[70]",
+          isExpanded ? "" : "cursor-grab active:cursor-grabbing",
           isDragging && "cursor-grabbing"
         )}
-        style={!isExpanded ? { bottom: 96, right: 16 } : undefined}
+        style={{
+          bottom: isExpanded ? 96 : undefined,
+          right: isExpanded ? 16 : undefined,
+          top: isExpanded ? undefined : 'auto',
+          left: isExpanded ? undefined : 'auto',
+          x: isExpanded ? 0 : position.x,
+          y: isExpanded ? 0 : position.y,
+          position: 'fixed',
+          ...(isExpanded ? {} : { bottom: 96, right: 16 }),
+        }}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         drag={!isExpanded}
-        dragConstraints={constraintsRef}
-        dragElastic={0.1}
+        dragConstraints={bounds}
+        dragElastic={0.05}
         dragMomentum={false}
-        onDragStart={() => setIsDragging(true)}
+        dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
         onDragEnd={handleDragEnd}
-        whileDrag={{ scale: 1.1, zIndex: 100 }}>
+        whileDrag={{ scale: 1.1, zIndex: 100 }}
+      >
         <AnimatePresence mode="wait">
           {isExpanded ? (
             // Expanded Card View
@@ -260,8 +291,8 @@ export const RadioBubble: React.FC = () => {
               </div>
             </motion.div>
           ) : (
-            // Collapsed Bubble View - Transparent glassmorphism style
-            <motion.button
+            // Collapsed Bubble View - Touch-friendly draggable
+            <motion.div
               key="collapsed"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
@@ -269,34 +300,46 @@ export const RadioBubble: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleBubbleClick}
+              onTouchEnd={(e) => {
+                // Handle tap on touch devices
+                if (!isDragging) {
+                  const dragDuration = Date.now() - dragStartTime.current;
+                  if (dragDuration < 200) {
+                    e.preventDefault();
+                    setIsExpanded(true);
+                  }
+                }
+              }}
               className={cn(
-                "relative w-14 h-14 rounded-full flex items-center justify-center",
-                "bg-black/30 backdrop-blur-xl",
-                "border border-white/20",
-                "shadow-lg shadow-black/20"
+                "relative w-16 h-16 rounded-full flex items-center justify-center",
+                "bg-black/40 backdrop-blur-xl",
+                "border-2 border-white/30",
+                "shadow-xl shadow-black/30",
+                "select-none"
               )}
+              style={{ touchAction: 'none' }}
             >
               {/* Album art background with more transparency */}
               <div
-                className="absolute inset-1.5 rounded-full bg-cover bg-center opacity-60"
+                className="absolute inset-2 rounded-full bg-cover bg-center opacity-70"
                 style={{ backgroundImage: `url(${currentStation.artwork})` }}
               />
 
               {/* Subtle glass overlay */}
-              <div className="absolute inset-1.5 rounded-full bg-gradient-to-br from-white/10 to-black/20" />
+              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/20 to-black/30" />
 
               {/* Icon overlay */}
               <div className="relative z-10">
                 {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin" />
                 ) : isPlaying ? (
                   <div className="flex items-center gap-0.5">
                     {[1, 2, 3].map((i) => (
                       <motion.div
                         key={i}
-                        className="w-1 bg-white/90 rounded-full"
+                        className="w-1.5 bg-white/95 rounded-full"
                         animate={{
-                          height: [6, 14, 6],
+                          height: [8, 18, 8],
                         }}
                         transition={{
                           duration: 0.5,
@@ -307,15 +350,18 @@ export const RadioBubble: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <Radio className="w-5 h-5 text-white/90" />
+                  <Radio className="w-6 h-6 text-white/95" />
                 )}
               </div>
 
-              {/* Live indicator - more subtle */}
+              {/* Live indicator - more visible */}
               {currentStation.isLive && isPlaying && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500/90 rounded-full border border-white/30 animate-pulse" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white/50 animate-pulse" />
               )}
-            </motion.button>
+
+              {/* Drag hint ring */}
+              <div className="absolute inset-0 rounded-full border-2 border-dashed border-white/0 transition-all duration-200 group-active:border-white/30" />
+            </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
