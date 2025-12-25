@@ -9,7 +9,9 @@ import {
   Settings,
   Shuffle,
   Palette,
-  Check
+  Check,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -266,6 +268,29 @@ const RadioPage: React.FC = () => {
     // Browse view (default)
     return (
       <div className="space-y-6 pb-32">
+        {/* Stream Notice Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-500/20 rounded-xl p-4"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+              <AlertCircle className="w-4 h-4 text-amber-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground mb-1">
+                Live Radio Streams
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Some radio stations may experience delays or temporary outages due to their live nature.
+                If a station isn't working, try the <RefreshCw className="w-3 h-3 inline mx-0.5" /> shuffle button
+                or choose another station. Most streams work great!
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Genre Sections - No duplicate featured card */}
         {radioGenres.map((genre) => (
           <RadioGenreSection
