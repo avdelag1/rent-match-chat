@@ -143,9 +143,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   const combinedOpacity = isTransitioning ? 1 : swipeOpacity;
 
   return (
-    <div className="min-h-screen w-full bg-background overflow-hidden relative">
+    <div className="min-h-screen w-full bg-background">
       <SkipToMainContent />
-      <main id="main-content" tabIndex={-1} className="outline-none w-full min-h-screen relative z-0">
+      <main id="main-content" tabIndex={-1} className="outline-none w-full min-h-screen">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
@@ -154,20 +154,13 @@ export function AppLayout({ children }: AppLayoutProps) {
             exit={transitionVariant.exit}
             transition={{
               ...springConfigs.ultraSmooth,
-              duration: 0.25,
+              duration: 0.2,
             }}
-            className="w-full min-h-screen overflow-x-hidden absolute inset-0"
+            className="w-full min-h-screen"
             style={{
-              // Only apply swipe x when not transitioning to prevent conflicts
               x: isTransitioning ? 0 : swipeX,
               opacity: combinedOpacity,
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1,
             }}
-            // Optimize for GPU-accelerated animations
             layout={false}
           >
             {children}
