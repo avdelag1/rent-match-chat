@@ -81,11 +81,6 @@ export const RadioCompactPlayer: React.FC = () => {
                 alt={currentStation.name}
                 className="w-full h-full object-cover"
               />
-              {isLoading && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
               {isPlaying && !isLoading && (
                 <div className="absolute bottom-2 right-2 flex gap-0.5">
                   {[1, 2, 3].map((i) => (

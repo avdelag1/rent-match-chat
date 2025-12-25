@@ -108,22 +108,6 @@ export const RadioMiniPlayer: React.FC = () => {
             </Button>
           </div>
         </div>
-
-        {/* Progress indicator for loading */}
-        {isLoading && (
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-secondary overflow-hidden">
-            <motion.div
-              className="h-full bg-primary"
-              initial={{ x: '-100%' }}
-              animate={{ x: '100%' }}
-              transition={{
-                repeat: Infinity,
-                duration: 1,
-                ease: 'linear'
-              }}
-            />
-          </div>
-        )}
       </div>
     </motion.div>
   );
