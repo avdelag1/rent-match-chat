@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Flame } from 'lucide-react';
+import { SwipessLogo } from './SwipessLogo';
 
 export function AppLoadingScreen() {
   const [showRefresh, setShowRefresh] = useState(false);

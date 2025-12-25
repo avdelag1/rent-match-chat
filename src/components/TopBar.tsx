@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 import { useNavigate } from 'react-router-dom';
+import { SwipessLogo } from './SwipessLogo';
 
 interface TopBarProps {
   onNotificationsClick?: () => void;
@@ -27,7 +28,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
         {/* Logo with 3D game-style effect */}
         <motion.div
-          className="flex items-center gap-0.5 select-none"
+          className="flex items-center select-none"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
