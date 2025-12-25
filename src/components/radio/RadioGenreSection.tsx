@@ -1,8 +1,9 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Shuffle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RadioGenre } from '@/data/radioStations';
 import { RadioStationCard } from './RadioStationCard';
+import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
 
 interface RadioGenreSectionProps {
@@ -11,6 +12,13 @@ interface RadioGenreSectionProps {
 }
 
 export const RadioGenreSection: React.FC<RadioGenreSectionProps> = ({ genre, onViewAll }) => {
+  const { shufflePlayGenre } = useRadioPlayer();
+
+  const handleShuffle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    shufflePlayGenre(genre.id);
+  };
+
   return (
     <section className="space-y-3">
       {/* Header */}
@@ -22,15 +30,26 @@ export const RadioGenreSection: React.FC<RadioGenreSectionProps> = ({ genre, onV
             <p className="text-xs text-muted-foreground">{genre.description}</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onViewAll}
-          className="text-primary gap-1 pr-1"
-        >
-          See All
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShuffle}
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            title={`Shuffle ${genre.name}`}
+          >
+            <Shuffle className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onViewAll}
+            className="text-primary gap-1 pr-1"
+          >
+            See All
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Horizontal Scroll Container */}

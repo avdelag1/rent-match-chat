@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
-import { RadioStation, getStationById, radioGenres, getAllStations } from '@/data/radioStations';
+import { RadioStation, getStationById, radioGenres, getAllStations, getRandomStation, getRandomStationFromGenre } from '@/data/radioStations';
 
 // Player Skin Types
 export type RadioSkin =
@@ -131,6 +131,8 @@ interface RadioPlayerContextType extends RadioPlayerState {
   getRemainingTime: () => number;
   skipToNext: () => void;
   skipToPrevious: () => void;
+  shufflePlay: () => void;
+  shufflePlayGenre: (genreId: string) => void;
 }
 
 const RadioPlayerContext = createContext<RadioPlayerContextType | null>(null);
@@ -509,7 +511,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const skipToPrevious = useCallback(() => {
     if (!state.currentStation) return;
-    
+
     // Check recently played first
     if (state.recentlyPlayed.length > 1) {
       const previousStationId = state.recentlyPlayed[1];
@@ -520,15 +522,15 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         return;
       }
     }
-    
+
     // Otherwise go to previous in genre
-    const currentGenre = radioGenres.find(g => 
+    const currentGenre = radioGenres.find(g =>
       g.stations.some(s => s.id === state.currentStation?.id)
     );
-    
+
     const stationList = currentGenre?.stations || getAllStations();
     const currentIndex = stationList.findIndex(s => s.id === state.currentStation?.id);
-    
+
     if (currentIndex >= 0) {
       const prevIndex = currentIndex === 0 ? stationList.length - 1 : currentIndex - 1;
       const prevStation = stationList[prevIndex];
@@ -536,6 +538,24 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       play(prevStation);
     }
   }, [state.currentStation, state.recentlyPlayed, setStation, play]);
+
+  // Shuffle play - play a random station from all genres
+  const shufflePlay = useCallback(() => {
+    const randomStation = getRandomStation();
+    if (randomStation) {
+      setStation(randomStation);
+      play(randomStation);
+    }
+  }, [setStation, play]);
+
+  // Shuffle play within a specific genre
+  const shufflePlayGenre = useCallback((genreId: string) => {
+    const randomStation = getRandomStationFromGenre(genreId);
+    if (randomStation) {
+      setStation(randomStation);
+      play(randomStation);
+    }
+  }, [setStation, play]);
 
   const contextValue: RadioPlayerContextType = {
     ...state,
@@ -556,6 +576,8 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     getRemainingTime,
     skipToNext,
     skipToPrevious,
+    shufflePlay,
+    shufflePlayGenre,
   };
 
   return (
