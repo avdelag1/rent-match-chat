@@ -123,7 +123,7 @@ export function AppLoadingScreen() {
               fontSize: 'clamp(3.5rem, 14vw, 5.5rem)',
             }}
           >
-            Swipess
+            SWIPESS
           </span>
         </h1>
       </motion.div>
