@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Building2, Home, Sparkles, Shield, ArrowRight } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
-import { SwipessLogo } from './SwipessLogo';
 function LegendaryLandingPage() {
   const [authDialog, setAuthDialog] = useState<{
     isOpen: boolean;
