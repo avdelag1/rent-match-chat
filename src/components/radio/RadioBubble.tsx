@@ -87,7 +87,6 @@ export const RadioBubble: React.FC = () => {
     skipToNext,
     skipToPrevious,
     shufflePlay,
-    expandPlayer,
   } = useRadioPlayer();
 
   // Handle viewport resize and ensure visible on mount
@@ -246,10 +245,10 @@ export const RadioBubble: React.FC = () => {
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden"
               >
-                {/* Header with artwork - tap to expand player */}
-                <div 
+                {/* Header with artwork - tap to navigate to radio page for full player */}
+                <div
                   className="relative h-24 overflow-hidden cursor-pointer"
-                  onClick={() => { setIsExpanded(false); expandPlayer(); }}
+                  onClick={() => { setIsExpanded(false); navigate('/radio'); }}
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center"

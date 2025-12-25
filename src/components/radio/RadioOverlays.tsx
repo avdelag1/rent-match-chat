@@ -23,9 +23,10 @@ export const RadioOverlays: React.FC = () => {
         {isRadioPage && isPlayerExpanded && <RadioPlayerSkinned key="global-skinned-player" />}
       </AnimatePresence>
 
-      {/* Mini Player - Global (when station exists but player not expanded) */}
+      {/* Mini Player - Only on /radio page (when station exists but player not expanded) */}
+      {/* On other pages, the RadioBubble handles the mini player UI */}
       <AnimatePresence>
-        {currentStation && !isPlayerExpanded && <RadioMiniPlayer key="global-mini-player" />}
+        {isRadioPage && currentStation && !isPlayerExpanded && <RadioMiniPlayer key="global-mini-player" />}
       </AnimatePresence>
     </>
   );
