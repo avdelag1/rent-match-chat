@@ -46,15 +46,10 @@ export function OwnerServicePreferences({ ownerId, onSave }: OwnerServicePrefere
   const loadPreferences = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('owner_service_preferences')
-        .select('*')
-        .eq('user_id', ownerId)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
+      // Use localStorage for preferences until table is created
+      const stored = localStorage.getItem(`owner_service_prefs_${ownerId}`);
+      if (stored) {
+        const data = JSON.parse(stored);
         setDesiredServices(data.desired_services || []);
         setDesiredWorkTypes(data.desired_work_types || []);
         setDesiredScheduleTypes(data.desired_schedule_types || []);
@@ -109,27 +104,8 @@ export function OwnerServicePreferences({ ownerId, onSave }: OwnerServicePrefere
         required_languages: requiredLanguages,
       };
 
-      // Check if preferences exist
-      const { data: existing } = await supabase
-        .from('owner_service_preferences')
-        .select('id')
-        .eq('user_id', ownerId)
-        .maybeSingle();
-
-      if (existing) {
-        const { error } = await supabase
-          .from('owner_service_preferences')
-          .update(preferences)
-          .eq('id', existing.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('owner_service_preferences')
-          .insert([preferences]);
-
-        if (error) throw error;
-      }
+      // Store in localStorage until table is created
+      localStorage.setItem(`owner_service_prefs_${ownerId}`, JSON.stringify(preferences));
 
       toast({
         title: "Success",

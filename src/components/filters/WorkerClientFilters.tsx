@@ -100,27 +100,28 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
 
   const handleSave = async () => {
     try {
-      await savePreferencesMutation.mutateAsync({
-        interested_in_workers: true,
-        worker_service_categories: serviceCategories,
-        worker_work_types: workTypes,
-        worker_schedule_types: scheduleTypes,
-        worker_days_available: daysAvailable,
-        worker_time_slots_available: timeSlotsAvailable,
-        worker_location_types: locationTypes,
-        worker_experience_levels: experienceLevels,
-        worker_min_experience_years: minExperienceYears,
-        worker_required_skills: requiredSkills,
-        worker_required_certifications: requiredCertifications,
-        worker_max_service_radius: maxServiceRadius,
-        worker_max_minimum_booking: maxMinimumBooking,
-        worker_needs_emergency_service: needsEmergencyService,
-        worker_needs_background_check: needsBackgroundCheck,
-        worker_needs_insurance: needsInsurance,
-        worker_price_min: priceRange[0],
-        worker_price_max: priceRange[1],
-        worker_required_languages: requiredLanguages,
-      });
+      // Store worker filter preferences in localStorage as workaround
+      const workerPrefs = {
+        service_categories: serviceCategories,
+        work_types: workTypes,
+        schedule_types: scheduleTypes,
+        days_available: daysAvailable,
+        time_slots_available: timeSlotsAvailable,
+        location_types: locationTypes,
+        experience_levels: experienceLevels,
+        min_experience_years: minExperienceYears,
+        required_skills: requiredSkills,
+        required_certifications: requiredCertifications,
+        max_service_radius: maxServiceRadius,
+        max_minimum_booking: maxMinimumBooking,
+        needs_emergency_service: needsEmergencyService,
+        needs_background_check: needsBackgroundCheck,
+        needs_insurance: needsInsurance,
+        price_min: priceRange[0],
+        price_max: priceRange[1],
+        required_languages: requiredLanguages,
+      };
+      localStorage.setItem('worker_filter_prefs', JSON.stringify(workerPrefs));
       toast({
         title: "Preferences Saved",
         description: "Your worker filter preferences have been saved.",

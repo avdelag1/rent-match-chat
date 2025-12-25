@@ -17,26 +17,26 @@ import { SERVICE_CATEGORIES, PRICING_UNITS } from '@/components/WorkerListingFor
 
 interface WorkerListing {
   id: string;
-  title: string;
-  description: string;
-  price: number;
-  images: string[];
-  city: string;
-  country: string;
-  service_category: string;
-  custom_service_name?: string;
-  pricing_unit: string;
-  availability: string;
-  experience_years: number;
-  languages: string[];
+  title: string | null;
+  description: string | null;
+  price: number | null;
+  images: string[] | null;
+  city: string | null;
+  country?: string | null;
+  service_category?: string | null;
+  custom_service_name?: string | null;
+  pricing_unit?: string | null;
+  availability?: string | null;
+  experience_years?: number | null;
+  languages?: string[] | null;
   owner_id: string;
-  created_at: string;
-  status: string;
+  created_at: string | null;
+  status: string | null;
   owner?: {
     id: string;
-    full_name: string;
-    avatar_url: string;
-  };
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 function useWorkerListings(serviceTypeFilter?: string) {
@@ -50,10 +50,6 @@ function useWorkerListings(serviceTypeFilter?: string) {
         .eq('status', 'active')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
-
-      if (serviceTypeFilter) {
-        query = query.eq('service_category', serviceTypeFilter);
-      }
 
       const { data: listings, error } = await query;
 
@@ -69,8 +65,16 @@ function useWorkerListings(serviceTypeFilter?: string) {
 
         const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
         return listings.map(l => ({
-          ...l,
-          owner: profileMap.get(l.owner_id),
+          id: l.id,
+          title: l.title,
+          description: l.description,
+          price: l.price,
+          images: l.images,
+          city: l.city,
+          owner_id: l.owner_id,
+          created_at: l.created_at,
+          status: l.status,
+          owner: profileMap.get(l.owner_id) || null,
         })) as WorkerListing[];
       }
 
