@@ -141,16 +141,16 @@ function LegendaryLandingPage() {
         delay: 0.2
       }} className="space-y-4">
           <h1
-            className="font-black text-center leading-none relative overflow-hidden"
-            style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
+            className="font-bold text-center leading-none relative overflow-hidden"
+            style={{ fontFamily: "'Quicksand', 'Poppins', system-ui, sans-serif" }}
           >
             <motion.span className="block relative" style={{
-            fontSize: 'clamp(3rem, 16vw, 6rem)',
-            fontWeight: 900,
-            letterSpacing: '-0.03em',
+            fontSize: 'clamp(2.5rem, 14vw, 5rem)',
+            fontWeight: 700,
+            letterSpacing: '0.02em',
             width: '100%',
             textAlign: 'center',
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
             backgroundSize: '200% 100%',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -163,7 +163,7 @@ function LegendaryLandingPage() {
             repeat: Infinity,
             ease: "linear"
           }}>
-              SWIPESS
+              Swipess
             </motion.span>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{

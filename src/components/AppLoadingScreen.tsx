@@ -97,14 +97,14 @@ export function AppLoadingScreen() {
         transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
         className="relative z-10 mb-16"
       >
-        <h1 className="font-black text-center leading-none" style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}>
+        <h1 className="font-bold text-center leading-none" style={{ fontFamily: "'Quicksand', 'Poppins', system-ui, sans-serif" }}>
           <motion.span
             className="block"
             style={{
-              fontSize: 'clamp(4rem, 16vw, 7rem)',
-              fontWeight: 900,
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
+              fontSize: 'clamp(3.5rem, 14vw, 5.5rem)',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -120,7 +120,7 @@ export function AppLoadingScreen() {
               ease: "linear",
             }}
           >
-            SWIPESS
+            Swipess
           </motion.span>
         </h1>
       </motion.div>

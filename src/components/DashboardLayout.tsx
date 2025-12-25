@@ -414,7 +414,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               setShowOnboarding(false);
               toast({
                 title: 'Profile Complete!',
-                description: 'Welcome to SWIPESS. Start exploring!',
+                description: 'Welcome to Swipess. Start exploring!',
               });
           }}
         />
