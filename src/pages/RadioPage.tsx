@@ -7,7 +7,6 @@ import {
   Clock,
   ChevronLeft,
   Settings,
-  Sparkles,
   Shuffle,
   Palette,
   Check
@@ -273,42 +272,7 @@ const RadioPage: React.FC = () => {
     // Browse view (default)
     return (
       <div className="space-y-6 pb-32">
-        {/* Featured / Now Playing Promo */}
-        {currentStation && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-2xl cursor-pointer"
-            onClick={expandPlayer}
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${currentStation.artwork})` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
-            <div className="relative p-6 flex items-end min-h-[180px]">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-0.5 bg-red-500 rounded-full text-xs font-semibold text-white flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                    LIVE
-                  </span>
-                  <span className="text-white/70 text-xs">{currentStation.country}</span>
-                </div>
-                <h3 className="text-xl font-bold text-white">{currentStation.name}</h3>
-                <p className="text-white/70 text-sm">{currentStation.description}</p>
-              </div>
-              <Button
-                size="icon"
-                className="w-14 h-14 rounded-full bg-white text-black hover:bg-white/90 shadow-xl"
-              >
-                <Sparkles className="w-6 h-6" />
-              </Button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Genre Sections */}
+        {/* Genre Sections - No duplicate featured card */}
         {radioGenres.map((genre) => (
           <RadioGenreSection
             key={genre.id}
