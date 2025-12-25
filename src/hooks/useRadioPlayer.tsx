@@ -190,6 +190,9 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       audioRef.current.preload = 'none';
       audioRef.current.volume = state.volume;
 
+      // Enable CORS for cross-origin streaming
+      audioRef.current.crossOrigin = 'anonymous';
+
       // Event listeners
       audioRef.current.addEventListener('playing', () => {
         retryCountRef.current = 0; // Reset retry count on successful play
@@ -208,9 +211,31 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setState(prev => ({ ...prev, isLoading: false }));
       });
 
-      audioRef.current.addEventListener('error', () => {
-        // Retry up to 3 times with exponential backoff
-        if (retryCountRef.current < 3) {
+      audioRef.current.addEventListener('error', (e) => {
+        const audio = e.target as HTMLAudioElement;
+        const error = audio.error;
+
+        // Determine error type
+        let errorMessage = 'Stream unavailable.';
+        if (error) {
+          switch (error.code) {
+            case MediaError.MEDIA_ERR_ABORTED:
+              errorMessage = 'Playback aborted. Please try again.';
+              break;
+            case MediaError.MEDIA_ERR_NETWORK:
+              errorMessage = 'Network error. Check your connection.';
+              break;
+            case MediaError.MEDIA_ERR_DECODE:
+              errorMessage = 'Stream format not supported.';
+              break;
+            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              errorMessage = 'This station is currently unavailable.';
+              break;
+          }
+        }
+
+        // Retry up to 3 times with exponential backoff for network errors
+        if (retryCountRef.current < 3 && error?.code === MediaError.MEDIA_ERR_NETWORK) {
           retryCountRef.current += 1;
           const retryDelay = Math.min(1000 * Math.pow(2, retryCountRef.current - 1), 5000);
 
@@ -229,12 +254,12 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             }
           }, retryDelay);
         } else {
-          // Max retries exceeded
+          // Max retries exceeded or non-network error
           setState(prev => ({
             ...prev,
             isLoading: false,
             isPlaying: false,
-            error: 'Stream unavailable. Try skipping to the next station.'
+            error: errorMessage + ' Try skipping to another station.'
           }));
           retryCountRef.current = 0;
         }
@@ -343,18 +368,49 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const play = useCallback((station?: RadioStation) => {
     if (station) {
       setStation(station);
-    }
 
-    if (audioRef.current && state.currentStation) {
-      if (!audioRef.current.src || (station && audioRef.current.src !== station.streamUrl)) {
-        audioRef.current.src = station?.streamUrl || state.currentStation.streamUrl;
+      // Set audio source immediately for the new station
+      if (audioRef.current) {
+        audioRef.current.src = station.streamUrl;
+        audioRef.current.load();
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+
+        // Try to play with better error handling
+        audioRef.current.play().catch((err) => {
+          console.error('Radio playback error:', err);
+          let errorMessage = 'Failed to play.';
+
+          if (err.name === 'NotAllowedError') {
+            errorMessage = 'Please allow audio playback and try again.';
+          } else if (err.name === 'NotSupportedError') {
+            errorMessage = 'This stream format is not supported.';
+          } else if (err.name === 'AbortError') {
+            errorMessage = 'Playback was interrupted. Try again.';
+          }
+
+          setState(prev => ({
+            ...prev,
+            isLoading: false,
+            isPlaying: false,
+            error: errorMessage
+          }));
+        });
       }
+    } else if (audioRef.current && state.currentStation) {
+      // Resume current station
+      if (!audioRef.current.src || audioRef.current.src === '') {
+        audioRef.current.src = state.currentStation.streamUrl;
+        audioRef.current.load();
+      }
+
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      audioRef.current.play().catch(() => {
+      audioRef.current.play().catch((err) => {
+        console.error('Radio playback error:', err);
         setState(prev => ({
           ...prev,
           isLoading: false,
-          error: 'Failed to play. Check your connection.'
+          isPlaying: false,
+          error: 'Failed to resume playback. Try again.'
         }));
       });
     }
