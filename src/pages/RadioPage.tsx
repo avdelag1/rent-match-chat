@@ -43,7 +43,7 @@ const RadioPage: React.FC = () => {
     setSkin
   } = useRadioPlayer();
 
-  // Smart back handler - clears internal state first, then navigates back
+  // Smart back handler - clears internal state first, then navigates to dashboard
   const handleBack = () => {
     // If viewing a specific genre, go back to browse
     if (selectedGenre) {
@@ -61,14 +61,9 @@ const RadioPage: React.FC = () => {
       setViewMode('browse');
       return;
     }
-    // Navigate back - check if there's history, otherwise go to dashboard
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      // Fallback to dashboard based on user role
-      const role = user?.user_metadata?.role;
-      navigate(role === 'owner' ? '/owner/dashboard' : '/client/dashboard');
-    }
+    // Always navigate to the user's dashboard directly to avoid history issues
+    const role = user?.user_metadata?.role;
+    navigate(role === 'owner' ? '/owner/dashboard' : '/client/dashboard', { replace: true });
   };
 
   // Get favorite stations
