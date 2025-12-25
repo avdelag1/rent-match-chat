@@ -62,12 +62,15 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ['react', 'react-dom'], // Prevent duplicate React instances
+    // Prevent duplicate React instances (including jsx runtimes)
+    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
   },
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
       '@tanstack/react-query',
       'framer-motion',
       'lucide-react'
