@@ -1895,7 +1895,29 @@ export const RadioPlayerSkinned: React.FC = () => {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSkinSelector, setShowSkinSelector] = useState(false);
 
-  if (!currentStation) return null;
+  // If no station, show a loading/empty state instead of returning null
+  // This prevents the player from disappearing unexpectedly
+  if (!currentStation) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-background"
+      >
+        <div className="text-center p-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted animate-pulse" />
+          <p className="text-muted-foreground">Select a station to play</p>
+          <button
+            onClick={collapsePlayer}
+            className="mt-4 px-4 py-2 text-sm bg-secondary rounded-lg hover:bg-secondary/80"
+          >
+            Go Back
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   const isFav = isFavorite(currentStation.id);
   const remainingTime = getRemainingTime();

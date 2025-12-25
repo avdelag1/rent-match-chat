@@ -19,8 +19,23 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const BUBBLE_SIZE = 64;
 const MARGIN = 16;
 
+// Safe default that works before window is ready
+const getDefaultPosition = (): { left: number; top: number } => {
+  // Use a safe default - bottom right area, will be adjusted on mount
+  const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
+  const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+  return {
+    left: Math.max(windowWidth - BUBBLE_SIZE - MARGIN, MARGIN),
+    top: Math.min(windowHeight - 200, 100),
+  };
+};
+
 // Get saved position from localStorage (absolute left/top values)
 const getSavedPosition = (): { left: number; top: number } => {
+  if (typeof window === 'undefined') {
+    return getDefaultPosition();
+  }
+
   try {
     const saved = localStorage.getItem('radioBubblePositionV2');
     if (saved) {
@@ -36,10 +51,10 @@ const getSavedPosition = (): { left: number; top: number } => {
   } catch (e) {
     // Ignore errors
   }
-  // Default position: top-right corner
+  // Default position: bottom-right corner (more visible on mobile)
   return {
     left: window.innerWidth - BUBBLE_SIZE - MARGIN,
-    top: 100,
+    top: window.innerHeight - 200,
   };
 };
 
@@ -75,20 +90,31 @@ export const RadioBubble: React.FC = () => {
     expandPlayer,
   } = useRadioPlayer();
 
-  // Handle viewport resize
+  // Handle viewport resize and ensure visible on mount
   useEffect(() => {
-    const handleResize = () => {
+    const ensureVisible = () => {
       setPosition(prev => {
         const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
         const maxTop = window.innerHeight - BUBBLE_SIZE - MARGIN;
-        return {
-          left: Math.min(Math.max(prev.left, MARGIN), maxLeft),
-          top: Math.min(Math.max(prev.top, MARGIN + 60), maxTop),
-        };
+        const minTop = MARGIN + 60;
+
+        // Calculate clamped position
+        const clampedLeft = Math.min(Math.max(prev.left, MARGIN), maxLeft);
+        const clampedTop = Math.min(Math.max(prev.top, minTop), maxTop);
+
+        // Only update if position changed significantly (avoid unnecessary re-renders)
+        if (Math.abs(clampedLeft - prev.left) > 1 || Math.abs(clampedTop - prev.top) > 1) {
+          return { left: clampedLeft, top: clampedTop };
+        }
+        return prev;
       });
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    // Run on mount to ensure position is valid
+    ensureVisible();
+
+    window.addEventListener('resize', ensureVisible);
+    return () => window.removeEventListener('resize', ensureVisible);
   }, []);
 
   // Clamp position within viewport
