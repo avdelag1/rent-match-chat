@@ -42,11 +42,11 @@ export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, com
   };
 
   const handleCardClick = () => {
-    if (isCurrentStation) {
-      expandPlayer();
-    } else {
+    if (!isCurrentStation) {
       play(station);
     }
+    // Always expand the player when clicking a station
+    expandPlayer();
   };
 
   if (compact) {
