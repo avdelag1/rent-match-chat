@@ -267,28 +267,20 @@ export function useSmartListingMatching(
 
         const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
 
-        // Fetch dislikes with cooldown status
-        const { data: dislikes, error: dislikesError } = await supabase
-          .from('dislikes')
-          .select('target_id, cooldown_until')
+        // NOTE: dislikes table doesn't exist in schema - using left swipes from likes table instead
+        const { data: leftSwipes } = await supabase
+          .from('likes')
+          .select('target_id')
           .eq('user_id', user.user.id)
-          .eq('target_type', 'listing');
+          .eq('direction', 'left');
 
-        // Categorize dislikes
+        // Build set of left-swiped IDs
         const permanentlyHiddenIds = new Set<string>();
         const refreshableDislikeIds = new Set<string>();
 
-        if (!dislikesError && dislikes) {
-          const now = new Date();
-          for (const dislike of dislikes) {
-            const cooldownUntil = new Date(dislike.cooldown_until);
-            if (cooldownUntil < now) {
-              // Cooldown passed - permanently hidden
-              permanentlyHiddenIds.add(dislike.target_id);
-            } else {
-              // Still within cooldown - can be shown on refresh
-              refreshableDislikeIds.add(dislike.target_id);
-            }
+        if (leftSwipes) {
+          for (const swipe of leftSwipes) {
+            permanentlyHiddenIds.add(swipe.target_id);
           }
         }
 
@@ -830,28 +822,20 @@ export function useSmartClientMatching(
           }
         }
 
-        // Fetch dislikes with cooldown status
-        const { data: dislikes, error: dislikesError } = await supabase
-          .from('dislikes')
-          .select('target_id, cooldown_until')
+        // NOTE: dislikes table doesn't exist in schema - using left swipes from likes table instead
+        const { data: leftSwipes } = await supabase
+          .from('likes')
+          .select('target_id')
           .eq('user_id', user.user.id)
-          .eq('target_type', 'profile');
+          .eq('direction', 'left');
 
-        // Categorize dislikes
+        // Build set of left-swiped IDs  
         const permanentlyHiddenIds = new Set<string>();
         const refreshableDislikeIds = new Set<string>();
 
-        if (!dislikesError && dislikes) {
-          const now = new Date();
-          for (const dislike of dislikes) {
-            const cooldownUntil = new Date(dislike.cooldown_until);
-            if (cooldownUntil < now) {
-              // Cooldown passed - permanently hidden
-              permanentlyHiddenIds.add(dislike.target_id);
-            } else {
-              // Still within cooldown - can be shown on refresh
-              refreshableDislikeIds.add(dislike.target_id);
-            }
+        if (leftSwipes) {
+          for (const swipe of leftSwipes) {
+            permanentlyHiddenIds.add(swipe.target_id);
           }
         }
 

@@ -9,7 +9,7 @@ import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, Mail, Calendar, Building2, Eye, MessageCircle,
-  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera, Radio
+  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera, Radio, ArrowLeft
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";

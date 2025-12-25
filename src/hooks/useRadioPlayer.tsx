@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
-import { RadioStation, getStationById } from '@/data/radioStations';
+import { RadioStation, getStationById, radioGenres, getAllStations } from '@/data/radioStations';
 
 // Player Skin Types
 export type RadioSkin =
@@ -129,6 +129,8 @@ interface RadioPlayerContextType extends RadioPlayerState {
   collapsePlayer: () => void;
   togglePlayerExpanded: () => void;
   getRemainingTime: () => number;
+  skipToNext: () => void;
+  skipToPrevious: () => void;
 }
 
 const RadioPlayerContext = createContext<RadioPlayerContextType | null>(null);
@@ -393,6 +395,55 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return Math.max(0, state.sleepTimerEndTime - Date.now());
   }, [state.sleepTimerEndTime]);
 
+  const skipToNext = useCallback(() => {
+    if (!state.currentStation) return;
+    
+    // Get stations from current genre or all stations
+    const currentGenre = radioGenres.find(g => 
+      g.stations.some(s => s.id === state.currentStation?.id)
+    );
+    
+    const stationList = currentGenre?.stations || getAllStations();
+    const currentIndex = stationList.findIndex(s => s.id === state.currentStation?.id);
+    
+    if (currentIndex >= 0) {
+      const nextIndex = (currentIndex + 1) % stationList.length;
+      const nextStation = stationList[nextIndex];
+      setStation(nextStation);
+      play(nextStation);
+    }
+  }, [state.currentStation, setStation, play]);
+
+  const skipToPrevious = useCallback(() => {
+    if (!state.currentStation) return;
+    
+    // Check recently played first
+    if (state.recentlyPlayed.length > 1) {
+      const previousStationId = state.recentlyPlayed[1];
+      const previousStation = getStationById(previousStationId);
+      if (previousStation) {
+        setStation(previousStation);
+        play(previousStation);
+        return;
+      }
+    }
+    
+    // Otherwise go to previous in genre
+    const currentGenre = radioGenres.find(g => 
+      g.stations.some(s => s.id === state.currentStation?.id)
+    );
+    
+    const stationList = currentGenre?.stations || getAllStations();
+    const currentIndex = stationList.findIndex(s => s.id === state.currentStation?.id);
+    
+    if (currentIndex >= 0) {
+      const prevIndex = currentIndex === 0 ? stationList.length - 1 : currentIndex - 1;
+      const prevStation = stationList[prevIndex];
+      setStation(prevStation);
+      play(prevStation);
+    }
+  }, [state.currentStation, state.recentlyPlayed, setStation, play]);
+
   const contextValue: RadioPlayerContextType = {
     ...state,
     play,
@@ -410,6 +461,8 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     collapsePlayer,
     togglePlayerExpanded,
     getRemainingTime,
+    skipToNext,
+    skipToPrevious,
   };
 
   return (

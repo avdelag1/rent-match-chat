@@ -32,6 +32,8 @@ export const RadioPlayer: React.FC = () => {
     isFavorite,
     collapsePlayer,
     getRemainingTime,
+    skipToNext,
+    skipToPrevious,
   } = useRadioPlayer();
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
@@ -202,8 +204,8 @@ export const RadioPlayer: React.FC = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="w-12 h-12 opacity-50"
-            disabled
+            className="w-12 h-12"
+            onClick={skipToPrevious}
           >
             <SkipBack className="w-5 h-5" />
           </Button>
@@ -225,8 +227,8 @@ export const RadioPlayer: React.FC = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="w-12 h-12 opacity-50"
-            disabled
+            className="w-12 h-12"
+            onClick={skipToNext}
           >
             <SkipForward className="w-5 h-5" />
           </Button>
