@@ -55,7 +55,7 @@ const OwnerYachtClientDiscovery = lazy(() => import("./pages/OwnerYachtClientDis
 const OwnerVehicleClientDiscovery = lazy(() => import("./pages/OwnerVehicleClientDiscovery"));
 const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
 const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
-const OwnerServicesDiscovery = lazy(() => import("./pages/OwnerServicesDiscovery"));
+const ClientWorkerDiscovery = lazy(() => import("./pages/ClientWorkerDiscovery"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 
 // Camera pages
@@ -188,6 +188,16 @@ const App = () => (
                       }
                     />
 
+                    {/* Client Services/Workers Discovery */}
+                    <Route
+                      path="/client/services"
+                      element={
+                        <ProtectedRoute requiredRole="client">
+                          <ClientWorkerDiscovery />
+                        </ProtectedRoute>
+                      }
+                    />
+
                     <Route
                       path="/owner/dashboard" 
                       element={
@@ -305,14 +315,7 @@ const App = () => (
                       }
                     />
 
-                    <Route
-                      path="/owner/services"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerServicesDiscovery />
-                        </ProtectedRoute>
-                      }
-                    />
+                    {/* Owner services route removed - workers are now managed through listings */}
 
                     <Route
                       path="/owner/saved-searches"

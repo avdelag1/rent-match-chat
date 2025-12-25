@@ -345,7 +345,7 @@ function LegendaryLandingPage() {
             />
 
             <Building2 className="w-5 h-5 relative z-10" />
-            <span className="relative z-10 drop-shadow-lg">I'm an Owner</span>
+            <span className="relative z-10 drop-shadow-lg">I'm a Seller</span>
             <motion.div className="relative z-10" animate={{
             x: hoveredButton === 'owner' ? 5 : 0,
             scale: hoveredButton === 'owner' ? 1.2 : 1

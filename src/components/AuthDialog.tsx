@@ -82,8 +82,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       ring: 'ring-amber-500/50',
       glow: 'shadow-[0_0_60px_rgba(251,146,60,0.3)]',
       icon: Building2,
-      title: 'Property Owner',
-      description: 'List and manage your properties',
+      title: 'Seller',
+      description: 'List properties, vehicles, or workers',
       buttonGlow: 'hover:shadow-[0_8px_32px_rgba(251,146,60,0.4)]',
     },
   }), []);
