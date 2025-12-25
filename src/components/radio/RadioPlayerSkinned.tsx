@@ -21,6 +21,7 @@ import { Slider } from '@/components/ui/slider';
 import { useRadioPlayer, RadioSkin, AVAILABLE_SKINS } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
 import { RadioSkinSelector } from './RadioSkinSelector';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SkinProps {
   currentStation: NonNullable<ReturnType<typeof useRadioPlayer>['currentStation']>;
@@ -41,6 +42,7 @@ interface SkinProps {
   skipToNext: () => void;
   skipToPrevious: () => void;
   onOpenSkinSelector: () => void;
+  isMobile: boolean;
 }
 
 // ========================================
@@ -49,19 +51,25 @@ interface SkinProps {
 const DefaultSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  // Responsive sizes
+  const artSize = isMobile ? 'w-32 h-32' : 'w-44 h-44';
+  const playBtnSize = isMobile ? 'w-14 h-14' : 'w-16 h-16';
+  const iconSize = isMobile ? 'w-5 h-5' : 'w-6 h-6';
+  const playIconSize = isMobile ? 'w-6 h-6' : 'w-7 h-7';
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"
+      className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 overflow-y-auto"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-[calc(var(--safe-top)+12px)] pb-2">
-        <Button variant="ghost" size="icon" onClick={collapsePlayer} className="w-10 h-10 text-white/80">
-          <ChevronDown className="w-6 h-6" />
+      <div className="flex items-center justify-between px-4 pt-[calc(var(--safe-top)+8px)] pb-2 shrink-0">
+        <Button variant="ghost" size="icon" onClick={collapsePlayer} className="w-9 h-9 text-white/80">
+          <ChevronDown className="w-5 h-5" />
         </Button>
         <div className="flex items-center gap-2">
           {sleepTimer && (
@@ -69,16 +77,16 @@ const DefaultSkin: React.FC<SkinProps> = ({
               <Moon className="w-3 h-3" /> {remainingMinutes}m
             </span>
           )}
-          <Button variant="ghost" size="icon" onClick={onOpenSkinSelector} className="w-10 h-10 text-white/80">
-            <Palette className="w-5 h-5" />
+          <Button variant="ghost" size="icon" onClick={onOpenSkinSelector} className="w-9 h-9 text-white/80">
+            <Palette className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      {/* Main Content - Centered */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 max-w-md mx-auto w-full">
+      {/* Main Content - Centered & Scrollable */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 max-w-md mx-auto w-full min-h-0">
         {/* Album Art */}
-        <div className="relative w-48 h-48 rounded-2xl overflow-hidden shadow-2xl mb-6">
+        <div className={cn("relative rounded-2xl overflow-hidden shadow-2xl mb-4 shrink-0", artSize)}>
           <img 
             src={currentStation.artwork} 
             alt={currentStation.name} 
@@ -86,7 +94,7 @@ const DefaultSkin: React.FC<SkinProps> = ({
           />
           {isLoading && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
             </div>
           )}
           {currentStation.isLive && (
@@ -98,30 +106,30 @@ const DefaultSkin: React.FC<SkinProps> = ({
         </div>
 
         {/* Station Info */}
-        <h2 className="text-xl font-bold text-white text-center truncate w-full">{currentStation.name}</h2>
-        <p className="text-sm text-white/60 text-center truncate w-full mb-2">{currentStation.description}</p>
+        <h2 className="text-lg font-bold text-white text-center truncate w-full">{currentStation.name}</h2>
+        <p className="text-xs text-white/60 text-center truncate w-full mb-2">{currentStation.description}</p>
         {error && <p className="text-xs text-red-400 text-center">{error}</p>}
 
         {/* Playback Controls */}
-        <div className="flex items-center justify-center gap-6 my-6">
+        <div className="flex items-center justify-center gap-4 my-4">
           <button 
             onClick={skipToPrevious}
             className="p-2 text-white/70 hover:text-white transition-colors"
           >
-            <SkipBack className="w-6 h-6" />
+            <SkipBack className={iconSize} />
           </button>
           
           <button
             onClick={togglePlayPause}
             disabled={isLoading}
-            className="w-16 h-16 rounded-full bg-violet-500 flex items-center justify-center text-white shadow-lg shadow-violet-500/30 hover:bg-violet-400 transition-colors"
+            className={cn("rounded-full bg-violet-500 flex items-center justify-center text-white shadow-lg shadow-violet-500/30 hover:bg-violet-400 transition-colors", playBtnSize)}
           >
             {isLoading ? (
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : isPlaying ? (
-              <Pause className="w-7 h-7" />
+              <Pause className={playIconSize} />
             ) : (
-              <Play className="w-7 h-7 ml-1" />
+              <Play className={cn(playIconSize, "ml-0.5")} />
             )}
           </button>
           
@@ -129,12 +137,12 @@ const DefaultSkin: React.FC<SkinProps> = ({
             onClick={skipToNext}
             className="p-2 text-white/70 hover:text-white transition-colors"
           >
-            <SkipForward className="w-6 h-6" />
+            <SkipForward className={iconSize} />
           </button>
         </div>
 
         {/* Volume Slider */}
-        <div className="flex items-center gap-3 w-full max-w-xs mb-4">
+        <div className="flex items-center gap-3 w-full max-w-xs mb-3">
           <button onClick={() => setVolume(0)} className="text-white/60">
             <VolumeX className="w-4 h-4" />
           </button>
@@ -152,9 +160,9 @@ const DefaultSkin: React.FC<SkinProps> = ({
         {/* Favorite Button */}
         <button
           onClick={() => toggleFavorite(currentStation.id)}
-          className="p-3 text-white/70 hover:text-red-400 transition-colors"
+          className="p-2 text-white/70 hover:text-red-400 transition-colors"
         >
-          <Heart className={cn("w-6 h-6", isFav && "text-red-500 fill-red-500")} />
+          <Heart className={cn("w-5 h-5", isFav && "text-red-500 fill-red-500")} />
         </button>
       </div>
     </motion.div>
@@ -167,12 +175,17 @@ const DefaultSkin: React.FC<SkinProps> = ({
 const IpodClassicSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  // Responsive sizing
+  const deviceWidth = isMobile ? 'max-w-[280px]' : 'max-w-[320px]';
+  const wheelSize = isMobile ? 'w-36 h-36' : 'w-48 h-48';
+  const centerBtn = isMobile ? 'w-14 h-14' : 'w-20 h-20';
+  
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-gray-900 to-black p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-gray-900 to-black p-2 overflow-y-auto">
       {/* iPod Body */}
-      <div className="relative w-full max-w-[320px] bg-gradient-to-b from-gray-100 via-white to-gray-200 rounded-[40px] shadow-2xl border-4 border-gray-300 overflow-hidden">
+      <div className={cn("relative w-full bg-gradient-to-b from-gray-100 via-white to-gray-200 rounded-[30px] shadow-2xl border-4 border-gray-300 overflow-hidden", deviceWidth)}>
         {/* Top Bar */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <Button variant="ghost" size="icon" onClick={collapsePlayer} className="w-8 h-8 text-gray-600">
@@ -220,7 +233,7 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
         </div>
 
         {/* Click Wheel */}
-        <div className="relative mx-auto my-6 w-48 h-48">
+        <div className={cn("relative mx-auto my-4", wheelSize)}>
           {/* Outer Ring */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 shadow-lg border border-gray-400">
             {/* Menu Button */}
@@ -324,12 +337,13 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
 const GameBoySkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  const deviceWidth = isMobile ? 'max-w-[260px]' : 'max-w-[300px]';
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-purple-900 to-indigo-950 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-purple-900 to-indigo-950 p-2 overflow-y-auto">
       {/* Game Boy Body */}
-      <div className="relative w-full max-w-[300px] bg-[#c4c4c4] rounded-[20px] rounded-br-[60px] shadow-2xl border-4 border-[#8b8b8b] overflow-hidden">
+      <div className={cn("relative w-full bg-[#c4c4c4] rounded-[20px] rounded-br-[60px] shadow-2xl border-4 border-[#8b8b8b] overflow-hidden", deviceWidth)}>
         {/* Top Section */}
         <div className="bg-[#8b8b8b] h-6 flex items-center px-4">
           <div className="flex gap-1">
@@ -492,10 +506,11 @@ const GameBoySkin: React.FC<SkinProps> = ({
 const VintageRadioSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  const deviceWidth = isMobile ? 'max-w-[300px]' : 'max-w-[400px]';
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-amber-950 to-stone-950 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-amber-950 to-stone-950 p-2 overflow-y-auto">
       {/* Radio Cabinet */}
       <div className="relative w-full max-w-[360px] bg-gradient-to-b from-amber-800 via-amber-700 to-amber-900 rounded-3xl shadow-2xl border-8 border-amber-950 overflow-hidden"
         style={{ boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.3), 0 10px 40px rgba(0,0,0,0.5)' }}
@@ -692,12 +707,13 @@ const VintageRadioSkin: React.FC<SkinProps> = ({
 const WalkmanSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  const deviceWidth = isMobile ? 'max-w-[260px]' : 'max-w-[300px]';
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-slate-900 to-slate-950 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-slate-900 to-slate-950 p-2 overflow-y-auto">
       {/* Walkman Body */}
-      <div className="relative w-full max-w-[300px] bg-gradient-to-b from-blue-600 via-blue-500 to-blue-700 rounded-2xl shadow-2xl border-4 border-blue-800 overflow-hidden">
+      <div className={cn("relative w-full bg-gradient-to-b from-blue-600 via-blue-500 to-blue-700 rounded-2xl shadow-2xl border-4 border-blue-800 overflow-hidden", deviceWidth)}>
         {/* Metallic Texture */}
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: 'linear-gradient(90deg, transparent 50%, rgba(255,255,255,0.1) 50%)', backgroundSize: '4px 4px' }}
@@ -851,7 +867,7 @@ const WalkmanSkin: React.FC<SkinProps> = ({
 const BeachSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-orange-400 via-pink-500 to-purple-600 overflow-y-auto">
@@ -1042,10 +1058,10 @@ const BeachSkin: React.FC<SkinProps> = ({
 const UfoSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-b from-slate-950 via-violet-950 to-slate-950 overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-gradient-to-b from-slate-950 via-violet-950 to-slate-950 overflow-y-auto">
       {/* Starfield */}
       <div className="absolute inset-0">
         {[...Array(50)].map((_, i) => (
@@ -1259,12 +1275,13 @@ const UfoSkin: React.FC<SkinProps> = ({
 const BoomboxSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  const deviceWidth = isMobile ? 'max-w-[300px]' : 'max-w-[380px]';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-zinc-800 to-zinc-950 p-2 overflow-y-auto">
       {/* Boombox Body */}
-      <div className="relative w-full max-w-[380px] bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 rounded-xl shadow-2xl border-4 border-zinc-600 overflow-hidden">
+      <div className={cn("relative w-full bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 rounded-xl shadow-2xl border-4 border-zinc-600 overflow-hidden", deviceWidth)}>
         {/* Chrome Trim */}
         <div className="absolute inset-0 border-2 border-zinc-500/20 rounded-lg pointer-events-none" />
 
@@ -1432,10 +1449,10 @@ const BoomboxSkin: React.FC<SkinProps> = ({
 const NeonCyberSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-b from-purple-950 via-slate-950 to-black overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-gradient-to-b from-purple-950 via-slate-950 to-black overflow-y-auto">
       {/* Neon Grid Background */}
       <div className="absolute inset-0 opacity-20"
         style={{
@@ -1646,12 +1663,13 @@ const NeonCyberSkin: React.FC<SkinProps> = ({
 const VinylTurntableSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  const deviceWidth = isMobile ? 'max-w-[280px]' : 'max-w-[360px]';
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-950 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-950 p-2 overflow-y-auto">
       {/* Turntable Base */}
-      <div className="relative w-full max-w-[360px] bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-xl shadow-2xl border border-neutral-700 overflow-hidden p-4">
+      <div className={cn("relative w-full bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-xl shadow-2xl border border-neutral-700 overflow-hidden p-3", deviceWidth)}>
         {/* Wood Grain Effect */}
         <div className="absolute inset-0 opacity-5"
           style={{
@@ -1811,12 +1829,13 @@ const VinylTurntableSkin: React.FC<SkinProps> = ({
 const SteampunkSkin: React.FC<SkinProps> = ({
   currentStation, isPlaying, isLoading, volume, isMuted, sleepTimer,
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
-  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector
+  togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
+  const deviceWidth = isMobile ? 'max-w-[280px]' : 'max-w-[340px]';
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-amber-950 via-stone-900 to-stone-950 p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-amber-950 via-stone-900 to-stone-950 p-2 overflow-y-auto">
       {/* Machine Body */}
-      <div className="relative w-full max-w-[340px] bg-gradient-to-b from-amber-700 via-amber-800 to-amber-900 rounded-2xl shadow-2xl border-8 border-amber-950 overflow-hidden"
+      <div className={cn("relative w-full bg-gradient-to-b from-amber-700 via-amber-800 to-amber-900 rounded-2xl shadow-2xl border-8 border-amber-950 overflow-hidden", deviceWidth)}
         style={{ boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.5), 0 10px 40px rgba(0,0,0,0.5)' }}
       >
         {/* Brass Rivets */}
@@ -2012,6 +2031,7 @@ export const RadioPlayerSkinned: React.FC = () => {
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSkinSelector, setShowSkinSelector] = useState(false);
+  const isMobile = useIsMobile();
 
   // If no station, show a loading/empty state instead of returning null
   // This prevents the player from disappearing unexpectedly
@@ -2060,6 +2080,7 @@ export const RadioPlayerSkinned: React.FC = () => {
     skipToNext,
     skipToPrevious,
     onOpenSkinSelector: () => setShowSkinSelector(true),
+    isMobile,
   };
 
   const renderSkin = () => {

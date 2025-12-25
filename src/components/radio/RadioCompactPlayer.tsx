@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useRadioPlayer, AVAILABLE_SKINS, RadioSkin } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const RadioCompactPlayer: React.FC = () => {
   const {
@@ -40,6 +41,7 @@ export const RadioCompactPlayer: React.FC = () => {
   } = useRadioPlayer();
 
   const [showVolume, setShowVolume] = useState(false);
+  const isMobile = useIsMobile();
 
   if (!currentStation) return null;
 
@@ -48,12 +50,15 @@ export const RadioCompactPlayer: React.FC = () => {
   const remainingMinutes = Math.ceil(remainingTime / 60000);
   const skinConfig = AVAILABLE_SKINS.find(s => s.id === currentSkin) || AVAILABLE_SKINS[0];
 
+  // Responsive artwork size
+  const artworkSize = isMobile ? 'w-36 h-36' : 'w-48 h-48';
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-background flex flex-col"
+      className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden"
     >
       {/* Header */}
       <header className="flex items-center justify-between px-4 pt-[calc(var(--safe-top)+8px)] pb-3 border-b border-border/50">
@@ -75,7 +80,7 @@ export const RadioCompactPlayer: React.FC = () => {
             )}
           >
             {/* Artwork */}
-            <div className="relative mx-auto w-48 h-48 rounded-2xl overflow-hidden shadow-2xl mb-6">
+            <div className={cn("relative mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4", artworkSize)}>
               <img
                 src={currentStation.artwork}
                 alt={currentStation.name}
