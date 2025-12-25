@@ -146,7 +146,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen w-full bg-background">
       <SkipToMainContent />
       <main id="main-content" tabIndex={-1} className="outline-none w-full min-h-screen">
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
             initial={transitionVariant.initial}
