@@ -3,8 +3,9 @@ import { RadioStation, getStationById, radioGenres, getAllStations, getRandomSta
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'react-router-dom';
 
-// Player Skin Types - 10 Creative Retro-Modern Skins
+// Player Skin Types - 11 Skins including Default/Minimal
 export type RadioSkin =
+  | 'default'
   | 'ipod-classic'
   | 'gameboy'
   | 'vintage-radio'
@@ -26,6 +27,14 @@ export interface SkinConfig {
 }
 
 export const AVAILABLE_SKINS: SkinConfig[] = [
+  {
+    id: 'default',
+    name: 'Minimal',
+    description: 'Clean and compact design',
+    emoji: '🎧',
+    gradient: 'from-slate-900 via-slate-800 to-slate-900',
+    accentColor: '#8b5cf6',
+  },
   {
     id: 'ipod-classic',
     name: 'iPod Classic',
