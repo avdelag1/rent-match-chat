@@ -32,6 +32,12 @@ const ClientProfile = () => {
     setShowPhotoPreview(true);
   }, []);
 
+  const handleRadioClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/radio');
+  }, [navigate]);
+
   // Calculate profile completion
   const calculateCompletion = () => {
     if (!profile) return 0;
@@ -66,12 +72,6 @@ const ClientProfile = () => {
       </DashboardLayout>
     );
   }
-
-  const handleRadioClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigate('/radio');
-  }, [navigate]);
 
   const menuItems = [
     { icon: User, label: 'Edit Profile', action: (_e: React.MouseEvent) => setShowEditDialog(true), color: 'text-blue-500' },
