@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { RadioPlayerProvider } from "@/hooks/useRadioPlayer";
+import { RadioBubble } from "@/components/radio";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
@@ -426,6 +427,7 @@ const App = () => (
                   </Routes>
                 </Suspense>
               </AppLayout>
+              <RadioBubble />
             </NotificationWrapper>
             </RadioPlayerProvider>
           </ThemeProvider>

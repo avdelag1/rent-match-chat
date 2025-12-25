@@ -7,7 +7,8 @@ import {
   Clock,
   ChevronLeft,
   Settings,
-  Sparkles
+  Sparkles,
+  Shuffle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,7 +34,8 @@ const RadioPage: React.FC = () => {
     isPlayerExpanded,
     favorites,
     recentlyPlayed,
-    expandPlayer
+    expandPlayer,
+    shufflePlay
   } = useRadioPlayer();
 
   // Get favorite stations
@@ -260,14 +262,25 @@ const RadioPage: React.FC = () => {
                   <p className="text-xs text-muted-foreground">Curated stations</p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewMode(viewMode === 'settings' ? 'browse' : 'settings')}
-                className={cn(viewMode === 'settings' && "bg-primary/10 text-primary")}
-              >
-                <Settings className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={shufflePlay}
+                  className="text-muted-foreground hover:text-primary"
+                  title="Shuffle all stations"
+                >
+                  <Shuffle className="w-5 h-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setViewMode(viewMode === 'settings' ? 'browse' : 'settings')}
+                  className={cn(viewMode === 'settings' && "bg-primary/10 text-primary")}
+                >
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
 
             {/* Search Bar */}
