@@ -279,11 +279,9 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      audioRef.current.preload = 'none';
+      // Use 'auto' for faster loading
+      audioRef.current.preload = 'auto';
       audioRef.current.volume = state.volume;
-
-      // Enable CORS for cross-origin streaming
-      audioRef.current.crossOrigin = 'anonymous';
 
       // Event listeners
       audioRef.current.addEventListener('playing', () => {
@@ -303,6 +301,11 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setState(prev => ({ ...prev, isLoading: false }));
       });
 
+      // Faster loading - start playing as soon as we have some data
+      audioRef.current.addEventListener('loadeddata', () => {
+        setState(prev => ({ ...prev, isLoading: false }));
+      });
+
       audioRef.current.addEventListener('error', (e) => {
         const audio = e.target as HTMLAudioElement;
         const error = audio.error;
@@ -312,8 +315,8 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (error) {
           switch (error.code) {
             case MediaError.MEDIA_ERR_ABORTED:
-              errorMessage = 'Playback aborted. Please try again.';
-              break;
+              // Don't show error for user-initiated aborts
+              return;
             case MediaError.MEDIA_ERR_NETWORK:
               errorMessage = 'Network error. Check your connection.';
               break;
@@ -326,15 +329,15 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           }
         }
 
-        // Retry up to 3 times with exponential backoff for network errors
-        if (retryCountRef.current < 3 && error?.code === MediaError.MEDIA_ERR_NETWORK) {
+        // Retry up to 2 times with shorter backoff for network errors
+        if (retryCountRef.current < 2 && error?.code === MediaError.MEDIA_ERR_NETWORK) {
           retryCountRef.current += 1;
-          const retryDelay = Math.min(1000 * Math.pow(2, retryCountRef.current - 1), 5000);
+          const retryDelay = 500 * retryCountRef.current; // 500ms, 1000ms
 
           setState(prev => ({
             ...prev,
             isLoading: true,
-            error: `Retrying connection (${retryCountRef.current}/3)...`
+            error: `Retrying (${retryCountRef.current}/2)...`
           }));
 
           retryTimeoutRef.current = setTimeout(() => {
@@ -351,7 +354,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
             ...prev,
             isLoading: false,
             isPlaying: false,
-            error: errorMessage + ' Try skipping to another station.'
+            error: errorMessage + ' Try another station.'
           }));
           retryCountRef.current = 0;
         }
@@ -459,53 +462,67 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const play = useCallback((station?: RadioStation) => {
+    // Cancel any pending play operations
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+
     if (station) {
       setStation(station);
 
       // Set audio source immediately for the new station
       if (audioRef.current) {
         audioRef.current.src = station.streamUrl;
-        audioRef.current.load();
         setState(prev => ({ ...prev, isLoading: true, error: null }));
 
         // Try to play with better error handling
-        audioRef.current.play().catch((err) => {
-          console.error('Radio playback error:', err);
-          let errorMessage = 'Failed to play.';
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            // AbortError is normal when quickly switching stations - ignore it
+            if (err.name === 'AbortError') {
+              return; // Silently ignore - this is expected behavior
+            }
 
-          if (err.name === 'NotAllowedError') {
-            errorMessage = 'Please allow audio playback and try again.';
-          } else if (err.name === 'NotSupportedError') {
-            errorMessage = 'This stream format is not supported.';
-          } else if (err.name === 'AbortError') {
-            errorMessage = 'Playback was interrupted. Try again.';
-          }
+            console.error('Radio playback error:', err);
+            let errorMessage = 'Failed to play.';
 
-          setState(prev => ({
-            ...prev,
-            isLoading: false,
-            isPlaying: false,
-            error: errorMessage
-          }));
-        });
+            if (err.name === 'NotAllowedError') {
+              errorMessage = 'Tap to allow audio playback.';
+            } else if (err.name === 'NotSupportedError') {
+              errorMessage = 'Stream not supported. Try another station.';
+            }
+
+            setState(prev => ({
+              ...prev,
+              isLoading: false,
+              isPlaying: false,
+              error: errorMessage
+            }));
+          });
+        }
       }
     } else if (audioRef.current && state.currentStation) {
       // Resume current station
       if (!audioRef.current.src || audioRef.current.src === '') {
         audioRef.current.src = state.currentStation.streamUrl;
-        audioRef.current.load();
       }
 
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      audioRef.current.play().catch((err) => {
-        console.error('Radio playback error:', err);
-        setState(prev => ({
-          ...prev,
-          isLoading: false,
-          isPlaying: false,
-          error: 'Failed to resume playback. Try again.'
-        }));
-      });
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err.name === 'AbortError') return; // Ignore abort errors
+          
+          console.error('Radio playback error:', err);
+          setState(prev => ({
+            ...prev,
+            isLoading: false,
+            isPlaying: false,
+            error: 'Failed to resume. Tap play again.'
+          }));
+        });
+      }
     }
   }, [state.currentStation, setStation]);
 
