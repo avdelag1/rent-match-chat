@@ -43,7 +43,7 @@ function useWorkerListings(serviceTypeFilter?: string) {
   return useQuery({
     queryKey: ['worker-listings', serviceTypeFilter],
     queryFn: async () => {
-      let query = supabase
+      const query = supabase
         .from('listings')
         .select('*')
         .eq('category', 'worker')
