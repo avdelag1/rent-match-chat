@@ -67,14 +67,19 @@ const savePosition = (left: number, top: number) => {
   }
 };
 
+// Close zone dimensions
+const CLOSE_ZONE_SIZE = 80;
+
 export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState(getSavedPosition);
   const [isDragging, setIsDragging] = useState(false);
+  const [isOverCloseZone, setIsOverCloseZone] = useState(false);
+  const [showCloseZone, setShowCloseZone] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
   const dragStartTimeRef = useRef<number>(0);
   const hasDraggedRef = useRef(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -87,7 +92,20 @@ export const RadioBubble: React.FC = () => {
     skipToNext,
     skipToPrevious,
     shufflePlay,
+    stopPlayback,
   } = useRadioPlayer();
+
+  // Check if bubble is over the close zone
+  const checkCloseZone = useCallback((left: number, top: number) => {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const bubbleCenterX = left + BUBBLE_SIZE / 2;
+    const bubbleCenterY = top + BUBBLE_SIZE / 2;
+    const distance = Math.sqrt(
+      Math.pow(bubbleCenterX - centerX, 2) + Math.pow(bubbleCenterY - centerY, 2)
+    );
+    return distance < CLOSE_ZONE_SIZE;
+  }, []);
 
   // Handle viewport resize and ensure visible on mount
   useEffect(() => {
@@ -145,41 +163,61 @@ export const RadioBubble: React.FC = () => {
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragStartRef.current || isExpanded) return;
-    
+
     const deltaX = e.clientX - dragStartRef.current.x;
     const deltaY = e.clientY - dragStartRef.current.y;
-    
+
     // Only count as drag if moved more than 5px
     if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
       hasDraggedRef.current = true;
+      if (!showCloseZone) setShowCloseZone(true);
     }
-    
+
     const newPos = clampPosition(
       dragStartRef.current.left + deltaX,
       dragStartRef.current.top + deltaY
     );
     setPosition(newPos);
-  }, [isExpanded, clampPosition]);
+
+    // Check if over close zone
+    if (hasDraggedRef.current) {
+      setIsOverCloseZone(checkCloseZone(newPos.left, newPos.top));
+    }
+  }, [isExpanded, clampPosition, checkCloseZone, showCloseZone]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!dragStartRef.current) return;
-    
+
     e.currentTarget.releasePointerCapture(e.pointerId);
-    
+
     const dragDuration = Date.now() - dragStartTimeRef.current;
     const wasDragged = hasDraggedRef.current;
-    
+
+    // Check if dropped on close zone
+    if (wasDragged && isOverCloseZone) {
+      // Stop playback and reset position
+      stopPlayback();
+      setPosition(getSavedPosition());
+      setIsOverCloseZone(false);
+      setShowCloseZone(false);
+      dragStartRef.current = null;
+      setIsDragging(false);
+      return;
+    }
+
     // Save final position
     savePosition(position.left, position.top);
-    
+
     // If it was a tap (short duration, no significant movement), expand
     if (!wasDragged && dragDuration < 300) {
       setIsExpanded(true);
     }
-    
+
     dragStartRef.current = null;
     setIsDragging(false);
-  }, [position]);
+    setIsOverCloseZone(false);
+    setShowCloseZone(false);
+  }, [position, isOverCloseZone, stopPlayback]);
 
   const handleGoToRadio = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
@@ -199,6 +237,32 @@ export const RadioBubble: React.FC = () => {
 
   return (
     <>
+      {/* Close zone - shown when dragging */}
+      <AnimatePresence>
+        {isDragging && showCloseZone && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 z-[65] pointer-events-none flex items-center justify-center"
+          >
+            <motion.div
+              animate={{
+                scale: isOverCloseZone ? 1.2 : 1,
+                backgroundColor: isOverCloseZone ? 'rgba(239, 68, 68, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+              }}
+              className={cn(
+                "w-20 h-20 rounded-full flex items-center justify-center",
+                "border-2 border-dashed",
+                isOverCloseZone ? "border-red-500" : "border-white/50"
+              )}
+            >
+              <X className={cn("w-8 h-8", isOverCloseZone ? "text-red-500" : "text-white/70")} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Backdrop when expanded */}
       <AnimatePresence>
         {isExpanded && (
