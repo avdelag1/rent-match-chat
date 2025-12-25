@@ -16,7 +16,7 @@ import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { radioGenres, getAllStations, searchStations, RadioStation, RadioGenre } from '@/data/radioStations';
 import { RadioStationCard } from '@/components/radio/RadioStationCard';
 import { RadioGenreSection } from '@/components/radio/RadioGenreSection';
-import { RadioPlayer } from '@/components/radio/RadioPlayer';
+import { RadioPlayerSkinned } from '@/components/radio/RadioPlayerSkinned';
 import { RadioMiniPlayer } from '@/components/radio/RadioMiniPlayer';
 import { RadioSleepTimer } from '@/components/radio/RadioSleepTimer';
 import { cn } from '@/lib/utils';
@@ -230,9 +230,9 @@ const RadioPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Full Screen Player */}
+      {/* Full Screen Player with Skins */}
       <AnimatePresence>
-        {isPlayerExpanded && <RadioPlayer />}
+        {isPlayerExpanded && <RadioPlayerSkinned />}
       </AnimatePresence>
 
       {/* Main Content */}

@@ -1,98 +1,109 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { RadioStation, getStationById, radioGenres, getAllStations, getRandomStation, getRandomStationFromGenre } from '@/data/radioStations';
 
-// Player Skin Types
+// Player Skin Types - 10 Creative Retro-Modern Skins
 export type RadioSkin =
-  | 'minimal'
   | 'ipod-classic'
-  | 'walkman'
-  | 'dj-controller'
   | 'gameboy'
   | 'vintage-radio'
-  | 'apple-glass';
-
-// Coming Soon Skins (disabled but visible)
-export type ComingSoonSkin =
-  | 'cyberpunk-neon'
-  | 'tesla-dashboard'
-  | 'studio-rack'
-  | 'bauhaus-dial'
-  | 'space-hud'
-  | 'tulum-jungle'
-  | 'analog-synth'
-  | 'boombox-90s'
-  | 'modular-eurorack';
+  | 'walkman'
+  | 'beach'
+  | 'ufo'
+  | 'boombox'
+  | 'neon-cyber'
+  | 'vinyl-turntable'
+  | 'steampunk';
 
 export interface SkinConfig {
-  id: RadioSkin | ComingSoonSkin;
+  id: RadioSkin;
   name: string;
   description: string;
-  preview: string;
-  available: boolean;
+  emoji: string;
+  gradient: string;
+  accentColor: string;
 }
 
 export const AVAILABLE_SKINS: SkinConfig[] = [
   {
-    id: 'minimal',
-    name: 'Apple Glass Minimal',
-    description: 'Clean, elegant, iOS-inspired design',
-    preview: 'glass-morphism',
-    available: true,
-  },
-  {
     id: 'ipod-classic',
     name: 'iPod Classic',
-    description: 'Nostalgic scroll wheel interface',
-    preview: 'ipod-white',
-    available: true,
-  },
-  {
-    id: 'walkman',
-    name: 'Walkman Cassette',
-    description: 'Retro Sony Walkman aesthetic',
-    preview: 'cassette-deck',
-    available: true,
-  },
-  {
-    id: 'dj-controller',
-    name: 'DJ Controller',
-    description: 'Professional deck layout',
-    preview: 'mixer-dark',
-    available: true,
+    description: 'Nostalgic click wheel interface',
+    emoji: '🎵',
+    gradient: 'from-gray-100 via-gray-50 to-white',
+    accentColor: '#1d1d1f',
   },
   {
     id: 'gameboy',
     name: 'Game Boy',
     description: 'Pixel-perfect Nintendo tribute',
-    preview: 'pixel-green',
-    available: true,
+    emoji: '🎮',
+    gradient: 'from-[#8bac0f] via-[#9bbc0f] to-[#306230]',
+    accentColor: '#0f380f',
   },
   {
     id: 'vintage-radio',
     name: 'Vintage Radio',
-    description: 'Classic tube radio dial',
-    preview: 'wood-brass',
-    available: true,
+    description: 'Classic tube radio with warm wood',
+    emoji: '📻',
+    gradient: 'from-amber-800 via-amber-700 to-amber-900',
+    accentColor: '#d4a574',
   },
   {
-    id: 'apple-glass',
-    name: 'Apple Glass',
-    description: 'Futuristic glassmorphic UI',
-    preview: 'translucent',
-    available: true,
+    id: 'walkman',
+    name: 'Sony Walkman',
+    description: 'Retro cassette player vibes',
+    emoji: '📼',
+    gradient: 'from-blue-600 via-blue-500 to-blue-700',
+    accentColor: '#fbbf24',
   },
-];
-
-export const COMING_SOON_SKINS: SkinConfig[] = [
-  { id: 'cyberpunk-neon', name: 'Cyberpunk Neon', description: 'Night City vibes', preview: 'neon-pink', available: false },
-  { id: 'tesla-dashboard', name: 'Tesla Dashboard', description: 'Electric vehicle UI', preview: 'dark-auto', available: false },
-  { id: 'studio-rack', name: 'Studio Rack', description: 'VU meters and faders', preview: 'studio-gear', available: false },
-  { id: 'bauhaus-dial', name: 'Bauhaus Dial', description: 'Geometric precision', preview: 'primary-colors', available: false },
-  { id: 'space-hud', name: 'Space HUD', description: 'Sci-fi command center', preview: 'holographic', available: false },
-  { id: 'tulum-jungle', name: 'Tulum Jungle Totem', description: 'Organic ceremonial', preview: 'wood-natural', available: false },
-  { id: 'analog-synth', name: 'Analog Synth', description: 'Moog-inspired knobs', preview: 'synth-panel', available: false },
-  { id: 'boombox-90s', name: 'Boombox 90s', description: 'Street style ghetto blaster', preview: 'chrome-silver', available: false },
-  { id: 'modular-eurorack', name: 'Modular Eurorack', description: 'Patch cable chaos', preview: 'rack-modules', available: false },
+  {
+    id: 'beach',
+    name: 'Beach Vibes',
+    description: 'Sunset waves and palm trees',
+    emoji: '🏖️',
+    gradient: 'from-orange-400 via-pink-500 to-purple-600',
+    accentColor: '#fcd34d',
+  },
+  {
+    id: 'ufo',
+    name: 'UFO Alien',
+    description: 'Extraterrestrial holographic tech',
+    emoji: '🛸',
+    gradient: 'from-emerald-400 via-cyan-500 to-violet-600',
+    accentColor: '#22d3ee',
+  },
+  {
+    id: 'boombox',
+    name: 'Boombox 90s',
+    description: 'Street style ghetto blaster',
+    emoji: '📻',
+    gradient: 'from-zinc-800 via-zinc-700 to-zinc-900',
+    accentColor: '#ef4444',
+  },
+  {
+    id: 'neon-cyber',
+    name: 'Neon Cyberpunk',
+    description: 'Night City neon vibes',
+    emoji: '🌃',
+    gradient: 'from-purple-900 via-pink-600 to-cyan-400',
+    accentColor: '#f472b6',
+  },
+  {
+    id: 'vinyl-turntable',
+    name: 'Vinyl Turntable',
+    description: 'Classic DJ turntable setup',
+    emoji: '💿',
+    gradient: 'from-neutral-900 via-neutral-800 to-neutral-950',
+    accentColor: '#dc2626',
+  },
+  {
+    id: 'steampunk',
+    name: 'Steampunk',
+    description: 'Victorian brass and gears',
+    emoji: '⚙️',
+    gradient: 'from-amber-600 via-yellow-700 to-amber-800',
+    accentColor: '#78350f',
+  },
 ];
 
 // Sleep Timer Options
@@ -177,13 +188,34 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     volume: loadFromStorage(STORAGE_KEYS.VOLUME, 0.8),
     isMuted: false,
     error: null,
-    currentSkin: loadFromStorage(STORAGE_KEYS.SKIN, 'minimal') as RadioSkin,
+    currentSkin: loadFromStorage(STORAGE_KEYS.SKIN, 'ipod-classic') as RadioSkin,
     sleepTimer: null,
     sleepTimerEndTime: null,
     favorites: loadFromStorage<string[]>(STORAGE_KEYS.FAVORITES, []),
     recentlyPlayed: loadFromStorage<string[]>(STORAGE_KEYS.RECENTLY_PLAYED, []),
     isPlayerExpanded: false,
   }));
+
+  // Stop radio function - exposed via window for auth to call
+  const stopRadio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
+    setState(prev => ({ ...prev, isPlaying: false, isLoading: false }));
+  }, []);
+
+  // Listen for sign-out event to stop radio
+  useEffect(() => {
+    const handleSignOut = () => {
+      stopRadio();
+    };
+
+    window.addEventListener('user-signout', handleSignOut);
+    return () => {
+      window.removeEventListener('user-signout', handleSignOut);
+    };
+  }, [stopRadio]);
 
   // Initialize audio element
   useEffect(() => {
