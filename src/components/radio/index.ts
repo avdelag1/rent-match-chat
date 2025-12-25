@@ -2,6 +2,7 @@ export { RadioStationCard } from './RadioStationCard';
 export { RadioGenreSection } from './RadioGenreSection';
 export { RadioPlayer } from './RadioPlayer';
 export { RadioPlayerSkinned } from './RadioPlayerSkinned';
+export { RadioCompactPlayer } from './RadioCompactPlayer';
 export { RadioMiniPlayer } from './RadioMiniPlayer';
 export { RadioSleepTimer } from './RadioSleepTimer';
 export { RadioSkinSelector } from './RadioSkinSelector';
