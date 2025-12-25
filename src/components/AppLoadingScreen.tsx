@@ -90,38 +90,41 @@ export function AppLoadingScreen() {
       {/* Fire Particles */}
       <FireParticles />
 
-      {/* Brand Name */}
+      {/* Brand Name - 3D Game-Style Logo */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 30, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
         className="relative z-10 mb-16"
       >
-        <h1 className="font-bold text-center leading-none" style={{ fontFamily: "'Quicksand', 'Poppins', system-ui, sans-serif" }}>
-          <motion.span
-            className="block"
+        {/* Glow effect behind the logo */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <motion.div
+            className="w-64 h-16 rounded-full"
             style={{
-              fontSize: 'clamp(3.5rem, 14vw, 5.5rem)',
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-              backgroundSize: '200% 100%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'drop-shadow(0 2px 8px rgba(249, 115, 22, 0.3))',
+              background: 'radial-gradient(ellipse at center, rgba(255, 180, 0, 0.5) 0%, rgba(255, 140, 0, 0.3) 40%, transparent 70%)',
+              filter: 'blur(20px)',
             }}
             animate={{
-              backgroundPosition: ['200% 50%', '0% 50%'],
+              opacity: [0.6, 0.9, 0.6],
+              scale: [1, 1.1, 1],
             }}
             transition={{
-              duration: 8,
+              duration: 2,
               repeat: Infinity,
-              ease: "linear",
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+        <h1 className="text-center leading-none relative">
+          <span
+            className="swipess-logo-simple block"
+            style={{
+              fontSize: 'clamp(3.5rem, 14vw, 5.5rem)',
             }}
           >
             SWIPESS
-          </motion.span>
+          </span>
         </h1>
       </motion.div>
 

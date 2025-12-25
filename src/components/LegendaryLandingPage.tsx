@@ -129,43 +129,52 @@ function LegendaryLandingPage() {
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-8 max-w-2xl w-full px-4">
 
-        {/* Title */}
+        {/* Title - 3D Game-Style Logo */}
         <motion.div initial={{
         opacity: 0,
-        y: 30
+        y: 30,
+        scale: 0.9
       }} animate={{
         opacity: 1,
-        y: 0
+        y: 0,
+        scale: 1
       }} transition={{
         duration: 0.6,
-        delay: 0.2
+        delay: 0.2,
+        type: "spring",
+        bounce: 0.3
       }} className="space-y-4">
-          <h1
-            className="font-bold text-center leading-none relative overflow-hidden"
-            style={{ fontFamily: "'Quicksand', 'Poppins', system-ui, sans-serif" }}
-          >
-            <motion.span className="block relative" style={{
-            fontSize: 'clamp(2.5rem, 14vw, 5rem)',
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            width: '100%',
-            textAlign: 'center',
-            background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-            backgroundSize: '200% 100%',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            filter: 'drop-shadow(0 2px 10px rgba(249, 115, 22, 0.35))'
-          }} animate={{
-            backgroundPosition: ['200% 50%', '0% 50%']
-          }} transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "linear"
-          }}>
-              SWIPESS
-            </motion.span>
-          </h1>
+          {/* Glow effect behind the logo */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <motion.div
+                className="w-72 h-20 rounded-full"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255, 180, 0, 0.5) 0%, rgba(255, 140, 0, 0.3) 40%, transparent 70%)',
+                  filter: 'blur(24px)',
+                }}
+                animate={{
+                  opacity: [0.5, 0.8, 0.5],
+                  scale: [1, 1.15, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </div>
+            <h1 className="text-center leading-none relative">
+              <span
+                className="swipess-logo-simple block"
+                style={{
+                  fontSize: 'clamp(2.5rem, 14vw, 5rem)',
+                }}
+              >
+                SWIPESS
+              </span>
+            </h1>
+          </div>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
         }} animate={{

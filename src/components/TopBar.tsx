@@ -25,22 +25,13 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
       className={cn('app-header bg-background/80 backdrop-blur-2xl border-b border-white/5', className)}
     >
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
-        {/* Logo with animated gradient */}
+        {/* Logo with 3D game-style effect */}
         <motion.div
           className="flex items-center gap-0.5 select-none"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span
-            className="text-2xl font-bold tracking-tighter font-brand"
-            style={{
-              background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
-              backgroundSize: '200% 100%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
+          <span className="text-2xl swipess-logo-header">
             SWIPESS
           </span>
         </motion.div>
