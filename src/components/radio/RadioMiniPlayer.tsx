@@ -23,9 +23,9 @@ export const RadioMiniPlayer: React.FC = () => {
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       className={cn(
-        "fixed left-0 right-0 z-50",
+        "fixed left-0 right-0 z-[55]",
         "bg-card/95 backdrop-blur-xl border-t border-border/50",
-        "bottom-[calc(var(--safe-bottom,0px)+16px)]"
+        "bottom-[72px]" // Above bottom navigation
       )}
     >
       <div className="px-4 py-3">

@@ -5,6 +5,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { RadioPlayerProvider } from "@/hooks/useRadioPlayer";
 import { RadioBubble } from "@/components/radio";
+import { RadioOverlays } from "@/components/radio/RadioOverlays";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
@@ -428,6 +429,7 @@ const App = () => (
                 </Suspense>
               </AppLayout>
               <RadioBubble />
+              <RadioOverlays />
             </NotificationWrapper>
             </RadioPlayerProvider>
           </ThemeProvider>
