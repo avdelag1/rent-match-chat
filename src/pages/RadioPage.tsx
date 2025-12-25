@@ -23,6 +23,7 @@ import { RadioMiniPlayer } from '@/components/radio/RadioMiniPlayer';
 import { RadioSleepTimer } from '@/components/radio/RadioSleepTimer';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 type ViewMode = 'browse' | 'favorites' | 'recent' | 'search' | 'settings';
 
@@ -31,6 +32,7 @@ const RadioPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     currentStation,
     isPlayerExpanded,
@@ -60,8 +62,14 @@ const RadioPage: React.FC = () => {
       setViewMode('browse');
       return;
     }
-    // Otherwise, navigate back in history
-    navigate(-1);
+    // Navigate back - check if there's history, otherwise go to dashboard
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // Fallback to dashboard based on user role
+      const role = user?.user_metadata?.role;
+      navigate(role === 'owner' ? '/owner/dashboard' : '/client/dashboard');
+    }
   };
 
   // Get favorite stations
