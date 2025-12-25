@@ -413,6 +413,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Stop the radio player before signing out
+      window.dispatchEvent(new CustomEvent('user-signout'));
+
       // Clear any pending OAuth role from localStorage
       localStorage.removeItem('pendingOAuthRole');
       localStorage.removeItem('rememberMe');
