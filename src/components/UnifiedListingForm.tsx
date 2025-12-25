@@ -17,11 +17,12 @@ import { MotorcycleListingForm, MotorcycleFormData } from './MotorcycleListingFo
 import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
 import { VehicleListingForm, VehicleFormData } from './VehicleListingForm';
 import { PropertyListingForm } from './PropertyListingForm';
+import { WorkerListingForm, WorkerFormData } from './WorkerListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
 
 interface EditingListing {
   id?: string;
-  category?: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle';
+  category?: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker';
   mode?: 'rent' | 'sale';
   images?: string[];
   latitude?: number;
@@ -85,8 +86,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
-      if (images.length < 3) {
-        throw new Error('Minimum 3 photos required');
+      // Workers only need 1 photo minimum, other categories need 3
+      const minPhotos = selectedCategory === 'worker' ? 1 : 3;
+      if (images.length < minPhotos) {
+        throw new Error(`Minimum ${minPhotos} photo${minPhotos > 1 ? 's' : ''} required`);
       }
 
       // Map form data to database columns based on category
@@ -204,6 +207,16 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           house_rules: formData.house_rules,
           rental_duration_type: formData.rental_duration_type,
           listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
+        });
+      } else if (selectedCategory === 'worker') {
+        Object.assign(listingData, {
+          service_category: formData.service_category,
+          custom_service_name: formData.custom_service_name,
+          pricing_unit: formData.pricing_unit,
+          availability: formData.availability,
+          experience_years: formData.experience_years,
+          languages: formData.languages,
+          listing_type: 'service',
         });
       }
 
@@ -380,10 +393,12 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   };
 
   const handleSubmit = () => {
-    if (images.length < 3) {
+    // Workers only need 1 photo minimum, other categories need 3
+    const minPhotos = selectedCategory === 'worker' ? 1 : 3;
+    if (images.length < minPhotos) {
       toast({
         title: "More Photos Needed",
-        description: "Please upload at least 3 photos to publish your listing.",
+        description: `Please upload at least ${minPhotos} photo${minPhotos > 1 ? 's' : ''} to publish your listing.`,
         variant: "destructive"
       });
       return;
@@ -464,7 +479,27 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         return;
       }
     }
-    
+
+    // Worker-specific validation
+    if (selectedCategory === 'worker') {
+      if (!formData.service_category) {
+        toast({
+          title: "Service Category Required",
+          description: "Please select a service category.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (formData.service_category === 'other' && !formData.custom_service_name) {
+        toast({
+          title: "Custom Service Name Required",
+          description: "Please enter a custom service name.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
     createListingMutation.mutate();
   };
 
@@ -522,6 +557,13 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             <VehicleListingForm
               onDataChange={(data) => setFormData({ ...formData, ...data })}
               initialData={formData as unknown as VehicleFormData}
+            />
+          )}
+
+          {selectedCategory === 'worker' && (
+            <WorkerListingForm
+              onDataChange={(data) => setFormData({ ...formData, ...data })}
+              initialData={formData as unknown as WorkerFormData}
             />
           )}
 

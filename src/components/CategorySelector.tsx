@@ -1,8 +1,8 @@
-import { Anchor, Bike, Home, Bike as Motorcycle, Car } from 'lucide-react';
+import { Anchor, Bike, Home, Bike as Motorcycle, Car, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-export type Category = 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle';
+export type Category = 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker';
 export type Mode = 'sale' | 'rent' | 'both';
 
 interface CategorySelectorProps {
@@ -22,10 +22,11 @@ export function CategorySelector({
 }: CategorySelectorProps) {
   const categories = [
     { value: 'property' as Category, label: 'Properties', icon: Home },
+    { value: 'vehicle' as Category, label: 'Vehicles', icon: Car },
+    { value: 'worker' as Category, label: 'Workers', icon: Briefcase },
     { value: 'yacht' as Category, label: 'Yachts', icon: Anchor },
     { value: 'motorcycle' as Category, label: 'Motorcycles', icon: Motorcycle },
     { value: 'bicycle' as Category, label: 'Bicycles', icon: Bike },
-    { value: 'vehicle' as Category, label: 'Vehicles', icon: Car },
   ];
 
   const modes = [
