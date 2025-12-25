@@ -38,6 +38,28 @@ const RadioPage: React.FC = () => {
     shufflePlay
   } = useRadioPlayer();
 
+  // Smart back handler - clears internal state first, then navigates back
+  const handleBack = () => {
+    // If viewing a specific genre, go back to browse
+    if (selectedGenre) {
+      setSelectedGenre(null);
+      return;
+    }
+    // If in search mode with query, clear search
+    if (viewMode === 'search' && searchQuery) {
+      setSearchQuery('');
+      setViewMode('browse');
+      return;
+    }
+    // If in any non-browse view, go back to browse
+    if (viewMode !== 'browse') {
+      setViewMode('browse');
+      return;
+    }
+    // Otherwise, navigate back in history
+    navigate(-1);
+  };
+
   // Get favorite stations
   const favoriteStations = useMemo(() => {
     const allStations = getAllStations();
@@ -249,7 +271,7 @@ const RadioPage: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => navigate(-1)}
+                  onClick={handleBack}
                   className="shrink-0"
                 >
                   <ChevronLeft className="w-5 h-5" />

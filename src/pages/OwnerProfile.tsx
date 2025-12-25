@@ -45,14 +45,20 @@ const OwnerProfile = () => {
     );
   }
 
+  const handleRadioClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/radio');
+  };
+
   const menuItems = [
-    { icon: User, label: 'Edit Profile', action: () => setShowEditDialog(true), color: 'text-blue-500' },
-    { icon: Building2, label: 'Manage Listings', action: () => navigate('/owner/properties'), color: 'text-primary' },
-    { icon: Radio, label: 'Radio', action: () => navigate('/radio'), color: 'text-cyan-500' },
-    { icon: Crown, label: 'Subscription', action: () => navigate('/subscription-packages'), color: 'text-amber-500' },
-    { icon: Settings, label: 'Settings', action: () => navigate('/owner/settings'), color: 'text-gray-500' },
-    { icon: Shield, label: 'Security', action: () => navigate('/owner/security'), color: 'text-green-500' },
-    { icon: Bell, label: 'Notifications', action: () => navigate('/notifications'), color: 'text-blue-500' },
+    { icon: User, label: 'Edit Profile', action: (_e: React.MouseEvent) => setShowEditDialog(true), color: 'text-blue-500' },
+    { icon: Building2, label: 'Manage Listings', action: (_e: React.MouseEvent) => navigate('/owner/properties'), color: 'text-primary' },
+    { icon: Radio, label: 'Radio', action: handleRadioClick, color: 'text-cyan-500' },
+    { icon: Crown, label: 'Subscription', action: (_e: React.MouseEvent) => navigate('/subscription-packages'), color: 'text-amber-500' },
+    { icon: Settings, label: 'Settings', action: (_e: React.MouseEvent) => navigate('/owner/settings'), color: 'text-gray-500' },
+    { icon: Shield, label: 'Security', action: (_e: React.MouseEvent) => navigate('/owner/security'), color: 'text-green-500' },
+    { icon: Bell, label: 'Notifications', action: (_e: React.MouseEvent) => navigate('/notifications'), color: 'text-blue-500' },
   ];
 
   return (
@@ -182,7 +188,7 @@ const OwnerProfile = () => {
                 {menuItems.map((item) => (
                   <button
                     key={item.label}
-                    onClick={item.action}
+                    onClick={(e) => item.action(e)}
                     className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border last:border-b-0"
                   >
                     <item.icon className={`w-5 h-5 ${item.color}`} />
