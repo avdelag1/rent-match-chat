@@ -19,7 +19,7 @@ import NotFound from "./pages/NotFound";
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
-const PerformanceMonitor = lazy(() => import("@/components/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
+import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 
 // Lazy load pages that are not immediately needed
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -434,9 +434,7 @@ const App = () => (
           </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>
-      <Suspense fallback={null}>
-        <PerformanceMonitor />
-      </Suspense>
+      <PerformanceMonitor />
     </QueryClientProvider>
   </GlobalErrorBoundary>
 );
