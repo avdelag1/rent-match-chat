@@ -14,11 +14,12 @@ import {
 } from 'lucide-react';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     currentStation,
     isPlaying,
@@ -32,8 +33,18 @@ export const RadioBubble: React.FC = () => {
     expandPlayer,
   } = useRadioPlayer();
 
-  // Don't show bubble if no station is selected
-  if (!currentStation) return null;
+  // Pages where the bubble should NOT appear
+  const hiddenPaths = [
+    '/client/dashboard',
+    '/owner/dashboard',
+    '/', // Main landing page
+  ];
+
+  // Check if current path should hide the bubble
+  const shouldHide = hiddenPaths.some(path => location.pathname === path);
+
+  // Don't show bubble if no station is selected or on hidden pages
+  if (!currentStation || shouldHide) return null;
 
   const handleBubbleClick = () => {
     if (isExpanded) {
@@ -57,14 +68,14 @@ export const RadioBubble: React.FC = () => {
 
   return (
     <>
-      {/* Backdrop when expanded */}
+      {/* Backdrop when expanded - subtle blur */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/10 backdrop-blur-sm z-[60]"
             onClick={() => setIsExpanded(false)}
           />
         )}
@@ -99,7 +110,7 @@ export const RadioBubble: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-72 bg-background/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-border/50 overflow-hidden"
+              className="w-72 bg-background/70 backdrop-blur-2xl rounded-2xl shadow-xl border border-white/10 overflow-hidden"
             >
               {/* Header with artwork */}
               <div className="relative h-24 overflow-hidden">
@@ -115,9 +126,9 @@ export const RadioBubble: React.FC = () => {
                     e.stopPropagation();
                     setIsExpanded(false);
                   }}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-white/90" />
                 </button>
 
                 {/* Station info */}
@@ -208,7 +219,7 @@ export const RadioBubble: React.FC = () => {
               </div>
             </motion.div>
           ) : (
-            // Collapsed Bubble View
+            // Collapsed Bubble View - Transparent glassmorphism style
             <motion.button
               key="collapsed"
               initial={{ scale: 0.8 }}
@@ -218,32 +229,33 @@ export const RadioBubble: React.FC = () => {
               whileTap={{ scale: 0.95 }}
               onClick={handleBubbleClick}
               className={cn(
-                "relative w-14 h-14 rounded-full shadow-lg flex items-center justify-center",
-                "bg-gradient-to-br from-primary to-primary/80",
-                "border-2 border-white/20"
+                "relative w-14 h-14 rounded-full flex items-center justify-center",
+                "bg-black/30 backdrop-blur-xl",
+                "border border-white/20",
+                "shadow-lg shadow-black/20"
               )}
             >
-              {/* Album art background */}
+              {/* Album art background with more transparency */}
               <div
-                className="absolute inset-1 rounded-full bg-cover bg-center opacity-80"
+                className="absolute inset-1.5 rounded-full bg-cover bg-center opacity-60"
                 style={{ backgroundImage: `url(${currentStation.artwork})` }}
               />
 
-              {/* Overlay gradient */}
-              <div className="absolute inset-1 rounded-full bg-black/30" />
+              {/* Subtle glass overlay */}
+              <div className="absolute inset-1.5 rounded-full bg-gradient-to-br from-white/10 to-black/20" />
 
               {/* Icon overlay */}
               <div className="relative z-10">
                 {isLoading ? (
-                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
                 ) : isPlaying ? (
                   <div className="flex items-center gap-0.5">
                     {[1, 2, 3].map((i) => (
                       <motion.div
                         key={i}
-                        className="w-1 bg-white rounded-full"
+                        className="w-1 bg-white/90 rounded-full"
                         animate={{
-                          height: [8, 16, 8],
+                          height: [6, 14, 6],
                         }}
                         transition={{
                           duration: 0.5,
@@ -254,13 +266,13 @@ export const RadioBubble: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <Radio className="w-6 h-6 text-white" />
+                  <Radio className="w-5 h-5 text-white/90" />
                 )}
               </div>
 
-              {/* Live indicator */}
+              {/* Live indicator - more subtle */}
               {currentStation.isLive && isPlaying && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-background animate-pulse" />
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500/90 rounded-full border border-white/30 animate-pulse" />
               )}
             </motion.button>
           )}

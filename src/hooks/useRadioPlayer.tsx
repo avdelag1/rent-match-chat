@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { RadioStation, getStationById, radioGenres, getAllStations, getRandomStation, getRandomStationFromGenre } from '@/data/radioStations';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from 'react-router-dom';
 
 // Player Skin Types - 10 Creative Retro-Modern Skins
 export type RadioSkin =
@@ -148,12 +150,16 @@ interface RadioPlayerContextType extends RadioPlayerState {
 
 const RadioPlayerContext = createContext<RadioPlayerContextType | null>(null);
 
-const STORAGE_KEYS = {
-  FAVORITES: 'radio_favorites',
-  RECENTLY_PLAYED: 'radio_recently_played',
-  SKIN: 'radio_skin',
-  VOLUME: 'radio_volume',
-  LAST_STATION: 'radio_last_station',
+// Create role-specific storage keys
+const getStorageKeys = (role: 'client' | 'owner' | null) => {
+  const prefix = role ? `radio_${role}_` : 'radio_';
+  return {
+    FAVORITES: `${prefix}favorites`,
+    RECENTLY_PLAYED: `${prefix}recently_played`,
+    SKIN: `${prefix}skin`,
+    VOLUME: `${prefix}volume`,
+    LAST_STATION: `${prefix}last_station`,
+  };
 };
 
 // Load from localStorage with fallback
@@ -176,25 +182,77 @@ const saveToStorage = (key: string, value: unknown): void => {
 };
 
 export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const location = useLocation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
   const retryCountRef = useRef<number>(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Determine current role from URL path (client or owner)
+  const currentRole = useMemo((): 'client' | 'owner' | null => {
+    const path = location.pathname;
+    if (path.startsWith('/client')) return 'client';
+    if (path.startsWith('/owner')) return 'owner';
+    // For shared pages like /messages, /radio, try to infer from user metadata
+    const metaRole = user?.user_metadata?.role;
+    if (metaRole === 'client' || metaRole === 'owner') return metaRole;
+    return null;
+  }, [location.pathname, user?.user_metadata?.role]);
+
+  // Get role-specific storage keys
+  const storageKeys = useMemo(() => getStorageKeys(currentRole), [currentRole]);
+
+  // Track previous role to detect changes
+  const previousRoleRef = useRef<'client' | 'owner' | null>(currentRole);
+
   const [state, setState] = useState<RadioPlayerState>(() => ({
     currentStation: null,
     isPlaying: false,
     isLoading: false,
-    volume: loadFromStorage(STORAGE_KEYS.VOLUME, 0.8),
+    volume: loadFromStorage(storageKeys.VOLUME, 0.8),
     isMuted: false,
     error: null,
-    currentSkin: loadFromStorage(STORAGE_KEYS.SKIN, 'ipod-classic') as RadioSkin,
+    currentSkin: loadFromStorage(storageKeys.SKIN, 'ipod-classic') as RadioSkin,
     sleepTimer: null,
     sleepTimerEndTime: null,
-    favorites: loadFromStorage<string[]>(STORAGE_KEYS.FAVORITES, []),
-    recentlyPlayed: loadFromStorage<string[]>(STORAGE_KEYS.RECENTLY_PLAYED, []),
+    favorites: loadFromStorage<string[]>(storageKeys.FAVORITES, []),
+    recentlyPlayed: loadFromStorage<string[]>(storageKeys.RECENTLY_PLAYED, []),
     isPlayerExpanded: false,
   }));
+
+  // When role changes, reload state from role-specific storage
+  useEffect(() => {
+    if (previousRoleRef.current !== currentRole && currentRole !== null) {
+      // Stop current playback when switching roles
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+
+      // Load role-specific state
+      const newStorageKeys = getStorageKeys(currentRole);
+      const lastStationId = loadFromStorage<string | null>(newStorageKeys.LAST_STATION, null);
+      const station = lastStationId ? getStationById(lastStationId) : null;
+
+      setState({
+        currentStation: station,
+        isPlaying: false,
+        isLoading: false,
+        volume: loadFromStorage(newStorageKeys.VOLUME, 0.8),
+        isMuted: false,
+        error: null,
+        currentSkin: loadFromStorage(newStorageKeys.SKIN, 'ipod-classic') as RadioSkin,
+        sleepTimer: null,
+        sleepTimerEndTime: null,
+        favorites: loadFromStorage<string[]>(newStorageKeys.FAVORITES, []),
+        recentlyPlayed: loadFromStorage<string[]>(newStorageKeys.RECENTLY_PLAYED, []),
+        isPlayerExpanded: false,
+      });
+
+      previousRoleRef.current = currentRole;
+    }
+  }, [currentRole]);
 
   // Stop radio function - exposed via window for auth to call
   const stopRadio = useCallback(() => {
@@ -300,8 +358,9 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       });
     }
 
-    // Load last played station on mount
-    const lastStationId = loadFromStorage<string | null>(STORAGE_KEYS.LAST_STATION, null);
+    // Load last played station on mount (using current role's storage)
+    const currentStorageKeys = getStorageKeys(previousRoleRef.current);
+    const lastStationId = loadFromStorage<string | null>(currentStorageKeys.LAST_STATION, null);
     if (lastStationId) {
       const station = getStationById(lastStationId);
       if (station) {
@@ -328,30 +387,30 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (audioRef.current) {
       audioRef.current.volume = state.isMuted ? 0 : state.volume;
     }
-    saveToStorage(STORAGE_KEYS.VOLUME, state.volume);
-  }, [state.volume, state.isMuted]);
+    saveToStorage(storageKeys.VOLUME, state.volume);
+  }, [state.volume, state.isMuted, storageKeys.VOLUME]);
 
   // Save skin preference
   useEffect(() => {
-    saveToStorage(STORAGE_KEYS.SKIN, state.currentSkin);
-  }, [state.currentSkin]);
+    saveToStorage(storageKeys.SKIN, state.currentSkin);
+  }, [state.currentSkin, storageKeys.SKIN]);
 
   // Save favorites
   useEffect(() => {
-    saveToStorage(STORAGE_KEYS.FAVORITES, state.favorites);
-  }, [state.favorites]);
+    saveToStorage(storageKeys.FAVORITES, state.favorites);
+  }, [state.favorites, storageKeys.FAVORITES]);
 
   // Save recently played
   useEffect(() => {
-    saveToStorage(STORAGE_KEYS.RECENTLY_PLAYED, state.recentlyPlayed);
-  }, [state.recentlyPlayed]);
+    saveToStorage(storageKeys.RECENTLY_PLAYED, state.recentlyPlayed);
+  }, [state.recentlyPlayed, storageKeys.RECENTLY_PLAYED]);
 
   // Save current station
   useEffect(() => {
     if (state.currentStation) {
-      saveToStorage(STORAGE_KEYS.LAST_STATION, state.currentStation.id);
+      saveToStorage(storageKeys.LAST_STATION, state.currentStation.id);
     }
-  }, [state.currentStation]);
+  }, [state.currentStation, storageKeys.LAST_STATION]);
 
   // Sleep timer countdown
   useEffect(() => {
