@@ -279,10 +279,10 @@ const RadioPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-y-auto">
       {/* Full Screen Skinned Player */}
-      <AnimatePresence>
-        {isPlayerExpanded && <RadioPlayerSkinned />}
+      <AnimatePresence mode="wait">
+        {isPlayerExpanded && <RadioPlayerSkinned key="skinned-player" />}
       </AnimatePresence>
 
       {/* Main Content */}

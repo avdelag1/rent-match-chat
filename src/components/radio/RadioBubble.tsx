@@ -190,15 +190,9 @@ export const RadioBubble: React.FC = () => {
     navigate('/radio');
   }, [navigate]);
 
-  // Pages where the bubble should NOT appear
-  const hiddenPaths = [
-    '/client/dashboard',
-    '/owner/dashboard',
-    '/',
-    '/radio',
-  ];
-
-  const shouldHide = hiddenPaths.some(path => location.pathname === path);
+  // Pages where the bubble should NOT appear (only landing page and full radio page)
+  const hiddenPaths = ['/', '/radio'];
+  const shouldHide = hiddenPaths.includes(location.pathname);
 
   if (!currentStation || shouldHide) return null;
 

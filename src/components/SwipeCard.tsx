@@ -75,30 +75,14 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
 
-    const threshold = 80; // More sensitive swipe threshold
+    const threshold = 80;
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
 
-    // Only swipe if dragged enough (prevent ghost taps)
     if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
       setDragOffset({ x: 0, y: 0 });
-    } else if (dragDistance > 10) {
-      // Only animate snap-back for movements larger than 10px (prevents gravity effect on light taps)
-      const card = cardRef.current;
-      if (card) {
-        card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
-        card.style.transform = 'translate(0px, 0px) rotate(0deg)';
-        if (snapBackTimeoutRef.current) {
-          clearTimeout(snapBackTimeoutRef.current);
-        }
-        snapBackTimeoutRef.current = setTimeout(() => {
-          card.style.transition = '';
-          card.style.transform = ''; // Clear inline transform to let React state control
-          setDragOffset({ x: 0, y: 0 }); // Reset state AFTER animation completes
-        }, 300);
-      }
     } else {
-      // For very small movements, reset immediately
+      // Always snap back - reset state immediately, CSS handles animation
       setDragOffset({ x: 0, y: 0 });
     }
   };
@@ -135,36 +119,23 @@ export function SwipeCard({
     if (!isDragging || !isTop) return;
     setIsDragging(false);
 
-    const threshold = 80; // More sensitive swipe threshold
+    const threshold = 80;
     const dragDistance = Math.sqrt(Math.pow(dragOffset.x, 2) + Math.pow(dragOffset.y, 2));
 
-    // Only swipe if dragged enough (prevent ghost taps)
     if (Math.abs(dragOffset.x) > threshold && dragDistance > 50) {
       onSwipe(dragOffset.x > 0 ? 'right' : 'left');
       setDragOffset({ x: 0, y: 0 });
-    } else if (dragDistance > 10) {
-      // Only animate snap-back for movements larger than 10px (prevents gravity effect on light taps)
-      const card = cardRef.current;
-      if (card) {
-        card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
-        card.style.transform = 'translate(0px, 0px) rotate(0deg)';
-        if (snapBackTimeoutRef.current) {
-          clearTimeout(snapBackTimeoutRef.current);
-        }
-        snapBackTimeoutRef.current = setTimeout(() => {
-          card.style.transition = '';
-          card.style.transform = ''; // Clear inline transform to let React state control
-          setDragOffset({ x: 0, y: 0 }); // Reset state AFTER animation completes
-        }, 300);
-      }
     } else {
-      // For very small movements, reset immediately
+      // Always snap back - reset state immediately, CSS handles animation
       setDragOffset({ x: 0, y: 0 });
     }
   };
 
   const rotation = dragOffset.x * 0.1;
   const opacity = isTop ? Math.max(0.8, 1 - Math.abs(dragOffset.x) / 400) : 1;
+  
+  // Only disable transition during active drag for smooth snap-back
+  const shouldAnimate = !isDragging;
 
   const primaryImage = listing.images && listing.images.length > 0 
     ? listing.images[0] 
@@ -173,7 +144,7 @@ export function SwipeCard({
   return (
     <Card
       ref={cardRef}
-      className={`absolute inset-0 cursor-grab active:cursor-grabbing transition-all duration-200 overflow-hidden bg-white border shadow-2xl rounded-3xl ${
+      className={`absolute inset-0 cursor-grab active:cursor-grabbing overflow-hidden bg-white border shadow-2xl rounded-3xl ${
         !isTop ? 'scale-95 z-0' : 'z-10'
       }`}
       style={{
@@ -181,8 +152,9 @@ export function SwipeCard({
           ? `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)` 
           : 'scale(0.95)',
         opacity,
-        borderRadius: '1.5rem', // 24px - ensures rounded corners during animation
+        borderRadius: '1.5rem',
         overflow: 'hidden',
+        transition: shouldAnimate ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s' : 'none',
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
