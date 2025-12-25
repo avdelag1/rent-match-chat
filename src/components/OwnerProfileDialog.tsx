@@ -72,9 +72,18 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
       profile_images: profileImages,
     };
 
-    await saveMutation.mutateAsync(payload);
-    toast({ title: 'Owner Profile Saved', description: 'Your business information has been updated.' });
-    onOpenChange(false);
+    try {
+      await saveMutation.mutateAsync(payload);
+      toast({ title: 'Owner Profile Saved', description: 'Your business information has been updated.' });
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving owner profile:', error);
+      toast({
+        title: 'Error saving profile',
+        description: error instanceof Error ? error.message : 'Please try again',
+        variant: 'destructive'
+      });
+    }
   };
 
   const completionPercentage = Math.round(
