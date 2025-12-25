@@ -18,11 +18,12 @@ import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
 import { VehicleListingForm, VehicleFormData } from './VehicleListingForm';
 import { PropertyListingForm } from './PropertyListingForm';
 import { WorkerListingForm, WorkerFormData } from './WorkerListingForm';
+import { CameraListingForm, CameraFormData } from './CameraListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
 
 interface EditingListing {
   id?: string;
-  category?: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker';
+  category?: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker' | 'camera';
   mode?: 'rent' | 'sale';
   images?: string[];
   latitude?: number;
@@ -213,10 +214,68 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           service_category: formData.service_category,
           custom_service_name: formData.custom_service_name,
           pricing_unit: formData.pricing_unit,
-          availability: formData.availability,
+          work_type: formData.work_type,
+          schedule_type: formData.schedule_type,
+          days_available: formData.days_available,
+          time_slots_available: formData.time_slots_available,
+          location_type: formData.location_type,
+          experience_level: formData.experience_level,
           experience_years: formData.experience_years,
+          worker_skills: formData.skills,
+          certifications: formData.certifications,
+          tools_equipment: formData.tools_equipment,
+          service_radius_km: formData.service_radius_km,
+          minimum_booking_hours: formData.minimum_booking_hours,
+          offers_emergency_service: formData.offers_emergency_service,
+          background_check_verified: formData.background_check_verified,
+          insurance_verified: formData.insurance_verified,
           languages: formData.languages,
           listing_type: 'service',
+        });
+      } else if (selectedCategory === 'camera') {
+        Object.assign(listingData, {
+          camera_type: formData.camera_type,
+          camera_brand: formData.camera_brand,
+          camera_model: formData.camera_model,
+          camera_year: formData.camera_year,
+          camera_condition: formData.camera_condition,
+          sensor_type: formData.sensor_type,
+          sensor_size: formData.sensor_size,
+          megapixels: formData.megapixels,
+          iso_range_min: formData.iso_range_min,
+          iso_range_max: formData.iso_range_max,
+          lens_mount: formData.lens_mount,
+          lens_type: formData.lens_type,
+          focal_length_min: formData.focal_length_min,
+          focal_length_max: formData.focal_length_max,
+          aperture_max: formData.aperture_max,
+          aperture_min: formData.aperture_min,
+          has_front_camera: formData.has_front_camera,
+          front_camera_megapixels: formData.front_camera_megapixels,
+          front_camera_aperture: formData.front_camera_aperture,
+          rear_camera_count: formData.rear_camera_count,
+          main_rear_camera_megapixels: formData.main_rear_camera_megapixels,
+          main_rear_camera_aperture: formData.main_rear_camera_aperture,
+          video_resolution: formData.video_resolution,
+          video_frame_rate: formData.video_frame_rate,
+          has_image_stabilization: formData.has_image_stabilization,
+          stabilization_type: formData.stabilization_type,
+          has_weather_sealing: formData.has_weather_sealing,
+          has_touchscreen: formData.has_touchscreen,
+          screen_size: formData.screen_size,
+          has_viewfinder: formData.has_viewfinder,
+          viewfinder_type: formData.viewfinder_type,
+          autofocus_type: formData.autofocus_type,
+          autofocus_points: formData.autofocus_points,
+          continuous_shooting_fps: formData.continuous_shooting_fps,
+          has_wifi: formData.has_wifi,
+          has_bluetooth: formData.has_bluetooth,
+          has_gps: formData.has_gps,
+          has_nfc: formData.has_nfc,
+          weight_grams: formData.weight_grams,
+          battery_type: formData.battery_type,
+          battery_shots: formData.battery_shots,
+          included_accessories: formData.included_accessories,
         });
       }
 
@@ -564,6 +623,13 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             <WorkerListingForm
               onDataChange={(data) => setFormData({ ...formData, ...data })}
               initialData={formData as unknown as WorkerFormData}
+            />
+          )}
+
+          {selectedCategory === 'camera' && (
+            <CameraListingForm
+              onDataChange={(data) => setFormData({ ...formData, ...data })}
+              initialData={formData as unknown as CameraFormData}
             />
           )}
 
