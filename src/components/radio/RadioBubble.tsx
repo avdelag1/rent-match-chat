@@ -24,9 +24,10 @@ const getDefaultPosition = (): { left: number; top: number } => {
   // Use a safe default - bottom right area, will be adjusted on mount
   const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
   const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+  // Position in bottom-right, but above bottom nav (at least 180px from bottom)
   return {
     left: Math.max(windowWidth - BUBBLE_SIZE - MARGIN, MARGIN),
-    top: Math.min(windowHeight - 200, 100),
+    top: Math.max(windowHeight - 180 - BUBBLE_SIZE, 100),
   };
 };
 
@@ -41,21 +42,20 @@ const getSavedPosition = (): { left: number; top: number } => {
     if (saved) {
       const pos = JSON.parse(saved);
       // Validate position is within viewport
+      // Leave space for bottom nav (~120px) and header (~80px)
       const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
-      const maxTop = window.innerHeight - BUBBLE_SIZE - MARGIN;
+      const maxTop = window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav
+      const minTop = MARGIN + 80; // Leave room for header
       return {
         left: Math.min(Math.max(pos.left ?? maxLeft, MARGIN), maxLeft),
-        top: Math.min(Math.max(pos.top ?? 100, MARGIN + 60), maxTop),
+        top: Math.min(Math.max(pos.top ?? maxTop, minTop), maxTop),
       };
     }
   } catch (e) {
     // Ignore errors
   }
-  // Default position: bottom-right corner (more visible on mobile)
-  return {
-    left: window.innerWidth - BUBBLE_SIZE - MARGIN,
-    top: window.innerHeight - 200,
-  };
+  // Default position: bottom-right corner, above bottom nav
+  return getDefaultPosition();
 };
 
 // Save position to localStorage
@@ -95,8 +95,8 @@ export const RadioBubble: React.FC = () => {
     const ensureVisible = () => {
       setPosition(prev => {
         const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
-        const maxTop = window.innerHeight - BUBBLE_SIZE - MARGIN;
-        const minTop = MARGIN + 60;
+        const maxTop = window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav
+        const minTop = MARGIN + 80; // Leave room for header
 
         // Calculate clamped position
         const clampedLeft = Math.min(Math.max(prev.left, MARGIN), maxLeft);
@@ -120,10 +120,11 @@ export const RadioBubble: React.FC = () => {
   // Clamp position within viewport
   const clampPosition = useCallback((left: number, top: number) => {
     const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
-    const maxTop = window.innerHeight - BUBBLE_SIZE - MARGIN;
+    const maxTop = window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav
+    const minTop = MARGIN + 80; // Leave room for header
     return {
       left: Math.min(Math.max(left, MARGIN), maxLeft),
-      top: Math.min(Math.max(top, MARGIN + 60), maxTop),
+      top: Math.min(Math.max(top, minTop), maxTop),
     };
   }, []);
 
