@@ -29,7 +29,7 @@ export function useScrollReveal(
     scale = 0.95,
   } = options;
 
-  const isInView = useInView(ref, { once, margin });
+  const isInView = useInView(ref, { once, margin: margin as `${number}px` });
   const controls = useAnimation();
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export function useStaggeredScrollReveal(
     staggerDelay = 0.05,
   } = options;
 
-  const isInView = useInView(ref, { once, margin });
+  const isInView = useInView(ref, { once, margin: margin as `${number}px` });
   const controls = useAnimation();
 
   useEffect(() => {

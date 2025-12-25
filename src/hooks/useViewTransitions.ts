@@ -45,8 +45,8 @@ export function startViewTransition(callback: () => void | Promise<void>) {
     return;
   }
 
-  // @ts-expect-error - startViewTransition is not yet in TypeScript definitions
-  document.startViewTransition(callback);
+  // Use type assertion for startViewTransition
+  (document as any).startViewTransition(callback);
 }
 
 /**
