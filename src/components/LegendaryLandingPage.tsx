@@ -147,7 +147,7 @@ function LegendaryLandingPage() {
             <motion.span className="block relative" style={{
             fontSize: 'clamp(2.5rem, 14vw, 5rem)',
             fontWeight: 700,
-            letterSpacing: '0.02em',
+            letterSpacing: '-0.02em',
             width: '100%',
             textAlign: 'center',
             background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
@@ -163,7 +163,7 @@ function LegendaryLandingPage() {
             repeat: Infinity,
             ease: "linear"
           }}>
-              Swipess
+              SWIPESS
             </motion.span>
           </h1>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{

@@ -103,7 +103,7 @@ export function AppLoadingScreen() {
             style={{
               fontSize: 'clamp(3.5rem, 14vw, 5.5rem)',
               fontWeight: 700,
-              letterSpacing: '0.02em',
+              letterSpacing: '-0.02em',
               background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
               backgroundSize: '200% 100%',
               WebkitBackgroundClip: 'text',
@@ -120,7 +120,7 @@ export function AppLoadingScreen() {
               ease: "linear",
             }}
           >
-            Swipess
+            SWIPESS
           </motion.span>
         </h1>
       </motion.div>
