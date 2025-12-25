@@ -1458,3 +1458,138 @@ input:focus, textarea:focus, select:focus {
 .swipe-indicator.nope.visible {
   transform: scale(1) rotate(15deg);
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  VIEW TRANSITIONS API - Native Browser Page Transitions              */
+/*  Modern standard for smooth morphing between pages                   */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Enable view transitions for navigation */
+@view-transition {
+  navigation: auto;
+}
+
+/* Customize default cross-fade animation */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  mix-blend-mode: normal;
+}
+
+/* Forward navigation - slide from right */
+html[data-navigation-direction="forward"] {
+  &::view-transition-old(root) {
+    animation-name: slide-out-left;
+  }
+
+  &::view-transition-new(root) {
+    animation-name: slide-in-right;
+  }
+}
+
+/* Backward navigation - slide from left */
+html[data-navigation-direction="back"] {
+  &::view-transition-old(root) {
+    animation-name: slide-out-right;
+  }
+
+  &::view-transition-new(root) {
+    animation-name: slide-in-left;
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Shared element transitions - for images and cards */
+.property-card-image,
+.listing-card-image {
+  view-transition-name: property-image;
+  contain: layout;
+}
+
+.profile-avatar {
+  view-transition-name: profile-avatar;
+  contain: layout;
+}
+
+/* Scale animation for modals and dialogs */
+::view-transition-old(modal),
+::view-transition-new(modal) {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-old(modal),
+  ::view-transition-new(modal) {
+    animation-duration: 0.05s !important;
+    animation-delay: 0s !important;
+  }
+
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* Optimize for mobile performance */
+@media (max-width: 768px) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.25s;
+  }
+}
+
+/* Dark mode view transitions */
+@media (prefers-color-scheme: dark) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    /* Ensure smooth transitions in dark mode */
+    mix-blend-mode: normal;
+  }
+}

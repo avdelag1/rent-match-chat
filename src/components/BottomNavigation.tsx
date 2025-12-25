@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
+import { springConfigs } from '@/utils/springConfigs';
 
 interface BottomNavigationProps {
   userRole: 'client' | 'owner';
@@ -165,14 +166,12 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   return (
     <nav className="app-bottom-bar pointer-events-none px-3">
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ 
-          type: 'spring', 
-          stiffness: 400, 
-          damping: 30,
-          delay: 0.1 
+        transition={{
+          ...springConfigs.snappy,
+          delay: 0.1
         }}
         className="flex items-center justify-center gap-2 px-4 py-3 pointer-events-auto bg-background/80 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] mx-auto max-w-fit"
       >
@@ -185,15 +184,13 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               key={item.id}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ 
-                type: 'spring',
-                stiffness: 500,
-                damping: 25,
+              transition={{
+                ...springConfigs.instant,
                 delay: 0.15 + index * 0.05
               }}
               onClick={() => handleNavClick(item)}
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.9, transition: springConfigs.instant }}
               className="relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl"
             >
               {/* Notification Badge - Animated dot */}
