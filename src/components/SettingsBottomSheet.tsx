@@ -202,8 +202,8 @@ export function SettingsBottomSheet({
 
         {/* Footer Info */}
         <div className="px-2 pt-2">
-          <p className="text-xs text-muted-foreground text-center font-brand tracking-tighter">
-            SWIPESS v1.0
+          <p className="text-xs text-center swipess-logo-header" style={{ fontSize: '0.875rem' }}>
+            Swipess <span className="text-muted-foreground font-normal" style={{ WebkitTextStroke: '0', background: 'none', WebkitTextFillColor: 'inherit' }}>v1.0</span>
           </p>
         </div>
       </div>

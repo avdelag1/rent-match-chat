@@ -145,8 +145,36 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
-          <div className="flex justify-center">
-            <SwipessLogo size="lg" showGlow={true} />
+          {/* Glow effect behind the logo */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <motion.div
+                className="w-72 h-20 rounded-full"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255, 180, 0, 0.5) 0%, rgba(255, 140, 0, 0.3) 40%, transparent 70%)',
+                  filter: 'blur(24px)',
+                }}
+                animate={{
+                  opacity: [0.5, 0.8, 0.5],
+                  scale: [1, 1.15, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </div>
+            <h1 className="text-center leading-none relative">
+              <span
+                className="swipess-logo-simple block"
+                style={{
+                  fontSize: 'clamp(2.5rem, 14vw, 5rem)',
+                }}
+              >
+                Swipess
+              </span>
+            </h1>
           </div>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0

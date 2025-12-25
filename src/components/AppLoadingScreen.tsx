@@ -98,7 +98,35 @@ export function AppLoadingScreen() {
         transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
         className="relative z-10 mb-16"
       >
-        <SwipessLogo size="xl" showGlow={true} />
+        {/* Glow effect behind the logo */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <motion.div
+            className="w-64 h-16 rounded-full"
+            style={{
+              background: 'radial-gradient(ellipse at center, rgba(255, 180, 0, 0.5) 0%, rgba(255, 140, 0, 0.3) 40%, transparent 70%)',
+              filter: 'blur(20px)',
+            }}
+            animate={{
+              opacity: [0.6, 0.9, 0.6],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+        <h1 className="text-center leading-none relative">
+          <span
+            className="swipess-logo-simple block"
+            style={{
+              fontSize: 'clamp(3.5rem, 14vw, 5.5rem)',
+            }}
+          >
+            Swipess
+          </span>
+        </h1>
       </motion.div>
 
       {/* Enhanced spinner with fire theme */}
