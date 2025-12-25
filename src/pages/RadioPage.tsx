@@ -8,11 +8,13 @@ import {
   ChevronLeft,
   Settings,
   Sparkles,
-  Shuffle
+  Shuffle,
+  Palette,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRadioPlayer } from '@/hooks/useRadioPlayer';
+import { useRadioPlayer, AVAILABLE_SKINS, RadioSkin } from '@/hooks/useRadioPlayer';
 import { radioGenres, getAllStations, searchStations, RadioStation, RadioGenre } from '@/data/radioStations';
 import { RadioStationCard } from '@/components/radio/RadioStationCard';
 import { RadioGenreSection } from '@/components/radio/RadioGenreSection';
@@ -35,7 +37,9 @@ const RadioPage: React.FC = () => {
     favorites,
     recentlyPlayed,
     expandPlayer,
-    shufflePlay
+    shufflePlay,
+    currentSkin,
+    setSkin
   } = useRadioPlayer();
 
   // Smart back handler - clears internal state first, then navigates back
@@ -89,7 +93,64 @@ const RadioPage: React.FC = () => {
     if (viewMode === 'settings') {
       return (
         <div className="space-y-6 pb-32">
-          <RadioSleepTimer />
+          {/* Player Skins Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Palette className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-semibold">Player Skins</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Choose a visual style for your radio player
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {AVAILABLE_SKINS.map((skin) => {
+                const isSelected = currentSkin === skin.id;
+                return (
+                  <motion.button
+                    key={skin.id}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSkin(skin.id)}
+                    className={cn(
+                      "relative p-3 rounded-xl border-2 transition-all text-left",
+                      isSelected
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50 hover:bg-accent/50"
+                    )}
+                  >
+                    {/* Gradient Preview */}
+                    <div
+                      className={cn(
+                        "w-full h-16 rounded-lg mb-2 flex items-center justify-center text-2xl",
+                        `bg-gradient-to-br ${skin.gradient}`
+                      )}
+                    >
+                      {skin.emoji}
+                    </div>
+
+                    {/* Info */}
+                    <h3 className="font-semibold text-sm">{skin.name}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{skin.description}</p>
+
+                    {/* Selected Check */}
+                    {isSelected && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+                      >
+                        <Check className="w-3 h-3 text-primary-foreground" />
+                      </motion.div>
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sleep Timer Section */}
+          <div className="border-t border-border pt-6">
+            <RadioSleepTimer />
+          </div>
         </div>
       );
     }
