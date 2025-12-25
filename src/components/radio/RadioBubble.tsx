@@ -70,6 +70,7 @@ export const RadioBubble: React.FC = () => {
     '/client/dashboard',
     '/owner/dashboard',
     '/', // Main landing page
+    '/radio', // Radio page - has its own players
   ];
 
   // Check if current path should hide the bubble
