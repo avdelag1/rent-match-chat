@@ -99,7 +99,15 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     }
   }, [user, userRole, loading, profileLoading, navigate, location, requiredRole, timedOut, isError]);
 
-  if (loading || profileLoading) {
+  // Only show loading screen during initial auth check
+  // Don't show loading if we already have cached role data (prevents flash on route changes)
+  if (loading) {
+    return <AppLoadingScreen />;
+  }
+
+  // Show loading only if we're fetching AND don't have any role data yet
+  // Once we have cached data, we skip the loading screen entirely
+  if (profileLoading && userRole === undefined) {
     return <AppLoadingScreen />;
   }
 
