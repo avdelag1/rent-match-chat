@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import {
   Radio,
   Play,
@@ -11,13 +11,39 @@ import {
   ChevronUp,
   Volume2,
   VolumeX,
+  GripVertical,
 } from 'lucide-react';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+// Get saved position from localStorage
+const getSavedPosition = () => {
+  try {
+    const saved = localStorage.getItem('radioBubblePosition');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    // Ignore errors
+  }
+  return { x: 0, y: 0 };
+};
+
+// Save position to localStorage
+const savePosition = (x: number, y: number) => {
+  try {
+    localStorage.setItem('radioBubblePosition', JSON.stringify({ x, y }));
+  } catch (e) {
+    // Ignore errors
+  }
+};
+
 export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState(getSavedPosition);
+  const constraintsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -47,10 +73,13 @@ export const RadioBubble: React.FC = () => {
   if (!currentStation || shouldHide) return null;
 
   const handleBubbleClick = () => {
-    if (isExpanded) {
-      expandPlayer();
-    } else {
-      setIsExpanded(true);
+    // Only expand if not dragging
+    if (!isDragging) {
+      if (isExpanded) {
+        expandPlayer();
+      } else {
+        setIsExpanded(true);
+      }
     }
   };
 
@@ -66,8 +95,22 @@ export const RadioBubble: React.FC = () => {
     }, 0);
   };
 
+  const handleDragEnd = (_: any, info: { point: { x: number; y: number } }) => {
+    // Save the new position
+    savePosition(info.point.x, info.point.y);
+    // Small delay to prevent click from firing
+    setTimeout(() => setIsDragging(false), 100);
+  };
+
   return (
     <>
+      {/* Full screen drag constraints container */}
+      <div 
+        ref={constraintsRef} 
+        className="fixed inset-0 pointer-events-none z-[65]"
+        style={{ top: 60, bottom: 80, left: 10, right: 10 }}
+      />
+
       {/* Backdrop when expanded - subtle blur */}
       <AnimatePresence>
         {isExpanded && (
@@ -84,23 +127,21 @@ export const RadioBubble: React.FC = () => {
       {/* Floating Bubble */}
       <motion.div
         className={cn(
-          "fixed z-[70] transition-all duration-300",
-          isExpanded
-            ? "bottom-24 right-4"
-            : "bottom-24 right-4"
+          "fixed z-[70] touch-none",
+          isExpanded ? "bottom-24 right-4" : "",
+          isDragging && "cursor-grabbing"
         )}
+        style={!isExpanded ? { bottom: 96, right: 16 } : undefined}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         drag={!isExpanded}
-        dragConstraints={{
-          top: 100,
-          left: 20,
-          right: window.innerWidth - 80,
-          bottom: window.innerHeight - 180,
-        }}
+        dragConstraints={constraintsRef}
         dragElastic={0.1}
-      >
+        dragMomentum={false}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={handleDragEnd}
+        whileDrag={{ scale: 1.1, zIndex: 100 }}>
         <AnimatePresence mode="wait">
           {isExpanded ? (
             // Expanded Card View
