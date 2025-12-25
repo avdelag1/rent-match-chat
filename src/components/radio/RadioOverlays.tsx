@@ -1,21 +1,26 @@
 import React from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { RadioPlayerSkinned } from '@/components/radio/RadioPlayerSkinned';
 import { RadioMiniPlayer } from '@/components/radio/RadioMiniPlayer';
 
 /**
  * Global radio overlays - mounted at app level for persistence across routes
- * Renders expanded player and mini player globally
+ * Full player ONLY on /radio page, mini player everywhere else
  */
 export const RadioOverlays: React.FC = () => {
   const { currentStation, isPlayerExpanded } = useRadioPlayer();
+  const location = useLocation();
+  
+  // Full player only shows on /radio page
+  const isRadioPage = location.pathname === '/radio';
 
   return (
     <>
-      {/* Full Screen Skinned Player - Global */}
+      {/* Full Screen Skinned Player - ONLY on /radio page */}
       <AnimatePresence mode="wait">
-        {isPlayerExpanded && <RadioPlayerSkinned key="global-skinned-player" />}
+        {isRadioPage && isPlayerExpanded && <RadioPlayerSkinned key="global-skinned-player" />}
       </AnimatePresence>
 
       {/* Mini Player - Global (when station exists but player not expanded) */}
