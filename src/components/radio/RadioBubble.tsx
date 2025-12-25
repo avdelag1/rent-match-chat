@@ -43,9 +43,16 @@ export const RadioBubble: React.FC = () => {
     }
   };
 
-  const handleGoToRadio = () => {
-    navigate('/radio');
+  const handleGoToRadio = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setIsExpanded(false);
+    // Use setTimeout to ensure state updates before navigation
+    setTimeout(() => {
+      navigate('/radio');
+    }, 0);
   };
 
   return (
@@ -192,7 +199,7 @@ export const RadioBubble: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={handleGoToRadio}
+                    onClick={(e) => handleGoToRadio(e)}
                     className="p-2 rounded-full hover:bg-secondary transition-colors"
                   >
                     <ChevronUp className="w-4 h-4" />

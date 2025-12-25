@@ -108,7 +108,11 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
               variant="ghost"
               size="icon"
               className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
-              onClick={() => navigate('/radio')}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate('/radio');
+              }}
               aria-label="Radio"
             >
               <Radio className="h-5 w-5 text-foreground/80" />
