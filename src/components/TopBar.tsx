@@ -32,7 +32,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           whileTap={{ scale: 0.98 }}
         >
           <span
-            className="text-2xl font-bold tracking-wide font-brand"
+            className="text-2xl font-bold tracking-tighter font-brand"
             style={{
               background: 'linear-gradient(90deg, #f97316, #ea580c, #fbbf24, #ff6b35, #dc2626, #f97316)',
               backgroundSize: '200% 100%',
@@ -41,7 +41,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
               backgroundClip: 'text',
             }}
           >
-            Swipess
+            SWIPESS
           </span>
         </motion.div>
 
