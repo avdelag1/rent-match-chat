@@ -165,6 +165,8 @@ const saveToStorage = (key: string, value: unknown): void => {
 export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sleepTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef<number>(0);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [state, setState] = useState<RadioPlayerState>(() => ({
     currentStation: null,
@@ -190,6 +192,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
       // Event listeners
       audioRef.current.addEventListener('playing', () => {
+        retryCountRef.current = 0; // Reset retry count on successful play
         setState(prev => ({ ...prev, isPlaying: true, isLoading: false, error: null }));
       });
 
@@ -206,12 +209,35 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       });
 
       audioRef.current.addEventListener('error', () => {
-        setState(prev => ({
-          ...prev,
-          isLoading: false,
-          isPlaying: false,
-          error: 'Unable to load stream. Please try another station.'
-        }));
+        // Retry up to 3 times with exponential backoff
+        if (retryCountRef.current < 3) {
+          retryCountRef.current += 1;
+          const retryDelay = Math.min(1000 * Math.pow(2, retryCountRef.current - 1), 5000);
+
+          setState(prev => ({
+            ...prev,
+            isLoading: true,
+            error: `Retrying connection (${retryCountRef.current}/3)...`
+          }));
+
+          retryTimeoutRef.current = setTimeout(() => {
+            if (audioRef.current && state.currentStation) {
+              audioRef.current.load();
+              audioRef.current.play().catch(() => {
+                // If retry fails, continue to next retry
+              });
+            }
+          }, retryDelay);
+        } else {
+          // Max retries exceeded
+          setState(prev => ({
+            ...prev,
+            isLoading: false,
+            isPlaying: false,
+            error: 'Stream unavailable. Try skipping to the next station.'
+          }));
+          retryCountRef.current = 0;
+        }
       });
     }
 
@@ -231,6 +257,9 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
       if (sleepTimerRef.current) {
         clearTimeout(sleepTimerRef.current);
+      }
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
       }
     };
   }, []);
@@ -288,6 +317,13 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [state.sleepTimerEndTime]);
 
   const setStation = useCallback((station: RadioStation) => {
+    // Reset retry count when changing stations
+    retryCountRef.current = 0;
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+
     setState(prev => ({
       ...prev,
       currentStation: station,
@@ -300,6 +336,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     if (audioRef.current) {
       audioRef.current.src = station.streamUrl;
+      audioRef.current.load(); // Force reload the stream
     }
   }, []);
 

@@ -25,6 +25,7 @@ export const RadioPlayer: React.FC = () => {
     volume,
     isMuted,
     sleepTimer,
+    error,
     togglePlayPause,
     setVolume,
     toggleMute,
@@ -159,6 +160,15 @@ export const RadioPlayer: React.FC = () => {
           <p className="text-sm text-muted-foreground truncate">
             {currentStation.description}
           </p>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-3 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg"
+            >
+              <p className="text-xs text-red-500">{error}</p>
+            </motion.div>
+          )}
         </div>
 
         {/* Volume Slider */}
