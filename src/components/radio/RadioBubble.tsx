@@ -191,11 +191,12 @@ export const RadioBubble: React.FC = () => {
     navigate('/radio');
   }, [navigate]);
 
-  // Pages where the bubble should NOT appear (only landing page and full radio page)
-  const hiddenPaths = ['/', '/radio'];
+  // Pages where the bubble should NOT appear (only landing page)
+  const hiddenPaths = ['/'];
   const shouldHide = hiddenPaths.includes(location.pathname);
 
-  if (!currentStation || shouldHide) return null;
+  // Show bubble on all authenticated pages (even without currentStation)
+  if (shouldHide) return null;
 
   return (
     <>
@@ -235,176 +236,104 @@ export const RadioBubble: React.FC = () => {
       >
         <AnimatePresence mode="wait">
           {isExpanded ? (
-            // Expanded Card View
-            <motion.div
-              key="expanded"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden"
-            >
-              {/* Header with artwork */}
-              <div className="relative h-24 overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${currentStation.artwork})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-
-                {/* Close button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsExpanded(false);
-                  }}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
+            currentStation ? (
+              // Expanded Card View with station playing
+              <motion.div
+                key="expanded-playing"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden"
+              >
+                {/* Header with artwork - tap to expand player */}
+                <div 
+                  className="relative h-24 overflow-hidden cursor-pointer"
+                  onClick={() => { setIsExpanded(false); expandPlayer(); }}
                 >
-                  <X className="w-4 h-4 text-white/90" />
-                </button>
-
-                {/* Station info */}
-                <div className="absolute bottom-2 left-3 right-3">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${currentStation.artwork})` }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white/90" />
+                  </button>
+                  <div className="absolute bottom-2 left-3 right-3">
                     {currentStation.isLive && (
-                      <span className="px-1.5 py-0.5 bg-red-500 rounded text-[10px] font-semibold text-white flex items-center gap-1">
+                      <span className="px-1.5 py-0.5 bg-red-500 rounded text-[10px] font-semibold text-white inline-flex items-center gap-1 mb-0.5">
                         <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
                         LIVE
                       </span>
                     )}
+                    <h3 className="text-sm font-bold text-foreground truncate">{currentStation.name}</h3>
+                    <p className="text-xs text-muted-foreground truncate">{currentStation.description}</p>
                   </div>
-                  <h3 className="text-sm font-bold text-foreground truncate">
-                    {currentStation.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {currentStation.description}
-                  </p>
                 </div>
-              </div>
-
-              {/* Controls */}
-              <div className="p-3 space-y-3">
-                {/* Playback controls */}
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    onClick={skipToPrevious}
-                    className="p-2 rounded-full hover:bg-secondary transition-colors"
-                  >
-                    <SkipBack className="w-5 h-5" />
+                <div className="p-3 space-y-3">
+                  <div className="flex items-center justify-center gap-4">
+                    <button onClick={skipToPrevious} className="p-2 rounded-full hover:bg-secondary transition-colors"><SkipBack className="w-5 h-5" /></button>
+                    <button onClick={togglePlayPause} disabled={isLoading} className={cn("p-3 rounded-full transition-all", isPlaying ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80")}>
+                      {isLoading ? <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" /> : isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+                    </button>
+                    <button onClick={skipToNext} className="p-2 rounded-full hover:bg-secondary transition-colors"><SkipForward className="w-5 h-5" /></button>
+                  </div>
+                  <div className="flex items-center justify-between px-2">
+                    <button onClick={toggleMute} className="p-2 rounded-full hover:bg-secondary transition-colors">{isMuted ? <VolumeX className="w-4 h-4 text-muted-foreground" /> : <Volume2 className="w-4 h-4" />}</button>
+                    <button onClick={shufflePlay} className="p-2 rounded-full hover:bg-secondary transition-colors flex items-center gap-1.5"><Shuffle className="w-4 h-4" /><span className="text-xs">Shuffle</span></button>
+                    <button onClick={(e) => handleGoToRadio(e)} className="p-2 rounded-full hover:bg-secondary transition-colors"><ChevronUp className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              // Expanded Card View - no station, quick radio options
+              <motion.div
+                key="expanded-empty"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden p-4"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold">Quick Radio</h3>
+                  <button onClick={() => setIsExpanded(false)} className="p-1 rounded-full hover:bg-secondary"><X className="w-4 h-4" /></button>
+                </div>
+                <div className="space-y-2">
+                  <button onClick={() => { shufflePlay(); setIsExpanded(false); }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
+                    <Shuffle className="w-5 h-5 text-primary" /><span className="text-sm font-medium">Shuffle Play</span>
                   </button>
-
-                  <button
-                    onClick={togglePlayPause}
-                    disabled={isLoading}
-                    className={cn(
-                      "p-3 rounded-full transition-all",
-                      isPlaying
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary hover:bg-secondary/80"
-                    )}
-                  >
-                    {isLoading ? (
-                      <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    ) : isPlaying ? (
-                      <Pause className="w-6 h-6" />
-                    ) : (
-                      <Play className="w-6 h-6 ml-0.5" />
-                    )}
-                  </button>
-
-                  <button
-                    onClick={skipToNext}
-                    className="p-2 rounded-full hover:bg-secondary transition-colors"
-                  >
-                    <SkipForward className="w-5 h-5" />
+                  <button onClick={(e) => handleGoToRadio(e)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors">
+                    <Radio className="w-5 h-5" /><span className="text-sm font-medium">Open Radio</span>
                   </button>
                 </div>
-
-                {/* Secondary controls */}
-                <div className="flex items-center justify-between px-2">
-                  <button
-                    onClick={toggleMute}
-                    className="p-2 rounded-full hover:bg-secondary transition-colors"
-                  >
-                    {isMuted ? (
-                      <VolumeX className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <Volume2 className="w-4 h-4" />
-                    )}
-                  </button>
-
-                  <button
-                    onClick={shufflePlay}
-                    className="p-2 rounded-full hover:bg-secondary transition-colors flex items-center gap-1.5"
-                  >
-                    <Shuffle className="w-4 h-4" />
-                    <span className="text-xs">Shuffle</span>
-                  </button>
-
-                  <button
-                    onClick={(e) => handleGoToRadio(e)}
-                    className="p-2 rounded-full hover:bg-secondary transition-colors"
-                  >
-                    <ChevronUp className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            )
           ) : (
-            // Collapsed Bubble View - Draggable with pointer events
+            // Collapsed Bubble View
             <motion.div
               key="collapsed"
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              className={cn(
-                "relative w-16 h-16 rounded-full flex items-center justify-center",
-                "bg-black/50 backdrop-blur-xl",
-                "border-2 border-white/30",
-                "shadow-xl shadow-black/30",
-                "select-none"
-              )}
+              className={cn("relative w-16 h-16 rounded-full flex items-center justify-center", "bg-black/50 backdrop-blur-xl", "border-2 border-white/30", "shadow-xl shadow-black/30", "select-none")}
             >
-              {/* Album art background */}
-              <div
-                className="absolute inset-2 rounded-full bg-cover bg-center opacity-70"
-                style={{ backgroundImage: `url(${currentStation.artwork})` }}
-              />
-
-              {/* Glass overlay */}
+              {currentStation && <div className="absolute inset-2 rounded-full bg-cover bg-center opacity-70" style={{ backgroundImage: `url(${currentStation.artwork})` }} />}
               <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/20 to-black/30" />
-
-              {/* Icon overlay */}
               <div className="relative z-10">
                 {isLoading ? (
                   <div className="w-6 h-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin" />
                 ) : isPlaying ? (
-                  <div className="flex items-center gap-0.5">
-                    {[1, 2, 3].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-1.5 bg-white/95 rounded-full"
-                        animate={{
-                          height: [8, 18, 8],
-                        }}
-                        transition={{
-                          duration: 0.5,
-                          repeat: Infinity,
-                          delay: i * 0.1,
-                        }}
-                      />
-                    ))}
-                  </div>
+                  <div className="flex items-center gap-0.5">{[1, 2, 3].map((i) => (<motion.div key={i} className="w-1.5 bg-white/95 rounded-full" animate={{ height: [8, 18, 8] }} transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }} />))}</div>
                 ) : (
                   <Radio className="w-6 h-6 text-white/95" />
                 )}
               </div>
-
-              {/* Live indicator */}
-              {currentStation.isLive && isPlaying && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white/50 animate-pulse" />
-              )}
+              {currentStation?.isLive && isPlaying && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white/50 animate-pulse" />}
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Radio,
   Search,
@@ -19,8 +19,6 @@ import { useRadioPlayer, AVAILABLE_SKINS, RadioSkin } from '@/hooks/useRadioPlay
 import { radioGenres, getAllStations, searchStations, RadioStation, RadioGenre } from '@/data/radioStations';
 import { RadioStationCard } from '@/components/radio/RadioStationCard';
 import { RadioGenreSection } from '@/components/radio/RadioGenreSection';
-import { RadioPlayerSkinned } from '@/components/radio/RadioPlayerSkinned';
-import { RadioMiniPlayer } from '@/components/radio/RadioMiniPlayer';
 import { RadioSleepTimer } from '@/components/radio/RadioSleepTimer';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -305,12 +303,7 @@ const RadioPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-y-auto">
-      {/* Full Screen Skinned Player */}
-      <AnimatePresence mode="wait">
-        {isPlayerExpanded && <RadioPlayerSkinned key="skinned-player" />}
-      </AnimatePresence>
-
-      {/* Main Content */}
+      {/* Main Content - hidden when player is expanded (global overlay handles the player) */}
       <div className={cn(
         "transition-opacity duration-300",
         isPlayerExpanded && "opacity-0 pointer-events-none"
@@ -406,13 +399,10 @@ const RadioPage: React.FC = () => {
         </header>
 
         {/* Content */}
-        <main className="px-4 py-4">
+        <main className="px-4 py-4 pb-32">
           {renderContent()}
         </main>
       </div>
-
-      {/* Mini Player */}
-      {currentStation && !isPlayerExpanded && <RadioMiniPlayer />}
     </div>
   );
 };
