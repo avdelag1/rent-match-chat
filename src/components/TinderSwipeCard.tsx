@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useMemo, memo } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -90,8 +90,9 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
       return;
     }
 
-    // Snap back - no haptic for smooth experience
-  }, [onSwipe]);
+    // Snap back - explicitly animate motion value back to 0
+    animate(x, 0, { type: "spring", stiffness: 800, damping: 35 });
+  }, [onSwipe, x]);
 
   const cardStyle = {
     x,
