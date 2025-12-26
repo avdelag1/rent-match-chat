@@ -189,6 +189,15 @@ const INTEREST_CATEGORIES = [
   'Volunteering',
 ];
 
+// Predefined budget ranges for owner filters
+const OWNER_BUDGET_RANGES = [
+  { value: '250-500', label: '$250 - $500/mo', min: 250, max: 500 },
+  { value: '500-1000', label: '$500 - $1,000/mo', min: 500, max: 1000 },
+  { value: '1000-3000', label: '$1,000 - $3,000/mo', min: 1000, max: 3000 },
+  { value: '3000-5000', label: '$3,000 - $5,000/mo', min: 3000, max: 5000 },
+  { value: '5000+', label: '$5,000+/mo', min: 5000, max: 50000 },
+];
+
 export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilterDialogProps) {
   
   const { preferences, updatePreferences, isUpdating } = useOwnerClientPreferences();
@@ -233,6 +242,8 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
 
   const [selectedListingTypes, setSelectedListingTypes] = useState<string[]>(['property']);
   const [selectedClientTypes, setSelectedClientTypes] = useState<string[]>(['tenant']);
+  const [selectedInterestTypes, setSelectedInterestTypes] = useState<string[]>(['both']);
+  const [selectedBudgetRange, setSelectedBudgetRange] = useState<string>('');
 
   useEffect(() => {
     if (preferences) {
@@ -430,7 +441,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
 
         <ScrollArea className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="space-y-6">
-          {/* ✅ FIX #6: Added Interest Type Filter */}
+          {/* Interest Type Filter */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Interest Type</Label>
             <p className="text-sm text-muted-foreground">What are clients looking for?</p>
@@ -442,18 +453,18 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
               ].map((option) => (
                 <Badge
                   key={option.value}
-                  variant={selectedClientTypes.includes(option.value) ? "default" : "outline"}
+                  variant={selectedInterestTypes.includes(option.value) ? "default" : "outline"}
                   className="cursor-pointer hover:opacity-80 text-xs sm:text-sm py-2 px-4"
                   onClick={() => {
-                    if (selectedClientTypes.includes(option.value)) {
-                      setSelectedClientTypes(selectedClientTypes.filter(t => t !== option.value));
+                    if (selectedInterestTypes.includes(option.value)) {
+                      setSelectedInterestTypes(selectedInterestTypes.filter(t => t !== option.value));
                     } else {
-                      setSelectedClientTypes([option.value]);
+                      setSelectedInterestTypes([option.value]);
                     }
                   }}
                 >
                   {option.label}
-                  {selectedClientTypes.includes(option.value) && (
+                  {selectedInterestTypes.includes(option.value) && (
                     <X className="w-3 h-3 ml-1" />
                   )}
                 </Badge>
@@ -532,27 +543,36 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           {/* Budget Range */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Budget Range</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <Label className="text-sm text-muted-foreground">Min Budget</Label>
-                <Input
-                  type="number"
-                  placeholder="Min $"
-                  className="text-base"
-                  value={formData.min_budget || ''}
-                  onChange={(e) => setFormData({ ...formData, min_budget: Number(e.target.value) || undefined })}
-                />
-              </div>
-              <div>
-                <Label className="text-sm text-muted-foreground">Max Budget</Label>
-                <Input
-                  type="number"
-                  placeholder="Max $"
-                  className="text-base"
-                  value={formData.max_budget || ''}
-                  onChange={(e) => setFormData({ ...formData, max_budget: Number(e.target.value) || undefined })}
-                />
-              </div>
+            <p className="text-sm text-muted-foreground">Select expected client budget for rentals</p>
+            <div className="flex flex-wrap gap-2">
+              {OWNER_BUDGET_RANGES.map((range) => {
+                const isSelected = selectedBudgetRange === range.value;
+                return (
+                  <Badge
+                    key={range.value}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`cursor-pointer text-xs sm:text-sm py-2 px-4 transition-all duration-200 ${
+                      isSelected
+                        ? 'shadow-md'
+                        : 'hover:shadow-sm'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedBudgetRange('');
+                        setFormData({ ...formData, min_budget: undefined, max_budget: undefined });
+                      } else {
+                        setSelectedBudgetRange(range.value);
+                        setFormData({ ...formData, min_budget: range.min, max_budget: range.max });
+                      }
+                    }}
+                  >
+                    {range.label}
+                    {isSelected && (
+                      <X className="w-3 h-3 ml-1.5 opacity-90" />
+                    )}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 

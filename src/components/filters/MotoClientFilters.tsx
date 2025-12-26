@@ -12,6 +12,23 @@ import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferenc
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
 
+// Predefined budget ranges for motorcycles (rent)
+const MOTO_RENT_BUDGET_RANGES = [
+  { value: '50-150', label: '$50 - $150/day', min: 50, max: 150 },
+  { value: '150-300', label: '$150 - $300/day', min: 150, max: 300 },
+  { value: '300-500', label: '$300 - $500/day', min: 300, max: 500 },
+  { value: '500+', label: '$500+/day', min: 500, max: 5000 },
+];
+
+// Predefined budget ranges for motorcycles (buy)
+const MOTO_BUY_BUDGET_RANGES = [
+  { value: '1000-3000', label: '$1K - $3K', min: 1000, max: 3000 },
+  { value: '3000-7000', label: '$3K - $7K', min: 3000, max: 7000 },
+  { value: '7000-15000', label: '$7K - $15K', min: 7000, max: 15000 },
+  { value: '15000-30000', label: '$15K - $30K', min: 15000, max: 30000 },
+  { value: '30000+', label: '$30K+', min: 30000, max: 500000 },
+];
+
 interface MotoClientFiltersProps {
   onApply: (filters: any) => void;
   initialFilters?: any;
@@ -20,15 +37,15 @@ interface MotoClientFiltersProps {
 
 export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }: MotoClientFiltersProps) {
   const savePreferencesMutation = useSaveClientFilterPreferences();
-  
+
   const [interestType, setInterestType] = useState(initialFilters.interest_type || 'both');
   const [motoTypes, setMotoTypes] = useState<string[]>(initialFilters.moto_types || []);
   const [engineRange, setEngineRange] = useState([initialFilters.engine_cc_min || 50, initialFilters.engine_cc_max || 1000]);
   const [experienceLevel, setExperienceLevel] = useState(initialFilters.experience_level || 'any');
   const [usagePurpose, setUsagePurpose] = useState<string[]>(initialFilters.usage_purpose || []);
 
-  // New filter options
-  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 50000]);
+  // Budget with predefined ranges
+  const [selectedBudgetRange, setSelectedBudgetRange] = useState<string>(initialFilters.selected_budget_range || '');
   const [yearRange, setYearRange] = useState([initialFilters.year_min || 2010, initialFilters.year_max || new Date().getFullYear()]);
   const [mileageRange, setMileageRange] = useState([initialFilters.mileage_min || 0, initialFilters.mileage_max || 100000]);
   const [transmission, setTransmission] = useState(initialFilters.transmission || 'any');
@@ -40,6 +57,18 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
   const [features, setFeatures] = useState<string[]>(initialFilters.features || []);
   const [batteryCapacity, setBatteryCapacity] = useState(initialFilters.battery_capacity_min || 0);
   const [isElectricOnly, setIsElectricOnly] = useState(initialFilters.is_electric_only || false);
+
+  // Get budget ranges based on interest type
+  const getBudgetRanges = () => {
+    if (interestType === 'buy') return MOTO_BUY_BUDGET_RANGES;
+    return MOTO_RENT_BUDGET_RANGES;
+  };
+
+  const getBudgetValues = () => {
+    const ranges = getBudgetRanges();
+    const selected = ranges.find(r => r.value === selectedBudgetRange);
+    return selected ? { min: selected.min, max: selected.max } : { min: undefined, max: undefined };
+  };
 
   // Client demographic filters
   const [genderPreference, setGenderPreference] = useState<string>(initialFilters.gender_preference || 'any');
@@ -84,6 +113,7 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
   const featureOptions = ['GPS Navigation', 'Heated Grips', 'Cruise Control', 'Traction Control', 'Quick Shifter', 'Riding Modes'];
 
   const handleApply = () => {
+    const budgetValues = getBudgetValues();
     onApply({
       category: 'moto',
       interest_type: interestType,
@@ -92,8 +122,9 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
       engine_cc_max: engineRange[1],
       experience_level: experienceLevel,
       usage_purpose: usagePurpose,
-      price_min: priceRange[0],
-      price_max: priceRange[1],
+      selected_budget_range: selectedBudgetRange,
+      price_min: budgetValues.min,
+      price_max: budgetValues.max,
       year_min: yearRange[0],
       year_max: yearRange[1],
       mileage_min: mileageRange[0],
@@ -124,7 +155,7 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
     setEngineRange([50, 1000]);
     setExperienceLevel('any');
     setUsagePurpose([]);
-    setPriceRange([0, 50000]);
+    setSelectedBudgetRange('');
     setYearRange([2010, new Date().getFullYear()]);
     setMileageRange([0, 100000]);
     setTransmission('any');
@@ -148,6 +179,7 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
 
   const handleSavePreferences = async () => {
     try {
+      const budgetValues = getBudgetValues();
       await savePreferencesMutation.mutateAsync({
         interested_in_motorcycles: true,
         moto_types: motoTypes.length > 0 ? motoTypes : null,
@@ -155,8 +187,8 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
         moto_engine_size_max: engineRange[1],
         moto_year_min: yearRange[0],
         moto_year_max: yearRange[1],
-        moto_price_min: priceRange[0],
-        moto_price_max: priceRange[1],
+        moto_price_min: budgetValues.min,
+        moto_price_max: budgetValues.max,
         moto_mileage_max: mileageRange[1],
         moto_transmission: transmission !== 'any' ? [transmission] : null,
         moto_condition: condition !== 'any' ? [condition] : null,
@@ -326,25 +358,26 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
 
       <Collapsible defaultOpen className="space-y-2">
         <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-muted hover:text-foreground rounded transition-colors">
-          <Label className="font-medium">Price Range</Label>
+          <Label className="font-medium">Budget Range</Label>
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2 pt-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>${priceRange[0].toLocaleString()}</span>
-              <span>${priceRange[1].toLocaleString()}</span>
-            </div>
-            <Slider
-              value={priceRange}
-              onValueChange={setPriceRange}
-              min={0}
-              max={100000}
-              step={1000}
-              className="w-full"
-            />
+          <div className="flex flex-wrap gap-2">
+            {getBudgetRanges().map((range) => (
+              <Badge
+                key={range.value}
+                variant={selectedBudgetRange === range.value ? "default" : "outline"}
+                className={`cursor-pointer transition-all duration-200 hover:scale-105 py-2 px-3 ${
+                  selectedBudgetRange === range.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setSelectedBudgetRange(selectedBudgetRange === range.value ? '' : range.value)}
+              >
+                {range.label}
+              </Badge>
+            ))}
           </div>
-          <p className="text-sm text-muted-foreground">Set budget range for motorcycle purchase or rental</p>
         </CollapsibleContent>
       </Collapsible>
 

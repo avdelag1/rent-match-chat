@@ -13,6 +13,15 @@ import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
 import { SERVICE_CATEGORIES, WORK_TYPES, SCHEDULE_TYPES, DAYS_OF_WEEK, TIME_SLOTS, LOCATION_TYPES, EXPERIENCE_LEVELS, COMMON_SKILLS } from '../WorkerListingForm';
 
+// Predefined hourly rate ranges for workers
+const WORKER_RATE_RANGES = [
+  { value: '15-25', label: '$15 - $25/hr', min: 15, max: 25 },
+  { value: '25-50', label: '$25 - $50/hr', min: 25, max: 50 },
+  { value: '50-100', label: '$50 - $100/hr', min: 50, max: 100 },
+  { value: '100-200', label: '$100 - $200/hr', min: 100, max: 200 },
+  { value: '200+', label: '$200+/hr', min: 200, max: 1000 },
+];
+
 interface WorkerClientFiltersProps {
   onApply: (filters: any) => void;
   initialFilters?: any;
@@ -39,12 +48,17 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
   // Service details
   const [maxServiceRadius, setMaxServiceRadius] = useState(initialFilters.max_service_radius || 50);
   const [maxMinimumBooking, setMaxMinimumBooking] = useState(initialFilters.max_minimum_booking || 8);
-  const [needsEmergencyService, setNeedsEmergencyService] = useState(initialFilters.needs_emergency_service);
-  const [needsBackgroundCheck, setNeedsBackgroundCheck] = useState(initialFilters.needs_background_check);
-  const [needsInsurance, setNeedsInsurance] = useState(initialFilters.needs_insurance);
+  const [needsEmergencyService, setNeedsEmergencyService] = useState(initialFilters.needs_emergency_service ?? false);
+  const [needsBackgroundCheck, setNeedsBackgroundCheck] = useState(initialFilters.needs_background_check ?? false);
+  const [needsInsurance, setNeedsInsurance] = useState(initialFilters.needs_insurance ?? false);
 
-  // Price filters
-  const [priceRange, setPriceRange] = useState([initialFilters.price_min || 0, initialFilters.price_max || 1000]);
+  // Budget with predefined ranges
+  const [selectedRateRange, setSelectedRateRange] = useState<string>(initialFilters.selected_rate_range || '');
+
+  const getRateValues = () => {
+    const selected = WORKER_RATE_RANGES.find(r => r.value === selectedRateRange);
+    return selected ? { min: selected.min, max: selected.max } : { min: undefined, max: undefined };
+  };
 
   // Languages
   const [requiredLanguages, setRequiredLanguages] = useState<string[]>(initialFilters.required_languages || []);
@@ -68,6 +82,7 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
   };
 
   const handleApply = () => {
+    const rateValues = getRateValues();
     const filters = {
       service_categories: serviceCategories,
       work_types: workTypes,
@@ -84,8 +99,9 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
       needs_emergency_service: needsEmergencyService,
       needs_background_check: needsBackgroundCheck,
       needs_insurance: needsInsurance,
-      price_min: priceRange[0],
-      price_max: priceRange[1],
+      selected_rate_range: selectedRateRange,
+      price_min: rateValues.min,
+      price_max: rateValues.max,
       required_languages: requiredLanguages,
       gender_preference: genderPreference,
       nationalities,
@@ -100,7 +116,8 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
 
   const handleSave = async () => {
     try {
-      // Store worker filter preferences in localStorage as workaround
+      const rateValues = getRateValues();
+      // Store worker filter preferences in localStorage
       const workerPrefs = {
         service_categories: serviceCategories,
         work_types: workTypes,
@@ -117,8 +134,9 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
         needs_emergency_service: needsEmergencyService,
         needs_background_check: needsBackgroundCheck,
         needs_insurance: needsInsurance,
-        price_min: priceRange[0],
-        price_max: priceRange[1],
+        selected_rate_range: selectedRateRange,
+        price_min: rateValues.min,
+        price_max: rateValues.max,
         required_languages: requiredLanguages,
       };
       localStorage.setItem('worker_filter_prefs', JSON.stringify(workerPrefs));
@@ -142,16 +160,25 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
         <Badge variant="secondary">{activeCount} active</Badge>
       </div>
 
-      {/* Price Range */}
+      {/* Hourly Rate Range */}
       <div className="space-y-2">
-        <Label>Hourly Rate (USD): ${priceRange[0]} - ${priceRange[1]}</Label>
-        <Slider
-          min={0}
-          max={1000}
-          step={10}
-          value={priceRange}
-          onValueChange={setPriceRange}
-        />
+        <Label className="font-medium">Hourly Rate Range</Label>
+        <div className="flex flex-wrap gap-2">
+          {WORKER_RATE_RANGES.map((range) => (
+            <Badge
+              key={range.value}
+              variant={selectedRateRange === range.value ? "default" : "outline"}
+              className={`cursor-pointer transition-all duration-200 hover:scale-105 py-2 px-3 ${
+                selectedRateRange === range.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-muted'
+              }`}
+              onClick={() => setSelectedRateRange(selectedRateRange === range.value ? '' : range.value)}
+            >
+              {range.label}
+            </Badge>
+          ))}
+        </div>
       </div>
 
       {/* Service Categories */}
