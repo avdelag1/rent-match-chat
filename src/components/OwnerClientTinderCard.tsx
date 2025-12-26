@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
 import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -86,7 +86,7 @@ export function OwnerClientTinderCard({
   }, [images.length, isBottomSheetExpanded]);
 
   // Ultra-responsive drag handling - instant feel like real touch
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
     const swipeThresholdX = 60; // Lower threshold for easier swipes
     const velocityThreshold = 200; // Very responsive to quick flicks
@@ -98,8 +98,10 @@ export function OwnerClientTinderCard({
       return;
     }
 
-    // Snap back - smooth spring animation
-  };
+    // Snap back - explicitly animate motion values back to 0
+    animate(x, 0, { type: "spring", stiffness: 800, damping: 35 });
+    animate(y, 0, { type: "spring", stiffness: 800, damping: 35 });
+  }, [onSwipe, x, y]);
 
   const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
 
