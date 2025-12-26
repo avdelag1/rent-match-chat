@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, memo, useMemo, useRef } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
+import { ShareDialog } from './ShareDialog';
 import { AppLoadingScreen } from './AppLoadingScreen';
 import { useListings } from '@/hooks/useListings';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
@@ -38,6 +39,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set()); // Track swiped listings
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshMode, setIsRefreshMode] = useState(false); // When true, show disliked listings within cooldown
@@ -181,6 +183,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   const handleInsights = () => {
     setInsightsModalOpen(true);
+    triggerHaptic('light');
+  };
+
+  const handleShare = () => {
+    setShareDialogOpen(true);
     triggerHaptic('light');
   };
 
@@ -453,6 +460,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 onTap={() => onListingTap(currentListing.id)}
                 onUndo={canUndo ? () => undoLastSwipe() : undefined}
                 onInsights={handleInsights}
+                onShare={handleShare}
                 hasPremium={true}
                 isTop={true}
                 hideActions={insightsModalOpen}
@@ -462,12 +470,21 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         </AnimatePresence>
       </div>
 
- 
+
       {/* Insights Modal */}
       <SwipeInsightsModal
         open={insightsModalOpen}
         onOpenChange={setInsightsModalOpen}
         listing={currentListing}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        listingId={currentListing?.id}
+        title={currentListing?.title || 'Check out this listing'}
+        description={currentListing?.description}
       />
     </div>
   );

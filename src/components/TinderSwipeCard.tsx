@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, RotateCcw, Eye, Flame } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, RotateCcw, Eye, Flame, Share2 } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -15,12 +15,13 @@ interface TinderSwipeCardProps {
   onTap?: () => void;
   onUndo?: () => void;
   onInsights?: () => void;
+  onShare?: () => void;
   hasPremium?: boolean;
   isTop?: boolean;
   hideActions?: boolean;
 }
 
-const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights, hasPremium = false, isTop = true, hideActions = false }: TinderSwipeCardProps) => {
+const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights, onShare, hasPremium = false, isTop = true, hideActions = false }: TinderSwipeCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -183,24 +184,6 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
 
           {/* Bottom gradient - Lighter for better photo visibility */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
-
-
-          {/* Insights Button - Top Right - Always Visible */}
-          {onInsights && hasPremium && isTop && (
-            <motion.button
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.3 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onInsights();
-              }}
-              className="absolute top-4 right-4 z-30 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center backdrop-blur-sm"
-              title="View Insights"
-            >
-              <Eye className="w-5 h-5" />
-            </motion.button>
-          )}
 
           {/* Verification Badge */}
           {(listing as any).has_verified_documents && (
@@ -442,6 +425,23 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                     title="View Insights"
                   >
                     <Eye className="w-5 h-5" />
+                  </motion.button>
+                )}
+
+                {/* Share Button */}
+                {onShare && (
+                  <motion.button
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.225 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onShare();
+                    }}
+                    className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                    title="Share"
+                  >
+                    <Share2 className="w-5 h-5" />
                   </motion.button>
                 )}
 

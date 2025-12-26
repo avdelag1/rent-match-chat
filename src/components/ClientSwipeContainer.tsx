@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { OwnerClientTinderCard } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
+import { ShareDialog } from './ShareDialog';
 import { AppLoadingScreen } from './AppLoadingScreen';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
@@ -37,6 +38,7 @@ export function ClientSwipeContainer({
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
@@ -131,6 +133,11 @@ export function ClientSwipeContainer({
         description: 'Viewing detailed insights for this client.',
       });
     }
+  };
+
+  const handleShare = () => {
+    setShareDialogOpen(true);
+    triggerHaptic('light');
   };
 
   const handleConnect = useCallback(async (clientId: string) => {
@@ -272,6 +279,7 @@ export function ClientSwipeContainer({
                 onTap={() => onClientTap(currentClient.user_id)}
                 onInsights={() => handleInsights(currentClient.user_id)}
                 onMessage={() => handleConnect(currentClient.user_id)}
+                onShare={handleShare}
                 onUndo={canUndo ? undoLastSwipe : undefined}
                 isTop={true}
                 hasPremium={hasPremiumMessaging}
@@ -291,6 +299,15 @@ export function ClientSwipeContainer({
           role: 'client'
         }}
         onMessage={() => currentClient?.user_id && handleConnect(currentClient.user_id)}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        profileId={currentClient?.user_id}
+        title={currentClient?.name ? `Check out ${currentClient.name}'s profile` : 'Check out this profile'}
+        description={`Budget: $${currentClient?.budget_max?.toLocaleString() || 'N/A'} - Looking for: ${currentClient?.preferred_listing_types?.join(', ') || 'Various properties'}`}
       />
     </div>
   );

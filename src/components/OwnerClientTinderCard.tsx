@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye } from 'lucide-react';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -26,6 +26,7 @@ interface OwnerClientTinderCardProps {
   onTap?: () => void;
   onInsights?: () => void;
   onMessage?: () => void;
+  onShare?: () => void;
   onUndo?: () => void;
   isTop?: boolean;
   showNextCard?: boolean;
@@ -39,6 +40,7 @@ export function OwnerClientTinderCard({
   onTap,
   onInsights,
   onMessage,
+  onShare,
   onUndo,
   isTop = false,
   showNextCard = false,
@@ -465,6 +467,20 @@ export function OwnerClientTinderCard({
                 title="View Insights"
               >
                 <Eye className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Share Button */}
+            {onShare && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare();
+                }}
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                title="Share"
+              >
+                <Share2 className="w-5 h-5" />
               </button>
             )}
 
