@@ -31,14 +31,14 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
 // Lazy load all dashboard and authenticated pages for better performance
 const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
-const ClientProfile = lazy(() => import("./pages/ClientProfile"));
-const ClientSettings = lazy(() => import("./pages/ClientSettings"));
+const ClientProfile = lazy(() => import("./pages/ClientProfileNew"));
+const ClientSettings = lazy(() => import("./pages/ClientSettingsNew"));
 const ClientLikedProperties = lazy(() => import("./pages/ClientLikedProperties"));
 const ClientSavedSearches = lazy(() => import("./pages/ClientSavedSearches"));
 const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
 const EnhancedOwnerDashboard = lazy(() => import("./components/EnhancedOwnerDashboard"));
-const OwnerProfile = lazy(() => import("./pages/OwnerProfile"));
-const OwnerSettings = lazy(() => import("./pages/OwnerSettings"));
+const OwnerProfile = lazy(() => import("./pages/OwnerProfileNew"));
+const OwnerSettings = lazy(() => import("./pages/OwnerSettingsNew"));
 const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
 const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
 const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })));

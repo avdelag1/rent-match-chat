@@ -9,7 +9,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
-import { SettingsBottomSheet } from '@/components/SettingsBottomSheet'
 import { QuickFilterBar, QuickFilters, QuickFilterCategory } from '@/components/QuickFilterBar'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
@@ -66,7 +65,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [onboardingChecked, setOnboardingChecked] = useState(false)
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
   const [showSavedSearches, setShowSavedSearches] = useState(false)
-  const [showSettingsMenu, setShowSettingsMenu] = useState(false)
 
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
   const [quickFilters, setQuickFilters] = useState<QuickFilters>({
@@ -174,8 +172,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [])
 
   const handleSettingsClick = useCallback(() => {
-    setShowSettingsMenu(true)
-  }, [])
+    navigate(userRole === 'client' ? '/client/settings' : '/owner/settings')
+  }, [navigate, userRole])
 
   const handleMenuItemClick = useCallback((action: string) => {
     switch (action) {
@@ -332,14 +330,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         onApplyFilters={handleApplyFilters}
         userRole={userRole}
         currentFilters={appliedFilters ?? {}}
-      />
-
-      {/* Settings/More Menu Bottom Sheet */}
-      <SettingsBottomSheet
-        isOpen={showSettingsMenu}
-        onClose={() => setShowSettingsMenu(false)}
-        userRole={userRole}
-        onMenuItemClick={handleMenuItemClick}
       />
 
       {/* All Dialogs/Modals */}
