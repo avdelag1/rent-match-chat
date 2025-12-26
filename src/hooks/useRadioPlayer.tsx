@@ -341,7 +341,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           }));
 
           retryTimeoutRef.current = setTimeout(() => {
-            if (audioRef.current && state.currentStation) {
+            if (audioRef.current && audioRef.current.src) {
               audioRef.current.load();
               audioRef.current.play().catch(() => {
                 // If retry fails, continue to next retry
