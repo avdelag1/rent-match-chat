@@ -248,9 +248,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
     return {
       ...base,
-      // Quick filter category takes precedence if set
-      category: quickFilters.categories.length === 1 ? quickFilters.categories[0] : base.category,
-      // Multiple categories means we need to handle this differently
+      // Quick filter categories take precedence if set
+      // Clear single category when using multiple categories
+      category: quickFilters.categories.length === 0 ? base.category : undefined,
       categories: quickFilters.categories.length > 0 ? quickFilters.categories : undefined,
       // Quick filter listing type takes precedence if not 'both'
       listingType: quickFilters.listingType !== 'both' ? quickFilters.listingType : base.listingType,
@@ -273,7 +273,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
 
   // Check if we're on a page that should show quick filters (client discovery page)
-  const showQuickFilters = userRole === 'client' && location.pathname === '/client';
+  const showQuickFilters = userRole === 'client' && location.pathname === '/client/dashboard';
 
   return (
     <div className="app-root bg-background">
