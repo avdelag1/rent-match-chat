@@ -361,7 +361,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
               Start the conversation
             </p>
             <p className="text-xs text-[#8E8E93] max-w-[200px]">
-              Say hello to {otherUser.full_name?.split(' ')[0] || 'your match'}!
+              Say hello to {otherUser.full_name?.split(' ')?.[0] || 'your match'}!
             </p>
           </div>
         ) : (

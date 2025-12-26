@@ -39,17 +39,16 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
     }
   };
 
-  if (!listing && !profile) return null;
-
   // Determine if we're showing client profile or property listing insights
   const isClientProfile = !!profile;
 
   // Get images for gallery
-  const images = isClientProfile 
+  const images = isClientProfile
     ? (profile?.profile_images || [])
     : (listing?.images || []);
 
   // Calculate insights data based on actual profile/listing data
+  // Note: useMemo must be called unconditionally before any early returns (Rules of Hooks)
   const insights = useMemo(() => {
     if (isClientProfile && profile) {
       // For client profiles: calculate based on profile completeness
@@ -135,6 +134,9 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
       readinessScore: 0,
     };
   }, [isClientProfile, profile, listing]);
+
+  // Early return if no data (placed after hooks per Rules of Hooks)
+  if (!listing && !profile) return null;
 
   return (
     <AnimatePresence mode="wait">

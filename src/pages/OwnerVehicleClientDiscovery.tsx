@@ -48,7 +48,7 @@ export default function OwnerVehicleClientDiscovery() {
   const { data: clients = [], refetch } = useSmartClientMatching('property', 0, 10, false, clientFilters); // Vehicle matching uses property category for now
 
   const filteredClients = (clients || []).filter(client =>
-    client.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    client.name?.toLowerCase()?.includes(searchQuery.toLowerCase())
   );
 
   const activeFilterCount = Object.keys(filters).filter(key => {

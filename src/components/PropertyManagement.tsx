@@ -70,11 +70,11 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   }, [initialCategory, initialMode]);
 
   const filteredListings = listings.filter(listing => {
-    const matchesSearch = listing.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      listing.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      listing.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      listing.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      listing.neighborhood?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = listing.title?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      listing.description?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      listing.address?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      listing.city?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      listing.neighborhood?.toLowerCase()?.includes(searchTerm.toLowerCase());
 
     // Filter by category
     let matchesCategory = true;

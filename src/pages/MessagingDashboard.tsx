@@ -77,7 +77,7 @@ export function MessagingDashboard() {
   useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
 
   const filteredConversations = conversations.filter(conv =>
-    conv.other_user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    conv.other_user?.full_name?.toLowerCase()?.includes(searchQuery.toLowerCase())
   );
 
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
