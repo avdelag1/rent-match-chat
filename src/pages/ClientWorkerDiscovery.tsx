@@ -193,9 +193,9 @@ export default function ClientWorkerDiscovery() {
     const query = searchQuery.toLowerCase();
     return (
       worker.title.toLowerCase().includes(query) ||
-      worker.owner?.full_name?.toLowerCase().includes(query) ||
-      worker.city?.toLowerCase().includes(query) ||
-      worker.description?.toLowerCase().includes(query)
+      worker.owner?.full_name?.toLowerCase()?.includes(query) ||
+      worker.city?.toLowerCase()?.includes(query) ||
+      worker.description?.toLowerCase()?.includes(query)
     );
   });
 

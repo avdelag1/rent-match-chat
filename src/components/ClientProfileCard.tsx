@@ -196,7 +196,7 @@ const ClientProfileCardComponent = ({
             <div className="text-center relative z-10">
               <div className="w-32 h-32 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border-4 border-white/50">
                 <span className="text-6xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  {profile.name?.charAt(0).toUpperCase() || '?'}
+                  {profile.name?.charAt(0)?.toUpperCase() || '?'}
                 </span>
               </div>
               <p className="text-white text-sm font-medium">

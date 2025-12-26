@@ -48,7 +48,7 @@ export default function OwnerBicycleClientDiscovery() {
   const { data: clients = [], refetch } = useSmartClientMatching('bicycle', 0, 10, false, clientFilters);
 
   const filteredClients = (clients || []).filter(client =>
-    client.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    client.name?.toLowerCase()?.includes(searchQuery.toLowerCase())
   );
 
   const activeFilterCount = Object.keys(filters).filter(key => {

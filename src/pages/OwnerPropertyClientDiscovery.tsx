@@ -83,7 +83,7 @@ export default function OwnerPropertyClientDiscovery() {
   const startConversation = useStartConversation();
 
   const filteredClients = (clients || []).filter(client =>
-    client.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    client.name?.toLowerCase()?.includes(searchQuery.toLowerCase())
   );
 
   const activeFilterCount = Object.keys(filters).filter(key => {

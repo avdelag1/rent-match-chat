@@ -48,7 +48,7 @@ export default function OwnerMotoClientDiscovery() {
   const { data: clients = [], refetch } = useSmartClientMatching('moto', 0, 10, false, clientFilters);
 
   const filteredClients = (clients || []).filter(client =>
-    client.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    client.name?.toLowerCase()?.includes(searchQuery.toLowerCase())
   );
 
   const activeFilterCount = Object.keys(filters).filter(key => {

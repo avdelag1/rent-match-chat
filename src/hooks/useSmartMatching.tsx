@@ -164,9 +164,9 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
   if (preferences.location_zones?.length && (listing.tulum_location || listing.neighborhood)) {
     criteria.push({
       weight: 18,
-      matches: preferences.location_zones.some(zone => 
-        listing.tulum_location?.toLowerCase().includes(zone.toLowerCase()) ||
-        listing.neighborhood?.toLowerCase().includes(zone.toLowerCase())
+      matches: preferences.location_zones.some(zone =>
+        listing.tulum_location?.toLowerCase()?.includes(zone.toLowerCase()) ||
+        listing.neighborhood?.toLowerCase()?.includes(zone.toLowerCase())
       ),
       reason: `Location matches preferred zones`,
       incompatibleReason: `Location not in preferred zones`
