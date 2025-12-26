@@ -111,7 +111,19 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return <AppLoadingScreen />;
   }
 
-  if (!user || (requiredRole && userRole !== requiredRole)) {
+  // Don't render if user is not authenticated
+  if (!user) {
+    return null;
+  }
+
+  // Don't render if user has no role (useEffect will redirect)
+  if (!userRole) {
+    return null;
+  }
+
+  // If a specific role is required, check if user has that role
+  // Both 'client' and 'owner' roles are valid - routes without requiredRole allow both
+  if (requiredRole && userRole !== requiredRole) {
     return null;
   }
 
