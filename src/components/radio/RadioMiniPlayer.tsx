@@ -61,8 +61,7 @@ export const RadioMiniPlayer: React.FC = () => {
     isPlaying,
     isLoading,
     togglePlayPause,
-    expandPlayer,
-    setStation
+    expandPlayer
   } = useRadioPlayer();
 
   // Handle viewport resize
