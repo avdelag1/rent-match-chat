@@ -41,14 +41,14 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-[9999] grid w-full max-w-lg max-h-[90vh] translate-x-[-50%] translate-y-[-50%] gap-4 border border-white/20 bg-background/95 backdrop-blur-md p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-3xl overflow-y-auto",
+        "fixed left-[50%] top-[50%] z-[9999] grid w-[calc(100%-24px)] max-w-lg max-h-[90vh] translate-x-[-50%] translate-y-[-50%] gap-4 border border-white/20 bg-background/95 backdrop-blur-md p-4 sm:p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-2xl sm:rounded-3xl overflow-hidden",
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 backdrop-blur-md flex items-center justify-center text-white border-2 border-white/20 transition-all duration-300 transform hover:scale-110 hover:rotate-90 hover:shadow-lg hover:shadow-red-500/50 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:pointer-events-none z-10">
-        <X className="w-5 h-5" />
+      <DialogPrimitive.Close className="absolute right-3 top-3 sm:right-4 sm:top-4 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 backdrop-blur-md flex items-center justify-center text-white border-2 border-white/20 transition-all duration-300 transform hover:scale-110 hover:rotate-90 hover:shadow-lg hover:shadow-red-500/50 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:pointer-events-none z-10">
+        <X className="w-4 h-4 sm:w-5 sm:h-5" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

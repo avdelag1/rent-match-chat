@@ -160,11 +160,11 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               transform: 'translateZ(0)',
             }}
           >
-            <DialogContent className={`w-[95vw] max-w-lg max-h-[85vh] overflow-y-auto overflow-x-hidden transition-opacity duration-75 p-0 ${isDragging ? 'opacity-90' : ''}`}>
-              <motion.div className="px-3 sm:px-6 py-4 sm:py-6">
-              <DialogHeader className="mb-3 sm:mb-4">
-                <DialogTitle className="text-lg sm:text-2xl font-bold flex items-center gap-2">
-                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <DialogContent className={`w-[calc(100%-16px)] max-w-[400px] sm:max-w-lg max-h-[85vh] overflow-y-auto overflow-x-hidden transition-opacity duration-75 p-0 ${isDragging ? 'opacity-90' : ''}`}>
+              <div className="px-3 sm:px-4 py-3 sm:py-4 w-full max-w-full overflow-x-hidden">
+              <DialogHeader className="mb-2 sm:mb-3">
+                <DialogTitle className="text-sm sm:text-lg font-bold flex items-center gap-2">
+                  <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   {isClientProfile ? 'Renter Insights' : 'Property Insights'}
                 </DialogTitle>
               </DialogHeader>
@@ -849,7 +849,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   </div>
               </div>
               ) : null}
-            </motion.div>
+            </div>
           </DialogContent>
 
           {/* Full Screen Image Gallery */}

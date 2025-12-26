@@ -12,6 +12,7 @@ import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { RotateCcw, RefreshCw, Home, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
