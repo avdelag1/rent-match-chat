@@ -89,12 +89,17 @@ export default function PaymentSuccess() {
   }, [navigate, purchaseDetails]);
 
   useEffect(() => {
+    let isMounted = true;
+    let confettiTimeout: NodeJS.Timeout | null = null;
+
     const processPayment = async () => {
       const pendingPurchase = localStorage.getItem(STORAGE.SELECTED_PLAN_KEY) || localStorage.getItem(STORAGE.PENDING_ACTIVATION_KEY);
 
       if (!pendingPurchase) {
-        setError('No pending purchase found. If you completed a payment, please contact support.');
-        setProcessing(false);
+        if (isMounted) {
+          setError('No pending purchase found. If you completed a payment, please contact support.');
+          setProcessing(false);
+        }
         return;
       }
 
@@ -115,6 +120,8 @@ export default function PaymentSuccess() {
           // Monthly subscription - need to map from old format
           pkg = await mapMonthlyPlanToPackage(purchase.planId);
         }
+
+        if (!isMounted) return;
 
         if (!pkg) {
           setError('Package not found. Please contact support.');
@@ -208,6 +215,8 @@ export default function PaymentSuccess() {
           if (activError) throw activError;
         }
 
+        if (!isMounted) return;
+
         setPurchaseDetails({
           packageName: pkg.name,
           tier: pkg.tier,
@@ -229,18 +238,31 @@ export default function PaymentSuccess() {
         setShowConfetti(true);
 
         // Stop confetti after 4 seconds
-        setTimeout(() => setShowConfetti(false), 4000);
+        confettiTimeout = setTimeout(() => {
+          if (isMounted) {
+            setShowConfetti(false);
+          }
+        }, 4000);
 
       } catch (error) {
         console.error('Payment processing error:', error);
-        setError('Failed to process payment. Please contact support with your PayPal receipt.');
-        setProcessing(false);
+        if (isMounted) {
+          setError('Failed to process payment. Please contact support with your PayPal receipt.');
+          setProcessing(false);
+        }
       }
     };
 
     if (user) {
       processPayment();
     }
+
+    return () => {
+      isMounted = false;
+      if (confettiTimeout) {
+        clearTimeout(confettiTimeout);
+      }
+    };
   }, [searchParams, user]);
 
   // Countdown timer
