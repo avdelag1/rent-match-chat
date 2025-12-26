@@ -386,8 +386,8 @@ export function MessageActivationPackages({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-      <div className="fixed inset-x-2 sm:inset-x-4 top-[5%] sm:top-[10%] bottom-[5%] sm:bottom-[10%] z-50 overflow-auto">
+    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm">
+      <div className="fixed inset-x-2 sm:inset-x-4 top-[5%] sm:top-[10%] bottom-[5%] sm:bottom-[10%] z-[100] overflow-auto">
         <div className="relative bg-background rounded-2xl border shadow-2xl max-w-5xl mx-auto">
           {onClose && (
             <Button

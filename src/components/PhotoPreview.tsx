@@ -31,7 +31,7 @@ export function PhotoPreview({ photos, isOpen, onClose, initialIndex = 0 }: Phot
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
