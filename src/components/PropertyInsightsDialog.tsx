@@ -3,13 +3,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle, TrendingUp, Clock, Shield, Star, CheckCircle, Home, Sparkles } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle, TrendingUp, Clock, Shield, Star, CheckCircle, Home, Sparkles, Anchor, Bike, Car, Zap, Fuel, Gauge, Users, Ruler, Settings, AlertCircle, ThumbsUp, Eye, Phone, Mail } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
 import { useState, useMemo } from 'react';
+
+// Category icons and labels
+const CATEGORY_CONFIG: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
+  property: { icon: <Home className="w-4 h-4" />, label: 'Property', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
+  yacht: { icon: <Anchor className="w-4 h-4" />, label: 'Yacht', color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20' },
+  motorcycle: { icon: <Car className="w-4 h-4" />, label: 'Motorcycle', color: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
+  bicycle: { icon: <Bike className="w-4 h-4" />, label: 'Bicycle', color: 'bg-green-500/10 text-green-600 border-green-500/20' },
+};
 
 interface PropertyInsightsDialogProps {
   open: boolean;
@@ -34,6 +42,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
     const amenityCount = listing.amenities?.length || 0;
     const imageCount = listing.images?.length || 0;
+    const equipmentCount = listing.equipment?.length || 0;
 
     // Calculate listing quality score (0-100)
     let qualityScore = 0;
@@ -47,6 +56,10 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
     if (listing.pet_friendly) qualityScore += 10;
     if (listing.square_footage) qualityScore += 5;
     if (listing.beds && listing.baths) qualityScore += 10;
+    // Bonus for vehicles/yachts
+    if (listing.year) qualityScore += 5;
+    if (listing.condition === 'excellent') qualityScore += 10;
+    if (equipmentCount >= 5) qualityScore += 10;
 
     // Value rating based on price per sqft (simplified)
     let valueRating: 'excellent' | 'good' | 'fair' | 'premium' = 'good';
@@ -57,16 +70,47 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
       else valueRating = 'premium';
     }
 
+    // Determine category
+    const category = listing.category || 'property';
+    const isYacht = category === 'yacht';
+    const isMotorcycle = category === 'motorcycle';
+    const isBicycle = category === 'bicycle';
+    const isVehicle = isYacht || isMotorcycle || isBicycle;
+    const isProperty = !isVehicle;
+
+    // Calculate demand level
+    const demandLevel = qualityScore >= 80 ? 'high' : qualityScore >= 50 ? 'medium' : 'low';
+
+    // Listing urgency (simulated based on status and quality)
+    const isHotListing = qualityScore >= 75 && listing.status === 'available';
+
     return {
       pricePerSqft,
       qualityScore: Math.min(100, qualityScore),
       valueRating,
       amenityCount,
       imageCount,
-      responseRate: Math.min(95, 70 + amenityCount * 2), // Simulated
-      avgResponseTime: amenityCount > 5 ? '< 1 hour' : '1-2 hours',
+      equipmentCount,
+      responseRate: Math.min(95, 70 + amenityCount * 2 + equipmentCount),
+      avgResponseTime: (amenityCount + equipmentCount) > 5 ? '< 1 hour' : '1-2 hours',
+      category,
+      isYacht,
+      isMotorcycle,
+      isBicycle,
+      isProperty,
+      isVehicle,
+      demandLevel,
+      isHotListing,
+      listingAge: listing.created_at ? getDaysAgo(new Date(listing.created_at)) : null,
     };
   }, [listing]);
+
+  // Helper function to get days ago
+  function getDaysAgo(date: Date): number {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  }
 
   if (!listing) return null;
 
@@ -121,61 +165,249 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
         <ScrollArea className="flex-1 h-full">
           <div className="space-y-5 py-4 px-6 pb-8">
-            {/* Basic Info - Compact */}
-            <div>
-              <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="w-4 h-4" />
-                <span>{listing.address}, {listing.neighborhood}, {listing.city}</span>
-              </div>
-            </div>
-
-            {/* Description - FIRST - Most Important */}
-            {listing.description && (
-              <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
-                <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
-                  <span className="text-lg">📝</span> About This Property
-                </h4>
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                  {listing.description}
-                </p>
+            {/* Hot Listing Alert */}
+            {propertyInsights?.isHotListing && (
+              <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
+                <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-red-600 dark:text-red-400">Hot Listing!</p>
+                  <p className="text-xs text-muted-foreground">High demand - Act fast to secure this one</p>
+                </div>
               </div>
             )}
 
-            {/* Property Details */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-green-600" />
-                <span className="font-semibold">${listing.price?.toLocaleString()}/month</span>
+            {/* Basic Info with Category Badge */}
+            <div>
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h3 className="text-xl font-bold flex-1">{listing.title}</h3>
+                {propertyInsights && (
+                  <div className="flex gap-2 shrink-0">
+                    {CATEGORY_CONFIG[propertyInsights.category] && (
+                      <Badge className={`${CATEGORY_CONFIG[propertyInsights.category].color} border`}>
+                        {CATEGORY_CONFIG[propertyInsights.category].icon}
+                        <span className="ml-1">{CATEGORY_CONFIG[propertyInsights.category].label}</span>
+                      </Badge>
+                    )}
+                    {listing.listing_type && (
+                      <Badge variant={listing.listing_type === 'buy' ? 'default' : 'secondary'}>
+                        {listing.listing_type === 'buy' ? 'For Sale' : 'For Rent'}
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </div>
-              {listing.beds && (
-                <div className="flex items-center gap-2">
-                  <Bed className="w-4 h-4" />
-                  <span>{listing.beds} bedroom{listing.beds !== 1 ? 's' : ''}</span>
-                </div>
-              )}
-              {listing.baths && (
-                <div className="flex items-center gap-2">
-                  <Bath className="w-4 h-4" />
-                  <span>{listing.baths} bathroom{listing.baths !== 1 ? 's' : ''}</span>
-                </div>
-              )}
-              {listing.square_footage && (
-                <div className="flex items-center gap-2">
-                  <Square className="w-4 h-4" />
-                  <span>{listing.square_footage} sqft</span>
-                </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="w-4 h-4" />
+                <span>{[listing.address, listing.neighborhood, listing.city].filter(Boolean).join(', ')}</span>
+              </div>
+              {propertyInsights?.listingAge !== null && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Listed {propertyInsights.listingAge === 0 ? 'today' : propertyInsights.listingAge === 1 ? 'yesterday' : `${propertyInsights.listingAge} days ago`}
+                </p>
               )}
             </div>
 
+            {/* Description - FIRST - Most Important */}
+            {(listing.description || listing.description_full) && (
+              <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
+                  <span className="text-lg">📝</span> About This {propertyInsights?.isVehicle ? 'Listing' : 'Property'}
+                </h4>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {listing.description_full || listing.description}
+                </p>
+                {listing.description_short && listing.description_short !== listing.description && (
+                  <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-primary/10">
+                    <span className="font-medium">Quick summary:</span> {listing.description_short}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Price & Key Details - Adaptive for category */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-green-600" />
+                <span className="font-semibold">
+                  ${listing.price?.toLocaleString()}
+                  {listing.listing_type !== 'buy' && '/month'}
+                </span>
+              </div>
+              {/* Property-specific */}
+              {propertyInsights?.isProperty && (
+                <>
+                  {listing.beds && (
+                    <div className="flex items-center gap-2">
+                      <Bed className="w-4 h-4" />
+                      <span>{listing.beds} bedroom{listing.beds !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  {listing.baths && (
+                    <div className="flex items-center gap-2">
+                      <Bath className="w-4 h-4" />
+                      <span>{listing.baths} bathroom{listing.baths !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  {listing.square_footage && (
+                    <div className="flex items-center gap-2">
+                      <Square className="w-4 h-4" />
+                      <span>{listing.square_footage} sqft</span>
+                    </div>
+                  )}
+                </>
+              )}
+              {/* Yacht-specific */}
+              {propertyInsights?.isYacht && (
+                <>
+                  {listing.length_m && (
+                    <div className="flex items-center gap-2">
+                      <Ruler className="w-4 h-4" />
+                      <span>{listing.length_m}m length</span>
+                    </div>
+                  )}
+                  {listing.max_passengers && (
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      <span>{listing.max_passengers} passengers</span>
+                    </div>
+                  )}
+                  {listing.berths && (
+                    <div className="flex items-center gap-2">
+                      <Bed className="w-4 h-4" />
+                      <span>{listing.berths} berths</span>
+                    </div>
+                  )}
+                </>
+              )}
+              {/* Motorcycle-specific */}
+              {propertyInsights?.isMotorcycle && (
+                <>
+                  {listing.engine_cc && (
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-4 h-4" />
+                      <span>{listing.engine_cc}cc engine</span>
+                    </div>
+                  )}
+                  {listing.mileage && (
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>{listing.mileage.toLocaleString()} miles</span>
+                    </div>
+                  )}
+                  {listing.year && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>{listing.year} model</span>
+                    </div>
+                  )}
+                </>
+              )}
+              {/* Bicycle-specific */}
+              {propertyInsights?.isBicycle && (
+                <>
+                  {listing.frame_size && (
+                    <div className="flex items-center gap-2">
+                      <Ruler className="w-4 h-4" />
+                      <span>{listing.frame_size} frame</span>
+                    </div>
+                  )}
+                  {listing.electric_assist && (
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-yellow-500" />
+                      <span>Electric Assist</span>
+                    </div>
+                  )}
+                  {listing.battery_range && (
+                    <div className="flex items-center gap-2">
+                      <Fuel className="w-4 h-4" />
+                      <span>{listing.battery_range}km range</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Vehicle Specifications - Only for vehicles */}
+            {propertyInsights?.isVehicle && (
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-primary" />
+                  Specifications
+                </h4>
+                <div className="bg-muted/30 p-4 rounded-lg grid grid-cols-2 gap-3 text-sm">
+                  {listing.brand && (
+                    <div><span className="text-muted-foreground">Brand:</span> <span className="font-medium">{listing.brand}</span></div>
+                  )}
+                  {listing.model && (
+                    <div><span className="text-muted-foreground">Model:</span> <span className="font-medium">{listing.model}</span></div>
+                  )}
+                  {listing.year && (
+                    <div><span className="text-muted-foreground">Year:</span> <span className="font-medium">{listing.year}</span></div>
+                  )}
+                  {listing.condition && (
+                    <div><span className="text-muted-foreground">Condition:</span> <span className="font-medium capitalize">{listing.condition}</span></div>
+                  )}
+                  {listing.color && (
+                    <div><span className="text-muted-foreground">Color:</span> <span className="font-medium capitalize">{listing.color}</span></div>
+                  )}
+                  {listing.transmission && (
+                    <div><span className="text-muted-foreground">Transmission:</span> <span className="font-medium capitalize">{listing.transmission}</span></div>
+                  )}
+                  {listing.fuel_type && (
+                    <div><span className="text-muted-foreground">Fuel:</span> <span className="font-medium capitalize">{listing.fuel_type}</span></div>
+                  )}
+                  {listing.hull_material && (
+                    <div><span className="text-muted-foreground">Hull:</span> <span className="font-medium capitalize">{listing.hull_material}</span></div>
+                  )}
+                  {listing.engines && (
+                    <div className="col-span-2"><span className="text-muted-foreground">Engines:</span> <span className="font-medium">{listing.engines}</span></div>
+                  )}
+                  {listing.frame_material && (
+                    <div><span className="text-muted-foreground">Frame:</span> <span className="font-medium capitalize">{listing.frame_material}</span></div>
+                  )}
+                  {listing.gear_type && (
+                    <div><span className="text-muted-foreground">Gears:</span> <span className="font-medium capitalize">{listing.gear_type}</span></div>
+                  )}
+                  {listing.brake_type && (
+                    <div><span className="text-muted-foreground">Brakes:</span> <span className="font-medium capitalize">{listing.brake_type}</span></div>
+                  )}
+                  {listing.license_required && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">License Required:</span>{' '}
+                      <span className="font-medium">{listing.license_required}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Equipment (for yachts/vehicles) */}
+            {listing.equipment && listing.equipment.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-2">Equipment Included</h4>
+                <div className="flex flex-wrap gap-2">
+                  {listing.equipment.map((item, index) => (
+                    <Badge key={index} variant="outline" className="bg-cyan-500/5 border-cyan-500/20">
+                      <CheckCircle className="w-3 h-3 mr-1 text-cyan-500" />
+                      {item}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Property Type & Features */}
             <div>
-              <h4 className="font-semibold mb-2">Property Features</h4>
+              <h4 className="font-semibold mb-2">{propertyInsights?.isVehicle ? 'Features' : 'Property Features'}</h4>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">{listing.property_type}</Badge>
+                {listing.property_type && <Badge variant="secondary">{listing.property_type}</Badge>}
+                {listing.vehicle_type && <Badge variant="secondary">{listing.vehicle_type}</Badge>}
                 {listing.furnished && <Badge variant="secondary">Furnished</Badge>}
                 {listing.pet_friendly && <Badge variant="secondary">Pet Friendly</Badge>}
-                <Badge variant="outline">{listing.status}</Badge>
+                {listing.electric_assist && <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">Electric</Badge>}
+                <Badge variant="outline" className={listing.status === 'available' ? 'bg-green-500/10 text-green-600 border-green-500/20' : ''}>{listing.status}</Badge>
               </div>
             </div>
 
@@ -191,16 +423,106 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
               </div>
             )}
 
-            {/* Property Analytics */}
+            {/* Rental Rates (for yachts with rental_rates) */}
+            {listing.rental_rates && (
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-500" />
+                  Rental Options
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {listing.rental_rates.hourly && (
+                    <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-center">
+                      <div className="text-lg font-bold text-green-600 dark:text-green-400">${listing.rental_rates.hourly}</div>
+                      <div className="text-xs text-muted-foreground">per hour</div>
+                    </div>
+                  )}
+                  {listing.rental_rates.daily && (
+                    <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-center">
+                      <div className="text-lg font-bold text-green-600 dark:text-green-400">${listing.rental_rates.daily}</div>
+                      <div className="text-xs text-muted-foreground">per day</div>
+                    </div>
+                  )}
+                  {listing.rental_rates.weekly && (
+                    <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-center">
+                      <div className="text-lg font-bold text-green-600 dark:text-green-400">${listing.rental_rates.weekly}</div>
+                      <div className="text-xs text-muted-foreground">per week</div>
+                    </div>
+                  )}
+                  {listing.rental_rates.monthly && (
+                    <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-center">
+                      <div className="text-lg font-bold text-green-600 dark:text-green-400">${listing.rental_rates.monthly}</div>
+                      <div className="text-xs text-muted-foreground">per month</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Listing Analytics */}
             <div>
-              <h4 className="font-semibold mb-2">Property Analytics</h4>
+              <h4 className="font-semibold mb-2">{propertyInsights?.isVehicle ? 'Listing' : 'Property'} Analytics</h4>
               <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                <p className="text-sm">📊 Current rent: ${listing.price?.toLocaleString()}/month</p>
-                <p className="text-sm">📏 Space: {listing.square_footage ? `${listing.square_footage} sqft` : 'Size not specified'}</p>
-                <p className="text-sm">🏠 Type: {listing.property_type} in {listing.neighborhood}</p>
-                <p className="text-sm">✨ Features: {(listing.amenities?.length || 0)} amenities listed</p>
-                {listing.furnished && <p className="text-sm">🪑 Furnished property available</p>}
+                <p className="text-sm">📊 {listing.listing_type === 'buy' ? 'Price' : 'Current rent'}: ${listing.price?.toLocaleString()}{listing.listing_type !== 'buy' && '/month'}</p>
+                {propertyInsights?.isProperty && (
+                  <p className="text-sm">📏 Space: {listing.square_footage ? `${listing.square_footage} sqft` : 'Size not specified'}</p>
+                )}
+                {propertyInsights?.isYacht && listing.length_m && (
+                  <p className="text-sm">📏 Length: {listing.length_m} meters</p>
+                )}
+                <p className="text-sm">🏠 Type: {listing.property_type || listing.vehicle_type || 'Not specified'} {listing.neighborhood && `in ${listing.neighborhood}`}</p>
+                <p className="text-sm">✨ Features: {(listing.amenities?.length || 0) + (listing.equipment?.length || 0)} items listed</p>
+                {listing.furnished && <p className="text-sm">🪑 Furnished {propertyInsights?.isVehicle ? 'option' : 'property'} available</p>}
                 {listing.pet_friendly && <p className="text-sm">🐕 Pet-friendly accommodation</p>}
+                {propertyInsights?.demandLevel && (
+                  <p className="text-sm">
+                    📈 Demand: <span className={`font-medium ${
+                      propertyInsights.demandLevel === 'high' ? 'text-red-500' :
+                      propertyInsights.demandLevel === 'medium' ? 'text-yellow-500' : 'text-green-500'
+                    }`}>
+                      {propertyInsights.demandLevel === 'high' ? 'High demand' :
+                       propertyInsights.demandLevel === 'medium' ? 'Moderate demand' : 'Low competition'}
+                    </span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Provider/Owner Quick Stats */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                About the {propertyInsights?.isVehicle ? 'Provider' : 'Owner'}
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-lg border border-green-500/20">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-xs text-muted-foreground">Response Rate</span>
+                  </div>
+                  <div className="text-lg font-bold text-green-600 dark:text-green-400">{propertyInsights?.responseRate || 85}%</div>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-lg border border-blue-500/20">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-xs text-muted-foreground">Avg Response</span>
+                  </div>
+                  <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{propertyInsights?.avgResponseTime || '1-2 hrs'}</div>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5 rounded-lg border border-purple-500/20">
+                  <div className="flex items-center gap-2 mb-1">
+                    <ThumbsUp className="w-4 h-4 text-purple-600" />
+                    <span className="text-xs text-muted-foreground">Verified</span>
+                  </div>
+                  <div className="text-lg font-bold text-purple-600 dark:text-purple-400">Yes</div>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-lg border border-yellow-500/20">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Eye className="w-4 h-4 text-yellow-600" />
+                    <span className="text-xs text-muted-foreground">Listing Quality</span>
+                  </div>
+                  <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{propertyInsights?.qualityScore || 75}%</div>
+                </div>
               </div>
             </div>
 

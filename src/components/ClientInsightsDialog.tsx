@@ -3,13 +3,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, User, Calendar, Flame, Star, MessageCircle, Eye, Award, TrendingUp, ThumbsUp, Shield, CheckCircle, Clock, Sparkles, Home } from 'lucide-react';
+import { MapPin, User, Calendar, Flame, Star, MessageCircle, Eye, Award, TrendingUp, ThumbsUp, Shield, CheckCircle, Clock, Sparkles, Home, Zap, Heart, DollarSign, Users, AlertCircle, Target, Briefcase, Coffee, Bike, Car, Anchor, PawPrint } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
 import { useState, memo, useMemo } from 'react';
+
+// Interest category icons for visual display
+const INTEREST_ICONS: Record<string, React.ReactNode> = {
+  'pet': <PawPrint className="w-3.5 h-3.5" />,
+  'digital nomad': <Zap className="w-3.5 h-3.5" />,
+  'remote': <Zap className="w-3.5 h-3.5" />,
+  'family': <Users className="w-3.5 h-3.5" />,
+  'work': <Briefcase className="w-3.5 h-3.5" />,
+  'coffee': <Coffee className="w-3.5 h-3.5" />,
+  'bicycle': <Bike className="w-3.5 h-3.5" />,
+  'bike': <Bike className="w-3.5 h-3.5" />,
+  'motorcycle': <Car className="w-3.5 h-3.5" />,
+  'yacht': <Anchor className="w-3.5 h-3.5" />,
+  'boat': <Anchor className="w-3.5 h-3.5" />,
+};
 
 // Tag categories for organized display
 const PROPERTY_TAGS = [
@@ -93,10 +108,33 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
     // Derive property preferences from interests
     const allTags = [...(profile.interests || []), ...(profile.preferred_activities || [])];
-    const wantsLongTerm = allTags.some(tag => tag.toLowerCase().includes('long-term') || tag.toLowerCase().includes('rent'));
-    const wantsShortTerm = allTags.some(tag => tag.toLowerCase().includes('short-term'));
-    const needsPetFriendly = allTags.some(tag => tag.toLowerCase().includes('pet'));
-    const prefersFurnished = allTags.some(tag => tag.toLowerCase().includes('furnished') || tag.toLowerCase().includes('corporate'));
+    const allTagsLower = allTags.map(t => t.toLowerCase());
+
+    const wantsLongTerm = allTagsLower.some(tag => tag.includes('long-term') || tag.includes('rent'));
+    const wantsShortTerm = allTagsLower.some(tag => tag.includes('short-term'));
+    const needsPetFriendly = allTagsLower.some(tag => tag.includes('pet'));
+    const prefersFurnished = allTagsLower.some(tag => tag.includes('furnished') || tag.includes('corporate'));
+    const isDigitalNomad = allTagsLower.some(tag => tag.includes('digital nomad') || tag.includes('remote'));
+    const needsFamily = allTagsLower.some(tag => tag.includes('family'));
+    const isStudent = allTagsLower.some(tag => tag.includes('student'));
+    const needsQuiet = allTagsLower.some(tag => tag.includes('quiet'));
+    const isBeachLover = allTagsLower.some(tag => tag.includes('beach'));
+    const needsCityCenter = allTagsLower.some(tag => tag.includes('city center'));
+    const isFitnessOriented = allTagsLower.some(tag => tag.includes('fitness') || tag.includes('wellness') || tag.includes('gym'));
+    const isEcoConscious = allTagsLower.some(tag => tag.includes('eco') || tag.includes('sustainable'));
+    const needsMotorcycle = allTagsLower.some(tag => tag.includes('motorcycle'));
+    const needsBicycle = allTagsLower.some(tag => tag.includes('bicycle') || tag.includes('bike'));
+    const needsYacht = allTagsLower.some(tag => tag.includes('yacht') || tag.includes('boat'));
+
+    // Calculate match potential (how good a renter they would be)
+    let matchPotential = readinessScore;
+    if (profile.verified) matchPotential += 10;
+    if (photoCount >= 2) matchPotential += 5;
+    if (interestCount >= 5) matchPotential += 5;
+    matchPotential = Math.min(100, matchPotential);
+
+    // Is this a hot prospect?
+    const isHotProspect = readinessScore >= 75 && activityLevel === 'very_active';
 
     return {
       readinessScore: Math.min(100, readinessScore),
@@ -107,6 +145,20 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
       wantsShortTerm,
       needsPetFriendly,
       prefersFurnished,
+      isDigitalNomad,
+      needsFamily,
+      isStudent,
+      needsQuiet,
+      isBeachLover,
+      needsCityCenter,
+      isFitnessOriented,
+      isEcoConscious,
+      needsMotorcycle,
+      needsBicycle,
+      needsYacht,
+      matchPotential,
+      isHotProspect,
+      completeness,
     };
   }, [profile]);
 
@@ -165,33 +217,75 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
         <ScrollArea className="flex-1 overflow-y-auto">
           <div className="space-y-6 py-4 px-6">
+            {/* Hot Prospect Alert */}
+            {renterInsights?.isHotProspect && (
+              <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
+                <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-red-600 dark:text-red-400">Hot Prospect!</p>
+                  <p className="text-xs text-muted-foreground">Highly engaged renter - Respond quickly</p>
+                </div>
+              </div>
+            )}
+
             {/* Basic Info Header */}
             <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
-              <h3 className="text-2xl font-bold mb-2">{profile.name}</h3>
-              <div className="flex items-center gap-4 text-muted-foreground mb-4">
-                {profile.age && (
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>{profile.age} years old</span>
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-2xl font-bold">{profile.name}</h3>
+                    {profile.verified && (
+                      <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Verified
+                      </Badge>
+                    )}
                   </div>
-                )}
-                {profile.gender && (
-                  <div className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
-                    <span>{profile.gender}</span>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                    {profile.age && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{profile.age} years old</span>
+                      </div>
+                    )}
+                    {profile.gender && (
+                      <div className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        <span>{profile.gender}</span>
+                      </div>
+                    )}
+                    {(profile.location || profile.city) && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{profile.city || 'Location verified'}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                {profile.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>Location verified</span>
+                </div>
+                {/* Match Potential Badge */}
+                {renterInsights && (
+                  <div className={`text-center p-3 rounded-xl border ${
+                    renterInsights.matchPotential >= 80 ? 'bg-green-500/10 border-green-500/30' :
+                    renterInsights.matchPotential >= 60 ? 'bg-blue-500/10 border-blue-500/30' :
+                    renterInsights.matchPotential >= 40 ? 'bg-yellow-500/10 border-yellow-500/30' :
+                    'bg-gray-500/10 border-gray-500/30'
+                  }`}>
+                    <div className={`text-2xl font-bold ${
+                      renterInsights.matchPotential >= 80 ? 'text-green-600 dark:text-green-400' :
+                      renterInsights.matchPotential >= 60 ? 'text-blue-600 dark:text-blue-400' :
+                      renterInsights.matchPotential >= 40 ? 'text-yellow-600 dark:text-yellow-400' :
+                      'text-gray-600 dark:text-gray-400'
+                    }`}>{renterInsights.matchPotential}%</div>
+                    <div className="text-[10px] text-muted-foreground">Match Score</div>
                   </div>
                 )}
               </div>
-              
+
               {/* Recommendation Stars */}
-              <div className="mt-4 flex items-center gap-2">
-                <span className="text-sm font-medium">Owner Recommendations:</span>
+              <div className="flex items-center gap-2 pt-3 border-t border-primary/10">
+                <span className="text-sm font-medium">Owner Rating:</span>
                 <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -347,44 +441,117 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               </div>
             </div>
 
-            {/* Property Preferences */}
+            {/* What They're Looking For - Enhanced */}
             <div>
               <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <Home className="w-5 h-5 text-primary" />
-                Property Preferences
+                <Target className="w-5 h-5 text-primary" />
+                What They're Looking For
               </h4>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {renterInsights.wantsLongTerm && (
-                  <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <div className="flex items-center gap-2 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm">Long-term Rental</span>
+                    <span className="text-sm font-medium">Long-term Rental</span>
                   </div>
                 )}
                 {renterInsights.wantsShortTerm && (
-                  <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <CheckCircle className="w-4 h-4 text-blue-500" />
-                    <span className="text-sm">Short-term Stay</span>
+                  <div className="flex items-center gap-2 p-2.5 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <Clock className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm font-medium">Short-term Stay</span>
                   </div>
                 )}
                 {renterInsights.needsPetFriendly && (
-                  <div className="flex items-center gap-2 p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                    <span className="text-base">🐾</span>
-                    <span className="text-sm">Has Pet(s)</span>
+                  <div className="flex items-center gap-2 p-2.5 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                    <PawPrint className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-medium">Has Pet(s)</span>
                   </div>
                 )}
                 {renterInsights.prefersFurnished && (
-                  <div className="flex items-center gap-2 p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                    <Home className="w-4 h-4 text-yellow-600" />
-                    <span className="text-sm">Prefers Furnished</span>
+                  <div className="flex items-center gap-2 p-2.5 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                    <Sparkles className="w-4 h-4 text-yellow-600" />
+                    <span className="text-sm font-medium">Prefers Furnished</span>
                   </div>
                 )}
-                {!renterInsights.wantsLongTerm && !renterInsights.wantsShortTerm && !renterInsights.needsPetFriendly && !renterInsights.prefersFurnished && (
-                  <div className="col-span-2 text-sm text-muted-foreground p-2">
-                    No specific property preferences indicated yet.
+                {renterInsights.isDigitalNomad && (
+                  <div className="flex items-center gap-2 p-2.5 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                    <Zap className="w-4 h-4 text-cyan-600" />
+                    <span className="text-sm font-medium">Digital Nomad</span>
+                  </div>
+                )}
+                {renterInsights.needsFamily && (
+                  <div className="flex items-center gap-2 p-2.5 bg-pink-500/10 rounded-lg border border-pink-500/20">
+                    <Users className="w-4 h-4 text-pink-600" />
+                    <span className="text-sm font-medium">Family Housing</span>
+                  </div>
+                )}
+                {renterInsights.isStudent && (
+                  <div className="flex items-center gap-2 p-2.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                    <Briefcase className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-medium">Student</span>
+                  </div>
+                )}
+                {renterInsights.needsQuiet && (
+                  <div className="flex items-center gap-2 p-2.5 bg-gray-500/10 rounded-lg border border-gray-500/20">
+                    <Home className="w-4 h-4 text-gray-600" />
+                    <span className="text-sm font-medium">Quiet Area</span>
+                  </div>
+                )}
+                {renterInsights.isBeachLover && (
+                  <div className="flex items-center gap-2 p-2.5 bg-sky-500/10 rounded-lg border border-sky-500/20">
+                    <span className="text-base">🏖️</span>
+                    <span className="text-sm font-medium">Beach Location</span>
+                  </div>
+                )}
+                {renterInsights.needsCityCenter && (
+                  <div className="flex items-center gap-2 p-2.5 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                    <MapPin className="w-4 h-4 text-orange-600" />
+                    <span className="text-sm font-medium">City Center</span>
+                  </div>
+                )}
+                {renterInsights.isFitnessOriented && (
+                  <div className="flex items-center gap-2 p-2.5 bg-red-500/10 rounded-lg border border-red-500/20">
+                    <Heart className="w-4 h-4 text-red-600" />
+                    <span className="text-sm font-medium">Fitness/Wellness</span>
+                  </div>
+                )}
+                {renterInsights.isEcoConscious && (
+                  <div className="flex items-center gap-2 p-2.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                    <span className="text-base">🌱</span>
+                    <span className="text-sm font-medium">Eco-Conscious</span>
                   </div>
                 )}
               </div>
             </div>
+
+            {/* Additional Services Needed */}
+            {(renterInsights.needsMotorcycle || renterInsights.needsBicycle || renterInsights.needsYacht) && (
+              <div>
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Car className="w-5 h-5 text-primary" />
+                  Additional Services Needed
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {renterInsights.needsMotorcycle && (
+                    <div className="flex items-center gap-2 p-2.5 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                      <Car className="w-4 h-4 text-orange-600" />
+                      <span className="text-sm font-medium">Motorcycle Rental</span>
+                    </div>
+                  )}
+                  {renterInsights.needsBicycle && (
+                    <div className="flex items-center gap-2 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <Bike className="w-4 h-4 text-green-600" />
+                      <span className="text-sm font-medium">Bicycle Rental</span>
+                    </div>
+                  )}
+                  {renterInsights.needsYacht && (
+                    <div className="flex items-center gap-2 p-2.5 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                      <Anchor className="w-4 h-4 text-cyan-600" />
+                      <span className="text-sm font-medium">Yacht Charter</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Verification Status */}
             <div>
@@ -440,26 +607,80 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               </div>
             </div>
 
+            {/* Why This Renter - Key selling points for owner */}
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <ThumbsUp className="w-5 h-5 text-green-500" />
+                Why This Renter
+              </h4>
+              <div className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
+                <div className="space-y-2">
+                  {profile.verified && (
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">Identity verified - Trustworthy renter</span>
+                    </div>
+                  )}
+                  {renterInsights.photoCount >= 2 && (
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">Multiple photos uploaded ({renterInsights.photoCount})</span>
+                    </div>
+                  )}
+                  {renterInsights.interestCount >= 5 && (
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">Clear preferences defined ({renterInsights.interestCount} interests)</span>
+                    </div>
+                  )}
+                  {renterInsights.readinessScore >= 60 && (
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">Complete profile - Serious about renting</span>
+                    </div>
+                  )}
+                  {renterInsights.activityLevel === 'very_active' && (
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">Very active - Quick response expected</span>
+                    </div>
+                  )}
+                  {renterInsights.wantsLongTerm && (
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">Looking for long-term - Stable tenancy</span>
+                    </div>
+                  )}
+                  {clientStats && clientStats.responseRate >= 80 && (
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">High response rate ({clientStats.responseRate}%)</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Recommendation Insights */}
             <div>
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
                 Profile Highlights
               </h4>
-              <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 p-4 rounded-lg border border-green-500/20 space-y-3">
+              <div className="bg-gradient-to-br from-primary/10 to-purple-500/10 p-4 rounded-lg border border-primary/20 space-y-3">
                 {recommendationScore >= 4 && (
                   <div className="flex items-start gap-2">
                     <Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
                     <p className="text-sm">
-                      <span className="font-semibold">Highly Engaged Profile:</span> Complete profile with detailed preferences
+                      <span className="font-semibold">Top-Rated Profile:</span> Complete profile with detailed preferences
                     </p>
                   </div>
                 )}
                 {(profile.interests?.length || 0) > 5 && (
                   <div className="flex items-start gap-2">
-                    <ThumbsUp className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                    <Target className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                     <p className="text-sm">
-                      <span className="font-semibold">Clear Preferences:</span> Well-defined requirements make matching easier
+                      <span className="font-semibold">Clear Requirements:</span> Well-defined needs make matching easier
                     </p>
                   </div>
                 )}
@@ -467,7 +688,23 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   <div className="flex items-start gap-2">
                     <Eye className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
                     <p className="text-sm">
-                      <span className="font-semibold">Verified Photos:</span> Multiple profile photos uploaded
+                      <span className="font-semibold">Photo Verified:</span> Multiple profile photos uploaded
+                    </p>
+                  </div>
+                )}
+                {renterInsights?.isDigitalNomad && (
+                  <div className="flex items-start gap-2">
+                    <Zap className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" />
+                    <p className="text-sm">
+                      <span className="font-semibold">Digital Nomad:</span> Flexible and independent lifestyle
+                    </p>
+                  </div>
+                )}
+                {profile.age && profile.age >= 25 && profile.age <= 45 && (
+                  <div className="flex items-start gap-2">
+                    <Briefcase className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <p className="text-sm">
+                      <span className="font-semibold">Working Professional:</span> Prime rental age group
                     </p>
                   </div>
                 )}
