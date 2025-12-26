@@ -47,8 +47,9 @@ export function ClientSwipeContainer({
   }>({ isOpen: false });
 
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
-  const [includeRecentLikes, setIncludeRecentLikes] = useState(false);
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(undefined, 0, 50, includeRecentLikes);
+  // isRefreshMode: When true, shows disliked profiles within 3-day cooldown (but NEVER liked profiles)
+  const [isRefreshMode, setIsRefreshMode] = useState(false);
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(undefined, 0, 50, isRefreshMode);
   
   const clientProfiles = externalProfiles || internalProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
@@ -118,8 +119,9 @@ export function ClientSwipeContainer({
   };
 
   const handleRefresh = useCallback(async () => {
-    // Keep includeRecentLikes as false - we don't want to show already-liked profiles
-    setIncludeRecentLikes(false);
+    // Keep isRefreshMode as false - normal mode excludes all swiped profiles
+    // Note: Liked profiles are NEVER shown again, disliked profiles hidden for 3 days
+    setIsRefreshMode(false);
     setCurrentIndex(0);
     await refetch();
     sonnerToast.success('New profiles loaded');

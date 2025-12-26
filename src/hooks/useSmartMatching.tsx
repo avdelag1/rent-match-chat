@@ -268,37 +268,52 @@ export function useSmartListingMatching(
 
         const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
 
-        // NOTE: dislikes table doesn't exist in schema - using left swipes from likes table instead
+        // Fetch left swipes with timestamps for 3-day expiry logic
+        // After 3 days, dislikes become permanent and won't show even on refresh
+        const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+
         const { data: leftSwipes } = await supabase
           .from('likes')
-          .select('target_id')
+          .select('target_id, created_at')
           .eq('user_id', user.user.id)
           .eq('direction', 'left');
 
-        // Build set of left-swiped IDs
+        // Build sets for dislike handling:
+        // - permanentlyHiddenIds: dislikes older than 3 days (NEVER show again)
+        // - refreshableDislikeIds: dislikes within 3 days (show only on refresh)
         const permanentlyHiddenIds = new Set<string>();
         const refreshableDislikeIds = new Set<string>();
 
         if (leftSwipes) {
           for (const swipe of leftSwipes) {
-            permanentlyHiddenIds.add(swipe.target_id);
+            const swipeDate = new Date(swipe.created_at);
+            const threeDaysAgoDate = new Date(threeDaysAgo);
+
+            if (swipeDate < threeDaysAgoDate) {
+              // Dislike is older than 3 days - permanently hidden
+              permanentlyHiddenIds.add(swipe.target_id);
+            } else {
+              // Dislike is within 3 days - can be refreshed
+              refreshableDislikeIds.add(swipe.target_id);
+            }
           }
         }
 
         // Build set of IDs to exclude based on mode
         const swipedListingIds = new Set<string>();
 
-        // Always exclude liked items
+        // ALWAYS exclude liked items - they are saved permanently, never show again
         for (const id of likedIds) {
           swipedListingIds.add(id);
         }
 
-        // Always exclude permanently hidden items
+        // ALWAYS exclude permanently hidden items (dislikes > 3 days old)
         for (const id of permanentlyHiddenIds) {
           swipedListingIds.add(id);
         }
 
         // In normal mode (not refresh), also exclude refreshable dislikes
+        // In refresh mode, refreshable dislikes can be shown again
         if (!isRefreshMode) {
           for (const id of refreshableDislikeIds) {
             swipedListingIds.add(id);
@@ -825,37 +840,52 @@ export function useSmartClientMatching(
           }
         }
 
-        // NOTE: dislikes table doesn't exist in schema - using left swipes from likes table instead
+        // Fetch left swipes with timestamps for 3-day expiry logic
+        // After 3 days, dislikes become permanent and won't show even on refresh
+        const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+
         const { data: leftSwipes } = await supabase
           .from('likes')
-          .select('target_id')
+          .select('target_id, created_at')
           .eq('user_id', user.user.id)
           .eq('direction', 'left');
 
-        // Build set of left-swiped IDs  
+        // Build sets for dislike handling:
+        // - permanentlyHiddenIds: dislikes older than 3 days (NEVER show again)
+        // - refreshableDislikeIds: dislikes within 3 days (show only on refresh)
         const permanentlyHiddenIds = new Set<string>();
         const refreshableDislikeIds = new Set<string>();
 
         if (leftSwipes) {
           for (const swipe of leftSwipes) {
-            permanentlyHiddenIds.add(swipe.target_id);
+            const swipeDate = new Date(swipe.created_at);
+            const threeDaysAgoDate = new Date(threeDaysAgo);
+
+            if (swipeDate < threeDaysAgoDate) {
+              // Dislike is older than 3 days - permanently hidden
+              permanentlyHiddenIds.add(swipe.target_id);
+            } else {
+              // Dislike is within 3 days - can be refreshed
+              refreshableDislikeIds.add(swipe.target_id);
+            }
           }
         }
 
         // Build set of IDs to exclude based on mode
         const swipedProfileIds = new Set<string>();
 
-        // Always exclude liked profiles
+        // ALWAYS exclude liked profiles - they are saved permanently, never show again
         for (const id of likedIds) {
           swipedProfileIds.add(id);
         }
 
-        // Always exclude permanently hidden profiles
+        // ALWAYS exclude permanently hidden profiles (dislikes > 3 days old)
         for (const id of permanentlyHiddenIds) {
           swipedProfileIds.add(id);
         }
 
         // In normal mode (not refresh), also exclude refreshable dislikes
+        // In refresh mode, refreshable dislikes can be shown again
         if (!isRefreshMode) {
           for (const id of refreshableDislikeIds) {
             swipedProfileIds.add(id);
