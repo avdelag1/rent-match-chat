@@ -71,26 +71,26 @@ function getTransitionVariant(fromPath: string, toPath: string) {
   // Going deeper (forward navigation) - slide from right
   if (toDepth > fromDepth) {
     return {
-      initial: { opacity: 0, x: 100, scale: 0.95 },
-      animate: { opacity: 1, x: 0, scale: 1 },
-      exit: { opacity: 0, x: -50, scale: 0.98 },
+      initial: { opacity: 0, x: 20 },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: -20 },
     };
   }
 
   // Going back (backward navigation) - slide from left
   if (toDepth < fromDepth) {
     return {
-      initial: { opacity: 0, x: -100, scale: 0.95 },
-      animate: { opacity: 1, x: 0, scale: 1 },
-      exit: { opacity: 0, x: 50, scale: 0.98 },
+      initial: { opacity: 0, x: -20 },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: 20 },
     };
   }
 
-  // Same level navigation - elegant fade with scale
+  // Same level navigation - simple fade
   return {
-    initial: { opacity: 0, scale: 0.96, filter: 'blur(4px)' },
-    animate: { opacity: 1, scale: 1, filter: 'blur(0px)' },
-    exit: { opacity: 0, scale: 1.02, filter: 'blur(2px)' },
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
   };
 }
 
@@ -131,8 +131,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     // Update ref after a brief delay to allow transition calculation
     const timer = requestAnimationFrame(() => {
       prevLocationRef.current = location.pathname;
-      // End transition after animation settles
-      setTimeout(() => setIsTransitioning(false), 300);
+      // End transition after animation settles (150ms duration + 50ms buffer)
+      setTimeout(() => setIsTransitioning(false), 200);
     });
 
     return () => cancelAnimationFrame(timer);
@@ -153,8 +153,8 @@ export function AppLayout({ children }: AppLayoutProps) {
             animate={transitionVariant.animate}
             exit={transitionVariant.exit}
             transition={{
-              ...springConfigs.ultraSmooth,
-              duration: 0.2,
+              duration: 0.15,
+              ease: "easeInOut",
             }}
             className="w-full min-h-screen"
             style={{

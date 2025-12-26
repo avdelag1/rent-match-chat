@@ -56,7 +56,7 @@ const ClientProfile = () => {
   if (isLoading) {
     return (
       <DashboardLayout userRole="client">
-        <div className="w-full h-full overflow-y-auto p-4 pb-32">
+        <div className="w-full p-4 pb-32">
           <div className="max-w-lg mx-auto space-y-4">
             <div className="flex items-center gap-4 mb-6">
               <Skeleton className="w-20 h-20 rounded-full" />
@@ -85,12 +85,7 @@ const ClientProfile = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <motion.div
-        className="w-full h-full overflow-y-auto px-5 py-4 pb-24"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      <div className="w-full px-5 py-4 pb-24">
         <div className="max-w-lg mx-auto space-y-4">
           {/* Back Button */}
           <Button
@@ -278,7 +273,7 @@ const ClientProfile = () => {
           {/* Bottom spacing for navigation */}
           <div className="h-8" />
         </div>
-      </motion.div>
+      </div>
 
       <ClientProfileDialog 
         open={showEditDialog} 

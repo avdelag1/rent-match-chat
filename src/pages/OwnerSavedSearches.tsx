@@ -21,7 +21,7 @@ const OwnerSavedSearches = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
+      <div className="w-full p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>

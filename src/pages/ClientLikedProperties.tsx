@@ -91,7 +91,7 @@ const ClientLikedProperties = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="w-full h-full overflow-y-auto pb-24 bg-background">
+      <div className="w-full pb-24 bg-background">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-6xl mx-auto">
             {/* Back Button */}
