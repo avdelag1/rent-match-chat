@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Card } from './ui/card';
 
+// Only render in development mode
+const isDev = import.meta.env.DEV;
+
 export function PerformanceMonitor() {
+  // Return null immediately in production
+  if (!isDev) return null;
+
+  return <PerformanceMonitorInner />;
+}
+
+function PerformanceMonitorInner() {
   const [fps, setFps] = useState(60);
   const [memory, setMemory] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (import.meta.env.PROD) return;
-
+    setMounted(true);
+    
     let frameCount = 0;
     let lastTime = performance.now();
     let rafId: number;
@@ -37,7 +48,7 @@ export function PerformanceMonitor() {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  if (import.meta.env.PROD) return null;
+  if (!mounted) return null;
 
   return (
     <Card className="fixed bottom-4 right-4 p-3 z-[9999] bg-black/80 text-white backdrop-blur-sm border border-white/10">
