@@ -22,6 +22,15 @@ import { useRadioPlayer, RadioSkin, AVAILABLE_SKINS } from '@/hooks/useRadioPlay
 import { cn } from '@/lib/utils';
 import { RadioSkinSelector } from './RadioSkinSelector';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  BackgroundRhythm,
+  SpectrumBars,
+  CircularVisualizer,
+  PulseRing,
+  ParticleBurst,
+  GlowEffect,
+  EqualizerBars,
+} from './AudioVisualizer';
 
 interface SkinProps {
   currentStation: NonNullable<ReturnType<typeof useRadioPlayer>['currentStation']>;
@@ -60,14 +69,17 @@ const DefaultSkin: React.FC<SkinProps> = ({
   const playIconSize = isMobile ? 'w-6 h-6' : 'w-7 h-7';
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 overflow-y-auto"
     >
+      {/* Rhythm background effect */}
+      <BackgroundRhythm isPlaying={isPlaying} color="rgba(139, 92, 246, 0.15)" />
+
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-[calc(var(--safe-top)+8px)] pb-2 shrink-0">
+      <div className="flex items-center justify-between px-4 pt-[calc(var(--safe-top)+8px)] pb-2 shrink-0 relative z-10">
         <Button variant="ghost" size="icon" onClick={collapsePlayer} className="w-9 h-9 text-white/80">
           <ChevronDown className="w-5 h-5" />
         </Button>
@@ -84,25 +96,64 @@ const DefaultSkin: React.FC<SkinProps> = ({
       </div>
 
       {/* Main Content - Centered & Scrollable */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 max-w-md mx-auto w-full min-h-0">
-        {/* Album Art */}
-        <div className={cn("relative rounded-2xl overflow-hidden shadow-2xl mb-4 shrink-0", artSize)}>
-          <img 
-            src={currentStation.artwork} 
-            alt={currentStation.name} 
-            className="w-full h-full object-cover"
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 max-w-md mx-auto w-full min-h-0 relative z-10">
+        {/* Album Art with visualizer */}
+        <div className="relative mb-4 shrink-0">
+          {/* Circular visualizer behind artwork */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <CircularVisualizer
+              isPlaying={isPlaying}
+              size={isMobile ? 160 : 220}
+              barCount={32}
+              color="rgba(139, 92, 246, 0.6)"
+            />
+          </div>
+
+          {/* Pulse ring effect */}
+          <PulseRing
+            isPlaying={isPlaying}
+            size={isMobile ? 140 : 190}
+            color="rgba(139, 92, 246, 0.4)"
+            className="inset-0"
           />
-          {isLoading && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-          {currentStation.isLive && (
-            <span className="absolute top-2 right-2 px-2 py-0.5 bg-red-500 rounded text-[10px] font-semibold text-white flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-              LIVE
-            </span>
-          )}
+
+          {/* Particle burst on beats */}
+          <ParticleBurst
+            isPlaying={isPlaying}
+            color="rgba(255, 255, 255, 0.7)"
+            particleCount={6}
+          />
+
+          <div className={cn("relative rounded-2xl overflow-hidden shadow-2xl", artSize)}>
+            <GlowEffect isPlaying={isPlaying} color="rgba(139, 92, 246, 0.5)" className="rounded-2xl" />
+            <img
+              src={currentStation.artwork}
+              alt={currentStation.name}
+              className="w-full h-full object-cover relative z-10"
+            />
+            {isLoading && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+            {currentStation.isLive && (
+              <span className="absolute top-2 right-2 px-2 py-0.5 bg-red-500 rounded text-[10px] font-semibold text-white flex items-center gap-1 z-20">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                LIVE
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Spectrum bars below artwork */}
+        <div className="w-full max-w-[200px] h-8 mb-4">
+          <SpectrumBars
+            isPlaying={isPlaying}
+            barCount={24}
+            height={32}
+            color="rgba(139, 92, 246, 0.8)"
+            mirrored
+          />
         </div>
 
         {/* Station Info */}
@@ -204,7 +255,10 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
         </div>
 
         {/* Screen */}
-        <div className="mx-4 bg-gradient-to-b from-gray-800 to-gray-900 rounded-lg p-3 shadow-inner border border-gray-700">
+        <div className="mx-4 bg-gradient-to-b from-gray-800 to-gray-900 rounded-lg p-3 shadow-inner border border-gray-700 relative overflow-hidden">
+          {/* Subtle glow effect */}
+          <GlowEffect isPlaying={isPlaying} color="rgba(59, 130, 246, 0.2)" />
+
           {/* Album Art */}
           <div className="relative aspect-square rounded-md overflow-hidden mb-3 bg-black">
             <img src={currentStation.artwork} alt={currentStation.name} className="w-full h-full object-cover" />
@@ -213,22 +267,38 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
                 <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin" />
               </div>
             )}
+            {/* Equalizer overlay on artwork when playing */}
+            {isPlaying && (
+              <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-black/70 to-transparent flex items-end justify-center pb-1">
+                <EqualizerBars
+                  isPlaying={isPlaying}
+                  barCount={12}
+                  height={16}
+                  gap={2}
+                  color="rgba(59, 130, 246, 0.9)"
+                />
+              </div>
+            )}
           </div>
 
           {/* Track Info */}
-          <div className="text-center">
+          <div className="text-center relative z-10">
             <h3 className="text-white font-bold text-sm truncate">{currentStation.name}</h3>
             <p className="text-gray-400 text-xs truncate">{currentStation.description}</p>
             {error && <p className="text-red-400 text-[10px] mt-1">{error}</p>}
           </div>
 
-          {/* Progress bar (decorative) */}
-          <div className="mt-3 h-1 bg-gray-700 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-blue-500"
-              animate={{ width: isPlaying ? ['0%', '100%'] : '0%' }}
-              transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+          {/* Spectrum visualizer instead of progress bar */}
+          <div className="mt-3 h-4 relative">
+            <SpectrumBars
+              isPlaying={isPlaying}
+              barCount={20}
+              height={16}
+              color="rgba(59, 130, 246, 0.8)"
             />
+            {!isPlaying && (
+              <div className="absolute inset-0 bg-gray-700 rounded-full h-1 top-1.5" />
+            )}
           </div>
         </div>
 
@@ -1453,6 +1523,9 @@ const NeonCyberSkin: React.FC<SkinProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-b from-purple-950 via-slate-950 to-black overflow-y-auto">
+      {/* Rhythm-based background effect */}
+      <BackgroundRhythm isPlaying={isPlaying} color="rgba(236, 72, 153, 0.2)" />
+
       {/* Neon Grid Background */}
       <div className="absolute inset-0 opacity-20"
         style={{
@@ -1464,9 +1537,14 @@ const NeonCyberSkin: React.FC<SkinProps> = ({
         }}
       />
 
-      {/* Glow Effects */}
+      {/* Glow Effects - enhanced with rhythm */}
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl" />
+
+      {/* Particle burst on beat */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <ParticleBurst isPlaying={isPlaying} color="rgba(236, 72, 153, 0.8)" particleCount={10} />
+      </div>
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-4 pt-[calc(var(--safe-top)+12px)] pb-4">
@@ -1549,27 +1627,25 @@ const NeonCyberSkin: React.FC<SkinProps> = ({
           {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
         </div>
 
-        {/* Waveform */}
-        <div className="mt-6 flex items-end justify-center gap-1 h-12">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="w-1.5 rounded-full"
-              style={{
-                background: `linear-gradient(180deg, #ec4899, #8b5cf6, #06b6d4)`,
-              }}
-              animate={{
-                height: isPlaying ? [8, 32, 8] : 8,
-                opacity: isPlaying ? [0.5, 1, 0.5] : 0.3,
-              }}
-              transition={{
-                duration: 0.5,
-                repeat: Infinity,
-                delay: i * 0.05,
-                ease: 'easeInOut'
-              }}
-            />
-          ))}
+        {/* Rhythm-responsive Spectrum */}
+        <div className="mt-6 w-full max-w-[280px] h-12">
+          <SpectrumBars
+            isPlaying={isPlaying}
+            barCount={32}
+            height={48}
+            color="linear-gradient(180deg, #ec4899, #8b5cf6, #06b6d4)"
+            mirrored
+          />
+        </div>
+
+        {/* Circular visualizer under controls */}
+        <div className="mt-4 flex justify-center">
+          <CircularVisualizer
+            isPlaying={isPlaying}
+            size={80}
+            barCount={20}
+            color="rgba(6, 182, 212, 0.6)"
+          />
         </div>
       </main>
 
@@ -1668,6 +1744,9 @@ const VinylTurntableSkin: React.FC<SkinProps> = ({
   const deviceWidth = isMobile ? 'max-w-[280px]' : 'max-w-[360px]';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-950 p-2 overflow-y-auto">
+      {/* Background rhythm pulse */}
+      <BackgroundRhythm isPlaying={isPlaying} color="rgba(220, 38, 38, 0.1)" />
+
       {/* Turntable Base */}
       <div className={cn("relative w-full bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-xl shadow-2xl border border-neutral-700 overflow-hidden p-3", deviceWidth)}>
         {/* Wood Grain Effect */}
@@ -1690,8 +1769,29 @@ const VinylTurntableSkin: React.FC<SkinProps> = ({
 
         {/* Platter */}
         <div className="relative mx-auto w-64 h-64">
+          {/* Circular visualizer around the platter */}
+          <div className="absolute -inset-4 flex items-center justify-center">
+            <CircularVisualizer
+              isPlaying={isPlaying}
+              size={288}
+              barCount={48}
+              color="rgba(220, 38, 38, 0.5)"
+            />
+          </div>
+
+          {/* Pulse ring around vinyl */}
+          <PulseRing
+            isPlaying={isPlaying}
+            size={260}
+            color="rgba(220, 38, 38, 0.3)"
+            className="inset-0"
+          />
+
           {/* Platter Base */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-b from-neutral-700 to-neutral-800 shadow-inner" />
+
+          {/* Glow effect on the vinyl */}
+          <GlowEffect isPlaying={isPlaying} color="rgba(220, 38, 38, 0.4)" className="absolute inset-2 rounded-full" />
 
           {/* Vinyl Record */}
           <motion.div
@@ -1740,6 +1840,16 @@ const VinylTurntableSkin: React.FC<SkinProps> = ({
               <Moon className="w-3 h-3" /> {remainingMinutes}m
             </p>
           )}
+        </div>
+
+        {/* Spectrum bars */}
+        <div className="mt-4 mx-auto max-w-[200px] h-6">
+          <SpectrumBars
+            isPlaying={isPlaying}
+            barCount={24}
+            height={24}
+            color="rgba(220, 38, 38, 0.7)"
+          />
         </div>
 
         {/* Controls */}
