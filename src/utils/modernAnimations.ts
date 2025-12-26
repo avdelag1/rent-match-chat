@@ -65,19 +65,19 @@ export const cardVariants: Variants = {
   }
 };
 
-// Swipe card exit animations
+// Swipe card exit animations - optimized for all screen sizes
 export const swipeExitVariants = {
   left: {
-    x: -1000,
+    x: -500,
     rotate: -25,
     opacity: 0,
-    transition: { duration: 0.4, ease: [0.32, 0.72, 0, 1] }
+    transition: { duration: 0.35, ease: [0.32, 0.72, 0, 1] }
   },
   right: {
-    x: 1000,
+    x: 500,
     rotate: 25,
     opacity: 0,
-    transition: { duration: 0.4, ease: [0.32, 0.72, 0, 1] }
+    transition: { duration: 0.35, ease: [0.32, 0.72, 0, 1] }
   },
 };
 

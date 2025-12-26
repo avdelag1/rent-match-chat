@@ -106,7 +106,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     left: 0,
     right: 0,
     bottom: 0,
-    height: '100%',
+    maxHeight: '100%',
     willChange: 'transform',
     backfaceVisibility: 'hidden' as const,
     WebkitBackfaceVisibility: 'hidden' as const,
@@ -206,7 +206,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
          <motion.div
            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
            animate={{
-             height: isBottomSheetExpanded ? '75%' : '14%',
+             height: isBottomSheetExpanded ? 'min(75%, calc(100vh - 220px))' : 'min(14%, 120px)',
              y: 0
            }}
            transition={{
@@ -214,7 +214,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
              stiffness: 400,
              damping: 32
            }}
-           style={{ willChange: 'height' }}
+           style={{ willChange: 'height', maxHeight: 'calc(100% - 80px)' }}
          >
           {/* Drag Handle */}
           <div className="flex justify-center py-2 pointer-events-none">
@@ -310,7 +310,8 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="mt-4 overflow-y-auto max-h-[calc(75vh-200px)]"
+                className="mt-4 overflow-y-auto"
+                style={{ maxHeight: 'calc(min(75vh, 100vh - 320px) - 200px)' }}
               >
                 {/* Description */}
                 {listing.description && (

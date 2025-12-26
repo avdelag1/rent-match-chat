@@ -122,6 +122,7 @@ export function OwnerClientTinderCard({
     left: 0,
     right: 0,
     bottom: 0,
+    maxHeight: '100%',
     willChange: 'transform, opacity',
     borderRadius: '1.5rem', // 24px - ensures rounded corners during animation
     overflow: 'hidden' as const,
@@ -245,11 +246,11 @@ export function OwnerClientTinderCard({
           }}
           className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing z-30"
           animate={{
-            height: isBottomSheetExpanded ? '75%' : '22%',
+            height: isBottomSheetExpanded ? 'min(75%, calc(100vh - 220px))' : 'min(22%, 180px)',
             y: 0
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 32 }}
-          style={{ willChange: 'height' }}
+          style={{ willChange: 'height', maxHeight: 'calc(100% - 80px)' }}
         >
           {/* Drag Handle */}
           <div className="flex justify-center py-2 pointer-events-none">
@@ -347,7 +348,8 @@ export function OwnerClientTinderCard({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="mt-4 overflow-y-auto max-h-[calc(75vh-200px)]"
+                className="mt-4 overflow-y-auto"
+                style={{ maxHeight: 'calc(min(75vh, 100vh - 320px) - 200px)' }}
               >
                 {/* Interests */}
                 {profile.interests && profile.interests.length > 0 && (
