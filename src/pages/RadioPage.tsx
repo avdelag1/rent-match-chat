@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRadioPlayer, AVAILABLE_SKINS, RadioSkin } from '@/hooks/useRadioPlayer';
-import { radioGenres, getAllStations, searchStations, RadioStation, RadioGenre } from '@/data/radioStations';
+import { orderedRadioGenres as radioGenres, getAllStations, searchStations, RadioStation, RadioGenre } from '@/data/radioStations';
 import { RadioStationCard } from '@/components/radio/RadioStationCard';
 import { RadioGenreSection } from '@/components/radio/RadioGenreSection';
 import { RadioSleepTimer } from '@/components/radio/RadioSleepTimer';

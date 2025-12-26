@@ -2805,6 +2805,39 @@ export const radioGenres: RadioGenre[] = [
   },
 ];
 
+// Reordered genres: Cities first, then Electronic/Music, then Podcasts/Books
+const GENRE_ORDER = [
+  // Cities
+  'newyork',
+  'miami', 
+  'california',
+  'ibiza',
+  'boston',
+  'texas',
+  'dubai',
+  'bali',
+  'canada',
+  'russia',
+  // Electronic & Music
+  'electronic',
+  'deep-house',
+  'underground',
+  'hip-hop',
+  'world',
+  'classical',
+  // Podcasts, Books & Wellness
+  'ideas',
+  'audiobooks',
+  'comedy',
+  'meditation',
+  'healing',
+];
+
+// Export reordered genres
+export const orderedRadioGenres: RadioGenre[] = GENRE_ORDER
+  .map(id => radioGenres.find(g => g.id === id))
+  .filter((g): g is RadioGenre => g !== undefined);
+
 // Helper function to get all stations flat
 export const getAllStations = (): RadioStation[] => {
   return radioGenres.flatMap(genre => genre.stations);

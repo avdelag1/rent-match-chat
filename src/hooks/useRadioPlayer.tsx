@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { RadioStation, getStationById, radioGenres, getAllStations, getRandomStation, getRandomStationFromGenre } from '@/data/radioStations';
+import { RadioStation, getStationById, orderedRadioGenres as radioGenres, getAllStations, getRandomStation, getRandomStationFromGenre } from '@/data/radioStations';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'react-router-dom';
 
