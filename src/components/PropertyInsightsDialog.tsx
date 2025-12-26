@@ -158,13 +158,13 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] sm:max-h-[92vh] flex flex-col p-0 top-[5vh] sm:top-[4vh] translate-y-0 sm:translate-y-0">
-        <DialogHeader className="px-6 py-4 border-b shrink-0">
-          <DialogTitle>Property Insights</DialogTitle>
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-3 sm:px-6 py-3 sm:py-4 border-b shrink-0">
+          <DialogTitle className="text-base sm:text-lg">Property Insights</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 h-full">
-          <div className="space-y-5 py-4 px-6 pb-8">
+        <ScrollArea className="flex-1 h-full overflow-x-hidden">
+          <div className="space-y-4 sm:space-y-5 py-3 sm:py-4 px-3 sm:px-6 pb-6 sm:pb-8">
             {/* Hot Listing Alert */}
             {propertyInsights?.isHotListing && (
               <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
@@ -180,8 +180,8 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
             {/* Basic Info with Category Badge */}
             <div>
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-xl font-bold flex-1">{listing.title}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                <h3 className="text-base sm:text-xl font-bold flex-1 break-words">{listing.title}</h3>
                 {propertyInsights && (
                   <div className="flex gap-2 shrink-0">
                     {CATEGORY_CONFIG[propertyInsights.category] && (
@@ -227,7 +227,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
             )}
 
             {/* Price & Key Details - Adaptive for category */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-4 text-sm sm:text-base">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-green-600" />
                 <span className="font-semibold">
@@ -336,7 +336,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
                   <Settings className="w-5 h-5 text-primary" />
                   Specifications
                 </h4>
-                <div className="bg-muted/30 p-4 rounded-lg grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-muted/30 p-3 sm:p-4 rounded-lg grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                   {listing.brand && (
                     <div><span className="text-muted-foreground">Brand:</span> <span className="font-medium">{listing.brand}</span></div>
                   )}
