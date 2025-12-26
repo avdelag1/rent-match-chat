@@ -220,7 +220,8 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
 }
 
 export interface ListingFilters {
-  category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht';
+  category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle';
+  categories?: ('property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle')[]; // Support multiple categories
   listingType?: 'rent' | 'sale' | 'both';
   propertyType?: string[];
   priceRange?: [number, number];
@@ -245,7 +246,7 @@ export function useSmartListingMatching(
   isRefreshMode: boolean = false // When true, show disliked items within cooldown
 ) {
   return useQuery({
-    queryKey: ['smart-listings', filters, page, isRefreshMode], // Include refresh mode in query key
+    queryKey: ['smart-listings', filters?.category, filters?.categories, filters?.listingType, filters, page, isRefreshMode], // Include category filters in query key
     queryFn: async () => {
       try {
         // Get current user's preferences
@@ -320,8 +321,10 @@ export function useSmartListingMatching(
 
         // Apply filter-based query constraints
         if (filters) {
-          // Category filter
-          if (filters.category) {
+          // Category filter - support multiple categories
+          if (filters.categories && filters.categories.length > 0) {
+            query = query.in('category', filters.categories);
+          } else if (filters.category) {
             query = query.eq('category', filters.category);
           }
 
