@@ -26,6 +26,8 @@ html {
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
   width: 100%;
+  /* Prevent page shift when scrollbar appears/disappears */
+  scrollbar-gutter: stable;
 
   /* Safe area CSS variables - Available globally */
   --sat: env(safe-area-inset-top, 0px);
@@ -48,6 +50,8 @@ body {
   min-height: 100dvh; /* Dynamic viewport height for mobile */
   margin: 0;
   padding: 0;
+  /* Prevent page shift when scrollbar appears/disappears */
+  scrollbar-gutter: stable;
   /* DO NOT add safe area padding here - let components handle it */
 }
 

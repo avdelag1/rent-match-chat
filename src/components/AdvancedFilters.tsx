@@ -2,15 +2,17 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X } from 'lucide-react';
-import { useAutoSaveListingTypes } from '@/hooks/useAutoSaveListingTypes';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Home, Car, Bike, Ship, CircleDot, Briefcase, RotateCcw, Sparkles } from 'lucide-react';
+import { PropertyClientFilters } from '@/components/filters/PropertyClientFilters';
+import { VehicleClientFilters } from '@/components/filters/VehicleClientFilters';
+import { MotoClientFilters } from '@/components/filters/MotoClientFilters';
+import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters';
+import { YachtClientFilters } from '@/components/filters/YachtClientFilters';
+import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
 
 interface AdvancedFiltersProps {
   isOpen: boolean;
@@ -20,389 +22,223 @@ interface AdvancedFiltersProps {
   currentFilters?: any;
 }
 
-const propertyTypes = ['apartment', 'house', 'studio', 'room', 'co-living', 'penthouse', 'loft'];
-const amenities = ['pool', 'gym', 'parking', 'wifi', 'security', 'pet-friendly', 'balcony', 'rooftop', 'coworking', 'elevator'];
-const lifestyleTags = ['student', 'professional', 'family', 'digital-nomad', 'couple', 'quiet', 'social', 'pet-lover', 'non-smoker'];
-const locationRadii = [1, 5, 10, 20, 50];
+type CategoryType = 'property' | 'vehicle' | 'moto' | 'bicycle' | 'yacht' | 'services';
+
+const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
+  { id: 'property', name: 'Property', icon: Home, color: 'text-emerald-500' },
+  { id: 'vehicle', name: 'Cars', icon: Car, color: 'text-blue-500' },
+  { id: 'moto', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
+  { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-purple-500' },
+  { id: 'yacht', name: 'Yachts', icon: Ship, color: 'text-cyan-500' },
+  { id: 'services', name: 'Jobs', icon: Briefcase, color: 'text-pink-500' },
+];
 
 export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, currentFilters }: AdvancedFiltersProps) {
-  const { saveListingTypes } = useAutoSaveListingTypes();
   const safeCurrentFilters = currentFilters ?? {};
-
-  const [filters, setFilters] = useState({
-    ...safeCurrentFilters,
-    priceRange: safeCurrentFilters.priceRange ?? [0, 100000],
-    propertyTypes: safeCurrentFilters.propertyTypes ?? [],
-    listingTypes: safeCurrentFilters.listingTypes ?? ['rent', 'buy'],
-    bedrooms: safeCurrentFilters.bedrooms ?? [1, 10],
-    bathrooms: safeCurrentFilters.bathrooms ?? [1, 5],
-    amenities: safeCurrentFilters.amenities ?? [],
-    locationRadius: safeCurrentFilters.locationRadius ?? 10,
-    furnished: safeCurrentFilters.furnished ?? 'any',
-    petFriendly: safeCurrentFilters.petFriendly ?? 'any',
-    availableFrom: safeCurrentFilters.availableFrom ?? '',
-    rentalDuration: safeCurrentFilters.rentalDuration ?? 'any',
-    lifestyleTags: safeCurrentFilters.lifestyleTags ?? [],
-    verified: safeCurrentFilters.verified ?? false,
-    premiumOnly: safeCurrentFilters.premiumOnly ?? false,
+  const [activeCategory, setActiveCategory] = useState<CategoryType>('property');
+  const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
+    property: 0,
+    vehicle: 0,
+    moto: 0,
+    bicycle: 0,
+    yacht: 0,
+    services: 0,
+  });
+  const [categoryFilters, setCategoryFilters] = useState<Record<CategoryType, any>>({
+    property: safeCurrentFilters,
+    vehicle: {},
+    moto: {},
+    bicycle: {},
+    yacht: {},
+    services: {},
   });
 
-  const handleToggleArrayItem = (array: string[], item: string, key: string) => {
-    const newArray = array.includes(item) 
-      ? array.filter(i => i !== item)
-      : [...array, item];
-    setFilters(prev => ({ ...prev, [key]: newArray }));
+  const handleApplyFilters = (category: CategoryType, filters: any) => {
+    // Count active filters
+    const count = Object.entries(filters).filter(([key, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'boolean') return value;
+      if (typeof value === 'string') return value !== '' && value !== 'any';
+      if (typeof value === 'number') return value > 0;
+      return false;
+    }).length;
+
+    setFilterCounts(prev => ({ ...prev, [category]: count }));
+    setCategoryFilters(prev => ({ ...prev, [category]: filters }));
   };
 
   const handleApply = () => {
-    
-    onApplyFilters(filters);
+    // Apply all filters with category information
+    const allFilters = {
+      ...categoryFilters[activeCategory],
+      activeCategory,
+      filterCounts,
+    };
+    onApplyFilters(allFilters);
     onClose();
   };
 
   const handleReset = () => {
-    setFilters({
-      priceRange: [0, 100000],
-      propertyTypes: [],
-      listingTypes: ['rent', 'buy'],
-      bedrooms: [1, 10],
-      bathrooms: [1, 5],
-      amenities: [],
-      locationRadius: 10,
-      furnished: 'any',
-      petFriendly: 'any',
-      availableFrom: '',
-      rentalDuration: 'any',
-      lifestyleTags: [],
-      verified: false,
-      premiumOnly: false
+    setFilterCounts({
+      property: 0,
+      vehicle: 0,
+      moto: 0,
+      bicycle: 0,
+      yacht: 0,
+      services: 0,
+    });
+    setCategoryFilters({
+      property: {},
+      vehicle: {},
+      moto: {},
+      bicycle: {},
+      yacht: {},
+      services: {},
     });
   };
 
+  const totalActiveFilters = Object.values(filterCounts).reduce((a, b) => a + b, 0);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">
-            {userRole === 'owner' ? '🔍 Filter Clients' : '🏠 Filter Properties'}
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            {userRole === 'owner' 
-              ? 'Select the type of clients you want to see based on their preferences' 
-              : 'Customize your property search preferences'}
-          </p>
+      <DialogContent className="max-w-2xl h-[90vh] sm:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+        {/* Header */}
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b bg-gradient-to-r from-primary/5 via-background to-background">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg sm:text-xl font-bold">
+                  {userRole === 'owner' ? 'Find Clients' : 'Filter Listings'}
+                </DialogTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  {userRole === 'owner'
+                    ? 'Customize your ideal client profile'
+                    : 'Find exactly what you\'re looking for'}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              className="text-muted-foreground hover:text-foreground gap-1.5 h-8"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Reset</span>
+            </Button>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Price Range */}
-          <div>
-            <Label className="text-base font-semibold">
-              {userRole === 'client' ? 'Price Range (Monthly)' : 'Client Budget Range'}
-            </Label>
-            <div className="mt-2">
-              <Slider
-                value={filters.priceRange}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value }))}
-                max={100000}
-                min={0}
-                step={1000}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                <span>${filters.priceRange[0].toLocaleString()}</span>
-                <span>${filters.priceRange[1].toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Property Types */}
-          <div>
-            <Label className="text-base font-semibold">
-              {userRole === 'client' ? 'Property Types' : 'Client Preferred Types'}
-            </Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {propertyTypes.map(type => (
-                <Badge
-                  key={type}
-                  variant={filters.propertyTypes.includes(type) ? "default" : "outline"}
-                  className="cursor-pointer capitalize"
-                  onClick={() => handleToggleArrayItem(filters.propertyTypes, type, 'propertyTypes')}
-                >
-                  {type}
-                  {filters.propertyTypes.includes(type) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Looking For */}
-          <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-4 rounded-lg border border-primary/20">
-            <Label className="text-base font-semibold flex items-center gap-2">
-              🏠 {userRole === 'owner' ? 'Client Looking For' : 'Looking For'}
-            </Label>
-            <p className="text-sm text-muted-foreground mb-3">
-              {userRole === 'owner' 
-                ? 'Filter clients by what type of property they want' 
-                : 'Are you looking to rent or buy?'}
-            </p>
-            <div className="grid grid-cols-3 gap-3 mt-2">
-              {['rent', 'buy', 'both'].map((type) => (
-                <Badge
-                  key={type}
-                  variant={
-                    type === 'both' 
-                      ? (filters.listingTypes.includes('rent') && filters.listingTypes.includes('buy') ? 'default' : 'outline')
-                      : (filters.listingTypes.includes(type) ? 'default' : 'outline')
-                  }
-                  className="cursor-pointer text-center justify-center p-3 text-base font-medium transition-all hover:scale-105"
-                  onClick={async () => {
-                    
-                    let newTypes;
-                    if (type === 'both') {
-                      newTypes = filters.listingTypes.includes('rent') && filters.listingTypes.includes('buy') 
-                        ? ['rent'] 
-                        : ['rent', 'buy'];
-                    } else {
-                      newTypes = filters.listingTypes.includes(type) && filters.listingTypes.length > 1
-                        ? filters.listingTypes.filter(t => t !== type)
-                        : [type];
-                    }
-                    
-                    setFilters(prev => ({ ...prev, listingTypes: newTypes }));
-                    
-                    // Auto-save to user preferences
-                    if (userRole === 'client') {
-                      await saveListingTypes(newTypes);
-                    }
-                  }}
-                >
-                  {type === 'both' ? '🏡 Rent & Buy' : type === 'rent' ? '🏠 Rent' : '💰 Buy'}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Selected: {filters.listingTypes.join(' + ') || 'None'}
-            </p>
-          </div>
-
-          {userRole === 'client' && (
-            <>
-              {/* Bedrooms & Bathrooms */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-base font-semibold">Bedrooms</Label>
-                  <div className="mt-2">
-                    <Slider
-                      value={filters.bedrooms}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, bedrooms: value }))}
-                      max={10}
-                      min={1}
-                      step={1}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>{filters.bedrooms[0]}</span>
-                      <span>{filters.bedrooms[1]}+</span>
+        {/* Category Tabs */}
+        <div className="shrink-0 px-4 sm:px-6 py-3 border-b bg-background/50">
+          <Tabs value={activeCategory} onValueChange={(value) => setActiveCategory(value as CategoryType)} className="w-full">
+            <TabsList className="w-full grid grid-cols-6 h-12 p-1 bg-muted/50 rounded-xl">
+              {categories.map((cat) => {
+                const Icon = cat.icon;
+                const count = filterCounts[cat.id];
+                return (
+                  <TabsTrigger
+                    key={cat.id}
+                    value={cat.id}
+                    className="relative rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200"
+                  >
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Icon className={`w-4 h-4 ${activeCategory === cat.id ? cat.color : 'text-muted-foreground'}`} />
+                      <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">{cat.name}</span>
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-base font-semibold">Bathrooms</Label>
-                  <div className="mt-2">
-                    <Slider
-                      value={filters.bathrooms}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, bathrooms: value }))}
-                      max={5}
-                      min={1}
-                      step={1}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>{filters.bathrooms[0]}</span>
-                      <span>{filters.bathrooms[1]}+</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Amenities */}
-              <div>
-                <Label className="text-base font-semibold">Required Amenities</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {amenities.map(amenity => (
-                    <Badge
-                      key={amenity}
-                      variant={filters.amenities.includes(amenity) ? "default" : "outline"}
-                      className="cursor-pointer capitalize"
-                      onClick={() => handleToggleArrayItem(filters.amenities, amenity, 'amenities')}
-                    >
-                      {amenity}
-                      {filters.amenities.includes(amenity) && (
-                        <X className="w-3 h-3 ml-1" />
+                    <AnimatePresence>
+                      {count > 0 && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="absolute -top-1 -right-1"
+                        >
+                          <Badge className="h-4 min-w-[16px] rounded-full px-1 text-[10px] font-bold shadow-sm bg-primary text-primary-foreground">
+                            {count}
+                          </Badge>
+                        </motion.div>
                       )}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Location Radius */}
-          <div>
-            <Label className="text-base font-semibold">Search Radius</Label>
-            <Select 
-              value={filters.locationRadius.toString()} 
-              onValueChange={(value) => setFilters(prev => ({ ...prev, locationRadius: parseInt(value) }))}
-            >
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select radius" />
-              </SelectTrigger>
-              <SelectContent>
-                {locationRadii.map(radius => (
-                  <SelectItem key={radius} value={radius.toString()}>
-                    {radius} km
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Lifestyle Tags */}
-          <div>
-            <Label className="text-base font-semibold">
-              {userRole === 'client' ? 'Your Lifestyle' : 'Compatible Lifestyles'}
-            </Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {lifestyleTags.map(tag => (
-                <Badge
-                  key={tag}
-                  variant={filters.lifestyleTags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer capitalize"
-                  onClick={() => handleToggleArrayItem(filters.lifestyleTags, tag, 'lifestyleTags')}
-                >
-                  {tag.replace('-', ' ')}
-                  {filters.lifestyleTags.includes(tag) && (
-                    <X className="w-3 h-3 ml-1" />
-                  )}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {userRole === 'client' && (
-            <>
-              {/* Furnished */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-base font-semibold">Furnished</Label>
-                  <Select 
-                    value={filters.furnished} 
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, furnished: value }))}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">Any</SelectItem>
-                      <SelectItem value="yes">Furnished</SelectItem>
-                      <SelectItem value="no">Unfurnished</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-base font-semibold">Pet Friendly</Label>
-                  <Select 
-                    value={filters.petFriendly} 
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, petFriendly: value }))}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">Any</SelectItem>
-                      <SelectItem value="yes">Pet Friendly</SelectItem>
-                      <SelectItem value="no">No Pets</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Available From */}
-              <div>
-                <Label className="text-base font-semibold">Available From</Label>
-                <Input
-                  type="date"
-                  value={filters.availableFrom}
-                  onChange={(e) => setFilters(prev => ({ ...prev, availableFrom: e.target.value }))}
-                  className="mt-2"
-                />
-              </div>
-            </>
-          )}
-
-          {/* Rental Duration */}
-          <div>
-            <Label className="text-base font-semibold">
-              {userRole === 'client' ? 'Rental Duration' : 'Client Stay Duration'}
-            </Label>
-            <Select 
-              value={filters.rentalDuration} 
-              onValueChange={(value) => setFilters(prev => ({ ...prev, rentalDuration: value }))}
-            >
-              <SelectTrigger className="mt-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="any">Any Duration</SelectItem>
-                <SelectItem value="short">Short-term (1-3 months)</SelectItem>
-                <SelectItem value="medium">Medium-term (3-12 months)</SelectItem>
-                <SelectItem value="long">Long-term (1+ year)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Premium Features */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="verified"
-                checked={filters.verified}
-                onCheckedChange={(checked) => setFilters(prev => ({ ...prev, verified: checked }))}
-              />
-              <Label htmlFor="verified">
-                {userRole === 'client' ? 'Verified Properties Only' : 'Verified Clients Only'}
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="premium"
-                checked={filters.premiumOnly}
-                onCheckedChange={(checked) => setFilters(prev => ({ ...prev, premiumOnly: checked }))}
-              />
-              <Label htmlFor="premium">
-                {userRole === 'client' ? 'Premium Properties Only' : 'Premium Clients Only'}
-              </Label>
-            </div>
-          </div>
+                    </AnimatePresence>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
         </div>
 
-        <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={handleReset}>
-            Reset All
-          </Button>
-          <Button variant="outline" onClick={onClose}>
+        {/* Filter Content */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-4 sm:p-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeCategory}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeCategory === 'property' && (
+                  <PropertyClientFilters
+                    onApply={(filters) => handleApplyFilters('property', filters)}
+                    initialFilters={categoryFilters.property}
+                    activeCount={filterCounts.property}
+                  />
+                )}
+                {activeCategory === 'vehicle' && (
+                  <VehicleClientFilters
+                    onApply={(filters) => handleApplyFilters('vehicle', filters)}
+                    initialFilters={categoryFilters.vehicle}
+                    activeCount={filterCounts.vehicle}
+                  />
+                )}
+                {activeCategory === 'moto' && (
+                  <MotoClientFilters
+                    onApply={(filters) => handleApplyFilters('moto', filters)}
+                    initialFilters={categoryFilters.moto}
+                    activeCount={filterCounts.moto}
+                  />
+                )}
+                {activeCategory === 'bicycle' && (
+                  <BicycleClientFilters
+                    onApply={(filters) => handleApplyFilters('bicycle', filters)}
+                    initialFilters={categoryFilters.bicycle}
+                    activeCount={filterCounts.bicycle}
+                  />
+                )}
+                {activeCategory === 'yacht' && (
+                  <YachtClientFilters
+                    onApply={(filters) => handleApplyFilters('yacht', filters)}
+                    initialFilters={categoryFilters.yacht}
+                    activeCount={filterCounts.yacht}
+                  />
+                )}
+                {activeCategory === 'services' && (
+                  <WorkerClientFilters
+                    onApply={(filters) => handleApplyFilters('services', filters)}
+                    initialFilters={categoryFilters.services}
+                    activeCount={filterCounts.services}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        <DialogFooter className="shrink-0 flex gap-2 p-4 sm:p-6 border-t bg-gradient-to-t from-background to-background/80">
+          <Button variant="outline" onClick={onClose} className="flex-1 sm:flex-none">
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleApply}
-            className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold"
+            className="flex-1 sm:flex-none bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold"
           >
-            ✅ Apply Filters
+            <Sparkles className="w-4 h-4 mr-2" />
+            Apply {totalActiveFilters > 0 && `(${totalActiveFilters})`}
           </Button>
         </DialogFooter>
       </DialogContent>

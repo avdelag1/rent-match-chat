@@ -1,36 +1,69 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Sparkles, Home, Bike, Ship, Car, RotateCcw } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Sparkles, Home, Bike, Ship, Car, CircleDot, Briefcase, RotateCcw } from 'lucide-react';
 import { PropertyClientFilters } from '@/components/filters/PropertyClientFilters';
 import { MotoClientFilters } from '@/components/filters/MotoClientFilters';
 import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters';
 import { YachtClientFilters } from '@/components/filters/YachtClientFilters';
+import { VehicleClientFilters } from '@/components/filters/VehicleClientFilters';
+import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+type CategoryType = 'property' | 'vehicle' | 'moto' | 'bicycle' | 'yacht' | 'services';
+
+const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
+  { id: 'property', name: 'Property', icon: Home, color: 'text-emerald-500' },
+  { id: 'vehicle', name: 'Cars', icon: Car, color: 'text-blue-500' },
+  { id: 'moto', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
+  { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-purple-500' },
+  { id: 'yacht', name: 'Yachts', icon: Ship, color: 'text-cyan-500' },
+  { id: 'services', name: 'Jobs', icon: Briefcase, color: 'text-pink-500' },
+];
+
 export default function OwnerFiltersExplore() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState<'property' | 'moto' | 'bicycle' | 'yacht'>('property');
-  const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<CategoryType>('property');
+  const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
+    property: 0,
+    vehicle: 0,
+    moto: 0,
+    bicycle: 0,
+    yacht: 0,
+    services: 0,
+  });
 
   const handleApplyFilters = () => {
     navigate('/owner/dashboard');
   };
 
   const handleClearAll = () => {
-    setActiveFilterCount(0);
+    setFilterCounts({
+      property: 0,
+      vehicle: 0,
+      moto: 0,
+      bicycle: 0,
+      yacht: 0,
+      services: 0,
+    });
   };
 
-  const categoryIcons = {
-    property: Home,
-    moto: Car,
-    bicycle: Bike,
-    yacht: Ship,
+  const handleFilterApply = (category: CategoryType, filters: any) => {
+    const count = Object.entries(filters).filter(([key, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'boolean') return value;
+      if (typeof value === 'string') return value !== '' && value !== 'any';
+      if (typeof value === 'number') return value > 0;
+      return false;
+    }).length;
+    setFilterCounts(prev => ({ ...prev, [category]: count }));
   };
+
+  const totalActiveFilters = Object.values(filterCounts).reduce((a, b) => a + b, 0);
 
   return (
     <DashboardLayout userRole="owner">
@@ -66,105 +99,96 @@ export default function OwnerFiltersExplore() {
           </div>
         </div>
 
-        {/* Category Tabs - Modern Design */}
+        {/* Category Tabs */}
         <div className="max-w-2xl mx-auto px-4 pt-4">
-          <Tabs value={activeCategory} onValueChange={(value: any) => setActiveCategory(value)} className="w-full">
-            <TabsList className="w-full grid grid-cols-4 h-14 p-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl">
-              {(['property', 'moto', 'bicycle', 'yacht'] as const).map((cat) => {
-                const Icon = categoryIcons[cat];
+          <Tabs value={activeCategory} onValueChange={(value) => setActiveCategory(value as CategoryType)} className="w-full">
+            <TabsList className="w-full grid grid-cols-6 h-14 p-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl">
+              {categories.map((cat) => {
+                const Icon = cat.icon;
+                const count = filterCounts[cat.id];
                 return (
                   <TabsTrigger
-                    key={cat}
-                    value={cat}
+                    key={cat.id}
+                    value={cat.id}
                     className="relative rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
                   >
-                    <div className="flex flex-col items-center gap-1">
-                      <Icon className="w-4 h-4" />
-                      <span className="text-xs capitalize">{cat}</span>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Icon className={`w-4 h-4 ${activeCategory === cat.id ? 'text-current' : cat.color}`} />
+                      <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">{cat.name}</span>
                     </div>
-                    {activeCategory === cat && activeFilterCount > 0 && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1"
-                      >
-                        <Badge className="h-5 min-w-[20px] rounded-full px-1.5 bg-accent text-accent-foreground text-xs font-bold shadow-lg">
-                          {activeFilterCount}
-                        </Badge>
-                      </motion.div>
-                    )}
+                    <AnimatePresence>
+                      {count > 0 && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="absolute -top-1 -right-1"
+                        >
+                          <Badge className="h-4 min-w-[16px] rounded-full px-1 text-[10px] font-bold shadow-sm bg-accent text-accent-foreground">
+                            {count}
+                          </Badge>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </TabsTrigger>
                 );
               })}
             </TabsList>
-
-            <ScrollArea className="h-[calc(100vh-340px)] mt-4">
-              <div className="space-y-4 pb-24">
-                <TabsContent value="property" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <PropertyClientFilters
-                      onApply={(filters) => {
-                        setActiveFilterCount(Object.keys(filters).length);
-                      }}
-                      activeCount={activeCategory === 'property' ? activeFilterCount : 0}
-                    />
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent value="moto" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <MotoClientFilters
-                      onApply={(filters) => {
-                        setActiveFilterCount(Object.keys(filters).length);
-                      }}
-                      activeCount={activeCategory === 'moto' ? activeFilterCount : 0}
-                    />
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent value="bicycle" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <BicycleClientFilters
-                      onApply={(filters) => {
-                        setActiveFilterCount(Object.keys(filters).length);
-                      }}
-                      activeCount={activeCategory === 'bicycle' ? activeFilterCount : 0}
-                    />
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent value="yacht" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <YachtClientFilters
-                      onApply={(filters) => {
-                        setActiveFilterCount(Object.keys(filters).length);
-                      }}
-                      activeCount={activeCategory === 'yacht' ? activeFilterCount : 0}
-                    />
-                  </motion.div>
-                </TabsContent>
-              </div>
-            </ScrollArea>
           </Tabs>
         </div>
 
-        {/* Apply Button - Fixed above bottom nav */}
+        <ScrollArea className="h-[calc(100vh-280px)] mt-4">
+          <div className="max-w-2xl mx-auto px-4 pb-32">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeCategory}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeCategory === 'property' && (
+                  <PropertyClientFilters
+                    onApply={(filters) => handleFilterApply('property', filters)}
+                    activeCount={filterCounts.property}
+                  />
+                )}
+                {activeCategory === 'vehicle' && (
+                  <VehicleClientFilters
+                    onApply={(filters) => handleFilterApply('vehicle', filters)}
+                    activeCount={filterCounts.vehicle}
+                  />
+                )}
+                {activeCategory === 'moto' && (
+                  <MotoClientFilters
+                    onApply={(filters) => handleFilterApply('moto', filters)}
+                    activeCount={filterCounts.moto}
+                  />
+                )}
+                {activeCategory === 'bicycle' && (
+                  <BicycleClientFilters
+                    onApply={(filters) => handleFilterApply('bicycle', filters)}
+                    activeCount={filterCounts.bicycle}
+                  />
+                )}
+                {activeCategory === 'yacht' && (
+                  <YachtClientFilters
+                    onApply={(filters) => handleFilterApply('yacht', filters)}
+                    activeCount={filterCounts.yacht}
+                  />
+                )}
+                {activeCategory === 'services' && (
+                  <WorkerClientFilters
+                    onApply={(filters) => handleFilterApply('services', filters)}
+                    activeCount={filterCounts.services}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </ScrollArea>
+
+        {/* Apply Button */}
         <div className="fixed bottom-24 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/95 to-transparent z-10">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -177,7 +201,7 @@ export default function OwnerFiltersExplore() {
               size="lg"
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              Apply Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
+              Apply Filters {totalActiveFilters > 0 && `(${totalActiveFilters})`}
             </Button>
           </motion.div>
         </div>

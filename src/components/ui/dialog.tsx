@@ -4,7 +4,12 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Dialog = DialogPrimitive.Root
+// Dialog that prevents body scroll shift
+const Dialog = ({ children, ...props }: DialogPrimitive.DialogProps) => (
+  <DialogPrimitive.Root {...props}>
+    {children}
+  </DialogPrimitive.Root>
+)
 
 const DialogTrigger = DialogPrimitive.Trigger
 

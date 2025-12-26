@@ -67,7 +67,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             </Button>
           </motion.div>
 
-          {/* Filters (Owner only) */}
+          {/* Filters */}
           <AnimatePresence>
             {showFilters && (
               <motion.div
