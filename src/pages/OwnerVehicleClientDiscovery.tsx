@@ -228,7 +228,7 @@ export default function OwnerVehicleClientDiscovery() {
                             variant="outline"
                             size="sm"
                             className="flex-1"
-                            onClick={() => navigate(`/owner/client/${client.user_id}`)}
+                            onClick={() => navigate(`/owner/view-client/${client.user_id}`)}
                           >
                             View Profile
                           </Button>
