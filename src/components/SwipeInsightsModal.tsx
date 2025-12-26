@@ -160,32 +160,32 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               transform: 'translateZ(0)',
             }}
           >
-            <DialogContent className={`max-w-lg w-full max-h-[85vh] overflow-y-auto transition-opacity duration-75 ${isDragging ? 'opacity-90' : ''}`}>
-              <motion.div>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                  <Eye className="w-6 h-6 text-primary" />
+            <DialogContent className={`w-[95vw] max-w-lg max-h-[85vh] overflow-y-auto overflow-x-hidden transition-opacity duration-75 p-0 ${isDragging ? 'opacity-90' : ''}`}>
+              <motion.div className="px-3 sm:px-6 py-4 sm:py-6">
+              <DialogHeader className="mb-3 sm:mb-4">
+                <DialogTitle className="text-lg sm:text-2xl font-bold flex items-center gap-2">
+                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   {isClientProfile ? 'Renter Insights' : 'Property Insights'}
                 </DialogTitle>
               </DialogHeader>
 
               {isClientProfile && profile ? (
                 // RENTER/CLIENT PROFILE INSIGHTS - Enhanced Info First Design
-                <div className="mt-4 space-y-5">
+                <div className="space-y-4 sm:space-y-5">
                   {/* Hero Profile Card */}
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/10 p-5 border border-primary/20">
+                  <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/10 p-3 sm:p-5 border border-primary/20">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-full blur-2xl" />
                     <div className="relative">
-                      <div className="flex items-center gap-4 mb-4">
+                      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                         {/* Small Avatar */}
                         {profile.avatar_url && (
-                          <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-primary/30 ring-offset-2 ring-offset-background">
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-primary/30 ring-offset-2 ring-offset-background shrink-0">
                             <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover" />
                           </div>
                         )}
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className="text-xl font-bold">{profile.name}</h3>
+                            <h3 className="text-base sm:text-xl font-bold truncate">{profile.name}</h3>
                             {profile.verified && (
                               <CheckCircle className="w-5 h-5 text-green-500" />
                             )}
@@ -250,36 +250,36 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   </div>
 
                   {/* Quick Stats Row */}
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="text-center p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-xl border border-yellow-500/20">
-                      <Star className="w-5 h-5 mx-auto text-yellow-600 mb-1" />
-                      <div className="text-sm font-bold text-yellow-600 dark:text-yellow-400">{insights.readinessScore}%</div>
-                      <div className="text-[10px] text-muted-foreground">Score</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-lg sm:rounded-xl border border-yellow-500/20">
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-yellow-600 mb-0.5 sm:mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-yellow-600 dark:text-yellow-400">{insights.readinessScore}%</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Score</div>
                     </div>
-                    <div className="text-center p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-xl border border-blue-500/20">
-                      <Clock className="w-5 h-5 mx-auto text-blue-600 mb-1" />
-                      <div className="text-sm font-bold text-blue-600 dark:text-blue-400">2-4h</div>
-                      <div className="text-[10px] text-muted-foreground">Response</div>
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-lg sm:rounded-xl border border-blue-500/20">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-0.5 sm:mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">2-4h</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Response</div>
                     </div>
-                    <div className="text-center p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
-                      <Eye className="w-5 h-5 mx-auto text-green-600 mb-1" />
-                      <div className="text-sm font-bold text-green-600 dark:text-green-400">{insights.photoCount}</div>
-                      <div className="text-[10px] text-muted-foreground">Photos</div>
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-lg sm:rounded-xl border border-green-500/20">
+                      <Eye className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-0.5 sm:mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">{insights.photoCount}</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Photos</div>
                     </div>
-                    <div className="text-center p-3 bg-gradient-to-br from-red-500/10 to-pink-500/5 rounded-xl border border-red-500/20">
-                      <Flame className="w-5 h-5 mx-auto text-red-600 mb-1" />
-                      <div className="text-sm font-bold text-red-600 dark:text-red-400">{insights.interestCount}</div>
-                      <div className="text-[10px] text-muted-foreground">Interests</div>
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-red-500/10 to-pink-500/5 rounded-lg sm:rounded-xl border border-red-500/20">
+                      <Flame className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-red-600 mb-0.5 sm:mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">{insights.interestCount}</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Interests</div>
                     </div>
                   </div>
 
                   {/* What They're Looking For */}
                   <div className="space-y-3">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <h4 className="font-semibold text-xs sm:text-sm flex items-center gap-2">
                       <Home className="w-4 h-4 text-primary" />
                       Looking For
                     </h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-1.5 sm:gap-2">
                       {profile.interests?.some(i => i.toLowerCase().includes('long-term') || i.toLowerCase().includes('rent')) && (
                         <div className="flex items-center gap-2 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
                           <CheckCircle className="w-4 h-4 text-green-500" />

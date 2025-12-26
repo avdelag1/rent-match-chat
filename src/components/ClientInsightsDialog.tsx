@@ -210,13 +210,13 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] sm:max-h-[92vh] flex flex-col p-0 top-[5vh] sm:top-[4vh] translate-y-0 sm:translate-y-0">
-        <DialogHeader className="px-6 py-4 border-b shrink-0">
-          <DialogTitle>Client Profile Insights</DialogTitle>
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-3 sm:px-6 py-3 sm:py-4 border-b shrink-0">
+          <DialogTitle className="text-base sm:text-lg">Client Profile Insights</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="space-y-6 py-4 px-6">
+        <ScrollArea className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="space-y-4 sm:space-y-6 py-3 sm:py-4 px-3 sm:px-6">
             {/* Hot Prospect Alert */}
             {renterInsights?.isHotProspect && (
               <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
@@ -231,11 +231,11 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
             )}
 
             {/* Basic Info Header */}
-            <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-6 rounded-lg border border-primary/20">
+            <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-3 sm:p-6 rounded-lg border border-primary/20">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-2xl font-bold">{profile.name}</h3>
+                    <h3 className="text-lg sm:text-2xl font-bold break-words">{profile.name}</h3>
                     {profile.verified && (
                       <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                         <CheckCircle className="w-3 h-3 mr-1" />
@@ -311,7 +311,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   <Eye className="w-5 h-5 text-primary" />
                   Client Photos
                 </h4>
-                <div className="grid grid-cols-3 gap-2 mb-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2">
                   {profile.profile_images.slice(0, 6).map((image, index) => (
                     <div
                       key={index}
@@ -342,29 +342,29 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 <TrendingUp className="w-5 h-5 text-primary" />
                 Client Statistics
               </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-primary/10 p-4 rounded-lg text-center border border-primary/20">
-                  <Eye className="w-6 h-6 mx-auto text-primary mb-2" />
-                  <div className="text-2xl font-bold text-primary">{clientStats.profileViews}</div>
-                  <div className="text-xs text-muted-foreground">Profile Views</div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                <div className="bg-primary/10 p-2 sm:p-4 rounded-lg text-center border border-primary/20">
+                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-primary mb-1 sm:mb-2" />
+                  <div className="text-lg sm:text-2xl font-bold text-primary">{clientStats.profileViews}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Profile Views</div>
                 </div>
                 
-                <div className="bg-secondary/10 p-4 rounded-lg text-center border border-secondary/20">
-                  <ThumbsUp className="w-6 h-6 mx-auto text-secondary mb-2" />
-                  <div className="text-2xl font-bold text-secondary">{clientStats.ownerLikes}</div>
-                  <div className="text-xs text-muted-foreground">Owner Likes</div>
+                <div className="bg-secondary/10 p-2 sm:p-4 rounded-lg text-center border border-secondary/20">
+                  <ThumbsUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-secondary mb-1 sm:mb-2" />
+                  <div className="text-lg sm:text-2xl font-bold text-secondary">{clientStats.ownerLikes}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Owner Likes</div>
                 </div>
                 
-                <div className="bg-green-500/10 p-4 rounded-lg text-center border border-green-500/20">
-                  <MessageCircle className="w-6 h-6 mx-auto text-green-600 dark:text-green-400 mb-2" />
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{clientStats.responseRate}%</div>
-                  <div className="text-xs text-muted-foreground">Response Rate</div>
+                <div className="bg-green-500/10 p-2 sm:p-4 rounded-lg text-center border border-green-500/20">
+                  <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-green-600 dark:text-green-400 mb-1 sm:mb-2" />
+                  <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">{clientStats.responseRate}%</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Response Rate</div>
                 </div>
                 
-                <div className="bg-blue-500/10 p-4 rounded-lg text-center border border-blue-500/20">
-                  <Calendar className="w-6 h-6 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{clientStats.averageResponseTime}</div>
-                  <div className="text-xs text-muted-foreground">Avg Response</div>
+                <div className="bg-blue-500/10 p-2 sm:p-4 rounded-lg text-center border border-blue-500/20">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-blue-600 dark:text-blue-400 mb-1 sm:mb-2" />
+                  <div className="text-base sm:text-2xl font-bold text-blue-600 dark:text-blue-400">{clientStats.averageResponseTime}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Response</div>
                 </div>
               </div>
             </div>
