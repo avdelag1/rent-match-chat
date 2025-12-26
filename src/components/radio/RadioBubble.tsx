@@ -143,9 +143,13 @@ export const RadioBubble: React.FC = () => {
   }, []);
 
   // Clamp position within viewport
-  const clampPosition = useCallback((left: number, top: number) => {
+  // When dragging, allow bubble to reach the close zone at the bottom
+  const clampPosition = useCallback((left: number, top: number, isDraggingToClose = false) => {
     const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
-    const maxTop = window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav
+    // When dragging, allow bubble to go lower to reach the close zone
+    const maxTop = isDraggingToClose
+      ? window.innerHeight - BUBBLE_SIZE - 20  // Allow reaching close zone (20px from bottom)
+      : window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav normally
     const minTop = MARGIN + 80; // Leave room for header
     return {
       left: Math.min(Math.max(left, MARGIN), maxLeft),
@@ -179,9 +183,11 @@ export const RadioBubble: React.FC = () => {
       if (!showCloseZone) setShowCloseZone(true);
     }
 
+    // Allow reaching close zone during drag (isDraggingToClose = true)
     const newPos = clampPosition(
       dragStartRef.current.left + deltaX,
-      dragStartRef.current.top + deltaY
+      dragStartRef.current.top + deltaY,
+      true // Allow bubble to reach close zone while dragging
     );
     setPosition(newPos);
 
@@ -212,8 +218,11 @@ export const RadioBubble: React.FC = () => {
       return;
     }
 
-    // Save final position
-    savePosition(position.left, position.top);
+    // Snap back to valid position (above bottom nav) if not on close zone
+    // Use isDraggingToClose = false to enforce normal bounds
+    const finalPos = clampPosition(position.left, position.top, false);
+    setPosition(finalPos);
+    savePosition(finalPos.left, finalPos.top);
 
     // If it was a tap (short duration, no significant movement) and not expanded, expand
     if (!wasDragged && dragDuration < 300 && !isExpanded) {
@@ -224,7 +233,7 @@ export const RadioBubble: React.FC = () => {
     setIsDragging(false);
     setIsOverCloseZone(false);
     setShowCloseZone(false);
-  }, [position, isOverCloseZone, stopPlayback, isExpanded]);
+  }, [position, isOverCloseZone, stopPlayback, isExpanded, clampPosition]);
 
   const handleGoToRadio = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
