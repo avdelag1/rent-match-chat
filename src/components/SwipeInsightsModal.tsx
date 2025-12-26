@@ -160,7 +160,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               transform: 'translateZ(0)',
             }}
           >
-            <DialogContent className={`max-w-lg w-full max-h-[85vh] overflow-y-auto transition-opacity duration-75 ${isDragging ? 'opacity-90' : ''} fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-50`}>
+            <DialogContent className={`max-w-lg w-full max-h-[85vh] overflow-y-auto transition-opacity duration-75 ${isDragging ? 'opacity-90' : ''}`}>
               <motion.div>
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">

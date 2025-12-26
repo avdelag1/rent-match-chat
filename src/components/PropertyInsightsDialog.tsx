@@ -158,7 +158,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[92vh] flex flex-col p-0 sm:top-[2vh]">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] sm:max-h-[92vh] flex flex-col p-0 top-[5vh] sm:top-[4vh] translate-y-0 sm:translate-y-0">
         <DialogHeader className="px-6 py-4 border-b shrink-0">
           <DialogTitle>Property Insights</DialogTitle>
         </DialogHeader>
