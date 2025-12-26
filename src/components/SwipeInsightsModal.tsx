@@ -489,24 +489,24 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   {/* Property Title & Location with Category */}
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 className="text-xl font-bold flex-1">{listing.title}</h3>
-                      <div className="flex gap-1.5 shrink-0">
+                      <h3 className="text-lg sm:text-xl font-bold flex-1 break-words">{listing.title}</h3>
+                      <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
                         {insights.category && CATEGORY_ICONS[insights.category] && (
-                          <Badge variant="outline" className="gap-1">
+                          <Badge variant="outline" className="gap-1 text-xs">
                             {CATEGORY_ICONS[insights.category]}
                             <span className="capitalize">{insights.category}</span>
                           </Badge>
                         )}
                         {listing.listing_type && (
-                          <Badge variant={listing.listing_type === 'buy' ? 'default' : 'secondary'}>
+                          <Badge variant={listing.listing_type === 'buy' ? 'default' : 'secondary'} className="text-xs">
                             {listing.listing_type === 'buy' ? 'Sale' : 'Rent'}
                           </Badge>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      <span>{[listing.neighborhood, listing.city].filter(Boolean).join(', ') || 'Location available'}</span>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span className="break-words">{[listing.neighborhood, listing.city].filter(Boolean).join(', ') || 'Location available'}</span>
                     </div>
                     {listing.created_at && (
                       <p className="text-xs text-muted-foreground mt-1">
@@ -528,58 +528,58 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   )}
 
                   {/* Quick Stats Row */}
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="text-center p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
-                      <DollarSign className="w-5 h-5 mx-auto text-green-600 mb-1" />
-                      <div className="text-sm font-bold text-green-600 dark:text-green-400">${listing.price?.toLocaleString()}</div>
-                      <div className="text-[10px] text-muted-foreground">{listing.listing_type === 'buy' ? 'price' : '/month'}</div>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
+                      <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400 break-all">${listing.price?.toLocaleString()}</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">{listing.listing_type === 'buy' ? 'price' : '/month'}</div>
                     </div>
-                    <div className="text-center p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5 rounded-xl border border-purple-500/20">
-                      <Star className="w-5 h-5 mx-auto text-purple-600 mb-1" />
-                      <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{insights.qualityScore || 75}%</div>
-                      <div className="text-[10px] text-muted-foreground">Quality</div>
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5 rounded-xl border border-purple-500/20">
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-purple-600 mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-purple-600 dark:text-purple-400">{insights.qualityScore || 75}%</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Quality</div>
                     </div>
-                    <div className="text-center p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-xl border border-blue-500/20">
-                      <Clock className="w-5 h-5 mx-auto text-blue-600 mb-1" />
-                      <div className="text-sm font-bold text-blue-600 dark:text-blue-400">&lt;2h</div>
-                      <div className="text-[10px] text-muted-foreground">Response</div>
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-xl border border-blue-500/20">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">&lt;2h</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Response</div>
                     </div>
-                    <div className="text-center p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-xl border border-yellow-500/20">
-                      <Heart className="w-5 h-5 mx-auto text-yellow-600 mb-1" />
-                      <div className="text-sm font-bold text-yellow-600 dark:text-yellow-400">{insights.saves}</div>
-                      <div className="text-[10px] text-muted-foreground">Interested</div>
+                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-xl border border-yellow-500/20">
+                      <Heart className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-yellow-600 mb-1" />
+                      <div className="text-xs sm:text-sm font-bold text-yellow-600 dark:text-yellow-400">{insights.saves}</div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Interested</div>
                     </div>
                   </div>
 
                   {/* Key Details Grid - Adaptive for category */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {/* Property-specific details */}
                     {!insights.isVehicle && (
                       <>
                         {listing.beds && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Bed className="w-5 h-5 text-primary" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.beds}</div>
-                              <div className="text-xs text-muted-foreground">Bedrooms</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Bed className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.beds}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Bedrooms</div>
                             </div>
                           </div>
                         )}
                         {listing.baths && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Bath className="w-5 h-5 text-primary" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.baths}</div>
-                              <div className="text-xs text-muted-foreground">Bathrooms</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Bath className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.baths}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Bathrooms</div>
                             </div>
                           </div>
                         )}
                         {listing.square_footage && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Square className="w-5 h-5 text-primary" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.square_footage}</div>
-                              <div className="text-xs text-muted-foreground">Sq Ft</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Square className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.square_footage}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Sq Ft</div>
                             </div>
                           </div>
                         )}
@@ -589,29 +589,29 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     {insights.category === 'yacht' && (
                       <>
                         {listing.length_m && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Ruler className="w-5 h-5 text-cyan-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.length_m}m</div>
-                              <div className="text-xs text-muted-foreground">Length</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.length_m}m</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Length</div>
                             </div>
                           </div>
                         )}
                         {listing.max_passengers && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Users className="w-5 h-5 text-cyan-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.max_passengers}</div>
-                              <div className="text-xs text-muted-foreground">Passengers</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.max_passengers}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Passengers</div>
                             </div>
                           </div>
                         )}
                         {listing.berths && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Bed className="w-5 h-5 text-cyan-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.berths}</div>
-                              <div className="text-xs text-muted-foreground">Berths</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Bed className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.berths}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Berths</div>
                             </div>
                           </div>
                         )}
@@ -621,29 +621,29 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     {insights.category === 'motorcycle' && (
                       <>
                         {listing.engine_cc && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Gauge className="w-5 h-5 text-orange-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.engine_cc}cc</div>
-                              <div className="text-xs text-muted-foreground">Engine</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Gauge className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.engine_cc}cc</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Engine</div>
                             </div>
                           </div>
                         )}
                         {listing.year && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Calendar className="w-5 h-5 text-orange-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.year}</div>
-                              <div className="text-xs text-muted-foreground">Year</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.year}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Year</div>
                             </div>
                           </div>
                         )}
                         {listing.mileage && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <TrendingUp className="w-5 h-5 text-orange-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.mileage.toLocaleString()}</div>
-                              <div className="text-xs text-muted-foreground">Miles</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.mileage.toLocaleString()}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Miles</div>
                             </div>
                           </div>
                         )}
@@ -653,29 +653,29 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     {insights.category === 'bicycle' && (
                       <>
                         {listing.frame_size && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <Ruler className="w-5 h-5 text-green-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.frame_size}</div>
-                              <div className="text-xs text-muted-foreground">Frame</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.frame_size}</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Frame</div>
                             </div>
                           </div>
                         )}
                         {listing.electric_assist && (
-                          <div className="flex items-center gap-3 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                            <Zap className="w-5 h-5 text-yellow-500" />
-                            <div>
-                              <div className="text-lg font-bold">E-Bike</div>
-                              <div className="text-xs text-muted-foreground">Electric</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                            <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold">E-Bike</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Electric</div>
                             </div>
                           </div>
                         )}
                         {listing.battery_range && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <TrendingUp className="w-5 h-5 text-green-500" />
-                            <div>
-                              <div className="text-lg font-bold">{listing.battery_range}km</div>
-                              <div className="text-xs text-muted-foreground">Range</div>
+                          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/30 rounded-lg">
+                            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="text-base sm:text-lg font-bold truncate">{listing.battery_range}km</div>
+                              <div className="text-[10px] sm:text-xs text-muted-foreground">Range</div>
                             </div>
                           </div>
                         )}
@@ -684,58 +684,58 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   </div>
 
                   {/* Key Features Badges */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {listing.property_type && (
-                      <Badge variant="secondary" className="gap-1">
-                        <Home className="w-3 h-3" />
-                        {listing.property_type}
+                      <Badge variant="secondary" className="gap-1 text-xs">
+                        <Home className="w-3 h-3 shrink-0" />
+                        <span className="break-all">{listing.property_type}</span>
                       </Badge>
                     )}
                     {listing.vehicle_type && (
-                      <Badge variant="secondary">{listing.vehicle_type}</Badge>
+                      <Badge variant="secondary" className="text-xs break-all">{listing.vehicle_type}</Badge>
                     )}
                     {listing.furnished && (
-                      <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1">
-                        <Sparkles className="w-3 h-3" />
+                      <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1 text-xs">
+                        <Sparkles className="w-3 h-3 shrink-0" />
                         Furnished
                       </Badge>
                     )}
                     {listing.pet_friendly && (
-                      <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/20">
+                      <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/20 text-xs">
                         🐾 Pet Friendly
                       </Badge>
                     )}
                     {listing.electric_assist && (
-                      <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 gap-1">
-                        <Zap className="w-3 h-3" />
+                      <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 gap-1 text-xs">
+                        <Zap className="w-3 h-3 shrink-0" />
                         Electric
                       </Badge>
                     )}
                     {listing.condition && (
-                      <Badge variant="outline" className="capitalize">{listing.condition}</Badge>
+                      <Badge variant="outline" className="capitalize text-xs break-all">{listing.condition}</Badge>
                     )}
                     {listing.brand && listing.model && (
-                      <Badge variant="outline">{listing.brand} {listing.model}</Badge>
+                      <Badge variant="outline" className="text-xs"><span className="break-all">{listing.brand} {listing.model}</span></Badge>
                     )}
                   </div>
 
                   {/* Amenities / Equipment */}
                   {((listing.amenities && listing.amenities.length > 0) || (listing.equipment && listing.equipment.length > 0)) && (
                     <div className="space-y-3">
-                      <h4 className="font-semibold flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-primary" />
-                        {insights.isVehicle ? 'Equipment & Features' : 'Amenities Included'}
+                      <h4 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
+                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+                        <span className="break-words">{insights.isVehicle ? 'Equipment & Features' : 'Amenities Included'}</span>
                       </h4>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {[...(listing.amenities || []), ...(listing.equipment || [])].slice(0, 8).map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            <span className="text-sm capitalize">{item}</span>
+                          <div key={idx} className="flex items-start gap-2 p-2 bg-muted/30 rounded-lg">
+                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-xs sm:text-sm capitalize break-words">{item}</span>
                           </div>
                         ))}
                         {([...(listing.amenities || []), ...(listing.equipment || [])].length > 8) && (
-                          <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg col-span-2">
-                            <span className="text-sm text-primary font-medium">
+                          <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg col-span-1 sm:col-span-2">
+                            <span className="text-xs sm:text-sm text-primary font-medium">
                               +{[...(listing.amenities || []), ...(listing.equipment || [])].length - 8} more features
                             </span>
                           </div>
