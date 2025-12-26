@@ -47,7 +47,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const lastFetchedPage = useRef(-1);
 
   // Get listings with filters applied and pagination
-  // isRefreshMode = true shows disliked listings within 3-day cooldown, but never liked listings
+  // isRefreshMode = true shows disliked listings within 3-day cooldown, but NEVER liked listings
+  // Smart matching properly filters out:
+  // - Liked items (right swipes) - NEVER shown again
+  // - Disliked items (left swipes) - hidden normally, can be refreshed within 3 days
+  // - Permanently hidden items (dislikes > 3 days old) - NEVER shown again
   const {
     data: smartListings = [],
     isLoading: smartLoading,
@@ -55,35 +59,35 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     isRefetching: smartRefetching,
     refetch: refetchSmart
   } = useSmartListingMatching([], filters, page, 10, isRefreshMode);
-  
-  const { 
-    data: regularListings = [], 
-    isLoading: regularLoading,
+
+  // Note: We no longer use regularListings as fallback because it doesn't
+  // properly filter out liked/disliked items. Smart matching is the sole source.
+  const {
     refetch: refetchRegular
-  } = useListings([]);
+  } = useListings([], { enabled: false }); // Disabled, only used for refetch
 
   // Use accumulated listings - memoized with length checks and filter out swiped items
+  // IMPORTANT: Only use smartListings which properly filters liked items
   const listings = useMemo(() => {
-    let baseListings = allListings.length > 0 ? allListings :
-                       smartListings.length > 0 ? smartListings : regularListings;
+    let baseListings = allListings.length > 0 ? allListings : smartListings;
     // Filter out any listings that have been swiped in this session
+    // This provides immediate UI feedback before the server catches up
     if (swipedIds.size > 0) {
       baseListings = baseListings.filter(l => !swipedIds.has(l.id));
     }
     return baseListings;
-  }, [allListings, smartListings, regularListings, swipedIds]);
-  
-  const isLoading = smartLoading || regularLoading;
+  }, [allListings, smartListings, swipedIds]);
+
+  const isLoading = smartLoading;
   const error = smartError;
   const isRefetching = smartRefetching;
-  
+
   const refetch = useCallback(() => {
     setCurrentIndex(0);
     setPage(0);
     setAllListings([]);
     refetchSmart();
-    refetchRegular();
-  }, [refetchSmart, refetchRegular]);
+  }, [refetchSmart]);
   
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();

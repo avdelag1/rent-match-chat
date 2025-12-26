@@ -27,30 +27,41 @@ export function useUnreadMessageCount() {
         const conversationIds = conversations.map(c => c.id);
 
         // Single query: get all unread messages for these conversations
+        // IMPORTANT: Only count messages that are:
+        // 1. Not sent by the current user
+        // 2. Explicitly marked as unread (is_read = false)
+        // 3. Have content (not empty/deleted messages)
         const { data: unreadMessages, error: unreadError } = await supabase
           .from('conversation_messages')
-          .select('conversation_id')
+          .select('id, conversation_id')
           .in('conversation_id', conversationIds)
           .neq('sender_id', user.id)
-          .eq('is_read', false);
+          .eq('is_read', false)
+          .not('content', 'is', null)
+          .neq('content', '');
 
         if (unreadError) throw unreadError;
 
+        // Return 0 if no unread messages found
+        if (!unreadMessages || unreadMessages.length === 0) {
+          return 0;
+        }
+
         // Count unique conversation IDs with unread messages
         const uniqueConversationIds = new Set(
-          (unreadMessages || []).map(m => m.conversation_id)
+          unreadMessages.map(m => m.conversation_id)
         );
 
-        const count = uniqueConversationIds.size;
-        return count;
+        return uniqueConversationIds.size;
       } catch (error) {
         console.error('[UnreadCount] Error:', error);
         return 0;
       }
     },
     enabled: !!user?.id,
-    refetchInterval: 60000, // Refetch every 60 seconds (reduced from 30s to minimize unnecessary calls)
-    staleTime: 5000, // Consider data fresh for 5 seconds to prevent excessive refetching
+    refetchInterval: 60000, // Refetch every 60 seconds
+    staleTime: 10000, // Consider data fresh for 10 seconds to prevent excessive refetching
+    refetchOnWindowFocus: true, // Refetch when user comes back to tab
   });
 
   // Debounced refetch function to prevent excessive updates
