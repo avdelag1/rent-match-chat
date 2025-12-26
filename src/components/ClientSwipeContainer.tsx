@@ -2,15 +2,14 @@ import { useState, useCallback } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { OwnerClientTinderCard } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
-import { MatchPercentageBadge } from './MatchPercentageBadge';
+import { AppLoadingScreen } from './AppLoadingScreen';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { Button } from '@/components/ui/button';
-import { X, RotateCcw, Sparkles, Flame, SlidersHorizontal, MessageCircle, Eye, ArrowLeft, RefreshCw } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { RefreshCw } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
@@ -169,17 +168,7 @@ export function ClientSwipeContainer({
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
 
   if (isLoading || isRefetching) {
-    return (
-      <div className="relative w-[95vw] sm:w-[90vw] md:max-w-xl mx-auto" style={{ minHeight: 'min(85vh, 600px)' }}>
-        <div className="w-full h-full bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-sm border-2 border-slate-700/50 rounded-3xl overflow-hidden">
-          <div className="p-6 space-y-4">
-            <Skeleton className="w-full h-[60vh] rounded-lg bg-slate-700" />
-            <Skeleton className="w-3/4 h-6 bg-slate-700" />
-            <Skeleton className="w-1/2 h-4 bg-slate-700" />
-          </div>
-        </div>
-      </div>
-    );
+    return <AppLoadingScreen />;
   }
 
   if (error) {
