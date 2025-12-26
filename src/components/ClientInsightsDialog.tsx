@@ -210,13 +210,13 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="px-3 sm:px-6 py-3 sm:py-4 border-b shrink-0">
-          <DialogTitle className="text-base sm:text-lg">Client Profile Insights</DialogTitle>
+      <DialogContent className="w-[calc(100%-16px)] max-w-[400px] sm:max-w-lg max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-3 sm:px-4 py-3 border-b shrink-0">
+          <DialogTitle className="text-sm sm:text-base">Client Profile Insights</DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="space-y-4 sm:space-y-6 py-3 sm:py-4 px-3 sm:px-6">
+          <div className="space-y-3 sm:space-y-4 py-3 px-3 sm:px-4 w-full max-w-full overflow-x-hidden">
             {/* Hot Prospect Alert */}
             {renterInsights?.isHotProspect && (
               <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
