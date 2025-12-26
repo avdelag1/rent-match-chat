@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, memo, useMemo, useRef } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
+import { AppLoadingScreen } from './AppLoadingScreen';
 import { useListings } from '@/hooks/useListings';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -11,9 +12,7 @@ import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { RotateCcw, Sparkles, RefreshCw, Home, Search, Filter } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { RotateCcw, RefreshCw, Home, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -250,27 +249,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   const progress = listings.length > 0 ? ((currentIndex + 1) / listings.length) * 100 : 0;
 
-  // Only show skeleton on initial load, not during background refetch
+  // Only show loading on initial load, not during background refetch
   if (isLoading && listings.length === 0) {
-    return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto">
-        <Card className="w-full h-[450px] bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border-2 border-border/50">
-          <div className="p-6 space-y-4">
-            <Skeleton className="w-full h-64 rounded-lg" />
-            <Skeleton className="w-3/4 h-6" />
-            <Skeleton className="w-1/2 h-4" />
-            <div className="flex space-x-2">
-              <Skeleton className="w-16 h-6 rounded-full" />
-              <Skeleton className="w-20 h-6 rounded-full" />
-            </div>
-          </div>
-        </Card>
-        <div className="text-center mt-4 text-muted-foreground">
-          <Sparkles className="w-5 h-5 mx-auto mb-2 animate-spin" />
-          Finding perfect properties...
-        </div>
-      </div>
-    );
+    return <AppLoadingScreen />;
   }
 
   if (error) {
