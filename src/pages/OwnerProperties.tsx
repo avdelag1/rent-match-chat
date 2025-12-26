@@ -31,7 +31,7 @@ const OwnerProperties = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+      <div className="w-full overflow-x-hidden">
         <div className="p-4">
           <Button
             variant="ghost"

@@ -26,7 +26,7 @@ const ClientSettings = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="w-full h-full overflow-y-auto overflow-x-hidden pb-24">
+      <div className="w-full overflow-x-hidden pb-24">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <PageHeader 

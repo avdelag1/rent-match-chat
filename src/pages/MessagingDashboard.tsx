@@ -333,7 +333,7 @@ export function MessagingDashboard() {
 
   return (
     <DashboardLayout userRole={userRole}>
-      <div className="w-full h-full overflow-y-auto pb-24 bg-[#000000]">
+      <div className="w-full pb-24 bg-[#000000]">
         <div className="w-full max-w-4xl mx-auto p-3 sm:p-4">
           {/* Vibrant Header */}
           <div className="mb-6">

@@ -144,7 +144,7 @@ export default function OwnerViewClientProfile() {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="h-full overflow-y-auto bg-background">
+      <div className="bg-background">
         {/* Header */}
         <div className="border-b bg-card sticky top-0 z-10">
           <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
