@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, Heart } from 'lucide-react';
+import { Play, Pause, Heart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { RadioStation } from '@/data/radioStations';
@@ -9,9 +9,10 @@ import { cn } from '@/lib/utils';
 interface RadioStationCardProps {
   station: RadioStation;
   compact?: boolean;
+  showRemoveButton?: boolean;
 }
 
-export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, compact = false }) => {
+export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, compact = false, showRemoveButton = false }) => {
   const {
     currentStation,
     isPlaying,
@@ -37,6 +38,11 @@ export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, com
   };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(station.id);
+  };
+
+  const handleRemoveClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleFavorite(station.id);
   };
@@ -112,19 +118,31 @@ export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, com
 
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleFavoriteClick}
-            className="w-9 h-9 shrink-0"
-          >
-            <Heart
-              className={cn(
-                "w-4 h-4 transition-colors",
-                isFav ? "text-red-500 fill-red-500" : "text-muted-foreground"
-              )}
-            />
-          </Button>
+          {showRemoveButton ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRemoveClick}
+              className="w-9 h-9 shrink-0 hover:bg-red-500/10 hover:text-red-500"
+              title="Remove from favorites"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleFavoriteClick}
+              className="w-9 h-9 shrink-0"
+            >
+              <Heart
+                className={cn(
+                  "w-4 h-4 transition-colors",
+                  isFav ? "text-red-500 fill-red-500" : "text-muted-foreground"
+                )}
+              />
+            </Button>
+          )}
           <Button
             size="icon"
             onClick={handlePlayClick}
