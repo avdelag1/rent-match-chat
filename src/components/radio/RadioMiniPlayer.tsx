@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { MiniVisualizer, GlowEffect, SpectrumBars } from './AudioVisualizer';
 
 const PLAYER_WIDTH = 320;
 const PLAYER_HEIGHT = 72;
@@ -165,8 +166,25 @@ export const RadioMiniPlayer: React.FC = () => {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      <div className="bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl">
-        <div className="px-4 py-3">
+      <div className="relative bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden">
+        {/* Glow effect on beat */}
+        <GlowEffect
+          isPlaying={isPlaying}
+          className="rounded-2xl"
+          color="rgba(139, 92, 246, 0.3)"
+        />
+
+        {/* Spectrum bars at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 overflow-hidden opacity-60">
+          <SpectrumBars
+            isPlaying={isPlaying}
+            barCount={40}
+            height={8}
+            color="rgba(139, 92, 246, 0.6)"
+          />
+        </div>
+
+        <div className="px-4 py-3 relative z-10">
           <div className="flex items-center gap-3">
             {/* Artwork */}
             <motion.div
@@ -186,21 +204,13 @@ export const RadioMiniPlayer: React.FC = () => {
                 draggable={false}
               />
               {isPlaying && (
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                  <div className="flex gap-0.5">
-                    {[...Array(3)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="w-0.5 bg-white rounded-full"
-                        animate={{ height: [6, 12, 6] }}
-                        transition={{
-                          duration: 0.5,
-                          repeat: Infinity,
-                          delay: i * 0.1
-                        }}
-                      />
-                    ))}
-                  </div>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <MiniVisualizer
+                    isPlaying={isPlaying}
+                    variant="bars"
+                    color="white"
+                    className="h-4"
+                  />
                 </div>
               )}
             </motion.div>
