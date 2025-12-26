@@ -10,6 +10,7 @@ import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
 import { SettingsBottomSheet } from '@/components/SettingsBottomSheet'
+import { QuickFilterBar, QuickFilters, QuickFilterCategory } from '@/components/QuickFilterBar'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
 const SubscriptionPackages = lazy(() => import("@/components/SubscriptionPackages").then(m => ({ default: m.SubscriptionPackages })))
@@ -68,6 +69,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
 
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
+  const [quickFilters, setQuickFilters] = useState<QuickFilters>({
+    categories: [],
+    listingType: 'both',
+  });
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -227,6 +232,31 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     });
   }, [])
 
+  // Handle quick filter changes
+  const handleQuickFilterChange = useCallback((newQuickFilters: QuickFilters) => {
+    setQuickFilters(newQuickFilters);
+  }, []);
+
+  // Combine quick filters with applied filters
+  const combinedFilters = useMemo(() => {
+    const base = appliedFilters || {};
+
+    // If no quick filters active, return base filters
+    if (quickFilters.categories.length === 0 && quickFilters.listingType === 'both') {
+      return base;
+    }
+
+    return {
+      ...base,
+      // Quick filter category takes precedence if set
+      category: quickFilters.categories.length === 1 ? quickFilters.categories[0] : base.category,
+      // Multiple categories means we need to handle this differently
+      categories: quickFilters.categories.length > 0 ? quickFilters.categories : undefined,
+      // Quick filter listing type takes precedence if not 'both'
+      listingType: quickFilters.listingType !== 'both' ? quickFilters.listingType : base.listingType,
+    };
+  }, [appliedFilters, quickFilters]);
+
   // ✅ FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {
     return React.Children.map(children, (child) => {
@@ -235,12 +265,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onPropertyInsights: handlePropertyInsights,
           onClientInsights: handleClientInsights,
           onMessageClick: handleMessageClick,
-          filters: appliedFilters,
+          filters: combinedFilters,
         } as any);
       }
       return child;
     });
-  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, appliedFilters]);
+  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
+
+  // Check if we're on a page that should show quick filters (client discovery page)
+  const showQuickFilters = userRole === 'client' && location.pathname === '/client';
 
   return (
     <div className="app-root bg-background">
@@ -254,11 +287,28 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         showFilters={true}
       />
 
+      {/* Quick Filter Bar - Only for clients on discovery page */}
+      {showQuickFilters && (
+        <div
+          className="fixed left-0 right-0 z-40"
+          style={{
+            top: 'calc(56px + var(--safe-top))',
+          }}
+        >
+          <QuickFilterBar
+            filters={quickFilters}
+            onChange={handleQuickFilterChange}
+          />
+        </div>
+      )}
+
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
         className="fixed inset-0 overflow-y-auto overflow-x-hidden"
         style={{
-          paddingTop: 'calc(56px + var(--safe-top))', // TopBar height + safe-top
+          paddingTop: showQuickFilters
+            ? 'calc(56px + 52px + var(--safe-top))' // TopBar + QuickFilterBar + safe-top
+            : 'calc(56px + var(--safe-top))', // TopBar height + safe-top
           paddingBottom: 'calc(72px + var(--safe-bottom))', // BottomNav height + safe-bottom
           paddingLeft: 'max(var(--safe-left), 0px)',
           paddingRight: 'max(var(--safe-right), 0px)',
