@@ -109,14 +109,12 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
         onMarkAllRead={markAllAsRead}
         onNotificationClick={handleNotificationClick}
       />
-      <div className="w-full h-full">
-        <ClientSwipeContainer
-          onClientTap={handleClientTap}
-          onInsights={handleInsights}
-          onMessageClick={onMessageClick}
-          insightsOpen={insightsOpen}
-        />
-      </div>
+      <ClientSwipeContainer
+        onClientTap={handleClientTap}
+        onInsights={handleInsights}
+        onMessageClick={onMessageClick}
+        insightsOpen={insightsOpen}
+      />
 
       {selectedClient && (
         <ClientInsightsDialog
