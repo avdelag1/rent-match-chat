@@ -67,8 +67,9 @@ const savePosition = (left: number, top: number) => {
   }
 };
 
-// Close zone dimensions
-const CLOSE_ZONE_SIZE = 80;
+// Close zone dimensions - at bottom of screen
+const CLOSE_ZONE_WIDTH = 120;
+const CLOSE_ZONE_HEIGHT = 80;
 
 export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -95,16 +96,23 @@ export const RadioBubble: React.FC = () => {
     stopPlayback,
   } = useRadioPlayer();
 
-  // Check if bubble is over the close zone
+  // Check if bubble is over the close zone (at bottom center of screen)
   const checkCloseZone = useCallback((left: number, top: number) => {
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
     const bubbleCenterX = left + BUBBLE_SIZE / 2;
     const bubbleCenterY = top + BUBBLE_SIZE / 2;
-    const distance = Math.sqrt(
-      Math.pow(bubbleCenterX - centerX, 2) + Math.pow(bubbleCenterY - centerY, 2)
+
+    // Close zone is at bottom center of screen
+    const zoneLeft = (window.innerWidth - CLOSE_ZONE_WIDTH) / 2;
+    const zoneRight = zoneLeft + CLOSE_ZONE_WIDTH;
+    const zoneTop = window.innerHeight - CLOSE_ZONE_HEIGHT - 20; // 20px from bottom
+    const zoneBottom = window.innerHeight - 20;
+
+    return (
+      bubbleCenterX >= zoneLeft &&
+      bubbleCenterX <= zoneRight &&
+      bubbleCenterY >= zoneTop &&
+      bubbleCenterY <= zoneBottom
     );
-    return distance < CLOSE_ZONE_SIZE;
   }, []);
 
   // Handle viewport resize and ensure visible on mount
@@ -236,27 +244,42 @@ export const RadioBubble: React.FC = () => {
 
   return (
     <>
-      {/* Close zone - shown when dragging */}
+      {/* Close zone - shown at bottom when dragging */}
       <AnimatePresence>
         {isDragging && showCloseZone && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 z-[65] pointer-events-none flex items-center justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed z-[65] pointer-events-none"
+            style={{
+              left: '50%',
+              bottom: 20,
+              transform: 'translateX(-50%)',
+            }}
           >
             <motion.div
               animate={{
-                scale: isOverCloseZone ? 1.2 : 1,
-                backgroundColor: isOverCloseZone ? 'rgba(239, 68, 68, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+                scale: isOverCloseZone ? 1.15 : 1,
+                backgroundColor: isOverCloseZone ? 'rgba(239, 68, 68, 0.25)' : 'rgba(0, 0, 0, 0.15)',
               }}
               className={cn(
-                "w-20 h-20 rounded-full flex items-center justify-center",
+                "flex items-center justify-center rounded-2xl backdrop-blur-sm",
                 "border-2 border-dashed",
-                isOverCloseZone ? "border-red-500" : "border-white/50"
+                isOverCloseZone ? "border-red-500" : "border-white/40"
               )}
+              style={{
+                width: CLOSE_ZONE_WIDTH,
+                height: CLOSE_ZONE_HEIGHT,
+              }}
             >
-              <X className={cn("w-8 h-8", isOverCloseZone ? "text-red-500" : "text-white/70")} />
+              <X
+                className={cn(
+                  "w-10 h-10 transition-colors",
+                  isOverCloseZone ? "text-red-500" : "text-white/60"
+                )}
+                strokeWidth={2.5}
+              />
             </motion.div>
           </motion.div>
         )}
