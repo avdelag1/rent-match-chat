@@ -155,6 +155,7 @@ interface RadioPlayerContextType extends RadioPlayerState {
   skipToPrevious: () => void;
   shufflePlay: () => void;
   shufflePlayGenre: (genreId: string) => void;
+  stopPlayback: () => void;
 }
 
 const RadioPlayerContext = createContext<RadioPlayerContextType | null>(null);
@@ -270,6 +271,15 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       audioRef.current.src = '';
     }
     setState(prev => ({ ...prev, isPlaying: false, isLoading: false }));
+  }, []);
+
+  // Stop playback completely and clear current station
+  const stopPlayback = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
+    setState(prev => ({ ...prev, currentStation: null, isPlaying: false, isLoading: false, error: null }));
   }, []);
 
   // Listen for sign-out event to stop radio
@@ -695,6 +705,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     skipToPrevious,
     shufflePlay,
     shufflePlayGenre,
+    stopPlayback,
   };
 
   return (

@@ -67,14 +67,19 @@ const savePosition = (left: number, top: number) => {
   }
 };
 
+// Close zone dimensions
+const CLOSE_ZONE_SIZE = 80;
+
 export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState(getSavedPosition);
   const [isDragging, setIsDragging] = useState(false);
+  const [isOverCloseZone, setIsOverCloseZone] = useState(false);
+  const [showCloseZone, setShowCloseZone] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
   const dragStartTimeRef = useRef<number>(0);
   const hasDraggedRef = useRef(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -87,7 +92,20 @@ export const RadioBubble: React.FC = () => {
     skipToNext,
     skipToPrevious,
     shufflePlay,
+    stopPlayback,
   } = useRadioPlayer();
+
+  // Check if bubble is over the close zone
+  const checkCloseZone = useCallback((left: number, top: number) => {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const bubbleCenterX = left + BUBBLE_SIZE / 2;
+    const bubbleCenterY = top + BUBBLE_SIZE / 2;
+    const distance = Math.sqrt(
+      Math.pow(bubbleCenterX - centerX, 2) + Math.pow(bubbleCenterY - centerY, 2)
+    );
+    return distance < CLOSE_ZONE_SIZE;
+  }, []);
 
   // Handle viewport resize and ensure visible on mount
   useEffect(() => {
@@ -129,8 +147,6 @@ export const RadioBubble: React.FC = () => {
 
   // Unified pointer handlers for both mouse and touch
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    if (isExpanded) return;
-    
     e.currentTarget.setPointerCapture(e.pointerId);
     dragStartRef.current = {
       x: e.clientX,
@@ -141,45 +157,66 @@ export const RadioBubble: React.FC = () => {
     dragStartTimeRef.current = Date.now();
     hasDraggedRef.current = false;
     setIsDragging(true);
-  }, [isExpanded, position]);
+  }, [position]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragStartRef.current || isExpanded) return;
-    
+    if (!dragStartRef.current) return;
+
     const deltaX = e.clientX - dragStartRef.current.x;
     const deltaY = e.clientY - dragStartRef.current.y;
-    
+
     // Only count as drag if moved more than 5px
     if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
       hasDraggedRef.current = true;
+      if (!showCloseZone) setShowCloseZone(true);
     }
-    
+
     const newPos = clampPosition(
       dragStartRef.current.left + deltaX,
       dragStartRef.current.top + deltaY
     );
     setPosition(newPos);
-  }, [isExpanded, clampPosition]);
+
+    // Check if over close zone
+    if (hasDraggedRef.current) {
+      setIsOverCloseZone(checkCloseZone(newPos.left, newPos.top));
+    }
+  }, [clampPosition, checkCloseZone, showCloseZone]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!dragStartRef.current) return;
-    
+
     e.currentTarget.releasePointerCapture(e.pointerId);
-    
+
     const dragDuration = Date.now() - dragStartTimeRef.current;
     const wasDragged = hasDraggedRef.current;
-    
+
+    // Check if dropped on close zone
+    if (wasDragged && isOverCloseZone) {
+      // Stop playback and reset position
+      stopPlayback();
+      setPosition(getSavedPosition());
+      setIsOverCloseZone(false);
+      setShowCloseZone(false);
+      setIsExpanded(false);
+      dragStartRef.current = null;
+      setIsDragging(false);
+      return;
+    }
+
     // Save final position
     savePosition(position.left, position.top);
-    
-    // If it was a tap (short duration, no significant movement), expand
-    if (!wasDragged && dragDuration < 300) {
+
+    // If it was a tap (short duration, no significant movement) and not expanded, expand
+    if (!wasDragged && dragDuration < 300 && !isExpanded) {
       setIsExpanded(true);
     }
-    
+
     dragStartRef.current = null;
     setIsDragging(false);
-  }, [position]);
+    setIsOverCloseZone(false);
+    setShowCloseZone(false);
+  }, [position, isOverCloseZone, stopPlayback, isExpanded]);
 
   const handleGoToRadio = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
@@ -199,6 +236,32 @@ export const RadioBubble: React.FC = () => {
 
   return (
     <>
+      {/* Close zone - shown when dragging */}
+      <AnimatePresence>
+        {isDragging && showCloseZone && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 z-[65] pointer-events-none flex items-center justify-center"
+          >
+            <motion.div
+              animate={{
+                scale: isOverCloseZone ? 1.2 : 1,
+                backgroundColor: isOverCloseZone ? 'rgba(239, 68, 68, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+              }}
+              className={cn(
+                "w-20 h-20 rounded-full flex items-center justify-center",
+                "border-2 border-dashed",
+                isOverCloseZone ? "border-red-500" : "border-white/50"
+              )}
+            >
+              <X className={cn("w-8 h-8", isOverCloseZone ? "text-red-500" : "text-white/70")} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Backdrop when expanded */}
       <AnimatePresence>
         {isExpanded && (
@@ -220,8 +283,8 @@ export const RadioBubble: React.FC = () => {
           isDragging ? "cursor-grabbing" : "cursor-grab"
         )}
         style={{
-          left: isExpanded ? position.left - 104 : position.left, // Center expanded card on bubble
-          top: isExpanded ? position.top + BUBBLE_SIZE + 8 : position.top,
+          left: position.left,
+          top: position.top,
           width: isExpanded ? 272 : BUBBLE_SIZE,
           height: isExpanded ? 'auto' : BUBBLE_SIZE,
         }}
@@ -245,10 +308,20 @@ export const RadioBubble: React.FC = () => {
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden"
               >
+                {/* Drag handle - grab to move */}
+                <div
+                  className="h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                >
+                  <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+                </div>
                 {/* Header with artwork - tap to navigate to radio page for full player */}
                 <div
-                  className="relative h-24 overflow-hidden cursor-pointer"
-                  onClick={() => { setIsExpanded(false); navigate('/radio'); }}
+                  className="relative h-20 overflow-hidden cursor-pointer"
+                  onClick={() => { if (!hasDraggedRef.current) { setIsExpanded(false); navigate('/radio'); } }}
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center"
@@ -295,19 +368,31 @@ export const RadioBubble: React.FC = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden p-4"
+                className="w-full bg-background/95 backdrop-blur-2xl rounded-2xl shadow-xl border border-border overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold">Quick Radio</h3>
-                  <button onClick={() => setIsExpanded(false)} className="p-1 rounded-full hover:bg-secondary"><X className="w-4 h-4" /></button>
+                {/* Drag handle - grab to move */}
+                <div
+                  className="h-6 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                >
+                  <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
                 </div>
-                <div className="space-y-2">
-                  <button onClick={() => { shufflePlay(); setIsExpanded(false); }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
-                    <Shuffle className="w-5 h-5 text-primary" /><span className="text-sm font-medium">Shuffle Play</span>
-                  </button>
-                  <button onClick={(e) => handleGoToRadio(e)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors">
-                    <Radio className="w-5 h-5" /><span className="text-sm font-medium">Open Radio</span>
-                  </button>
+                <div className="px-4 pb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold">Quick Radio</h3>
+                    <button onClick={() => setIsExpanded(false)} className="p-1 rounded-full hover:bg-secondary"><X className="w-4 h-4" /></button>
+                  </div>
+                  <div className="space-y-2">
+                    <button onClick={() => { shufflePlay(); setIsExpanded(false); }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
+                      <Shuffle className="w-5 h-5 text-primary" /><span className="text-sm font-medium">Shuffle Play</span>
+                    </button>
+                    <button onClick={(e) => handleGoToRadio(e)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors">
+                      <Radio className="w-5 h-5" /><span className="text-sm font-medium">Open Radio</span>
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )
