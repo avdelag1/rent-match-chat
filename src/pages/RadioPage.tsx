@@ -190,7 +190,7 @@ const RadioPage: React.FC = () => {
           {favoriteStations.length > 0 ? (
             <div className="grid grid-cols-1 gap-3">
               {favoriteStations.map(station => (
-                <RadioStationCard key={station.id} station={station} compact />
+                <RadioStationCard key={station.id} station={station} compact showRemoveButton />
               ))}
             </div>
           ) : (
