@@ -411,7 +411,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       )}
 
       {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-160px)] max-w-lg mx-auto overflow-visible mt-2">
+      <div className="relative w-full h-[calc(100vh-160px)] max-w-lg mx-auto overflow-clip mt-2" style={{ contain: 'layout' }}>
         <AnimatePresence mode="sync" initial={false}>
           {/* Show next card behind current card for stack effect */}
           {nextListing && (

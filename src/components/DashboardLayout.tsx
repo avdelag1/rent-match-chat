@@ -304,7 +304,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
-        className="fixed inset-0 overflow-y-auto overflow-x-hidden"
+        className="fixed inset-0 overflow-y-auto overflow-x-clip"
         style={{
           paddingTop: showQuickFilters
             ? 'calc(56px + 52px + var(--safe-top))' // TopBar + QuickFilterBar + safe-top
