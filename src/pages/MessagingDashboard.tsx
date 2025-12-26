@@ -54,6 +54,8 @@ export function MessagingDashboard() {
 
   // Get user role
   useEffect(() => {
+    let isMounted = true;
+
     const getUserRole = async () => {
       if (!user?.id) return;
 
@@ -64,14 +66,20 @@ export function MessagingDashboard() {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        setUserRole(roleData?.role || user?.user_metadata?.role || 'client');
+        if (isMounted) {
+          setUserRole(roleData?.role || user?.user_metadata?.role || 'client');
+        }
       } catch (error) {
         console.error('Error getting user role:', error);
       }
     };
 
     getUserRole();
-  }, [user?.id]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, user?.user_metadata?.role]);
 
   // Mark messages as read when viewing conversation
   useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
@@ -124,27 +132,8 @@ export function MessagingDashboard() {
     };
   }, [user?.id, debouncedRefetch]);
 
-  // Handle direct conversation opening or auto-start from URL parameters
-  useEffect(() => {
-    const conversationId = searchParams.get('conversationId');
-    const startConversationUserId = searchParams.get('startConversation');
-
-    // Store direct conversation ID for priority display
-    if (conversationId) {
-      setDirectConversationId(conversationId);
-    }
-
-    // Direct conversation ID - open immediately
-    if (conversationId && !isStartingConversation) {
-      handleDirectOpenConversation(conversationId);
-    }
-    // User ID - start new conversation
-    else if (startConversationUserId && !isStartingConversation) {
-      handleAutoStartConversation(startConversationUserId);
-    }
-  }, [searchParams]);
-
-  const handleDirectOpenConversation = async (conversationId: string) => {
+  // Memoized handlers for conversation opening
+  const handleDirectOpenConversation = useCallback(async (conversationId: string) => {
     setIsStartingConversation(true);
     setDirectlyFetchedConversation(null); // Reset any previously fetched conversation
 
@@ -200,17 +189,17 @@ export function MessagingDashboard() {
     } finally {
       setIsStartingConversation(false);
     }
-  };
+  }, [conversations, refetch, fetchSingleConversation, setSearchParams]);
 
-  const handleAutoStartConversation = async (userId: string) => {
+  const handleAutoStartConversation = useCallback(async (userId: string) => {
     setIsStartingConversation(true);
-    
+
     try {
       // Check if conversation already exists
-      const existingConv = conversations.find(c => 
+      const existingConv = conversations.find(c =>
         c.other_user?.id === userId
       );
-      
+
       if (existingConv) {
         toast({
           title: 'Opening conversation',
@@ -229,7 +218,7 @@ export function MessagingDashboard() {
         setIsStartingConversation(false);
         return;
       }
-      
+
       // Create new conversation
       toast({
         title: 'Starting conversation',
@@ -244,20 +233,19 @@ export function MessagingDashboard() {
 
       if (result.conversationId) {
         // Wait a moment for the conversation to be available
-        setTimeout(async () => {
-          await refetch();
-          setSelectedConversationId(result.conversationId);
-          setSearchParams({});
-          toast({
-            title: 'Conversation started',
-            description: 'You can now send messages!',
-          });
-          setIsStartingConversation(false);
-        }, 500);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await refetch();
+        setSelectedConversationId(result.conversationId);
+        setSearchParams({});
+        toast({
+          title: 'Conversation started',
+          description: 'You can now send messages!',
+        });
+        setIsStartingConversation(false);
       }
     } catch (error: any) {
       console.error('Error auto-starting conversation:', error);
-      
+
       if (error?.message === 'QUOTA_EXCEEDED') {
         setShowUpgradeDialog(true);
       } else {
@@ -267,11 +255,31 @@ export function MessagingDashboard() {
           variant: 'destructive',
         });
       }
-      
+
       setSearchParams({});
       setIsStartingConversation(false);
     }
-  };
+  }, [conversations, canSendMessage, totalActivations, startConversation, refetch, setSearchParams]);
+
+  // Handle direct conversation opening or auto-start from URL parameters
+  useEffect(() => {
+    const conversationId = searchParams.get('conversationId');
+    const startConversationUserId = searchParams.get('startConversation');
+
+    // Store direct conversation ID for priority display
+    if (conversationId) {
+      setDirectConversationId(conversationId);
+    }
+
+    // Direct conversation ID - open immediately
+    if (conversationId && !isStartingConversation) {
+      handleDirectOpenConversation(conversationId);
+    }
+    // User ID - start new conversation
+    else if (startConversationUserId && !isStartingConversation) {
+      handleAutoStartConversation(startConversationUserId);
+    }
+  }, [searchParams, isStartingConversation, handleDirectOpenConversation, handleAutoStartConversation]);
 
   if (selectedConversationId) {
     // If we have a selected conversation ID, show the messaging interface

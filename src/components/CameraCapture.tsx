@@ -138,32 +138,39 @@ export function CameraCapture({
 
   // Initialize camera
   useEffect(() => {
+    let isMounted = true;
+
     const init = async () => {
       const permitted = await checkPermissions();
+      if (!isMounted) return;
+
       if (!permitted) {
         const granted = await requestPermissions();
-        if (!granted) return;
+        if (!granted || !isMounted) return;
       }
 
-      if (!isNative && videoRef.current) {
+      if (!isNative && videoRef.current && isMounted) {
         const success = await startStream(videoRef.current);
-        setIsStreamActive(success);
+        if (isMounted) {
+          setIsStreamActive(success);
+        }
       }
     };
 
     init();
 
     return () => {
+      isMounted = false;
       cleanup();
     };
-  }, []);
+  }, [checkPermissions, requestPermissions, isNative, startStream, cleanup]);
 
   // Restart stream when direction changes
   useEffect(() => {
     if (!isNative && videoRef.current && isStreamActive) {
       startStream(videoRef.current);
     }
-  }, [currentDirection]);
+  }, [currentDirection, isNative, isStreamActive, startStream]);
 
   // Custom capture with filters applied
   const captureWithEffects = useCallback(async () => {
