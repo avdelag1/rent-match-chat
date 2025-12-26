@@ -71,12 +71,32 @@ const savePosition = (left: number, top: number) => {
 const CLOSE_ZONE_WIDTH = 120;
 const CLOSE_ZONE_HEIGHT = 80;
 
+// Get bubble visibility state from localStorage
+const getBubbleVisibility = (): boolean => {
+  try {
+    const saved = localStorage.getItem('radioBubbleVisible');
+    return saved === null ? true : JSON.parse(saved);
+  } catch {
+    return true;
+  }
+};
+
+// Save bubble visibility state to localStorage
+const saveBubbleVisibility = (visible: boolean) => {
+  try {
+    localStorage.setItem('radioBubbleVisible', JSON.stringify(visible));
+  } catch {
+    // Ignore errors
+  }
+};
+
 export const RadioBubble: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState(getSavedPosition);
   const [isDragging, setIsDragging] = useState(false);
   const [isOverCloseZone, setIsOverCloseZone] = useState(false);
   const [showCloseZone, setShowCloseZone] = useState(false);
+  const [isBubbleVisible, setIsBubbleVisible] = useState(getBubbleVisibility);
   const dragStartRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
   const dragStartTimeRef = useRef<number>(0);
   const hasDraggedRef = useRef(false);
@@ -207,8 +227,10 @@ export const RadioBubble: React.FC = () => {
 
     // Check if dropped on close zone
     if (wasDragged && isOverCloseZone) {
-      // Stop playback and reset position
+      // Stop playback, hide bubble, and reset position
       stopPlayback();
+      setIsBubbleVisible(false);
+      saveBubbleVisibility(false);
       setPosition(getSavedPosition());
       setIsOverCloseZone(false);
       setShowCloseZone(false);
@@ -244,12 +266,20 @@ export const RadioBubble: React.FC = () => {
     navigate('/radio');
   }, [navigate]);
 
+  // Show bubble when a station starts playing
+  useEffect(() => {
+    if (currentStation && !isBubbleVisible) {
+      setIsBubbleVisible(true);
+      saveBubbleVisibility(true);
+    }
+  }, [currentStation, isBubbleVisible]);
+
   // Pages where the bubble should NOT appear (only landing page)
   const hiddenPaths = ['/'];
   const shouldHide = hiddenPaths.includes(location.pathname);
 
-  // Show bubble on all authenticated pages (even without currentStation)
-  if (shouldHide) return null;
+  // Hide bubble if on landing page or if explicitly closed
+  if (shouldHide || !isBubbleVisible) return null;
 
   return (
     <>
