@@ -166,7 +166,7 @@ export const RadioMiniPlayer: React.FC = () => {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      <div className="relative bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-xl overflow-hidden pointer-events-none">
         {/* Glow effect on beat */}
         <GlowEffect
           isPlaying={isPlaying}
@@ -184,7 +184,7 @@ export const RadioMiniPlayer: React.FC = () => {
           />
         </div>
 
-        <div className="px-4 py-3 relative z-10">
+        <div className="px-4 py-3 relative z-10 pointer-events-auto">
           <div className="flex items-center gap-3">
             {/* Artwork */}
             <motion.div
@@ -195,7 +195,7 @@ export const RadioMiniPlayer: React.FC = () => {
                   handleExpandClick();
                 }
               }}
-              className="relative w-12 h-12 rounded-xl overflow-hidden cursor-pointer shrink-0 shadow-lg"
+              className="relative w-12 h-12 rounded-xl overflow-hidden cursor-pointer shrink-0 shadow-lg pointer-events-auto"
             >
               <img
                 src={currentStation.artwork}
@@ -217,7 +217,7 @@ export const RadioMiniPlayer: React.FC = () => {
 
             {/* Info */}
             <div
-              className="flex-1 min-w-0 cursor-pointer"
+              className="flex-1 min-w-0 cursor-pointer pointer-events-auto"
               onClick={(e) => {
                 if (!hasDraggedRef.current) {
                   e.stopPropagation();
