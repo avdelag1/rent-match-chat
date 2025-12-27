@@ -10,11 +10,9 @@ import {
   Users,
   Flame,
   Filter,
-  Palette,
   ChevronRight,
   Shield
 } from 'lucide-react';
-import { ThemeSelector } from '@/components/ThemeSelector';
 import { Badge } from '@/components/ui/badge';
 
 interface SettingsBottomSheetProps {
@@ -126,22 +124,6 @@ export function SettingsBottomSheet({
       height="large"
     >
       <div className="space-y-2 pb-6">
-        {/* Theme Selector Section */}
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3 px-2">
-            Appearance
-          </h3>
-          <div className="flex items-center gap-2 px-2">
-            <Palette className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Theme</span>
-          </div>
-          <div className="mt-3">
-            <ThemeSelector />
-          </div>
-        </div>
-
-        <Separator className="my-4" />
-
         {/* Menu Items Section */}
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground mb-3 px-2">
