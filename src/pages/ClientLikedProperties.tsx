@@ -10,11 +10,64 @@ import { Badge } from "@/components/ui/badge";
 import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
 import { useStartConversation, useConversationStats } from "@/hooks/useConversations";
-import { useNavigate } from "react-router-dom";
-import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, Camera, ArrowLeft } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, Camera, ArrowLeft, Home, Car, Ship, Bike, Briefcase, Trash2, MoreVertical } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
 import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+// Custom motorcycle icon
+function MotorcycleIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="5" cy="17" r="3" />
+      <circle cx="19" cy="17" r="3" />
+      <path d="M9 17h6" />
+      <path d="M19 17l-2-7h-4l-1 4" />
+      <path d="M12 10l-1-3h-2l-1 3" />
+      <path d="M5 17l2-7h2" />
+    </svg>
+  );
+}
+
+// Category configuration
+const categories = [
+  { id: 'all', label: 'All', icon: Flame },
+  { id: 'property', label: 'Property', icon: Home },
+  { id: 'vehicle', label: 'Vehicles', icon: Car },
+  { id: 'motorcycle', label: 'Motos', icon: MotorcycleIcon },
+  { id: 'bicycle', label: 'Bicycles', icon: Bike },
+  { id: 'yacht', label: 'Yachts', icon: Ship },
+  { id: 'worker', label: 'Services', icon: Briefcase },
+];
 
 const ClientLikedProperties = () => {
   const [showLikedDialog, setShowLikedDialog] = useState(false);
@@ -31,6 +84,12 @@ const ClientLikedProperties = () => {
     alt: '',
     initialIndex: 0
   });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get('category') || 'all';
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl);
+  const [propertyToDelete, setPropertyToDelete] = useState<any>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const { data: likedProperties = [], isLoading, refetch: refreshLikedProperties } = useLikedProperties();
   const { data: subscription } = useUserSubscription();
   const { data: conversationStats } = useConversationStats();
@@ -38,9 +97,77 @@ const ClientLikedProperties = () => {
   const navigate = useNavigate();
   const { canStartNewConversation } = useMessagingQuota();
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   // Get conversations remaining from the stats
   const conversationsRemaining = conversationStats?.conversationsLeft || 0;
+
+  // Remove like mutation
+  const removeLikeMutation = useMutation({
+    mutationFn: async (propertyId: string) => {
+      const { error } = await supabase
+        .from('likes')
+        .delete()
+        .eq('user_id', user?.id)
+        .eq('target_id', propertyId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
+      toast({
+        title: "Removed",
+        description: "Property removed from your likes",
+      });
+      setShowDeleteDialog(false);
+      setPropertyToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove property from likes",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handle category change
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSearchParams({ category });
+  };
+
+  // Filter properties by category
+  const filteredProperties = likedProperties.filter(property => {
+    if (selectedCategory === 'all') return true;
+
+    // Check the category field
+    const propertyCategory = property.category?.toLowerCase() || '';
+    const selectedCat = selectedCategory.toLowerCase();
+
+    // Handle various category mappings
+    if (selectedCat === 'property') {
+      return propertyCategory === 'property' || propertyCategory === '' || !property.category;
+    }
+    if (selectedCat === 'motorcycle') {
+      return propertyCategory === 'motorcycle' || propertyCategory === 'moto';
+    }
+
+    return propertyCategory === selectedCat;
+  });
+
+  // Handle remove like
+  const handleRemoveLike = (property: any) => {
+    setPropertyToDelete(property);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmRemoveLike = () => {
+    if (propertyToDelete) {
+      removeLikeMutation.mutate(propertyToDelete.id);
+    }
+  };
 
   const handlePropertySelect = (listingId: string) => {
     setSelectedListingId(listingId);
@@ -121,18 +248,41 @@ const ClientLikedProperties = () => {
               }
             />
 
+            {/* Category Tabs */}
+            <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full mb-6">
+              <TabsList className="grid w-full grid-cols-7 h-auto overflow-x-auto">
+                {categories.map(({ id, label, icon: Icon }) => (
+                  <TabsTrigger
+                    key={id}
+                    value={id}
+                    className="flex items-center gap-1 sm:gap-2 px-2 py-2 text-xs sm:text-sm"
+                  >
+                    <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">{label}</span>
+                    <span className="sm:hidden">{label.substring(0, 4)}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+
+            {/* Count indicator */}
+            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
+              <Flame className="w-4 h-4" />
+              <span>{filteredProperties.length} {selectedCategory === 'all' ? 'liked items' : `liked ${selectedCategory}`}</span>
+            </div>
+
             {isLoading ? (
               <Card className="bg-card border-border shadow-sm">
                 <CardContent className="flex items-center justify-center py-12">
                   <p className="text-muted-foreground">Loading your liked properties...</p>
                 </CardContent>
               </Card>
-            ) : likedProperties.length > 0 ? (
+            ) : filteredProperties.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {likedProperties.map((property) => (
+                {filteredProperties.map((property) => (
                   <Card key={property.id} className="bg-card border-border hover:bg-accent/50 transition-all duration-300 overflow-hidden group shadow-sm">
                     {/* Property Image */}
-                    <div 
+                    <div
                       className="relative h-48 overflow-hidden cursor-pointer group"
                       onClick={() => handleImageClick(property, 0)}
                     >
@@ -167,7 +317,7 @@ const ClientLikedProperties = () => {
                           Liked
                         </Badge>
                       </div>
-                      <div className="absolute top-2 right-2">
+                      <div className="absolute top-2 right-2 flex gap-1">
                         <Button
                           size="sm"
                           variant="ghost"
@@ -179,6 +329,30 @@ const ClientLikedProperties = () => {
                         >
                           <ExternalLink className="w-4 h-4" />
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="bg-background/20 hover:bg-background/30 text-foreground"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveLike(property);
+                              }}
+                              className="text-destructive focus:text-destructive cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Remove from Likes
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
 
@@ -267,10 +441,23 @@ const ClientLikedProperties = () => {
               <Card className="bg-card border-border shadow-sm">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Flame className="w-16 h-16 text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-semibold text-foreground mb-2">No Liked Properties</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    {selectedCategory === 'all' ? 'No Liked Items' : `No Liked ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}`}
+                  </h3>
                   <p className="text-muted-foreground text-center">
-                    Properties you like will appear here.
+                    {selectedCategory === 'all'
+                      ? 'Items you like will appear here.'
+                      : `Swipe right on ${selectedCategory} listings to add them here.`}
                   </p>
+                  {selectedCategory !== 'all' && likedProperties.length > 0 && (
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => handleCategoryChange('all')}
+                    >
+                      View All Likes ({likedProperties.length})
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -292,7 +479,7 @@ const ClientLikedProperties = () => {
           setSelectedListingId(null);
         }}
         onMessageClick={() => {
-          const selectedProperty = likedProperties.find(p => p.id === selectedListingId);
+          const selectedProperty = likedProperties.find(p => p.id === selectedListingId) || filteredProperties.find(p => p.id === selectedListingId);
           if (selectedProperty) {
             handleContactOwner(selectedProperty);
           }
@@ -316,6 +503,32 @@ const ClientLikedProperties = () => {
         }}
         userRole={'client'}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-destructive" />
+              Remove from Likes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove "{propertyToDelete?.title}" from your liked properties?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPropertyToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveLike}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              disabled={removeLikeMutation.isPending}
+            >
+              {removeLikeMutation.isPending ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
