@@ -15,35 +15,57 @@ export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysPro
   const likeScale = useTransform(x, [0, 50], [0.85, 1.15]);
   const passScale = useTransform(x, [-50, 0], [1.15, 0.85]);
 
+  // Subtle rotation intensifies with swipe
+  const likeRotate = useTransform(x, [0, 100], [-12, -15]);
+  const passRotate = useTransform(x, [-100, 0], [15, 12]);
+
   return (
     <>
-      {/* Like Overlay (Right Swipe) - GREEN LIKED */}
+      {/* Like Overlay (Right Swipe) - PREMIUM GREEN with Neon Glow */}
       <motion.div
         style={{ opacity: likeOpacity }}
-        className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
+        className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none swipe-overlay-container like-overlay"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/50 via-emerald-500/40 to-green-600/50 backdrop-blur-sm" />
+        {/* Enhanced radial gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/60 via-emerald-500/50 to-green-600/60 backdrop-blur-[6px]" />
+
+        {/* Animated glow rings */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-80 h-80 rounded-full bg-green-400/20 animate-ping" style={{ animationDuration: '2s' }} />
+          <div className="absolute w-64 h-64 rounded-full bg-green-500/25 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
+        </div>
+
         <motion.div
-          className="relative transform -rotate-12"
-          style={{ scale: likeScale }}
+          className="relative"
+          style={{ scale: likeScale, rotate: likeRotate }}
         >
-          <span className="text-8xl font-black text-white drop-shadow-[0_8px_40px_rgba(34,197,94,1)] tracking-wider" style={{ textShadow: '0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
+          {/* Premium shiny text with animated effects */}
+          <span className="text-8xl swipe-text-liked">
             LIKED
           </span>
         </motion.div>
       </motion.div>
 
-      {/* Pass Overlay (Left Swipe) - ENHANCED RED with Emoji */}
+      {/* Pass Overlay (Left Swipe) - PREMIUM RED with Neon Glow */}
       <motion.div
         style={{ opacity: passOpacity }}
-        className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
+        className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none swipe-overlay-container pass-overlay"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/50 via-rose-500/40 to-red-600/50 backdrop-blur-sm" />
+        {/* Enhanced radial gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/60 via-rose-500/50 to-red-600/60 backdrop-blur-[6px]" />
+
+        {/* Animated glow rings */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-80 h-80 rounded-full bg-red-400/20 animate-ping" style={{ animationDuration: '2s' }} />
+          <div className="absolute w-64 h-64 rounded-full bg-red-500/25 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
+        </div>
+
         <motion.div
-          className="relative transform rotate-12"
-          style={{ scale: passScale }}
+          className="relative"
+          style={{ scale: passScale, rotate: passRotate }}
         >
-          <span className="text-8xl font-black text-white drop-shadow-[0_8px_40px_rgba(239,68,68,1)] tracking-wider" style={{ textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
+          {/* Premium shiny text with animated effects */}
+          <span className="text-8xl swipe-text-pass">
             PASS
           </span>
         </motion.div>
