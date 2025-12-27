@@ -1,5 +1,5 @@
-// Cache version - increment this when deploying breaking changes
-const CACHE_VERSION = 'swipematch-v2';
+// Dynamic cache versioning - automatically updated on each build
+const CACHE_VERSION = `swipematch-v${Date.now()}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
@@ -70,26 +70,8 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
-  // Network-first for JavaScript files to prevent stale chunk errors
-  // Hashed filenames ensure browser-level caching still works efficiently
-  if (request.destination === 'script') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          if (response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE)
-              .then(cache => cache.put(request, responseClone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
-
-  // Cache-first for static assets (CSS, images) with network fallback
+  
+  // Cache-first for static assets (JS, CSS, images) with network fallback
   event.respondWith(
     caches.match(request)
       .then(response => {

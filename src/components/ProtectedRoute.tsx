@@ -10,16 +10,6 @@ interface ProtectedRouteProps {
   requiredRole?: 'client' | 'owner';
 }
 
-// Loading spinner component to prevent white page - defined outside to avoid recreation
-const LoadingSpinner = () => (
-  <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-    <div className="text-center space-y-4">
-      <div className="w-12 h-12 mx-auto border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-      <p className="text-white/70 text-sm">Loading...</p>
-    </div>
-  </div>
-);
-
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -111,30 +101,30 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     }
   }, [user, userRole, loading, profileLoading, isFetching, navigate, location, requiredRole, timedOut, isError]);
 
-  // Show loading spinner during auth check - prevents white page
+  // Return null during loading - no blocking screen
   if (loading || isFetching) {
-    return <LoadingSpinner />;
+    return null;
   }
 
-  // Show loading spinner while fetching role
+  // Return null while fetching role
   if (profileLoading) {
-    return <LoadingSpinner />;
+    return null;
   }
 
-  // Don't render if user is not authenticated (useEffect will redirect)
+  // Don't render if user is not authenticated
   if (!user) {
-    return <LoadingSpinner />;
+    return null;
   }
 
-  // Show loading while waiting for role (useEffect will redirect)
+  // Don't render if user has no role (useEffect will redirect)
   if (!userRole) {
-    return <LoadingSpinner />;
+    return null;
   }
 
   // If a specific role is required, check if user has that role
   // Both 'client' and 'owner' roles are valid - routes without requiredRole allow both
   if (requiredRole && userRole !== requiredRole) {
-    return <LoadingSpinner />;
+    return null;
   }
 
   return <>{children}</>;
