@@ -59,6 +59,30 @@ export const springConfigs = {
     damping: 35,
     mass: 0.3,
   },
+
+  // GAME-LIKE - Tinder/game style ultra-responsive (for swipe cards)
+  gameLike: {
+    type: 'spring' as const,
+    stiffness: 1200,
+    damping: 50,
+    mass: 0.1,
+  },
+
+  // Touch - Immediate finger-attached feel
+  touch: {
+    type: 'spring' as const,
+    stiffness: 1500,
+    damping: 60,
+    mass: 0.05,
+  },
+
+  // SnapBack - Ultra-fast return to origin
+  snapBack: {
+    type: 'spring' as const,
+    stiffness: 1200,
+    damping: 40,
+    mass: 0.1,
+  },
 } as const;
 
 // Easing curves for non-spring animations

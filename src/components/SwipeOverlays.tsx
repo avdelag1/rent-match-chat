@@ -6,14 +6,14 @@ interface SwipeOverlaysProps {
 }
 
 export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysProps) {
-  // Optimized: Calculate opacity and scale directly from x in single transforms
-  // Avoids chained transforms which reduce performance
-  const likeOpacity = useTransform(x, [0, 100], [0, 1]);
-  const passOpacity = useTransform(x, [-100, 0], [1, 0]);
+  // INSTANT visual feedback - overlays appear immediately on small movements
+  // Lower threshold = faster response = game-like feel
+  const likeOpacity = useTransform(x, [0, 50], [0, 1]);
+  const passOpacity = useTransform(x, [-50, 0], [1, 0]);
 
-  // Direct scale calculation from x instead of chaining from opacity
-  const likeScale = useTransform(x, [0, 100], [0.8, 1.1]);
-  const passScale = useTransform(x, [-100, 0], [1.1, 0.8]);
+  // Direct scale calculation - quick scale-up for punchy feel
+  const likeScale = useTransform(x, [0, 50], [0.85, 1.15]);
+  const passScale = useTransform(x, [-50, 0], [1.15, 0.85]);
 
   return (
     <>
