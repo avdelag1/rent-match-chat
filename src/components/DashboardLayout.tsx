@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useResponsiveContext } from '@/contexts/ResponsiveContext'
 
 // New Mobile Navigation Components
 import { TopBar } from '@/components/TopBar'
@@ -75,6 +76,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const responsive = useResponsiveContext()
 
   // Lazy load listings and profiles only when insights dialogs are opened
   // This prevents unnecessary API calls on every page load
@@ -273,8 +275,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Check if we're on a page that should show quick filters (client discovery page)
   const showQuickFilters = userRole === 'client' && location.pathname === '/client/dashboard';
 
+  // Calculate responsive layout values
+  const topBarHeight = responsive.isMobile ? 52 : 56;
+  const quickFilterHeight = showQuickFilters ? (responsive.isMobile ? 48 : 52) : 0;
+  const bottomNavHeight = responsive.isMobile ? 68 : 72;
+
   return (
-    <div className="app-root bg-background">
+    <div className="app-root bg-background min-h-screen min-h-dvh overflow-x-hidden">
       <NotificationSystem />
 
       {/* Top Bar - Fixed with safe-area-top */}
@@ -290,7 +297,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <div
           className="fixed left-0 right-0 z-40"
           style={{
-            top: 'calc(56px + var(--safe-top))',
+            top: `calc(${topBarHeight}px + var(--safe-top))`,
           }}
         >
           <QuickFilterBar
@@ -302,12 +309,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
-        className="fixed inset-0 overflow-y-auto overflow-x-clip"
+        className="fixed inset-0 overflow-y-auto overflow-x-clip scroll-area-momentum"
         style={{
-          paddingTop: showQuickFilters
-            ? 'calc(56px + 52px + var(--safe-top))' // TopBar + QuickFilterBar + safe-top
-            : 'calc(56px + var(--safe-top))', // TopBar height + safe-top
-          paddingBottom: 'calc(72px + var(--safe-bottom))', // BottomNav height + safe-bottom
+          paddingTop: `calc(${topBarHeight + quickFilterHeight}px + var(--safe-top))`,
+          paddingBottom: `calc(${bottomNavHeight}px + var(--safe-bottom))`,
           paddingLeft: 'max(var(--safe-left), 0px)',
           paddingRight: 'max(var(--safe-right), 0px)',
         }}

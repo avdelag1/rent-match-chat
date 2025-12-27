@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { RadioPlayerProvider } from "@/hooks/useRadioPlayer";
+import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
 import { RadioBubble } from "@/components/radio";
 import { RadioOverlays } from "@/components/radio/RadioOverlays";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -108,6 +109,7 @@ const App = () => (
         <ErrorBoundary>
           <AuthProvider>
           <ThemeProvider>
+            <ResponsiveProvider>
             <RadioPlayerProvider>
             <NotificationWrapper>
               <AppLayout>
@@ -432,6 +434,7 @@ const App = () => (
               <RadioOverlays />
             </NotificationWrapper>
             </RadioPlayerProvider>
+            </ResponsiveProvider>
           </ThemeProvider>
           </AuthProvider>
         </ErrorBoundary>
