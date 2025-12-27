@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowDown, Share, Plus } from 'lucide-react';
+import { X, Share, Plus } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -160,18 +160,46 @@ export function PWAInstallBanner() {
               </div>
             </div>
           ) : (
-            // Main banner - Compact neon pill
+            // Main banner - Compact pill with flame icon
             <button
               onClick={handleInstall}
-              className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-lg shadow-orange-500/40 border border-white/20 backdrop-blur-sm hover:shadow-xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300"
+              className="group flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 shadow-lg shadow-orange-500/30 border border-orange-500/30 backdrop-blur-xl hover:shadow-xl hover:shadow-orange-500/50 hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
             >
-              {/* Animated arrow */}
-              <motion.div
-                animate={{ y: [0, 3, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <ArrowDown className="w-4 h-4 text-white" />
-              </motion.div>
+              {/* Flame App Icon */}
+              <div className="relative w-9 h-9 rounded-xl bg-black overflow-hidden flex items-center justify-center shadow-inner">
+                {/* Animated flame SVG */}
+                <motion.svg
+                  viewBox="0 0 24 24"
+                  className="w-7 h-7"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <defs>
+                    <linearGradient id="flameGrad" x1="12" y1="22" x2="12" y2="2" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#f97316" />
+                      <stop offset="40%" stopColor="#ea580c" />
+                      <stop offset="70%" stopColor="#dc2626" />
+                      <stop offset="100%" stopColor="#b91c1c" />
+                    </linearGradient>
+                    <linearGradient id="innerFlameGrad" x1="12" y1="18" x2="12" y2="8" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#fbbf24" />
+                      <stop offset="100%" stopColor="#fde047" />
+                    </linearGradient>
+                  </defs>
+                  {/* Main flame */}
+                  <path
+                    d="M12 2C12 2 6 9 6 14C6 17.866 8.686 21 12 21C15.314 21 18 17.866 18 14C18 9 12 2 12 2Z"
+                    fill="url(#flameGrad)"
+                  />
+                  {/* Inner flame */}
+                  <path
+                    d="M12 8C12 8 9 12 9 14.5C9 16.433 10.343 18 12 18C13.657 18 15 16.433 15 14.5C15 12 12 8 12 8Z"
+                    fill="url(#innerFlameGrad)"
+                  />
+                </motion.svg>
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent pointer-events-none" />
+              </div>
 
               {/* Text */}
               <span className="text-white font-semibold text-sm whitespace-nowrap">
@@ -184,7 +212,7 @@ export function PWAInstallBanner() {
                   e.stopPropagation();
                   handleDismiss();
                 }}
-                className="ml-1 rounded-full p-1 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                className="ml-1 rounded-full p-1 text-white/60 hover:text-white hover:bg-white/10 transition-all"
               >
                 <X className="w-3.5 h-3.5" />
               </div>
