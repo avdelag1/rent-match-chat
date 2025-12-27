@@ -132,22 +132,24 @@ export function AppLayout({ children }: AppLayoutProps) {
     // Mark as transitioning to prevent glitches
     setIsTransitioning(true);
 
-    // Update ref after a brief delay to allow transition calculation
+    // Update ref immediately for next calculation
+    prevLocationRef.current = location.pathname;
+
+    // End transition quickly - match animation duration (120ms mobile, 150ms desktop)
+    // Using RAF ensures smooth frame timing
     const timer = requestAnimationFrame(() => {
-      prevLocationRef.current = location.pathname;
-      // End transition after animation settles (150ms duration + 50ms buffer)
-      setTimeout(() => setIsTransitioning(false), 200);
+      setTimeout(() => setIsTransitioning(false), responsive.isMobile ? 120 : 150);
     });
 
     return () => cancelAnimationFrame(timer);
-  }, [location.pathname]);
+  }, [location.pathname, responsive.isMobile]);
 
   // Combine swipe opacity with transition - only apply swipe during active swipe
   // This prevents flash when swipe completes and page transitions
   const combinedOpacity = isTransitioning ? 1 : swipeOpacity;
 
-  // Adjust transition duration based on device - faster on mobile for snappier feel
-  const transitionDuration = responsive.isMobile ? 0.12 : 0.15;
+  // INSTANT page transitions - game-like speed
+  const transitionDuration = responsive.isMobile ? 0.08 : 0.1;
 
   return (
     <div className="min-h-screen min-h-dvh w-full bg-background overflow-x-hidden">
@@ -157,7 +159,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         tabIndex={-1}
         className="outline-none w-full min-h-screen min-h-dvh"
       >
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={location.pathname}
             initial={transitionVariant.initial}
@@ -165,12 +167,13 @@ export function AppLayout({ children }: AppLayoutProps) {
             exit={transitionVariant.exit}
             transition={{
               duration: transitionDuration,
-              ease: "easeInOut",
+              ease: [0.32, 0.72, 0, 1], // iOS-like snappy easing
             }}
             className="w-full min-h-screen min-h-dvh"
             style={{
               x: isTransitioning ? 0 : swipeX,
               opacity: combinedOpacity,
+              willChange: 'transform, opacity',
             }}
             layout={false}
           >
