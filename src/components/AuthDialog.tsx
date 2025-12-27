@@ -53,7 +53,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const { signIn, signUp, signInWithOAuth } = useAuth();
+  const [pendingCloseAfterAuth, setPendingCloseAfterAuth] = useState(false);
+  const { user, signIn, signUp, signInWithOAuth } = useAuth();
 
   // Check if running on a native platform (iOS/Android)
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -106,8 +107,18 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       setIsLogin(true);
       setIsForgotPassword(false);
       setShowPassword(false);
+      setPendingCloseAfterAuth(false);
     }
   }, [isOpen, role]);
+
+  // Prevent a brief flash of the landing page: only close after auth state is actually updated
+  useEffect(() => {
+    if (!isOpen) return;
+    if (pendingCloseAfterAuth && user) {
+      setPendingCloseAfterAuth(false);
+      onClose();
+    }
+  }, [pendingCloseAfterAuth, user, isOpen, onClose]);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,7 +178,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           } else {
             localStorage.removeItem(getStorageKey(role, 'email'));
           }
-          onClose();
+
+          // Close only after AuthProvider has updated `user` (prevents landing-page flash)
+          setPendingCloseAfterAuth(true);
         } else {
           throw error;
         }
@@ -187,7 +200,14 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         if (!error) {
           localStorage.removeItem(getStorageKey(role, 'email'));
           localStorage.removeItem(getStorageKey(role, 'password'));
-          onClose();
+
+          // If signup created a session immediately, also wait for auth state before closing
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            setPendingCloseAfterAuth(true);
+          } else {
+            onClose();
+          }
         } else {
           throw error;
         }
