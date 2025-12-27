@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share, Plus } from 'lucide-react';
+import { X, Share, Plus, Share2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -23,8 +24,6 @@ export function PWAInstallBanner() {
       || (window.navigator as any).standalone === true;
     setIsStandalone(standalone);
 
-    if (standalone) return;
-
     // Check if dismissed recently
     const dismissedAt = localStorage.getItem(DISMISS_KEY);
     if (dismissedAt) {
@@ -38,55 +37,56 @@ export function PWAInstallBanner() {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
-    // Detect if on mobile device
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    // For iOS, show banner after a short delay
-    if (isIOSDevice) {
-      const timer = setTimeout(() => {
-        setShowBanner(true);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
+    // Always show banner after a delay on main page
+    const timer = setTimeout(() => {
+      setShowBanner(true);
+    }, 2000);
 
     // For Android/Chrome, listen for beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show banner after a short delay
-      setTimeout(() => {
-        setShowBanner(true);
-      }, 1500);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Check if app was installed
     const handleAppInstalled = () => {
-      setShowBanner(false);
       setDeferredPrompt(null);
     };
 
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Show banner on mobile even without beforeinstallprompt event (for testing/visibility)
-    if (isMobileDevice) {
-      const timer = setTimeout(() => {
-        setShowBanner(true);
-      }, 2500);
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        window.removeEventListener('appinstalled', handleAppInstalled);
-      };
-    }
-
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
+  const handleShare = useCallback(async () => {
+    const shareData = {
+      title: 'SWIPESS',
+      text: 'Check out SWIPESS - Find your perfect match for properties, vehicles & more!',
+      url: window.location.origin,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        toast({
+          title: "Link copied!",
+          description: "Share link copied to clipboard",
+        });
+      }
+    } catch (error) {
+      // User cancelled or error
+      console.log('Share cancelled or failed:', error);
+    }
+  }, []);
 
   const handleInstall = useCallback(async () => {
     if (isIOS) {
@@ -94,7 +94,11 @@ export function PWAInstallBanner() {
       return;
     }
 
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // No install prompt available, just share instead
+      handleShare();
+      return;
+    }
 
     try {
       await deferredPrompt.prompt();
@@ -107,16 +111,13 @@ export function PWAInstallBanner() {
     } catch (error) {
       console.error('Install prompt error:', error);
     }
-  }, [deferredPrompt, isIOS]);
+  }, [deferredPrompt, isIOS, handleShare]);
 
   const handleDismiss = useCallback(() => {
     setShowBanner(false);
     setShowIOSInstructions(false);
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
   }, []);
-
-  // Don't render if already installed
-  if (isStandalone) return null;
 
   return (
     <AnimatePresence>
@@ -151,72 +152,92 @@ export function PWAInstallBanner() {
                     <span>Select <strong className="text-white">"Add to Home Screen"</strong></span>
                   </div>
                 </div>
-                <button
-                  onClick={handleDismiss}
-                  className="text-xs text-white/50 hover:text-white/80 transition-colors"
-                >
-                  Got it
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleDismiss}
+                    className="text-xs text-white/50 hover:text-white/80 transition-colors"
+                  >
+                    Got it
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                  >
+                    <Share2 className="h-3 w-3" />
+                    Share
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
-            // Main banner - Compact pill with flame icon
-            <button
-              onClick={handleInstall}
-              className="group flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 shadow-lg shadow-orange-500/30 border border-orange-500/30 backdrop-blur-xl hover:shadow-xl hover:shadow-orange-500/50 hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
-            >
-              {/* Flame App Icon */}
-              <div className="relative w-9 h-9 rounded-xl bg-black overflow-hidden flex items-center justify-center shadow-inner">
-                {/* Animated flame SVG */}
-                <motion.svg
-                  viewBox="0 0 24 24"
-                  className="w-7 h-7"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <defs>
-                    <linearGradient id="flameGrad" x1="12" y1="22" x2="12" y2="2" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="#f97316" />
-                      <stop offset="40%" stopColor="#ea580c" />
-                      <stop offset="70%" stopColor="#dc2626" />
-                      <stop offset="100%" stopColor="#b91c1c" />
-                    </linearGradient>
-                    <linearGradient id="innerFlameGrad" x1="12" y1="18" x2="12" y2="8" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="#fbbf24" />
-                      <stop offset="100%" stopColor="#fde047" />
-                    </linearGradient>
-                  </defs>
-                  {/* Main flame */}
-                  <path
-                    d="M12 2C12 2 6 9 6 14C6 17.866 8.686 21 12 21C15.314 21 18 17.866 18 14C18 9 12 2 12 2Z"
-                    fill="url(#flameGrad)"
-                  />
-                  {/* Inner flame */}
-                  <path
-                    d="M12 8C12 8 9 12 9 14.5C9 16.433 10.343 18 12 18C13.657 18 15 16.433 15 14.5C15 12 12 8 12 8Z"
-                    fill="url(#innerFlameGrad)"
-                  />
-                </motion.svg>
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent pointer-events-none" />
-              </div>
-
-              {/* Text */}
-              <span className="text-white font-semibold text-sm whitespace-nowrap">
-                Download App
-              </span>
-
-              {/* Close button */}
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDismiss();
-                }}
-                className="ml-1 rounded-full p-1 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+            // Main banner - Compact pill with flame icon and share
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleInstall}
+                className="group flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 shadow-lg shadow-orange-500/30 border border-orange-500/30 backdrop-blur-xl hover:shadow-xl hover:shadow-orange-500/50 hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
               >
-                <X className="w-3.5 h-3.5" />
-              </div>
-            </button>
+                {/* Flame App Icon */}
+                <div className="relative w-9 h-9 rounded-xl bg-black overflow-hidden flex items-center justify-center shadow-inner">
+                  {/* Animated flame SVG */}
+                  <motion.svg
+                    viewBox="0 0 24 24"
+                    className="w-7 h-7"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <defs>
+                      <linearGradient id="flameGrad" x1="12" y1="22" x2="12" y2="2" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#f97316" />
+                        <stop offset="40%" stopColor="#ea580c" />
+                        <stop offset="70%" stopColor="#dc2626" />
+                        <stop offset="100%" stopColor="#b91c1c" />
+                      </linearGradient>
+                      <linearGradient id="innerFlameGrad" x1="12" y1="18" x2="12" y2="8" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#fbbf24" />
+                        <stop offset="100%" stopColor="#fde047" />
+                      </linearGradient>
+                    </defs>
+                    {/* Main flame */}
+                    <path
+                      d="M12 2C12 2 6 9 6 14C6 17.866 8.686 21 12 21C15.314 21 18 17.866 18 14C18 9 12 2 12 2Z"
+                      fill="url(#flameGrad)"
+                    />
+                    {/* Inner flame */}
+                    <path
+                      d="M12 8C12 8 9 12 9 14.5C9 16.433 10.343 18 12 18C13.657 18 15 16.433 15 14.5C15 12 12 8 12 8Z"
+                      fill="url(#innerFlameGrad)"
+                    />
+                  </motion.svg>
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent pointer-events-none" />
+                </div>
+
+                {/* Text */}
+                <span className="text-white font-semibold text-sm whitespace-nowrap">
+                  {isStandalone ? 'Share App' : 'Download App'}
+                </span>
+
+                {/* Close button */}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDismiss();
+                  }}
+                  className="ml-1 rounded-full p-1 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </div>
+              </button>
+
+              {/* Separate Share button */}
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-gray-900/95 to-gray-800/95 shadow-lg border border-white/20 backdrop-blur-xl hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
+                aria-label="Share app"
+              >
+                <Share2 className="w-4 h-4 text-orange-400" />
+              </button>
+            </div>
           )}
         </motion.div>
       )}
