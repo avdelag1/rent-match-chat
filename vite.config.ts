@@ -128,20 +128,13 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks(id) {
-          // Core React runtime - smallest possible critical chunk
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
-            return 'react-vendor';
-          }
-          // React Router - loaded on every page, keep small
-          if (id.includes('node_modules/react-router')) {
-            return 'react-router';
-          }
-          // Scheduler (React dependency) - keep with react
-          if (id.includes('node_modules/scheduler')) {
-            return 'react-vendor';
-          }
-          // React Query - bundle with React to prevent loading order issues
-          if (id.includes('node_modules/@tanstack/react-query')) {
+          // Core React runtime and dependencies - bundle together to prevent loading order issues
+          // This ensures React is ALWAYS loaded before any library that depends on it
+          if (id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/scheduler') ||
+              id.includes('node_modules/react-router') ||
+              id.includes('node_modules/@tanstack/react-query')) {
             return 'react-vendor';
           }
           // Supabase client - only load when auth is needed
