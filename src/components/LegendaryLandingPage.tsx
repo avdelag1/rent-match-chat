@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Building2, Home, Sparkles, Shield, ArrowRight } from 'lucide-react';
+import { Users, Sparkles, Shield } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 
 function LegendaryLandingPage() {
@@ -243,18 +243,7 @@ function LegendaryLandingPage() {
               />
             </motion.div>
 
-            <Home className="w-5 h-5 relative z-10" />
-            <span className="relative z-10 drop-shadow-lg electric-text">I'm a Client</span>
-            <motion.div className="relative z-10" animate={{
-            x: hoveredButton === 'client' ? 5 : 0,
-            scale: hoveredButton === 'client' ? 1.2 : 1
-          }} transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 10
-          }}>
-              <ArrowRight className="w-4 h-4" />
-            </motion.div>
+            <span className="relative z-10 drop-shadow-lg electric-text">I'M A CLIENT</span>
           </motion.button>
 
           {/* I'm an Owner Button - Vibrant Magenta to Gold */}
@@ -314,18 +303,7 @@ function LegendaryLandingPage() {
               />
             </motion.div>
 
-            <Building2 className="w-5 h-5 relative z-10" />
-            <span className="relative z-10 drop-shadow-lg electric-text">I'm an Owner</span>
-            <motion.div className="relative z-10" animate={{
-            x: hoveredButton === 'owner' ? 5 : 0,
-            scale: hoveredButton === 'owner' ? 1.2 : 1
-          }} transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 10
-          }}>
-              <ArrowRight className="w-4 h-4" />
-            </motion.div>
+            <span className="relative z-10 drop-shadow-lg electric-text">I'M AN OWNER</span>
           </motion.button>
         </div>
 
