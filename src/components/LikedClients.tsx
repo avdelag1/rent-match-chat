@@ -298,7 +298,7 @@ export function LikedClients() {
   // Filter by search term and category
   const filteredClients = likedClients.filter(client => {
     // Search filter
-    const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = client.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
       (client.bio && client.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (client.occupation && client.occupation.toLowerCase().includes(searchTerm.toLowerCase()));
 
