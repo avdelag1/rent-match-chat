@@ -39,11 +39,14 @@ export function PWAInstallBanner() {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
+    // Detect if on mobile device
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
     // For iOS, show banner after a short delay
     if (isIOSDevice) {
       const timer = setTimeout(() => {
         setShowBanner(true);
-      }, 3000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
 
@@ -54,7 +57,7 @@ export function PWAInstallBanner() {
       // Show banner after a short delay
       setTimeout(() => {
         setShowBanner(true);
-      }, 2000);
+      }, 1500);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -67,11 +70,24 @@ export function PWAInstallBanner() {
 
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // Show banner on mobile even without beforeinstallprompt event (for testing/visibility)
+    if (isMobileDevice) {
+      const timer = setTimeout(() => {
+        setShowBanner(true);
+      }, 2500);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.removeEventListener('appinstalled', handleAppInstalled);
+      };
+    }
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
+
 
   const handleInstall = useCallback(async () => {
     if (isIOS) {
