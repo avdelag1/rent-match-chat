@@ -10,33 +10,33 @@
     
     <!-- Outer flame gradient - deep reds -->
     <linearGradient id="outerFlame" x1="512" y1="900" x2="512" y2="100" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#7f1d1d"/>
-      <stop offset="30%" stop-color="#b91c1c"/>
-      <stop offset="60%" stop-color="#dc2626"/>
-      <stop offset="100%" stop-color="#ef4444"/>
+      <stop offset="0%" stop-color="#8B2C2C"/>
+      <stop offset="30%" stop-color="#D32F2F"/>
+      <stop offset="60%" stop-color="#FF5722"/>
+      <stop offset="100%" stop-color="#FF7043"/>
     </linearGradient>
     
     <!-- Mid flame gradient - oranges -->
     <linearGradient id="midFlame" x1="512" y1="850" x2="512" y2="180" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#c2410c"/>
-      <stop offset="35%" stop-color="#ea580c"/>
-      <stop offset="70%" stop-color="#f97316"/>
-      <stop offset="100%" stop-color="#fb923c"/>
+      <stop offset="0%" stop-color="#E84C3D"/>
+      <stop offset="35%" stop-color="#FF6D3B"/>
+      <stop offset="70%" stop-color="#FF8A50"/>
+      <stop offset="100%" stop-color="#FFAA6B"/>
     </linearGradient>
     
     <!-- Inner flame gradient - yellows -->
     <linearGradient id="innerFlame" x1="512" y1="780" x2="512" y2="250" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#d97706"/>
-      <stop offset="40%" stop-color="#f59e0b"/>
-      <stop offset="70%" stop-color="#fbbf24"/>
-      <stop offset="100%" stop-color="#fde047"/>
+      <stop offset="0%" stop-color="#FF8A65"/>
+      <stop offset="40%" stop-color="#FFAA6B"/>
+      <stop offset="70%" stop-color="#FFD699"/>
+      <stop offset="100%" stop-color="#FFE5CC"/>
     </linearGradient>
     
     <!-- Core flame gradient - white hot -->
     <linearGradient id="coreFlame" x1="512" y1="700" x2="512" y2="350" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fcd34d"/>
-      <stop offset="50%" stop-color="#fef3c7"/>
-      <stop offset="100%" stop-color="#fffbeb"/>
+      <stop offset="0%" stop-color="#FFD699"/>
+      <stop offset="50%" stop-color="#FFECDC"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
     </linearGradient>
     
     <!-- Glow filter -->
@@ -65,7 +65,7 @@
   <rect width="1024" height="1024" rx="224" fill="url(#bgGlow)"/>
   
   <!-- Ambient glow behind flame -->
-  <ellipse cx="512" cy="600" rx="280" ry="320" fill="#f97316" opacity="0.15" filter="url(#innerGlow)"/>
+  <ellipse cx="512" cy="600" rx="280" ry="320" fill="#FF6633" opacity="0.15" filter="url(#innerGlow)"/>
   
   <!-- Outer flame - organic shape with multiple tongues -->
   <path filter="url(#flameGlow)" d="
@@ -162,15 +162,15 @@
   <ellipse cx="512" cy="580" rx="20" ry="80" fill="#ffffff" opacity="0.95"/>
   
   <!-- Ember particles -->
-  <circle cx="420" cy="300" r="8" fill="#fbbf24" filter="url(#emberGlow)"/>
-  <circle cx="600" cy="280" r="6" fill="#f97316" filter="url(#emberGlow)"/>
-  <circle cx="350" cy="450" r="7" fill="#fcd34d" filter="url(#emberGlow)"/>
-  <circle cx="680" cy="420" r="5" fill="#fb923c" filter="url(#emberGlow)"/>
-  <circle cx="380" cy="350" r="4" fill="#fde047" filter="url(#emberGlow)"/>
-  <circle cx="640" cy="340" r="6" fill="#fbbf24" filter="url(#emberGlow)"/>
+  <circle cx="420" cy="300" r="8" fill="#FFD699" filter="url(#emberGlow)"/>
+  <circle cx="600" cy="280" r="6" fill="#FF6633" filter="url(#emberGlow)"/>
+  <circle cx="350" cy="450" r="7" fill="#FFD699" filter="url(#emberGlow)"/>
+  <circle cx="680" cy="420" r="5" fill="#FFAA6B" filter="url(#emberGlow)"/>
+  <circle cx="380" cy="350" r="4" fill="#FFE5CC" filter="url(#emberGlow)"/>
+  <circle cx="640" cy="340" r="6" fill="#FFD699" filter="url(#emberGlow)"/>
   
   <!-- Small spark highlights -->
   <circle cx="480" cy="400" r="3" fill="#ffffff" opacity="0.8"/>
   <circle cx="540" cy="380" r="2" fill="#ffffff" opacity="0.9"/>
-  <circle cx="500" cy="450" r="2.5" fill="#fef3c7" opacity="0.85"/>
+  <circle cx="500" cy="450" r="2.5" fill="#FFECDC" opacity="0.85"/>
 </svg>
