@@ -165,13 +165,16 @@ function LegendaryLandingPage() {
               />
             </div>
             <h1 className="text-center leading-none relative">
-              <span
-                className="swipess-logo-simple block"
-                style={{
-                  fontSize: 'clamp(2.5rem, 14vw, 5rem)',
-                }}
-              >
-                SWIPESS
+              <span className="title-wave-container">
+                <span
+                  className="swipess-logo-simple block"
+                  style={{
+                    fontSize: 'clamp(2.5rem, 14vw, 5rem)',
+                  }}
+                >
+                  SWIPESS
+                </span>
+                <span className="title-wave-shine" />
               </span>
             </h1>
           </div>

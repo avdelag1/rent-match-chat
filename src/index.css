@@ -733,6 +733,43 @@ body {
       drop-shadow(0 8px 16px rgba(255, 140, 0, 0.5));
   }
 
+  /* Title wave animation - subtle light sweep effect */
+  @keyframes title-wave-sweep {
+    0% {
+      transform: translateX(-100%) skewX(-15deg);
+    }
+    100% {
+      transform: translateX(300%) skewX(-15deg);
+    }
+  }
+
+  .title-wave-container {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+  }
+
+  .title-wave-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(255, 255, 255, 0.08) 35%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.08) 65%,
+      rgba(255, 255, 255, 0) 80%,
+      transparent 100%
+    );
+    animation: title-wave-sweep 3.5s ease-in-out infinite;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
   /* TopBar smaller version */
   .swipess-logo-header {
     font-family: 'Quicksand', 'Poppins', system-ui, sans-serif;
