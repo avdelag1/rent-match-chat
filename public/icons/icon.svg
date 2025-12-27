@@ -1,24 +1,176 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="1024" height="1024" rx="224" fill="#000000"/>
-
-  <!-- Gradient Definition for Flame -->
   <defs>
-    <linearGradient id="flameGradient" x1="512" y1="896" x2="512" y2="128" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#f97316"/>
-      <stop offset="50%" stop-color="#ea580c"/>
-      <stop offset="100%" stop-color="#dc2626"/>
+    <!-- Background radial gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="60%" r="60%" fx="50%" fy="60%">
+      <stop offset="0%" stop-color="#1a0a00"/>
+      <stop offset="50%" stop-color="#0d0502"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    
+    <!-- Outer flame gradient - deep reds -->
+    <linearGradient id="outerFlame" x1="512" y1="900" x2="512" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7f1d1d"/>
+      <stop offset="30%" stop-color="#b91c1c"/>
+      <stop offset="60%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#ef4444"/>
     </linearGradient>
-    <linearGradient id="innerFlame" x1="512" y1="704" x2="512" y2="320" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fbbf24"/>
+    
+    <!-- Mid flame gradient - oranges -->
+    <linearGradient id="midFlame" x1="512" y1="850" x2="512" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="35%" stop-color="#ea580c"/>
+      <stop offset="70%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    
+    <!-- Inner flame gradient - yellows -->
+    <linearGradient id="innerFlame" x1="512" y1="780" x2="512" y2="250" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="40%" stop-color="#f59e0b"/>
+      <stop offset="70%" stop-color="#fbbf24"/>
       <stop offset="100%" stop-color="#fde047"/>
     </linearGradient>
+    
+    <!-- Core flame gradient - white hot -->
+    <linearGradient id="coreFlame" x1="512" y1="700" x2="512" y2="350" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="50%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fffbeb"/>
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="flameGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="25" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 0.4 0 0 0  0 0 0.1 0 0  0 0 0 0.8 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Inner glow -->
+    <filter id="innerGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0.8 0 0 0  0.6 0.3 0 0 0  0 0 0 0 0  0 0 0 1 0"/>
+    </filter>
+    
+    <!-- Ember glow -->
+    <filter id="emberGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+    </filter>
   </defs>
 
-  <!-- Main Flame -->
-  <path d="M512 128C512 128 256 448 256 640C256 781.385 364.615 896 512 896C659.385 896 768 781.385 768 640C768 448 512 128 512 128Z" fill="url(#flameGradient)"/>
-
-  <!-- Inner Flame -->
-  <path d="M512 320C512 320 400 480 400 576C400 637.856 451.145 688 512 688C572.856 688 624 637.856 624 576C624 480 512 320 512 320Z" fill="url(#innerFlame)"/>
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bgGlow)"/>
+  
+  <!-- Ambient glow behind flame -->
+  <ellipse cx="512" cy="600" rx="280" ry="320" fill="#f97316" opacity="0.15" filter="url(#innerGlow)"/>
+  
+  <!-- Outer flame - organic shape with multiple tongues -->
+  <path filter="url(#flameGlow)" d="
+    M512 80
+    C460 180, 380 280, 340 380
+    C300 480, 280 520, 260 580
+    C230 680, 220 750, 260 820
+    C300 890, 380 940, 512 940
+    C644 940, 724 890, 764 820
+    C804 750, 794 680, 764 580
+    C744 520, 724 480, 684 380
+    C644 280, 564 180, 512 80
+    Z
+    M380 200
+    C340 280, 300 360, 320 400
+    C340 440, 380 420, 400 360
+    C420 300, 400 240, 380 200
+    Z
+    M644 200
+    C684 280, 724 360, 704 400
+    C684 440, 644 420, 624 360
+    C604 300, 624 240, 644 200
+    Z
+    M280 420
+    C240 500, 200 580, 220 640
+    C240 700, 300 680, 320 620
+    C340 560, 320 480, 280 420
+    Z
+    M744 420
+    C784 500, 824 580, 804 640
+    C784 700, 724 680, 704 620
+    C684 560, 704 480, 744 420
+    Z
+  " fill="url(#outerFlame)"/>
+  
+  <!-- Mid flame layer -->
+  <path d="
+    M512 140
+    C470 220, 400 320, 370 420
+    C340 520, 320 580, 310 650
+    C295 740, 320 820, 400 870
+    C460 905, 512 910, 564 905
+    C704 870, 729 740, 714 650
+    C704 580, 684 520, 654 420
+    C624 320, 554 220, 512 140
+    Z
+    M400 260
+    C370 320, 340 400, 360 450
+    C380 500, 420 480, 440 420
+    C460 360, 430 300, 400 260
+    Z
+    M624 260
+    C654 320, 684 400, 664 450
+    C644 500, 604 480, 584 420
+    C564 360, 594 300, 624 260
+    Z
+  " fill="url(#midFlame)"/>
+  
+  <!-- Inner flame layer -->
+  <path d="
+    M512 220
+    C480 300, 430 400, 410 500
+    C390 600, 380 680, 400 760
+    C430 830, 480 860, 512 860
+    C544 860, 594 830, 624 760
+    C644 680, 634 600, 614 500
+    C594 400, 544 300, 512 220
+    Z
+    M460 340
+    C440 400, 420 460, 440 500
+    C460 540, 500 520, 510 460
+    C520 400, 490 360, 460 340
+    Z
+    M564 340
+    C584 400, 604 460, 584 500
+    C564 540, 524 520, 514 460
+    C504 400, 534 360, 564 340
+    Z
+  " fill="url(#innerFlame)"/>
+  
+  <!-- Core flame - white hot center -->
+  <path d="
+    M512 320
+    C490 380, 460 460, 450 540
+    C440 620, 450 700, 480 760
+    C500 800, 512 810, 524 800
+    C574 760, 584 620, 574 540
+    C564 460, 534 380, 512 320
+    Z
+  " fill="url(#coreFlame)"/>
+  
+  <!-- Bright core highlight -->
+  <ellipse cx="512" cy="600" rx="35" ry="120" fill="#fffbeb" opacity="0.9"/>
+  <ellipse cx="512" cy="580" rx="20" ry="80" fill="#ffffff" opacity="0.95"/>
+  
+  <!-- Ember particles -->
+  <circle cx="420" cy="300" r="8" fill="#fbbf24" filter="url(#emberGlow)"/>
+  <circle cx="600" cy="280" r="6" fill="#f97316" filter="url(#emberGlow)"/>
+  <circle cx="350" cy="450" r="7" fill="#fcd34d" filter="url(#emberGlow)"/>
+  <circle cx="680" cy="420" r="5" fill="#fb923c" filter="url(#emberGlow)"/>
+  <circle cx="380" cy="350" r="4" fill="#fde047" filter="url(#emberGlow)"/>
+  <circle cx="640" cy="340" r="6" fill="#fbbf24" filter="url(#emberGlow)"/>
+  
+  <!-- Small spark highlights -->
+  <circle cx="480" cy="400" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="540" cy="380" r="2" fill="#ffffff" opacity="0.9"/>
+  <circle cx="500" cy="450" r="2.5" fill="#fef3c7" opacity="0.85"/>
 </svg>
