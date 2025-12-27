@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { X, ArrowDown, Share, Plus } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -123,100 +122,74 @@ export function PWAInstallBanner() {
     <AnimatePresence>
       {showBanner && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
+          initial={{ y: 100, opacity: 0, scale: 0.9 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 100, opacity: 0, scale: 0.9 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-4 left-4 right-4 z-[9999] md:left-auto md:right-4 md:max-w-sm"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999]"
         >
-          <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-background/95 via-background/98 to-background/95 p-4 shadow-2xl backdrop-blur-xl">
-            {/* Gradient accent */}
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-red-500" />
+          {showIOSInstructions ? (
+            // iOS Instructions - Compact Card
+            <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 p-4 shadow-2xl backdrop-blur-xl">
+              <button
+                onClick={handleDismiss}
+                className="absolute right-2 top-2 rounded-full p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                aria-label="Dismiss"
+              >
+                <X className="h-4 w-4" />
+              </button>
 
-            {/* Close button */}
-            <button
-              onClick={handleDismiss}
-              className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Dismiss"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            {showIOSInstructions ? (
-              // iOS Instructions
-              <div className="pr-6">
-                <div className="mb-3 flex items-center gap-3">
-                  {/* Professional App Icon */}
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
-                    <span className="font-bold text-2xl text-white drop-shadow-sm" style={{ fontFamily: 'Quicksand, Poppins, sans-serif' }}>S</span>
+              <div className="pr-6 space-y-3">
+                <h3 className="font-semibold text-white text-sm">Install SWIPESS</h3>
+                <div className="space-y-2 text-xs text-white/70">
+                  <div className="flex items-center gap-2">
+                    <Share className="h-3.5 w-3.5 text-blue-400" />
+                    <span>Tap <strong className="text-white">Share</strong></span>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Install SWIPESS</h3>
-                    <p className="text-xs text-muted-foreground">Add to Home Screen</p>
+                  <div className="flex items-center gap-2">
+                    <Plus className="h-3.5 w-3.5 text-orange-400" />
+                    <span>Select <strong className="text-white">"Add to Home Screen"</strong></span>
                   </div>
                 </div>
-
-                <div className="space-y-2.5 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
-                      <Share className="h-4 w-4 text-blue-400" />
-                    </div>
-                    <span>Tap the <strong className="text-foreground">Share</strong> button</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-500/10">
-                      <Plus className="h-4 w-4 text-orange-400" />
-                    </div>
-                    <span>Select <strong className="text-foreground">"Add to Home Screen"</strong></span>
-                  </div>
-                </div>
-
-                <Button
+                <button
                   onClick={handleDismiss}
-                  variant="ghost"
-                  size="sm"
-                  className="mt-3 w-full text-muted-foreground hover:text-foreground"
+                  className="text-xs text-white/50 hover:text-white/80 transition-colors"
                 >
                   Got it
-                </Button>
+                </button>
               </div>
-            ) : (
-              // Main banner content
-              <div className="flex items-start gap-3 pr-6">
-                {/* Professional App Icon - Modern rounded square with "S" */}
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
-                  <span className="font-bold text-3xl text-white drop-shadow-sm" style={{ fontFamily: 'Quicksand, Poppins, sans-serif' }}>S</span>
-                </div>
+            </div>
+          ) : (
+            // Main banner - Compact neon pill
+            <button
+              onClick={handleInstall}
+              className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-lg shadow-orange-500/40 border border-white/20 backdrop-blur-sm hover:shadow-xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300"
+            >
+              {/* Animated arrow */}
+              <motion.div
+                animate={{ y: [0, 3, 0] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <ArrowDown className="w-4 h-4 text-white" />
+              </motion.div>
 
-                <div className="flex-1">
-                  <h3 className="mb-0.5 font-semibold text-foreground">
-                    Get the SWIPESS App
-                  </h3>
-                  <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
-                    Install for faster access, offline support & a better experience
-                  </p>
+              {/* Text */}
+              <span className="text-white font-semibold text-sm whitespace-nowrap">
+                Download App
+              </span>
 
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleInstall}
-                      size="sm"
-                      className="h-9 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-5 text-xs font-semibold text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/30 transition-all"
-                    >
-                      Install App
-                    </Button>
-                    <Button
-                      onClick={handleDismiss}
-                      variant="ghost"
-                      size="sm"
-                      className="h-9 rounded-xl px-3 text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      Not now
-                    </Button>
-                  </div>
-                </div>
+              {/* Close button */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDismiss();
+                }}
+                className="ml-1 rounded-full p-1 text-white/70 hover:text-white hover:bg-white/20 transition-all"
+              >
+                <X className="w-3.5 h-3.5" />
               </div>
-            )}
-          </div>
+            </button>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

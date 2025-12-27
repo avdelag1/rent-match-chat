@@ -725,45 +725,60 @@ body {
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: none;
-    /* NO stroke - clean modern look */
+    /* Clean modern look with soft glow */
     filter: drop-shadow(0 4px 12px rgba(255, 127, 80, 0.35));
   }
 
-  /* Title wave animation - subtle light sweep effect */
-  @keyframes title-wave-sweep {
+  /* Premium shine sweep animation */
+  @keyframes premium-shine-sweep {
     0% {
-      transform: translateX(-100%) skewX(-15deg);
+      left: -100%;
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    40% {
+      opacity: 1;
+    }
+    50% {
+      left: 100%;
+      opacity: 0;
     }
     100% {
-      transform: translateX(300%) skewX(-15deg);
+      left: 100%;
+      opacity: 0;
     }
   }
 
-  .title-wave-container {
+  /* Container for the shine effect */
+  .swipess-logo-shine-container {
     position: relative;
     display: inline-block;
     overflow: hidden;
   }
 
-  .title-wave-shine {
+  /* Beautiful animated shine overlay */
+  .swipess-logo-shine-container::after {
+    content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0) 20%,
-      rgba(255, 255, 255, 0.08) 35%,
-      rgba(255, 255, 255, 0.25) 50%,
-      rgba(255, 255, 255, 0.08) 65%,
-      rgba(255, 255, 255, 0) 80%,
+      rgba(255, 255, 255, 0.05) 20%,
+      rgba(255, 255, 255, 0.35) 40%,
+      rgba(255, 255, 255, 0.6) 50%,
+      rgba(255, 255, 255, 0.35) 60%,
+      rgba(255, 255, 255, 0.05) 80%,
       transparent 100%
     );
-    animation: title-wave-sweep 3.5s ease-in-out infinite;
+    animation: premium-shine-sweep 4s ease-in-out infinite;
     pointer-events: none;
-    mix-blend-mode: overlay;
+    transform: skewX(-20deg);
   }
 
   /* TopBar smaller version - Clean professional */

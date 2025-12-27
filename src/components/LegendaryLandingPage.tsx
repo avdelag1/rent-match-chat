@@ -144,11 +144,11 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
-          {/* Logo - clean, no excessive glow */}
+          {/* Logo with beautiful shine effect */}
           <div className="relative">
             <h1 className="text-center leading-none relative">
               <span
-                className="swipess-logo-simple block"
+                className="swipess-logo-simple swipess-logo-shine-container block"
                 style={{
                   fontSize: 'clamp(2.5rem, 14vw, 5rem)',
                 }}
