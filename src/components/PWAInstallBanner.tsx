@@ -177,39 +177,78 @@ export function PWAInstallBanner() {
                 className="group flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 shadow-lg shadow-orange-500/30 border border-orange-500/30 backdrop-blur-xl hover:shadow-xl hover:shadow-orange-500/50 hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
               >
                 {/* Flame App Icon */}
-                <div className="relative w-9 h-9 rounded-xl bg-black overflow-hidden flex items-center justify-center shadow-inner">
+                <div className="relative w-10 h-10 rounded-xl bg-gradient-radial from-[#1a0a00] via-[#0d0502] to-black overflow-hidden flex items-center justify-center shadow-inner">
                   {/* Animated flame SVG */}
                   <motion.svg
-                    viewBox="0 0 24 24"
-                    className="w-7 h-7"
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    viewBox="0 0 64 64"
+                    className="w-8 h-8"
+                    animate={{ scale: [1, 1.08, 1], y: [0, -1, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   >
                     <defs>
-                      <linearGradient id="flameGrad" x1="12" y1="22" x2="12" y2="2" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stopColor="#f97316" />
-                        <stop offset="40%" stopColor="#ea580c" />
-                        <stop offset="70%" stopColor="#dc2626" />
-                        <stop offset="100%" stopColor="#b91c1c" />
+                      <linearGradient id="bannerOuterFlame" x1="32" y1="58" x2="32" y2="6" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#7f1d1d"/>
+                        <stop offset="30%" stopColor="#b91c1c"/>
+                        <stop offset="60%" stopColor="#dc2626"/>
+                        <stop offset="100%" stopColor="#ef4444"/>
                       </linearGradient>
-                      <linearGradient id="innerFlameGrad" x1="12" y1="18" x2="12" y2="8" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stopColor="#fbbf24" />
-                        <stop offset="100%" stopColor="#fde047" />
+                      <linearGradient id="bannerMidFlame" x1="32" y1="54" x2="32" y2="12" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#c2410c"/>
+                        <stop offset="35%" stopColor="#ea580c"/>
+                        <stop offset="70%" stopColor="#f97316"/>
+                        <stop offset="100%" stopColor="#fb923c"/>
                       </linearGradient>
+                      <linearGradient id="bannerInnerFlame" x1="32" y1="48" x2="32" y2="18" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#d97706"/>
+                        <stop offset="40%" stopColor="#f59e0b"/>
+                        <stop offset="70%" stopColor="#fbbf24"/>
+                        <stop offset="100%" stopColor="#fde047"/>
+                      </linearGradient>
+                      <linearGradient id="bannerCoreFlame" x1="32" y1="44" x2="32" y2="24" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#fcd34d"/>
+                        <stop offset="50%" stopColor="#fef3c7"/>
+                        <stop offset="100%" stopColor="#fffbeb"/>
+                      </linearGradient>
+                      <filter id="bannerGlow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+                        <feMerge>
+                          <feMergeNode/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
                     </defs>
-                    {/* Main flame */}
+                    {/* Outer flame */}
                     <path
-                      d="M12 2C12 2 6 9 6 14C6 17.866 8.686 21 12 21C15.314 21 18 17.866 18 14C18 9 12 2 12 2Z"
-                      fill="url(#flameGrad)"
+                      filter="url(#bannerGlow)"
+                      d="M32 5C28 12, 20 22, 17 30C14 38, 13 44, 16 51C19 57, 26 60, 32 60C38 60, 45 57, 48 51C51 44, 50 38, 47 30C44 22, 36 12, 32 5Z M24 14C22 18, 19 24, 21 27C23 30, 26 28, 27 24C28 20, 26 16, 24 14Z M40 14C42 18, 45 24, 43 27C41 30, 38 28, 37 24C36 20, 38 16, 40 14Z"
+                      fill="url(#bannerOuterFlame)"
+                    />
+                    {/* Mid flame */}
+                    <path
+                      d="M32 10C29 16, 24 24, 22 32C20 40, 20 46, 24 52C27 56, 32 58, 37 56C44 52, 44 40, 42 32C40 24, 35 16, 32 10Z"
+                      fill="url(#bannerMidFlame)"
                     />
                     {/* Inner flame */}
                     <path
-                      d="M12 8C12 8 9 12 9 14.5C9 16.433 10.343 18 12 18C13.657 18 15 16.433 15 14.5C15 12 12 8 12 8Z"
-                      fill="url(#innerFlameGrad)"
+                      d="M32 16C30 22, 26 30, 25 38C24 44, 26 50, 32 52C38 50, 40 44, 39 38C38 30, 34 22, 32 16Z"
+                      fill="url(#bannerInnerFlame)"
                     />
+                    {/* Core flame */}
+                    <path
+                      d="M32 24C30 30, 28 36, 28 42C28 46, 30 49, 32 50C34 49, 36 46, 36 42C36 36, 34 30, 32 24Z"
+                      fill="url(#bannerCoreFlame)"
+                    />
+                    {/* White hot center */}
+                    <ellipse cx="32" cy="40" rx="2.5" ry="8" fill="#fffbeb" opacity="0.95"/>
+                    <ellipse cx="32" cy="38" rx="1.5" ry="5" fill="#ffffff"/>
+                    {/* Ember particles */}
+                    <circle cx="26" cy="20" r="1" fill="#fbbf24"/>
+                    <circle cx="38" cy="18" r="0.8" fill="#f97316"/>
+                    <circle cx="22" cy="30" r="0.9" fill="#fcd34d"/>
+                    <circle cx="42" cy="28" r="0.7" fill="#fb923c"/>
                   </motion.svg>
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent pointer-events-none" />
+                  {/* Ambient glow effect */}
+                  <div className="absolute inset-0 bg-gradient-radial from-orange-500/30 via-orange-600/10 to-transparent pointer-events-none" />
                 </div>
 
                 {/* Text */}
