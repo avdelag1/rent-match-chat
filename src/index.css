@@ -558,7 +558,7 @@ body {
     min-height: 100vh;
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
   }
   
   .brand-glow {
@@ -795,9 +795,9 @@ body {
   }
 
 
-  /* Optimized card interactions */
+  /* Optimized card interactions - GAME-LIKE INSTANT FEEL */
   .fast-card {
-    transition: transform 0.15s ease-out;
+    transition: transform 0.1s ease-out;
     will-change: transform;
   }
 
@@ -806,20 +806,20 @@ body {
   }
 
   .fast-card:active {
-    transform: translateY(0) scale(0.98);
+    transform: translateY(0) scale(0.95);
   }
 
   .swipe-card {
-    transition: transform 0.2s ease-out;
+    transition: transform 0.12s ease-out;
     will-change: transform;
   }
 
   .swipe-card:active {
-    transform: scale(0.98);
+    transform: scale(0.95);
   }
 
   .smooth-page {
-    animation: fast-fade-in 0.3s ease-out;
+    animation: fast-fade-in 0.2s ease-out;
   }
 
   .dynamic-card {
@@ -855,13 +855,13 @@ body {
     border: 2px solid hsl(280, 100%, 70%);
   }
 
-  /* Modern ripple effect */
+  /* Modern ripple effect - FASTER for instant feedback */
   .ripple {
     position: absolute;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.4);
     transform: scale(0);
-    animation: ripple-animation 0.6s ease-out;
+    animation: ripple-animation 0.4s ease-out;
     pointer-events: none;
   }
 
