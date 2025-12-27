@@ -1,6 +1,6 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User } from 'lucide-react';
+import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Category type matching ListingFilters
@@ -37,9 +37,9 @@ const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNod
 ];
 
 const listingTypes: { id: QuickFilterListingType; label: string }[] = [
+  { id: 'both', label: 'All' },
   { id: 'rent', label: 'Rent' },
   { id: 'sale', label: 'Buy' },
-  { id: 'both', label: 'Both' },
 ];
 
 const genderOptions: { id: OwnerClientGender; label: string; icon: React.ReactNode }[] = [
@@ -48,11 +48,11 @@ const genderOptions: { id: OwnerClientGender; label: string; icon: React.ReactNo
   { id: 'male', label: 'Men', icon: <User className="w-4 h-4" /> },
 ];
 
-const clientTypeOptions: { id: OwnerClientType; label: string; icon?: React.ReactNode }[] = [
-  { id: 'all', label: 'All Clients' },
-  { id: 'hire', label: 'Hiring Services', icon: <Briefcase className="w-4 h-4" /> },
-  { id: 'rent', label: 'Looking to Rent' },
-  { id: 'buy', label: 'Looking to Buy' },
+const clientTypeOptions: { id: OwnerClientType; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'hire', label: 'Hiring' },
+  { id: 'rent', label: 'Renting' },
+  { id: 'buy', label: 'Buying' },
 ];
 
 // Custom motorcycle icon since lucide doesn't have one
@@ -74,6 +74,90 @@ function MotorcycleIcon() {
       <path d="M12 10l-1-3h-2l-1 3" />
       <path d="M5 17l2-7h2" />
     </svg>
+  );
+}
+
+// Dropdown component for compact filters
+function FilterDropdown({ 
+  label, 
+  icon, 
+  options, 
+  value, 
+  onChange, 
+  isActive 
+}: { 
+  label: string;
+  icon?: React.ReactNode;
+  options: { id: string; label: string; icon?: React.ReactNode }[];
+  value: string;
+  onChange: (id: string) => void;
+  isActive?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(o => o.id === value);
+
+  return (
+    <div ref={dropdownRef} className="relative flex-shrink-0">
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
+          'border',
+          isActive
+            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-lg shadow-orange-500/25'
+            : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
+        )}
+      >
+        {icon}
+        <span>{selectedOption?.label || label}</span>
+        <ChevronDown className={cn('w-3 h-3 transition-transform', isOpen && 'rotate-180')} />
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -5, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -5, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-0 mt-1 z-50 min-w-[120px] bg-popover border border-border rounded-lg shadow-xl overflow-hidden"
+          >
+            {options.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => {
+                  onChange(option.id);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  'w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors',
+                  value === option.id
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'text-foreground hover:bg-muted'
+                )}
+              >
+                {option.icon}
+                <span>{option.label}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -144,62 +228,26 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
         )}
       >
         <div className="max-w-screen-xl mx-auto">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-            {/* Gender filter chips */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              {genderOptions.map((option) => {
-                const isActive = filters.clientGender === option.id || (!filters.clientGender && option.id === 'any');
-                return (
-                  <motion.button
-                    key={option.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleGenderChange(option.id)}
-                    className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-                      'border',
-                      isActive
-                        ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25'
-                        : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
-                    )}
-                  >
-                    {option.icon}
-                    <span>{option.label}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            {/* Gender dropdown */}
+            <FilterDropdown
+              label="Gender"
+              icon={<Users className="w-4 h-4" />}
+              options={genderOptions}
+              value={filters.clientGender || 'any'}
+              onChange={(id) => handleGenderChange(id as OwnerClientGender)}
+              isActive={filters.clientGender !== 'any' && filters.clientGender !== undefined}
+            />
 
-            {/* Divider */}
-            <div className="w-px h-6 bg-white/10 flex-shrink-0" />
-
-            {/* Client type chips */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              {clientTypeOptions.map((option) => {
-                const isActive = filters.clientType === option.id || (!filters.clientType && option.id === 'all');
-                return (
-                  <motion.button
-                    key={option.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleClientTypeChange(option.id)}
-                    className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-                      'border',
-                      isActive
-                        ? option.id === 'hire' 
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/25'
-                          : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-lg shadow-orange-500/25'
-                        : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
-                    )}
-                  >
-                    {option.icon}
-                    <span className="hidden sm:inline">{option.label}</span>
-                    <span className="sm:hidden">{option.id === 'all' ? 'All' : option.id === 'hire' ? 'Hire' : option.id === 'rent' ? 'Rent' : 'Buy'}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
+            {/* Client type dropdown */}
+            <FilterDropdown
+              label="Looking for"
+              icon={<Briefcase className="w-4 h-4" />}
+              options={clientTypeOptions}
+              value={filters.clientType || 'all'}
+              onChange={(id) => handleClientTypeChange(id as OwnerClientType)}
+              isActive={filters.clientType !== 'all' && filters.clientType !== undefined}
+            />
 
             {/* Reset button */}
             <AnimatePresence>
@@ -212,13 +260,12 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                   whileTap={{ scale: 0.95 }}
                   onClick={handleReset}
                   className={cn(
-                    'flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium',
+                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
                     'bg-destructive/10 text-destructive border border-destructive/20',
                     'hover:bg-destructive/20 transition-all duration-200 flex-shrink-0'
                   )}
                 >
                   <RotateCcw className="w-3 h-3" />
-                  <span>Reset</span>
                 </motion.button>
               )}
             </AnimatePresence>
@@ -241,8 +288,8 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
     >
       <div className="max-w-screen-xl mx-auto">
         {/* Main filter row */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-          {/* Hire Services Button - NEW */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          {/* Workers/Services Button */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -255,15 +302,15 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                 : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
             )}
           >
-            <Briefcase className="w-4 h-4" />
-            <span>Hire</span>
+            <Wrench className="w-4 h-4" />
+            <span>Services</span>
           </motion.button>
 
           {/* Divider */}
           <div className="w-px h-6 bg-white/10 flex-shrink-0" />
 
-          {/* Category chips */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Category chips - compact */}
+          <div className="flex items-center gap-1 flex-shrink-0">
             {categories.map((category) => {
               const isActive = filters.categories.includes(category.id);
               return (
@@ -273,7 +320,7 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleCategoryToggle(category.id)}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
+                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
                     'border',
                     isActive
                       ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25'
@@ -290,29 +337,14 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
           {/* Divider */}
           <div className="w-px h-6 bg-white/10 flex-shrink-0" />
 
-          {/* Listing type chips */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {listingTypes.map((type) => {
-              const isActive = filters.listingType === type.id;
-              return (
-                <motion.button
-                  key={type.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleListingTypeChange(type.id)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-                    'border',
-                    isActive
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-lg shadow-orange-500/25'
-                      : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
-                  )}
-                >
-                  {type.label}
-                </motion.button>
-              );
-            })}
-          </div>
+          {/* Listing type dropdown - compact */}
+          <FilterDropdown
+            label="Type"
+            options={listingTypes}
+            value={filters.listingType}
+            onChange={(id) => handleListingTypeChange(id as QuickFilterListingType)}
+            isActive={filters.listingType !== 'both'}
+          />
 
           {/* Reset button - only show when filters are active */}
           <AnimatePresence>
@@ -325,39 +357,16 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                 whileTap={{ scale: 0.95 }}
                 onClick={handleReset}
                 className={cn(
-                  'flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium',
+                  'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
                   'bg-destructive/10 text-destructive border border-destructive/20',
                   'hover:bg-destructive/20 transition-all duration-200 flex-shrink-0'
                 )}
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Reset</span>
               </motion.button>
             )}
           </AnimatePresence>
         </div>
-
-        {/* Active filter summary */}
-        <AnimatePresence>
-          {hasActiveFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-1 overflow-hidden"
-            >
-              <p className="text-[10px] text-muted-foreground">
-                Showing: {filters.showHireServices ? 'Services' : ''}{filters.showHireServices && filters.categories.length > 0 ? ' + ' : ''}
-                {filters.categories.length > 0
-                  ? filters.categories.map(c => categories.find(cat => cat.id === c)?.label).join(', ')
-                  : !filters.showHireServices ? 'All categories' : ''
-                }
-                {' • '}
-                {filters.listingType === 'both' ? 'Rent & Buy' : filters.listingType === 'rent' ? 'For Rent' : 'For Sale'}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </motion.div>
   );
