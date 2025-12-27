@@ -727,10 +727,10 @@ body {
   .swipess-logo-simple {
     font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
     font-weight: 900;
-    font-style: normal;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 8%, #FFD699 16%, #FFC266 32%, #FF9944 48%, #FF6633 72%, #DD3333 100%);
+    font-style: italic;
+    letter-spacing: 0.12em;
+    text-transform: capitalize;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 5%, #FFD699 12%, #FFC266 25%, #FF9944 40%, #FF6633 60%, #DD3333 85%, #CC2222 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -815,10 +815,10 @@ body {
   .swipess-logo-header {
     font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
     font-weight: 900;
-    font-style: normal;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 8%, #FFD699 16%, #FFC266 32%, #FF9944 48%, #FF6633 72%, #DD3333 100%);
+    font-style: italic;
+    letter-spacing: 0.1em;
+    text-transform: capitalize;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 5%, #FFD699 12%, #FFC266 25%, #FF9944 40%, #FF6633 60%, #DD3333 85%, #CC2222 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -861,10 +861,10 @@ body {
   .swipess-logo-medium {
     font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
     font-weight: 900;
-    font-style: normal;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 8%, #FFD699 16%, #FFC266 32%, #FF9944 48%, #FF6633 72%, #DD3333 100%);
+    font-style: italic;
+    letter-spacing: 0.1em;
+    text-transform: capitalize;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 5%, #FFD699 12%, #FFC266 25%, #FF9944 40%, #FF6633 60%, #DD3333 85%, #CC2222 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
