@@ -1,8 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
 import { OwnerClientFilterDialog } from "@/components/OwnerClientFilterDialog";
-import { FilterColorPreferences } from "@/components/FilterColorPreferences";
-import { ThemeSelector } from "@/components/ThemeSelector";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +12,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, LogOut, Building2, Eye, MessageCircle,
   Camera, Radio, ArrowLeft, Crown, Settings as SettingsIcon,
-  Flame, Filter, Palette, Users
+  Flame, Filter, Users
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -192,39 +190,6 @@ const OwnerProfileNew = () => {
                 </button>
               </CardContent>
             </Card>
-          </motion.div>
-
-          <Separator className="my-4" />
-
-          {/* Personalization Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...fastSpring, delay: 0.2 }}
-            className="space-y-3"
-          >
-            <h3 className="text-sm font-semibold text-muted-foreground px-2">
-              Personalization
-            </h3>
-
-            {/* Theme Selector */}
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-base">Theme</CardTitle>
-                </div>
-                <CardDescription className="text-xs">
-                  Choose your preferred color theme
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ThemeSelector />
-              </CardContent>
-            </Card>
-
-            {/* Filter Color Preferences */}
-            <FilterColorPreferences compact />
           </motion.div>
 
           <Separator className="my-4" />
