@@ -1,17 +1,9 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Sparkles, Shield } from 'lucide-react';
+import { Users, Building2, Home, Sparkles, Shield, ArrowRight } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 
 function LegendaryLandingPage() {
-  // Force animations to replay on every mount
-  const [animationKey, setAnimationKey] = useState(0);
-  
-  useEffect(() => {
-    // Reset animation key on mount to guarantee fresh animations
-    setAnimationKey(Date.now());
-  }, []);
-
   // Set orange status bar for landing page
   useEffect(() => {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -80,7 +72,7 @@ function LegendaryLandingPage() {
     }
   }, []);
 
-  return <motion.div key={animationKey} ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" style={{
+  return <motion.div ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" style={{
     willChange: 'background',
     contain: 'paint'
   }} onMouseMove={handleMouseMove} onClick={createRipple} animate={{
@@ -251,7 +243,18 @@ function LegendaryLandingPage() {
               />
             </motion.div>
 
-            <span className="relative z-10 drop-shadow-lg electric-text">I'M A CLIENT</span>
+            <Home className="w-5 h-5 relative z-10" />
+            <span className="relative z-10 drop-shadow-lg electric-text">I'm a Client</span>
+            <motion.div className="relative z-10" animate={{
+            x: hoveredButton === 'client' ? 5 : 0,
+            scale: hoveredButton === 'client' ? 1.2 : 1
+          }} transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 10
+          }}>
+              <ArrowRight className="w-4 h-4" />
+            </motion.div>
           </motion.button>
 
           {/* I'm an Owner Button - Vibrant Magenta to Gold */}
@@ -311,7 +314,18 @@ function LegendaryLandingPage() {
               />
             </motion.div>
 
-            <span className="relative z-10 drop-shadow-lg electric-text">I'M AN OWNER</span>
+            <Building2 className="w-5 h-5 relative z-10" />
+            <span className="relative z-10 drop-shadow-lg electric-text">I'm an Owner</span>
+            <motion.div className="relative z-10" animate={{
+            x: hoveredButton === 'owner' ? 5 : 0,
+            scale: hoveredButton === 'owner' ? 1.2 : 1
+          }} transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 10
+          }}>
+              <ArrowRight className="w-4 h-4" />
+            </motion.div>
           </motion.button>
         </div>
 
@@ -361,4 +375,4 @@ function LegendaryLandingPage() {
       <AuthDialog isOpen={authDialog.isOpen} onClose={closeAuthDialog} role={authDialog.role} />
     </motion.div>;
 }
-export default LegendaryLandingPage;
+export default memo(LegendaryLandingPage);
