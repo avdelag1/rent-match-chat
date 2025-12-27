@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart, Briefcase } from 'lucide-react';
+import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { springConfigs } from '@/utils/springConfigs';
@@ -34,12 +34,6 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       label: 'Browse',
       icon: Home,
       path: '/client/dashboard',
-    },
-    {
-      id: 'services',
-      label: 'Services',
-      icon: Briefcase,
-      path: '/client/services',
     },
     {
       id: 'likes',

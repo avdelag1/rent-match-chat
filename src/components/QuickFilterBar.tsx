@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Category type matching ListingFilters
-export type QuickFilterCategory = 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle';
+// Category type matching ListingFilters - now includes services
+export type QuickFilterCategory = 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services';
 export type QuickFilterListingType = 'rent' | 'sale' | 'both';
 
 // Owner-specific filter types
@@ -14,8 +14,6 @@ export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
 export interface QuickFilters {
   categories: QuickFilterCategory[];
   listingType: QuickFilterListingType;
-  // Client-specific
-  showHireServices?: boolean;
   // Owner-specific filters
   clientGender?: OwnerClientGender;
   clientType?: OwnerClientType;
@@ -34,6 +32,7 @@ const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNod
   { id: 'motorcycle', label: 'Motos', icon: <MotorcycleIcon /> },
   { id: 'bicycle', label: 'Bikes', icon: <Bike className="w-4 h-4" /> },
   { id: 'yacht', label: 'Yachts', icon: <Ship className="w-4 h-4" /> },
+  { id: 'services', label: 'Services', icon: <Wrench className="w-4 h-4" /> },
 ];
 
 const listingTypes: { id: QuickFilterListingType; label: string }[] = [
@@ -202,13 +201,6 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
     });
   }, [filters, onChange]);
 
-  const handleHireToggle = useCallback(() => {
-    onChange({
-      ...filters,
-      showHireServices: !filters.showHireServices,
-    });
-  }, [filters, onChange]);
-
   const handleGenderChange = useCallback((gender: OwnerClientGender) => {
     onChange({
       ...filters,
@@ -227,14 +219,13 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
     onChange({
       categories: [],
       listingType: 'both',
-      showHireServices: false,
       clientGender: 'any',
       clientType: 'all',
     });
   }, [onChange]);
 
   const hasActiveFilters = userRole === 'client'
-    ? filters.categories.length > 0 || filters.listingType !== 'both' || filters.showHireServices
+    ? filters.categories.length > 0 || filters.listingType !== 'both'
     : (filters.clientGender && filters.clientGender !== 'any') || (filters.clientType && filters.clientType !== 'all');
 
   // Owner Quick Filters
@@ -311,30 +302,11 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
       <div className="max-w-screen-xl mx-auto">
         {/* Main filter row */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          {/* Workers/Services Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleHireToggle}
-            className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-              'border flex-shrink-0',
-              filters.showHireServices
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/25'
-                : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
-            )}
-          >
-            <Wrench className="w-4 h-4" />
-            <span>Services</span>
-          </motion.button>
-
-          {/* Divider */}
-          <div className="w-px h-6 bg-white/10 flex-shrink-0" />
-
-          {/* Category chips - compact */}
+          {/* Category chips - all listing types including services */}
           <div className="flex items-center gap-1 flex-shrink-0">
             {categories.map((category) => {
               const isActive = filters.categories.includes(category.id);
+              const isServices = category.id === 'services';
               return (
                 <motion.button
                   key={category.id}
@@ -345,7 +317,9 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                     'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
                     'border',
                     isActive
-                      ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25'
+                      ? isServices
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/25'
+                        : 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25'
                       : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
                   )}
                 >
