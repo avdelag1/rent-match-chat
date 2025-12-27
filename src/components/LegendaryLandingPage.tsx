@@ -171,192 +171,144 @@ function LegendaryLandingPage() {
         {/* Buttons Container with Enhanced Effects */}
         <div className="space-y-2 mt-8">
 
-          {/* I'm a Client Button - LED Style Banner */}
-          <motion.button
-            onClick={() => openAuthDialog('client')}
-            onMouseEnter={() => setHoveredButton('client')}
-            onMouseLeave={() => setHoveredButton(null)}
-            className="mx-auto py-4 px-6 text-white font-bold rounded-xl shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group"
-            style={{
-              background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1, #8b5cf6)',
-              width: 'clamp(250px, 70vw, 500px)',
-              fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
-            }}
-            initial={{
-              opacity: 0,
-              x: 300,
-              scale: 0.8,
-              rotate: 5
-            }}
-            animate={{
-              opacity: 1,
-              x: 0,
-              scale: 1,
-              rotate: 0
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 8,
-              mass: 0.6,
-              delay: 0.4,
-              velocity: 2
-            }}
-            whileHover={{
-              scale: 1.05,
-              y: -6,
-              boxShadow: '0 20px 60px rgba(6,182,212,0.6), 0 0 30px rgba(99,102,241,0.4)'
-            }}
-            whileTap={{
-              scale: 0.95
-            }}
-          >
+          {/* I'm a Client Button - Vibrant Cyan to Electric Blue */}
+          <motion.button onClick={() => openAuthDialog('client')} onMouseEnter={() => setHoveredButton('client')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-sm mx-auto py-2.5 px-8 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
+            background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1, #8b5cf6)'
+          }} initial={{
+          opacity: 0,
+          x: 300,
+          scale: 0.8,
+          rotate: 5
+        }} animate={{
+          opacity: 1,
+          x: 0,
+          scale: 1,
+          rotate: 0
+        }} transition={{
+          type: "spring",
+          stiffness: 200,
+          damping: 8,
+          mass: 0.6,
+          delay: 0.4,
+          velocity: 2
+        }} whileHover={{
+          scale: 1.05,
+          y: -6,
+          boxShadow: '0 20px 60px rgba(6,182,212,0.6), 0 0 30px rgba(99,102,241,0.4)'
+        }} whileTap={{
+          scale: 0.95
+        }}>
             {/* Animated shimmer background on hover */}
-            <motion.div
-              className="absolute inset-0"
-              style={{
-                background: 'linear-gradient(135deg, #22d3ee, #38bdf8, #60a5fa, #818cf8, #a78bfa)'
-              }}
-              initial={{
-                opacity: 0
-              }}
-              animate={{
-                opacity: hoveredButton === 'client' ? 1 : 0
-              }}
-              transition={{
-                duration: 0.3
-              }}
-            />
+            <motion.div className="absolute inset-0" style={{
+              background: 'linear-gradient(135deg, #22d3ee, #38bdf8, #60a5fa, #818cf8, #a78bfa)'
+            }} initial={{
+            opacity: 0
+          }} animate={{
+            opacity: hoveredButton === 'client' ? 1 : 0
+          }} transition={{
+            duration: 0.3
+          }} />
 
-            {/* LED Banner Effect */}
-            <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+            {/* Subtle slow glare effect */}
+            <motion.div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
               <motion.div
-                className="absolute inset-y-0 whitespace-nowrap flex items-center"
+                className="absolute inset-y-0 w-24"
                 style={{
-                  fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
-                  fontWeight: 'bold',
-                  color: '#ffffff',
-                  textShadow: '0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(6,182,212,0.6)',
-                  letterSpacing: '0.1em',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), rgba(255,255,255,0.15), rgba(255,255,255,0.08), transparent)',
                 }}
                 animate={{
-                  x: ['-50%', '150%']
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: 'linear'
-                }}
-              >
-                <span>I'M A CLIENT&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;I'M A CLIENT&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;</span>
-              </motion.div>
-            </div>
-
-            <Home className="w-5 h-5 relative z-10 opacity-0" />
-            <span className="relative z-10 drop-shadow-lg opacity-0">I'm a Client</span>
-            <motion.div className="relative z-10 opacity-0" animate={{
-              x: hoveredButton === 'client' ? 5 : 0,
-              scale: hoveredButton === 'client' ? 1.2 : 1
-            }} transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 10
-            }}>
-              <ArrowRight className="w-4 h-4" />
-            </motion.div>
-          </motion.button>
-
-          {/* I'm an Owner Button - LED Style Banner (Slower) */}
-          <motion.button
-            onClick={() => openAuthDialog('owner')}
-            onMouseEnter={() => setHoveredButton('owner')}
-            onMouseLeave={() => setHoveredButton(null)}
-            className="mx-auto py-4 px-6 text-white font-bold rounded-xl shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group"
-            style={{
-              background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7, #8b5cf6)',
-              width: 'clamp(250px, 70vw, 500px)',
-              fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
-            }}
-            initial={{
-              opacity: 0,
-              x: -300,
-              scale: 0.8,
-              rotate: -5
-            }}
-            animate={{
-              opacity: 1,
-              x: 0,
-              scale: 1,
-              rotate: 0
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 8,
-              mass: 0.6,
-              delay: 0.55,
-              velocity: 2
-            }}
-            whileHover={{
-              scale: 1.05,
-              y: -6,
-              boxShadow: '0 20px 60px rgba(236,72,153,0.6), 0 0 30px rgba(168,85,247,0.4)'
-            }}
-            whileTap={{
-              scale: 0.95
-            }}
-          >
-            {/* Animated shimmer background on hover */}
-            <motion.div
-              className="absolute inset-0"
-              style={{
-                background: 'linear-gradient(135deg, #fb7185, #f472b6, #e879f9, #c084fc, #a78bfa)'
-              }}
-              initial={{
-                opacity: 0
-              }}
-              animate={{
-                opacity: hoveredButton === 'owner' ? 1 : 0
-              }}
-              transition={{
-                duration: 0.3
-              }}
-            />
-
-            {/* LED Banner Effect - Slower Speed */}
-            <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-              <motion.div
-                className="absolute inset-y-0 whitespace-nowrap flex items-center"
-                style={{
-                  fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
-                  fontWeight: 'bold',
-                  color: '#ffffff',
-                  textShadow: '0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(236,72,153,0.6)',
-                  letterSpacing: '0.1em',
-                }}
-                animate={{
-                  x: ['-50%', '150%']
+                  x: ['-100%', '600%']
                 }}
                 transition={{
                   duration: 12,
                   repeat: Infinity,
+                  repeatDelay: 4,
                   ease: 'linear'
                 }}
-              >
-                <span>I'M AN OWNER&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;I'M AN OWNER&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;</span>
-              </motion.div>
-            </div>
+              />
+            </motion.div>
 
-            <Building2 className="w-5 h-5 relative z-10 opacity-0" />
-            <span className="relative z-10 drop-shadow-lg opacity-0">I'm an Owner</span>
-            <motion.div className="relative z-10 opacity-0" animate={{
-              x: hoveredButton === 'owner' ? 5 : 0,
-              scale: hoveredButton === 'owner' ? 1.2 : 1
-            }} transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 10
-            }}>
+            <Home className="w-5 h-5 relative z-10" />
+            <span className="relative z-10 drop-shadow-lg">I'm a Client</span>
+            <motion.div className="relative z-10" animate={{
+            x: hoveredButton === 'client' ? 5 : 0,
+            scale: hoveredButton === 'client' ? 1.2 : 1
+          }} transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 10
+          }}>
+              <ArrowRight className="w-4 h-4" />
+            </motion.div>
+          </motion.button>
+
+          {/* I'm an Owner Button - Vibrant Magenta to Gold */}
+          <motion.button onClick={() => openAuthDialog('owner')} onMouseEnter={() => setHoveredButton('owner')} onMouseLeave={() => setHoveredButton(null)} className="w-full max-w-sm mx-auto py-2.5 px-8 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group" style={{
+            background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7, #8b5cf6)'
+          }} initial={{
+          opacity: 0,
+          x: -300,
+          scale: 0.8,
+          rotate: -5
+        }} animate={{
+          opacity: 1,
+          x: 0,
+          scale: 1,
+          rotate: 0
+        }} transition={{
+          type: "spring",
+          stiffness: 200,
+          damping: 8,
+          mass: 0.6,
+          delay: 0.55,
+          velocity: 2
+        }} whileHover={{
+          scale: 1.05,
+          y: -6,
+          boxShadow: '0 20px 60px rgba(236,72,153,0.6), 0 0 30px rgba(168,85,247,0.4)'
+        }} whileTap={{
+          scale: 0.95
+        }}>
+            {/* Animated shimmer background on hover */}
+            <motion.div className="absolute inset-0" style={{
+              background: 'linear-gradient(135deg, #fb7185, #f472b6, #e879f9, #c084fc, #a78bfa)'
+            }} initial={{
+            opacity: 0
+          }} animate={{
+            opacity: hoveredButton === 'owner' ? 1 : 0
+          }} transition={{
+            duration: 0.3
+          }} />
+
+            {/* Subtle slow glare effect */}
+            <motion.div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+              <motion.div
+                className="absolute inset-y-0 w-24"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), rgba(255,255,255,0.15), rgba(255,255,255,0.08), transparent)',
+                }}
+                animate={{
+                  x: ['-100%', '600%']
+                }}
+                transition={{
+                  duration: 12,
+                  repeat: Infinity,
+                  repeatDelay: 6,
+                  ease: 'linear'
+                }}
+              />
+            </motion.div>
+
+            <Building2 className="w-5 h-5 relative z-10" />
+            <span className="relative z-10 drop-shadow-lg">I'm an Owner</span>
+            <motion.div className="relative z-10" animate={{
+            x: hoveredButton === 'owner' ? 5 : 0,
+            scale: hoveredButton === 'owner' ? 1.2 : 1
+          }} transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 10
+          }}>
               <ArrowRight className="w-4 h-4" />
             </motion.div>
           </motion.button>
