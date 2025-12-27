@@ -113,13 +113,13 @@ const App = () => (
             <RadioPlayerProvider>
             <NotificationWrapper>
               <AppLayout>
-                <Suspense fallback={null}>
+                <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-center">Loading...</div></div>}>
                   <TooltipProvider>
                     <Toaster />
                     <Sonner />
                   </TooltipProvider>
                 </Suspense>
-                <Suspense fallback={null}>
+                <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-center">Loading...</div></div>}>
                   <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
