@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { logger } from "@/utils/prodLogger";
-import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -132,9 +131,13 @@ const Index = () => {
     }
   }, [user, userRole, loading, profileLoading, isError, navigate]);
 
-  // Show loading state ONLY when user is authenticated AND we're fetching their role
+  // Show landing page while loading role (no blocking loader)
   if (user && profileLoading && !loadingTimeout) {
-    return <AppLoadingScreen />;
+    return (
+      <div className="min-h-screen">
+        <LegendaryLandingPage />
+      </div>
+    );
   }
 
   // If loading timeout reached, show landing page with error message
@@ -162,8 +165,13 @@ const Index = () => {
     );
   }
 
-  // Show loading state while navigating to dashboard (user is authenticated and has role)
-  return <AppLoadingScreen />;
+  // Show landing page while navigating (no blocking loader)
+  return (
+    <div className="min-h-screen">
+      <LegendaryLandingPage />
+    </div>
+  );
 };
+
 
 export default Index;

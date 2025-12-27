@@ -3,7 +3,6 @@ import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { ShareDialog } from './ShareDialog';
-import { AppLoadingScreen } from './AppLoadingScreen';
 import { useListings } from '@/hooks/useListings';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -263,7 +262,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // Only show loading on initial load, not during background refetch
   if (isLoading && listings.length === 0) {
-    return <AppLoadingScreen />;
+    return (
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   if (error) {

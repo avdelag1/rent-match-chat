@@ -144,37 +144,16 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
-          {/* Glow effect behind the logo */}
+          {/* Logo - clean, no excessive glow */}
           <div className="relative">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <motion.div
-                className="w-72 h-20 rounded-full"
-                style={{
-                  background: 'radial-gradient(ellipse at center, rgba(255, 180, 0, 0.5) 0%, rgba(255, 140, 0, 0.3) 40%, transparent 70%)',
-                  filter: 'blur(24px)',
-                }}
-                animate={{
-                  opacity: [0.5, 0.8, 0.5],
-                  scale: [1, 1.15, 1],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            </div>
             <h1 className="text-center leading-none relative">
-              <span className="title-wave-container">
-                <span
-                  className="swipess-logo-simple block"
-                  style={{
-                    fontSize: 'clamp(2.5rem, 14vw, 5rem)',
-                  }}
-                >
-                  SWIPESS
-                </span>
-                <span className="title-wave-shine" />
+              <span
+                className="swipess-logo-simple block"
+                style={{
+                  fontSize: 'clamp(2.5rem, 14vw, 5rem)',
+                }}
+              >
+                SWIPESS
               </span>
             </h1>
           </div>
@@ -230,41 +209,24 @@ function LegendaryLandingPage() {
             duration: 0.3
           }} />
 
-            {/* Rainbow shiny reflection effect */}
-            <motion.div className="absolute inset-0 overflow-hidden">
+            {/* Subtle slow glare effect */}
+            <motion.div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
               <motion.div
-                className="absolute inset-y-0 w-40"
+                className="absolute inset-y-0 w-24"
                 style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.8), rgba(255,255,255,0.3), transparent)',
-                  filter: 'blur(2px)'
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), rgba(255,255,255,0.15), rgba(255,255,255,0.08), transparent)',
                 }}
                 animate={{
-                  x: ['-200%', '500%']
+                  x: ['-100%', '600%']
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 12,
                   repeat: Infinity,
-                  repeatDelay: 3,
-                  ease: 'easeInOut'
+                  repeatDelay: 4,
+                  ease: 'linear'
                 }}
               />
             </motion.div>
-
-            {/* Particle sparkle effect */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 40%)'
-              }}
-              animate={{
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
 
             <Home className="w-5 h-5 relative z-10" />
             <span className="relative z-10 drop-shadow-lg">I'm a Client</span>
@@ -318,43 +280,24 @@ function LegendaryLandingPage() {
             duration: 0.3
           }} />
 
-            {/* Rainbow shiny reflection effect */}
-            <motion.div className="absolute inset-0 overflow-hidden">
+            {/* Subtle slow glare effect */}
+            <motion.div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
               <motion.div
-                className="absolute inset-y-0 w-40"
+                className="absolute inset-y-0 w-24"
                 style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.8), rgba(255,255,255,0.3), transparent)',
-                  filter: 'blur(2px)'
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), rgba(255,255,255,0.15), rgba(255,255,255,0.08), transparent)',
                 }}
                 animate={{
-                  x: ['-200%', '500%']
+                  x: ['-100%', '600%']
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 12,
                   repeat: Infinity,
-                  repeatDelay: 3,
-                  ease: 'easeInOut',
-                  delay: 1.5
+                  repeatDelay: 6,
+                  ease: 'linear'
                 }}
               />
             </motion.div>
-
-            {/* Particle sparkle effect */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.2) 0%, transparent 40%)'
-              }}
-              animate={{
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5
-              }}
-            />
 
             <Building2 className="w-5 h-5 relative z-10" />
             <span className="relative z-10 drop-shadow-lg">I'm a Seller</span>

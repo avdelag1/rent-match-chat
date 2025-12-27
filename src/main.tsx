@@ -15,19 +15,6 @@ root.render(
   </StrictMode>
 );
 
-// Remove static loading screen AFTER React has rendered
-// Use requestAnimationFrame to ensure DOM has updated
-requestAnimationFrame(() => {
-  requestAnimationFrame(() => {
-    const loadingScreen = document.getElementById('app-loading-screen');
-    if (loadingScreen) {
-      // Fade out the loading screen smoothly
-      loadingScreen.style.transition = 'opacity 0.3s ease-out';
-      loadingScreen.style.opacity = '0';
-      setTimeout(() => loadingScreen.remove(), 300);
-    }
-  });
-});
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // DEFERRED INITIALIZATION

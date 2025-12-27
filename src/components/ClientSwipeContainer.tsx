@@ -3,7 +3,6 @@ import { triggerHaptic } from '@/utils/haptics';
 import { OwnerClientTinderCard } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
-import { AppLoadingScreen } from './AppLoadingScreen';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
@@ -177,7 +176,11 @@ export function ClientSwipeContainer({
   const progress = clientProfiles.length > 0 ? ((currentIndex + 1) / clientProfiles.length) * 100 : 0;
 
   if (isLoading || isRefetching) {
-    return <AppLoadingScreen />;
+    return (
+      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   if (error) {

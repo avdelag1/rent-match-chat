@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { AppLoadingScreen } from './AppLoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -99,16 +98,14 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     }
   }, [user, userRole, loading, profileLoading, navigate, location, requiredRole, timedOut, isError]);
 
-  // Only show loading screen during initial auth check
-  // Don't show loading if we already have cached role data (prevents flash on route changes)
+  // Return null during loading - no blocking screen
   if (loading) {
-    return <AppLoadingScreen />;
+    return null;
   }
 
-  // Show loading only if we're fetching AND don't have any role data yet
-  // Once we have cached data, we skip the loading screen entirely
+  // Return null while fetching role
   if (profileLoading && userRole === undefined) {
-    return <AppLoadingScreen />;
+    return null;
   }
 
   // Don't render if user is not authenticated
