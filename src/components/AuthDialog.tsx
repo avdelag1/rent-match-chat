@@ -299,8 +299,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Logo and Header */}
               <div className="text-center mb-8 animate-fade-in">
-                <div className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${theme.gradient} rounded-3xl mb-5 ${theme.glow}`}>
-                  <Flame className="w-10 h-10 text-white drop-shadow-lg" />
+                {/* SWIPESS Brand Logo */}
+                <div className="mb-4">
+                  <span className="swipess-logo-medium text-2xl">SWIPESS</span>
                 </div>
 
                 <h2 className="text-3xl font-bold text-white mb-2">
