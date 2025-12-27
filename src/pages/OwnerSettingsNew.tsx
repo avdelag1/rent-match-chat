@@ -8,6 +8,8 @@ import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import { SwipeNavigationWrapper } from "@/components/SwipeNavigationWrapper";
+import { ownerSettingsRoutes } from "@/config/swipeNavigationRoutes";
 
 const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
@@ -70,105 +72,109 @@ const OwnerSettingsNew = () => {
   if (activeSection === 'security') {
     return (
       <DashboardLayout userRole="owner">
-        <div className="w-full px-5 py-4 pb-24">
-          <div className="max-w-3xl mx-auto">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setActiveSection(null)}
-              className="mb-4 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Settings
-            </Button>
+        <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
+          <div className="w-full px-5 py-4 pb-24">
+            <div className="max-w-3xl mx-auto">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveSection(null)}
+                className="mb-4 text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Settings
+              </Button>
 
-            <PageHeader
-              title="Account Security"
-              subtitle="Manage your password and security settings"
-            />
+              <PageHeader
+                title="Account Security"
+                subtitle="Manage your password and security settings"
+              />
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={fastSpring}
-            >
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <AccountSecurity userRole="owner" />
-                </CardContent>
-              </Card>
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={fastSpring}
+              >
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <AccountSecurity userRole="owner" />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
           </div>
-        </div>
+        </SwipeNavigationWrapper>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full px-5 py-4 pb-24">
-        <div className="max-w-3xl mx-auto space-y-6">
-          {/* Back Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+      <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
+        <div className="w-full px-5 py-4 pb-24">
+          <div className="max-w-3xl mx-auto space-y-6">
+            {/* Back Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
 
-          {/* Page Header */}
-          <PageHeader
-            title="Settings"
-            subtitle="Manage your account and preferences"
-          />
+            {/* Page Header */}
+            <PageHeader
+              title="Settings"
+              subtitle="Manage your account and preferences"
+            />
 
-          {/* Settings Menu */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={fastSpring}
-          >
-            <Card className="bg-card border-border overflow-hidden">
-              <CardContent className="p-0">
-                {settingsItems.map((item, index) => (
-                  <div key={item.label}>
-                    <button
-                      onClick={() => {
-                        if (item.section) {
-                          setActiveSection(item.section);
-                        } else if (item.action) {
-                          item.action();
-                        }
-                      }}
-                      className="w-full flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors text-left"
-                    >
-                      <div className={`mt-1 ${item.color}`}>
-                        <item.icon className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-foreground">{item.label}</div>
-                        <div className="text-sm text-muted-foreground">{item.description}</div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground mt-1" />
-                    </button>
-                    {index < settingsItems.length - 1 && <Separator />}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Settings Menu */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={fastSpring}
+            >
+              <Card className="bg-card border-border overflow-hidden">
+                <CardContent className="p-0">
+                  {settingsItems.map((item, index) => (
+                    <div key={item.label}>
+                      <button
+                        onClick={() => {
+                          if (item.section) {
+                            setActiveSection(item.section);
+                          } else if (item.action) {
+                            item.action();
+                          }
+                        }}
+                        className="w-full flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors text-left"
+                      >
+                        <div className={`mt-1 ${item.color}`}>
+                          <item.icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-foreground">{item.label}</div>
+                          <div className="text-sm text-muted-foreground">{item.description}</div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground mt-1" />
+                      </button>
+                      {index < settingsItems.length - 1 && <Separator />}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* App Version */}
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground font-brand tracking-tighter">
-              SWIPESS v1.0
-            </p>
+            {/* App Version */}
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground font-brand tracking-tighter">
+                SWIPESS v1.0
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </SwipeNavigationWrapper>
     </DashboardLayout>
   );
 };
