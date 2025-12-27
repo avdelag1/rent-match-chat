@@ -1,9 +1,17 @@
-import { useState, useRef, useCallback, memo, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Sparkles, Shield } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 
 function LegendaryLandingPage() {
+  // Force animations to replay on every mount
+  const [animationKey, setAnimationKey] = useState(0);
+  
+  useEffect(() => {
+    // Reset animation key on mount to guarantee fresh animations
+    setAnimationKey(Date.now());
+  }, []);
+
   // Set orange status bar for landing page
   useEffect(() => {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -72,7 +80,7 @@ function LegendaryLandingPage() {
     }
   }, []);
 
-  return <motion.div ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" style={{
+  return <motion.div key={animationKey} ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 cursor-pointer" style={{
     willChange: 'background',
     contain: 'paint'
   }} onMouseMove={handleMouseMove} onClick={createRipple} animate={{
@@ -353,4 +361,4 @@ function LegendaryLandingPage() {
       <AuthDialog isOpen={authDialog.isOpen} onClose={closeAuthDialog} role={authDialog.role} />
     </motion.div>;
 }
-export default memo(LegendaryLandingPage);
+export default LegendaryLandingPage;
