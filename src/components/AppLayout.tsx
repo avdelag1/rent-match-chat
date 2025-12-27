@@ -7,6 +7,7 @@ import { useOfflineDetection } from '@/hooks/useOfflineDetection';
 import { useErrorReporting } from '@/hooks/useErrorReporting';
 import { useViewTransitions } from '@/hooks/useViewTransitions';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
+import { useResponsiveContext } from '@/contexts/ResponsiveContext';
 import { springConfigs } from '@/utils/springConfigs';
 
 interface AppLayoutProps {
@@ -99,6 +100,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   const prevLocationRef = useRef(location.pathname);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Get responsive state for adaptive behavior
+  const responsive = useResponsiveContext();
+
   // Initialize app features
   useKeyboardShortcuts();
   useFocusManagement();
@@ -108,11 +112,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Enable View Transitions API
   useViewTransitions();
 
-  // Enable swipe back gesture
+  // Enable swipe back gesture - adjust edge width based on screen size
   const { x: swipeX, opacity: swipeOpacity } = useSwipeBack({
-    enabled: true,
-    edgeWidth: 50,
-    threshold: 100,
+    enabled: responsive.isTouchDevice,
+    edgeWidth: responsive.isMobile ? 30 : 50,
+    threshold: responsive.isMobile ? 80 : 100,
   });
 
   // Get dynamic transition variant based on navigation direction
@@ -142,10 +146,17 @@ export function AppLayout({ children }: AppLayoutProps) {
   // This prevents flash when swipe completes and page transitions
   const combinedOpacity = isTransitioning ? 1 : swipeOpacity;
 
+  // Adjust transition duration based on device - faster on mobile for snappier feel
+  const transitionDuration = responsive.isMobile ? 0.12 : 0.15;
+
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div className="min-h-screen min-h-dvh w-full bg-background overflow-x-hidden">
       <SkipToMainContent />
-      <main id="main-content" tabIndex={-1} className="outline-none w-full min-h-screen">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="outline-none w-full min-h-screen min-h-dvh"
+      >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
@@ -153,10 +164,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             animate={transitionVariant.animate}
             exit={transitionVariant.exit}
             transition={{
-              duration: 0.15,
+              duration: transitionDuration,
               ease: "easeInOut",
             }}
-            className="w-full min-h-screen"
+            className="w-full min-h-screen min-h-dvh"
             style={{
               x: isTransitioning ? 0 : swipeX,
               opacity: combinedOpacity,
