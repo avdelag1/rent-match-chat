@@ -13,7 +13,7 @@ const Index = () => {
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   // Fetch user role from secure user_roles table
-  const { data: userRole, isLoading: profileLoading, refetch, error, isError } = useQuery({
+  const { data: userRole, isLoading: profileLoading, isFetching, refetch, error, isError } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -37,7 +37,7 @@ const Index = () => {
     enabled: !!user,
     retry: 3, // Increased from 2 to 3 for better reliability on new signups
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s, 3s
-    staleTime: 60000, // Increased from 5s to 60s - user roles don't change frequently
+    staleTime: 60000, // 60 seconds - user roles don't change frequently
     gcTime: 300000, // Cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus
     refetchOnMount: false, // Don't refetch on component mount if data is fresh
@@ -45,7 +45,7 @@ const Index = () => {
 
   // Add timeout fallback - if query takes too long, force refetch with faster timeout
   useEffect(() => {
-    if (user && profileLoading) {
+    if (user && (profileLoading || isFetching)) {
       const timeout = setTimeout(() => {
         logger.log('[Index] Query taking too long (2s), forcing faster refetch...');
         refetch();
@@ -53,11 +53,11 @@ const Index = () => {
 
       return () => clearTimeout(timeout);
     }
-  }, [user, profileLoading, refetch]);
+  }, [user, profileLoading, isFetching, refetch]);
 
   // Add timeout to prevent infinite loading - show landing page after 6 seconds
   useEffect(() => {
-    if (user && (profileLoading || !userRole)) {
+    if (user && (profileLoading || isFetching || !userRole)) {
       const timeout = setTimeout(() => {
         logger.log('[Index] Loading timeout reached (6s), showing fallback...');
         setLoadingTimeout(true);
@@ -65,7 +65,7 @@ const Index = () => {
 
       return () => clearTimeout(timeout);
     }
-  }, [user, profileLoading, userRole]);
+  }, [user, profileLoading, isFetching, userRole]);
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
@@ -75,6 +75,7 @@ const Index = () => {
       userRole,
       loading,
       profileLoading,
+      isFetching,
       isError
     });
 
@@ -82,7 +83,7 @@ const Index = () => {
 
     if (user) {
       // If query failed after all retries, show error ONLY if we're not in the middle of signup
-      if (isError && !profileLoading) {
+      if (isError && !profileLoading && !isFetching) {
         logger.error('[Index] User authenticated but role query failed after retries');
 
         // Don't show error immediately after signup - give cache more time
@@ -99,8 +100,8 @@ const Index = () => {
         return;
       }
 
-      // If still loading, wait
-      if (profileLoading) {
+      // If still loading or fetching, wait
+      if (profileLoading || isFetching) {
         logger.log('[Index] Still loading role...');
         return;
       }
@@ -129,11 +130,11 @@ const Index = () => {
       logger.log(`[Index] ✅ Authenticated user ${user.email} with role="${userRole}" -> Redirecting to: ${targetPath}`);
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, isError, navigate]);
+  }, [user, userRole, loading, profileLoading, isFetching, isError, navigate]);
 
   // Show loading spinner when user is authenticated but role is loading
   // This prevents showing the "I'm a Client" / "I'm an Owner" buttons after login
-  if (user && (profileLoading || !userRole) && !loadingTimeout) {
+  if (user && (profileLoading || isFetching || !userRole) && !loadingTimeout) {
     return (
       <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
         <div className="text-center space-y-4">
