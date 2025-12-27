@@ -5,7 +5,9 @@ import './index.css'
 import './styles/responsive.css'
 import { ErrorBoundaryWrapper } from './components/ErrorBoundaryWrapper'
 
-// Render React app immediately - fastest possible FCP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PERFORMANCE: Render React app immediately - fastest possible FCP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <StrictMode>
@@ -15,22 +17,27 @@ root.render(
   </StrictMode>
 );
 
-
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // DEFERRED INITIALIZATION
 // Non-critical operations run after main render completes
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // Use requestIdleCallback for non-critical init, fallback to setTimeout
-const deferredInit = (callback: () => void) => {
+const deferredInit = (callback: () => void, timeout = 3000) => {
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(callback, { timeout: 3000 });
+    requestIdleCallback(callback, { timeout });
   } else {
     setTimeout(callback, 100);
   }
 };
 
-// Defer all non-critical initialization
+// Priority 1: Route prefetching for instant navigation (runs first)
+deferredInit(async () => {
+  const { prefetchCriticalRoutes } = await import('./utils/routePrefetcher');
+  prefetchCriticalRoutes();
+}, 1000);
+
+// Priority 2: Performance monitoring and cache management
 deferredInit(async () => {
   // Dynamic imports for non-critical modules
   const [
@@ -51,9 +58,9 @@ deferredInit(async () => {
   setupUpdateChecker();
   initPerformanceOptimizations();
   initWebVitalsMonitoring();
-});
+}, 3000);
 
-// Capacitor StatusBar initialization - only on native platforms
+// Priority 3: Capacitor StatusBar - only on native platforms
 deferredInit(async () => {
   const { Capacitor } = await import('@capacitor/core');
 
@@ -67,4 +74,16 @@ deferredInit(async () => {
       // StatusBar initialization errors are non-critical
     }
   }
-});
+}, 5000);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SERVICE WORKER REGISTRATION
+// Register SW for offline support and faster repeat visits
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Service worker registration failed - non-critical
+    });
+  });
+}

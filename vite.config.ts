@@ -9,15 +9,16 @@ function buildVersionPlugin() {
   return {
     name: 'build-version-injector',
     transformIndexHtml(html: string) {
-      // Inject version into HTML meta tag for reference
-      return html.replace(
-        '</head>',
-        `<meta name="app-version" content="${buildTime}" />\n</head>`
-      );
+      // Inject version, preconnect hints, and performance optimizations
+      const preconnects = `
+    <link rel="preconnect" href="https://vxplzgwimqqimkpabvja.supabase.co" crossorigin>
+    <link rel="dns-prefetch" href="https://vxplzgwimqqimkpabvja.supabase.co">
+    <meta name="app-version" content="${buildTime}" />`;
+      return html.replace('</head>', `${preconnects}\n</head>`);
     },
     transform(code: string, id: string) {
       // Replace __BUILD_TIME__ in service worker
-      if (id.endsWith('sw.js')) {
+      if (id.endsWith('sw.js') || id.includes('service-worker')) {
         return code.replace(/__BUILD_TIME__/g, buildTime);
       }
       return code;
@@ -45,6 +46,32 @@ function cssOptimizationPlugin(): import('vite').Plugin {
   };
 }
 
+// Preload hints plugin - generates modulepreload for critical chunks
+function preloadPlugin(): import('vite').Plugin {
+  return {
+    name: 'preload-plugin',
+    enforce: 'post',
+    transformIndexHtml(html, ctx) {
+      if (!ctx.bundle) return html;
+
+      // Find critical chunks to preload
+      const criticalChunks = ['react-vendor', 'react-router'];
+      const preloadLinks: string[] = [];
+
+      for (const [fileName, chunk] of Object.entries(ctx.bundle)) {
+        if (chunk.type === 'chunk') {
+          const isCritical = criticalChunks.some(name => fileName.includes(name));
+          if (isCritical) {
+            preloadLinks.push(`<link rel="modulepreload" href="/${fileName}">`);
+          }
+        }
+      }
+
+      return html.replace('</head>', `${preloadLinks.join('\n')}\n</head>`);
+    }
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -55,8 +82,8 @@ export default defineConfig(({ mode }) => ({
     react(),
     buildVersionPlugin(),
     cssOptimizationPlugin(),
-    mode === 'development' &&
-    componentTagger(),
+    preloadPlugin(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -130,6 +157,10 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks(id) {
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // CRITICAL PATH - Smallest possible initial bundle
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
           // Core React runtime - smallest possible critical chunk
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
             return 'react-vendor';
@@ -142,6 +173,24 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/scheduler')) {
             return 'react-vendor';
           }
+
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // LARGE DATA FILES - Load on demand (210KB+ savings)
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+          // World locations data - only needed for location filters
+          if (id.includes('data/worldLocations') || id.includes('data/mexicanLocations')) {
+            return 'data-locations';
+          }
+          // Radio stations data - only needed for radio page
+          if (id.includes('data/radioStations')) {
+            return 'data-radio';
+          }
+
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // FEATURE CHUNKS - Lazy loaded per feature
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
           // React Query - defer loading, not needed for initial render
           if (id.includes('node_modules/@tanstack/react-query')) {
             return 'react-query';
@@ -154,6 +203,11 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/framer-motion')) {
             return 'motion';
           }
+
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // UI COMPONENTS - Split by usage pattern
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
           // Split Radix UI by component type for granular loading
           if (id.includes('node_modules/@radix-ui/react-dialog') ||
               id.includes('node_modules/@radix-ui/react-alert-dialog')) {
@@ -164,9 +218,18 @@ export default defineConfig(({ mode }) => ({
               id.includes('node_modules/@radix-ui/react-popover')) {
             return 'ui-dropdowns';
           }
+          // Tooltip - very common, keep separate and small
+          if (id.includes('node_modules/@radix-ui/react-tooltip')) {
+            return 'ui-tooltip';
+          }
           if (id.includes('node_modules/@radix-ui')) {
             return 'ui-radix';
           }
+
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // UTILITIES & LIBRARIES
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
           // Date utilities - only needed for calendar/date features
           if (id.includes('node_modules/date-fns')) {
             return 'date-utils';
@@ -182,8 +245,8 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform')) {
             return 'forms';
           }
-          // Charts - only needed on dashboard
-          if (id.includes('node_modules/recharts')) {
+          // Charts - only needed on dashboard analytics
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) {
             return 'charts';
           }
           // Capacitor - only needed in native apps
@@ -194,7 +257,11 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/embla-carousel')) {
             return 'carousel';
           }
-          // Other vendor chunks - catch-all
+          // cmdk - command palette, rarely used
+          if (id.includes('node_modules/cmdk')) {
+            return 'cmdk';
+          }
+          // Other vendor chunks - catch-all (keep small)
           if (id.includes('node_modules')) {
             return 'vendor';
           }
