@@ -1733,138 +1733,28 @@ html[data-navigation-direction="back"] {
   }
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-/*  THEATER MARQUEE SYSTEM - Light Bulb Effect Typography            */
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-/* Light bulb sweep - traveling brightness across letters */
-@keyframes bulb-sweep {
-  0% { 
-    background-position: -200% center;
-  }
-  100% { 
+/* Electric sign marquee animation */
+@keyframes electric-marquee {
+  0% {
     background-position: 200% center;
   }
-}
-
-/* Flickering bulb effect for organic feel */
-@keyframes bulb-flicker {
-  0%, 100% { opacity: 0.92; }
-  10% { opacity: 1; }
-  20% { opacity: 0.88; }
-  30% { opacity: 1; }
-  50% { opacity: 0.95; }
-  70% { opacity: 1; }
-  90% { opacity: 0.9; }
-}
-
-/* Glow pulse for tap feedback */
-@keyframes glow-pulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 8px currentColor);
-  }
-  50% {
-    filter: drop-shadow(0 0 25px currentColor) drop-shadow(0 0 50px currentColor);
+  100% {
+    background-position: -200% center;
   }
 }
 
-/* Base marquee text style */
-.marquee-text {
-  font-family: 'Quicksand', 'Poppins', system-ui, sans-serif;
-  font-weight: 900;
-  font-size: clamp(1.6rem, 7vw, 2.8rem);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  position: relative;
-  display: inline-block;
-  white-space: nowrap;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  animation: bulb-flicker 3s ease-in-out infinite;
-}
-
-/* Client text - Cyan to Purple gradient with bulb sweep */
-.marquee-text-client {
-  background: linear-gradient(90deg, 
-    #06b6d4 0%, 
-    #22d3ee 15%,
-    #38bdf8 25%,
-    #ffffff 35%,
-    #ffffff 40%,
-    #60a5fa 50%,
-    #818cf8 65%,
-    #a78bfa 80%,
-    #c084fc 90%,
-    #06b6d4 100%
+.electric-text {
+  background: linear-gradient(
+    90deg, 
+    currentColor 0%, 
+    currentColor 40%,
+    rgba(255, 255, 255, 1) 50%,
+    currentColor 60%,
+    currentColor 100%
   );
-  background-size: 300% 100%;
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: 
-    bulb-sweep 4s ease-in-out infinite,
-    bulb-flicker 2.5s ease-in-out infinite;
-  filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.6))
-          drop-shadow(0 0 25px rgba(99, 102, 241, 0.4));
-}
-
-/* Owner text - Rose to Violet gradient with bulb sweep */
-.marquee-text-owner {
-  background: linear-gradient(90deg,
-    #f43f5e 0%,
-    #fb7185 15%,
-    #ec4899 25%,
-    #ffffff 35%,
-    #ffffff 40%,
-    #d946ef 50%,
-    #c084fc 65%,
-    #a855f7 80%,
-    #8b5cf6 90%,
-    #f43f5e 100%
-  );
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: 
-    bulb-sweep 4s ease-in-out infinite 1.5s,
-    bulb-flicker 2.8s ease-in-out infinite 0.5s;
-  filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.6))
-          drop-shadow(0 0 25px rgba(168, 85, 247, 0.4));
-}
-
-/* Marquee container */
-.marquee-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem 0;
-  position: relative;
-}
-
-/* Tap/hover glow boost */
-.marquee-text:hover,
-.marquee-text:active {
-  animation-play-state: running;
-}
-
-.marquee-text-client:hover {
-  filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.9))
-          drop-shadow(0 0 40px rgba(99, 102, 241, 0.7))
-          drop-shadow(0 0 60px rgba(6, 182, 212, 0.5));
-}
-
-.marquee-text-owner:hover {
-  filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.9))
-          drop-shadow(0 0 40px rgba(168, 85, 247, 0.7))
-          drop-shadow(0 0 60px rgba(236, 72, 153, 0.5));
-}
-
-/* Color customization CSS variables for future use */
-:root {
-  --marquee-client-primary: 186 100% 42%;
-  --marquee-client-secondary: 250 89% 70%;
-  --marquee-owner-primary: 347 77% 60%;
-  --marquee-owner-secondary: 270 91% 65%;
+  animation: electric-marquee 2s linear infinite;
 }
