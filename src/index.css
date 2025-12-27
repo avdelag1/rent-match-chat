@@ -1732,3 +1732,29 @@ html[data-navigation-direction="back"] {
     mix-blend-mode: normal;
   }
 }
+
+/* Electric sign marquee animation */
+@keyframes electric-marquee {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.electric-text {
+  background: linear-gradient(
+    90deg, 
+    currentColor 0%, 
+    currentColor 40%,
+    rgba(255, 255, 255, 1) 50%,
+    currentColor 60%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: electric-marquee 2s linear infinite;
+}
