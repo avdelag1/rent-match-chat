@@ -55,13 +55,13 @@ const Index = () => {
     }
   }, [user, profileLoading, isFetching, refetch]);
 
-  // Add timeout to prevent infinite loading - show landing page after 6 seconds
+  // Add timeout to prevent infinite loading - show landing page after 10 seconds
   useEffect(() => {
     if (user && (profileLoading || isFetching || !userRole)) {
       const timeout = setTimeout(() => {
-        logger.log('[Index] Loading timeout reached (6s), showing fallback...');
+        logger.log('[Index] Loading timeout reached (10s), showing fallback...');
         setLoadingTimeout(true);
-      }, 6000); // Reduced from 10s to 6s for faster feedback on timeout
+      }, 10000); // Increased to 10s to give more time for role to load
 
       return () => clearTimeout(timeout);
     }
@@ -134,16 +134,23 @@ const Index = () => {
 
   // Show loading spinner when user is authenticated but role is loading
   // This prevents showing the "I'm a Client" / "I'm an Owner" buttons after login
-  if (user && (profileLoading || isFetching || !userRole) && !loadingTimeout) {
-    return (
-      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-        <div className="text-center space-y-4">
-          {/* Simple loading spinner */}
-          <div className="w-12 h-12 mx-auto border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-          <p className="text-white/70 text-sm">Loading your dashboard...</p>
+  // CRITICAL: This must come BEFORE the landing page render to prevent flickering
+  if (user && !loadingTimeout) {
+    // Show loading state if:
+    // 1. Still loading profile data
+    // 2. Still fetching profile data
+    // 3. User role hasn't been determined yet
+    if (profileLoading || isFetching || !userRole) {
+      return (
+        <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+          <div className="text-center space-y-4">
+            {/* Simple loading spinner */}
+            <div className="w-12 h-12 mx-auto border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+            <p className="text-white/70 text-sm">Loading your dashboard...</p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   // If loading timeout reached, show error with retry option

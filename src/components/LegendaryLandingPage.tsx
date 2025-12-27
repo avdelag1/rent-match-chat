@@ -165,10 +165,10 @@ function LegendaryLandingPage() {
               <span
                 className="swipess-logo-simple swipess-logo-shine-container block"
                 style={{
-                  fontSize: 'clamp(2.5rem, 14vw, 5rem)',
+                  fontSize: 'clamp(2rem, 10vw, 3.5rem)',
                 }}
               >
-                SWIPESS
+                Swipes
               </span>
             </h1>
           </div>
