@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Share, Plus, Smartphone } from 'lucide-react';
+import { X, Share, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -145,9 +145,10 @@ export function PWAInstallBanner() {
             {showIOSInstructions ? (
               // iOS Instructions
               <div className="pr-6">
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
-                    <Smartphone className="h-5 w-5 text-white" />
+                <div className="mb-3 flex items-center gap-3">
+                  {/* Professional App Icon */}
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
+                    <span className="font-bold text-2xl text-white drop-shadow-sm" style={{ fontFamily: 'Quicksand, Poppins, sans-serif' }}>S</span>
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground">Install SWIPESS</h3>
@@ -182,8 +183,9 @@ export function PWAInstallBanner() {
             ) : (
               // Main banner content
               <div className="flex items-start gap-3 pr-6">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500 shadow-lg shadow-orange-500/20">
-                  <Download className="h-6 w-6 text-white" />
+                {/* Professional App Icon - Modern rounded square with "S" */}
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 shadow-lg shadow-orange-500/30 ring-1 ring-white/20">
+                  <span className="font-bold text-3xl text-white drop-shadow-sm" style={{ fontFamily: 'Quicksand, Poppins, sans-serif' }}>S</span>
                 </div>
 
                 <div className="flex-1">
@@ -198,16 +200,15 @@ export function PWAInstallBanner() {
                     <Button
                       onClick={handleInstall}
                       size="sm"
-                      className="h-8 bg-gradient-to-r from-orange-500 to-red-500 px-4 text-xs font-medium text-white hover:from-orange-600 hover:to-red-600"
+                      className="h-9 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-5 text-xs font-semibold text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/30 transition-all"
                     >
-                      <Download className="mr-1.5 h-3.5 w-3.5" />
-                      Install
+                      Install App
                     </Button>
                     <Button
                       onClick={handleDismiss}
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground"
+                      className="h-9 rounded-xl px-3 text-xs text-muted-foreground hover:text-foreground"
                     >
                       Not now
                     </Button>
