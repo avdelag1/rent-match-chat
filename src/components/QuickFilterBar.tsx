@@ -95,6 +95,8 @@ function FilterDropdown({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -106,14 +108,28 @@ function FilterDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+      });
+    }
+  }, [isOpen]);
+
   const selectedOption = options.find(o => o.id === value);
 
   return (
     <div ref={dropdownRef} className="relative flex-shrink-0">
       <motion.button
+        ref={buttonRef}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         className={cn(
           'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
           'border',
@@ -134,17 +150,23 @@ function FilterDropdown({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -5, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 mt-1 z-50 min-w-[120px] bg-popover border border-border rounded-lg shadow-xl overflow-hidden"
+            style={{
+              position: 'fixed',
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+            }}
+            className="z-[9999] min-w-[120px] bg-popover border border-border rounded-lg shadow-xl overflow-hidden pointer-events-auto"
           >
             {options.map((option) => (
               <button
                 key={option.id}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onChange(option.id);
                   setIsOpen(false);
                 }}
                 className={cn(
-                  'w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors',
+                  'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left transition-colors',
                   value === option.id
                     ? 'bg-primary/10 text-primary font-medium'
                     : 'text-foreground hover:bg-muted'
