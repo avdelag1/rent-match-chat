@@ -71,7 +71,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [quickFilters, setQuickFilters] = useState<QuickFilters>({
     categories: [],
     listingType: 'both',
-    showHireServices: false,
     clientGender: 'any',
     clientType: 'all',
   });
@@ -245,16 +244,18 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     const base = appliedFilters || {};
 
     // Check if any quick filters are active
-    const hasClientQuickFilters = quickFilters.categories.length > 0 || 
-                                   quickFilters.listingType !== 'both' || 
-                                   quickFilters.showHireServices;
-    const hasOwnerQuickFilters = (quickFilters.clientGender && quickFilters.clientGender !== 'any') || 
+    const hasClientQuickFilters = quickFilters.categories.length > 0 ||
+                                   quickFilters.listingType !== 'both';
+    const hasOwnerQuickFilters = (quickFilters.clientGender && quickFilters.clientGender !== 'any') ||
                                   (quickFilters.clientType && quickFilters.clientType !== 'all');
 
     // If no quick filters active, return base filters
     if (!hasClientQuickFilters && !hasOwnerQuickFilters) {
       return base;
     }
+
+    // Check if services category is selected
+    const hasServicesCategory = quickFilters.categories.includes('services');
 
     return {
       ...base,
@@ -263,8 +264,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       categories: quickFilters.categories.length > 0 ? quickFilters.categories : undefined,
       // Quick filter listing type takes precedence if not 'both'
       listingType: quickFilters.listingType !== 'both' ? quickFilters.listingType : base.listingType,
-      // Client hire services filter
-      showHireServices: quickFilters.showHireServices || undefined,
+      // Services filter - derived from categories
+      showHireServices: hasServicesCategory || undefined,
       // Owner quick filters
       clientGender: quickFilters.clientGender !== 'any' ? quickFilters.clientGender : undefined,
       clientType: quickFilters.clientType !== 'all' ? quickFilters.clientType : undefined,
