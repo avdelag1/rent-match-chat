@@ -1,14 +1,24 @@
-// Dynamic cache versioning - automatically updated on each build
-const CACHE_VERSION = `swipematch-v${Date.now()}`;
+/**
+ * Ultra-Fast Service Worker - Optimized for lightning-speed loading
+ * Cache version is injected at build time for proper cache busting
+ */
+const BUILD_TIME = '__BUILD_TIME__';
+const CACHE_VERSION = `tinderent-v${BUILD_TIME}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
+const IMAGE_CACHE = `${CACHE_NAME}-images`;
 
+// Critical assets to precache immediately
 const urlsToCache = [
   '/',
   '/manifest.json',
   '/index.html'
 ];
+
+// Maximum cache sizes (number of items)
+const MAX_DYNAMIC_CACHE_SIZE = 100;
+const MAX_IMAGE_CACHE_SIZE = 200;
 
 // Message handler for version requests
 self.addEventListener('message', (event) => {

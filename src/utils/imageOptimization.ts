@@ -139,3 +139,107 @@ export async function preloadImages(urls: string[]): Promise<void> {
     validUrls.map(url => preloadImage(url))
   );
 }
+
+/**
+ * Ultra-Fast Image Preloader with priority queue
+ * Preloads images in order of importance
+ */
+class ImagePreloadQueue {
+  private queue: Array<{ url: string; priority: number; resolve: () => void }> = [];
+  private loading = 0;
+  private readonly maxConcurrent = 4;
+
+  add(url: string, priority: number = 0): Promise<void> {
+    return new Promise((resolve) => {
+      this.queue.push({ url, priority, resolve });
+      this.queue.sort((a, b) => b.priority - a.priority);
+      this.processQueue();
+    });
+  }
+
+  private processQueue(): void {
+    while (this.loading < this.maxConcurrent && this.queue.length > 0) {
+      const item = this.queue.shift();
+      if (!item) break;
+
+      this.loading++;
+      preloadImage(item.url)
+        .finally(() => {
+          this.loading--;
+          item.resolve();
+          this.processQueue();
+        });
+    }
+  }
+}
+
+export const imagePreloadQueue = new ImagePreloadQueue();
+
+/**
+ * Create responsive srcset for optimal image loading
+ */
+export function createSrcSet(url: string): string {
+  if (!url || !url.includes('supabase.co/storage')) {
+    return '';
+  }
+
+  const sizes = [320, 640, 960, 1280, 1920];
+  return sizes
+    .map(size => `${optimizeImageUrl(url, { width: size })} ${size}w`)
+    .join(', ');
+}
+
+/**
+ * Get optimal image size based on viewport and device pixel ratio
+ */
+export function getOptimalImageSize(containerWidth: number): number {
+  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+  const optimalWidth = containerWidth * dpr;
+
+  // Round up to nearest size step for better caching
+  const sizeSteps = [320, 640, 960, 1280, 1920];
+  return sizeSteps.find(size => size >= optimalWidth) || 1920;
+}
+
+/**
+ * Create lazy loading observer for images
+ * Uses Intersection Observer for viewport-based loading
+ */
+export function createImageObserver(
+  callback: (entry: IntersectionObserverEntry) => void,
+  options?: IntersectionObserverInit
+): IntersectionObserver | null {
+  if (typeof IntersectionObserver === 'undefined') return null;
+
+  return new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          callback(entry);
+        }
+      });
+    },
+    {
+      rootMargin: '200px', // Start loading 200px before visible
+      threshold: 0,
+      ...options,
+    }
+  );
+}
+
+/**
+ * Native lazy loading attributes for images
+ */
+export const lazyImageProps = {
+  loading: 'lazy' as const,
+  decoding: 'async' as const,
+};
+
+/**
+ * Priority image loading attributes (for above-fold images)
+ */
+export const priorityImageProps = {
+  loading: 'eager' as const,
+  decoding: 'async' as const,
+  fetchPriority: 'high' as const,
+};
