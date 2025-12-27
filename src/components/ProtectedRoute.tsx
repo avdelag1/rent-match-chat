@@ -26,7 +26,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return () => clearTimeout(timer);
   }, [loading]);
 
-  const { data: userRole, isLoading: profileLoading, isError } = useQuery({
+  const { data: userRole, isLoading: profileLoading, isError, isFetching } = useQuery({
     queryKey: ['user-role', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -44,10 +44,12 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return data?.role;
     },
     enabled: !!user,
-    retry: 2,
-    retryDelay: 300,
-    staleTime: 30 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
+    retry: 3, // Increased from 2 to match Index.tsx
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Match Index.tsx exponential backoff
+    staleTime: 60000, // Match Index.tsx (60 seconds)
+    gcTime: 300000, // Match Index.tsx (5 minutes)
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     }
 
     // Show loading while checking auth/role
-    if (loading || profileLoading) {
+    if (loading || profileLoading || isFetching) {
       return;
     }
 
@@ -68,14 +70,15 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return;
     }
 
-    // Handle query error
-    if (isError) {
-      console.error('[ProtectedRoute] Role query failed');
+    // Handle query error - only after retries are exhausted and we're not fetching
+    if (isError && !profileLoading && !isFetching) {
+      console.error('[ProtectedRoute] Role query failed after retries');
       navigate('/', { replace: true });
       return;
     }
 
-    if (!userRole && !profileLoading) {
+    // Only redirect if we're certain there's no role (not loading, not fetching, query completed)
+    if (!userRole && !profileLoading && !isFetching) {
       console.error('[ProtectedRoute] User authenticated but no role found');
       toast({
         title: "Account setup incomplete",
@@ -96,15 +99,15 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       });
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, navigate, location, requiredRole, timedOut, isError]);
+  }, [user, userRole, loading, profileLoading, isFetching, navigate, location, requiredRole, timedOut, isError]);
 
   // Return null during loading - no blocking screen
-  if (loading) {
+  if (loading || isFetching) {
     return null;
   }
 
   // Return null while fetching role
-  if (profileLoading && userRole === undefined) {
+  if (profileLoading) {
     return null;
   }
 
