@@ -52,7 +52,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
   const [interests, setInterests] = useState<string[]>([]);
 
 const steps = [
-    { title: 'Welcome', icon: Sparkles, description: 'Welcome to SWIPESS!' },
+    { title: 'Welcome', icon: Sparkles, description: 'Get started with SWIPESS' },
     { title: 'Photos', icon: Camera, description: 'Add your profile photos' },
     { title: 'Basic Info', icon: User, description: 'Tell us about yourself' },
     { title: 'Demographics', icon: Globe, description: 'A bit more about you' },
@@ -190,13 +190,11 @@ const steps = [
             className="text-center space-y-6 py-8"
           >
             <div className="flex justify-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center">
-                <Sparkles className="w-10 h-10 text-white" />
-              </div>
+              <span className="swipess-logo-medium text-4xl">SWIPESS</span>
             </div>
             <div>
-              <h2 className="text-3xl font-bold font-brand tracking-tighter bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-3">
-                Welcome to SWIPESS!
+              <h2 className="text-2xl font-bold text-white mb-3">
+                Welcome!
               </h2>
               <p className="text-lg text-white/80">
                 Let's set up your profile in just a few steps.
