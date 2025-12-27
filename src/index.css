@@ -715,22 +715,18 @@ body {
     z-index: -3;
   }
 
-  /* Simplified version without pseudo-elements for inline use */
+  /* Simplified version - Clean modern professional look */
   .swipess-logo-simple {
     font-family: 'Quicksand', 'Poppins', system-ui, sans-serif;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
-    background: linear-gradient(180deg, #FFE066 0%, #FFD700 20%, #FFC107 40%, #FF9800 70%, #FF6D00 100%);
+    background: linear-gradient(135deg, #FFB347 0%, #FF9F40 30%, #FF7F50 60%, #FF6B6B 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: none;
-    paint-order: stroke fill;
-    -webkit-text-stroke: 2px #8B2500;
-    filter:
-      drop-shadow(1px 2px 0px #5C1500)
-      drop-shadow(2px 3px 0px #3D0E00)
-      drop-shadow(0 8px 16px rgba(255, 140, 0, 0.5));
+    /* NO stroke - clean modern look */
+    filter: drop-shadow(0 4px 12px rgba(255, 127, 80, 0.35));
   }
 
   /* Title wave animation - subtle light sweep effect */
@@ -770,21 +766,17 @@ body {
     mix-blend-mode: overlay;
   }
 
-  /* TopBar smaller version */
+  /* TopBar smaller version - Clean professional */
   .swipess-logo-header {
     font-family: 'Quicksand', 'Poppins', system-ui, sans-serif;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
-    background: linear-gradient(180deg, #FFE066 0%, #FFD700 25%, #FFC107 50%, #FF9800 75%, #FF6D00 100%);
+    background: linear-gradient(135deg, #FFB347 0%, #FF9F40 30%, #FF7F50 60%, #FF6B6B 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    paint-order: stroke fill;
-    -webkit-text-stroke: 1.5px #8B2500;
-    filter:
-      drop-shadow(1px 1px 0px #5C1500)
-      drop-shadow(1px 2px 0px #3D0E00)
-      drop-shadow(0 4px 8px rgba(255, 140, 0, 0.4));
+    /* NO stroke - clean modern look */
+    filter: drop-shadow(0 3px 8px rgba(255, 127, 80, 0.3));
   }
 
 
