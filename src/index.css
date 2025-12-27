@@ -667,33 +667,33 @@ body {
     font-style: normal;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 8%, #FFD699 16%, #FFC266 32%, #FF9944 48%, #FF6633 72%, #DD3333 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
     /* Bold cartoon outline and 3D depth */
-    -webkit-text-stroke: 3px #7B2000;
+    -webkit-text-stroke: 3px #8B2C2C;
     paint-order: stroke fill;
     text-shadow:
       /* Thick outline for cartoon effect */
-      -2px -2px 0 #6D1B00,
-      2px -2px 0 #6D1B00,
-      -2px 2px 0 #6D1B00,
-      2px 2px 0 #6D1B00,
-      -3px 0 0 #6D1B00,
-      3px 0 0 #6D1B00,
-      0 -3px 0 #6D1B00,
-      0 3px 0 #6D1B00,
+      -2px -2px 0 #7A2424,
+      2px -2px 0 #7A2424,
+      -2px 2px 0 #7A2424,
+      2px 2px 0 #7A2424,
+      -3px 0 0 #7A2424,
+      3px 0 0 #7A2424,
+      0 -3px 0 #7A2424,
+      0 3px 0 #7A2424,
       /* 3D extrusion depth */
-      0 4px 0 #5A1500,
-      0 5px 0 #4A1200,
-      0 6px 0 #3A0E00,
+      0 4px 0 #6A1E1E,
+      0 5px 0 #5A1818,
+      0 6px 0 #4A1212,
       /* Soft drop shadow */
-      0 8px 12px rgba(0, 0, 0, 0.4),
-      0 12px 20px rgba(0, 0, 0, 0.25);
-    filter: drop-shadow(0 5px 14px rgba(139, 37, 0, 0.4));
+      0 8px 12px rgba(139, 37, 37, 0.4),
+      0 12px 20px rgba(139, 37, 37, 0.25);
+    filter: drop-shadow(0 5px 14px rgba(221, 51, 51, 0.4));
   }
 
   .swipess-logo::before {
@@ -718,7 +718,7 @@ body {
     transform: translateX(-50%);
     width: 90%;
     height: 30px;
-    background: radial-gradient(ellipse at center, rgba(255, 167, 38, 0.6) 0%, rgba(255, 152, 0, 0.35) 40%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(255, 102, 51, 0.6) 0%, rgba(255, 68, 68, 0.35) 40%, transparent 70%);
     filter: blur(12px);
     z-index: -3;
   }
@@ -730,33 +730,33 @@ body {
     font-style: normal;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 8%, #FFD699 16%, #FFC266 32%, #FF9944 48%, #FF6633 72%, #DD3333 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
     /* Bold cartoon outline and 3D depth */
-    -webkit-text-stroke: 2.5px #7B2000;
+    -webkit-text-stroke: 2.5px #8B2C2C;
     paint-order: stroke fill;
     text-shadow:
       /* Thick outline for cartoon effect */
-      -2px -2px 0 #6D1B00,
-      2px -2px 0 #6D1B00,
-      -2px 2px 0 #6D1B00,
-      2px 2px 0 #6D1B00,
-      -2px 0 0 #6D1B00,
-      2px 0 0 #6D1B00,
-      0 -2px 0 #6D1B00,
-      0 2px 0 #6D1B00,
+      -2px -2px 0 #7A2424,
+      2px -2px 0 #7A2424,
+      -2px 2px 0 #7A2424,
+      2px 2px 0 #7A2424,
+      -2px 0 0 #7A2424,
+      2px 0 0 #7A2424,
+      0 -2px 0 #7A2424,
+      0 2px 0 #7A2424,
       /* 3D extrusion depth */
-      0 3px 0 #5A1500,
-      0 4px 0 #4A1200,
-      0 5px 0 #3A0E00,
+      0 3px 0 #6A1E1E,
+      0 4px 0 #5A1818,
+      0 5px 0 #4A1212,
       /* Soft drop shadow */
-      0 6px 10px rgba(0, 0, 0, 0.35),
-      0 10px 18px rgba(0, 0, 0, 0.2);
-    filter: drop-shadow(0 4px 12px rgba(139, 37, 0, 0.35));
+      0 6px 10px rgba(139, 37, 37, 0.35),
+      0 10px 18px rgba(139, 37, 37, 0.2);
+    filter: drop-shadow(0 4px 12px rgba(221, 51, 51, 0.35));
   }
 
   /* Premium shine sweep animation */
@@ -818,28 +818,28 @@ body {
     font-style: normal;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 8%, #FFD699 16%, #FFC266 32%, #FF9944 48%, #FF6633 72%, #DD3333 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
     /* Scaled down cartoon outline for header */
-    -webkit-text-stroke: 1.5px #7B2000;
+    -webkit-text-stroke: 1.5px #8B2C2C;
     paint-order: stroke fill;
     text-shadow:
       /* Outline for cartoon effect */
-      -1px -1px 0 #6D1B00,
-      1px -1px 0 #6D1B00,
-      -1px 1px 0 #6D1B00,
-      1px 1px 0 #6D1B00,
+      -1px -1px 0 #7A2424,
+      1px -1px 0 #7A2424,
+      -1px 1px 0 #7A2424,
+      1px 1px 0 #7A2424,
       /* 3D depth */
-      0 2px 0 #5A1500,
-      0 3px 0 #4A1200,
+      0 2px 0 #6A1E1E,
+      0 3px 0 #5A1818,
       /* Shadow */
-      0 3px 6px rgba(0, 0, 0, 0.3),
-      0 5px 10px rgba(0, 0, 0, 0.2);
-    filter: drop-shadow(0 2px 6px rgba(139, 37, 0, 0.3));
+      0 3px 6px rgba(139, 37, 37, 0.3),
+      0 5px 10px rgba(139, 37, 37, 0.2);
+    filter: drop-shadow(0 2px 6px rgba(221, 51, 51, 0.3));
   }
 
   /* Inline text logo style - for use within sentences */
@@ -849,11 +849,11 @@ body {
     font-style: normal;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFCA28 50%, #FF9800 100%);
+    background: linear-gradient(180deg, #FFE5CC 0%, #FF9944 50%, #FF6633 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1px #7B2000;
+    -webkit-text-stroke: 1px #8B2C2C;
     paint-order: stroke fill;
   }
 
@@ -864,24 +864,24 @@ body {
     font-style: normal;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFE5CC 8%, #FFD699 16%, #FFC266 32%, #FF9944 48%, #FF6633 72%, #DD3333 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
-    -webkit-text-stroke: 2px #7B2000;
+    -webkit-text-stroke: 2px #8B2C2C;
     paint-order: stroke fill;
     text-shadow:
-      -1.5px -1.5px 0 #6D1B00,
-      1.5px -1.5px 0 #6D1B00,
-      -1.5px 1.5px 0 #6D1B00,
-      1.5px 1.5px 0 #6D1B00,
-      0 2.5px 0 #5A1500,
-      0 3.5px 0 #4A1200,
-      0 4px 8px rgba(0, 0, 0, 0.3),
-      0 6px 12px rgba(0, 0, 0, 0.2);
-    filter: drop-shadow(0 3px 8px rgba(139, 37, 0, 0.35));
+      -1.5px -1.5px 0 #7A2424,
+      1.5px -1.5px 0 #7A2424,
+      -1.5px 1.5px 0 #7A2424,
+      1.5px 1.5px 0 #7A2424,
+      0 2.5px 0 #6A1E1E,
+      0 3.5px 0 #5A1818,
+      0 4px 8px rgba(139, 37, 37, 0.3),
+      0 6px 12px rgba(139, 37, 37, 0.2);
+    filter: drop-shadow(0 3px 8px rgba(221, 51, 51, 0.35));
   }
 
 
