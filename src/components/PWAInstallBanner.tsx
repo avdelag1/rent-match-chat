@@ -136,7 +136,7 @@ export function PWAInstallBanner() {
               </button>
 
               <div className="pr-6 space-y-3">
-                <h3 className="font-semibold text-white text-sm">Install <span className="swipess-text">SWIPESS</span></h3>
+                <h3 className="font-semibold text-white text-sm">Install SWIPESS</h3>
                 <div className="space-y-2 text-xs text-white/70">
                   {isIOS ? (
                     <>

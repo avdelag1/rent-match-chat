@@ -660,40 +660,37 @@ body {
   }
 
   /* ===== SWIPESS LOGO STYLE ===== */
-  /* Bold 3D cartoon-style logo with bright yellow-orange gradient - matches brand image */
+  /* Bold 3D game-style logo with metallic orange-gold gradient, dark outline, and glow */
   .swipess-logo {
-    font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
+    font-family: 'Quicksand', 'Poppins', 'Impact', system-ui, sans-serif;
     font-weight: 900;
-    font-style: normal;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
+    font-style: italic;
+    letter-spacing: 0.02em;
+    background: linear-gradient(180deg, #FFE97F 0%, #FFDB4D 15%, #FFC107 35%, #FF9800 60%, #FF6D00 85%, #E65100 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
-    /* Bold cartoon outline and 3D depth */
-    -webkit-text-stroke: 3px #7B2000;
-    paint-order: stroke fill;
+    /* Bold 3D shadow stack for maximum depth */
+    -webkit-text-stroke: 4px #8B2500;
     text-shadow:
-      /* Thick outline for cartoon effect */
-      -2px -2px 0 #6D1B00,
-      2px -2px 0 #6D1B00,
-      -2px 2px 0 #6D1B00,
-      2px 2px 0 #6D1B00,
-      -3px 0 0 #6D1B00,
-      3px 0 0 #6D1B00,
-      0 -3px 0 #6D1B00,
-      0 3px 0 #6D1B00,
-      /* 3D extrusion depth */
-      0 4px 0 #5A1500,
-      0 5px 0 #4A1200,
-      0 6px 0 #3A0E00,
-      /* Soft drop shadow */
-      0 8px 12px rgba(0, 0, 0, 0.4),
-      0 12px 20px rgba(0, 0, 0, 0.25);
-    filter: drop-shadow(0 5px 14px rgba(139, 37, 0, 0.4));
+      /* Inner highlight */
+      0 2px 0 rgba(255, 255, 255, 0.4),
+      /* Dark outline layers */
+      -3px -3px 0 #5C1500,
+      3px -3px 0 #5C1500,
+      -3px 3px 0 #5C1500,
+      3px 3px 0 #5C1500,
+      /* Extra thick 3D depth */
+      0 5px 0 #3D0E00,
+      0 7px 0 #2D0A00,
+      0 9px 0 #1D0600,
+      0 11px 0 #0D0300,
+      /* Shadow blur layers */
+      0 10px 16px rgba(0, 0, 0, 0.7),
+      0 15px 30px rgba(0, 0, 0, 0.5);
+    filter: drop-shadow(0 8px 20px rgba(139, 37, 0, 0.6));
   }
 
   .swipess-logo::before {
@@ -718,45 +715,41 @@ body {
     transform: translateX(-50%);
     width: 90%;
     height: 30px;
-    background: radial-gradient(ellipse at center, rgba(255, 167, 38, 0.6) 0%, rgba(255, 152, 0, 0.35) 40%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(255, 109, 0, 0.7) 0%, rgba(255, 109, 0, 0.4) 40%, transparent 70%);
     filter: blur(12px);
     z-index: -3;
   }
 
-  /* Simplified version - Bold cartoon look for main landing page */
+  /* Simplified version - Bold 3D metallic look matching the design */
   .swipess-logo-simple {
-    font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
+    font-family: 'Quicksand', 'Poppins', 'Impact', system-ui, sans-serif;
     font-weight: 900;
-    font-style: normal;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
+    font-style: italic;
+    letter-spacing: 0.02em;
+    background: linear-gradient(180deg, #FFE97F 0%, #FFDB4D 15%, #FFC107 35%, #FF9800 60%, #FF6D00 85%, #E65100 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
-    /* Bold cartoon outline and 3D depth */
-    -webkit-text-stroke: 2.5px #7B2000;
-    paint-order: stroke fill;
+    /* Bold 3D shadow stack for depth */
+    -webkit-text-stroke: 3px #8B2500;
     text-shadow:
-      /* Thick outline for cartoon effect */
-      -2px -2px 0 #6D1B00,
-      2px -2px 0 #6D1B00,
-      -2px 2px 0 #6D1B00,
-      2px 2px 0 #6D1B00,
-      -2px 0 0 #6D1B00,
-      2px 0 0 #6D1B00,
-      0 -2px 0 #6D1B00,
-      0 2px 0 #6D1B00,
-      /* 3D extrusion depth */
-      0 3px 0 #5A1500,
-      0 4px 0 #4A1200,
-      0 5px 0 #3A0E00,
-      /* Soft drop shadow */
-      0 6px 10px rgba(0, 0, 0, 0.35),
-      0 10px 18px rgba(0, 0, 0, 0.2);
-    filter: drop-shadow(0 4px 12px rgba(139, 37, 0, 0.35));
+      /* Inner highlight */
+      0 1px 0 rgba(255, 255, 255, 0.4),
+      /* Dark outline layers */
+      -2px -2px 0 #5C1500,
+      2px -2px 0 #5C1500,
+      -2px 2px 0 #5C1500,
+      2px 2px 0 #5C1500,
+      /* 3D depth */
+      0 4px 0 #3D0E00,
+      0 5px 0 #2D0A00,
+      0 6px 0 #1D0600,
+      /* Shadow blur */
+      0 8px 12px rgba(0, 0, 0, 0.6),
+      0 12px 24px rgba(0, 0, 0, 0.4);
+    filter: drop-shadow(0 6px 16px rgba(139, 37, 0, 0.5));
   }
 
   /* Premium shine sweep animation */
@@ -811,77 +804,35 @@ body {
     transform: skewX(-20deg);
   }
 
-  /* TopBar smaller version - Bold cartoon look for header */
+  /* TopBar smaller version - Bold 3D metallic look */
   .swipess-logo-header {
-    font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
+    font-family: 'Quicksand', 'Poppins', 'Impact', system-ui, sans-serif;
     font-weight: 900;
-    font-style: normal;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    position: relative;
-    display: inline-block;
-    /* Scaled down cartoon outline for header */
-    -webkit-text-stroke: 1.5px #7B2000;
-    paint-order: stroke fill;
-    text-shadow:
-      /* Outline for cartoon effect */
-      -1px -1px 0 #6D1B00,
-      1px -1px 0 #6D1B00,
-      -1px 1px 0 #6D1B00,
-      1px 1px 0 #6D1B00,
-      /* 3D depth */
-      0 2px 0 #5A1500,
-      0 3px 0 #4A1200,
-      /* Shadow */
-      0 3px 6px rgba(0, 0, 0, 0.3),
-      0 5px 10px rgba(0, 0, 0, 0.2);
-    filter: drop-shadow(0 2px 6px rgba(139, 37, 0, 0.3));
-  }
-
-  /* Inline text logo style - for use within sentences */
-  .swipess-text {
-    font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
-    font-weight: 800;
-    font-style: normal;
+    font-style: italic;
     letter-spacing: 0.02em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFCA28 50%, #FF9800 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1px #7B2000;
-    paint-order: stroke fill;
-  }
-
-  /* Medium size logo - for dialogs and cards */
-  .swipess-logo-medium {
-    font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
-    font-weight: 900;
-    font-style: normal;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: linear-gradient(180deg, #FFF176 0%, #FFEE58 12%, #FFD54F 28%, #FFCA28 45%, #FFA726 65%, #FF9800 80%, #F57C00 100%);
+    background: linear-gradient(180deg, #FFE97F 0%, #FFDB4D 15%, #FFC107 35%, #FF9800 60%, #FF6D00 85%, #E65100 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
-    -webkit-text-stroke: 2px #7B2000;
-    paint-order: stroke fill;
+    /* Scaled down 3D effect for header */
+    -webkit-text-stroke: 2px #8B2500;
     text-shadow:
-      -1.5px -1.5px 0 #6D1B00,
-      1.5px -1.5px 0 #6D1B00,
-      -1.5px 1.5px 0 #6D1B00,
-      1.5px 1.5px 0 #6D1B00,
-      0 2.5px 0 #5A1500,
-      0 3.5px 0 #4A1200,
-      0 4px 8px rgba(0, 0, 0, 0.3),
-      0 6px 12px rgba(0, 0, 0, 0.2);
-    filter: drop-shadow(0 3px 8px rgba(139, 37, 0, 0.35));
+      /* Inner highlight */
+      0 0.5px 0 rgba(255, 255, 255, 0.3),
+      /* Dark outline layers */
+      -1px -1px 0 #5C1500,
+      1px -1px 0 #5C1500,
+      -1px 1px 0 #5C1500,
+      1px 1px 0 #5C1500,
+      /* 3D depth */
+      0 2px 0 #3D0E00,
+      0 3px 0 #2D0A00,
+      /* Shadow blur */
+      0 4px 8px rgba(0, 0, 0, 0.5),
+      0 6px 12px rgba(0, 0, 0, 0.3);
+    filter: drop-shadow(0 3px 8px rgba(139, 37, 0, 0.4));
   }
 
 
