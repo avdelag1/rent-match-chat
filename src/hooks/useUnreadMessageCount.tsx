@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 
 export function useUnreadMessageCount() {
   const { user } = useAuth();
-  const refetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const refetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const query = useQuery({
     queryKey: ['unread-message-count', user?.id],
@@ -36,9 +36,7 @@ export function useUnreadMessageCount() {
           .select('id, conversation_id')
           .in('conversation_id', conversationIds)
           .neq('sender_id', user.id)
-          .eq('is_read', false)
-          .not('content', 'is', null)
-          .neq('content', '');
+          .eq('is_read', false);
 
         if (unreadError) throw unreadError;
 

@@ -14,7 +14,6 @@ import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
-import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -120,7 +119,7 @@ const App = () => (
                     <Sonner />
                   </TooltipProvider>
                 </Suspense>
-                <Suspense fallback={<AppLoadingScreen />}>
+                <Suspense fallback={null}>
                   <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
