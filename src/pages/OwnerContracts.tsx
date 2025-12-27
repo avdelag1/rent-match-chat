@@ -9,6 +9,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { ContractUploadDialog } from "@/components/ContractUploadDialog";
 import { ContractSigningDialog } from "@/components/ContractSigningDialog";
+import { SwipeNavigationWrapper } from "@/components/SwipeNavigationWrapper";
+import { ownerSettingsRoutes } from "@/config/swipeNavigationRoutes";
 
 const OwnerContracts = () => {
   const { data: contracts, isLoading: contractsLoading } = useContracts();
@@ -40,19 +42,22 @@ const OwnerContracts = () => {
   if (contractsLoading || dealsLoading) {
     return (
       <DashboardLayout userRole="owner">
-        <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground text-sm sm:text-base">Loading contracts...</p>
+        <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
+          <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground text-sm sm:text-base">Loading contracts...</p>
+            </div>
           </div>
-        </div>
+        </SwipeNavigationWrapper>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8">
+      <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
+        <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-4">Contract Management</h1>
@@ -179,7 +184,8 @@ const OwnerContracts = () => {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </SwipeNavigationWrapper>
 
       <ContractUploadDialog
         open={showUploadDialog}

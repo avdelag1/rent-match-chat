@@ -33,6 +33,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { SwipeNavigationWrapper } from '@/components/SwipeNavigationWrapper';
+import { clientSettingsRoutes, ownerSettingsRoutes } from '@/config/swipeNavigationRoutes';
 
 interface Notification {
   id: string;
@@ -329,9 +331,13 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  // Determine which routes to use based on user role
+  const swipeRoutes = userRole === 'owner' || userRole === 'admin' ? ownerSettingsRoutes : clientSettingsRoutes;
+
   return (
     <DashboardLayout userRole={(userRole === 'admin' ? 'owner' : userRole) || 'client'}>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 pb-24 overflow-y-auto">
+      <SwipeNavigationWrapper routes={swipeRoutes}>
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 pb-24 overflow-y-auto">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Header */}
@@ -526,7 +532,8 @@ export default function NotificationsPage() {
           </Tabs>
           </div>
         </div>
-      </div>
+        </div>
+      </SwipeNavigationWrapper>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

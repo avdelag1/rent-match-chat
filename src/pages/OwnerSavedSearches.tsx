@@ -6,6 +6,8 @@ import { Settings, Users } from "lucide-react";
 import { OwnerClientFilterDialog } from "@/components/OwnerClientFilterDialog";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { SwipeNavigationWrapper } from "@/components/SwipeNavigationWrapper";
+import { ownerSettingsRoutes } from "@/config/swipeNavigationRoutes";
 
 const OwnerSavedSearches = () => {
   const [showFilterDialog, setShowFilterDialog] = useState(false);
@@ -21,7 +23,8 @@ const OwnerSavedSearches = () => {
 
   return (
     <DashboardLayout userRole="owner">
-      <div className="w-full p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
+      <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
+        <div className="w-full p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
@@ -50,12 +53,13 @@ const OwnerSavedSearches = () => {
               </Button>
             </div>
           </div>
-          
+
           <SavedSearches userRole="owner" onApplyFilter={handleApplyFilter} />
         </div>
-      </div>
-      
-      <OwnerClientFilterDialog 
+        </div>
+      </SwipeNavigationWrapper>
+
+      <OwnerClientFilterDialog
         open={showFilterDialog}
         onOpenChange={setShowFilterDialog}
       />
