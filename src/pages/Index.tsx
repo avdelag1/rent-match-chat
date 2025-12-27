@@ -131,32 +131,40 @@ const Index = () => {
     }
   }, [user, userRole, loading, profileLoading, isError, navigate]);
 
-  // Show landing page while loading role (no blocking loader)
-  if (user && profileLoading && !loadingTimeout) {
+  // Show loading spinner when user is authenticated but role is loading
+  // This prevents showing the "I'm a Client" / "I'm an Owner" buttons after login
+  if (user && (profileLoading || !userRole) && !loadingTimeout) {
     return (
-      <div className="min-h-screen">
-        <LegendaryLandingPage />
+      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+        <div className="text-center space-y-4">
+          {/* Simple loading spinner */}
+          <div className="w-12 h-12 mx-auto border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+          <p className="text-white/70 text-sm">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  // If loading timeout reached, show landing page with error message
+  // If loading timeout reached, show error with retry option
   if (user && loadingTimeout) {
-    logger.error('[Index] Loading timeout - showing landing page with error');
-    toast({
-      title: "Loading Issue",
-      description: "Please try signing in again.",
-      variant: "destructive"
-    });
-    // Show landing page so user can try again
+    logger.error('[Index] Loading timeout - showing error');
     return (
-      <div className="min-h-screen">
-        <LegendaryLandingPage />
+      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+        <div className="text-center space-y-4 px-6">
+          <p className="text-white/90 text-lg font-medium">Taking longer than expected</p>
+          <p className="text-white/60 text-sm">Please refresh the page or try signing in again.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Show landing page if user is NOT authenticated (or while checking auth on initial load)
+  // Show landing page ONLY if user is NOT authenticated
   if (!user) {
     return (
       <div className="min-h-screen">
@@ -165,10 +173,10 @@ const Index = () => {
     );
   }
 
-  // Show landing page while navigating (no blocking loader)
+  // User is authenticated and has role - show loading while redirecting
   return (
-    <div className="min-h-screen">
-      <LegendaryLandingPage />
+    <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+      <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
     </div>
   );
 };
