@@ -7,6 +7,7 @@ import { RadioPlayerProvider } from "@/hooks/useRadioPlayer";
 import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
 import { RadioBubble } from "@/components/radio";
 import { RadioOverlays } from "@/components/radio/RadioOverlays";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
@@ -432,6 +433,7 @@ const App = () => (
               </AppLayout>
               <RadioBubble />
               <RadioOverlays />
+              <PWAInstallBanner />
             </NotificationWrapper>
             </RadioPlayerProvider>
             </ResponsiveProvider>
