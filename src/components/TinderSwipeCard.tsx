@@ -395,7 +395,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
               className="absolute bottom-[12%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none"
             >
               <div className="flex items-center gap-3 pointer-events-auto">
-                {/* Undo/Return Button */}
+                {/* Undo/Return Button - Premium Shine Effect */}
                 {onUndo && (
                   <motion.button
                     initial={{ scale: 0 }}
@@ -405,14 +405,14 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                       e.stopPropagation();
                       onUndo();
                     }}
-                    className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                    className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo"
                     title="Undo"
                   >
                     <RotateCcw className="w-5 h-5" />
                   </motion.button>
                 )}
 
-                {/* Dislike Button */}
+                {/* Dislike Button - Premium Shine Effect */}
                 <motion.button
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -421,13 +421,13 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                     e.stopPropagation();
                     onSwipe('left');
                   }}
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike"
                   title="Dislike"
                 >
                   <X className="w-7 h-7" strokeWidth={3} />
                 </motion.button>
 
-                {/* Insights Button */}
+                {/* Insights Button - Premium Shine Effect */}
                 {onInsights && hasPremium && (
                   <motion.button
                     initial={{ scale: 0 }}
@@ -437,14 +437,14 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                       e.stopPropagation();
                       onInsights();
                     }}
-                    className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                    className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights"
                     title="View Insights"
                   >
                     <Eye className="w-5 h-5" />
                   </motion.button>
                 )}
 
-                {/* Share Button */}
+                {/* Share Button - Premium Shine Effect */}
                 {onShare && (
                   <motion.button
                     initial={{ scale: 0 }}
@@ -454,14 +454,14 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                       e.stopPropagation();
                       onShare();
                     }}
-                    className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                    className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share"
                     title="Share"
                   >
                     <Share2 className="w-5 h-5" />
                   </motion.button>
                 )}
 
-                {/* Like Button */}
+                {/* Like Button - Premium Shine Effect */}
                 <motion.button
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -470,7 +470,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                     e.stopPropagation();
                     onSwipe('right');
                   }}
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                  className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-like"
                   title="Flame"
                 >
                   <Flame className="w-7 h-7" fill="currentColor" />

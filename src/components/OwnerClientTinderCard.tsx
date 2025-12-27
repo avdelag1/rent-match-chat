@@ -168,40 +168,58 @@ export function OwnerClientTinderCard({
       }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
     >
-      {/* Swipe Overlays - Enhanced Visibility */}
-      {/* Right Swipe - GREEN LIKE */}
+      {/* Swipe Overlays - PREMIUM with Neon Glow Effects */}
+      {/* Right Swipe - GREEN LIKE with animated shine */}
       <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none swipe-overlay-container like-overlay"
         style={{ opacity: rightOverlayOpacity }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/50 via-emerald-500/40 to-green-600/50 backdrop-blur-sm" />
+        {/* Enhanced radial gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/60 via-emerald-500/50 to-green-600/60 backdrop-blur-[6px]" />
+
+        {/* Animated glow rings */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-80 h-80 rounded-full bg-green-400/20 animate-ping" style={{ animationDuration: '2s' }} />
+          <div className="absolute w-64 h-64 rounded-full bg-green-500/25 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
+        </div>
+
         <motion.div
           className="relative text-center"
           style={{
-            scale: useTransform(rightOverlayOpacity, [0, 1], [0.8, 1.1]),
+            scale: useTransform(rightOverlayOpacity, [0, 1], [0.8, 1.15]),
             rotate: -12
           }}
         >
-          <span className="text-8xl font-black text-white tracking-wider drop-shadow-[0_8px_40px_rgba(34,197,94,1)]" style={{ textShadow: '0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
+          {/* Premium shiny text */}
+          <span className="text-8xl swipe-text-like">
             LIKE
           </span>
         </motion.div>
       </motion.div>
 
-      {/* Left Swipe - RED PASS */}
+      {/* Left Swipe - RED PASS with animated shine */}
       <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none swipe-overlay-container pass-overlay"
         style={{ opacity: leftOverlayOpacity }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/50 via-rose-500/40 to-red-600/50 backdrop-blur-sm" />
+        {/* Enhanced radial gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/60 via-rose-500/50 to-red-600/60 backdrop-blur-[6px]" />
+
+        {/* Animated glow rings */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-80 h-80 rounded-full bg-red-400/20 animate-ping" style={{ animationDuration: '2s' }} />
+          <div className="absolute w-64 h-64 rounded-full bg-red-500/25 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
+        </div>
+
         <motion.div
           className="relative text-center"
           style={{
-            scale: useTransform(leftOverlayOpacity, [0, 1], [0.8, 1.1]),
+            scale: useTransform(leftOverlayOpacity, [0, 1], [0.8, 1.15]),
             rotate: 12
           }}
         >
-          <span className="text-8xl font-black text-white tracking-wider drop-shadow-[0_8px_40px_rgba(239,68,68,1)]" style={{ textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.6), 0 4px 8px rgba(0,0,0,0.5)' }}>
+          {/* Premium shiny text */}
+          <span className="text-8xl swipe-text-pass">
             PASS
           </span>
         </motion.div>
@@ -451,67 +469,67 @@ export function OwnerClientTinderCard({
           }`}
         >
           <div className="flex items-center gap-3">
-            {/* Undo/Return Button */}
+            {/* Undo/Return Button - Premium Shine Effect */}
             {onUndo && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onUndo();
                 }}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo"
                 title="Undo"
               >
                 <RotateCcw className="w-5 h-5" />
               </button>
             )}
 
-            {/* Dislike Button */}
+            {/* Dislike Button - Premium Shine Effect */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onSwipe('left');
               }}
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+              className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike"
               title="Dislike"
             >
               <X className="w-7 h-7" strokeWidth={3} />
             </button>
 
-            {/* Insights Button */}
+            {/* Insights Button - Premium Shine Effect */}
             {onInsights && hasPremium && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onInsights();
                 }}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights"
                 title="View Insights"
               >
                 <Eye className="w-5 h-5" />
               </button>
             )}
 
-            {/* Share Button */}
+            {/* Share Button - Premium Shine Effect */}
             {onShare && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onShare();
                 }}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+                className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share"
                 title="Share"
               >
                 <Share2 className="w-5 h-5" />
               </button>
             )}
 
-            {/* Like Button */}
+            {/* Like Button - Premium Shine Effect */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onSwipe('right');
               }}
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+              className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart"
               title="Like"
             >
               <Heart className="w-7 h-7" fill="currentColor" />
