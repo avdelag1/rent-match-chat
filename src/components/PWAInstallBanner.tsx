@@ -15,7 +15,7 @@ export function PWAInstallBanner() {
   const [showBanner, setShowBanner] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
-  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const [showInstallInstructions, setShowInstallInstructions] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
@@ -89,33 +89,28 @@ export function PWAInstallBanner() {
   }, []);
 
   const handleInstall = useCallback(async () => {
-    if (isIOS) {
-      setShowIOSInstructions(true);
-      return;
-    }
-
-    if (!deferredPrompt) {
-      // No install prompt available, just share instead
-      handleShare();
-      return;
-    }
-
-    try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-
-      if (outcome === 'accepted') {
-        setShowBanner(false);
+    // If we have a native install prompt (Chrome/Android), use it
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          setShowBanner(false);
+        }
+        setDeferredPrompt(null);
+      } catch (error) {
+        console.error('Install prompt error:', error);
       }
-      setDeferredPrompt(null);
-    } catch (error) {
-      console.error('Install prompt error:', error);
+      return;
     }
-  }, [deferredPrompt, isIOS, handleShare]);
+
+    // Otherwise show manual install instructions
+    setShowInstallInstructions(true);
+  }, [deferredPrompt]);
 
   const handleDismiss = useCallback(() => {
     setShowBanner(false);
-    setShowIOSInstructions(false);
+    setShowInstallInstructions(false);
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
   }, []);
 
@@ -129,9 +124,9 @@ export function PWAInstallBanner() {
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999]"
         >
-          {showIOSInstructions ? (
-            // iOS Instructions - Compact Card
-            <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 p-4 shadow-2xl backdrop-blur-xl">
+          {showInstallInstructions ? (
+            // Install Instructions Card - works for iOS, Android, tablets
+            <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 p-4 shadow-2xl backdrop-blur-xl max-w-xs">
               <button
                 onClick={handleDismiss}
                 className="absolute right-2 top-2 rounded-full p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
@@ -143,28 +138,42 @@ export function PWAInstallBanner() {
               <div className="pr-6 space-y-3">
                 <h3 className="font-semibold text-white text-sm">Install SWIPESS</h3>
                 <div className="space-y-2 text-xs text-white/70">
-                  <div className="flex items-center gap-2">
-                    <Share className="h-3.5 w-3.5 text-blue-400" />
-                    <span>Tap <strong className="text-white">Share</strong></span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Plus className="h-3.5 w-3.5 text-orange-400" />
-                    <span>Select <strong className="text-white">"Add to Home Screen"</strong></span>
-                  </div>
+                  {isIOS ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <Share className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+                        <span>Tap <strong className="text-white">Share</strong> button below</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Plus className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />
+                        <span>Select <strong className="text-white">"Add to Home Screen"</strong></span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg flex-shrink-0">⋮</span>
+                        <span>Tap browser menu <strong className="text-white">(3 dots)</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Plus className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />
+                        <span>Select <strong className="text-white">"Add to Home Screen"</strong> or <strong className="text-white">"Install App"</strong></span>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 pt-1">
                   <button
-                    onClick={handleDismiss}
+                    onClick={() => setShowInstallInstructions(false)}
                     className="text-xs text-white/50 hover:text-white/80 transition-colors"
                   >
-                    Got it
+                    Back
                   </button>
                   <button
-                    onClick={handleShare}
-                    className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                    onClick={handleDismiss}
+                    className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
                   >
-                    <Share2 className="h-3 w-3" />
-                    Share
+                    Got it
                   </button>
                 </div>
               </div>
