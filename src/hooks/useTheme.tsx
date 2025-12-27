@@ -58,7 +58,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user?.id]);
 
-  // Apply theme class to document
+  // Apply theme class to document and update status bar
   useEffect(() => {
     const root = window.document.documentElement;
     // Remove all theme classes
@@ -66,6 +66,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Add current theme class
     root.classList.add(theme);
+
+    // Update status bar color based on theme
+    const themeColors: Record<string, string> = {
+      'grey-matte': '#1a1a1a',
+      'black-matte': '#000000',
+      'white-matte': '#f5f5f5',
+      'red-matte': '#7f1d1d',
+    };
+
+    const color = themeColors[theme] || '#1a1a1a';
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaThemeColor);
+    }
+    
+    metaThemeColor.setAttribute('content', color);
   }, [theme]);
 
   // Save theme to database and update state

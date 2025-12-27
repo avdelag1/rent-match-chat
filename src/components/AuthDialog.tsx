@@ -226,39 +226,35 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     }
   };
 
-  // Floating fire particles component
+  // Optimized fire particles - reduced count for better performance
   const FireParticles = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <motion.div
           key={i}
-          className="absolute"
+          className="absolute will-change-transform"
           style={{
-            width: `${2 + Math.random() * 4}px`,
-            height: `${4 + Math.random() * 8}px`,
+            width: `${3 + i}px`,
+            height: `${6 + i * 2}px`,
             background: `linear-gradient(45deg, ${
               role === 'client'
-                ? i % 3 === 0 ? '#f43f5e' : i % 3 === 1 ? '#fb7185' : '#fda4af'
-                : i % 3 === 0 ? '#f97316' : i % 3 === 1 ? '#fbbf24' : '#fcd34d'
+                ? i % 2 === 0 ? '#f43f5e' : '#fb7185'
+                : i % 2 === 0 ? '#f97316' : '#fbbf24'
             }, transparent)`,
-            boxShadow: `0 0 ${8 + Math.random() * 16}px ${
-              role === 'client' ? '#f43f5e' : '#f97316'
-            }60`,
+            boxShadow: `0 0 12px ${role === 'client' ? '#f43f5e' : '#f97316'}40`,
             borderRadius: '50%',
-            left: `${Math.random() * 100}%`,
+            left: `${20 + i * 20}%`,
             bottom: '-10px',
           }}
           animate={{
-            y: [0, -(window.innerHeight * 0.8 + Math.random() * 200)],
-            x: [0, (Math.random() - 0.5) * 100],
-            opacity: [0, 0.8, 0.6, 0],
-            scale: [0.3, 1, 0.8, 0.2],
+            y: [0, -400],
+            opacity: [0, 0.6, 0],
           }}
           transition={{
-            duration: 8 + Math.random() * 6,
+            duration: 6 + i * 2,
             repeat: Infinity,
             ease: "easeOut",
-            delay: Math.random() * 4,
+            delay: i * 1.5,
           }}
         />
       ))}
@@ -268,16 +264,16 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   return (
     <DialogPrimitive.Root open={isOpen} onOpenChange={onClose}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gradient-to-br ${theme.gradientBg}`}>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-fade-in" />
+        <DialogPrimitive.Content className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gradient-to-br ${theme.gradientBg} will-change-transform`}>
           <FireParticles />
 
           <div className="min-h-full flex items-center justify-center p-4 sm:p-6 relative z-10">
             <motion.div
-              className="w-full max-w-md"
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="w-full max-w-md will-change-transform"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             >
               <DialogTitle className="sr-only">
                 {isLogin ? 'Sign In' : 'Sign Up'} as {role}
@@ -287,55 +283,25 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               </DialogDescription>
 
               {/* Back Button */}
-              <motion.button
+              <button
                 onClick={onClose}
-                className="mb-6 flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
-                whileHover={{ x: -4 }}
-                whileTap={{ scale: 0.95 }}
+                className="mb-6 flex items-center gap-2 text-white/70 hover:text-white transition-all duration-200 group active:scale-95"
               >
-                <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                <ArrowLeft className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-1" />
                 <span className="text-sm font-medium">Back</span>
-              </motion.button>
+              </button>
 
               {/* Role Badge */}
-              <motion.div
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${theme.accentBg} ${theme.border} border mb-6`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${theme.accentBg} ${theme.border} border mb-6 animate-fade-in`}>
                 <RoleIcon className={`w-4 h-4 ${theme.accent}`} />
                 <span className={`text-sm font-semibold ${theme.accent}`}>{theme.title}</span>
-              </motion.div>
+              </div>
 
               {/* Logo and Header */}
-              <motion.div
-                className="text-center mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-              >
-                <motion.div
-                  className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${theme.gradient} rounded-3xl mb-5 ${theme.glow}`}
-                  animate={{
-                    boxShadow: [
-                      `0 0 40px ${role === 'client' ? 'rgba(244,63,94,0.3)' : 'rgba(251,146,60,0.3)'}`,
-                      `0 0 60px ${role === 'client' ? 'rgba(244,63,94,0.5)' : 'rgba(251,146,60,0.5)'}`,
-                      `0 0 40px ${role === 'client' ? 'rgba(244,63,94,0.3)' : 'rgba(251,146,60,0.3)'}`,
-                    ]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    <Flame className="w-10 h-10 text-white drop-shadow-lg" />
-                  </motion.div>
-                </motion.div>
+              <div className="text-center mb-8 animate-fade-in">
+                <div className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${theme.gradient} rounded-3xl mb-5 ${theme.glow}`}>
+                  <Flame className="w-10 h-10 text-white drop-shadow-lg" />
+                </div>
 
                 <h2 className="text-3xl font-bold text-white mb-2">
                   {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
@@ -346,23 +312,14 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     : theme.description
                   }
                 </p>
-              </motion.div>
+              </div>
 
               {/* Main Card */}
-              <motion.div
-                className={`bg-white/5 backdrop-blur-2xl border ${theme.border} rounded-3xl p-8 ${theme.glow}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
+              <div className={`bg-white/5 backdrop-blur-xl border ${theme.border} rounded-3xl p-8 ${theme.glow} animate-fade-in`}>
                 {!isForgotPassword && !isNativePlatform && (
                   <>
                     {/* Google OAuth Button */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.25 }}
-                    >
+                    <div>
                       <Button
                         type="button"
                         onClick={(e) => handleOAuthSignIn(e, 'google')}
@@ -382,7 +339,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           </>
                         )}
                       </Button>
-                    </motion.div>
+                    </div>
 
                     {/* Divider */}
                     <div className="relative flex items-center my-8">
@@ -702,18 +659,13 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     </p>
                   )}
                 </motion.div>
-              </motion.div>
+              </div>
 
               {/* Security Notice */}
-              <motion.div
-                className="flex items-center justify-center gap-2 mt-6 text-white/40"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
+              <div className="flex items-center justify-center gap-2 mt-6 text-white/40 animate-fade-in">
                 <Shield className="w-4 h-4" />
                 <span className="text-xs">Secured with industry-standard encryption</span>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         </DialogPrimitive.Content>

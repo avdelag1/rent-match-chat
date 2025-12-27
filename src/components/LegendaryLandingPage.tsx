@@ -1,8 +1,23 @@
-import { useState, useRef, useCallback, memo } from 'react';
+import { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Building2, Home, Sparkles, Shield, ArrowRight } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
+
 function LegendaryLandingPage() {
+  // Set orange status bar for landing page
+  useEffect(() => {
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', '#f97316');
+    }
+    
+    return () => {
+      // Reset to default when leaving landing page
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', '#1a1a1a');
+      }
+    };
+  }, []);
   const [authDialog, setAuthDialog] = useState<{
     isOpen: boolean;
     role: 'client' | 'owner';
