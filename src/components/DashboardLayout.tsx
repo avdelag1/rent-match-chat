@@ -71,6 +71,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [quickFilters, setQuickFilters] = useState<QuickFilters>({
     categories: [],
     listingType: 'both',
+    showHireServices: false,
+    clientGender: 'any',
+    clientType: 'all',
   });
 
   const navigate = useNavigate()
@@ -241,19 +244,30 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const combinedFilters = useMemo(() => {
     const base = appliedFilters || {};
 
+    // Check if any quick filters are active
+    const hasClientQuickFilters = quickFilters.categories.length > 0 || 
+                                   quickFilters.listingType !== 'both' || 
+                                   quickFilters.showHireServices;
+    const hasOwnerQuickFilters = (quickFilters.clientGender && quickFilters.clientGender !== 'any') || 
+                                  (quickFilters.clientType && quickFilters.clientType !== 'all');
+
     // If no quick filters active, return base filters
-    if (quickFilters.categories.length === 0 && quickFilters.listingType === 'both') {
+    if (!hasClientQuickFilters && !hasOwnerQuickFilters) {
       return base;
     }
 
     return {
       ...base,
-      // Quick filter categories take precedence if set
-      // Clear single category when using multiple categories
+      // Client quick filter categories take precedence if set
       category: quickFilters.categories.length === 0 ? base.category : undefined,
       categories: quickFilters.categories.length > 0 ? quickFilters.categories : undefined,
       // Quick filter listing type takes precedence if not 'both'
       listingType: quickFilters.listingType !== 'both' ? quickFilters.listingType : base.listingType,
+      // Client hire services filter
+      showHireServices: quickFilters.showHireServices || undefined,
+      // Owner quick filters
+      clientGender: quickFilters.clientGender !== 'any' ? quickFilters.clientGender : undefined,
+      clientType: quickFilters.clientType !== 'all' ? quickFilters.clientType : undefined,
     };
   }, [appliedFilters, quickFilters]);
 
@@ -272,8 +286,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     });
   }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
 
-  // Check if we're on a page that should show quick filters (client discovery page)
-  const showQuickFilters = userRole === 'client' && location.pathname === '/client/dashboard';
+  // Check if we're on a page that should show quick filters (client or owner discovery page)
+  const showQuickFilters = (userRole === 'client' && location.pathname === '/client/dashboard') ||
+                           (userRole === 'owner' && location.pathname === '/owner/dashboard');
 
   // Calculate responsive layout values
   const topBarHeight = responsive.isMobile ? 52 : 56;
@@ -292,7 +307,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         showFilters={true}
       />
 
-      {/* Quick Filter Bar - Only for clients on discovery page */}
+      {/* Quick Filter Bar - For clients and owners on discovery pages */}
       {showQuickFilters && (
         <div
           className="fixed left-0 right-0 z-40"
@@ -303,6 +318,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           <QuickFilterBar
             filters={quickFilters}
             onChange={handleQuickFilterChange}
+            userRole={userRole}
           />
         </div>
       )}
