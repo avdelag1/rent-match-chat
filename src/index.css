@@ -1559,6 +1559,39 @@ input:focus, textarea:focus, select:focus {
   80% { transform: translateX(4px); }
 }
 
+/* ===== GAME-LIKE INSTANT TOUCH RESPONSE ===== */
+/* Remove ALL touch delays for Tinder/game feel */
+.swipe-card-container,
+[class*="TinderSwipeCard"],
+[class*="SwipeCard"] {
+  touch-action: pan-x !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Force GPU acceleration for 0-latency transforms */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Remove any transition delays during drag */
+  transition: none !important;
+}
+
+/* Ensure dragging feels instant - no transition interference */
+.swipe-card-container:active,
+[class*="TinderSwipeCard"]:active,
+[class*="SwipeCard"]:active {
+  transition: none !important;
+  cursor: grabbing !important;
+}
+
+/* Ultra-fast overlay appearance */
+.swipe-overlay {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  transition: none !important;
+}
+
 /* ===== SWIPE CARD ENHANCEMENTS ===== */
 .swipe-indicator {
   position: absolute;
@@ -1568,7 +1601,7 @@ input:focus, textarea:focus, select:focus {
   font-size: 1.25rem;
   opacity: 0;
   transform: scale(0.8) rotate(-15deg);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity 0.1s ease, transform 0.1s ease;
   pointer-events: none;
 }
 
