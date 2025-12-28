@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, RotateCcw, Eye, Flame, Share2 } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, Eye, Flame, Share2 } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -125,362 +125,346 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   };
 
   return (
-    <motion.div
-      ref={cardRef}
-      style={cardStyle}
-      drag={isTop ? "x" : false}
-      dragConstraints={{ left: -500, right: 500 }}
-      dragElastic={0.9}
-      dragMomentum={false}
-      dragTransition={{
-        bounceStiffness: 1200,
-        bounceDamping: 50,
-        power: 0.1,
-        timeConstant: 100
-      }}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
-      initial={false}
-      transition={{
-        type: "spring",
-        stiffness: 1200,
-        damping: 50,
-        mass: 0.1
-      }}
-    >
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
-        {/* Swipe Overlays */}
-        <SwipeOverlays x={x} />
+    <div className="absolute inset-0 flex flex-col" ref={cardRef}>
+      {/* Draggable Card - Takes most of the space */}
+      <motion.div
+        style={{
+          x,
+          rotate: isTop ? rotate : 0,
+          scale: isTop ? scale : 0.95,
+          opacity: isTop ? opacity : 1,
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+        }}
+        drag={isTop ? "x" : false}
+        dragConstraints={{ left: -500, right: 500 }}
+        dragElastic={0.9}
+        dragMomentum={false}
+        dragTransition={{
+          bounceStiffness: 1200,
+          bounceDamping: 50,
+          power: 0.1,
+          timeConstant: 100
+        }}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl relative"
+        initial={false}
+        transition={{
+          type: "spring",
+          stiffness: 1200,
+          damping: 50,
+          mass: 0.1
+        }}
+      >
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          {/* Swipe Overlays */}
+          <SwipeOverlays x={x} />
 
-        {/* Main Image - Fullscreen */}
-        <div
-          className="absolute inset-0 w-full h-full overflow-hidden cursor-pointer select-none"
-          onClick={handleImageClick}
-          style={{ touchAction: 'manipulation' }}
-        >
-          {/* Story-Style Dots at Top */}
-          {imageCount > 1 && (
-            <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
-              {images.map((_, index) => (
-                <div
-                  key={`image-dot-${index}`}
-                  className="flex-1 h-1 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
-                >
+          {/* Main Image - Fullscreen */}
+          <div
+            className="absolute inset-0 w-full h-full overflow-hidden cursor-pointer select-none"
+            onClick={handleImageClick}
+            style={{ touchAction: 'manipulation' }}
+          >
+            {/* Story-Style Dots at Top */}
+            {imageCount > 1 && (
+              <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
+                {images.map((_, index) => (
                   <div
-                    className={`h-full bg-white shadow-lg transition-all duration-200 ${
-                      index === currentImageIndex ? 'w-full' : 'w-0'
-                    }`}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Image with Gradient Overlay */}
-          <img
-            src={images[Math.min(currentImageIndex, imageCount - 1)]}
-            alt={listing.title}
-            className="absolute inset-0 w-full h-full object-cover rounded-3xl"
-            draggable={false}
-            loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
-            decoding="async"
-            fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
-            style={{
-              willChange: 'transform',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              transform: 'translateZ(0)'
-            }}
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder.svg';
-            }}
-          />
-
-          {/* Bottom gradient - Lighter for better photo visibility */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
-
-          {/* Verification Badge */}
-          {(listing as any).has_verified_documents && (
-            <div className="absolute top-20 right-4 z-20">
-              <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
-                {(listing as any).category === 'bicycle' ? (
-                  <CheckCircle className="w-4 h-4" />
-                ) : (
-                  <>
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="text-sm font-medium">Verified</span>
-                  </>
-                )}
-              </Badge>
-            </div>
-          )}
-        </div>
-
-         {/* Bottom Sheet - Collapsible with Glassmorphism */}
-         <motion.div
-           className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
-           animate={{
-             height: isBottomSheetExpanded ? 'min(75%, calc(100vh - 220px))' : 'min(14%, 120px)',
-             y: 0
-           }}
-           transition={{
-             type: "spring",
-             stiffness: 400,
-             damping: 32
-           }}
-           style={{ willChange: 'height', maxHeight: 'calc(100% - 80px)' }}
-         >
-          {/* Drag Handle */}
-          <div className="flex justify-center py-2 pointer-events-none">
-            <div className="w-10 h-1.5 bg-white/50 rounded-full" />
-          </div>
-
-          {/* Collapsed State Content */}
-          <div className="px-4 pb-3">
-            <div className="flex justify-between items-start mb-1.5">
-              <div className="flex-1">
-                <h2 className="text-base font-bold text-foreground">
-                  {listing.title}
-                </h2>
-                <div className="flex items-center text-muted-foreground text-xs">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span>{listing.neighborhood}, {listing.city}</span>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <div className="text-xl font-bold text-primary">
-                  ${listing.price?.toLocaleString()}
-                </div>
-                <div className="text-[10px] text-muted-foreground">/month</div>
-              </div>
-            </div>
-
-            {/* Key Stats */}
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
-              {listing.category === 'vehicle' ? (
-                <>
-                  {listing.brand && (
-                    <div className="flex items-center gap-0.5">
-                      <span className="font-medium text-[11px]">{listing.brand}</span>
-                    </div>
-                  )}
-                  {listing.model && (
-                    <div className="flex items-center gap-0.5">
-                      <span className="font-medium text-[11px]">{listing.model}</span>
-                    </div>
-                  )}
-                  {listing.year && (
-                    <div className="flex items-center gap-0.5">
-                      <span className="font-medium text-[11px]">{listing.year}</span>
-                    </div>
-                  )}
-                  {listing.mileage && (
-                    <div className="flex items-center gap-0.5">
-                      <span className="font-medium text-[11px]">{listing.mileage.toLocaleString()} km</span>
-                    </div>
-                  )}
-                </>
-              ) : listing.category === 'motorcycle' || listing.category === 'bicycle' || listing.category === 'yacht' ? (
-                <>
-                  {listing.brand && (
-                    <div className="flex items-center gap-0.5">
-                      <span className="font-medium text-[11px]">{listing.brand}</span>
-                    </div>
-                  )}
-                  {listing.model && (
-                    <div className="flex items-center gap-0.5">
-                      <span className="font-medium text-[11px]">{listing.model}</span>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {listing.beds && (
-                    <div className="flex items-center gap-0.5">
-                      <Bed className="w-3 h-3" />
-                      <span className="font-medium text-[11px]">{listing.beds}</span>
-                    </div>
-                  )}
-                  {listing.baths && (
-                    <div className="flex items-center gap-0.5">
-                      <Bath className="w-3 h-3" />
-                      <span className="font-medium text-[11px]">{listing.baths}</span>
-                    </div>
-                  )}
-                  {listing.square_footage && (
-                    <div className="flex items-center gap-0.5">
-                      <Square className="w-3 h-3" />
-                      <span className="font-medium text-[11px]">{listing.square_footage} ft²</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Expanded State Content */}
-            {isBottomSheetExpanded && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mt-4 overflow-y-auto"
-                style={{ maxHeight: 'calc(min(75vh, 100vh - 320px) - 200px)' }}
-              >
-                {/* Description */}
-                {listing.description && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      About
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {listing.description}
-                    </p>
+                    key={`image-dot-${index}`}
+                    className="flex-1 h-1 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
+                  >
+                    <div
+                      className={`h-full bg-white shadow-lg transition-all duration-200 ${
+                        index === currentImageIndex ? 'w-full' : 'w-0'
+                      }`}
+                    />
                   </div>
-                )}
-
-                {/* Amenities */}
-                {listing.amenities && listing.amenities.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-foreground mb-3">
-                      Amenities
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {listing.amenities.map((amenity, idx) => (
-                        <div
-                          key={`amenity-${idx}`}
-                          className="flex items-center gap-2 text-muted-foreground"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <span className="text-primary">✓</span>
-                          </div>
-                          <span className="capitalize">{amenity}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
+                ))}
+              </div>
             )}
 
-            {/* Expand/Collapse Indicator */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-1 text-muted-foreground h-5"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsBottomSheetExpanded(!isBottomSheetExpanded);
-                triggerHaptic('light');
+            {/* Image with Gradient Overlay */}
+            <img
+              src={images[Math.min(currentImageIndex, imageCount - 1)]}
+              alt={listing.title}
+              className="absolute inset-0 w-full h-full object-cover rounded-3xl"
+              draggable={false}
+              loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
+              style={{
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'translateZ(0)'
               }}
-            >
-              <ChevronDown
-                className={`w-3 h-3 transition-transform duration-200 ${
-                  isBottomSheetExpanded ? 'rotate-180' : ''
-                }`}
-              />
-            </Button>
-          </div>
-        </motion.div>
+              onError={(e) => {
+                e.currentTarget.src = '/placeholder.svg';
+              }}
+            />
 
-        {/* Action Buttons - Bottom Fixed Position - Animated hide/show */}
-        <AnimatePresence>
-          {isTop && !hideActions && !isBottomSheetExpanded && (
-            <motion.div
-              initial={{ opacity: 0, y: 50, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 50, scale: 0.8 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="absolute bottom-[12%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none"
-            >
-              <div className="flex items-center gap-3 pointer-events-auto">
-                {/* Undo/Return Button - Premium Shine Effect */}
-                {onUndo && (
-                  <motion.button
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.1 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUndo();
-                    }}
-                    className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo"
-                    title="Undo"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                  </motion.button>
-                )}
+            {/* Bottom gradient - Lighter for better photo visibility */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
 
-                {/* Dislike Button - Premium Shine Effect */}
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.15 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSwipe('left');
-                  }}
-                  className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike"
-                  title="Dislike"
-                >
-                  <X className="w-7 h-7" strokeWidth={3} />
-                </motion.button>
-
-                {/* Insights Button - Premium Shine Effect */}
-                {onInsights && hasPremium && (
-                  <motion.button
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.2 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onInsights();
-                    }}
-                    className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights"
-                    title="View Insights"
-                  >
-                    <Eye className="w-5 h-5" />
-                  </motion.button>
-                )}
-
-                {/* Share Button - Premium Shine Effect */}
-                {onShare && (
-                  <motion.button
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.225 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onShare();
-                    }}
-                    className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share"
-                    title="Share"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </motion.button>
-                )}
-
-                {/* Like Button - Premium Shine Effect */}
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.25 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSwipe('right');
-                  }}
-                  className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-like"
-                  title="Flame"
-                >
-                  <Flame className="w-7 h-7" fill="currentColor" />
-                </motion.button>
+            {/* Verification Badge */}
+            {(listing as any).has_verified_documents && (
+              <div className="absolute top-20 right-4 z-20">
+                <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
+                  {(listing as any).category === 'bicycle' ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4" />
+                      <span className="text-sm font-medium">Verified</span>
+                    </>
+                  )}
+                </Badge>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
+            )}
+          </div>
+
+          {/* Bottom Sheet - Collapsible with Glassmorphism */}
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+            animate={{
+              height: isBottomSheetExpanded ? 'min(60%, 350px)' : 'min(18%, 120px)',
+              y: 0
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 32
+            }}
+            style={{ willChange: 'height', maxHeight: 'calc(100% - 60px)' }}
+          >
+            {/* Drag Handle */}
+            <div className="flex justify-center py-2 pointer-events-none">
+              <div className="w-10 h-1.5 bg-white/50 rounded-full" />
+            </div>
+
+            {/* Collapsed State Content */}
+            <div className="px-4 pb-3">
+              <div className="flex justify-between items-start mb-1.5">
+                <div className="flex-1">
+                  <h2 className="text-base font-bold text-foreground">
+                    {listing.title}
+                  </h2>
+                  <div className="flex items-center text-muted-foreground text-xs">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    <span>{listing.neighborhood}, {listing.city}</span>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="text-xl font-bold text-primary">
+                    ${listing.price?.toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">/month</div>
+                </div>
+              </div>
+
+              {/* Key Stats */}
+              <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                {listing.category === 'vehicle' ? (
+                  <>
+                    {listing.brand && (
+                      <div className="flex items-center gap-0.5">
+                        <span className="font-medium text-[11px]">{listing.brand}</span>
+                      </div>
+                    )}
+                    {listing.model && (
+                      <div className="flex items-center gap-0.5">
+                        <span className="font-medium text-[11px]">{listing.model}</span>
+                      </div>
+                    )}
+                    {listing.year && (
+                      <div className="flex items-center gap-0.5">
+                        <span className="font-medium text-[11px]">{listing.year}</span>
+                      </div>
+                    )}
+                    {listing.mileage && (
+                      <div className="flex items-center gap-0.5">
+                        <span className="font-medium text-[11px]">{listing.mileage.toLocaleString()} km</span>
+                      </div>
+                    )}
+                  </>
+                ) : listing.category === 'motorcycle' || listing.category === 'bicycle' || listing.category === 'yacht' ? (
+                  <>
+                    {listing.brand && (
+                      <div className="flex items-center gap-0.5">
+                        <span className="font-medium text-[11px]">{listing.brand}</span>
+                      </div>
+                    )}
+                    {listing.model && (
+                      <div className="flex items-center gap-0.5">
+                        <span className="font-medium text-[11px]">{listing.model}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {listing.beds && (
+                      <div className="flex items-center gap-0.5">
+                        <Bed className="w-3 h-3" />
+                        <span className="font-medium text-[11px]">{listing.beds}</span>
+                      </div>
+                    )}
+                    {listing.baths && (
+                      <div className="flex items-center gap-0.5">
+                        <Bath className="w-3 h-3" />
+                        <span className="font-medium text-[11px]">{listing.baths}</span>
+                      </div>
+                    )}
+                    {listing.square_footage && (
+                      <div className="flex items-center gap-0.5">
+                        <Square className="w-3 h-3" />
+                        <span className="font-medium text-[11px]">{listing.square_footage} ft²</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Expanded State Content */}
+              {isBottomSheetExpanded && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="mt-4 overflow-y-auto"
+                  style={{ maxHeight: '150px' }}
+                >
+                  {/* Description */}
+                  {listing.description && (
+                    <div className="mb-4">
+                      <h3 className="text-sm font-semibold text-foreground mb-2">
+                        About
+                      </h3>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        {listing.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Amenities */}
+                  {listing.amenities && listing.amenities.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="text-sm font-semibold text-foreground mb-2">
+                        Amenities
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {listing.amenities.map((amenity, idx) => (
+                          <Badge key={`amenity-${idx}`} variant="secondary" className="text-xs">
+                            {amenity}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Expand/Collapse Indicator */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full mt-1 text-muted-foreground h-5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsBottomSheetExpanded(!isBottomSheetExpanded);
+                  triggerHaptic('light');
+                }}
+              >
+                <ChevronDown
+                  className={`w-3 h-3 transition-transform duration-200 ${
+                    isBottomSheetExpanded ? 'rotate-180' : ''
+                  }`}
+                />
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Action Buttons - FIXED at bottom, OUTSIDE the draggable card */}
+      <AnimatePresence>
+        {isTop && !hideActions && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="flex-shrink-0 flex justify-center items-center py-3 px-4"
+          >
+            <div className="flex items-center gap-3">
+              {/* Dislike Button */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerHaptic('warning');
+                  onSwipe('left');
+                }}
+                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike shadow-lg"
+                title="Dislike"
+              >
+                <X className="w-7 h-7" strokeWidth={3} />
+              </motion.button>
+
+              {/* Insights Button */}
+              {onInsights && hasPremium && (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    onInsights();
+                  }}
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights shadow-lg"
+                  title="View Insights"
+                >
+                  <Eye className="w-5 h-5" />
+                </motion.button>
+              )}
+
+              {/* Share Button */}
+              {onShare && (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    onShare();
+                  }}
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share shadow-lg"
+                  title="Share"
+                >
+                  <Share2 className="w-5 h-5" />
+                </motion.button>
+              )}
+
+              {/* Like Button */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerHaptic('success');
+                  onSwipe('right');
+                }}
+                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart shadow-lg"
+                title="Like"
+              >
+                <Flame className="w-7 h-7" fill="currentColor" />
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

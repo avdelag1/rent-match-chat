@@ -263,7 +263,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Only show loading on initial load, not during background refetch
   if (isLoading && listings.length === 0) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -271,12 +271,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (error) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
           <p className="text-muted-foreground mb-4">We couldn't load properties right now.</p>
-          <Button 
+          <Button
             onClick={handleRefresh}
             variant="outline"
             className="gap-2"
@@ -291,7 +291,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (listings.length === 0) {
     return (
-      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -333,7 +333,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   if (currentIndex >= listings.length) {
     return (
-      <div className="relative w-full h-[calc(100vh-200px)] max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -394,72 +394,38 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   }
 
   const currentListing = listings[currentIndex];
-  const nextListing = listings[currentIndex + 1];
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-start" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
-      {/* Refresh Button - Top Right - Only show when all cards swiped */}
-      {currentIndex >= listings.length && (
-        <div className="absolute top-2 right-2 z-50 mt-16 md:mt-20">
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            size="icon"
-            className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
-            disabled={isRefetching}
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-      )}
-
-      {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-160px)] max-w-lg mx-auto overflow-clip mt-2" style={{ contain: 'layout' }}>
-        <AnimatePresence mode="sync" initial={false}>
-          {/* Show next card behind current card for stack effect */}
-          {nextListing && (
-            <motion.div
-              key={`next-${nextListing.id}`}
-              initial={{ scale: 0.95, y: 8, opacity: 0.8 }}
-              animate={{ scale: 0.95, y: 8, opacity: 0.8 }}
-              className="w-full h-full absolute inset-0 pointer-events-none"
-              style={{ zIndex: 0 }}
-            >
-              <TinderSwipeCard
-                listing={nextListing}
-                onSwipe={() => {}}
-                isTop={false}
-              />
-            </motion.div>
-          )}
-
+    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3">
+      {/* Card Container - Full height, no clipping */}
+      <div className="relative flex-1 w-full">
+        <AnimatePresence mode="popLayout">
           {/* Current card on top */}
           {currentListing && (
             <motion.div
               key={currentListing.id}
-              initial={{ scale: 1, y: 0, opacity: 1 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               exit={{
-                x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
-                y: 0,
+                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
-                scale: 0.9,
+                rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
+                scale: 0.85,
                 transition: {
                   type: "spring",
-                  stiffness: 600,
-                  damping: 30,
-                  mass: 0.4
+                  stiffness: 500,
+                  damping: 35,
+                  mass: 0.5
                 }
               }}
               transition={{
                 type: "spring",
-                stiffness: 600,
+                stiffness: 500,
                 damping: 35,
-                mass: 0.4
+                mass: 0.5
               }}
               className="w-full h-full absolute inset-0"
-              style={{ willChange: 'transform, opacity', zIndex: 1 }}
+              style={{ willChange: 'transform, opacity' }}
             >
               <TinderSwipeCard
                 listing={currentListing}
@@ -476,7 +442,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           )}
         </AnimatePresence>
       </div>
-
 
       {/* Insights Modal */}
       <SwipeInsightsModal
