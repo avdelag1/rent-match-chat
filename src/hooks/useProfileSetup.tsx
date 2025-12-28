@@ -11,6 +11,9 @@ interface CreateProfileData {
   email?: string;
 }
 
+// Track ongoing profile creation to prevent concurrent attempts
+const profileCreationInProgress = new Set<string>();
+
 export function useProfileSetup() {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const queryClient = useQueryClient();
@@ -18,6 +21,13 @@ export function useProfileSetup() {
   const createProfileIfMissing = async (user: User, role: 'client' | 'owner') => {
     if (!user) return null;
 
+    // Prevent concurrent profile creation for the same user
+    if (profileCreationInProgress.has(user.id)) {
+      console.log('[ProfileSetup] Profile creation already in progress for user:', user.id);
+      return null;
+    }
+
+    profileCreationInProgress.add(user.id);
     setIsCreatingProfile(true);
     
     try {
@@ -185,6 +195,7 @@ export function useProfileSetup() {
       });
       return null;
     } finally {
+      profileCreationInProgress.delete(user.id);
       setIsCreatingProfile(false);
     }
   };

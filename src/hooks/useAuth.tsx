@@ -70,17 +70,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(session?.user ?? null);
           setLoading(false);
 
-          // Handle OAuth users - setup role but DON'T redirect (Index.tsx handles redirects)
+          // Handle OAuth users ONLY - email/password users are handled in signUp/signIn functions
+          // Check if this is an OAuth sign-in by looking at the provider
           if (event === 'SIGNED_IN' && session?.user) {
-            // Use Promise instead of setTimeout to avoid stale closure
-            handleOAuthUserSetupOnly(session.user).catch(err => {
-              console.error('[Auth] OAuth setup failed:', err);
-              toast({
-                title: 'Profile Setup Failed',
-                description: 'Failed to complete your profile setup. Please try signing in again.',
-                variant: 'destructive',
+            const provider = session.user.app_metadata?.provider;
+            const isOAuthUser = provider && provider !== 'email';
+
+            // Only run OAuth setup for actual OAuth sign-ins (not email/password)
+            if (isOAuthUser) {
+              handleOAuthUserSetupOnly(session.user).catch(err => {
+                console.error('[Auth] OAuth setup failed:', err);
+                toast({
+                  title: 'Profile Setup Failed',
+                  description: 'Failed to complete your profile setup. Please try signing in again.',
+                  variant: 'destructive',
+                });
               });
-            });
+            }
           }
         }
       }
