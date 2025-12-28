@@ -19,15 +19,40 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const BUBBLE_SIZE = 64;
 const MARGIN = 16;
 
+// Get safe area insets from CSS variables
+const getSafeAreaInsets = () => {
+  if (typeof window === 'undefined') {
+    return { top: 0, bottom: 0, left: 0, right: 0 };
+  }
+
+  const style = getComputedStyle(document.documentElement);
+  const parseInset = (value: string) => {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  return {
+    top: parseInset(style.getPropertyValue('--safe-top')),
+    bottom: parseInset(style.getPropertyValue('--safe-bottom')),
+    left: parseInset(style.getPropertyValue('--safe-left')),
+    right: parseInset(style.getPropertyValue('--safe-right')),
+  };
+};
+
 // Safe default that works before window is ready
 const getDefaultPosition = (): { left: number; top: number } => {
   // Use a safe default - bottom right area, will be adjusted on mount
   const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
   const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-  // Position in bottom-right, but above bottom nav (at least 180px from bottom)
+  const safeArea = getSafeAreaInsets();
+
+  // Position in bottom-right, accounting for safe areas
+  const availableWidth = windowWidth - safeArea.left - safeArea.right;
+  const availableHeight = windowHeight - safeArea.top - safeArea.bottom;
+
   return {
-    left: Math.max(windowWidth - BUBBLE_SIZE - MARGIN, MARGIN),
-    top: Math.max(windowHeight - 180 - BUBBLE_SIZE, 100),
+    left: Math.max(safeArea.left + availableWidth - BUBBLE_SIZE - MARGIN, safeArea.left + MARGIN),
+    top: Math.max(safeArea.top + availableHeight - 180 - BUBBLE_SIZE, safeArea.top + 100),
   };
 };
 
@@ -41,13 +66,17 @@ const getSavedPosition = (): { left: number; top: number } => {
     const saved = localStorage.getItem('radioBubblePositionV2');
     if (saved) {
       const pos = JSON.parse(saved);
-      // Validate position is within viewport
+      const safeArea = getSafeAreaInsets();
+
+      // Validate position is within viewport, accounting for safe areas
       // Leave space for bottom nav (~120px) and header (~80px)
-      const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
-      const maxTop = window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav
-      const minTop = MARGIN + 80; // Leave room for header
+      const maxLeft = window.innerWidth - safeArea.right - BUBBLE_SIZE - MARGIN;
+      const maxTop = window.innerHeight - safeArea.bottom - BUBBLE_SIZE - 120; // Leave room for bottom nav
+      const minLeft = safeArea.left + MARGIN;
+      const minTop = safeArea.top + MARGIN + 80; // Leave room for header
+
       return {
-        left: Math.min(Math.max(pos.left ?? maxLeft, MARGIN), maxLeft),
+        left: Math.min(Math.max(pos.left ?? maxLeft, minLeft), maxLeft),
         top: Math.min(Math.max(pos.top ?? maxTop, minTop), maxTop),
       };
     }
@@ -120,12 +149,14 @@ export const RadioBubble: React.FC = () => {
   const checkCloseZone = useCallback((left: number, top: number) => {
     const bubbleCenterX = left + BUBBLE_SIZE / 2;
     const bubbleCenterY = top + BUBBLE_SIZE / 2;
+    const safeArea = getSafeAreaInsets();
 
-    // Close zone is at bottom center of screen
-    const zoneLeft = (window.innerWidth - CLOSE_ZONE_WIDTH) / 2;
+    // Close zone is at bottom center of screen, accounting for safe areas
+    const availableWidth = window.innerWidth - safeArea.left - safeArea.right;
+    const zoneLeft = safeArea.left + (availableWidth - CLOSE_ZONE_WIDTH) / 2;
     const zoneRight = zoneLeft + CLOSE_ZONE_WIDTH;
-    const zoneTop = window.innerHeight - CLOSE_ZONE_HEIGHT - 20; // 20px from bottom
-    const zoneBottom = window.innerHeight - 20;
+    const zoneTop = window.innerHeight - safeArea.bottom - CLOSE_ZONE_HEIGHT - 20; // 20px from safe area bottom
+    const zoneBottom = window.innerHeight - safeArea.bottom - 20;
 
     return (
       bubbleCenterX >= zoneLeft &&
@@ -139,12 +170,14 @@ export const RadioBubble: React.FC = () => {
   useEffect(() => {
     const ensureVisible = () => {
       setPosition(prev => {
-        const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
-        const maxTop = window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav
-        const minTop = MARGIN + 80; // Leave room for header
+        const safeArea = getSafeAreaInsets();
+        const maxLeft = window.innerWidth - safeArea.right - BUBBLE_SIZE - MARGIN;
+        const maxTop = window.innerHeight - safeArea.bottom - BUBBLE_SIZE - 120; // Leave room for bottom nav
+        const minLeft = safeArea.left + MARGIN;
+        const minTop = safeArea.top + MARGIN + 80; // Leave room for header
 
         // Calculate clamped position
-        const clampedLeft = Math.min(Math.max(prev.left, MARGIN), maxLeft);
+        const clampedLeft = Math.min(Math.max(prev.left, minLeft), maxLeft);
         const clampedTop = Math.min(Math.max(prev.top, minTop), maxTop);
 
         // Only update if position changed significantly (avoid unnecessary re-renders)
@@ -165,14 +198,16 @@ export const RadioBubble: React.FC = () => {
   // Clamp position within viewport
   // When dragging, allow bubble to reach the close zone at the bottom
   const clampPosition = useCallback((left: number, top: number, isDraggingToClose = false) => {
-    const maxLeft = window.innerWidth - BUBBLE_SIZE - MARGIN;
+    const safeArea = getSafeAreaInsets();
+    const maxLeft = window.innerWidth - safeArea.right - BUBBLE_SIZE - MARGIN;
     // When dragging, allow bubble to go lower to reach the close zone
     const maxTop = isDraggingToClose
-      ? window.innerHeight - BUBBLE_SIZE - 20  // Allow reaching close zone (20px from bottom)
-      : window.innerHeight - BUBBLE_SIZE - 120; // Leave room for bottom nav normally
-    const minTop = MARGIN + 80; // Leave room for header
+      ? window.innerHeight - safeArea.bottom - BUBBLE_SIZE - 20  // Allow reaching close zone (20px from bottom)
+      : window.innerHeight - safeArea.bottom - BUBBLE_SIZE - 120; // Leave room for bottom nav normally
+    const minLeft = safeArea.left + MARGIN;
+    const minTop = safeArea.top + MARGIN + 80; // Leave room for header
     return {
-      left: Math.min(Math.max(left, MARGIN), maxLeft),
+      left: Math.min(Math.max(left, minLeft), maxLeft),
       top: Math.min(Math.max(top, minTop), maxTop),
     };
   }, []);

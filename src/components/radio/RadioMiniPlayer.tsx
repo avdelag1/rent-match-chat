@@ -11,32 +11,55 @@ const PLAYER_WIDTH = 320;
 const PLAYER_HEIGHT = 72;
 const MARGIN = 16;
 
+// Get safe area insets from CSS variables
+const getSafeAreaInsets = () => {
+  if (typeof window === 'undefined') {
+    return { top: 0, bottom: 0, left: 0, right: 0 };
+  }
+
+  const style = getComputedStyle(document.documentElement);
+  const parseInset = (value: string) => {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  return {
+    top: parseInset(style.getPropertyValue('--safe-top')),
+    bottom: parseInset(style.getPropertyValue('--safe-bottom')),
+    left: parseInset(style.getPropertyValue('--safe-left')),
+    right: parseInset(style.getPropertyValue('--safe-right')),
+  };
+};
+
 // Get saved position from localStorage
 const getSavedPosition = (): { left: number; top: number } => {
   if (typeof window === 'undefined') {
     return { left: MARGIN, top: 100 };
   }
 
+  const safeArea = getSafeAreaInsets();
+
   try {
     const saved = localStorage.getItem('radioMiniPlayerPositionV1');
     if (saved) {
       const pos = JSON.parse(saved);
-      const maxLeft = window.innerWidth - PLAYER_WIDTH - MARGIN;
-      const maxTop = window.innerHeight - PLAYER_HEIGHT - 120;
-      const minTop = MARGIN + 80;
+      const maxLeft = window.innerWidth - safeArea.right - PLAYER_WIDTH - MARGIN;
+      const maxTop = window.innerHeight - safeArea.bottom - PLAYER_HEIGHT - 120;
+      const minLeft = safeArea.left + MARGIN;
+      const minTop = safeArea.top + MARGIN + 80;
       return {
-        left: Math.min(Math.max(pos.left ?? MARGIN, MARGIN), maxLeft),
+        left: Math.min(Math.max(pos.left ?? minLeft, minLeft), maxLeft),
         top: Math.min(Math.max(pos.top ?? maxTop, minTop), maxTop),
       };
     }
   } catch (e) {
     // Ignore errors
   }
-  
-  // Default: bottom left, above bottom nav
+
+  // Default: bottom left, above bottom nav, accounting for safe areas
   return {
-    left: MARGIN,
-    top: typeof window !== 'undefined' ? window.innerHeight - PLAYER_HEIGHT - 140 : 500,
+    left: safeArea.left + MARGIN,
+    top: window.innerHeight - safeArea.bottom - PLAYER_HEIGHT - 140,
   };
 };
 
@@ -69,11 +92,13 @@ export const RadioMiniPlayer: React.FC = () => {
   useEffect(() => {
     const ensureVisible = () => {
       setPosition(prev => {
-        const maxLeft = window.innerWidth - PLAYER_WIDTH - MARGIN;
-        const maxTop = window.innerHeight - PLAYER_HEIGHT - 120;
-        const minTop = MARGIN + 80;
+        const safeArea = getSafeAreaInsets();
+        const maxLeft = window.innerWidth - safeArea.right - PLAYER_WIDTH - MARGIN;
+        const maxTop = window.innerHeight - safeArea.bottom - PLAYER_HEIGHT - 120;
+        const minLeft = safeArea.left + MARGIN;
+        const minTop = safeArea.top + MARGIN + 80;
 
-        const clampedLeft = Math.min(Math.max(prev.left, MARGIN), maxLeft);
+        const clampedLeft = Math.min(Math.max(prev.left, minLeft), maxLeft);
         const clampedTop = Math.min(Math.max(prev.top, minTop), maxTop);
 
         if (Math.abs(clampedLeft - prev.left) > 1 || Math.abs(clampedTop - prev.top) > 1) {
@@ -89,11 +114,13 @@ export const RadioMiniPlayer: React.FC = () => {
   }, []);
 
   const clampPosition = useCallback((left: number, top: number) => {
-    const maxLeft = window.innerWidth - PLAYER_WIDTH - MARGIN;
-    const maxTop = window.innerHeight - PLAYER_HEIGHT - 120;
-    const minTop = MARGIN + 80;
+    const safeArea = getSafeAreaInsets();
+    const maxLeft = window.innerWidth - safeArea.right - PLAYER_WIDTH - MARGIN;
+    const maxTop = window.innerHeight - safeArea.bottom - PLAYER_HEIGHT - 120;
+    const minLeft = safeArea.left + MARGIN;
+    const minTop = safeArea.top + MARGIN + 80;
     return {
-      left: Math.min(Math.max(left, MARGIN), maxLeft),
+      left: Math.min(Math.max(left, minLeft), maxLeft),
       top: Math.min(Math.max(top, minTop), maxTop),
     };
   }, []);
