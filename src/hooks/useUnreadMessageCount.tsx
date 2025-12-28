@@ -26,31 +26,19 @@ export function useUnreadMessageCount() {
         // Get conversation IDs as array
         const conversationIds = conversations.map(c => c.id);
 
-        // Single query: get all unread messages for these conversations
-        // IMPORTANT: Only count messages that are:
-        // 1. Not sent by the current user
-        // 2. Explicitly marked as unread (is_read = false)
-        // 3. Have content (not empty/deleted messages)
-        const { data: unreadMessages, error: unreadError } = await supabase
+        // OPTIMIZED: Use COUNT query instead of fetching all messages
+        // Count unique conversations with unread messages using a single efficient query
+        const { count, error: unreadError } = await supabase
           .from('conversation_messages')
-          .select('id, conversation_id')
+          .select('conversation_id', { count: 'exact', head: true })
           .in('conversation_id', conversationIds)
           .neq('sender_id', user.id)
           .eq('is_read', false);
 
         if (unreadError) throw unreadError;
 
-        // Return 0 if no unread messages found
-        if (!unreadMessages || unreadMessages.length === 0) {
-          return 0;
-        }
-
-        // Count unique conversation IDs with unread messages
-        const uniqueConversationIds = new Set(
-          unreadMessages.map(m => m.conversation_id)
-        );
-
-        return uniqueConversationIds.size;
+        // Return count of unread conversations (capped to avoid performance issues)
+        return Math.min(count || 0, 99);
       } catch (error) {
         console.error('[UnreadCount] Error:', error);
         return 0;

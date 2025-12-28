@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CameraCapture } from '@/components/CameraCapture';
 import { CapturedPhoto } from '@/hooks/useCamera';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+
+// Upload timeout in milliseconds (60 seconds for multiple photos)
+const UPLOAD_TIMEOUT = 60000;
 
 interface LocationState {
   returnPath?: string;
@@ -19,6 +22,19 @@ export default function OwnerListingCamera() {
   const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const uploadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (uploadTimeoutRef.current) {
+        clearTimeout(uploadTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const state = location.state as LocationState | undefined;
   const returnPath = state?.returnPath || '/owner/properties';
@@ -37,6 +53,20 @@ export default function OwnerListingCamera() {
 
     setIsUploading(true);
     setUploadProgress(0);
+
+    // Set upload timeout to prevent stuck loading state
+    uploadTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setIsUploading(false);
+        setUploadProgress(0);
+        toast({
+          title: 'Upload Timeout',
+          description: 'Upload took too long. Please try again.',
+          variant: 'destructive',
+        });
+        navigate(returnPath);
+      }
+    }, UPLOAD_TIMEOUT);
 
     try {
       const uploadedUrls: string[] = [];
@@ -98,28 +128,43 @@ export default function OwnerListingCamera() {
         }
       }
 
-      toast({
-        title: 'Photos Uploaded!',
-        description: `${uploadedUrls.length} photo(s) have been saved successfully.`,
-      });
+      // Clear timeout on success
+      if (uploadTimeoutRef.current) {
+        clearTimeout(uploadTimeoutRef.current);
+      }
 
-      // Navigate back with the uploaded URLs in state
-      navigate(returnPath, {
-        state: {
-          newPhotos: uploadedUrls,
-          allPhotos: [...existingPhotos, ...uploadedUrls],
-        },
-      });
+      if (isMountedRef.current) {
+        toast({
+          title: 'Photos Uploaded!',
+          description: `${uploadedUrls.length} photo(s) have been saved successfully.`,
+        });
+
+        // Navigate back with the uploaded URLs in state
+        navigate(returnPath, {
+          state: {
+            newPhotos: uploadedUrls,
+            allPhotos: [...existingPhotos, ...uploadedUrls],
+          },
+        });
+      }
     } catch (error) {
-      console.error('Error uploading listing photos:', error);
-      toast({
-        title: 'Upload Failed',
-        description: 'Some photos failed to upload. Please try again.',
-        variant: 'destructive',
-      });
+      // Clear timeout on error
+      if (uploadTimeoutRef.current) {
+        clearTimeout(uploadTimeoutRef.current);
+      }
+
+      if (isMountedRef.current) {
+        toast({
+          title: 'Upload Failed',
+          description: 'Some photos failed to upload. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
+      if (isMountedRef.current) {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
     }
   }, [user, navigate, returnPath, listingId, existingPhotos]);
 

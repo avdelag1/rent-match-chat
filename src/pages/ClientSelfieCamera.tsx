@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CameraCapture } from '@/components/CameraCapture';
 import { CapturedPhoto } from '@/hooks/useCamera';
@@ -6,11 +6,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
+// Upload timeout in milliseconds (30 seconds)
+const UPLOAD_TIMEOUT = 30000;
+
 export default function ClientSelfieCamera() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
+  const uploadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (uploadTimeoutRef.current) {
+        clearTimeout(uploadTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Get return path from state or default to profile
   const returnPath = (location.state as { returnPath?: string })?.returnPath || '/client/profile';
@@ -22,6 +38,20 @@ export default function ClientSelfieCamera() {
     }
 
     setIsUploading(true);
+
+    // Set upload timeout to prevent stuck loading state
+    uploadTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setIsUploading(false);
+        toast({
+          title: 'Upload Timeout',
+          description: 'Upload took too long. Please try again.',
+          variant: 'destructive',
+        });
+        navigate(returnPath);
+      }
+    }, UPLOAD_TIMEOUT);
+
     try {
       const photo = photos[0]; // For selfie, we only take one photo
 
@@ -34,7 +64,7 @@ export default function ClientSelfieCamera() {
       const fileName = `${user.id}/selfie_${Date.now()}.${fileExt}`;
 
       // Upload to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('profile-photos')
         .upload(fileName, blob, {
           contentType: `image/${fileExt}`,
@@ -71,21 +101,35 @@ export default function ClientSelfieCamera() {
         },
       });
 
-      toast({
-        title: 'Profile Photo Updated!',
-        description: 'Your new selfie has been saved as your profile photo.',
-      });
+      // Clear timeout on success
+      if (uploadTimeoutRef.current) {
+        clearTimeout(uploadTimeoutRef.current);
+      }
 
-      navigate(returnPath);
+      if (isMountedRef.current) {
+        toast({
+          title: 'Profile Photo Updated!',
+          description: 'Your new selfie has been saved as your profile photo.',
+        });
+        navigate(returnPath);
+      }
     } catch (error) {
-      console.error('Error uploading selfie:', error);
-      toast({
-        title: 'Upload Failed',
-        description: 'Failed to save your photo. Please try again.',
-        variant: 'destructive',
-      });
+      // Clear timeout on error
+      if (uploadTimeoutRef.current) {
+        clearTimeout(uploadTimeoutRef.current);
+      }
+
+      if (isMountedRef.current) {
+        toast({
+          title: 'Upload Failed',
+          description: 'Failed to save your photo. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
-      setIsUploading(false);
+      if (isMountedRef.current) {
+        setIsUploading(false);
+      }
     }
   }, [user, navigate, returnPath]);
 
