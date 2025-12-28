@@ -113,8 +113,10 @@ export function useUnreadMessageCount() {
       if (refetchTimeoutRef.current) {
         clearTimeout(refetchTimeoutRef.current);
       }
-      supabase.removeChannel(channel);
+      // Properly unsubscribe before removing channel
+      channel.unsubscribe();
     };
+    // Note: debouncedRefetch is intentionally excluded as it references query.refetch which is stable
   }, [user?.id]);
 
   return {

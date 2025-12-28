@@ -128,7 +128,8 @@ export function MessagingDashboard() {
       if (refetchTimeoutRef.current) {
         clearTimeout(refetchTimeoutRef.current);
       }
-      supabase.removeChannel(conversationsChannel);
+      // Properly unsubscribe before removing channel
+      conversationsChannel.unsubscribe();
     };
   }, [user?.id, debouncedRefetch]);
 
