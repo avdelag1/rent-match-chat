@@ -291,9 +291,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     });
   }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
 
-  // Check if we're on a page that should show quick filters (client or owner discovery page)
-  const showQuickFilters = (userRole === 'client' && location.pathname === '/client/dashboard') ||
-                           (userRole === 'owner' && location.pathname === '/owner/dashboard');
+  // Check if we're on a page that should show quick filters (client discovery page only)
+  // Owner filters are now shown in the TopBar
+  const showQuickFilters = userRole === 'client' && location.pathname === '/client/dashboard';
+  const showOwnerFiltersInTopBar = userRole === 'owner' && location.pathname === '/owner/dashboard';
 
   // Calculate responsive layout values
   const topBarHeight = responsive.isMobile ? 52 : 56;
@@ -308,6 +309,18 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
+        showOwnerFilters={showOwnerFiltersInTopBar}
+        ownerFilters={{
+          clientGender: quickFilters.clientGender,
+          clientType: quickFilters.clientType,
+        }}
+        onOwnerFiltersChange={(filters) => {
+          setQuickFilters(prev => ({
+            ...prev,
+            clientGender: filters.clientGender,
+            clientType: filters.clientType,
+          }));
+        }}
       />
 
       {/* Quick Filter Bar - For clients and owners on discovery pages */}
