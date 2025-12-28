@@ -2375,7 +2375,7 @@ export const radioGenres: RadioGenre[] = [
         country: 'United States',
         countryCode: 'US',
         description: 'Austin\'s NPR station - news, culture and music',
-        streamUrl: 'https://kut.streamguys1.com/kut128',
+        streamUrl: 'https://streams.kut.org/4426_128.mp3',
         website: 'https://www.kut.org',
         artwork: 'https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=400&h=400&fit=crop',
         accentColor: '#BF5700',
@@ -2389,7 +2389,7 @@ export const radioGenres: RadioGenre[] = [
         country: 'United States',
         countryCode: 'US',
         description: 'Austin\'s classic country music station',
-        streamUrl: 'https://stream.revma.ihrhls.com/zc2561',
+        streamUrl: 'https://arn.leanplayer.com/KOKEFM',
         website: 'https://www.kokefm.com',
         artwork: 'https://images.unsplash.com/photo-1500673922987-e212871fec22?w=400&h=400&fit=crop',
         accentColor: '#8B4513',
@@ -2417,7 +2417,7 @@ export const radioGenres: RadioGenre[] = [
         country: 'United States',
         countryCode: 'US',
         description: 'Houston\'s Pacifica community radio',
-        streamUrl: 'https://kpft.streamguys1.com/kpft-aac64k',
+        streamUrl: 'https://kpft.streamguys1.com/kpft',
         website: 'https://kpft.org',
         artwork: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=400&fit=crop',
         accentColor: '#FF6600',
@@ -2445,7 +2445,7 @@ export const radioGenres: RadioGenre[] = [
         country: 'United States',
         countryCode: 'US',
         description: 'Austin\'s rock radio heritage',
-        streamUrl: 'https://stream.revma.ihrhls.com/zc1873',
+        streamUrl: 'https://stream.revma.ihrhls.com/zc6054',
         website: 'https://www.klbjfm.com',
         artwork: 'https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=400&h=400&fit=crop',
         accentColor: '#FF4500',
@@ -2987,15 +2987,33 @@ export const searchStations = (query: string): RadioStation[] => {
 };
 
 // Helper function to get a random station from all genres
-export const getRandomStation = (): RadioStation => {
+export const getRandomStation = (excludeStationId?: string): RadioStation => {
   const allStations = getAllStations();
+
+  // If we need to exclude a station and there's more than one station available
+  if (excludeStationId && allStations.length > 1) {
+    const filteredStations = allStations.filter(s => s.id !== excludeStationId);
+    if (filteredStations.length > 0) {
+      return filteredStations[Math.floor(Math.random() * filteredStations.length)];
+    }
+  }
+
   return allStations[Math.floor(Math.random() * allStations.length)];
 };
 
 // Helper function to get a random station from a specific genre
-export const getRandomStationFromGenre = (genreId: string): RadioStation | undefined => {
+export const getRandomStationFromGenre = (genreId: string, excludeStationId?: string): RadioStation | undefined => {
   const genre = getGenreById(genreId);
   if (!genre || genre.stations.length === 0) return undefined;
+
+  // If we need to exclude a station and there's more than one station in the genre
+  if (excludeStationId && genre.stations.length > 1) {
+    const filteredStations = genre.stations.filter(s => s.id !== excludeStationId);
+    if (filteredStations.length > 0) {
+      return filteredStations[Math.floor(Math.random() * filteredStations.length)];
+    }
+  }
+
   return genre.stations[Math.floor(Math.random() * genre.stations.length)];
 };
 
