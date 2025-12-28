@@ -143,6 +143,7 @@ export const RadioBubble: React.FC = () => {
     skipToPrevious,
     shufflePlay,
     stopPlayback,
+    expandPlayer,
   } = useRadioPlayer();
 
   // Check if bubble is over the close zone (at bottom center of screen)
@@ -298,8 +299,13 @@ export const RadioBubble: React.FC = () => {
       e.stopPropagation();
     }
     setIsExpanded(false);
-    navigate('/radio');
-  }, [navigate]);
+    // If on radio page, expand the player. Otherwise navigate to radio
+    if (location.pathname === '/radio') {
+      expandPlayer();
+    } else {
+      navigate('/radio');
+    }
+  }, [location.pathname, expandPlayer, navigate]);
 
   // Show bubble when a station starts playing
   useEffect(() => {
@@ -418,7 +424,16 @@ export const RadioBubble: React.FC = () => {
                 {/* Header with artwork - tap to navigate to radio page for full player */}
                 <div
                   className="relative h-20 overflow-hidden cursor-pointer"
-                  onClick={() => { if (!hasDraggedRef.current) { setIsExpanded(false); navigate('/radio'); } }}
+                  onClick={() => {
+                    if (!hasDraggedRef.current) {
+                      setIsExpanded(false);
+                      if (location.pathname === '/radio') {
+                        expandPlayer();
+                      } else {
+                        navigate('/radio');
+                      }
+                    }
+                  }}
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center"

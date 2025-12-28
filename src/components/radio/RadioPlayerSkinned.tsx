@@ -62,11 +62,11 @@ const DefaultSkin: React.FC<SkinProps> = ({
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
   togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
-  // Responsive sizes
-  const artSize = isMobile ? 'w-32 h-32' : 'w-44 h-44';
-  const playBtnSize = isMobile ? 'w-14 h-14' : 'w-16 h-16';
-  const iconSize = isMobile ? 'w-5 h-5' : 'w-6 h-6';
-  const playIconSize = isMobile ? 'w-6 h-6' : 'w-7 h-7';
+  // Responsive sizes - made more compact
+  const artSize = isMobile ? 'w-28 h-28' : 'w-36 h-36';
+  const playBtnSize = isMobile ? 'w-12 h-12' : 'w-14 h-14';
+  const iconSize = isMobile ? 'w-4 h-4' : 'w-5 h-5';
+  const playIconSize = isMobile ? 'w-5 h-5' : 'w-6 h-6';
 
   return (
     <motion.div
@@ -103,7 +103,7 @@ const DefaultSkin: React.FC<SkinProps> = ({
           <div className="absolute inset-0 flex items-center justify-center">
             <CircularVisualizer
               isPlaying={isPlaying}
-              size={isMobile ? 160 : 220}
+              size={isMobile ? 136 : 176}
               barCount={32}
               color="rgba(139, 92, 246, 0.6)"
             />
@@ -112,7 +112,7 @@ const DefaultSkin: React.FC<SkinProps> = ({
           {/* Pulse ring effect */}
           <PulseRing
             isPlaying={isPlaying}
-            size={isMobile ? 140 : 190}
+            size={isMobile ? 120 : 156}
             color="rgba(139, 92, 246, 0.4)"
             className="inset-0"
           />
@@ -228,39 +228,39 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
   error, isFav, remainingMinutes, showVolumeSlider, setShowVolumeSlider,
   togglePlayPause, setVolume, toggleFavorite, collapsePlayer, skipToNext, skipToPrevious, onOpenSkinSelector, isMobile
 }) => {
-  // Responsive sizing
-  const deviceWidth = isMobile ? 'max-w-[280px]' : 'max-w-[320px]';
-  const wheelSize = isMobile ? 'w-36 h-36' : 'w-48 h-48';
-  const centerBtn = isMobile ? 'w-14 h-14' : 'w-20 h-20';
-  
+  // Responsive sizing - made more compact
+  const deviceWidth = isMobile ? 'max-w-[240px]' : 'max-w-[280px]';
+  const wheelSize = isMobile ? 'w-28 h-28' : 'w-36 h-36';
+  const centerBtn = isMobile ? 'w-11 h-11' : 'w-14 h-14';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-gray-900 to-black p-2 overflow-y-auto">
       {/* iPod Body */}
       <div className={cn("relative w-full bg-gradient-to-b from-gray-100 via-white to-gray-200 rounded-[30px] shadow-2xl border-4 border-gray-300 overflow-hidden", deviceWidth)}>
         {/* Top Bar */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <Button variant="ghost" size="icon" onClick={collapsePlayer} className="w-8 h-8 text-gray-600">
-            <ChevronDown className="w-5 h-5" />
+        <div className="flex items-center justify-between px-3 pt-3 pb-1">
+          <Button variant="ghost" size="icon" onClick={collapsePlayer} className="w-7 h-7 text-gray-600">
+            <ChevronDown className="w-4 h-4" />
           </Button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {sleepTimer && (
               <span className="text-[10px] text-gray-500 flex items-center gap-1">
                 <Moon className="w-3 h-3" /> {remainingMinutes}m
               </span>
             )}
-            <Button variant="ghost" size="icon" onClick={onOpenSkinSelector} className="w-8 h-8 text-gray-600">
-              <Palette className="w-4 h-4" />
+            <Button variant="ghost" size="icon" onClick={onOpenSkinSelector} className="w-7 h-7 text-gray-600">
+              <Palette className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>
 
         {/* Screen */}
-        <div className="mx-4 bg-gradient-to-b from-gray-800 to-gray-900 rounded-lg p-3 shadow-inner border border-gray-700 relative overflow-hidden">
+        <div className="mx-3 bg-gradient-to-b from-gray-800 to-gray-900 rounded-lg p-2 shadow-inner border border-gray-700 relative overflow-hidden">
           {/* Subtle glow effect */}
           <GlowEffect isPlaying={isPlaying} color="rgba(59, 130, 246, 0.2)" />
 
           {/* Album Art */}
-          <div className="relative aspect-square rounded-md overflow-hidden mb-3 bg-black">
+          <div className="relative aspect-square rounded-md overflow-hidden mb-2 bg-black">
             <img src={currentStation.artwork} alt={currentStation.name} className="w-full h-full object-cover" />
             {isLoading && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -289,7 +289,7 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
           </div>
 
           {/* Spectrum visualizer instead of progress bar */}
-          <div className="mt-3 h-4 relative">
+          <div className="mt-2 h-4 relative">
             <SpectrumBars
               isPlaying={isPlaying}
               barCount={20}
@@ -303,7 +303,7 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
         </div>
 
         {/* Click Wheel */}
-        <div className={cn("relative mx-auto my-4", wheelSize)}>
+        <div className={cn("relative mx-auto my-3", wheelSize)}>
           {/* Outer Ring */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 shadow-lg border border-gray-400">
             {/* Menu Button */}
@@ -355,7 +355,7 @@ const IpodClassicSkin: React.FC<SkinProps> = ({
         </div>
 
         {/* Bottom Actions */}
-        <div className="flex justify-center gap-6 pb-6">
+        <div className="flex justify-center gap-4 pb-3">
           <Button
             variant="ghost"
             size="icon"
