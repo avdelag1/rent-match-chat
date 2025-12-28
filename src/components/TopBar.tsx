@@ -30,7 +30,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, className }: Top
           whileTap={{ scale: 0.98 }}
         >
         <span className="text-2xl swipess-logo-header">
-          SWiPESS
+          Swipess
         </span>
         </motion.div>
 

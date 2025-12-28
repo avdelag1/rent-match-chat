@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, memo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
-import { MapPin, Heart, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2 } from 'lucide-react';
+import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -256,7 +256,7 @@ const OwnerClientTinderCardComponent = ({
             }}
             className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing z-30"
             animate={{
-              height: isBottomSheetExpanded ? 'min(60%, 350px)' : 'min(28%, 160px)',
+              height: isBottomSheetExpanded ? 'min(60%, 350px)' : 'min(18%, 120px)',
               y: 0
             }}
             transition={{ type: 'spring', stiffness: 350, damping: 32 }}
@@ -501,7 +501,7 @@ const OwnerClientTinderCardComponent = ({
                 className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart shadow-lg"
                 title="Like"
               >
-                <Heart className="w-7 h-7" fill="currentColor" />
+                <Flame className="w-7 h-7" fill="currentColor" />
               </motion.button>
             </div>
           </motion.div>
