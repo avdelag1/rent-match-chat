@@ -130,11 +130,11 @@ export function PWAInstallBanner() {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 100, opacity: 0, scale: 0.9 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-6 inset-x-0 z-[9999] flex justify-center px-4"
+          className="fixed bottom-6 inset-x-0 z-[9999] flex justify-center px-4 pointer-events-none"
         >
           {showInstallInstructions ? (
             // Install Instructions Card - works for iOS, Android, tablets
-            <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 p-4 shadow-2xl backdrop-blur-xl max-w-xs">
+            <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 p-4 shadow-2xl backdrop-blur-xl max-w-xs pointer-events-auto">
               <button
                 onClick={handleDismiss}
                 className="absolute right-2 top-2 rounded-full p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
@@ -188,7 +188,7 @@ export function PWAInstallBanner() {
             </div>
           ) : (
             // Main banner - Compact pill with flame icon and share
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pointer-events-auto">
               <button
                 onClick={handleInstall}
                 className="group flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 shadow-lg shadow-orange-500/30 border border-orange-500/30 backdrop-blur-xl hover:shadow-xl hover:shadow-orange-500/50 hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
