@@ -91,18 +91,14 @@ export default defineConfig(({ mode }) => ({
       // Force single React instance (prevents Invalid Hook Call)
       react: path.resolve(__dirname, "./node_modules/react"),
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
-      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime.js"),
-      "react/jsx-dev-runtime": path.resolve(__dirname, "./node_modules/react/jsx-dev-runtime.js"),
     },
     // Prevent duplicate React instances (including jsx runtimes)
-    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+    dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
-      'react/jsx-runtime',
-      'react/jsx-dev-runtime',
       '@tanstack/react-query',
       'framer-motion',
       'lucide-react'
