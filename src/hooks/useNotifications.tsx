@@ -80,7 +80,8 @@ export function useNotifications() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      // Properly unsubscribe before removing channel
+      channel.unsubscribe();
     };
   }, [user?.id]);
 

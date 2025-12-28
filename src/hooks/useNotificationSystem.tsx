@@ -3,9 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
+type NotificationType = 'like' | 'message' | 'super_like' | 'match' | 'new_user';
+
 interface Notification {
   id: string;
-  type: 'like' | 'message' | 'super_like' | 'match' | 'new_user';
+  type: NotificationType;
   title: string;
   message: string;
   avatar?: string;
@@ -14,6 +16,16 @@ interface Notification {
   actionUrl?: string;
   relatedUserId?: string;
   conversationId?: string;
+}
+
+interface DBNotification {
+  id: string;
+  type: string;
+  message: string | null;
+  created_at: string;
+  read: boolean | null;
+  link_url?: string;
+  related_user_id?: string;
 }
 
 export function useNotificationSystem() {
@@ -39,17 +51,17 @@ export function useNotificationSystem() {
       }
 
       if (data && data.length > 0) {
-        const formattedNotifications: Notification[] = data.map(notif => ({
+        const formattedNotifications: Notification[] = data.map((notif: DBNotification) => ({
           id: notif.id,
-          type: notif.type as any,
+          type: (notif.type as NotificationType) || 'like',
           title: notif.type === 'like' ? 'New Like' :
                  notif.type === 'match' ? 'New Match' :
                  notif.type === 'message' ? 'New Message' : 'Notification',
           message: notif.message || '',
           timestamp: new Date(notif.created_at),
           read: notif.read || false,
-          actionUrl: (notif as any).link_url,
-          relatedUserId: (notif as any).related_user_id || undefined,
+          actionUrl: notif.link_url,
+          relatedUserId: notif.related_user_id || undefined,
         }));
         setNotifications(formattedNotifications);
       }
@@ -210,9 +222,10 @@ export function useNotificationSystem() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(swipesChannel);
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(matchesChannel);
+      // Properly unsubscribe before removing channels to prevent memory leaks
+      swipesChannel.unsubscribe();
+      messagesChannel.unsubscribe();
+      matchesChannel.unsubscribe();
     };
   }, [user?.id]);
 

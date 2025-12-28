@@ -43,28 +43,23 @@ const Index = () => {
     refetchOnMount: false, // Don't refetch on component mount if data is fresh
   });
 
-  // Add timeout fallback - if query takes too long, force refetch with faster timeout
+  // Combined timeout handling to prevent race conditions between multiple timers
   useEffect(() => {
-    if (user && (profileLoading || isFetching)) {
-      const timeout = setTimeout(() => {
-        logger.log('[Index] Query taking too long (2s), forcing faster refetch...');
-        refetch();
-      }, 2000); // Reduced from 5s to 2s for faster feedback
-
-      return () => clearTimeout(timeout);
+    if (!user || (!profileLoading && !isFetching && userRole)) {
+      // Reset timeout state when not loading
+      setLoadingTimeout(false);
+      return;
     }
-  }, [user, profileLoading, isFetching, refetch]);
 
-  // Add timeout to prevent infinite loading - show landing page after 6 seconds
-  useEffect(() => {
-    if (user && (profileLoading || isFetching || !userRole)) {
-      const timeout = setTimeout(() => {
-        logger.log('[Index] Loading timeout reached (6s), showing fallback...');
-        setLoadingTimeout(true);
-      }, 6000); // Reduced from 10s to 6s for faster feedback on timeout
+    // Single timeout for fallback UI after 6 seconds
+    const fallbackTimeout = setTimeout(() => {
+      logger.log('[Index] Loading timeout reached (6s), showing fallback...');
+      setLoadingTimeout(true);
+    }, 6000);
 
-      return () => clearTimeout(timeout);
-    }
+    return () => {
+      clearTimeout(fallbackTimeout);
+    };
   }, [user, profileLoading, isFetching, userRole]);
 
   // Redirect authenticated users directly to dashboard

@@ -251,9 +251,9 @@ export function useRealtimeChat(conversationId: string) {
       // Clear typing state
       setIsTyping(false);
 
-      // Remove channels
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(typingChannel);
+      // Properly unsubscribe channels
+      messagesChannel.unsubscribe();
+      typingChannel.unsubscribe();
 
       // Clear state
       setTypingUsers([]);

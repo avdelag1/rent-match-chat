@@ -107,12 +107,56 @@ export default function NotificationsPage() {
   const { data: userRole } = useUserRole(user?.id);
 
   useEffect(() => {
-    if (user?.id) {
-      fetchNotifications();
-      subscribeToNotifications();
-      // Auto-mark all notifications as read when visiting this page
-      markAllAsReadSilently();
-    }
+    if (!user?.id) return;
+
+    fetchNotifications();
+    // Auto-mark all notifications as read when visiting this page
+    markAllAsReadSilently();
+
+    // Subscribe to real-time notifications
+    const channel = supabase
+      .channel('notifications-page')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const n = payload.new as Record<string, unknown>;
+            const newNotification: Notification = {
+              id: n.id as string,
+              type: (n.type as string) || 'system',
+              title: n.type === 'new_like' || n.type === 'like' ? 'New Like' :
+                     n.type === 'new_match' || n.type === 'match' ? 'New Match!' :
+                     n.type === 'new_message' || n.type === 'message' ? 'New Message' :
+                     n.type === 'super_like' ? 'Super Like!' : 'Notification',
+              message: (n.message as string) || '',
+              created_at: n.created_at as string,
+              read: (n.read as boolean) || false,
+              link_url: n.link_url as string | null,
+              related_user_id: n.related_user_id as string | null,
+              metadata: n.metadata,
+            };
+            setNotifications(prev => [newNotification, ...prev]);
+          } else if (payload.eventType === 'DELETE') {
+            setNotifications(prev => prev.filter(n => n.id !== (payload.old as { id: string }).id));
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as { id: string; read: boolean };
+            setNotifications(prev =>
+              prev.map(n => n.id === updated.id ? { ...n, read: updated.read } : n)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
   }, [user?.id]);
 
   // Mark all as read without toast (silent version for auto-marking)
@@ -143,19 +187,19 @@ export default function NotificationsPage() {
 
       if (error) throw error;
 
-      const formattedNotifications: Notification[] = (data || []).map(n => ({
-        id: n.id,
-        type: n.type || 'system',
+      const formattedNotifications: Notification[] = (data || []).map((n: Record<string, unknown>) => ({
+        id: n.id as string,
+        type: (n.type as string) || 'system',
         title: n.type === 'new_like' || n.type === 'like' ? 'New Like' :
                n.type === 'new_match' || n.type === 'match' ? 'New Match!' :
                n.type === 'new_message' || n.type === 'message' ? 'New Message' :
                n.type === 'super_like' ? 'Super Like!' : 'Notification',
-        message: n.message || '',
-        created_at: n.created_at,
-        read: n.read || false,
-        link_url: (n as any).link_url,
-        related_user_id: (n as any).related_user_id,
-        metadata: (n as any).metadata,
+        message: (n.message as string) || '',
+        created_at: n.created_at as string,
+        read: (n.read as boolean) || false,
+        link_url: n.link_url as string | null,
+        related_user_id: n.related_user_id as string | null,
+        metadata: n.metadata,
       }));
 
       setNotifications(formattedNotifications);
@@ -164,53 +208,6 @@ export default function NotificationsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const subscribeToNotifications = () => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel('notifications-page')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            const n = payload.new;
-            const newNotification: Notification = {
-              id: n.id,
-              type: n.type || 'system',
-              title: n.type === 'new_like' || n.type === 'like' ? 'New Like' :
-                     n.type === 'new_match' || n.type === 'match' ? 'New Match!' :
-                     n.type === 'new_message' || n.type === 'message' ? 'New Message' :
-                     n.type === 'super_like' ? 'Super Like!' : 'Notification',
-              message: n.message || '',
-              created_at: n.created_at,
-              read: n.read || false,
-              link_url: (n as any).link_url,
-              related_user_id: (n as any).related_user_id,
-              metadata: (n as any).metadata,
-            };
-            setNotifications(prev => [newNotification, ...prev]);
-          } else if (payload.eventType === 'DELETE') {
-            setNotifications(prev => prev.filter(n => n.id !== payload.old.id));
-          } else if (payload.eventType === 'UPDATE') {
-            setNotifications(prev => 
-              prev.map(n => n.id === payload.new.id ? { ...n, read: payload.new.read } : n)
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   };
 
   const markAsRead = async (notificationId: string) => {
