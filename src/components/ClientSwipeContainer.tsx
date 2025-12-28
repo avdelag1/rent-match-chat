@@ -177,7 +177,7 @@ export function ClientSwipeContainer({
 
   if (isLoading || isRefetching) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -185,7 +185,7 @@ export function ClientSwipeContainer({
 
   if (error) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Error</h3>
@@ -205,7 +205,7 @@ export function ClientSwipeContainer({
 
   if (clientProfiles.length === 0) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground text-sm">
             Discover more clients by refreshing
@@ -226,7 +226,7 @@ export function ClientSwipeContainer({
 
   if (currentIndex >= clientProfiles.length) {
     return (
-      <div className="relative w-full h-[550px] max-w-sm mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground text-sm">
             You've seen all available clients
@@ -248,35 +248,35 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-start" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
-      {/* Card Container - Full screen swipe experience */}
-      <div className="relative w-full h-[calc(100vh-160px)] max-w-lg mx-auto overflow-clip mt-2" style={{ contain: 'layout' }}>
-        <AnimatePresence mode="wait">
+    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3">
+      {/* Card Container - Full height, no clipping */}
+      <div className="relative flex-1 w-full">
+        <AnimatePresence mode="popLayout">
           {currentClient && (
             <motion.div
               key={currentClient.user_id}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
-                x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
+                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 25 : swipeDirection === 'left' ? -25 : 0,
-                scale: 0.9,
+                rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
+                scale: 0.85,
                 transition: {
                   type: "spring",
-                  stiffness: 600,
-                  damping: 30,
-                  mass: 0.4
+                  stiffness: 500,
+                  damping: 35,
+                  mass: 0.5
                 }
               }}
               transition={{
                 type: "spring",
-                stiffness: 600,
+                stiffness: 500,
                 damping: 35,
-                mass: 0.4
+                mass: 0.5
               }}
               className="w-full h-full absolute inset-0"
-              style={{ willChange: 'transform, opacity', zIndex: 1 }}
+              style={{ willChange: 'transform, opacity' }}
             >
               <OwnerClientTinderCard
                 profile={currentClient}
