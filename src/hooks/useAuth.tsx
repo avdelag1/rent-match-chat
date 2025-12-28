@@ -136,16 +136,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, role: 'client' | 'owner', name?: string) => {
     try {
-      // Check if account already exists with this email
-      const { profile: existingProfile } = await checkExistingAccount(email);
-      
+      // Check if account already exists with this email (with timeout to prevent hanging)
+      let existingProfile = null;
+      try {
+        const checkPromise = checkExistingAccount(email);
+        const timeoutPromise = new Promise<{ profile: null; hasConflict: false }>((_, reject) =>
+          setTimeout(() => reject(new Error('Check timeout')), 5000)
+        );
+        const result = await Promise.race([checkPromise, timeoutPromise]);
+        existingProfile = result.profile;
+      } catch (checkError) {
+        // If check times out or fails, continue with signup - Supabase will handle duplicates
+        console.log('[Auth] Existing account check skipped:', checkError);
+      }
+
       if (existingProfile) {
         const existingRole = existingProfile.role;
-        const correctPage = existingRole === 'client' ? 'Client' : 'Owner';
-        const wrongPage = role === 'client' ? 'Client' : 'Owner';
-        
+
         // Check if trying to sign up with different role
-        if (existingRole !== role) {
+        if (existingRole && existingRole !== role) {
           toast({
             title: "Email Already Registered",
             description: `This email is already registered as a ${existingRole.toUpperCase()} account. To use both roles, please create a separate account with a different email address.`,
@@ -153,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           return { error: new Error(`Email already registered with ${existingRole} role`) };
         }
-        
+
         // Same role - just redirect to sign in
         toast({
           title: "Account Already Exists",
@@ -164,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
