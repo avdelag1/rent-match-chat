@@ -300,16 +300,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const quickFilterHeight = showQuickFilters ? (responsive.isMobile ? 48 : 52) : 0;
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
 
-  // Reference to main content for scroll reset
-  const mainContentRef = useRef<HTMLElement>(null);
-
-  // Scroll to top and reset horizontal position when route changes to fix page rendering issues
-  useEffect(() => {
-    if (mainContentRef.current) {
-      mainContentRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    }
-  }, [location.pathname]);
-
   return (
     <div className="app-root bg-background min-h-screen min-h-dvh overflow-x-hidden" style={{ width: '100%', maxWidth: '100vw', position: 'relative' }}>
       <NotificationSystem />
@@ -338,7 +328,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
-        ref={mainContentRef}
+        key={location.pathname}
         className="fixed inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
           paddingTop: `calc(${topBarHeight + quickFilterHeight}px + var(--safe-top))`,
