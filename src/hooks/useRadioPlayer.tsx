@@ -120,6 +120,15 @@ export const AVAILABLE_SKINS: SkinConfig[] = [
 // Sleep Timer Options
 export type SleepTimerOption = 15 | 30 | 60 | null;
 
+// Playlist interface
+export interface RadioPlaylist {
+  id: string;
+  name: string;
+  stationIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 interface RadioPlayerState {
   currentStation: RadioStation | null;
   isPlaying: boolean;
@@ -133,6 +142,7 @@ interface RadioPlayerState {
   favorites: string[];
   recentlyPlayed: string[];
   isPlayerExpanded: boolean;
+  playlists: RadioPlaylist[];
 }
 
 interface RadioPlayerContextType extends RadioPlayerState {
@@ -155,7 +165,15 @@ interface RadioPlayerContextType extends RadioPlayerState {
   skipToPrevious: () => void;
   shufflePlay: () => void;
   shufflePlayGenre: (genreId: string) => void;
+  shufflePlayFavorites: () => void;
+  shufflePlayPlaylist: (playlistId: string) => void;
   stopPlayback: () => void;
+  createPlaylist: (name: string, stationIds?: string[]) => RadioPlaylist;
+  deletePlaylist: (playlistId: string) => void;
+  renamePlaylist: (playlistId: string, newName: string) => void;
+  addToPlaylist: (playlistId: string, stationId: string) => void;
+  removeFromPlaylist: (playlistId: string, stationId: string) => void;
+  getPlaylistById: (playlistId: string) => RadioPlaylist | undefined;
 }
 
 const RadioPlayerContext = createContext<RadioPlayerContextType | null>(null);
@@ -169,6 +187,7 @@ const getStorageKeys = (role: 'client' | 'owner' | null) => {
     SKIN: `${prefix}skin`,
     VOLUME: `${prefix}volume`,
     LAST_STATION: `${prefix}last_station`,
+    PLAYLISTS: `${prefix}playlists`,
   };
 };
 
@@ -229,6 +248,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     favorites: loadFromStorage<string[]>(storageKeys.FAVORITES, []),
     recentlyPlayed: loadFromStorage<string[]>(storageKeys.RECENTLY_PLAYED, []),
     isPlayerExpanded: false,
+    playlists: loadFromStorage<RadioPlaylist[]>(storageKeys.PLAYLISTS, []),
   }));
 
   // When role changes, reload state from role-specific storage
@@ -258,6 +278,7 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         favorites: loadFromStorage<string[]>(newStorageKeys.FAVORITES, []),
         recentlyPlayed: loadFromStorage<string[]>(newStorageKeys.RECENTLY_PLAYED, []),
         isPlayerExpanded: false,
+        playlists: loadFromStorage<RadioPlaylist[]>(newStorageKeys.PLAYLISTS, []),
       });
 
       previousRoleRef.current = currentRole;
@@ -426,6 +447,11 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     saveToStorage(storageKeys.RECENTLY_PLAYED, state.recentlyPlayed);
   }, [state.recentlyPlayed, storageKeys.RECENTLY_PLAYED]);
+
+  // Save playlists
+  useEffect(() => {
+    saveToStorage(storageKeys.PLAYLISTS, state.playlists);
+  }, [state.playlists, storageKeys.PLAYLISTS]);
 
   // Save current station
   useEffect(() => {
@@ -684,6 +710,124 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, [state.currentStation, setStation, play]);
 
+  // Shuffle play from favorites
+  const shufflePlayFavorites = useCallback(() => {
+    if (state.favorites.length === 0) return;
+
+    const allStations = getAllStations();
+    const favoriteStations = state.favorites
+      .map(id => allStations.find(s => s.id === id))
+      .filter(Boolean) as RadioStation[];
+
+    if (favoriteStations.length === 0) return;
+
+    // Filter out current station to avoid repeating
+    const availableStations = favoriteStations.filter(
+      s => s.id !== state.currentStation?.id
+    );
+
+    // If only one station in favorites, play it anyway
+    const stationsToShuffle = availableStations.length > 0 ? availableStations : favoriteStations;
+    const randomIndex = Math.floor(Math.random() * stationsToShuffle.length);
+    const randomStation = stationsToShuffle[randomIndex];
+
+    setStation(randomStation);
+    play(randomStation);
+  }, [state.favorites, state.currentStation, setStation, play]);
+
+  // Shuffle play from a specific playlist
+  const shufflePlayPlaylist = useCallback((playlistId: string) => {
+    const playlist = state.playlists.find(p => p.id === playlistId);
+    if (!playlist || playlist.stationIds.length === 0) return;
+
+    const allStations = getAllStations();
+    const playlistStations = playlist.stationIds
+      .map(id => allStations.find(s => s.id === id))
+      .filter(Boolean) as RadioStation[];
+
+    if (playlistStations.length === 0) return;
+
+    // Filter out current station to avoid repeating
+    const availableStations = playlistStations.filter(
+      s => s.id !== state.currentStation?.id
+    );
+
+    // If only one station in playlist, play it anyway
+    const stationsToShuffle = availableStations.length > 0 ? availableStations : playlistStations;
+    const randomIndex = Math.floor(Math.random() * stationsToShuffle.length);
+    const randomStation = stationsToShuffle[randomIndex];
+
+    setStation(randomStation);
+    play(randomStation);
+  }, [state.playlists, state.currentStation, setStation, play]);
+
+  // Create a new playlist
+  const createPlaylist = useCallback((name: string, stationIds: string[] = []): RadioPlaylist => {
+    const newPlaylist: RadioPlaylist = {
+      id: `playlist_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name,
+      stationIds,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+
+    setState(prev => ({
+      ...prev,
+      playlists: [...prev.playlists, newPlaylist],
+    }));
+
+    return newPlaylist;
+  }, []);
+
+  // Delete a playlist
+  const deletePlaylist = useCallback((playlistId: string) => {
+    setState(prev => ({
+      ...prev,
+      playlists: prev.playlists.filter(p => p.id !== playlistId),
+    }));
+  }, []);
+
+  // Rename a playlist
+  const renamePlaylist = useCallback((playlistId: string, newName: string) => {
+    setState(prev => ({
+      ...prev,
+      playlists: prev.playlists.map(p =>
+        p.id === playlistId
+          ? { ...p, name: newName, updatedAt: Date.now() }
+          : p
+      ),
+    }));
+  }, []);
+
+  // Add station to playlist
+  const addToPlaylist = useCallback((playlistId: string, stationId: string) => {
+    setState(prev => ({
+      ...prev,
+      playlists: prev.playlists.map(p =>
+        p.id === playlistId && !p.stationIds.includes(stationId)
+          ? { ...p, stationIds: [...p.stationIds, stationId], updatedAt: Date.now() }
+          : p
+      ),
+    }));
+  }, []);
+
+  // Remove station from playlist
+  const removeFromPlaylist = useCallback((playlistId: string, stationId: string) => {
+    setState(prev => ({
+      ...prev,
+      playlists: prev.playlists.map(p =>
+        p.id === playlistId
+          ? { ...p, stationIds: p.stationIds.filter(id => id !== stationId), updatedAt: Date.now() }
+          : p
+      ),
+    }));
+  }, []);
+
+  // Get playlist by ID
+  const getPlaylistById = useCallback((playlistId: string): RadioPlaylist | undefined => {
+    return state.playlists.find(p => p.id === playlistId);
+  }, [state.playlists]);
+
   const contextValue: RadioPlayerContextType = {
     ...state,
     play,
@@ -705,7 +849,15 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     skipToPrevious,
     shufflePlay,
     shufflePlayGenre,
+    shufflePlayFavorites,
+    shufflePlayPlaylist,
     stopPlayback,
+    createPlaylist,
+    deletePlaylist,
+    renamePlaylist,
+    addToPlaylist,
+    removeFromPlaylist,
+    getPlaylistById,
   };
 
   return (
