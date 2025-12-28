@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings, Filter, Radio } from 'lucide-react';
+import { Bell, Settings, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -8,12 +8,10 @@ import { useNavigate } from 'react-router-dom';
 interface TopBarProps {
   onNotificationsClick?: () => void;
   onSettingsClick?: () => void;
-  onFiltersClick?: () => void;
   className?: string;
-  showFilters?: boolean;
 }
 
-export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
+export function TopBar({ onNotificationsClick, onSettingsClick, className }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
   const navigate = useNavigate();
 
@@ -66,28 +64,6 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
               </AnimatePresence>
             </Button>
           </motion.div>
-
-          {/* Filters */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ delay: 0.15, type: 'spring', stiffness: 500 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
-                  onClick={onFiltersClick}
-                  aria-label="Open filters"
-                >
-                  <Filter className="h-5 w-5 text-foreground/80" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Radio */}
           <motion.div

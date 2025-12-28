@@ -36,6 +36,12 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       path: '/client/dashboard',
     },
     {
+      id: 'filter',
+      label: 'Filter',
+      icon: SlidersHorizontal,
+      onClick: onFilterClick,
+    },
+    {
       id: 'likes',
       label: 'Flames',
       icon: Flame,
@@ -63,6 +69,12 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       label: 'Browse',
       icon: Building2,
       path: '/owner/dashboard',
+    },
+    {
+      id: 'filter',
+      label: 'Filter',
+      icon: SlidersHorizontal,
+      onClick: onFilterClick,
     },
     {
       id: 'liked',
