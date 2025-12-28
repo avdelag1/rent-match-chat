@@ -71,6 +71,12 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       path: '/owner/dashboard',
     },
     {
+      id: 'filter',
+      label: 'Filter',
+      icon: SlidersHorizontal,
+      onClick: onFilterClick,
+    },
+    {
       id: 'liked',
       label: 'Liked',
       icon: Heart,

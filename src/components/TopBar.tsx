@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings, Filter, Radio } from 'lucide-react';
+import { Bell, Settings, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -8,12 +8,10 @@ import { useNavigate } from 'react-router-dom';
 interface TopBarProps {
   onNotificationsClick?: () => void;
   onSettingsClick?: () => void;
-  onFiltersClick?: () => void;
   className?: string;
-  showFilters?: boolean;
 }
 
-export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, className, showFilters = false }: TopBarProps) {
+export function TopBar({ onNotificationsClick, onSettingsClick, className }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
   const navigate = useNavigate();
 

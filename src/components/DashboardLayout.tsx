@@ -1,5 +1,5 @@
 
-import React, { ReactNode, useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react'
+import React, { ReactNode, useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from 'react'
 import { useAuth } from "@/hooks/useAuth"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
@@ -160,8 +160,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [])
 
   const handleFilterClick = useCallback(() => {
-    setShowFilters(true)
-  }, [])
+    if (userRole === 'owner') {
+      navigate('/owner/filters-explore')
+    } else {
+      setShowFilters(true)
+    }
+  }, [userRole, navigate])
 
   const handleAddListingClick = useCallback(() => {
     setShowCategoryDialog(true)
@@ -296,6 +300,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const quickFilterHeight = showQuickFilters ? (responsive.isMobile ? 48 : 52) : 0;
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
 
+  // Reference to main content for scroll reset
+  const mainContentRef = useRef<HTMLElement>(null);
+
+  // Scroll to top when route changes to fix page rendering issues
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [location.pathname]);
+
   return (
     <div className="app-root bg-background min-h-screen min-h-dvh overflow-x-hidden">
       <NotificationSystem />
@@ -304,8 +318,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
-        onFiltersClick={userRole === 'owner' ? () => navigate('/owner/filters-explore') : handleFilterClick}
-        showFilters={true}
       />
 
       {/* Quick Filter Bar - For clients and owners on discovery pages */}
@@ -326,6 +338,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
+        ref={mainContentRef}
         className="fixed inset-0 overflow-y-auto overflow-x-clip scroll-area-momentum"
         style={{
           paddingTop: `calc(${topBarHeight + quickFilterHeight}px + var(--safe-top))`,
