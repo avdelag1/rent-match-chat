@@ -66,8 +66,8 @@ export function PWAInstallBanner() {
 
   const handleShare = useCallback(async () => {
     const shareData = {
-      title: 'swipeSs',
-      text: 'Check out swipeSs - Find your perfect match for properties, vehicles & more!',
+      title: 'SWiPESS',
+      text: 'Check out SWiPESS - Find your perfect match for properties, vehicles & more!',
       url: window.location.origin,
     };
 
@@ -136,7 +136,7 @@ export function PWAInstallBanner() {
               </button>
 
               <div className="pr-6 space-y-3">
-                <h3 className="font-semibold text-white text-sm">Install <span className="swipess-text">swipeSs</span></h3>
+                <h3 className="font-semibold text-white text-sm">Install <span className="swipess-text">SWiPESS</span></h3>
                 <div className="space-y-2 text-xs text-white/70">
                   {isIOS ? (
                     <>

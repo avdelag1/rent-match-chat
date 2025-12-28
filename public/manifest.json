@@ -1,7 +1,7 @@
 {
-  "name": "SWIPESS - Find Your Perfect Rental",
-  "short_name": "SWIPESS",
-  "description": "Find your perfect rental property or tenant with ease. Swipe through properties and connect with the right matches. SWIPESS makes matching easy.",
+  "name": "SWiPESS - Find Your Perfect Rental",
+  "short_name": "SWiPESS",
+  "description": "Find your perfect rental property or tenant with ease. Swipe through properties and connect with the right matches. SWiPESS makes matching easy.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -78,7 +78,7 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "SWIPESS on desktop"
+      "label": "SWiPESS on desktop"
     }
   ],
   "shortcuts": [
