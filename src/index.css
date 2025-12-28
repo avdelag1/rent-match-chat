@@ -57,9 +57,13 @@ body {
 
 #root {
   width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
+  /* Prevent layout shifts during navigation */
+  position: relative;
+  box-sizing: border-box;
 }
 
 /* ===== PROFESSIONAL LAYOUT SYSTEM WITH SAFE AREAS ===== */
@@ -71,7 +75,16 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
+  overflow-y: auto;
+  /* Prevent layout shifts */
+  position: relative;
+  box-sizing: border-box;
+  /* Force GPU acceleration for stability */
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* App Header - Fixed top bar with safe-area-top */
@@ -1357,25 +1370,26 @@ a {
 }
 
 /* ===== INSTANT PAGE TRANSITIONS - Game-like speed ===== */
+/* Using scale instead of translateX to prevent horizontal page shifts */
 .page-enter {
   opacity: 0;
-  transform: translateX(12px) translateZ(0);
+  transform: scale(0.98) translateZ(0);
 }
 
 .page-enter-active {
   opacity: 1;
-  transform: translateX(0) translateZ(0);
+  transform: scale(1) translateZ(0);
   transition: opacity 0.08s ease-out, transform 0.08s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .page-exit {
   opacity: 1;
-  transform: translateX(0) translateZ(0);
+  transform: scale(1) translateZ(0);
 }
 
 .page-exit-active {
   opacity: 0;
-  transform: translateX(-12px) translateZ(0);
+  transform: scale(1.02) translateZ(0);
   transition: opacity 0.06s ease-in, transform 0.06s ease-in;
 }
 
@@ -1739,68 +1753,69 @@ input:focus, textarea:focus, select:focus {
   mix-blend-mode: normal;
 }
 
-/* Forward navigation - slide from right */
+/* Forward navigation - use scale instead of x transforms to prevent shifting */
 html[data-navigation-direction="forward"] {
   &::view-transition-old(root) {
-    animation-name: slide-out-left;
+    animation-name: scale-fade-out;
   }
 
   &::view-transition-new(root) {
-    animation-name: slide-in-right;
+    animation-name: scale-fade-in;
   }
 }
 
-/* Backward navigation - slide from left */
+/* Backward navigation - use scale instead of x transforms to prevent shifting */
 html[data-navigation-direction="back"] {
   &::view-transition-old(root) {
-    animation-name: slide-out-right;
+    animation-name: scale-fade-out-back;
   }
 
   &::view-transition-new(root) {
-    animation-name: slide-in-left;
+    animation-name: scale-fade-in-back;
   }
 }
 
-@keyframes slide-out-left {
+/* Scale-based animations to prevent horizontal page shifts */
+@keyframes scale-fade-out {
   from {
-    transform: translateX(0);
+    transform: scale(1);
     opacity: 1;
   }
   to {
-    transform: translateX(-30px);
+    transform: scale(0.98);
     opacity: 0;
   }
 }
 
-@keyframes slide-in-right {
+@keyframes scale-fade-in {
   from {
-    transform: translateX(30px);
+    transform: scale(1.02);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: scale(1);
     opacity: 1;
   }
 }
 
-@keyframes slide-out-right {
+@keyframes scale-fade-out-back {
   from {
-    transform: translateX(0);
+    transform: scale(1);
     opacity: 1;
   }
   to {
-    transform: translateX(30px);
+    transform: scale(1.02);
     opacity: 0;
   }
 }
 
-@keyframes slide-in-left {
+@keyframes scale-fade-in-back {
   from {
-    transform: translateX(-30px);
+    transform: scale(0.98);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: scale(1);
     opacity: 1;
   }
 }
