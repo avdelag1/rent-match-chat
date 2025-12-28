@@ -169,7 +169,7 @@ const ClientSettingsNew = () => {
             {/* App Version */}
             <div className="text-center">
               <p className="text-xs text-muted-foreground">
-                <span className="swipess-text text-sm">SWIPESS</span> <span className="opacity-60">v1.0</span>
+                <span className="swipess-text text-sm">swipeSs</span> <span className="opacity-60">v1.0</span>
               </p>
             </div>
           </div>

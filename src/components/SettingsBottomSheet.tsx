@@ -185,7 +185,7 @@ export function SettingsBottomSheet({
         {/* Footer Info */}
         <div className="px-2 pt-2">
           <p className="text-xs text-muted-foreground text-center">
-            <span className="swipess-text text-sm">SWIPESS</span> <span className="opacity-60">v1.0</span>
+            <span className="swipess-text text-sm">swipeSs</span> <span className="opacity-60">v1.0</span>
           </p>
         </div>
       </div>

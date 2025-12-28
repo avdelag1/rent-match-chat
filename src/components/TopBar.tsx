@@ -29,9 +29,9 @@ export function TopBar({ onNotificationsClick, onSettingsClick, className }: Top
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span className="text-2xl swipess-logo-header">
-            SWIPESS
-          </span>
+        <span className="text-2xl swipess-logo-header">
+          swipeSs
+        </span>
         </motion.div>
 
         {/* Actions */}
@@ -64,6 +64,8 @@ export function TopBar({ onNotificationsClick, onSettingsClick, className }: Top
               </AnimatePresence>
             </Button>
           </motion.div>
+
+          {/* Radio moved before filters */}
 
           {/* Radio */}
           <motion.div
