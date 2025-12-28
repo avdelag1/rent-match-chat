@@ -69,21 +69,23 @@ function getTransitionVariant(fromPath: string, toPath: string) {
   const fromDepth = getRouteDepth(fromPath);
   const toDepth = getRouteDepth(toPath);
 
-  // Going deeper (forward navigation) - slide from right
+  // Use opacity-only transitions to prevent page shifting
+  // The x transforms were causing horizontal layout shifts
   if (toDepth > fromDepth) {
+    // Going deeper (forward navigation) - subtle scale fade
     return {
-      initial: { opacity: 0, x: 20 },
-      animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: -20 },
+      initial: { opacity: 0, scale: 0.98 },
+      animate: { opacity: 1, scale: 1 },
+      exit: { opacity: 0, scale: 1.02 },
     };
   }
 
-  // Going back (backward navigation) - slide from left
   if (toDepth < fromDepth) {
+    // Going back (backward navigation) - subtle scale fade
     return {
-      initial: { opacity: 0, x: -20 },
-      animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: 20 },
+      initial: { opacity: 0, scale: 1.02 },
+      animate: { opacity: 1, scale: 1 },
+      exit: { opacity: 0, scale: 0.98 },
     };
   }
 
@@ -113,7 +115,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   useViewTransitions();
 
   // Enable swipe back gesture - adjust edge width based on screen size
-  const { x: swipeX, opacity: swipeOpacity } = useSwipeBack({
+  // Note: We only use swipeOpacity to prevent horizontal page shifts
+  // swipeX was removed as it caused the page to move left/right unexpectedly
+  const { opacity: swipeOpacity } = useSwipeBack({
     enabled: responsive.isTouchDevice,
     edgeWidth: responsive.isMobile ? 30 : 50,
     threshold: responsive.isMobile ? 80 : 100,
@@ -171,9 +175,11 @@ export function AppLayout({ children }: AppLayoutProps) {
             }}
             className="w-full min-h-screen min-h-dvh overflow-x-hidden"
             style={{
-              x: isTransitioning ? 0 : swipeX,
+              // Removed x transform to prevent horizontal page shifts
+              // swipeX was causing the page to move left/right unexpectedly
               opacity: combinedOpacity,
-              willChange: 'transform, opacity',
+              willChange: 'opacity',
+              transformOrigin: 'center center',
             }}
             layout={false}
             onAnimationComplete={() => {

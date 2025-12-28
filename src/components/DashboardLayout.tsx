@@ -301,7 +301,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
 
   return (
-    <div className="app-root bg-background min-h-screen min-h-dvh overflow-x-hidden" style={{ width: '100%', maxWidth: '100vw', position: 'relative' }}>
+    <div className="app-root bg-background min-h-screen min-h-dvh overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
       <NotificationSystem />
 
       {/* Top Bar - Fixed with safe-area-top */}
@@ -336,6 +336,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           paddingRight: 'max(var(--safe-right), 0px)',
           width: '100%',
           maxWidth: '100vw',
+          // Prevent layout shifts by ensuring stable dimensions
+          boxSizing: 'border-box',
+          transform: 'translateZ(0)', // Force GPU layer for stability
         }}
       >
         {enhancedChildren}
