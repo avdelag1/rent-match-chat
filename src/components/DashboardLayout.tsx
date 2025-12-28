@@ -311,7 +311,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [location.pathname]);
 
   return (
-    <div className="app-root bg-background min-h-screen min-h-dvh overflow-x-hidden">
+    <div className="app-root bg-background min-h-screen min-h-dvh overflow-x-hidden" style={{ width: '100%', maxWidth: '100vw', position: 'relative' }}>
       <NotificationSystem />
 
       {/* Top Bar - Fixed with safe-area-top */}
@@ -345,6 +345,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           paddingBottom: `calc(${bottomNavHeight}px + var(--safe-bottom))`,
           paddingLeft: 'max(var(--safe-left), 0px)',
           paddingRight: 'max(var(--safe-right), 0px)',
+          width: '100%',
+          maxWidth: '100vw',
         }}
       >
         {enhancedChildren}
