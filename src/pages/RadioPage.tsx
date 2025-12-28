@@ -11,7 +11,11 @@ import {
   Palette,
   Check,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  ListMusic,
+  Plus,
+  Play,
+  Music
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,16 +24,20 @@ import { orderedRadioGenres as radioGenres, getAllStations, searchStations, Radi
 import { RadioStationCard } from '@/components/radio/RadioStationCard';
 import { RadioGenreSection } from '@/components/radio/RadioGenreSection';
 import { RadioSleepTimer } from '@/components/radio/RadioSleepTimer';
+import { PlaylistModal } from '@/components/radio/PlaylistModal';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
-type ViewMode = 'browse' | 'favorites' | 'recent' | 'search' | 'settings';
+type ViewMode = 'browse' | 'favorites' | 'recent' | 'search' | 'settings' | 'playlists';
 
 const RadioPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('browse');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
+  const [playlistModalMode, setPlaylistModalMode] = useState<'create' | 'manage' | 'view'>('manage');
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
   const { user } = useAuth();
   const {
@@ -37,8 +45,12 @@ const RadioPage: React.FC = () => {
     isPlayerExpanded,
     favorites,
     recentlyPlayed,
+    playlists,
     expandPlayer,
     shufflePlay,
+    shufflePlayFavorites,
+    shufflePlayPlaylist,
+    play,
     currentSkin,
     setSkin
   } = useRadioPlayer();
@@ -183,10 +195,40 @@ const RadioPage: React.FC = () => {
     if (viewMode === 'favorites') {
       return (
         <div className="space-y-4 pb-32">
-          <h2 className="text-lg font-semibold text-foreground/80 flex items-center gap-2">
-            <Heart className="w-5 h-5 text-red-500" fill="currentColor" />
-            Your Favorites
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground/80 flex items-center gap-2">
+              <Heart className="w-5 h-5 text-red-500" fill="currentColor" />
+              Your Favorites
+            </h2>
+            {favoriteStations.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={shufflePlayFavorites}
+                  className="gap-1.5"
+                  title="Shuffle favorites"
+                >
+                  <Shuffle className="w-4 h-4" />
+                  Shuffle
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setPlaylistModalMode('create');
+                    setSelectedPlaylistId(undefined);
+                    setPlaylistModalOpen(true);
+                  }}
+                  className="gap-1.5"
+                  title="Create playlist from favorites"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Playlist
+                </Button>
+              </div>
+            )}
+          </div>
           {favoriteStations.length > 0 ? (
             <div className="grid grid-cols-1 gap-3">
               {favoriteStations.map(station => (
@@ -200,6 +242,135 @@ const RadioPage: React.FC = () => {
               <p className="text-sm text-muted-foreground/70 mt-2">
                 Tap the heart on any station to save it
               </p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Playlists view
+    if (viewMode === 'playlists') {
+      return (
+        <div className="space-y-4 pb-32">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground/80 flex items-center gap-2">
+              <ListMusic className="w-5 h-5 text-primary" />
+              Your Playlists
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setPlaylistModalMode('create');
+                setSelectedPlaylistId(undefined);
+                setPlaylistModalOpen(true);
+              }}
+              className="gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              New Playlist
+            </Button>
+          </div>
+          {playlists.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3">
+              {playlists.map(playlist => {
+                const playlistStations = playlist.stationIds
+                  .map(id => getAllStations().find(s => s.id === id))
+                  .filter(Boolean) as RadioStation[];
+                const firstStation = playlistStations[0];
+
+                return (
+                  <motion.div
+                    key={playlist.id}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-secondary/50 rounded-xl p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Playlist Artwork */}
+                      <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                        {firstStation?.artwork ? (
+                          <img
+                            src={firstStation.artwork}
+                            alt={playlist.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Music className="w-6 h-6 text-primary" />
+                        )}
+                      </div>
+
+                      {/* Playlist Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium truncate">{playlist.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {playlist.stationIds.length} station{playlist.stationIds.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1">
+                        {playlist.stationIds.length > 0 && (
+                          <>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-9 w-9"
+                              onClick={() => {
+                                if (firstStation) play(firstStation);
+                              }}
+                              title="Play"
+                            >
+                              <Play className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-9 w-9"
+                              onClick={() => shufflePlayPlaylist(playlist.id)}
+                              title="Shuffle"
+                            >
+                              <Shuffle className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-9 w-9"
+                          onClick={() => {
+                            setPlaylistModalMode('view');
+                            setSelectedPlaylistId(playlist.id);
+                            setPlaylistModalOpen(true);
+                          }}
+                          title="View"
+                        >
+                          <ListMusic className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <ListMusic className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
+              <p className="text-muted-foreground">No playlists yet</p>
+              <p className="text-sm text-muted-foreground/70 mt-2">
+                Create a playlist from your favorite stations
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4 gap-1.5"
+                onClick={() => {
+                  setPlaylistModalMode('create');
+                  setPlaylistModalOpen(true);
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Create Your First Playlist
+              </Button>
             </div>
           )}
         </div>
@@ -374,6 +545,7 @@ const RadioPage: React.FC = () => {
               {[
                 { id: 'browse', label: 'Browse', icon: Radio },
                 { id: 'favorites', label: 'Favorites', icon: Heart },
+                { id: 'playlists', label: 'Playlists', icon: ListMusic },
                 { id: 'recent', label: 'Recent', icon: Clock },
               ].map((tab) => (
                 <Button
@@ -403,6 +575,15 @@ const RadioPage: React.FC = () => {
           {renderContent()}
         </main>
       </div>
+
+      {/* Playlist Modal */}
+      <PlaylistModal
+        isOpen={playlistModalOpen}
+        onClose={() => setPlaylistModalOpen(false)}
+        mode={playlistModalMode}
+        playlistId={selectedPlaylistId}
+        initialStationIds={playlistModalMode === 'create' && viewMode === 'favorites' ? favorites : []}
+      />
     </div>
   );
 };
