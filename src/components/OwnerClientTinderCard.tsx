@@ -1,8 +1,10 @@
-import { useState, useCallback, useMemo } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
-import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye, Share2 } from 'lucide-react';
+import { useState, useCallback, useMemo, memo } from 'react';
+import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
+import { MapPin, Briefcase, Heart, Users, Calendar, DollarSign, CheckCircle, BarChart3, Home, ChevronDown, RotateCcw, X, Eye, Share2, Flame } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { SwipeOverlays } from './SwipeOverlays';
+import { triggerHaptic } from '@/utils/haptics';
 
 interface ClientProfile {
   user_id: string;
@@ -34,7 +36,7 @@ interface OwnerClientTinderCardProps {
   hideActions?: boolean;
 }
 
-export function OwnerClientTinderCard({
+const OwnerClientTinderCardComponent = ({
   profile,
   onSwipe,
   onTap,
@@ -46,7 +48,7 @@ export function OwnerClientTinderCard({
   showNextCard = false,
   hasPremium = false,
   hideActions = false
-}: OwnerClientTinderCardProps) {
+}: OwnerClientTinderCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
@@ -71,29 +73,29 @@ export function OwnerClientTinderCard({
   );
 
   const handleImageClick = useCallback((e: React.MouseEvent) => {
+    if (!isTop) return;
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    if (clickX < width * 0.3) {
-      // Left 30% - Previous image
-      setCurrentImageIndex(prev => Math.max(0, prev - 1));
-    } else if (clickX > width * 0.7) {
-      // Right 30% - Next image
-      setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1));
+    // Left 30% = previous, Center 40% = expand details, Right 30% = next
+    if (clickX < width * 0.3 && images.length > 1) {
+      setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
+      triggerHaptic('light');
+    } else if (clickX > width * 0.7 && images.length > 1) {
+      setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
+      triggerHaptic('light');
     } else {
-      // Center 40% - Expand details
       setIsBottomSheetExpanded(!isBottomSheetExpanded);
+      triggerHaptic('medium');
     }
-  }, [images.length, isBottomSheetExpanded]);
+  }, [isTop, images.length, isBottomSheetExpanded]);
 
   // GAME-LIKE instant drag handling - Tinder-style ultra responsive
   const handleDragStart = useCallback(() => {
     // Instant haptic feedback when finger touches
-    if ('vibrate' in navigator) {
-      navigator.vibrate(5);
-    }
+    triggerHaptic('light');
   }, []);
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
@@ -106,9 +108,7 @@ export function OwnerClientTinderCard({
     if (Math.abs(velocity.x) > velocityThreshold || Math.abs(offset.x) > swipeThresholdX) {
       const direction = offset.x > 0 || velocity.x > velocityThreshold ? 'right' : 'left';
       // Haptic on swipe
-      if ('vibrate' in navigator) {
-        navigator.vibrate(direction === 'right' ? [10, 30, 10] : [15, 50, 15]);
-      }
+      triggerHaptic(direction === 'right' ? 'success' : 'warning');
       onSwipe(direction);
       return;
     }
@@ -117,12 +117,6 @@ export function OwnerClientTinderCard({
     animate(x, 0, { type: "spring", stiffness: 1200, damping: 40, mass: 0.1 });
     animate(y, 0, { type: "spring", stiffness: 1200, damping: 40, mass: 0.1 });
   }, [onSwipe, x, y]);
-
-  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
-
-  // Calculate overlay opacity based on drag distance - INSTANT visual feedback
-  const rightOverlayOpacity = useTransform(x, [0, 60], [0, 1]);
-  const leftOverlayOpacity = useTransform(x, [-60, 0], [1, 0]);
 
   const cardStyle = {
     x,
@@ -168,98 +162,65 @@ export function OwnerClientTinderCard({
       }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
     >
-      {/* Swipe Overlays - PREMIUM with Neon Glow Effects */}
-      {/* Right Swipe - GREEN LIKE with animated shine */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none swipe-overlay-container like-overlay"
-        style={{ opacity: rightOverlayOpacity }}
-      >
-        {/* Enhanced radial gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/60 via-emerald-500/50 to-green-600/60 backdrop-blur-[6px]" />
-
-        {/* Animated glow rings */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute w-80 h-80 rounded-full bg-green-400/20 animate-ping" style={{ animationDuration: '2s' }} />
-          <div className="absolute w-64 h-64 rounded-full bg-green-500/25 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
-        </div>
-
-        <motion.div
-          className="relative text-center"
-          style={{
-            scale: useTransform(rightOverlayOpacity, [0, 1], [0.8, 1.15]),
-            rotate: -12
-          }}
-        >
-          {/* Premium shiny text */}
-          <span className="text-8xl swipe-text-like">
-            LIKE
-          </span>
-        </motion.div>
-      </motion.div>
-
-      {/* Left Swipe - RED PASS with animated shine */}
-      <motion.div
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none swipe-overlay-container pass-overlay"
-        style={{ opacity: leftOverlayOpacity }}
-      >
-        {/* Enhanced radial gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-500/60 via-rose-500/50 to-red-600/60 backdrop-blur-[6px]" />
-
-        {/* Animated glow rings */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute w-80 h-80 rounded-full bg-red-400/20 animate-ping" style={{ animationDuration: '2s' }} />
-          <div className="absolute w-64 h-64 rounded-full bg-red-500/25 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
-        </div>
-
-        <motion.div
-          className="relative text-center"
-          style={{
-            scale: useTransform(leftOverlayOpacity, [0, 1], [0.8, 1.15]),
-            rotate: 12
-          }}
-        >
-          {/* Premium shiny text */}
-          <span className="text-8xl swipe-text-pass">
-            PASS
-          </span>
-        </motion.div>
-      </motion.div>
+      {/* Swipe Overlays - Premium Chinese-inspired */}
+      <SwipeOverlays x={x} />
 
       {/* Card Content */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Main Image with Tap Zones */}
-        <div 
+        <div
           className="absolute inset-0 w-full h-full cursor-pointer select-none"
           onClick={handleImageClick}
           style={{ touchAction: 'manipulation' }}
         >
+          {/* Story-Style Dots at Top */}
+          {images.length > 1 && (
+            <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
+              {images.map((_, index) => (
+                <div
+                  key={`image-dot-${index}`}
+                  className="flex-1 h-1 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
+                >
+                  <div
+                    className={`h-full bg-white shadow-lg transition-all duration-200 ${
+                      index === currentImageIndex ? 'w-full' : 'w-0'
+                    }`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Image with Gradient Overlay */}
           <img
-            src={images[currentImageIndex]}
+            src={images[Math.min(currentImageIndex, images.length - 1)]}
             alt={profile.name}
             className="absolute inset-0 w-full h-full object-cover rounded-3xl"
             loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
             decoding="async"
+            fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
             draggable={false}
             style={{
-              aspectRatio: '9/16',
               willChange: 'transform',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
               transform: 'translateZ(0)'
             }}
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder-avatar.svg';
+            }}
           />
-          
+
           {/* Bottom gradient - Lighter for better photo visibility */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
 
-
-
           {/* Verified Badge */}
           {profile.verified && (
-            <div className="absolute top-4 right-4 z-10">
-              <div className="bg-blue-500 text-white rounded-full p-2 shadow-lg">
-                <CheckCircle className="w-5 h-5" />
-              </div>
+            <div className="absolute top-20 right-4 z-20">
+              <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Verified</span>
+              </Badge>
             </div>
           )}
         </div>
@@ -446,6 +407,7 @@ export function OwnerClientTinderCard({
               onClick={(e) => {
                 e.stopPropagation();
                 setIsBottomSheetExpanded(!isBottomSheetExpanded);
+                triggerHaptic('light');
               }}
             >
               <ChevronDown
@@ -459,85 +421,112 @@ export function OwnerClientTinderCard({
 
       </div>
 
-      {/* Action Buttons - Hide on insights/expanded */}
-      {isTop && (
-        <div
-          className={`absolute bottom-[12%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 transition-all duration-300 ease-out ${
-            hideActions || isBottomSheetExpanded
-              ? 'opacity-0 translate-y-12 pointer-events-none'
-              : 'opacity-100 translate-y-0 pointer-events-auto'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            {/* Undo/Return Button - Premium Shine Effect */}
-            {onUndo && (
-              <button
+      {/* Action Buttons - Bottom Fixed Position - Animated hide/show */}
+      <AnimatePresence>
+        {isTop && !hideActions && !isBottomSheetExpanded && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="absolute bottom-[12%] left-0 right-0 flex justify-center items-center gap-4 px-6 z-40 pointer-events-none"
+          >
+            <div className="flex items-center gap-3 pointer-events-auto">
+              {/* Undo/Return Button - Premium Shine Effect */}
+              {onUndo && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.1 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    onUndo();
+                  }}
+                  className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo"
+                  title="Undo"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </motion.button>
+              )}
+
+              {/* Dislike Button - Premium Shine Effect */}
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.15 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onUndo();
+                  triggerHaptic('warning');
+                  onSwipe('left');
                 }}
-                className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo"
-                title="Undo"
+                className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike"
+                title="Dislike"
               >
-                <RotateCcw className="w-5 h-5" />
-              </button>
-            )}
+                <X className="w-7 h-7" strokeWidth={3} />
+              </motion.button>
 
-            {/* Dislike Button - Premium Shine Effect */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSwipe('left');
-              }}
-              className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike"
-              title="Dislike"
-            >
-              <X className="w-7 h-7" strokeWidth={3} />
-            </button>
+              {/* Insights Button - Premium Shine Effect */}
+              {onInsights && hasPremium && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.2 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    onInsights();
+                  }}
+                  className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights"
+                  title="View Insights"
+                >
+                  <Eye className="w-5 h-5" />
+                </motion.button>
+              )}
 
-            {/* Insights Button - Premium Shine Effect */}
-            {onInsights && hasPremium && (
-              <button
+              {/* Share Button - Premium Shine Effect */}
+              {onShare && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.225 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    onShare();
+                  }}
+                  className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share"
+                  title="Share"
+                >
+                  <Share2 className="w-5 h-5" />
+                </motion.button>
+              )}
+
+              {/* Like Button - Premium Shine Effect */}
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.25 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onInsights();
+                  triggerHaptic('success');
+                  onSwipe('right');
                 }}
-                className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights"
-                title="View Insights"
+                className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-like"
+                title="Like"
               >
-                <Eye className="w-5 h-5" />
-              </button>
-            )}
-
-            {/* Share Button - Premium Shine Effect */}
-            {onShare && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShare();
-                }}
-                className="w-12 h-12 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share"
-                title="Share"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-            )}
-
-            {/* Like Button - Premium Shine Effect */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSwipe('right');
-              }}
-              className="w-16 h-16 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart"
-              title="Like"
-            >
-              <Heart className="w-7 h-7" fill="currentColor" />
-            </button>
-          </div>
-        </div>
-      )}
+                <Flame className="w-7 h-7" fill="currentColor" />
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </motion.div>
   );
-}
+};
+
+// Memoize with custom comparison - only re-render if profile ID or isTop changes
+export const OwnerClientTinderCard = memo(OwnerClientTinderCardComponent, (prevProps, nextProps) => {
+  return prevProps.profile.user_id === nextProps.profile.user_id && prevProps.isTop === nextProps.isTop;
+});
