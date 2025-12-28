@@ -157,7 +157,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <main
         id="main-content"
         tabIndex={-1}
-        className="outline-none w-full min-h-screen min-h-dvh"
+        className="outline-none w-full min-h-screen min-h-dvh overflow-x-hidden"
       >
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
@@ -169,13 +169,19 @@ export function AppLayout({ children }: AppLayoutProps) {
               duration: transitionDuration,
               ease: [0.32, 0.72, 0, 1], // iOS-like snappy easing
             }}
-            className="w-full min-h-screen min-h-dvh"
+            className="w-full min-h-screen min-h-dvh overflow-x-hidden"
             style={{
               x: isTransitioning ? 0 : swipeX,
               opacity: combinedOpacity,
               willChange: 'transform, opacity',
             }}
             layout={false}
+            onAnimationComplete={() => {
+              // Ensure transform is reset after animation completes
+              if (isTransitioning) {
+                setIsTransitioning(false);
+              }
+            }}
           >
             {children}
           </motion.div>
