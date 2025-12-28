@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share, Plus, Share2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -17,6 +18,10 @@ export function PWAInstallBanner() {
   const [isIOS, setIsIOS] = useState(false);
   const [showInstallInstructions, setShowInstallInstructions] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const location = useLocation();
+
+  // Hide banner on landing page
+  const isLandingPage = location.pathname === '/';
 
   useEffect(() => {
     // Check if already in standalone mode (installed)
@@ -113,6 +118,9 @@ export function PWAInstallBanner() {
     setShowInstallInstructions(false);
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
   }, []);
+
+  // Don't show on landing page
+  if (isLandingPage) return null;
 
   return (
     <AnimatePresence>
