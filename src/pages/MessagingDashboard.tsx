@@ -292,8 +292,8 @@ export function MessagingDashboard() {
 
     return (
       <DashboardLayout userRole={userRole}>
-        <div className="w-full min-h-screen flex flex-col">
-          <div className="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col">
+        <div className="w-full flex flex-col pb-24">
+          <div className="w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col">
             {otherUser ? (
               <MessagingInterface
                 conversationId={selectedConversationId}

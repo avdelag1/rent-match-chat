@@ -328,7 +328,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
-        key={location.pathname}
         className="fixed inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
           paddingTop: `calc(${topBarHeight + quickFilterHeight}px + var(--safe-top))`,
