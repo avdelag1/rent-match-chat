@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart } from 'lucide-react';
+import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { springConfigs } from '@/utils/springConfigs';
@@ -27,13 +27,19 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   const location = useLocation();
   const { unreadCount } = useUnreadMessageCount();
 
-  // Client/Renter Navigation Items
+  // Client/Renter Navigation Items - with Filter between Browse and Flames
   const clientNavItems: NavItem[] = [
     {
       id: 'browse',
       label: 'Browse',
       icon: Home,
       path: '/client/dashboard',
+    },
+    {
+      id: 'filter',
+      label: 'Filter',
+      icon: Filter,
+      onClick: onFilterClick,
     },
     {
       id: 'likes',

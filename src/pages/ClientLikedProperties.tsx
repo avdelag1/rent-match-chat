@@ -58,15 +58,15 @@ function MotorcycleIcon({ className }: { className?: string }) {
   );
 }
 
-// Category configuration
+// Category configuration with dynamic titles
 const categories = [
-  { id: 'all', label: 'All', icon: Flame },
-  { id: 'property', label: 'Property', icon: Home },
-  { id: 'vehicle', label: 'Vehicles', icon: Car },
-  { id: 'motorcycle', label: 'Motos', icon: MotorcycleIcon },
-  { id: 'bicycle', label: 'Bicycles', icon: Bike },
-  { id: 'yacht', label: 'Yachts', icon: Ship },
-  { id: 'worker', label: 'Services', icon: Briefcase },
+  { id: 'all', label: 'all', icon: Flame, title: 'liked items', subtitle: 'items you\'ve shown interest in' },
+  { id: 'property', label: 'properties', icon: Home, title: 'liked properties', subtitle: 'properties you\'ve shown interest in' },
+  { id: 'vehicle', label: 'vehicles', icon: Car, title: 'liked vehicles', subtitle: 'vehicles you\'ve shown interest in' },
+  { id: 'motorcycle', label: 'motos', icon: MotorcycleIcon, title: 'liked motos', subtitle: 'motorcycles you\'ve shown interest in' },
+  { id: 'bicycle', label: 'bikes', icon: Bike, title: 'liked bikes', subtitle: 'bicycles you\'ve shown interest in' },
+  { id: 'yacht', label: 'yachts', icon: Ship, title: 'liked yachts', subtitle: 'yachts you\'ve shown interest in' },
+  { id: 'worker', label: 'services', icon: Briefcase, title: 'liked services', subtitle: 'services you\'ve shown interest in' },
 ];
 
 const ClientLikedProperties = () => {
@@ -216,25 +216,19 @@ const ClientLikedProperties = () => {
     }
   };
 
+  // Get current category info for dynamic title
+  const currentCategory = categories.find(c => c.id === selectedCategory) || categories[0];
+
   return (
     <DashboardLayout userRole="client">
       <div className="w-full pb-24 bg-background">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-6xl mx-auto">
-            {/* Back Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="mb-4 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-
+            {/* Dynamic Title with PageHeader - only one back button */}
             <PageHeader
-              title="Liked Properties"
-              subtitle="Properties you've shown interest in"
+              title={currentCategory.title}
+              subtitle={currentCategory.subtitle}
+              showBack={true}
               actions={
                 <Button
                   onClick={() => refreshLikedProperties()}
@@ -243,7 +237,7 @@ const ClientLikedProperties = () => {
                   disabled={isLoading}
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                  Refresh
+                  refresh
                 </Button>
               }
             />

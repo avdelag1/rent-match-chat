@@ -1,13 +1,14 @@
 import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench } from 'lucide-react';
+import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench, Filter, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Re-export from CascadeFilterButton for backwards compatibility
+export { CascadeFilterButton } from './CascadeFilterButton';
 
 // Category type matching ListingFilters - now includes services
 export type QuickFilterCategory = 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services';
 export type QuickFilterListingType = 'rent' | 'sale' | 'both';
-
-// Owner-specific filter types
 export type OwnerClientGender = 'female' | 'male' | 'any';
 export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
 
