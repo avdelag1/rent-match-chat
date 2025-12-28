@@ -264,7 +264,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
 
   if (isLoading) {
     return (
-      <div className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6 pb-24 sm:pb-8">
+      <div className="w-full bg-gray-900 p-4 sm:p-6 pb-24 sm:pb-8">
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
           <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
           <p className="text-white/80 text-xs sm:text-sm">Loading your listings...</p>
@@ -275,7 +275,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
 
   if (error) {
     return (
-      <div className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-900 p-4 sm:p-6 pb-24 sm:pb-8">
+      <div className="w-full bg-gray-900 p-4 sm:p-6 pb-24 sm:pb-8">
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
           <div className="p-3 sm:p-4 rounded-full bg-red-500/20">
             <Home className="w-6 h-6 sm:w-8 sm:h-8 text-red-400" />
@@ -288,7 +288,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   }
 
   return (
-    <div className="min-h-full overflow-y-auto overflow-x-hidden bg-gray-900">
+    <div className="w-full bg-gray-900">
       <div className="p-3 sm:p-6 pb-24 sm:pb-8 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
         {/* Enhanced Header */}
         <motion.div
