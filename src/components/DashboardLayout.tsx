@@ -303,10 +303,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Reference to main content for scroll reset
   const mainContentRef = useRef<HTMLElement>(null);
 
-  // Scroll to top when route changes to fix page rendering issues
+  // Scroll to top and reset horizontal position when route changes to fix page rendering issues
   useEffect(() => {
     if (mainContentRef.current) {
-      mainContentRef.current.scrollTo({ top: 0, behavior: 'instant' });
+      mainContentRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }
   }, [location.pathname]);
 
@@ -339,7 +339,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
         ref={mainContentRef}
-        className="fixed inset-0 overflow-y-auto overflow-x-clip scroll-area-momentum"
+        className="fixed inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
           paddingTop: `calc(${topBarHeight + quickFilterHeight}px + var(--safe-top))`,
           paddingBottom: `calc(${bottomNavHeight}px + var(--safe-bottom))`,
