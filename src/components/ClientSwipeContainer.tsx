@@ -258,22 +258,22 @@ export function ClientSwipeContainer({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
-                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
+                x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
-                scale: 0.85,
+                rotate: swipeDirection === 'right' ? 20 : swipeDirection === 'left' ? -20 : 0,
+                scale: 0.8,
                 transition: {
                   type: "spring",
-                  stiffness: 500,
-                  damping: 35,
-                  mass: 0.5
+                  stiffness: 350,
+                  damping: 30,
+                  mass: 0.6
                 }
               }}
               transition={{
                 type: "spring",
-                stiffness: 500,
-                damping: 35,
-                mass: 0.5
+                stiffness: 400,
+                damping: 30,
+                mass: 0.6
               }}
               className="w-full h-full absolute inset-0"
               style={{ willChange: 'transform, opacity' }}
