@@ -2151,20 +2151,20 @@ html[data-navigation-direction="back"] {
   }
 }
 
-/* LIKE text - Green neon glow (shorter version) */
+/* LIKE text - Imperial Gold & Jade Green glow - Chinese-inspired luxury */
 .swipe-text-like {
-  --text-glow-color: rgba(34, 197, 94, 1);
+  --text-glow-color: rgba(212, 175, 55, 1);
   font-weight: 900;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   background: linear-gradient(
-    90deg,
-    #ffffff 0%,
-    #dcfce7 15%,
-    #ffffff 30%,
-    #bbf7d0 50%,
-    #ffffff 70%,
-    #dcfce7 85%,
-    #ffffff 100%
+    135deg,
+    #FFD700 0%,
+    #FFF8DC 15%,
+    #FFD700 30%,
+    #FFFACD 50%,
+    #FFD700 70%,
+    #FFF8DC 85%,
+    #D4AF37 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -2173,27 +2173,28 @@ html[data-navigation-direction="back"] {
   animation:
     text-shine-sweep 2s linear infinite,
     text-glow-pulse 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 0 30px rgba(34, 197, 94, 0.9))
-          drop-shadow(0 0 60px rgba(34, 197, 94, 0.6))
-          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-  -webkit-text-stroke: 2px rgba(22, 163, 74, 0.4);
+  filter: drop-shadow(0 0 30px rgba(212, 175, 55, 1))
+          drop-shadow(0 0 60px rgba(255, 215, 0, 0.8))
+          drop-shadow(0 0 90px rgba(184, 134, 11, 0.5))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+  -webkit-text-stroke: 2px rgba(139, 90, 43, 0.5);
   paint-order: stroke fill;
 }
 
-/* LIKED text - Green neon glow */
+/* LIKED text - Imperial Gold - Chinese-inspired luxury */
 .swipe-text-liked {
-  --text-glow-color: rgba(34, 197, 94, 1);
+  --text-glow-color: rgba(212, 175, 55, 1);
   font-weight: 900;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   background: linear-gradient(
-    90deg,
-    #ffffff 0%,
-    #dcfce7 15%,
-    #ffffff 30%,
-    #bbf7d0 50%,
-    #ffffff 70%,
-    #dcfce7 85%,
-    #ffffff 100%
+    135deg,
+    #FFD700 0%,
+    #FFF8DC 15%,
+    #FFD700 30%,
+    #FFFACD 50%,
+    #FFD700 70%,
+    #FFF8DC 85%,
+    #D4AF37 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -2202,27 +2203,28 @@ html[data-navigation-direction="back"] {
   animation:
     text-shine-sweep 2s linear infinite,
     text-glow-pulse 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 0 30px rgba(34, 197, 94, 0.9))
-          drop-shadow(0 0 60px rgba(34, 197, 94, 0.6))
-          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-  -webkit-text-stroke: 2px rgba(22, 163, 74, 0.4);
+  filter: drop-shadow(0 0 30px rgba(212, 175, 55, 1))
+          drop-shadow(0 0 60px rgba(255, 215, 0, 0.8))
+          drop-shadow(0 0 90px rgba(184, 134, 11, 0.5))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+  -webkit-text-stroke: 2px rgba(139, 90, 43, 0.5);
   paint-order: stroke fill;
 }
 
-/* PASS text - Red neon glow */
+/* PASS text - Deep Crimson Red neon glow - Chinese-inspired */
 .swipe-text-pass {
-  --text-glow-color: rgba(239, 68, 68, 1);
+  --text-glow-color: rgba(196, 30, 58, 1);
   font-weight: 900;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   background: linear-gradient(
-    90deg,
-    #ffffff 0%,
-    #fecaca 15%,
-    #ffffff 30%,
-    #fca5a5 50%,
-    #ffffff 70%,
-    #fecaca 85%,
-    #ffffff 100%
+    135deg,
+    #FF4D6D 0%,
+    #FFB3C1 15%,
+    #C9184A 30%,
+    #FF758F 50%,
+    #C9184A 70%,
+    #FFB3C1 85%,
+    #800020 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -2231,34 +2233,39 @@ html[data-navigation-direction="back"] {
   animation:
     text-shine-sweep 2s linear infinite,
     text-glow-pulse 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.9))
-          drop-shadow(0 0 60px rgba(239, 68, 68, 0.6))
-          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-  -webkit-text-stroke: 2px rgba(220, 38, 38, 0.4);
+  filter: drop-shadow(0 0 30px rgba(196, 30, 58, 1))
+          drop-shadow(0 0 60px rgba(139, 0, 0, 0.8))
+          drop-shadow(0 0 90px rgba(128, 0, 32, 0.5))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+  -webkit-text-stroke: 2px rgba(128, 0, 32, 0.5);
   paint-order: stroke fill;
 }
 
-/* Overlay container enhancement */
+/* Overlay container enhancement - Chinese-inspired luxury feel */
 .swipe-overlay-container {
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 
+/* LIKE overlay - Imperial Gold & Jade green inspired */
 .swipe-overlay-container.like-overlay {
   background: radial-gradient(
     ellipse at center,
-    rgba(34, 197, 94, 0.4) 0%,
-    rgba(22, 163, 74, 0.3) 30%,
-    rgba(21, 128, 61, 0.2) 60%,
+    rgba(212, 175, 55, 0.5) 0%,
+    rgba(184, 134, 11, 0.4) 25%,
+    rgba(0, 128, 128, 0.25) 50%,
+    rgba(34, 139, 34, 0.15) 75%,
     transparent 100%
   );
 }
 
+/* PASS overlay - Deep Crimson Chinese Red inspired */
 .swipe-overlay-container.pass-overlay {
   background: radial-gradient(
     ellipse at center,
-    rgba(239, 68, 68, 0.4) 0%,
-    rgba(220, 38, 38, 0.3) 30%,
-    rgba(185, 28, 28, 0.2) 60%,
+    rgba(196, 30, 58, 0.55) 0%,
+    rgba(139, 0, 0, 0.45) 25%,
+    rgba(128, 0, 32, 0.35) 50%,
+    rgba(80, 0, 20, 0.2) 75%,
     transparent 100%
   );
 }
