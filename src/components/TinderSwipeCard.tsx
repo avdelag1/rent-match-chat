@@ -26,14 +26,14 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Motion values for drag - GAME-LIKE INSTANT RESPONSE
+  // Motion values for drag - PROFESSIONAL RESPONSIVE FEEL
   const x = useMotionValue(0);
-  // More dramatic rotation for game-like feel - responds faster to small movements
-  const rotate = useTransform(x, [-200, -50, 0, 50, 200], [-18, -8, 0, 8, 18]);
-  // Subtle scale for depth without slowing things down
-  const scale = useTransform(x, [-150, 0, 150], [0.97, 1, 0.97]);
-  // Quick opacity response
-  const opacity = useTransform(x, [-200, -80, 0, 80, 200], [0.5, 0.95, 1, 0.95, 0.5]);
+  // PROGRESSIVE rotation - gradual feedback as user approaches decision threshold (120px)
+  const rotate = useTransform(x, [-180, -120, -60, 0, 60, 120, 180], [-20, -15, -6, 0, 6, 15, 20]);
+  // Subtle scale reduction as card moves away - creates depth perception
+  const scale = useTransform(x, [-180, 0, 180], [0.95, 1, 0.95]);
+  // Opacity stays high until near threshold, then fades slightly to indicate "leaving"
+  const opacity = useTransform(x, [-180, -120, 0, 120, 180], [0.7, 0.9, 1, 0.9, 0.7]);
 
   // Guard for missing images - memoized
   const images = useMemo(() => {
@@ -80,7 +80,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     }
   }, []);
 
-  // GAME-LIKE instant drag handling - Tinder-style ultra responsive
+  // PROFESSIONAL drag handling - responsive but controlled
   const handleDragStart = useCallback(() => {
     // Instant haptic feedback when finger touches
     triggerHaptic('light');
@@ -88,20 +88,36 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
     const { offset, velocity } = info;
-    // SUPER LOW thresholds for instant swipe detection
-    const swipeThresholdX = 40; // Very easy to trigger
-    const velocityThreshold = 150; // Quick flicks register immediately
+    // HIGHER thresholds for controlled swipe decisions
+    // Users must intentionally swipe far enough to commit
+    const swipeThresholdX = 120; // Must drag 120px to commit to swipe
+    const velocityThreshold = 400; // Fast flicks still work but need real intent
 
-    // Prioritize velocity for that game-like snap feel
-    if (Math.abs(velocity.x) > velocityThreshold || Math.abs(offset.x) > swipeThresholdX) {
-      const direction = offset.x > 0 || velocity.x > velocityThreshold ? 'right' : 'left';
+    // Calculate if swipe should trigger based on distance OR velocity
+    const hasEnoughDistance = Math.abs(offset.x) > swipeThresholdX;
+    const hasEnoughVelocity = Math.abs(velocity.x) > velocityThreshold;
+
+    if (hasEnoughDistance || hasEnoughVelocity) {
+      // Determine direction based on offset primarily, velocity as tiebreaker
+      const direction = offset.x > 0 ? 'right' : 'left';
+      // Haptic feedback on successful swipe
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
       onSwipe(direction);
       return;
     }
 
-    // Ultra-fast snap back - high stiffness, low mass = instant return
-    animate(x, 0, { type: "spring", stiffness: 1200, damping: 40, mass: 0.1 });
+    // SMOOTH SNAPBACK ANIMATION - Professional feel
+    // Lower stiffness = smoother return, higher damping = no oscillation
+    animate(x, 0, {
+      type: "spring",
+      stiffness: 400,
+      damping: 30,
+      mass: 0.8,
+      velocity: velocity.x * 0.3
+    });
+
+    // Light haptic on snapback to provide feedback
+    triggerHaptic('light');
   }, [onSwipe, x]);
 
   const cardStyle = {
@@ -140,13 +156,13 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
         }}
         drag={isTop ? "x" : false}
         dragConstraints={{ left: -500, right: 500 }}
-        dragElastic={0.9}
+        dragElastic={0.7}
         dragMomentum={false}
         dragTransition={{
-          bounceStiffness: 1200,
-          bounceDamping: 50,
-          power: 0.1,
-          timeConstant: 100
+          bounceStiffness: 600,
+          bounceDamping: 35,
+          power: 0.3,
+          timeConstant: 150
         }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -154,9 +170,9 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
         initial={false}
         transition={{
           type: "spring",
-          stiffness: 1200,
-          damping: 50,
-          mass: 0.1
+          stiffness: 500,
+          damping: 35,
+          mass: 0.5
         }}
       >
         <div className="absolute inset-0 w-full h-full overflow-hidden">

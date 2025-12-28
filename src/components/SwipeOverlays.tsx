@@ -6,18 +6,20 @@ interface SwipeOverlaysProps {
 }
 
 export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysProps) {
-  // INSTANT visual feedback - overlays appear immediately on small movements
-  // Lower threshold = faster response = game-like feel
-  const likeOpacity = useTransform(x, [0, 50], [0, 1]);
-  const passOpacity = useTransform(x, [-50, 0], [1, 0]);
+  // PROGRESSIVE visual feedback - matches 120px swipe threshold
+  // Overlays fade in gradually: starts appearing at 40px, full at 120px (decision point)
+  // This gives users clear feedback on how close they are to committing
+  const likeOpacity = useTransform(x, [0, 40, 80, 120], [0, 0.3, 0.6, 1]);
+  const passOpacity = useTransform(x, [-120, -80, -40, 0], [1, 0.6, 0.3, 0]);
 
-  // Direct scale calculation - quick scale-up for punchy feel
-  const likeScale = useTransform(x, [0, 50], [0.85, 1.15]);
-  const passScale = useTransform(x, [-50, 0], [1.15, 0.85]);
+  // Progressive scale - grows as user approaches threshold
+  // Starts subtle, becomes prominent at decision point
+  const likeScale = useTransform(x, [0, 60, 120], [0.7, 0.9, 1.1]);
+  const passScale = useTransform(x, [-120, -60, 0], [1.1, 0.9, 0.7]);
 
-  // Subtle rotation intensifies with swipe
-  const likeRotate = useTransform(x, [0, 100], [-12, -15]);
-  const passRotate = useTransform(x, [-100, 0], [15, 12]);
+  // Rotation intensifies progressively with swipe distance
+  const likeRotate = useTransform(x, [0, 60, 120], [-8, -12, -15]);
+  const passRotate = useTransform(x, [-120, -60, 0], [15, 12, 8]);
 
   return (
     <>
