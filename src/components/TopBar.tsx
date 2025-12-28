@@ -31,9 +31,9 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span className="text-2xl swipess-logo-header">
-            SWIPESS
-          </span>
+        <span className="text-2xl swipess-logo-header">
+          swipeSs
+        </span>
         </motion.div>
 
         {/* Actions */}
@@ -67,27 +67,7 @@ export function TopBar({ onNotificationsClick, onSettingsClick, onFiltersClick, 
             </Button>
           </motion.div>
 
-          {/* Filters */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ delay: 0.15, type: 'spring', stiffness: 500 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
-                  onClick={onFiltersClick}
-                  aria-label="Open filters"
-                >
-                  <Filter className="h-5 w-5 text-foreground/80" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Radio moved before filters */}
 
           {/* Radio */}
           <motion.div

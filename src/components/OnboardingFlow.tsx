@@ -52,7 +52,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
   const [interests, setInterests] = useState<string[]>([]);
 
 const steps = [
-    { title: 'Welcome', icon: Sparkles, description: 'Get started with SWIPESS' },
+    { title: 'Welcome', icon: Sparkles, description: 'Get started with swipeSs' },
     { title: 'Photos', icon: Camera, description: 'Add your profile photos' },
     { title: 'Basic Info', icon: User, description: 'Tell us about yourself' },
     { title: 'Demographics', icon: Globe, description: 'A bit more about you' },

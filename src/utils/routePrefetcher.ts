@@ -21,7 +21,7 @@ const routeImports: Record<string, RouteImport> = {
   '/owner/listings/new': () => import('@/pages/OwnerNewListing'),
   '/owner/liked-clients': () => import('@/pages/OwnerLikedClients'),
   '/owner/contracts': () => import('@/pages/OwnerContracts'),
-  '/messages': () => import('@/pages/MessagingDashboard'),
+  '/messages': () => import('@/pages/MessagingDashboard').then(m => ({ default: m.MessagingDashboard })),
   '/notifications': () => import('@/pages/NotificationsPage'),
   '/radio': () => import('@/pages/RadioPage'),
   '/subscription-packages': () => import('@/pages/SubscriptionPackagesPage'),

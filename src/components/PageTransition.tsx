@@ -7,17 +7,11 @@ interface PageTransitionProps {
   variant?: 'default' | 'slide' | 'scale' | 'fade' | 'slideUp' | 'morphIn';
 }
 
-// Default page transition - simplified for reliability
+// Default page transition - ultra-fast for snappy navigation
 const defaultVariants = {
-  initial: {
-    opacity: 0,
-  },
-  in: {
-    opacity: 1,
-  },
-  out: {
-    opacity: 0,
-  },
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 0 },
 };
 
 // Slide transition - horizontal movement with depth
@@ -143,7 +137,7 @@ export function PageTransition({ children, className = '', variant = 'default' }
       animate="in"
       exit="out"
       variants={variants}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      transition={{ duration: 0.08, ease: 'easeOut' }}
       className={`w-full h-full ${className}`}
     >
       {children}

@@ -279,7 +279,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 {isLogin ? 'Sign In' : 'Sign Up'} as {role}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                {isLogin ? 'Sign in to your account' : 'Create a new account'} to access SWIPESS
+                {isLogin ? 'Sign in to your account' : 'Create a new account'} to access swipeSs
               </DialogDescription>
 
               {/* Back Button */}
@@ -299,10 +299,10 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Logo and Header */}
               <div className="text-center mb-8 animate-fade-in">
-                {/* SWIPESS Brand Logo */}
-                <div className="mb-4">
-                  <span className="swipess-logo-medium text-2xl">SWIPESS</span>
-                </div>
+              {/* swipeSs Brand Logo */}
+              <div className="mb-4">
+                <span className="swipess-logo-medium text-2xl">swipeSs</span>
+              </div>
 
                 <h2 className="text-3xl font-bold text-white mb-2">
                   {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
