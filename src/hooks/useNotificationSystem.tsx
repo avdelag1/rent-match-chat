@@ -154,9 +154,9 @@ export function useNotificationSystem() {
                 read: false,
                 relatedUserId: message.sender_id,
                 conversationId: message.conversation_id,
-                actionUrl: '/messaging'
+                actionUrl: '/messages'
               };
-              
+
               setNotifications(prev => [notification, ...prev]);
             }
           }
@@ -199,9 +199,9 @@ export function useNotificationSystem() {
                 timestamp: new Date(),
                 read: false,
                 relatedUserId: otherUserId,
-                actionUrl: '/messaging'
+                actionUrl: '/messages'
               };
-              
+
               setNotifications(prev => [notification, ...prev]);
             }
           }
@@ -233,7 +233,7 @@ export function useNotificationSystem() {
     // Navigate to appropriate page
     if (notification.actionUrl) {
       if (notification.type === 'message' && notification.conversationId) {
-        navigate(`/messaging?conversation=${notification.conversationId}`);
+        navigate(`/messages?conversationId=${notification.conversationId}`);
       } else {
         navigate(notification.actionUrl);
       }

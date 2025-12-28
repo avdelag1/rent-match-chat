@@ -3,10 +3,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, Bookmark, ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { SwipeNavigationWrapper } from "@/components/SwipeNavigationWrapper";
 import { clientSettingsRoutes } from "@/config/swipeNavigationRoutes";
@@ -15,7 +15,16 @@ const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass:
 
 const ClientSettingsNew = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  // Handle hash fragment navigation (e.g., #subscription)
+  useEffect(() => {
+    if (location.hash === '#subscription') {
+      // Navigate to subscription packages page
+      navigate('/subscription-packages', { replace: true });
+    }
+  }, [location.hash, navigate]);
 
   const settingsItems = [
     {

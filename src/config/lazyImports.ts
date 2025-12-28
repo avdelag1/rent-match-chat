@@ -70,7 +70,7 @@ export const HOVER_PRELOADS = {
   '/client/dashboard': () => import('../pages/ClientDashboard'),
   '/owner/dashboard': () => import('../components/EnhancedOwnerDashboard'),
   '/client/profile': () => import('../pages/ClientProfile'),
-  '/messaging': () => import('../pages/MessagingDashboard'),
+  '/messages': () => import('../pages/MessagingDashboard'),
 } as const;
 
 export default {
