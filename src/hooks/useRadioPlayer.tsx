@@ -668,21 +668,21 @@ export const RadioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Shuffle play - play a random station from all genres
   const shufflePlay = useCallback(() => {
-    const randomStation = getRandomStation();
+    const randomStation = getRandomStation(state.currentStation?.id);
     if (randomStation) {
       setStation(randomStation);
       play(randomStation);
     }
-  }, [setStation, play]);
+  }, [state.currentStation, setStation, play]);
 
   // Shuffle play within a specific genre
   const shufflePlayGenre = useCallback((genreId: string) => {
-    const randomStation = getRandomStationFromGenre(genreId);
+    const randomStation = getRandomStationFromGenre(genreId, state.currentStation?.id);
     if (randomStation) {
       setStation(randomStation);
       play(randomStation);
     }
-  }, [setStation, play]);
+  }, [state.currentStation, setStation, play]);
 
   const contextValue: RadioPlayerContextType = {
     ...state,
