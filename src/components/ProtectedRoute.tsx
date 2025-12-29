@@ -1,131 +1,126 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { useEffect, useMemo, useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'client' | 'owner';
+  requiredRole?: "client" | "owner";
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [timedOut, setTimedOut] = useState(false);
+  const didNavigateRef = useRef(false);
 
-  // Timeout to prevent infinite loading - redirect to home after 10s
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) {
-        setTimedOut(true);
-      }
-    }, 10000);
-    return () => clearTimeout(timer);
-  }, [loading]);
+  // Calculate user age to handle new users whose role row might not exist yet
+  const userAgeMs = useMemo(() => {
+    if (!user?.created_at) return Infinity;
+    return Date.now() - new Date(user.created_at).getTime();
+  }, [user?.created_at]);
 
-  const { data: userRole, isLoading: profileLoading, isError, isFetching } = useQuery({
-    queryKey: ['user-role', user?.id],
+  const isNewUser = userAgeMs < 20000; // Within 20 seconds of account creation
+
+  const {
+    data: userRole,
+    isLoading: roleLoading,
+    isFetching: roleFetching,
+    isError,
+  } = useQuery({
+    queryKey: ["user-role", user?.id],
+    // CRITICAL: Only enable when auth is stable (user exists AND loading is complete)
+    enabled: !!user && !loading,
     queryFn: async () => {
       if (!user) return null;
 
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
         .maybeSingle();
 
+      // CRITICAL: Throw on error so React Query's isError works correctly
       if (error) {
-        console.error('Role fetch error in ProtectedRoute:', error);
-        return null;
+        throw error;
       }
-      return data?.role;
+      return data?.role ?? null;
     },
-    enabled: !!user,
-    retry: 3, // Increased from 2 to match Index.tsx
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Match Index.tsx exponential backoff
-    staleTime: 60000, // Match Index.tsx (60 seconds)
-    gcTime: 300000, // Match Index.tsx (5 minutes)
+
+    // For new users, poll briefly until role row exists (created by trigger)
+    refetchInterval: (query) => {
+      const role = query.state.data as string | null | undefined;
+      if (!user) return false;
+      if (loading) return false;
+      if (!isNewUser) return false;
+      if (role) return false; // Stop polling once we have a role
+      return 1000; // Poll every 1 second for new users
+    },
+
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
+    staleTime: 60000,
+    gcTime: 300000,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 
   useEffect(() => {
-    // Handle timeout - redirect to home
-    if (timedOut && !user) {
-      navigate('/', { replace: true });
-      return;
-    }
+    // Prevent duplicate navigations
+    if (didNavigateRef.current) return;
 
-    // Show loading while checking auth/role
-    if (loading || profileLoading || isFetching) {
-      return;
-    }
+    // Wait for auth to stabilize
+    if (loading) return;
 
-    // Redirect to login if not authenticated
+    // Not authenticated -> redirect to home (login/landing)
     if (!user) {
-      navigate('/', { replace: true, state: { from: location } });
+      didNavigateRef.current = true;
+      navigate("/", { replace: true, state: { from: location } });
       return;
     }
 
-    // Handle query error - only after retries are exhausted and we're not fetching
-    if (isError && !profileLoading && !isFetching) {
-      console.error('[ProtectedRoute] Role query failed after retries');
-      navigate('/', { replace: true });
+    // If role query had a real error -> redirect to home
+    if (isError) {
+      didNavigateRef.current = true;
+      navigate("/", { replace: true });
       return;
     }
 
-    // Only redirect if we're certain there's no role (not loading, not fetching, query completed)
-    if (!userRole && !profileLoading && !isFetching) {
-      console.error('[ProtectedRoute] User authenticated but no role found');
-      toast({
-        title: "Account setup incomplete",
-        description: "Please try signing in again.",
-        variant: "destructive"
-      });
-      navigate('/', { replace: true });
-      return;
+    // CRITICAL FIX: While role is being resolved (loading/fetching or null for new users)
+    // DO NOT redirect. Let Index.tsx handle the loading state and initial redirect.
+    // This prevents the ping-pong: "/" -> "/dashboard" -> "/" -> "/dashboard"
+    if (roleLoading || roleFetching || !userRole) return;
+
+    // Role mismatch: redirect to the correct dashboard once
+    if (requiredRole && userRole !== requiredRole) {
+      didNavigateRef.current = true;
+      const target = userRole === "client" ? "/client/dashboard" : "/owner/dashboard";
+      navigate(target, { replace: true });
     }
+  }, [
+    user,
+    loading,
+    userRole,
+    roleLoading,
+    roleFetching,
+    isError,
+    requiredRole,
+    navigate,
+    location,
+  ]);
 
-    // Check role-based access for protected routes
-    if (requiredRole && userRole && userRole !== requiredRole) {
-      const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      toast({
-        title: "Access Denied",
-        description: `Redirecting to your ${userRole} dashboard.`,
-        variant: "destructive"
-      });
-      navigate(targetPath, { replace: true });
-    }
-  }, [user, userRole, loading, profileLoading, isFetching, navigate, location, requiredRole, timedOut, isError]);
+  // Render nothing while auth is loading
+  if (loading) return null;
 
-  // Return null during loading - no blocking screen
-  if (loading || isFetching) {
-    return null;
-  }
+  // Not logged in: block render (effect will redirect)
+  if (!user) return null;
 
-  // Return null while fetching role
-  if (profileLoading) {
-    return null;
-  }
+  // Waiting for role: block render (Index.tsx handles showing a loader)
+  if (roleLoading || roleFetching || !userRole) return null;
 
-  // Don't render if user is not authenticated
-  if (!user) {
-    return null;
-  }
-
-  // Don't render if user has no role (useEffect will redirect)
-  if (!userRole) {
-    return null;
-  }
-
-  // If a specific role is required, check if user has that role
-  // Both 'client' and 'owner' roles are valid - routes without requiredRole allow both
-  if (requiredRole && userRole !== requiredRole) {
-    return null;
-  }
+  // Role mismatch: block render (effect will redirect)
+  if (requiredRole && userRole !== requiredRole) return null;
 
   return <>{children}</>;
 }
