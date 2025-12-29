@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { Users, Key, UserCircle, Sparkles, Shield, ChevronRight } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
+import { SwipessLogo } from './SwipessLogo';
 
 function LegendaryLandingPage() {
   // Set orange status bar for landing page
@@ -180,7 +181,7 @@ function LegendaryLandingPage() {
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-8 max-w-2xl w-full px-4">
 
-        {/* Title - 3D Game-Style Logo */}
+        {/* Title - Swipess Logo */}
         <motion.div initial={{
         opacity: 0,
         y: 30,
@@ -195,6 +196,7 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
+          <SwipessLogo size="xl" />
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
         }} animate={{

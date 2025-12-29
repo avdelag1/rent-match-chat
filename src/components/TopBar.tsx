@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 import { useNavigate } from 'react-router-dom';
+import { SwipessLogo } from './SwipessLogo';
 
 export type OwnerClientGender = 'female' | 'male' | 'any';
 export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
@@ -188,12 +189,13 @@ function TopBarComponent({
       className={cn('app-header bg-background/80 backdrop-blur-2xl border-b border-white/5', className)}
     >
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
-        {/* Logo with 3D game-style effect */}
+        {/* Logo */}
         <motion.div
           className="flex items-center gap-0.5 select-none"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
+          <SwipessLogo size="sm" />
         </motion.div>
 
         {/* Actions */}
