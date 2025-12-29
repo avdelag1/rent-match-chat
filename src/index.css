@@ -745,45 +745,45 @@ body {
     z-index: -3;
   }
 
-  /* Simplified version - Balloon-like friendly look for main landing page */
+  /* Simplified version - Fiery red/orange for main landing page */
   .swipess-logo-simple {
     font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
     font-weight: 900;
     font-style: normal;
     letter-spacing: 0.06em;
-    text-transform: uppercase;
-    /* Warm bright brown/caramel balloon gradient */
+    text-transform: none;
+    /* Fiery red/orange gradient */
     background: linear-gradient(180deg,
-      #FFF8F0 0%,
-      #FFE4C4 15%,
-      #F5C77E 30%,
-      #E8A849 50%,
-      #D4893D 70%,
-      #C67B3A 85%,
-      #B86A30 100%
+      #FFEDD5 0%,
+      #FDBA74 15%,
+      #FB923C 30%,
+      #F97316 50%,
+      #EA580C 70%,
+      #DC2626 85%,
+      #B91C1C 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
-    /* Soft warm brown outline for balloon effect */
-    -webkit-text-stroke: 2px #A05A25;
+    /* Deep red outline for depth */
+    -webkit-text-stroke: 2px #991B1B;
     paint-order: stroke fill;
     text-shadow:
       /* Soft rounded outline */
-      -1.5px -1.5px 0 #8B4513,
-      1.5px -1.5px 0 #8B4513,
-      -1.5px 1.5px 0 #8B4513,
-      1.5px 1.5px 0 #8B4513,
+      -1.5px -1.5px 0 #7F1D1D,
+      1.5px -1.5px 0 #7F1D1D,
+      -1.5px 1.5px 0 #7F1D1D,
+      1.5px 1.5px 0 #7F1D1D,
       /* Gentle 3D puffy depth */
-      0 2px 0 #9A5A2A,
-      0 3px 0 #8B4F26,
-      0 4px 2px rgba(139, 69, 19, 0.3),
+      0 2px 0 #991B1B,
+      0 3px 0 #7F1D1D,
+      0 4px 2px rgba(127, 29, 29, 0.3),
       /* Warm glow shadow */
-      0 6px 15px rgba(184, 106, 48, 0.4),
-      0 10px 25px rgba(168, 85, 37, 0.25);
-    filter: drop-shadow(0 4px 16px rgba(232, 168, 73, 0.45));
+      0 6px 15px rgba(249, 115, 22, 0.4),
+      0 10px 25px rgba(239, 68, 68, 0.25);
+    filter: drop-shadow(0 4px 16px rgba(249, 115, 22, 0.45));
   }
 
   /* Premium shine sweep animation */
@@ -838,44 +838,44 @@ body {
     transform: skewX(-20deg);
   }
 
-  /* TopBar smaller version - Balloon-like friendly look for header */
+  /* TopBar smaller version - Fiery red/orange for header */
   .swipess-logo-header {
     font-family: 'Quicksand', 'Poppins', 'Arial Rounded MT Bold', 'Nunito', system-ui, sans-serif;
     font-weight: 900;
     font-style: normal;
     letter-spacing: 0.05em;
-    text-transform: uppercase;
-    /* Warm bright brown/caramel balloon gradient */
+    text-transform: none;
+    /* Fiery red/orange gradient */
     background: linear-gradient(180deg,
-      #FFF8F0 0%,
-      #FFE4C4 15%,
-      #F5C77E 30%,
-      #E8A849 50%,
-      #D4893D 70%,
-      #C67B3A 85%,
-      #B86A30 100%
+      #FFEDD5 0%,
+      #FDBA74 15%,
+      #FB923C 30%,
+      #F97316 50%,
+      #EA580C 70%,
+      #DC2626 85%,
+      #B91C1C 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
-    /* Soft warm brown outline for balloon effect */
-    -webkit-text-stroke: 1.2px #A05A25;
+    /* Deep red outline for depth */
+    -webkit-text-stroke: 1.2px #991B1B;
     paint-order: stroke fill;
     text-shadow:
       /* Soft outline */
-      -1px -1px 0 #8B4513,
-      1px -1px 0 #8B4513,
-      -1px 1px 0 #8B4513,
-      1px 1px 0 #8B4513,
+      -1px -1px 0 #7F1D1D,
+      1px -1px 0 #7F1D1D,
+      -1px 1px 0 #7F1D1D,
+      1px 1px 0 #7F1D1D,
       /* Gentle 3D puffy depth */
-      0 1.5px 0 #9A5A2A,
-      0 2.5px 0 #8B4F26,
+      0 1.5px 0 #991B1B,
+      0 2.5px 0 #7F1D1D,
       /* Warm glow shadow */
-      0 3px 6px rgba(184, 106, 48, 0.3),
-      0 5px 10px rgba(168, 85, 37, 0.2);
-    filter: drop-shadow(0 2px 8px rgba(232, 168, 73, 0.35));
+      0 3px 6px rgba(249, 115, 22, 0.3),
+      0 5px 10px rgba(239, 68, 68, 0.2);
+    filter: drop-shadow(0 2px 8px rgba(249, 115, 22, 0.35));
   }
 
   /* Inline text logo style - for use within sentences */
@@ -899,34 +899,34 @@ body {
     font-weight: 900;
     font-style: normal;
     letter-spacing: 0.05em;
-    text-transform: uppercase;
-    /* Warm bright brown/caramel balloon gradient */
+    text-transform: none;
+    /* Fiery red/orange gradient */
     background: linear-gradient(180deg,
-      #FFF8F0 0%,
-      #FFE4C4 15%,
-      #F5C77E 30%,
-      #E8A849 50%,
-      #D4893D 70%,
-      #C67B3A 85%,
-      #B86A30 100%
+      #FFEDD5 0%,
+      #FDBA74 15%,
+      #FB923C 30%,
+      #F97316 50%,
+      #EA580C 70%,
+      #DC2626 85%,
+      #B91C1C 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
     display: inline-block;
-    -webkit-text-stroke: 1.5px #A05A25;
+    -webkit-text-stroke: 1.5px #991B1B;
     paint-order: stroke fill;
     text-shadow:
-      -1.5px -1.5px 0 #8B4513,
-      1.5px -1.5px 0 #8B4513,
-      -1.5px 1.5px 0 #8B4513,
-      1.5px 1.5px 0 #8B4513,
-      0 2px 0 #9A5A2A,
-      0 3px 0 #8B4F26,
-      0 4px 8px rgba(184, 106, 48, 0.3),
-      0 6px 12px rgba(168, 85, 37, 0.2);
-    filter: drop-shadow(0 3px 10px rgba(232, 168, 73, 0.35));
+      -1.5px -1.5px 0 #7F1D1D,
+      1.5px -1.5px 0 #7F1D1D,
+      -1.5px 1.5px 0 #7F1D1D,
+      1.5px 1.5px 0 #7F1D1D,
+      0 2px 0 #991B1B,
+      0 3px 0 #7F1D1D,
+      0 4px 8px rgba(249, 115, 22, 0.3),
+      0 6px 12px rgba(239, 68, 68, 0.2);
+    filter: drop-shadow(0 3px 10px rgba(249, 115, 22, 0.35));
   }
 
 

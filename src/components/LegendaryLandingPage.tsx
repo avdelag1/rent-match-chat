@@ -185,7 +185,9 @@ function LegendaryLandingPage() {
                   fontSize: 'clamp(2.5rem, 14vw, 5rem)',
                 }}
               >
-                Swipess
+                <span className="font-black">SW</span>
+                <span className="font-light" style={{ fontSize: '0.85em' }}>i</span>
+                <span className="font-black">PESS</span>
               </span>
             </h1>
           </div>
