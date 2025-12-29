@@ -176,19 +176,6 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
-          {/* Logo with beautiful shine effect */}
-          <div className="relative">
-            <h1 className="text-center leading-none relative">
-              <span
-                className="swipess-logo-simple swipess-logo-shine-container block"
-                style={{
-                  fontSize: 'clamp(3rem, 16vw, 6rem)',
-                }}
-              >
-                Swipess
-              </span>
-            </h1>
-          </div>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
         }} animate={{
