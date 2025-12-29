@@ -210,11 +210,12 @@ function LegendaryLandingPage() {
               onMouseEnter={() => setHoveredButton('client')}
               onMouseLeave={() => setHoveredButton(null)}
               drag="x"
-              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD }}
-              dragElastic={0.1}
+              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD + 50 }}
+              dragSnapToOrigin={true}
+              dragElastic={0.2}
               onDrag={(_, info) => handleDrag('client', info)}
               onDragEnd={(_, info) => handleDragEnd('client', info)}
-              className="w-full py-2.5 px-8 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
                 background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1, #8b5cf6)'
               }}
@@ -312,11 +313,12 @@ function LegendaryLandingPage() {
               onMouseEnter={() => setHoveredButton('owner')}
               onMouseLeave={() => setHoveredButton(null)}
               drag="x"
-              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD }}
-              dragElastic={0.1}
+              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD + 50 }}
+              dragSnapToOrigin={true}
+              dragElastic={0.2}
               onDrag={(_, info) => handleDrag('owner', info)}
               onDragEnd={(_, info) => handleDragEnd('owner', info)}
-              className="w-full py-2.5 px-8 text-white font-bold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
                 background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7, #8b5cf6)'
               }}
