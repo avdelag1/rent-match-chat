@@ -73,7 +73,7 @@ const OwnerSettingsNew = () => {
     return (
       <DashboardLayout userRole="owner">
         <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
-          <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
+          <div className="w-full px-4 sm:px-5 py-4" style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom, 0px))' }}>
             <div className="max-w-3xl mx-auto">
               <Button
                 variant="ghost"
@@ -111,7 +111,7 @@ const OwnerSettingsNew = () => {
   return (
     <DashboardLayout userRole="owner">
       <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
-        <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
+        <div className="w-full px-4 sm:px-5 py-4" style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom, 0px))' }}>
           <div className="max-w-3xl mx-auto space-y-6">
             {/* Back Button */}
             <Button

@@ -177,8 +177,8 @@ export default function OwnerPropertyClientDiscovery() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex gap-6">
             {/* Desktop Filters Sidebar */}
-            <div className="hidden lg:block w-80 flex-shrink-0">
-              <div className="sticky top-6">
+            <div className="hidden lg:block w-72 xl:w-80 flex-shrink-0">
+              <div className="sticky top-20">
                 <PropertyClientFilters
                   onApply={handleApplyFilters}
                   initialFilters={filters}
@@ -285,7 +285,7 @@ export default function OwnerPropertyClientDiscovery() {
         </div>
 
         {/* Mobile Filter Sheet */}
-        <div className="lg:hidden fixed bottom-6 right-6 z-50">
+        <div className="lg:hidden fixed z-50" style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))', right: '1.5rem' }}>
           <Sheet>
             <SheetTrigger asChild>
               <Button size="lg" className="rounded-full shadow-lg">
@@ -296,11 +296,11 @@ export default function OwnerPropertyClientDiscovery() {
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[80vh]">
+            <SheetContent side="bottom" className="h-[70vh] max-h-[600px]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
               <SheetHeader>
                 <SheetTitle>Filter Property Clients</SheetTitle>
               </SheetHeader>
-              <div className="overflow-y-auto h-full pb-6">
+              <div className="overflow-y-auto flex-1 pb-4">
                 <PropertyClientFilters
                   onApply={handleApplyFilters}
                   initialFilters={filters}

@@ -102,7 +102,7 @@ export default function OwnerVehicleClientDiscovery() {
                     <Filter className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-80 overflow-y-auto">
+                <SheetContent side="left" className="w-72 sm:w-80 overflow-y-auto" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
                   <SheetHeader>
                     <SheetTitle>Filters</SheetTitle>
                   </SheetHeader>
@@ -134,8 +134,8 @@ export default function OwnerVehicleClientDiscovery() {
 
         <div className="container mx-auto px-4 py-6">
           <div className="flex gap-6">
-            <div className="hidden lg:block w-80 flex-shrink-0">
-              <div className="sticky top-6">
+            <div className="hidden lg:block w-72 xl:w-80 flex-shrink-0">
+              <div className="sticky top-20">
                 <VehicleClientFilters
                   onApply={handleApplyFilters}
                   initialFilters={filters}
