@@ -82,7 +82,7 @@ const ClientSettingsNew = () => {
     return (
       <DashboardLayout userRole="client">
         <SwipeNavigationWrapper routes={clientSettingsRoutes}>
-          <div className="w-full px-5 py-4 pb-24">
+          <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
             <div className="max-w-3xl mx-auto">
               <Button
                 variant="ghost"
@@ -120,7 +120,7 @@ const ClientSettingsNew = () => {
   return (
     <DashboardLayout userRole="client">
       <SwipeNavigationWrapper routes={clientSettingsRoutes}>
-        <div className="w-full px-5 py-4 pb-24">
+        <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
           <div className="max-w-3xl mx-auto space-y-6">
             {/* Back Button */}
             <Button
