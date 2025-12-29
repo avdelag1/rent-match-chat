@@ -41,7 +41,7 @@ export const SwipeNavigationWrapper: React.FC<SwipeNavigationWrapperProps> = ({
   const rightIndicatorOpacity = useTransform(x, [0, -100], [0, 1]);
 
   return (
-    <div className={cn('relative w-full h-full overflow-hidden', className)}>
+    <div className={cn('relative w-full h-full', className)}>
       {/* Left swipe indicator */}
       {showIndicators && canSwipeLeft && previousRoute && (
         <motion.div
@@ -68,10 +68,10 @@ export const SwipeNavigationWrapper: React.FC<SwipeNavigationWrapperProps> = ({
         </motion.div>
       )}
 
-      {/* Page content with drag handlers */}
+      {/* Page content with drag handlers - allow vertical scrolling */}
       <motion.div
         {...dragProps}
-        className="w-full h-full"
+        className="w-full h-full overflow-y-auto overflow-x-hidden"
       >
         {children}
       </motion.div>
