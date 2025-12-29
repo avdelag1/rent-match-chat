@@ -190,11 +190,7 @@ const steps = [
             className="text-center space-y-6 py-8"
           >
             <div className="flex justify-center">
-              <span className="swipess-logo-medium text-4xl">
-                <span className="font-black">SW</span>
-                <span className="font-light" style={{ fontSize: '0.85em' }}>i</span>
-                <span className="font-black">PESS</span>
-              </span>
+              <span className="swipess-logo-medium text-5xl">Swipess</span>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">
