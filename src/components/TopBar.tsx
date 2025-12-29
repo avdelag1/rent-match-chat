@@ -195,7 +195,9 @@ function TopBarComponent({
           whileTap={{ scale: 0.98 }}
         >
         <span className="text-2xl swipess-logo-header">
-          Swipess
+          <span className="font-black">SW</span>
+          <span className="font-light" style={{ fontSize: '0.85em' }}>i</span>
+          <span className="font-black">PESS</span>
         </span>
         </motion.div>
 

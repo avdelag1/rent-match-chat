@@ -58,33 +58,33 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   // Check if running on a native platform (iOS/Android)
   const isNativePlatform = Capacitor.isNativePlatform();
 
-  // Role-specific theming
+  // Role-specific theming - Clean minimal style
   const roleTheme = useMemo(() => ({
     client: {
-      gradient: 'from-red-500 via-rose-500 to-pink-500',
-      gradientBg: 'from-gray-900 via-red-950/30 to-gray-900',
-      accent: 'text-rose-400',
-      accentBg: 'bg-rose-500/20',
-      border: 'border-rose-500/30',
-      ring: 'ring-rose-500/50',
-      glow: 'shadow-[0_0_60px_rgba(244,63,94,0.3)]',
+      gradient: 'from-orange-500 via-red-500 to-rose-500',
+      gradientBg: 'from-black via-black to-black',
+      accent: 'text-orange-400',
+      accentBg: 'bg-orange-500/10',
+      border: 'border-orange-500/20',
+      ring: 'ring-orange-500/30',
+      glow: '',
       icon: Home,
       title: 'Client',
       description: 'Find your perfect rental property',
-      buttonGlow: 'hover:shadow-[0_8px_32px_rgba(244,63,94,0.4)]',
+      buttonGlow: '',
     },
     owner: {
-      gradient: 'from-orange-500 via-amber-500 to-yellow-500',
-      gradientBg: 'from-gray-900 via-orange-950/30 to-gray-900',
-      accent: 'text-amber-400',
-      accentBg: 'bg-amber-500/20',
-      border: 'border-amber-500/30',
-      ring: 'ring-amber-500/50',
-      glow: 'shadow-[0_0_60px_rgba(251,146,60,0.3)]',
+      gradient: 'from-orange-500 via-red-500 to-rose-500',
+      gradientBg: 'from-black via-black to-black',
+      accent: 'text-orange-400',
+      accentBg: 'bg-orange-500/10',
+      border: 'border-orange-500/20',
+      ring: 'ring-orange-500/30',
+      glow: '',
       icon: Building2,
       title: 'Seller',
       description: 'List properties, vehicles, or workers',
-      buttonGlow: 'hover:shadow-[0_8px_32px_rgba(251,146,60,0.4)]',
+      buttonGlow: '',
     },
   }), []);
 
@@ -226,47 +226,13 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     }
   };
 
-  // Optimized fire particles - reduced count for better performance
-  const FireParticles = () => (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute will-change-transform"
-          style={{
-            width: `${3 + i}px`,
-            height: `${6 + i * 2}px`,
-            background: `linear-gradient(45deg, ${
-              role === 'client'
-                ? i % 2 === 0 ? '#f43f5e' : '#fb7185'
-                : i % 2 === 0 ? '#f97316' : '#fbbf24'
-            }, transparent)`,
-            boxShadow: `0 0 12px ${role === 'client' ? '#f43f5e' : '#f97316'}40`,
-            borderRadius: '50%',
-            left: `${20 + i * 20}%`,
-            bottom: '-10px',
-          }}
-          animate={{
-            y: [0, -400],
-            opacity: [0, 0.6, 0],
-          }}
-          transition={{
-            duration: 6 + i * 2,
-            repeat: Infinity,
-            ease: "easeOut",
-            delay: i * 1.5,
-          }}
-        />
-      ))}
-    </div>
-  );
+  // Removed fire particles for cleaner design
 
   return (
     <DialogPrimitive.Root open={isOpen} onOpenChange={onClose}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-fade-in" />
-        <DialogPrimitive.Content className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-gradient-to-br ${theme.gradientBg} will-change-transform`}>
-          <FireParticles />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm animate-fade-in" />
+        <DialogPrimitive.Content className="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-black will-change-transform">
 
           <div className="min-h-full flex items-center justify-center p-4 sm:p-6 relative z-10">
             <motion.div
@@ -299,15 +265,19 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Logo and Header */}
               <div className="text-center mb-8 animate-fade-in">
-              {/* Swipess Brand Logo */}
+              {/* SWiPESS Brand Logo */}
               <div className="mb-4">
-                <span className="swipess-logo-medium text-2xl">Swipess</span>
+                <span className="swipess-logo-medium text-2xl">
+                  <span className="font-black">SW</span>
+                  <span className="font-light" style={{ fontSize: '0.85em' }}>i</span>
+                  <span className="font-black">PESS</span>
+                </span>
               </div>
 
                 <h2 className="text-3xl font-bold text-white mb-2">
                   {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
                 </h2>
-                <p className="text-white/60">
+                <p className="text-white/50">
                   {isForgotPassword
                     ? 'Enter your email to receive a reset link'
                     : theme.description
@@ -315,8 +285,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 </p>
               </div>
 
-              {/* Main Card */}
-              <div className={`bg-white/5 backdrop-blur-xl border ${theme.border} rounded-3xl p-8 ${theme.glow} animate-fade-in`}>
+              {/* Main Card - Minimal black design */}
+              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 animate-fade-in">
                 {!isForgotPassword && !isNativePlatform && (
                   <>
                     {/* Google OAuth Button */}
@@ -326,7 +296,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         onClick={(e) => handleOAuthSignIn(e, 'google')}
                         disabled={isLoading}
                         variant="outline"
-                        className={`w-full h-14 border-2 border-white/20 bg-white/5 backdrop-blur-xl font-semibold text-base text-white hover:bg-white/10 hover:border-white/30 transition-all ${theme.buttonGlow}`}
+                        className="w-full h-14 border border-white/10 bg-white/[0.02] font-semibold text-base text-white hover:bg-white/[0.05] hover:border-white/20 transition-all"
                       >
                         {isLoading ? (
                           <>
@@ -344,9 +314,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
                     {/* Divider */}
                     <div className="relative flex items-center my-8">
-                      <div className="flex-grow border-t border-white/20"></div>
-                      <span className="flex-shrink mx-4 text-white/40 text-sm font-medium">or continue with email</span>
-                      <div className="flex-grow border-t border-white/20"></div>
+                      <div className="flex-grow border-t border-white/10"></div>
+                      <span className="flex-shrink mx-4 text-white/30 text-sm font-medium">or continue with email</span>
+                      <div className="flex-grow border-t border-white/10"></div>
                     </div>
                   </>
                 )}
@@ -363,18 +333,18 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <Label htmlFor="name" className="text-sm font-medium text-white/80">
+                        <Label htmlFor="name" className="text-sm font-medium text-white/60">
                           Full Name
                         </Label>
                         <div className="relative group">
-                          <User className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:${theme.accent} transition-colors`} />
+                          <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/30 group-focus-within:text-orange-400 transition-colors" />
                           <Input
                             id="name"
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
-                            className={`pl-12 h-14 text-base bg-white/5 border-white/20 text-white placeholder:text-white/30 focus:border-${role === 'client' ? 'rose' : 'amber'}-500/50 focus:${theme.ring}`}
+                            className="pl-12 h-14 text-base bg-transparent border-0 border-b border-white/10 rounded-none text-white placeholder:text-white/20 focus:border-orange-500/50 focus:ring-0"
                             placeholder="John Doe"
                           />
                         </div>
@@ -389,18 +359,18 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <Label htmlFor="email" className="text-sm font-medium text-white/80">
+                    <Label htmlFor="email" className="text-sm font-medium text-white/60">
                       Email
                     </Label>
                     <div className="relative group">
-                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-white/70 transition-colors" />
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/30 group-focus-within:text-orange-400 transition-colors" />
                       <Input
                         id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="pl-12 h-14 text-base bg-white/5 border-white/20 text-white placeholder:text-white/30"
+                        className="pl-12 h-14 text-base bg-transparent border-0 border-b border-white/10 rounded-none text-white placeholder:text-white/20 focus:border-orange-500/50 focus:ring-0"
                         placeholder="you@example.com"
                       />
                     </div>
@@ -416,24 +386,24 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ delay: 0.35 }}
                       >
-                        <Label htmlFor="password" className="text-sm font-medium text-white/80">
+                        <Label htmlFor="password" className="text-sm font-medium text-white/60">
                           Password
                         </Label>
                         <div className="relative group">
-                          <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-white/70 transition-colors" />
+                          <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/30 group-focus-within:text-orange-400 transition-colors" />
                           <Input
                             id="password"
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="pl-12 pr-12 h-14 text-base bg-white/5 border-white/20 text-white placeholder:text-white/30"
+                            className="pl-12 pr-12 h-14 text-base bg-transparent border-0 border-b border-white/10 rounded-none text-white placeholder:text-white/20 focus:border-orange-500/50 focus:ring-0"
                             placeholder="••••••••"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                           >
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                           </button>
@@ -583,11 +553,11 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className={`w-full h-14 text-base font-bold bg-gradient-to-r ${theme.gradient} text-white shadow-lg ${theme.buttonGlow} transition-all mt-4 relative overflow-hidden group`}
+                      className="w-full h-14 text-base font-bold bg-gradient-to-r from-orange-500 via-red-500 to-rose-500 text-white transition-all mt-4 relative overflow-hidden group hover:opacity-90"
                     >
                       {/* Shimmer effect */}
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full"
                         animate={{ x: ['100%', '-100%'] }}
                         transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1 }}
                       />
@@ -663,7 +633,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               </div>
 
               {/* Security Notice */}
-              <div className="flex items-center justify-center gap-2 mt-6 text-white/40 animate-fade-in">
+              <div className="flex items-center justify-center gap-2 mt-6 text-white/30 animate-fade-in">
                 <Shield className="w-4 h-4" />
                 <span className="text-xs">Secured with industry-standard encryption</span>
               </div>
