@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { SwipessLogo } from './SwipessLogo';
 
 const NATIONALITY_OPTIONS = [
   'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'France', 'Spain', 'Italy',
@@ -189,6 +190,9 @@ const steps = [
             exit={{ opacity: 0, y: -20 }}
             className="text-center space-y-6 py-8"
           >
+            <div className="flex justify-center mb-4">
+              <SwipessLogo size="lg" />
+            </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">
                 Welcome!

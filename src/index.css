@@ -672,6 +672,55 @@ body {
     box-shadow: var(--shadow-premium);
   }
 
+  /* ===== SWIPESS LOGO STYLE ===== */
+  .swipess-logo {
+    font-family: 'Poppins', 'Quicksand', system-ui, sans-serif;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg,
+      #f43f5e 0%,
+      #fb7185 20%,
+      #f97316 50%,
+      #fb923c 75%,
+      #fbbf24 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    filter: drop-shadow(0 2px 4px rgba(249, 115, 22, 0.3));
+  }
+
+  /* Small variant for headers */
+  .swipess-logo-sm {
+    font-family: 'Poppins', 'Quicksand', system-ui, sans-serif;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg,
+      #f43f5e 0%,
+      #fb7185 25%,
+      #f97316 60%,
+      #fbbf24 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+
+  /* Inline text variant */
+  .swipess-text {
+    font-family: 'Poppins', 'Quicksand', system-ui, sans-serif;
+    font-weight: 600;
+    font-style: italic;
+    background: linear-gradient(180deg, #f43f5e 0%, #f97316 50%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
   /* Optimized card interactions - GAME-LIKE INSTANT FEEL */
   .fast-card {
     transition: transform 0.1s ease-out;

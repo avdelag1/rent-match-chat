@@ -1,0 +1,30 @@
+import { memo } from 'react';
+import { cn } from '@/lib/utils';
+
+interface SwipessLogoProps {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
+}
+
+function SwipessLogoComponent({ size = 'md', className }: SwipessLogoProps) {
+  const sizeClasses = {
+    sm: 'text-xl',
+    md: 'text-3xl',
+    lg: 'text-5xl',
+    xl: 'text-6xl sm:text-7xl',
+  };
+
+  return (
+    <span
+      className={cn(
+        'swipess-logo font-bold italic select-none',
+        sizeClasses[size],
+        className
+      )}
+    >
+      Swipess
+    </span>
+  );
+}
+
+export const SwipessLogo = memo(SwipessLogoComponent);
