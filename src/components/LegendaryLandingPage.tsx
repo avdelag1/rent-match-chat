@@ -196,7 +196,7 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
-          <SwipessLogo size="xl" />
+          <SwipessLogo size="2xl" />
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
         }} animate={{
