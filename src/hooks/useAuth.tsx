@@ -1,8 +1,8 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useProfileSetup } from './useProfileSetup';
 import { useAccountLinking } from './useAccountLinking';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,14 +24,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
   const { createProfileIfMissing } = useProfileSetup();
   const { handleOAuthUserSetup: linkOAuthAccount, checkExistingAccount } = useAccountLinking();
 
+  // Prevent duplicate OAuth setup calls
+  const processingOAuthRef = useRef(false);
+  const processedUserIdRef = useRef<string | null>(null);
+
   useEffect(() => {
-    let isInitialLoad = true;
     let isMounted = true;
+    let isInitializing = true;
 
     // Initialize auth state from Supabase session storage
     const initializeAuth = async () => {
@@ -42,18 +45,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('[Auth] Session retrieval error:', error);
         }
 
-        if (isInitialLoad && isMounted) {
+        if (isMounted) {
           setSession(session);
           setUser(session?.user ?? null);
+
+          // CRITICAL: Set loading to false IMMEDIATELY after getting session
+          // Profile/role setup will happen separately via Index.tsx and ProtectedRoute
           setLoading(false);
-          isInitialLoad = false;
         }
       } catch (error) {
         console.error('[Auth] Failed to initialize auth:', error);
-        if (isInitialLoad && isMounted) {
+        if (isMounted) {
           setLoading(false);
-          isInitialLoad = false;
         }
+      } finally {
+        isInitializing = false;
       }
     };
 
@@ -62,87 +68,106 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener for subsequent changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        isInitialLoad = false;
+      async (event, session) => {
+        // Skip processing during initial load (already handled above)
+        if (isInitializing) return;
 
-        if (isMounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
+        if (!isMounted) return;
 
-          // Handle OAuth users ONLY - email/password users are handled in signUp/signIn functions
-          // Check if this is an OAuth sign-in by looking at the provider
-          if (event === 'SIGNED_IN' && session?.user) {
-            const provider = session.user.app_metadata?.provider;
-            const isOAuthUser = provider && provider !== 'email';
+        console.log('[Auth] State change:', event, session?.user?.email);
 
-            // Only run OAuth setup for actual OAuth sign-ins (not email/password)
-            if (isOAuthUser) {
-              handleOAuthUserSetupOnly(session.user).catch(err => {
-                console.error('[Auth] OAuth setup failed:', err);
-                toast({
-                  title: 'Profile Setup Failed',
-                  description: 'Failed to complete your profile setup. Please try signing in again.',
-                  variant: 'destructive',
-                });
-              });
-            }
+        // Update state immediately
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        // CRITICAL: Set loading to false immediately
+        // Don't wait for profile setup - that's handled by Index/ProtectedRoute
+        setLoading(false);
+
+        // Handle OAuth setup asynchronously WITHOUT blocking loading state
+        if (event === 'SIGNED_IN' && session?.user) {
+          const provider = session.user.app_metadata?.provider;
+          const isOAuthUser = provider && provider !== 'email';
+
+          // Only process OAuth users, and only once per user
+          if (isOAuthUser && !processingOAuthRef.current && processedUserIdRef.current !== session.user.id) {
+            processingOAuthRef.current = true;
+            processedUserIdRef.current = session.user.id;
+
+            // Run OAuth setup in background (non-blocking)
+            handleOAuthUserSetupAsync(session.user).finally(() => {
+              processingOAuthRef.current = false;
+            });
           }
+        }
+
+        // Clear processed user on sign out
+        if (event === 'SIGNED_OUT') {
+          processedUserIdRef.current = null;
+          processingOAuthRef.current = false;
         }
       }
     );
 
     return () => {
-      isInitialLoad = false;
       isMounted = false;
       subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle OAuth user setup WITHOUT redirecting (Index.tsx handles redirects)
-  const handleOAuthUserSetupOnly = async (user: User) => {
-    // For OAuth users, check localStorage for pending role FIRST, then URL params
-    const pendingRole = localStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
-    const urlParams = new URLSearchParams(window.location.search);
-    const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
-    
-    const roleToUse = pendingRole || roleFromUrl;
+  // Non-blocking OAuth user setup
+  const handleOAuthUserSetupAsync = async (user: User) => {
+    try {
+      // Check localStorage first, then URL params
+      const pendingRole = localStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
+      const urlParams = new URLSearchParams(window.location.search);
+      const roleFromUrl = urlParams.get('role') as 'client' | 'owner' | null;
 
-    if (roleToUse) {
-      // Clear the pending role from localStorage
-      localStorage.removeItem('pendingOAuthRole');
-      
-      // Use enhanced account linking for OAuth users
-      const linkingResult = await linkOAuthAccount(user, roleToUse);
-      
-      if (linkingResult.success) {
-        // Clear role from URL params if present
-        if (roleFromUrl) {
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.delete('role');
-          window.history.replaceState({}, '', newUrl.toString());
+      const roleToUse = pendingRole || roleFromUrl;
+
+      if (roleToUse) {
+        // Clear pending role
+        localStorage.removeItem('pendingOAuthRole');
+
+        // Use enhanced account linking
+        const linkingResult = await linkOAuthAccount(user, roleToUse);
+
+        if (linkingResult.success) {
+          // Clear URL params
+          if (roleFromUrl) {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('role');
+            window.history.replaceState({}, '', newUrl.toString());
+          }
+
+          const finalRole = linkingResult.existingProfile?.role || roleToUse;
+
+          // Create profile if missing
+          await createProfileIfMissing(user, finalRole);
+        } else {
+          console.error('[Auth] OAuth account linking failed');
         }
-
-        const finalRole = linkingResult.existingProfile?.role || roleToUse;
-
-        // Ensure profile exists with correct role
-        await createProfileIfMissing(user, finalRole);
       } else {
-        console.error('OAuth account linking failed');
+        // Try metadata role
+        const role = user.user_metadata?.role as 'client' | 'owner' | undefined;
+        if (role) {
+          await createProfileIfMissing(user, role);
+        }
       }
-    } else {
-      // Try to get existing profile or create one if we have role in metadata
-      const role = user.user_metadata?.role as 'client' | 'owner' | undefined;
-      if (role) {
-        await createProfileIfMissing(user, role);
-      }
+    } catch (error) {
+      console.error('[Auth] OAuth setup error:', error);
+      toast({
+        title: 'Profile Setup Failed',
+        description: 'Failed to complete your profile setup. Please try signing in again.',
+        variant: 'destructive',
+      });
     }
   };
 
   const signUp = async (email: string, password: string, role: 'client' | 'owner', name?: string) => {
     try {
-      // Check if account already exists with this email (with timeout to prevent hanging)
+      // Check existing account (with timeout)
       let existingProfile = null;
       try {
         const checkPromise = checkExistingAccount(email);
@@ -152,14 +177,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const result = await Promise.race([checkPromise, timeoutPromise]);
         existingProfile = result.profile;
       } catch (checkError) {
-        // If check times out or fails, continue with signup - Supabase will handle duplicates
         console.log('[Auth] Existing account check skipped:', checkError);
       }
 
       if (existingProfile) {
         const existingRole = existingProfile.role;
 
-        // Check if trying to sign up with different role
         if (existingRole && existingRole !== role) {
           toast({
             title: "Email Already Registered",
@@ -169,7 +192,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: new Error(`Email already registered with ${existingRole} role`) };
         }
 
-        // Same role - just redirect to sign in
         toast({
           title: "Account Already Exists",
           description: `An account with this email already exists. Please sign in instead.`,
@@ -194,29 +216,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('Sign up error:', error);
+        console.error('[Auth] Sign up error:', error);
         throw error;
       }
 
-      // If user is immediately available (some auth providers), create profile
       if (data.user && !data.user.email_confirmed_at) {
         toast({
           title: "Welcome to Zwipes!",
           description: "Please check your email to verify your account.",
         });
       } else if (data.user) {
-        // Show feedback to user
         toast({
           title: "Creating your account...",
           description: "Setting up your profile.",
         });
 
-        // Auto-create profile for immediate sign-ups
+        // Create profile
         const profileResult = await createProfileIfMissing(data.user, role);
 
         if (!profileResult) {
-          // Profile/role creation failed
-          console.error('[useAuth] Profile creation failed, signing out user');
+          console.error('[Auth] Profile creation failed');
           await supabase.auth.signOut();
           toast({
             title: "Setup Failed",
@@ -225,12 +244,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           return { error: new Error('Failed to complete account setup') };
         }
-        
-        // Wait for database consistency
+
+        // Brief wait for DB consistency
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Note: Cache invalidation moved to useProfileSetup after role creation completes
-        
         toast({
           title: "Welcome to Zwipes!",
           description: "Redirecting to your dashboard...",
@@ -239,9 +256,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null };
     } catch (error: any) {
-      console.error('Sign up error:', error);
+      console.error('[Auth] Sign up error:', error);
       let errorMessage = "Failed to create account. Please try again.";
-      
+
       if (error.message?.includes('User already registered')) {
         errorMessage = "An account with this email already exists. Please sign in instead.";
       } else if (error.message?.includes('Password should be at least')) {
@@ -251,7 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       toast({
         title: "Sign Up Failed",
         description: errorMessage,
@@ -269,12 +286,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('Sign in error:', error);
+        console.error('[Auth] Sign in error:', error);
         throw error;
       }
 
       if (data.user) {
-        // CRITICAL: Check user's ACTUAL role from user_roles table (source of truth)
+        // Check actual role from user_roles table
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
@@ -286,17 +303,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw new Error('Failed to verify user role');
         }
 
-        // If role exists in user_roles, check if it matches the page
         if (roleData) {
           const actualRole = roleData.role as 'client' | 'owner';
 
-          // CRITICAL: Reject login if user is on wrong page
+          // Reject if wrong page
           if (actualRole !== role) {
-            await supabase.auth.signOut(); // Sign them out immediately
-            
+            await supabase.auth.signOut();
+
             const correctPage = actualRole === 'client' ? 'Client' : 'Owner';
-            const wrongPage = role === 'client' ? 'Client' : 'Owner';
-            
+
             toast({
               title: "Wrong Login Page",
               description: `This email is registered as a ${actualRole.toUpperCase()} account. Please go to the ${correctPage} login page to sign in.`,
@@ -306,7 +321,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             throw new Error(`ROLE_MISMATCH: This is a ${actualRole} account, not a ${role} account.`);
           }
 
-          // Ensure profile exists with correct role
+          // Ensure profile exists
           await createProfileIfMissing(data.user, actualRole);
 
           toast({
@@ -317,8 +332,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: null };
         }
 
-        // No role found anywhere - this shouldn't happen for existing users
-        console.error('[Auth] ❌ No role found in user_roles for existing user!');
+        // No role found
+        console.error('[Auth] No role found for existing user');
         await supabase.auth.signOut();
 
         throw new Error('Account setup incomplete. Please contact support or sign up again.');
@@ -326,7 +341,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null };
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error('[Auth] Sign in error:', error);
       let errorMessage = 'Failed to sign in. Please try again.';
 
       if (error.message === 'Invalid login credentials') {
@@ -352,15 +367,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithOAuth = async (provider: 'google', role: 'client' | 'owner') => {
     try {
-      // Validate Supabase configuration
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
         throw new Error('Supabase configuration is missing. Please check your environment variables.');
       }
 
-      // Store the role in localStorage BEFORE OAuth redirect
+      // Store role before OAuth redirect
       localStorage.setItem('pendingOAuthRole', role);
 
-      // Build OAuth options with Google-specific query params
       const queryParams: Record<string, string> = {
         prompt: 'consent',
         access_type: 'offline',
@@ -378,21 +391,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error(`[OAuth] ${provider} OAuth error:`, error);
-        console.error(`[OAuth] Error details:`, {
-          message: error.message,
-          status: error.status,
-          code: error.code,
-          name: error.name
-        });
+        console.error(`[Auth] ${provider} OAuth error:`, error);
         localStorage.removeItem('pendingOAuthRole');
         throw error;
       }
 
       return { error: null };
     } catch (error: any) {
-      console.error(`[OAuth] ${provider} OAuth error caught:`, error);
+      console.error(`[Auth] ${provider} OAuth error:`, error);
       localStorage.removeItem('pendingOAuthRole');
+
       let errorMessage = `Failed to sign in with ${provider}. Please try again.`;
 
       if (error.message?.includes('Supabase configuration is missing')) {
@@ -402,17 +410,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (error.message?.includes('access_denied')) {
         errorMessage = `Access denied. Please grant permission to continue with ${provider}.`;
       } else if (error.message?.includes('Provider not enabled') || error.message?.includes('not enabled')) {
-        errorMessage = `${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not enabled in Supabase. Please check the Supabase dashboard and ensure Google OAuth provider is configured.`;
+        errorMessage = `${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not enabled in Supabase.`;
       } else if (error.message?.includes('redirect_uri_mismatch')) {
-        errorMessage = 'Redirect URL configuration error. Please verify your domain is whitelisted in Supabase OAuth settings.';
+        errorMessage = 'Redirect URL configuration error.';
       } else if (error.message?.includes('invalid_client')) {
-        errorMessage = 'Invalid OAuth credentials. Please verify your Google OAuth setup in Supabase dashboard (check Client ID and Secret).';
+        errorMessage = 'Invalid OAuth credentials.';
       } else if (error.message?.includes('invalid_grant')) {
         errorMessage = 'Authorization grant error. Please try signing in again.';
       } else if (error.status === 400) {
-        errorMessage = 'Bad OAuth request. Please check Supabase configuration and try again.';
+        errorMessage = 'Bad OAuth request.';
       } else if (error.status === 401 || error.status === 403) {
-        errorMessage = `OAuth authentication failed (${error.status}). Please check Supabase setup.`;
+        errorMessage = `OAuth authentication failed (${error.status}).`;
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -428,17 +436,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Stop the radio player before signing out
+      // Dispatch sign out event
       window.dispatchEvent(new CustomEvent('user-signout'));
 
-      // Clear any pending OAuth role from localStorage
+      // Clear localStorage
       localStorage.removeItem('pendingOAuthRole');
       localStorage.removeItem('rememberMe');
 
-      // Clear all React Query cache
+      // Clear React Query cache
       queryClient.clear();
 
-      // Sign out from Supabase (removes session from localStorage and server)
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
 
       if (error) {
@@ -451,7 +459,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Clear local state explicitly
+      // Clear local state
       setUser(null);
       setSession(null);
 
@@ -460,7 +468,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "You have been signed out successfully.",
       });
 
-      // Navigate to home page with replace to prevent back navigation to protected routes
+      // Navigate to home
       navigate('/', { replace: true });
     } catch (error) {
       console.error('[Auth] Unexpected sign out error:', error);
