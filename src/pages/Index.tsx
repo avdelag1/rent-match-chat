@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import LegendaryLandingPage from "@/components/LegendaryLandingPage";
@@ -11,7 +11,10 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  
+
+  // Ref to prevent toast spam on re-renders
+  const hasShownError = useRef(false);
+
   // Fetch user role from secure user_roles table
   const { data: userRole, isLoading: profileLoading, isFetching, refetch, error, isError } = useQuery({
     queryKey: ['user-role', user?.id],
@@ -43,24 +46,31 @@ const Index = () => {
     refetchOnMount: false, // Don't refetch on component mount if data is fresh
   });
 
+  // Better loading condition - distinguishes between undefined (loading) and null (no data)
+  // userRole is undefined while loading, null if no record exists, or a string if found
+  const isLoadingRole = (profileLoading || isFetching) && userRole === undefined;
+
   // Combined timeout handling to prevent race conditions between multiple timers
   useEffect(() => {
-    if (!user || (!profileLoading && !isFetching && userRole)) {
-      // Reset timeout state when not loading
+    // Reset timeout if user logs out or loading completes
+    if (!user || !isLoadingRole) {
       setLoadingTimeout(false);
       return;
     }
 
     // Single timeout for fallback UI after 6 seconds
     const fallbackTimeout = setTimeout(() => {
-      logger.log('[Index] Loading timeout reached (6s), showing fallback...');
-      setLoadingTimeout(true);
+      // Double-check we're still loading before showing error (prevents race condition)
+      if (isLoadingRole) {
+        logger.log('[Index] Loading timeout reached (6s), showing fallback...');
+        setLoadingTimeout(true);
+      }
     }, 6000);
 
     return () => {
       clearTimeout(fallbackTimeout);
     };
-  }, [user, profileLoading, isFetching, userRole]);
+  }, [user, isLoadingRole]);
 
   // Redirect authenticated users directly to dashboard
   useEffect(() => {
@@ -69,67 +79,62 @@ const Index = () => {
       userEmail: user?.email,
       userRole,
       loading,
-      profileLoading,
-      isFetching,
+      isLoadingRole,
       isError
     });
 
     if (loading) return;
 
     if (user) {
-      // If query failed after all retries, show error ONLY if we're not in the middle of signup
-      if (isError && !profileLoading && !isFetching) {
+      // If query failed after all retries, show error (with spam prevention)
+      if (isError && !isLoadingRole) {
         logger.error('[Index] User authenticated but role query failed after retries');
 
-        // Don't show error immediately after signup - give cache more time
-        const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
-        if (userAge > 20000) { // Give new users up to 20s for profile setup
+        if (!hasShownError.current) {
+          hasShownError.current = true;
           toast({
             title: "Account Setup Issue",
             description: "Taking longer than expected. Please refresh the page.",
             variant: "destructive"
           });
-        } else {
-          logger.log('[Index] New user detected (age: ' + userAge + 'ms), waiting for profile setup...');
         }
         return;
       }
 
-      // If still loading or fetching, wait
-      if (profileLoading || isFetching) {
+      // If still loading, wait
+      if (isLoadingRole) {
         logger.log('[Index] Still loading role...');
         return;
       }
 
-      // If no role found after query completed
-      if (!userRole) {
+      // userRole is null (no record found) vs undefined (still loading)
+      // At this point, isLoadingRole is false, so userRole should be null or a string
+      if (userRole === null || userRole === undefined) {
         logger.error('[Index] ❌ No role found for authenticated user:', user.email);
-        const userAge = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
 
-        // For brand new users, be more patient (up to 20s)
-        if (userAge < 20000) {
-          logger.log('[Index] Brand new user (age: ' + userAge + 'ms), waiting for role creation...');
-          return;
+        if (!hasShownError.current) {
+          hasShownError.current = true;
+          toast({
+            title: "Account Setup Incomplete",
+            description: "Please refresh the page or contact support if this persists.",
+            variant: "destructive"
+          });
         }
-
-        toast({
-          title: "Account Setup Incomplete",
-          description: "Please refresh the page or contact support if this persists.",
-          variant: "destructive"
-        });
         return;
       }
 
       // CRITICAL: Success - redirect to correct dashboard based on ACTUAL role from DB
+      // Reset error flag on successful redirect (for future sessions)
+      hasShownError.current = false;
       const targetPath = userRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
       logger.log(`[Index] ✅ Authenticated user ${user.email} with role="${userRole}" -> Redirecting to: ${targetPath}`);
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, profileLoading, isFetching, isError, navigate]);
+  }, [user, userRole, loading, isLoadingRole, isError, navigate]);
 
   // Show loading spinner when user is authenticated but role is loading
   // This prevents showing the "I'm a Client" / "I'm an Owner" buttons after login
-  if (user && (profileLoading || isFetching || !userRole) && !loadingTimeout) {
+  if (user && isLoadingRole && !loadingTimeout) {
     return (
       <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
         <div className="text-center space-y-4">
