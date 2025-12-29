@@ -152,34 +152,8 @@ function LegendaryLandingPage() {
       }} />)}
       </AnimatePresence>
 
-      {/* SVG Filter for Organic Flame Effect */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <linearGradient id="flameGradientR" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="40%" stopColor="#ea580c" />
-            <stop offset="70%" stopColor="#dc2626" />
-            <stop offset="100%" stopColor="#fbbf24" />
-          </linearGradient>
-          <filter id="flameDistortion" x="-50%" y="-50%" width="200%" height="200%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="5" result="noise">
-              <animate attributeName="baseFrequency" values="0.015;0.02;0.015" dur="4s" repeatCount="indefinite" />
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-          <filter id="flameGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
-
       {/* Main Content */}
-      <div className="relative z-10 text-center space-y-8 max-w-2xl w-full px-4">
+      <div className="relative z-10 text-center space-y-8 max-w-2xl w-full px-4 safe-area-pt">
 
         {/* Title - Swipess Logo */}
         <motion.div initial={{
