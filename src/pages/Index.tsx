@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import LegendaryLandingPage from "@/components/LegendaryLandingPage";
@@ -14,6 +14,14 @@ const Index = () => {
 
   // Ref to prevent toast spam on re-renders
   const hasShownError = useRef(false);
+
+  // Calculate user age to handle new users whose role row might not exist yet
+  const userAgeMs = useMemo(() => {
+    if (!user?.created_at) return Infinity;
+    return Date.now() - new Date(user.created_at).getTime();
+  }, [user?.created_at]);
+
+  const isNewUser = userAgeMs < 20000; // Within 20 seconds of account creation
 
   // Fetch user role from secure user_roles table
   const { data: userRole, isLoading: profileLoading, isFetching, refetch, error, isError } = useQuery({
@@ -37,13 +45,24 @@ const Index = () => {
       logger.log('[Index] Role fetched successfully:', data?.role);
       return data?.role;
     },
-    enabled: !!user,
+    // CRITICAL: Only enable when auth is stable (user exists AND loading is complete)
+    enabled: !!user && !loading,
     retry: 3, // Increased from 2 to 3 for better reliability on new signups
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s, 3s
     staleTime: 60000, // 60 seconds - user roles don't change frequently
     gcTime: 300000, // Cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnMount: false, // Don't refetch on component mount if data is fresh
+    refetchOnMount: true, // Refetch on mount to ensure fresh data
+
+    // For new users, poll briefly until role row exists (created by trigger)
+    refetchInterval: (query) => {
+      const role = query.state.data as string | null | undefined;
+      if (!user) return false;
+      if (loading) return false;
+      if (!isNewUser) return false;
+      if (role) return false; // Stop polling once we have a role
+      return 1000; // Poll every 1 second for new users
+    },
   });
 
   // Better loading condition - distinguishes between undefined (loading) and null (no data)
@@ -110,6 +129,12 @@ const Index = () => {
       // userRole is null (no record found) vs undefined (still loading)
       // At this point, isLoadingRole is false, so userRole should be null or a string
       if (userRole === null || userRole === undefined) {
+        // For new users, keep waiting - the role row might be created by a trigger
+        if (isNewUser) {
+          logger.log('[Index] New user - role row may still be creating, continuing to poll...');
+          return;
+        }
+
         logger.error('[Index] ❌ No role found for authenticated user:', user.email);
 
         if (!hasShownError.current) {
@@ -130,11 +155,12 @@ const Index = () => {
       logger.log(`[Index] ✅ Authenticated user ${user.email} with role="${userRole}" -> Redirecting to: ${targetPath}`);
       navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, isLoadingRole, isError, navigate]);
+  }, [user, userRole, loading, isLoadingRole, isError, isNewUser, navigate]);
 
   // Show loading spinner when user is authenticated but role is loading
   // This prevents showing the "I'm a Client" / "I'm an Owner" buttons after login
-  if (user && isLoadingRole && !loadingTimeout) {
+  // Also show spinner for new users waiting for role row to be created
+  if (user && (isLoadingRole || (isNewUser && !userRole)) && !loadingTimeout) {
     return (
       <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
         <div className="text-center space-y-4">
