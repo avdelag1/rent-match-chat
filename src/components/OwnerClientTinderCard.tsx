@@ -190,9 +190,20 @@ const OwnerClientTinderCardComponent = ({
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col pb-0">
-      {/* Draggable Card - Takes full height, action buttons overlay on top */}
+    <div className="absolute inset-0 flex flex-col">
+      {/* Draggable Card - Takes most of the space */}
       <motion.div
+        style={{
+          x,
+          y,
+          rotate: isTop ? rotate : 0,
+          scale: isTop ? scale : 0.95,
+          opacity: isTop ? opacity : 1,
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+        }}
         drag={isTop ? "x" : false}
         dragConstraints={{ left: -500, right: 500 }}
         dragElastic={0.7}
@@ -205,17 +216,7 @@ const OwnerClientTinderCardComponent = ({
         }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        style={{
-          x,
-          y,
-          rotate: isTop ? rotate : 0,
-          scale: isTop ? scale : 0.95,
-          opacity: isTop ? opacity : 0,
-          willChange: 'transform, opacity',
-          backfaceVisibility: 'hidden',
-          WebkitBackfaceVisibility: 'hidden',
-          transform: 'translateZ(0)',
-        }}
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl relative"
         initial={false}
         transition={{
           type: "spring",
@@ -223,7 +224,6 @@ const OwnerClientTinderCardComponent = ({
           damping: 35,
           mass: 0.5
         }}
-        className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl"
       >
         {/* Swipe Overlays - Premium Chinese-inspired */}
         <SwipeOverlays x={x} />
@@ -288,31 +288,19 @@ const OwnerClientTinderCardComponent = ({
             )}
           </div>
 
-          {/* Bottom Sheet - Clean Style Matching Property Cards - positioned higher to leave room for action buttons */}
+          {/* Bottom Sheet - Collapsible with Glassmorphism */}
           <motion.div
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.2}
-            onDragEnd={(event, info) => {
-              const { offset, velocity } = info;
-              const swipeThreshold = 50;
-              const velocityThreshold = 300;
-
-              // Swipe up = expand, Swipe down = collapse
-              if (offset.y < -swipeThreshold || velocity.y < -velocityThreshold) {
-                setIsBottomSheetExpanded(true);
-              } else if (offset.y > swipeThreshold || velocity.y > velocityThreshold) {
-                setIsBottomSheetExpanded(false);
-              }
-            }}
-            className="absolute left-0 right-0 bg-black/80 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 cursor-grab active:cursor-grabbing z-30"
+            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
             animate={{
-              height: isBottomSheetExpanded ? 'min(55%, 320px)' : 'min(15%, 100px)',
-              bottom: hideActions ? 0 : 72,
+              height: isBottomSheetExpanded ? 'min(60%, 350px)' : 'min(18%, 120px)',
               y: 0
             }}
-            transition={{ type: 'spring', stiffness: 350, damping: 32 }}
-            style={{ willChange: 'height, bottom', maxHeight: 'calc(100% - 140px)' }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 32
+            }}
+            style={{ willChange: 'height', maxHeight: 'calc(100% - 60px)' }}
           >
             {/* Drag Handle */}
             <div className="flex justify-center py-2 pointer-events-none">
@@ -485,7 +473,7 @@ const OwnerClientTinderCardComponent = ({
         </div>
       </motion.div>
 
-      {/* Action Buttons - Positioned at the absolute bottom of the card, overlapping the bottom sheet */}
+      {/* Action Buttons - FIXED at bottom, OUTSIDE the draggable card */}
       <AnimatePresence>
         {isTop && !hideActions && (
           <motion.div
@@ -493,9 +481,9 @@ const OwnerClientTinderCardComponent = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="absolute bottom-3 left-0 right-0 flex justify-center items-center z-40 pointer-events-none"
+            className="flex-shrink-0 flex justify-center items-center py-3 px-4"
           >
-            <div className="flex items-center gap-3 pointer-events-auto">
+            <div className="flex items-center gap-3">
               {/* Dislike Button */}
               <motion.button
                 whileTap={{ scale: 0.85 }}

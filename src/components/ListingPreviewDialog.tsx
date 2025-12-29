@@ -340,16 +340,6 @@ export function ListingPreviewDialog({
               </div>
             </div>
 
-            {/* Description */}
-            {(listing.description || listing.description_full) && (
-              <div className="space-y-2 sm:space-y-3">
-                <h3 className="text-sm sm:text-base lg:text-lg font-semibold">Description</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">
-                  {listing.description_full || listing.description}
-                </p>
-              </div>
-            )}
-
             {/* Additional Details */}
             <div className="space-y-2 sm:space-y-3">
               <h3 className="text-sm sm:text-base lg:text-lg font-semibold">Additional Information</h3>

@@ -221,13 +221,6 @@ export function SwipeCard({
               </span>
             </div>
 
-            {/* Description Preview */}
-            {listing.description && (
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {listing.description}
-              </p>
-            )}
-
             <div className="grid grid-cols-3 gap-2">
               {listing.price && (
                 <div className="text-center">

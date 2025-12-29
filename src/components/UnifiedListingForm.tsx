@@ -86,10 +86,9 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
-      // Workers only need 1 photo minimum, other categories need 3
-      const minPhotos = selectedCategory === 'worker' ? 1 : 3;
-      if (images.length < minPhotos) {
-        throw new Error(`Minimum ${minPhotos} photo${minPhotos > 1 ? 's' : ''} required`);
+      // All categories only need 1 photo minimum
+      if (images.length < 1) {
+        throw new Error('At least 1 photo required');
       }
 
       // Map form data to database columns based on category
@@ -101,7 +100,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         is_active: true,
         images: images,
         title: formData.title || '',
-        description: formData.description,
         price: formData.price,
         rental_rates: formData.rental_rates,
         city: formData.city,
@@ -406,12 +404,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   };
 
   const handleSubmit = () => {
-    // Workers only need 1 photo minimum, other categories need 3
-    const minPhotos = selectedCategory === 'worker' ? 1 : 3;
-    if (images.length < minPhotos) {
+    // All categories only need 1 photo minimum
+    if (images.length < 1) {
       toast({
-        title: "More Photos Needed",
-        description: `Please upload at least ${minPhotos} photo${minPhotos > 1 ? 's' : ''} to publish your listing.`,
+        title: "Photo Required",
+        description: "Please upload at least 1 photo to publish your listing.",
         variant: "destructive"
       });
       return;
@@ -584,10 +581,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           <Card>
             <CardHeader>
               <CardTitle>
-                Photos * (min {selectedCategory === 'worker' ? '1' : '3'}, max 30)
-                {images.length < (selectedCategory === 'worker' ? 1 : 3) && (
+                Photos * (min 1, max 30)
+                {images.length < 1 && (
                   <span className="text-destructive text-sm font-normal ml-2">
-                    - Need {(selectedCategory === 'worker' ? 1 : 3) - images.length} more
+                    - Need at least 1 photo
                   </span>
                 )}
               </CardTitle>

@@ -373,18 +373,6 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                   className="mt-4 overflow-y-auto"
                   style={{ maxHeight: '150px' }}
                 >
-                  {/* Description */}
-                  {listing.description && (
-                    <div className="mb-4">
-                      <h3 className="text-sm font-semibold text-foreground mb-2">
-                        About
-                      </h3>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        {listing.description}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Amenities */}
                   {listing.amenities && listing.amenities.length > 0 && (
                     <div className="mb-4">

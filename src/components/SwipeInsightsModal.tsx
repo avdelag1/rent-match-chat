@@ -85,13 +85,12 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
       const amenityCount = (listing.amenities?.length || 0);
       const imageCount = (listing.images?.length || 0);
       const equipmentCount = (listing.equipment?.length || 0);
-      const completeness = imageCount * 20 + (listing.description?.length ? 30 : 0) + (amenityCount * 2) + (equipmentCount * 2);
+      const completeness = imageCount * 20 + (amenityCount * 2) + (equipmentCount * 2);
       const category = listing.category || 'property';
       const isVehicle = ['yacht', 'motorcycle', 'bicycle'].includes(category);
 
       // Calculate quality score
       let qualityScore = 0;
-      if (listing.description && listing.description.length > 100) qualityScore += 20;
       if (imageCount >= 5) qualityScore += 25;
       else if (imageCount >= 3) qualityScore += 15;
       if (amenityCount >= 5) qualityScore += 20;
@@ -515,18 +514,6 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     )}
                   </div>
 
-                  {/* Full Description - FIRST - Most Important */}
-                  {(listing.description || listing.description_full) && (
-                    <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
-                      <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
-                        <span className="text-lg">📝</span> About This {insights.isVehicle ? 'Listing' : 'Property'}
-                      </h4>
-                      <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                        {listing.description_full || listing.description}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Quick Stats Row */}
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
@@ -821,12 +808,6 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                         <div className="flex items-start gap-2">
                           <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                           <span className="text-sm">Well-documented with {listing.images.length} photos</span>
-                        </div>
-                      )}
-                      {listing.description && listing.description.length > 100 && (
-                        <div className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">Detailed description provided</span>
                         </div>
                       )}
                       {((listing.amenities?.length || 0) + (listing.equipment?.length || 0)) >= 5 && (
