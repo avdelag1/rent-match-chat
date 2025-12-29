@@ -5,14 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, Globe, MapPin, Search, Star } from 'lucide-react';
+import { AlertCircle, MapPin, Search } from 'lucide-react';
 import {
   getRegions,
   getCountriesInRegion,
   getCitiesInCountry,
   searchCities,
-  getFeaturedDestinations,
   CityLocation,
 } from '@/data/worldLocations';
 
@@ -52,13 +50,11 @@ export function OwnerLocationSelector({
   const [selectedCountry, setSelectedCountry] = useState(country || '');
   const [selectedCity, setSelectedCity] = useState(city || '');
   const [selectedNeighborhood, setSelectedNeighborhood] = useState(neighborhood || '');
-  const [showQuickSelect, setShowQuickSelect] = useState(true);
 
   // Get data from world locations
   const regions = useMemo(() => getRegions(), []);
   const countries = useMemo(() => selectedRegion ? getCountriesInRegion(selectedRegion) : [], [selectedRegion]);
   const cities = useMemo(() => selectedRegion && selectedCountry ? getCitiesInCountry(selectedRegion, selectedCountry) : [], [selectedRegion, selectedCountry]);
-  const featuredDestinations = useMemo(() => getFeaturedDestinations(), []);
   const searchResults = useMemo(() => searchQuery.length >= 2 ? searchCities(searchQuery) : [], [searchQuery]);
 
   // Get selected city data for neighborhoods
@@ -86,7 +82,6 @@ export function OwnerLocationSelector({
     onCountryChange('');
     onCityChange('');
     onNeighborhoodChange('');
-    setShowQuickSelect(false);
   };
 
   const handleCountryChange = (value: string) => {
@@ -96,7 +91,6 @@ export function OwnerLocationSelector({
     onCountryChange(value);
     onCityChange('');
     onNeighborhoodChange('');
-    setShowQuickSelect(false);
   };
 
   const handleCityChange = (value: string) => {
@@ -117,14 +111,13 @@ export function OwnerLocationSelector({
     onNeighborhoodChange(value);
   };
 
-  // Handle quick city selection
+  // Handle quick city selection from search
   const handleQuickCitySelect = (cityData: CityLocation, countryName: string, regionName: string) => {
     setSelectedRegion(regionName);
     setSelectedCountry(countryName);
     setSelectedCity(cityData.name);
     setSelectedNeighborhood('');
     setSearchQuery('');
-    setShowQuickSelect(false);
 
     onRegionChange?.(regionName);
     onCountryChange(countryName);
@@ -138,30 +131,26 @@ export function OwnerLocationSelector({
 
   return (
     <Card className="bg-card border-border">
-      <CardHeader>
-        <div className="flex items-start justify-between flex-wrap gap-2">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-4">
           <CardTitle className="text-foreground text-lg flex items-center gap-2">
             <MapPin className="w-5 h-5" />
             Property Location
           </CardTitle>
-          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950 px-3 py-2 rounded-lg">
-            <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              General location only - no exact address shown
-            </p>
-          </div>
+          <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            General location only - no exact address shown
+          </Badge>
         </div>
       </CardHeader>
+
       <CardContent className="space-y-4">
         {/* Quick Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setShowQuickSelect(e.target.value.length < 2);
-            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search for your city..."
             className="pl-10 bg-background border-border text-foreground"
           />
@@ -185,75 +174,12 @@ export function OwnerLocationSelector({
           </ScrollArea>
         )}
 
-        {/* Quick Select - Popular Destinations */}
-        {showQuickSelect && searchQuery.length < 2 && (
-          <div className="space-y-3">
-            <Label className="text-xs text-muted-foreground flex items-center gap-1">
-              <Star className="w-3 h-3" />
-              Popular Destinations
-            </Label>
-            <ScrollArea className="h-32">
-              <div className="flex flex-wrap gap-1.5">
-                {/* Top Mexico destinations */}
-                {featuredDestinations.mexico.slice(0, 8).map(city => (
-                  <Button
-                    key={city.name}
-                    variant={selectedCity === city.name ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleQuickCitySelect(city, 'Mexico', 'North America')}
-                    className="text-xs h-7"
-                  >
-                    {city.name}
-                  </Button>
-                ))}
-                {/* Top USA destinations */}
-                {featuredDestinations.usa.slice(0, 4).map(city => (
-                  <Button
-                    key={city.name}
-                    variant={selectedCity === city.name ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleQuickCitySelect(city, 'United States', 'North America')}
-                    className="text-xs h-7"
-                  >
-                    {city.name}
-                  </Button>
-                ))}
-                {/* Top Europe destinations */}
-                {featuredDestinations.europe.slice(0, 6).map(city => (
-                  <Button
-                    key={city.name}
-                    variant={selectedCity === city.name ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleQuickCitySelect(city, city.name, 'Europe')}
-                    className="text-xs h-7"
-                  >
-                    {city.name}
-                  </Button>
-                ))}
-                {/* Bali */}
-                {featuredDestinations.asiaPacific.slice(0, 3).map(city => (
-                  <Button
-                    key={city.name}
-                    variant={selectedCity === city.name ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleQuickCitySelect(city, city.name, 'Asia Pacific')}
-                    className="text-xs h-7"
-                  >
-                    {city.name}
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
-
-        {/* Dropdown Selectors */}
+        {/* Location Dropdowns - Single Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {/* Region */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label className="text-foreground text-xs">Region</Label>
             <Select value={selectedRegion} onValueChange={handleRegionChange}>
-              <SelectTrigger className="bg-background border-border text-foreground">
+              <SelectTrigger className="bg-background border-border text-foreground h-9">
                 <SelectValue placeholder="Select region" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border max-h-60">
@@ -266,15 +192,14 @@ export function OwnerLocationSelector({
             </Select>
           </div>
 
-          {/* Country */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label className="text-foreground text-xs">Country *</Label>
             <Select
               value={selectedCountry}
               onValueChange={handleCountryChange}
               disabled={!selectedRegion}
             >
-              <SelectTrigger className="bg-background border-border text-foreground">
+              <SelectTrigger className="bg-background border-border text-foreground h-9">
                 <SelectValue placeholder={selectedRegion ? "Select country" : "Select region first"} />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border max-h-60">
@@ -287,15 +212,14 @@ export function OwnerLocationSelector({
             </Select>
           </div>
 
-          {/* City */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label className="text-foreground text-xs">City *</Label>
             <Select
               value={selectedCity}
               onValueChange={handleCityChange}
               disabled={!selectedCountry}
             >
-              <SelectTrigger className="bg-background border-border text-foreground">
+              <SelectTrigger className="bg-background border-border text-foreground h-9">
                 <SelectValue placeholder={selectedCountry ? "Select city" : "Select country first"} />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border max-h-60">
@@ -308,15 +232,14 @@ export function OwnerLocationSelector({
             </Select>
           </div>
 
-          {/* Neighborhood */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label className="text-foreground text-xs">Neighborhood</Label>
             <Select
               value={selectedNeighborhood}
               onValueChange={handleNeighborhoodChange}
               disabled={!selectedCity || neighborhoods.length === 0}
             >
-              <SelectTrigger className="bg-background border-border text-foreground">
+              <SelectTrigger className="bg-background border-border text-foreground h-9">
                 <SelectValue placeholder={selectedCity ? "Select area" : "Select city first"} />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border max-h-60">
@@ -327,51 +250,44 @@ export function OwnerLocationSelector({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] text-muted-foreground">
               Optional - helps clients find you
             </p>
           </div>
         </div>
 
-        {/* Selected Location Summary */}
+        {/* Selected Location Tags */}
         {(selectedCity || selectedCountry) && (
-          <div className="flex flex-wrap gap-2 pt-2">
+          <div className="flex flex-wrap gap-1.5">
             {selectedRegion && (
-              <Badge variant="secondary" className="text-xs">
-                <Globe className="w-3 h-3 mr-1" />
+              <Badge variant="secondary" className="text-xs py-0.5">
                 {selectedRegion}
               </Badge>
             )}
             {selectedCountry && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs py-0.5">
                 {selectedCountry}
               </Badge>
             )}
             {selectedCity && (
-              <Badge variant="default" className="text-xs">
+              <Badge variant="default" className="text-xs py-0.5">
                 <MapPin className="w-3 h-3 mr-1" />
                 {selectedCity}
               </Badge>
             )}
             {selectedNeighborhood && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs py-0.5">
                 {selectedNeighborhood}
               </Badge>
             )}
           </div>
         )}
 
-        {/* Info Box */}
-        <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
-          <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
-            Privacy Note
-          </h4>
-          <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
-            <li>Your city and neighborhood are visible to clients searching in your area</li>
-            <li>Your exact address is kept private until after a match</li>
-            <li>Clients see your property on a map within your neighborhood</li>
-            <li>You can share your full address after activation if you choose</li>
-          </ul>
+        {/* Privacy Note - Compact */}
+        <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+          <p className="text-xs text-amber-200 font-medium mb-1">Privacy Note</p>
+          <p className="text-xs text-amber-200/80">Your city and neighborhood are visible to clients searching in your area</p>
+          <p className="text-xs text-amber-200/80">Your exact address is kept private until after a match</p>
         </div>
       </CardContent>
     </Card>

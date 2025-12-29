@@ -485,8 +485,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }
       if (!formData.rental_duration_type) {
         toast({
-          title: "Rental Duration Required",
-          description: "Please select a rental duration.",
+          title: "Minimum Stay Required",
+          description: "Please select a minimum stay duration (3 months, 6 months, or 1 year).",
           variant: "destructive"
         });
         return;
@@ -583,7 +583,14 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           {/* Photos */}
           <Card>
             <CardHeader>
-              <CardTitle>Photos * (min 3, max 30)</CardTitle>
+              <CardTitle>
+                Photos * (min {selectedCategory === 'worker' ? '1' : '3'}, max 30)
+                {images.length < (selectedCategory === 'worker' ? 1 : 3) && (
+                  <span className="text-destructive text-sm font-normal ml-2">
+                    - Need {(selectedCategory === 'worker' ? 1 : 3) - images.length} more
+                  </span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -642,12 +649,16 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         </ScrollArea>
 
         {/* Submit */}
-        <div className="shrink-0 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t">
+        <div className="shrink-0 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t bg-background">
           <Button variant="outline" onClick={handleClose} className="h-10 sm:h-11 text-sm order-2 sm:order-1">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={createListingMutation.isPending} className="h-10 sm:h-11 text-sm order-1 sm:order-2">
-            {createListingMutation.isPending ? 'Saving...' : 'Save Listing'}
+          <Button
+            onClick={handleSubmit}
+            disabled={createListingMutation.isPending}
+            className="h-10 sm:h-11 text-sm order-1 sm:order-2 bg-red-500 hover:bg-red-600 text-white"
+          >
+            {createListingMutation.isPending ? 'Saving...' : (editingId ? 'Save Listing' : 'Save Listing')}
           </Button>
         </div>
       </DialogContent>
