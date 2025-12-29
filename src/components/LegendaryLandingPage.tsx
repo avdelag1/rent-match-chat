@@ -205,19 +205,19 @@ function LegendaryLandingPage() {
 
           {/* I'm a Client Button - Vibrant Cyan to Electric Blue */}
           <div className="relative w-full max-w-sm mx-auto">
-            {/* Swipe track background */}
-            <div className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-              <motion.div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30"
-                animate={{ width: `${swipeProgress.client * 100}%` }}
-                transition={{ duration: 0.05 }}
-              />
-              {swipeProgress.client > 0 && (
+            {/* Swipe track background - only visible when swiping */}
+            {swipeProgress.client > 0 && (
+              <div className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+                <motion.div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30"
+                  animate={{ width: `${swipeProgress.client * 100}%` }}
+                  transition={{ duration: 0.05 }}
+                />
                 <div className="absolute inset-0 flex items-center justify-center text-white/50 text-xs font-medium">
                   {swipeProgress.client >= 1 ? '→ Release to sign in' : '→ Swipe right'}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
             <motion.button
               onClick={() => openAuthDialog('client')}
               onMouseEnter={() => setHoveredButton('client')}
@@ -307,19 +307,19 @@ function LegendaryLandingPage() {
 
           {/* I'm an Owner Button - Vibrant Magenta to Gold */}
           <div className="relative w-full max-w-sm mx-auto">
-            {/* Swipe track background */}
-            <div className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-              <motion.div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-500/30 to-purple-500/30"
-                animate={{ width: `${swipeProgress.owner * 100}%` }}
-                transition={{ duration: 0.05 }}
-              />
-              {swipeProgress.owner > 0 && (
+            {/* Swipe track background - only visible when swiping */}
+            {swipeProgress.owner > 0 && (
+              <div className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+                <motion.div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-500/30 to-purple-500/30"
+                  animate={{ width: `${swipeProgress.owner * 100}%` }}
+                  transition={{ duration: 0.05 }}
+                />
                 <div className="absolute inset-0 flex items-center justify-center text-white/50 text-xs font-medium">
                   {swipeProgress.owner >= 1 ? '→ Release to sign in' : '→ Swipe right'}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
             <motion.button
               onClick={() => openAuthDialog('owner')}
               onMouseEnter={() => setHoveredButton('owner')}
