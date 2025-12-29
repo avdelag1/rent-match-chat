@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, memo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Key, UserCircle, Sparkles, Shield, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { Users, Key, UserCircle, Sparkles, Shield, ChevronRight } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 
 function LegendaryLandingPage() {
@@ -36,8 +36,15 @@ function LegendaryLandingPage() {
   });
   const [hoveredButton, setHoveredButton] = useState<'client' | 'owner' | null>(null);
   const [swipeProgress, setSwipeProgress] = useState<{ client: number; owner: number }>({ client: 0, owner: 0 });
+  const [isDragging, setIsDragging] = useState<{ client: boolean; owner: boolean }>({ client: false, owner: false });
   const containerRef = useRef<HTMLDivElement>(null);
-  const SWIPE_THRESHOLD = 100; // pixels to trigger action
+  const clientControls = useAnimation();
+  const ownerControls = useAnimation();
+  const SWIPE_THRESHOLD = 120; // pixels to trigger action
+
+  const handleDragStart = useCallback((role: 'client' | 'owner') => {
+    setIsDragging(prev => ({ ...prev, [role]: true }));
+  }, []);
 
   const handleDrag = useCallback((role: 'client' | 'owner', info: { offset: { x: number } }) => {
     const progress = Math.min(Math.max(info.offset.x / SWIPE_THRESHOLD, 0), 1);
@@ -45,14 +52,26 @@ function LegendaryLandingPage() {
   }, []);
 
   const handleDragEnd = useCallback((role: 'client' | 'owner', info: { offset: { x: number }; velocity: { x: number } }) => {
-    // Reset swipe progress
-    setSwipeProgress(prev => ({ ...prev, [role]: 0 }));
+    const controls = role === 'client' ? clientControls : ownerControls;
+    setIsDragging(prev => ({ ...prev, [role]: false }));
 
     // Trigger if swiped past threshold or with high velocity
-    if (info.offset.x >= SWIPE_THRESHOLD || info.velocity.x > 500) {
-      openAuthDialog(role);
+    if (info.offset.x >= SWIPE_THRESHOLD * 0.8 || info.velocity.x > 400) {
+      // Success - animate to completion then open dialog
+      controls.start({ x: SWIPE_THRESHOLD + 20, transition: { type: "spring", stiffness: 400, damping: 30 } });
+      setSwipeProgress(prev => ({ ...prev, [role]: 1 }));
+
+      setTimeout(() => {
+        setSwipeProgress(prev => ({ ...prev, [role]: 0 }));
+        controls.start({ x: 0, transition: { type: "spring", stiffness: 300, damping: 25 } });
+        openAuthDialog(role);
+      }, 150);
+    } else {
+      // Snap back with spring animation
+      controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 25 } });
+      setSwipeProgress(prev => ({ ...prev, [role]: 0 }));
     }
-  }, []);
+  }, [clientControls, ownerControls]);
   const openAuthDialog = (role: 'client' | 'owner') => {
     setAuthDialog({
       isOpen: true,
@@ -176,19 +195,6 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
-          {/* Logo with beautiful shine effect */}
-          <div className="relative">
-            <h1 className="text-center leading-none relative">
-              <span
-                className="swipess-logo-simple swipess-logo-shine-container block"
-                style={{
-                  fontSize: 'clamp(3rem, 16vw, 6rem)',
-                }}
-              >
-                Swipess
-              </span>
-            </h1>
-          </div>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
         }} animate={{
@@ -203,23 +209,42 @@ function LegendaryLandingPage() {
         {/* Buttons Container with Enhanced Effects */}
         <div className="space-y-2 mt-8">
 
-          {/* I'm a Client Button - Vibrant Cyan to Electric Blue */}
-          <div className="relative w-full max-w-sm mx-auto">
-            {/* Swipe track background - only visible when swiping */}
-            {swipeProgress.client > 0 && (
-              <div className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-                <motion.div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30"
-                  animate={{ width: `${swipeProgress.client * 100}%` }}
-                  transition={{ duration: 0.05 }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center text-white/50 text-xs font-medium">
-                  {swipeProgress.client >= 1 ? '→ Release to sign in' : '→ Swipe right'}
-                </div>
+          {/* I'm a Client Button - Swipe to unlock style */}
+          <div className="relative w-full max-w-sm mx-auto h-14">
+            {/* Track background */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-950/80 to-indigo-950/80 border border-cyan-500/30 overflow-hidden">
+              {/* Animated progress fill */}
+              <motion.div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/40 via-blue-500/40 to-indigo-500/40"
+                animate={{ width: `${swipeProgress.client * 100}%` }}
+                transition={{ duration: 0.05 }}
+              />
+              {/* Shimmer on track */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              />
+              {/* Hint text */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <motion.span
+                  className="text-white/40 text-sm font-medium flex items-center gap-1"
+                  animate={{
+                    opacity: isDragging.client ? 0 : [0.4, 0.6, 0.4],
+                    x: isDragging.client ? 20 : [0, 5, 0]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 -ml-2" />
+                  <span className="ml-1">Swipe to continue</span>
+                </motion.span>
               </div>
-            )}
+            </div>
+
+            {/* Draggable button thumb */}
             <motion.button
-              onClick={() => openAuthDialog('client')}
+              onClick={() => !isDragging.client && openAuthDialog('client')}
               onMouseEnter={() => setHoveredButton('client')}
               onMouseLeave={() => setHoveredButton(null)}
               drag="x"
@@ -230,99 +255,72 @@ function LegendaryLandingPage() {
               onDragEnd={(_, info) => handleDragEnd('client', info)}
               className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
-                background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1, #8b5cf6)'
+                background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1)',
+                boxShadow: '0 4px 20px rgba(6,182,212,0.5), 0 0 0 1px rgba(255,255,255,0.1)'
               }}
-              initial={{
-                opacity: 0,
-                x: 300,
-                scale: 0.8,
-                rotate: 5
-              }}
-              animate={{
-                opacity: 1,
-                x: 0,
-                scale: 1,
-                rotate: 0
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 8,
-                mass: 0.6,
-                delay: 0.4,
-                velocity: 2
-              }}
-              whileHover={{
-                scale: 1.05,
-                y: -6,
-                boxShadow: '0 20px 60px rgba(6,182,212,0.6), 0 0 30px rgba(99,102,241,0.4)'
-              }}
-              whileTap={{
-                scale: 0.98
-              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.4 }}
+              whileHover={{ scale: 1.02, boxShadow: '0 8px 30px rgba(6,182,212,0.6)' }}
+              whileTap={{ scale: 0.98 }}
             >
-              {/* Animated shimmer background on hover */}
-              <motion.div className="absolute inset-0" style={{
-                background: 'linear-gradient(135deg, #22d3ee, #38bdf8, #60a5fa, #818cf8, #a78bfa)'
-              }} initial={{
-                opacity: 0
-              }} animate={{
-                opacity: hoveredButton === 'client' ? 1 : 0
-              }} transition={{
-                duration: 0.3
-              }} />
-
-              {/* Subtle slow glare effect */}
-              <motion.div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-                <motion.div
-                  className="absolute inset-y-0 w-24"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), rgba(255,255,255,0.15), rgba(255,255,255,0.08), transparent)',
-                  }}
-                  animate={{
-                    x: ['-100%', '600%']
-                  }}
-                  transition={{
-                    duration: 12,
-                    repeat: Infinity,
-                    repeatDelay: 4,
-                    ease: 'linear'
-                  }}
-                />
-              </motion.div>
+              {/* Glow effect on drag */}
+              <motion.div
+                className="absolute inset-0 rounded-xl bg-white/20"
+                animate={{ opacity: swipeProgress.client > 0.5 ? 0.3 : 0 }}
+                transition={{ duration: 0.2 }}
+              />
 
               <UserCircle className="w-5 h-5 relative z-10" />
-              <span className="relative z-10 drop-shadow-lg electric-text">I'm a Client</span>
-              <motion.div className="relative z-10" animate={{
-                x: hoveredButton === 'client' || swipeProgress.client > 0 ? 5 : 0,
-                scale: hoveredButton === 'client' || swipeProgress.client > 0 ? 1.2 : 1
-              }} transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 10
-              }}>
-                <ArrowRight className="w-4 h-4" />
+              <span className="relative z-10 drop-shadow-lg">I'm a Client</span>
+              <motion.div
+                className="relative z-10 flex"
+                animate={{
+                  x: swipeProgress.client > 0 ? [0, 4, 0] : 0,
+                }}
+                transition={{ duration: 0.3, repeat: swipeProgress.client > 0 ? Infinity : 0 }}
+              >
+                <ChevronRight className="w-5 h-5" />
               </motion.div>
             </motion.button>
           </div>
 
-          {/* I'm an Owner Button - Vibrant Magenta to Gold */}
-          <div className="relative w-full max-w-sm mx-auto">
-            {/* Swipe track background - only visible when swiping */}
-            {swipeProgress.owner > 0 && (
-              <div className="absolute inset-0 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-                <motion.div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-500/30 to-purple-500/30"
-                  animate={{ width: `${swipeProgress.owner * 100}%` }}
-                  transition={{ duration: 0.05 }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center text-white/50 text-xs font-medium">
-                  {swipeProgress.owner >= 1 ? '→ Release to sign in' : '→ Swipe right'}
-                </div>
+          {/* I'm an Owner Button - Swipe to unlock style */}
+          <div className="relative w-full max-w-sm mx-auto h-14">
+            {/* Track background */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-pink-950/80 to-purple-950/80 border border-pink-500/30 overflow-hidden">
+              {/* Animated progress fill */}
+              <motion.div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-500/40 via-purple-500/40 to-violet-500/40"
+                animate={{ width: `${swipeProgress.owner * 100}%` }}
+                transition={{ duration: 0.05 }}
+              />
+              {/* Shimmer on track */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear', delay: 1 }}
+              />
+              {/* Hint text */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <motion.span
+                  className="text-white/40 text-sm font-medium flex items-center gap-1"
+                  animate={{
+                    opacity: isDragging.owner ? 0 : [0.4, 0.6, 0.4],
+                    x: isDragging.owner ? 20 : [0, 5, 0]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 -ml-2" />
+                  <span className="ml-1">Swipe to continue</span>
+                </motion.span>
               </div>
-            )}
+            </div>
+
+            {/* Draggable button thumb */}
             <motion.button
-              onClick={() => openAuthDialog('owner')}
+              onClick={() => !isDragging.owner && openAuthDialog('owner')}
               onMouseEnter={() => setHoveredButton('owner')}
               onMouseLeave={() => setHoveredButton(null)}
               drag="x"
@@ -333,78 +331,32 @@ function LegendaryLandingPage() {
               onDragEnd={(_, info) => handleDragEnd('owner', info)}
               className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
-                background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7, #8b5cf6)'
+                background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7)',
+                boxShadow: '0 4px 20px rgba(236,72,153,0.5), 0 0 0 1px rgba(255,255,255,0.1)'
               }}
-              initial={{
-                opacity: 0,
-                x: -300,
-                scale: 0.8,
-                rotate: -5
-              }}
-              animate={{
-                opacity: 1,
-                x: 0,
-                scale: 1,
-                rotate: 0
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 8,
-                mass: 0.6,
-                delay: 0.55,
-                velocity: 2
-              }}
-              whileHover={{
-                scale: 1.05,
-                y: -6,
-                boxShadow: '0 20px 60px rgba(236,72,153,0.6), 0 0 30px rgba(168,85,247,0.4)'
-              }}
-              whileTap={{
-                scale: 0.98
-              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.5 }}
+              whileHover={{ scale: 1.02, boxShadow: '0 8px 30px rgba(236,72,153,0.6)' }}
+              whileTap={{ scale: 0.98 }}
             >
-              {/* Animated shimmer background on hover */}
-              <motion.div className="absolute inset-0" style={{
-                background: 'linear-gradient(135deg, #fb7185, #f472b6, #e879f9, #c084fc, #a78bfa)'
-              }} initial={{
-                opacity: 0
-              }} animate={{
-                opacity: hoveredButton === 'owner' ? 1 : 0
-              }} transition={{
-                duration: 0.3
-              }} />
-
-              {/* Subtle slow glare effect */}
-              <motion.div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-                <motion.div
-                  className="absolute inset-y-0 w-24"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), rgba(255,255,255,0.15), rgba(255,255,255,0.08), transparent)',
-                  }}
-                  animate={{
-                    x: ['-100%', '600%']
-                  }}
-                  transition={{
-                    duration: 12,
-                    repeat: Infinity,
-                    repeatDelay: 6,
-                    ease: 'linear'
-                  }}
-                />
-              </motion.div>
+              {/* Glow effect on drag */}
+              <motion.div
+                className="absolute inset-0 rounded-xl bg-white/20"
+                animate={{ opacity: swipeProgress.owner > 0.5 ? 0.3 : 0 }}
+                transition={{ duration: 0.2 }}
+              />
 
               <Key className="w-5 h-5 relative z-10" />
-              <span className="relative z-10 drop-shadow-lg electric-text">I'm an Owner</span>
-              <motion.div className="relative z-10" animate={{
-                x: hoveredButton === 'owner' || swipeProgress.owner > 0 ? 5 : 0,
-                scale: hoveredButton === 'owner' || swipeProgress.owner > 0 ? 1.2 : 1
-              }} transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 10
-              }}>
-                <ArrowRight className="w-4 h-4" />
+              <span className="relative z-10 drop-shadow-lg">I'm an Owner</span>
+              <motion.div
+                className="relative z-10 flex"
+                animate={{
+                  x: swipeProgress.owner > 0 ? [0, 4, 0] : 0,
+                }}
+                transition={{ duration: 0.3, repeat: swipeProgress.owner > 0 ? Infinity : 0 }}
+              >
+                <ChevronRight className="w-5 h-5" />
               </motion.div>
             </motion.button>
           </div>
