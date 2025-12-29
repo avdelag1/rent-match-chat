@@ -815,8 +815,11 @@ export function useSmartClientMatching(
   isRefreshMode: boolean = false, // When true, show disliked profiles within cooldown
   filters?: ClientFilters
 ) {
+  // Serialize filters to string for stable query key (prevents cache misses from object reference changes)
+  const filtersKey = filters ? JSON.stringify(filters) : '';
+
   return useQuery<MatchedClientProfile[]>({
-    queryKey: ['smart-clients', category, page, isRefreshMode, filters],
+    queryKey: ['smart-clients', category, page, isRefreshMode, filtersKey],
     queryFn: async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
@@ -1086,8 +1089,10 @@ export function useSmartClientMatching(
       }
     },
     enabled: true,
-    staleTime: 30 * 1000, // 30 seconds - shorter to reflect filter changes faster
+    staleTime: 2 * 60 * 1000, // 2 minutes - prevents excessive refetches while keeping data reasonably fresh
+    gcTime: 5 * 60 * 1000, // 5 minutes - cache for longer to improve performance
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
+    refetchInterval: false, // Disable automatic refetching - only refetch when filters change
     retry: 3,
     retryDelay: 1000,
   });

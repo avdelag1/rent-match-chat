@@ -1,4 +1,5 @@
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -8,11 +9,16 @@ interface AppErrorProps {
 }
 
 export function AppError({ error, resetError }: AppErrorProps) {
+  const navigate = useNavigate();
+
   const handleGoHome = () => {
-    window.location.href = '/';
+    resetError();
+    navigate('/', { replace: true });
   };
 
   const handleReload = () => {
+    // Keep window.location.reload() for full reload scenario
+    // This clears any corrupted state that a soft navigation might not fix
     window.location.reload();
   };
 

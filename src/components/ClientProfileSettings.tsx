@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import { getStates, getCitiesForState, getNeighborhoodsForCity } from '@/data/me
 
 export function ClientProfileSettings() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   
   // Profile form state
@@ -108,7 +110,7 @@ export function ClientProfileSettings() {
 
       // Sign out after successful deletion
       await supabase.auth.signOut();
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error: any) {
       console.error('Delete account error:', error);
       toast({

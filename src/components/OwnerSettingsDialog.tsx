@@ -5,6 +5,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -15,6 +16,7 @@ interface OwnerSettingsDialogProps {
 
 export function OwnerSettingsDialog({ open, onOpenChange }: OwnerSettingsDialogProps) {
   const [notifications, setNotifications] = useState(true);
+  const navigate = useNavigate();
 
   const handleDeleteAccount = async () => {
     try {
@@ -43,7 +45,7 @@ export function OwnerSettingsDialog({ open, onOpenChange }: OwnerSettingsDialogP
 
       // Sign out after successful deletion
       await supabase.auth.signOut();
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error: any) {
       console.error('Delete account error:', error);
       toast({
