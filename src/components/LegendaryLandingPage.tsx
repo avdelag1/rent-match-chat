@@ -195,21 +195,6 @@ function LegendaryLandingPage() {
         type: "spring",
         bounce: 0.3
       }} className="space-y-4">
-          {/* Logo with beautiful shine effect */}
-          <div className="relative">
-            <h1 className="text-center leading-none relative">
-              <span
-                className="swipess-logo-simple swipess-logo-shine-container block"
-                style={{
-                  fontSize: 'clamp(2.5rem, 14vw, 5rem)',
-                }}
-              >
-                <span className="font-black">SW</span>
-                <span className="font-light" style={{ fontSize: '0.85em' }}>i</span>
-                <span className="font-black">PESS</span>
-              </span>
-            </h1>
-          </div>
           <motion.p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto" initial={{
           opacity: 0
         }} animate={{
@@ -263,13 +248,12 @@ function LegendaryLandingPage() {
               onMouseEnter={() => setHoveredButton('client')}
               onMouseLeave={() => setHoveredButton(null)}
               drag="x"
-              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD }}
-              dragElastic={0.05}
-              onDragStart={() => handleDragStart('client')}
+              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD + 50 }}
+              dragSnapToOrigin={true}
+              dragElastic={0.2}
               onDrag={(_, info) => handleDrag('client', info)}
               onDragEnd={(_, info) => handleDragEnd('client', info)}
-              animate={clientControls}
-              className="absolute left-1 top-1 bottom-1 py-2 px-6 text-white font-bold text-sm sm:text-base rounded-xl flex items-center gap-2 shadow-lg backdrop-blur-sm border border-white/30 cursor-grab active:cursor-grabbing touch-none select-none"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(6,182,212,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
                 background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1)',
                 boxShadow: '0 4px 20px rgba(6,182,212,0.5), 0 0 0 1px rgba(255,255,255,0.1)'
@@ -340,13 +324,12 @@ function LegendaryLandingPage() {
               onMouseEnter={() => setHoveredButton('owner')}
               onMouseLeave={() => setHoveredButton(null)}
               drag="x"
-              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD }}
-              dragElastic={0.05}
-              onDragStart={() => handleDragStart('owner')}
+              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD + 50 }}
+              dragSnapToOrigin={true}
+              dragElastic={0.2}
               onDrag={(_, info) => handleDrag('owner', info)}
               onDragEnd={(_, info) => handleDragEnd('owner', info)}
-              animate={ownerControls}
-              className="absolute left-1 top-1 bottom-1 py-2 px-6 text-white font-bold text-sm sm:text-base rounded-xl flex items-center gap-2 shadow-lg backdrop-blur-sm border border-white/30 cursor-grab active:cursor-grabbing touch-none select-none"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(236,72,153,0.5)] backdrop-blur-sm border border-white/40 relative overflow-hidden group cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
                 background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7)',
                 boxShadow: '0 4px 20px rgba(236,72,153,0.5), 0 0 0 1px rgba(255,255,255,0.1)'
