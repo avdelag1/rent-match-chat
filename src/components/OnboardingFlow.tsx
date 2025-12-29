@@ -52,7 +52,7 @@ export function OnboardingFlow({ open, onComplete }: OnboardingFlowProps) {
   const [interests, setInterests] = useState<string[]>([]);
 
 const steps = [
-    { title: 'Welcome', icon: Sparkles, description: 'Get started with SWiPESS' },
+    { title: 'Welcome', icon: Sparkles, description: 'Get started with Swipess' },
     { title: 'Photos', icon: Camera, description: 'Add your profile photos' },
     { title: 'Basic Info', icon: User, description: 'Tell us about yourself' },
     { title: 'Demographics', icon: Globe, description: 'A bit more about you' },
@@ -190,7 +190,7 @@ const steps = [
             className="text-center space-y-6 py-8"
           >
             <div className="flex justify-center">
-              <span className="swipess-logo-medium text-4xl">SWiPESS</span>
+              <span className="swipess-logo-medium text-4xl">Swipess</span>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">

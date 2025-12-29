@@ -185,7 +185,7 @@ function LegendaryLandingPage() {
                   fontSize: 'clamp(2.5rem, 14vw, 5rem)',
                 }}
               >
-                SWiPESS
+                Swipess
               </span>
             </h1>
           </div>
