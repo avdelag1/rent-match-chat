@@ -80,6 +80,25 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     }
   }, []);
 
+  // BUTTON SWIPE - Animate card then trigger swipe for smooth swoosh effect
+  const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
+    const targetX = direction === 'right' ? 500 : -500;
+
+    // Haptic feedback immediately
+    triggerHaptic(direction === 'right' ? 'success' : 'warning');
+
+    // Animate card swooshing out with spring physics
+    animate(x, targetX, {
+      type: "spring",
+      stiffness: 300,
+      damping: 25,
+      mass: 0.8,
+      onComplete: () => {
+        onSwipe(direction);
+      }
+    });
+  }, [onSwipe, x]);
+
   // PROFESSIONAL drag handling - responsive but controlled
   const handleDragStart = useCallback(() => {
     // Instant haptic feedback when finger touches
@@ -419,11 +438,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
             <div className="flex items-center gap-3">
               {/* Dislike Button */}
               <motion.button
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.85 }}
+                whileHover={{ scale: 1.05 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  triggerHaptic('warning');
-                  onSwipe('left');
+                  handleButtonSwipe('left');
                 }}
                 className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike shadow-lg"
                 title="Dislike"
@@ -465,11 +484,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
 
               {/* Like Button */}
               <motion.button
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.85 }}
+                whileHover={{ scale: 1.05 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  triggerHaptic('success');
-                  onSwipe('right');
+                  handleButtonSwipe('right');
                 }}
                 className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart shadow-lg"
                 title="Like"
