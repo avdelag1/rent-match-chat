@@ -734,6 +734,8 @@ body {
     font-style: italic;
     letter-spacing: 0.02em;
     text-transform: none;
+    /* Fallback color for browsers that don't support gradient text */
+    color: #FF6B6B;
     /* Pink to orange horizontal gradient */
     background: linear-gradient(90deg,
       #FF1493 0%,
@@ -751,6 +753,15 @@ body {
     display: inline-block;
     paint-order: stroke fill;
     filter: drop-shadow(0 6px 25px rgba(255, 107, 107, 0.6));
+  }
+
+  /* Fallback for browsers without background-clip support */
+  @supports not (-webkit-background-clip: text) {
+    .swipess-logo-simple {
+      color: #FF6B6B;
+      -webkit-text-fill-color: #FF6B6B;
+      text-shadow: 0 4px 20px rgba(255, 107, 107, 0.5);
+    }
   }
 
   /* Premium shine sweep animation */
@@ -779,7 +790,7 @@ body {
   .swipess-logo-shine-container {
     position: relative;
     display: inline-block;
-    overflow: hidden;
+    /* Remove overflow hidden to prevent text clipping */
   }
 
   /* Beautiful animated shine overlay */
@@ -803,6 +814,7 @@ body {
     animation: premium-shine-sweep 4s ease-in-out infinite;
     pointer-events: none;
     transform: skewX(-20deg);
+    z-index: 1;
   }
 
   /* TopBar smaller version - Pink to orange gradient */
@@ -812,6 +824,8 @@ body {
     font-style: italic;
     letter-spacing: 0.02em;
     text-transform: none;
+    /* Fallback color */
+    color: #FF6B6B;
     /* Pink to orange horizontal gradient */
     background: linear-gradient(90deg,
       #FF1493 0%,
@@ -838,6 +852,7 @@ body {
     font-style: italic;
     letter-spacing: 0.02em;
     text-transform: none;
+    color: #FF6B6B;
     background: linear-gradient(90deg, #FF1493 0%, #FF6B6B 50%, #FFA726 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -852,6 +867,8 @@ body {
     font-style: italic;
     letter-spacing: 0.02em;
     text-transform: none;
+    /* Fallback color */
+    color: #FF6B6B;
     /* Pink to orange horizontal gradient */
     background: linear-gradient(90deg,
       #FF1493 0%,
