@@ -216,7 +216,7 @@ const OwnerClientTinderCardComponent = ({
         }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl shadow-2xl relative"
         initial={false}
         transition={{
           type: "spring",
@@ -229,7 +229,7 @@ const OwnerClientTinderCardComponent = ({
         <SwipeOverlays x={x} />
 
         {/* Card Content */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
+        <div className="absolute inset-0 w-full h-full overflow-hidden rounded-3xl">
           {/* Main Image with Tap Zones */}
           <div
             className="absolute inset-0 w-full h-full cursor-pointer select-none"
@@ -292,7 +292,7 @@ const OwnerClientTinderCardComponent = ({
           <motion.div
             className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
             animate={{
-              height: isBottomSheetExpanded ? 'min(60%, 350px)' : 'min(18%, 120px)',
+              height: isBottomSheetExpanded ? 'min(55%, 320px)' : 'min(18%, 110px)',
               y: 0
             }}
             transition={{
@@ -300,7 +300,7 @@ const OwnerClientTinderCardComponent = ({
               stiffness: 400,
               damping: 32
             }}
-            style={{ willChange: 'height', maxHeight: 'calc(100% - 60px)' }}
+            style={{ willChange: 'height', maxHeight: 'calc(100% - 80px)' }}
           >
             {/* Drag Handle */}
             <div className="flex justify-center py-2 pointer-events-none">
@@ -399,7 +399,7 @@ const OwnerClientTinderCardComponent = ({
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
                   className="mt-4 overflow-y-auto"
-                  style={{ maxHeight: '150px' }}
+                  style={{ maxHeight: 'min(180px, 30vh)' }}
                 >
                   {/* Interests */}
                   {profile.interests && profile.interests.length > 0 && (

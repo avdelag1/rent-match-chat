@@ -95,7 +95,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-2xl h-[calc(100vh-4rem)] sm:h-auto max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-white/10 text-white" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <DialogHeader className="px-4 sm:px-6 py-4 border-b border-white/10 shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
@@ -107,7 +107,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto">
+        <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
           <div className="px-4 sm:px-6 py-4 space-y-6">
             {/* Profile Photos Section */}
             <div className="space-y-3">

@@ -92,7 +92,7 @@ export function OwnerListingsStats({ listings }: OwnerListingsStatsProps) {
             transition={{ delay: index * 0.1, duration: 0.4 }}
           >
             <Card className={cn(
-              "relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300",
+              "relative border border-white/5 shadow-lg hover:shadow-xl transition-all duration-300",
               "bg-gradient-to-br from-gray-800/90 to-gray-900/90 backdrop-blur-sm"
             )}>
               {/* Background gradient effect */}

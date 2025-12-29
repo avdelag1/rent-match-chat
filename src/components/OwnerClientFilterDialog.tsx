@@ -428,7 +428,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
               backfaceVisibility: 'hidden'
             }}
           >
-            <DialogContent className="bg-white max-w-2xl w-[95vw] max-h-[85vh] sm:h-[90vh] flex flex-col p-0">
+            <DialogContent className="bg-white max-w-2xl w-[calc(100vw-2rem)] sm:w-[95vw] h-[calc(100vh-4rem)] sm:h-[85vh] max-h-[90vh] flex flex-col p-0" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b">
           <DialogTitle className="text-xl sm:text-2xl">Client Discovery Preferences</DialogTitle>
           <p className="text-sm sm:text-base text-muted-foreground">Set your preferences to improve Smart Match recommendations</p>
@@ -439,7 +439,7 @@ export function OwnerClientFilterDialog({ open, onOpenChange }: OwnerClientFilte
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
+        <ScrollArea className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="space-y-6">
           {/* Interest Type Filter */}
           <div className="space-y-3">
