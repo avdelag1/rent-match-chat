@@ -352,6 +352,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           // Prevent layout shifts by ensuring stable dimensions
           boxSizing: 'border-box',
           transform: 'translateZ(0)', // Force GPU layer for stability
+          // Prevent flickering with smooth transitions
+          WebkitOverflowScrolling: 'touch',
+          willChange: 'contents',
         }}
       >
         {enhancedChildren}

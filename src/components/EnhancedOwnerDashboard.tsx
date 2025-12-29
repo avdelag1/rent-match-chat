@@ -37,15 +37,14 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   // Initialize notifications
   useNotifications();
 
-  // Show loading state
+  // Show loading state - Use a simpler loading state to reduce flickering
   if (isLoading) {
     return (
       <DashboardLayout userRole="owner">
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center h-full w-full">
           <div className="text-center">
-            <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-lg font-medium">Loading client profiles...</p>
-            <p className="text-sm text-muted-foreground mt-2">This may take a moment</p>
+            <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Loading profiles...</p>
           </div>
         </div>
       </DashboardLayout>

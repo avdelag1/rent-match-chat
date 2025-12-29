@@ -1,5 +1,6 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { OwnerLocationSelector } from './location/OwnerLocationSelector';
 
 interface PropertyFormData {
   title?: string;
+  description?: string;
   price?: number;
   country?: string;
   state?: string;
@@ -65,6 +67,16 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
             />
           </div>
 
+          <div className="space-y-2">
+            <Label className="text-foreground">Description</Label>
+            <Textarea
+              value={initialData.description || ''}
+              onChange={(e) => handleChange('description', e.target.value)}
+              placeholder="Describe your property in detail - features, neighborhood, nearby amenities..."
+              className="bg-background border-border text-foreground min-h-[100px] resize-none"
+              rows={4}
+            />
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

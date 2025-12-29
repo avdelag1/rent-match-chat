@@ -178,7 +178,10 @@ export function ClientSwipeContainer({
   if (isLoading || isRefetching) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-3 border-primary border-t-transparent"></div>
+          <p className="text-sm text-muted-foreground">Loading profiles...</p>
+        </div>
       </div>
     );
   }
@@ -248,14 +251,14 @@ export function ClientSwipeContainer({
   const currentClient = clientProfiles[currentIndex];
 
   return (
-    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3">
-      {/* Card Container - Full height, no clipping */}
-      <div className="relative flex-1 w-full">
+    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-2">
+      {/* Card Container - Full height with minimal padding */}
+      <div className="relative flex-1 w-full min-h-0">
         <AnimatePresence mode="popLayout">
           {currentClient && (
             <motion.div
               key={currentClient.user_id}
-              initial={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.98, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 500 : swipeDirection === 'left' ? -500 : 0,
