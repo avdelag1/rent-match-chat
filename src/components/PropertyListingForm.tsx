@@ -32,7 +32,11 @@ interface PropertyListingFormProps {
 }
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Villa', 'Condo', 'Studio', 'Loft', 'Penthouse', 'Townhouse'];
-const RENTAL_DURATIONS = ['daily', 'weekly', 'monthly', 'long-term'];
+const RENTAL_DURATIONS = [
+  { value: '3-months', label: '3 Months' },
+  { value: '6-months', label: '6 Months' },
+  { value: '1-year', label: '1 Year' },
+];
 const AMENITIES = ['Pool', 'Gym', 'Parking', 'AC', 'WiFi', 'Security', 'Garden', 'Balcony', 'Elevator', 'Storage'];
 const SERVICES = ['Water', 'Electricity', 'Gas', 'Internet', 'Cleaning', 'Maintenance', 'Trash', 'Cable TV'];
 
@@ -91,15 +95,15 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-foreground">Rental Duration *</Label>
+              <Label className="text-foreground">Minimum Stay *</Label>
               <Select value={initialData.rental_duration_type} onValueChange={(value) => handleChange('rental_duration_type', value)}>
                 <SelectTrigger className="bg-background border-border text-foreground">
-                  <SelectValue placeholder="Select duration" />
+                  <SelectValue placeholder="Select minimum stay" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
                   {RENTAL_DURATIONS.map(duration => (
-                    <SelectItem key={duration} value={duration} className="text-foreground">
-                      {duration.charAt(0).toUpperCase() + duration.slice(1)}
+                    <SelectItem key={duration.value} value={duration.value} className="text-foreground">
+                      {duration.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
