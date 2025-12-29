@@ -363,14 +363,6 @@ export default function PublicListingPreview() {
                 )}
               </div>
 
-              {/* Description Preview */}
-              {listing.description && (
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Description</h3>
-                  <p className="text-gray-300 line-clamp-3">{listing.description}</p>
-                </div>
-              )}
-
               {/* Stats */}
               <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-700/50">
                 <div className="text-center p-2 bg-gray-700/20 rounded-lg">
