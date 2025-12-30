@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
+import { EmbeddedLocationFilter } from './EmbeddedLocationFilter';
 import { SERVICE_CATEGORIES, WORK_TYPES, SCHEDULE_TYPES, DAYS_OF_WEEK, TIME_SLOTS, LOCATION_TYPES, EXPERIENCE_LEVELS, COMMON_SKILLS } from '../WorkerListingForm';
 
 // Predefined hourly rate ranges for workers
@@ -71,6 +72,14 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
   const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
   const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
 
+  // Location filters
+  const [locationCountry, setLocationCountry] = useState<string>(initialFilters.location_country || '');
+  const [locationCity, setLocationCity] = useState<string>(initialFilters.location_city || '');
+  const [locationNeighborhood, setLocationNeighborhood] = useState<string>(initialFilters.location_neighborhood || '');
+  const [locationCountries, setLocationCountries] = useState<string[]>(initialFilters.location_countries || []);
+  const [locationCities, setLocationCities] = useState<string[]>(initialFilters.location_cities || []);
+  const [locationNeighborhoods, setLocationNeighborhoods] = useState<string[]>(initialFilters.location_neighborhoods || []);
+
   const commonLanguages = ['English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian', 'Chinese', 'Japanese', 'Russian', 'Arabic'];
 
   const toggleArrayValue = (array: string[], value: string, setter: (arr: string[]) => void) => {
@@ -110,6 +119,13 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
       has_pets_filter: hasPetsFilter,
       age_min: ageRange[0],
       age_max: ageRange[1],
+      // Location filters
+      location_country: locationCountry,
+      location_city: locationCity,
+      location_neighborhood: locationNeighborhood,
+      location_countries: locationCountries,
+      location_cities: locationCities,
+      location_neighborhoods: locationNeighborhoods,
     };
     onApply(filters);
   };
@@ -442,6 +458,24 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
         setHasPetsFilter={setHasPetsFilter}
         ageRange={ageRange}
         setAgeRange={setAgeRange}
+      />
+
+      {/* Location Search */}
+      <EmbeddedLocationFilter
+        country={locationCountry}
+        setCountry={setLocationCountry}
+        city={locationCity}
+        setCity={setLocationCity}
+        neighborhood={locationNeighborhood}
+        setNeighborhood={setLocationNeighborhood}
+        countries={locationCountries}
+        setCountries={setLocationCountries}
+        cities={locationCities}
+        setCities={setLocationCities}
+        neighborhoods={locationNeighborhoods}
+        setNeighborhoods={setLocationNeighborhoods}
+        multiSelect={true}
+        defaultOpen={false}
       />
 
       {/* Action Buttons */}

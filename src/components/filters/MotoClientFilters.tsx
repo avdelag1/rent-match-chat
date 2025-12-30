@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useSaveClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { toast } from '@/hooks/use-toast';
 import { ClientDemographicFilters } from './ClientDemographicFilters';
+import { EmbeddedLocationFilter } from './EmbeddedLocationFilter';
 
 // Predefined budget ranges for motorcycles (rent)
 const MOTO_RENT_BUDGET_RANGES = [
@@ -77,6 +78,14 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
   const [relationshipStatus, setRelationshipStatus] = useState<string[]>(initialFilters.relationship_status || []);
   const [hasPetsFilter, setHasPetsFilter] = useState<string>(initialFilters.has_pets_filter || 'any');
   const [ageRange, setAgeRange] = useState([initialFilters.age_min || 18, initialFilters.age_max || 65]);
+
+  // Location filters
+  const [locationCountry, setLocationCountry] = useState<string>(initialFilters.location_country || '');
+  const [locationCity, setLocationCity] = useState<string>(initialFilters.location_city || '');
+  const [locationNeighborhood, setLocationNeighborhood] = useState<string>(initialFilters.location_neighborhood || '');
+  const [locationCountries, setLocationCountries] = useState<string[]>(initialFilters.location_countries || []);
+  const [locationCities, setLocationCities] = useState<string[]>(initialFilters.location_cities || []);
+  const [locationNeighborhoods, setLocationNeighborhoods] = useState<string[]>(initialFilters.location_neighborhoods || []);
 
   const motoTypeOptions = ['Sport Bike', 'Cruiser', 'Scooter', 'Off-Road', 'Touring', 'Street'];
   const usagePurposeOptions = ['Commuting', 'Touring', 'Racing', 'Off-Road', 'City Riding'];
@@ -145,7 +154,14 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
       relationship_status: relationshipStatus,
       has_pets_filter: hasPetsFilter,
       age_min: ageRange[0],
-      age_max: ageRange[1]
+      age_max: ageRange[1],
+      // Location filters
+      location_country: locationCountry,
+      location_city: locationCity,
+      location_neighborhood: locationNeighborhood,
+      location_countries: locationCountries,
+      location_cities: locationCities,
+      location_neighborhoods: locationNeighborhoods
     });
   };
 
@@ -174,6 +190,13 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
     setRelationshipStatus([]);
     setHasPetsFilter('any');
     setAgeRange([18, 65]);
+    // Clear location filters
+    setLocationCountry('');
+    setLocationCity('');
+    setLocationNeighborhood('');
+    setLocationCountries([]);
+    setLocationCities([]);
+    setLocationNeighborhoods([]);
     onApply({});
   };
 
@@ -255,6 +278,24 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
         setNationalities={setNationalities}
         languages={languages}
         setLanguages={setLanguages}
+      />
+
+      {/* Location Search */}
+      <EmbeddedLocationFilter
+        country={locationCountry}
+        setCountry={setLocationCountry}
+        city={locationCity}
+        setCity={setLocationCity}
+        neighborhood={locationNeighborhood}
+        setNeighborhood={setLocationNeighborhood}
+        countries={locationCountries}
+        setCountries={setLocationCountries}
+        cities={locationCities}
+        setCities={setLocationCities}
+        neighborhoods={locationNeighborhoods}
+        setNeighborhoods={setLocationNeighborhoods}
+        multiSelect={true}
+        defaultOpen={false}
       />
 
       <Collapsible defaultOpen className="space-y-2">
