@@ -9,6 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, Search, Plus, Home, Bike, Ship, Car } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { MessagingInterface } from '@/components/MessagingInterface';
@@ -26,9 +27,12 @@ export function MessagingDashboard() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isStartingConversation, setIsStartingConversation] = useState(false);
-  const [userRole, setUserRole] = useState<'client' | 'owner'>('client');
   const [directConversationId, setDirectConversationId] = useState<string | null>(null);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+
+  // Use React Query-based hook for role - prevents menu flickering
+  const { data: fetchedRole, isLoading: roleLoading } = useUserRole(user?.id);
+  const userRole = fetchedRole || 'client';
 
   const { data: conversations = [], isLoading, refetch, ensureConversationInCache, fetchSingleConversation } = useConversations();
   // State to store a directly fetched conversation (when not in cache)
@@ -52,34 +56,6 @@ export function MessagingDashboard() {
     }, 500); // 500ms debounce for smoother real-time updates
   }, [refetch]);
 
-  // Get user role
-  useEffect(() => {
-    let isMounted = true;
-
-    const getUserRole = async () => {
-      if (!user?.id) return;
-
-      try {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (isMounted) {
-          setUserRole(roleData?.role || user?.user_metadata?.role || 'client');
-        }
-      } catch (error) {
-        console.error('Error getting user role:', error);
-      }
-    };
-
-    getUserRole();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.id, user?.user_metadata?.role]);
 
   // Mark messages as read when viewing conversation
   useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
@@ -281,6 +257,18 @@ export function MessagingDashboard() {
       handleAutoStartConversation(startConversationUserId);
     }
   }, [searchParams, isStartingConversation, handleDirectOpenConversation, handleAutoStartConversation]);
+
+  // Show loading state while role is being fetched to prevent menu flickering
+  if (roleLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#000000]">
+        <div className="flex flex-col items-center gap-4">
+          <MessageCircle className="w-12 h-12 text-[#007AFF] animate-pulse" />
+          <p className="text-[#8E8E93]">Loading messages...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (selectedConversationId) {
     // If we have a selected conversation ID, show the messaging interface

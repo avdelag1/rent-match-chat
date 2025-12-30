@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import { useStartConversation } from "@/hooks/useConversations";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
@@ -69,8 +70,11 @@ export function LikedClients() {
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const [userRole, setUserRole] = useState<'client' | 'owner'>('owner');
   const [showReportDialog, setShowReportDialog] = useState(false);
+
+  // Use React Query-based hook for role - prevents menu flickering
+  const { data: fetchedRole } = useUserRole(user?.id);
+  const userRole = fetchedRole || 'owner';
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [selectedClientForAction, setSelectedClientForAction] = useState<LikedClient | null>(null);
   const [reportReason, setReportReason] = useState('');
