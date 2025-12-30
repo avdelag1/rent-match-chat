@@ -17,10 +17,10 @@ import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
-// Lazy load non-critical UI components
-const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
-const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
-const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
+// Import UI components directly (not lazy) to avoid useContext issues with ThemeProvider
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 
 // Lazy load pages that are not immediately needed
@@ -113,12 +113,10 @@ const App = () => (
             <RadioPlayerProvider>
             <NotificationWrapper>
               <AppLayout>
-                <Suspense fallback={null}>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Sonner />
-                  </TooltipProvider>
-                </Suspense>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                </TooltipProvider>
                 <Suspense fallback={null}>
                   <Routes>
                     <Route path="/" element={
