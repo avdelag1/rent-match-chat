@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, MapPin, ChevronDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertCircle, MapPin, Search } from 'lucide-react';
 import {
-  WORLD_LOCATIONS,
   getRegions,
   getCountriesInRegion,
   getCitiesInCountry,
   getCityByName,
-  getAllCities,
 } from '@/data/worldLocations';
 
 interface OwnerLocationSelectorProps {
@@ -38,6 +38,9 @@ export function OwnerLocationSelector({
   onCoordinatesChange,
 }: OwnerLocationSelectorProps) {
   const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [countrySearch, setCountrySearch] = useState('');
+  const [citySearch, setCitySearch] = useState('');
+  const [neighborhoodSearch, setNeighborhoodSearch] = useState('');
 
   // Get all unique countries across all regions
   const allCountries = useMemo(() => {
@@ -49,6 +52,12 @@ export function OwnerLocationSelector({
     }
     return Array.from(countries).sort();
   }, []);
+
+  // Filtered countries based on search
+  const filteredCountries = useMemo(() =>
+    allCountries.filter(c => c.toLowerCase().includes(countrySearch.toLowerCase())),
+    [allCountries, countrySearch]
+  );
 
   // Find the region for the current country
   useEffect(() => {
@@ -77,12 +86,27 @@ export function OwnerLocationSelector({
     return cityData?.city.neighborhoods || [];
   }, [city]);
 
+  // Filtered cities based on search
+  const filteredCities = useMemo(() =>
+    availableCities.filter(c => c.name.toLowerCase().includes(citySearch.toLowerCase())),
+    [availableCities, citySearch]
+  );
+
+  // Filtered neighborhoods based on search
+  const filteredNeighborhoods = useMemo(() =>
+    availableNeighborhoods.filter(n => n.toLowerCase().includes(neighborhoodSearch.toLowerCase())),
+    [availableNeighborhoods, neighborhoodSearch]
+  );
+
   // Handle country change
   const handleCountryChange = (newCountry: string) => {
     onCountryChange(newCountry);
+    setCountrySearch('');
     // Clear city and neighborhood when country changes
     onCityChange('');
     onNeighborhoodChange('');
+    setCitySearch('');
+    setNeighborhoodSearch('');
 
     // Find the region for this country
     const regions = getRegions();
@@ -98,8 +122,10 @@ export function OwnerLocationSelector({
   // Handle city change
   const handleCityChange = (newCity: string) => {
     onCityChange(newCity);
+    setCitySearch('');
     // Clear neighborhood when city changes
     onNeighborhoodChange('');
+    setNeighborhoodSearch('');
 
     // Update coordinates if available
     if (newCity && onCoordinatesChange) {
@@ -108,6 +134,12 @@ export function OwnerLocationSelector({
         onCoordinatesChange(cityData.city.coordinates.lat, cityData.city.coordinates.lng);
       }
     }
+  };
+
+  // Handle neighborhood change
+  const handleNeighborhoodChange = (newNeighborhood: string) => {
+    onNeighborhoodChange(newNeighborhood);
+    setNeighborhoodSearch('');
   };
 
   return (
@@ -131,63 +163,127 @@ export function OwnerLocationSelector({
           {/* Country Select */}
           <div className="space-y-2">
             <Label className="text-foreground text-sm">Country *</Label>
-            <div className="relative">
-              <select
-                value={country}
-                onChange={(e) => handleCountryChange(e.target.value)}
-                className="w-full h-10 px-3 pr-10 rounded-md border border-border bg-background text-foreground text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-              >
-                <option value="">Select a country</option>
-                {allCountries.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            </div>
+            <Select value={country} onValueChange={handleCountryChange}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Select a country" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                <div className="p-2 sticky top-0 bg-popover border-b border-border z-10">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search countries..."
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      className="h-8 pl-8 text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                </div>
+                <div className="max-h-48 overflow-y-auto">
+                  {filteredCountries.length > 0 ? (
+                    filteredCountries.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-center text-muted-foreground text-sm">
+                      No countries found
+                    </div>
+                  )}
+                </div>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* City Select */}
           <div className="space-y-2">
             <Label className="text-foreground text-sm">City *</Label>
-            <div className="relative">
-              <select
-                value={city}
-                onChange={(e) => handleCityChange(e.target.value)}
-                disabled={!country}
-                className="w-full h-10 px-3 pr-10 rounded-md border border-border bg-background text-foreground text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">{country ? 'Select a city' : 'Select country first'}</option>
-                {availableCities.map((c) => (
-                  <option key={c.name} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            </div>
+            <Select value={city} onValueChange={handleCityChange} disabled={!country}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder={country ? 'Select a city' : 'Select country first'} />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {availableCities.length > 0 && (
+                  <div className="p-2 sticky top-0 bg-popover border-b border-border z-10">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Search cities..."
+                        value={citySearch}
+                        onChange={(e) => setCitySearch(e.target.value)}
+                        className="h-8 pl-8 text-sm"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="max-h-48 overflow-y-auto">
+                  {filteredCities.length > 0 ? (
+                    filteredCities.map((c) => (
+                      <SelectItem key={c.name} value={c.name}>
+                        {c.name}
+                      </SelectItem>
+                    ))
+                  ) : availableCities.length > 0 ? (
+                    <div className="p-2 text-center text-muted-foreground text-sm">
+                      No cities found
+                    </div>
+                  ) : null}
+                </div>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Neighborhood Select */}
           <div className="space-y-2">
             <Label className="text-foreground text-sm">Neighborhood</Label>
-            <div className="relative">
-              <select
-                value={neighborhood}
-                onChange={(e) => onNeighborhoodChange(e.target.value)}
-                disabled={!city}
-                className="w-full h-10 px-3 pr-10 rounded-md border border-border bg-background text-foreground text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">{city ? 'Select a neighborhood (optional)' : 'Select city first'}</option>
-                {availableNeighborhoods.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            </div>
+            <Select
+              value={neighborhood}
+              onValueChange={handleNeighborhoodChange}
+              disabled={!city || availableNeighborhoods.length === 0}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder={
+                  !city ? 'Select city first' :
+                  availableNeighborhoods.length === 0 ? 'No neighborhoods available' :
+                  'Select a neighborhood (optional)'
+                } />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {availableNeighborhoods.length > 0 && (
+                  <div className="p-2 sticky top-0 bg-popover border-b border-border z-10">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Search neighborhoods..."
+                        value={neighborhoodSearch}
+                        onChange={(e) => setNeighborhoodSearch(e.target.value)}
+                        className="h-8 pl-8 text-sm"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="max-h-48 overflow-y-auto">
+                  {filteredNeighborhoods.length > 0 ? (
+                    filteredNeighborhoods.map((n) => (
+                      <SelectItem key={n} value={n}>
+                        {n}
+                      </SelectItem>
+                    ))
+                  ) : availableNeighborhoods.length > 0 ? (
+                    <div className="p-2 text-center text-muted-foreground text-sm">
+                      No neighborhoods found
+                    </div>
+                  ) : null}
+                </div>
+              </SelectContent>
+            </Select>
             <p className="text-[10px] text-muted-foreground">
               Optional - helps clients find you
             </p>
