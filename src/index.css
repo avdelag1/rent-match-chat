@@ -1136,6 +1136,11 @@ a {
   }
 }
 
+/* Shimmer animation utility */
+.animate-shimmer {
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
 /* ===== IMAGE LAZY LOADING WITH BLUR PLACEHOLDER ===== */
 .lazy-image {
   opacity: 0;
