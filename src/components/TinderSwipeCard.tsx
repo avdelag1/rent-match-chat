@@ -9,6 +9,63 @@ import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
 
+// Progressive image component with blur placeholder
+const ProgressiveImage = memo(({
+  src,
+  alt,
+  isTop,
+  currentImageIndex
+}: {
+  src: string;
+  alt: string;
+  isTop: boolean;
+  currentImageIndex: number;
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <>
+      {/* Blur placeholder - shows while loading */}
+      {!isLoaded && !hasError && (
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-muted/60 via-muted/40 to-muted/60 animate-pulse"
+          style={{
+            backdropFilter: 'blur(20px)',
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"
+               style={{ backgroundSize: '200% 100%' }} />
+        </div>
+      )}
+
+      {/* Actual image */}
+      <img
+        src={hasError ? '/placeholder.svg' : src}
+        alt={alt}
+        className={`absolute inset-0 w-full h-full object-cover rounded-3xl transition-opacity duration-300 ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        draggable={false}
+        loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
+        style={{
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)'
+        }}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => {
+          setHasError(true);
+          setIsLoaded(true);
+        }}
+      />
+    </>
+  );
+});
+
 interface TinderSwipeCardProps {
   listing: Listing | MatchedListing;
   onSwipe: (direction: 'left' | 'right') => void;
@@ -222,24 +279,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
               </div>
             )}
 
-            {/* Image with Gradient Overlay */}
-            <img
+            {/* Image with Gradient Overlay - Progressive Loading */}
+            <ProgressiveImage
               src={images[Math.min(currentImageIndex, imageCount - 1)]}
               alt={listing.title}
-              className="absolute inset-0 w-full h-full object-cover rounded-3xl"
-              draggable={false}
-              loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
-              decoding="async"
-              fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
-              style={{
-                willChange: 'transform',
-                backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden',
-                transform: 'translateZ(0)'
-              }}
-              onError={(e) => {
-                e.currentTarget.src = '/placeholder.svg';
-              }}
+              isTop={isTop}
+              currentImageIndex={currentImageIndex}
             />
 
             {/* Bottom gradient - Lighter for better photo visibility */}

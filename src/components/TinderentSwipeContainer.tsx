@@ -13,10 +13,60 @@ import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw, RefreshCw, Home, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Debounce utility for preventing rapid-fire actions
+function useDebounce<T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number
+): T {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const callbackRef = useRef(callback);
+
+  // Keep callback ref updated
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  return useCallback((...args: Parameters<T>) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      callbackRef.current(...args);
+    }, delay);
+  }, [delay]) as T;
+}
+
+// Navigation guard to prevent double-taps
+function useNavigationGuard() {
+  const isNavigatingRef = useRef(false);
+  const lastNavigationRef = useRef(0);
+
+  const canNavigate = useCallback(() => {
+    const now = Date.now();
+    // Prevent navigation if already navigating or within 300ms cooldown
+    if (isNavigatingRef.current || now - lastNavigationRef.current < 300) {
+      return false;
+    }
+    return true;
+  }, []);
+
+  const startNavigation = useCallback(() => {
+    isNavigatingRef.current = true;
+    lastNavigationRef.current = Date.now();
+  }, []);
+
+  const endNavigation = useCallback(() => {
+    isNavigatingRef.current = false;
+  }, []);
+
+  return { canNavigate, startNavigation, endNavigation };
+}
 
 interface TinderentSwipeContainerProps {
   onListingTap: (listingId: string) => void;
@@ -46,6 +96,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Fetch guards to prevent infinite loops
   const isFetchingMore = useRef(false);
   const lastFetchedPage = useRef(-1);
+
+  // Navigation guard to prevent double-tap issues
+  const { canNavigate, startNavigation, endNavigation } = useNavigationGuard();
 
   // Get listings with filters applied and pagination
   // isRefreshMode = true shows disliked listings within 3-day cooldown, but NEVER liked listings
@@ -83,12 +136,15 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const error = smartError;
   const isRefetching = smartRefetching;
 
-  const refetch = useCallback(() => {
+  // Debounced refetch to prevent rapid-fire calls
+  const refetchCore = useCallback(() => {
     setCurrentIndex(0);
     setPage(0);
     setAllListings([]);
     refetchSmart();
   }, [refetchSmart]);
+
+  const refetch = useDebounce(refetchCore, 300);
   
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
@@ -196,7 +252,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   const handleMessage = async () => {
     const currentListing = listings[currentIndex];
-    
+
+    // Navigation guard - prevent double-tap
+    if (!canNavigate()) {
+      return;
+    }
+
     if (!currentListing?.owner_id || isCreatingConversation) {
       toast({
         title: 'Cannot Start Conversation',
@@ -206,24 +267,29 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
 
     if (needsUpgrade) {
+      startNavigation();
       navigate('/client/settings#subscription');
       toast({
         title: 'Subscription Required',
         description: 'Upgrade to message property owners.',
       });
+      setTimeout(endNavigation, 500);
       return;
     }
 
     if (!hasPremiumMessaging) {
+      startNavigation();
       navigate('/client/settings#subscription');
+      setTimeout(endNavigation, 500);
       return;
     }
 
     setIsCreatingConversation(true);
-    
+    startNavigation();
+
     try {
       toast({
-        title: '⏳ Creating conversation...',
+        title: 'Creating conversation...',
         description: 'Please wait'
       });
 
@@ -234,37 +300,87 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         canStartNewConversation: true,
       });
 
-
       if (result?.conversationId) {
         toast({
-          title: '✅ Conversation created!',
+          title: 'Conversation created!',
           description: 'Opening chat...'
         });
-        
-        // Wait 500ms before navigating to ensure DB is updated
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+
+        // Navigate immediately - the mutation already completed successfully
+        // No need for setTimeout hack since we awaited the mutation
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('[TinderentSwipe] Error starting conversation:', error);
+      if (import.meta.env.DEV) {
+        console.error('[TinderentSwipe] Error starting conversation:', error);
+      }
       toast({
-        title: '❌ Error',
+        title: 'Error',
         description: error instanceof Error ? error.message : 'Could not start conversation',
         variant: 'destructive'
       });
     } finally {
       setIsCreatingConversation(false);
+      endNavigation();
     }
   };
 
   const progress = listings.length > 0 ? ((currentIndex + 1) / listings.length) * 100 : 0;
 
   // Only show loading on initial load, not during background refetch
+  // Use skeleton screen instead of spinner for professional feel
   if (isLoading && listings.length === 0) {
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
+        {/* Skeleton Card - Matches TinderSwipeCard layout */}
+        <div className="relative flex-1 w-full">
+          <div className="absolute inset-0 rounded-3xl overflow-hidden bg-muted/30 animate-pulse">
+            {/* Image skeleton with gradient shimmer */}
+            <div className="absolute inset-0 bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
+                   style={{ animationDuration: '1.5s', backgroundSize: '200% 100%' }} />
+            </div>
+
+            {/* Story dots skeleton */}
+            <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
+              {[1, 2, 3, 4].map((_, index) => (
+                <div key={index} className="flex-1 h-1 rounded-full bg-white/20" />
+              ))}
+            </div>
+
+            {/* Bottom sheet skeleton */}
+            <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-xl rounded-t-[24px] p-4 pt-6">
+              <div className="flex justify-center mb-2">
+                <div className="w-10 h-1.5 bg-white/30 rounded-full" />
+              </div>
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-3/4 bg-white/20" />
+                  <Skeleton className="h-4 w-1/2 bg-white/15" />
+                </div>
+                <div className="text-right space-y-1">
+                  <Skeleton className="h-6 w-20 bg-white/20" />
+                  <Skeleton className="h-3 w-12 bg-white/15 ml-auto" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-4 w-12 bg-white/15" />
+                <Skeleton className="h-4 w-12 bg-white/15" />
+                <Skeleton className="h-4 w-16 bg-white/15" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action buttons skeleton */}
+        <div className="flex-shrink-0 flex justify-center items-center py-3 px-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-14 h-14 rounded-full bg-muted/40" />
+            <Skeleton className="w-11 h-11 rounded-full bg-muted/30" />
+            <Skeleton className="w-11 h-11 rounded-full bg-muted/30" />
+            <Skeleton className="w-14 h-14 rounded-full bg-muted/40" />
+          </div>
+        </div>
       </div>
     );
   }
