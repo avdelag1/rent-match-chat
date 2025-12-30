@@ -321,16 +321,11 @@ export function useSmartListingMatching(
         }
 
         // Build query with filters and subscription data for premium prioritization
+        // Simplified query without broken foreign key join
+        // Premium features will be handled separately if needed
         let query = supabase
           .from('listings')
-          .select(`
-            *,
-            owner:profiles!listings_user_id_fkey(
-              user_subscriptions(
-                subscription_packages(tier, priority_matching, visibility_boost)
-              )
-            )
-          ` as any)
+          .select('*')
           .eq('status', 'active')
           .eq('is_active', true);
 
@@ -415,14 +410,10 @@ export function useSmartListingMatching(
           });
         }
 
-        // Premium only filter - check if owner has premium subscription
+        // Premium only filter - disabled since we removed the join
+        // This can be re-enabled with a separate query if needed
         if (filters?.premiumOnly) {
-          filteredListings = filteredListings.filter(listing => {
-            const ownerData = (listing as any).owner;
-            const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
-            const tier = subscriptionData?.tier || 'free';
-            return tier !== 'free' && tier !== 'basic';
-          });
+          // Skip premium filtering for now - all listings shown
         }
 
         // Filter out already-swiped listings (both likes and dislikes)
@@ -443,32 +434,13 @@ export function useSmartListingMatching(
         const matchedListings: MatchedListing[] = filteredListings.map(listing => {
           const match = calculateListingMatch(preferences, listing as Listing);
 
-          // Extract owner's subscription tier for premium boost
-          const ownerData = (listing as any).owner;
-          const subscriptionData = ownerData?.user_subscriptions?.[0]?.subscription_packages;
-          const tier = subscriptionData?.tier || 'free';
-          const visibilityBoost = subscriptionData?.visibility_boost || 0;
-          const priorityMatching = subscriptionData?.priority_matching || false;
-
-          // Apply premium boost to match percentage
-          let boostedPercentage = match.percentage;
-          if (priorityMatching && visibilityBoost > 0) {
-            // Premium boost: add up to 20 points based on visibility boost (0.25-1.0 -> 5-20 points)
-            const boostPoints = Math.min(20, visibilityBoost * 20);
-            boostedPercentage = Math.min(100, match.percentage + boostPoints);
-
-            if (boostPoints > 0) {
-              match.reasons.push(`Premium listing boost: +${boostPoints}%`);
-            }
-          }
-
           return {
             ...listing as Listing,
-            matchPercentage: boostedPercentage,
+            matchPercentage: match.percentage,
             matchReasons: match.reasons,
             incompatibleReasons: match.incompatible,
-            _premiumTier: tier, // Store for sorting
-            _visibilityBoost: visibilityBoost
+            _premiumTier: 'free', // Default since we removed premium join
+            _visibilityBoost: 0
           };
         });
 
