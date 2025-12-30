@@ -448,7 +448,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     if (!formData.city) {
       toast({
         title: "City Required",
-        description: "Please enter a city for your listing.",
+        description: "Please select a city for your listing.",
         variant: "destructive"
       });
       return;
@@ -456,6 +456,14 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
     // Category-specific validation
     if (selectedCategory === 'property') {
+      if (!formData.country) {
+        toast({
+          title: "Country Required",
+          description: "Please select a country for your listing.",
+          variant: "destructive"
+        });
+        return;
+      }
       if (!formData.property_type) {
         toast({
           title: "Property Type Required",

@@ -77,12 +77,15 @@ export const propertyListingSchema = z.object({
   price: z
     .number({ required_error: 'Price is required', invalid_type_error: 'Price must be a number' })
     .positive('Price must be greater than 0'),
-  location: z
-    .string({ required_error: 'Location is required' })
-    .min(3, 'Location must be at least 3 characters'),
   country: z
     .string({ required_error: 'Country is required' })
     .min(2, 'Please select a country'),
+  city: z
+    .string({ required_error: 'City is required' })
+    .min(2, 'Please select a city'),
+  neighborhood: z
+    .string()
+    .optional(),
   bedrooms: z
     .number({ invalid_type_error: 'Bedrooms must be a number' })
     .int('Bedrooms must be a whole number')
