@@ -12,6 +12,12 @@ export type ClientProfileLite = {
   interests?: string[] | null;
   preferred_activities?: string[] | null;
   profile_images?: string[] | null;
+  // Location fields
+  country?: string | null;
+  city?: string | null;
+  neighborhood?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 // Type for database operations (excluding id)
@@ -126,6 +132,23 @@ export function useSaveClientProfile() {
       // Sync preferred activities
       if (updates.preferred_activities !== undefined) {
         syncPayload.preferred_activities = updates.preferred_activities;
+      }
+
+      // Sync location fields
+      if (updates.country !== undefined) {
+        syncPayload.country = updates.country;
+      }
+      if (updates.city !== undefined) {
+        syncPayload.city = updates.city;
+      }
+      if (updates.neighborhood !== undefined) {
+        syncPayload.neighborhood = updates.neighborhood;
+      }
+      if (updates.latitude !== undefined) {
+        syncPayload.latitude = updates.latitude;
+      }
+      if (updates.longitude !== undefined) {
+        syncPayload.longitude = updates.longitude;
       }
 
       // Only update if we have fields to sync

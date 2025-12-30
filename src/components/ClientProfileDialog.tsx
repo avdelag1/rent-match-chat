@@ -12,7 +12,13 @@ import { useClientProfile, useSaveClientProfile } from '@/hooks/useClientProfile
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
-import { Check } from 'lucide-react';
+import { Check, MapPin, Search } from 'lucide-react';
+import {
+  getRegions,
+  getCountriesInRegion,
+  getCitiesInCountry,
+  getCityByName,
+} from '@/data/worldLocations';
 
 // Predefined tag categories
 const PROPERTY_TAGS = [
@@ -122,6 +128,89 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
   const [personalityTraits, setPersonalityTraits] = useState<string[]>([]);
   const [interestCategories, setInterestCategories] = useState<string[]>([]);
 
+  // Location fields
+  const [country, setCountry] = useState<string>('');
+  const [city, setCity] = useState<string>('');
+  const [neighborhood, setNeighborhood] = useState<string>('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [countrySearch, setCountrySearch] = useState('');
+  const [citySearch, setCitySearch] = useState('');
+
+  // Get all unique countries across all regions
+  const allCountries = (() => {
+    const countries = new Set<string>();
+    const regions = getRegions();
+    for (const region of regions) {
+      const regionCountries = getCountriesInRegion(region);
+      regionCountries.forEach(c => countries.add(c));
+    }
+    return Array.from(countries).sort();
+  })();
+
+  // Filtered countries based on search
+  const filteredCountries = allCountries.filter(c =>
+    c.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  // Get cities for the selected country
+  const availableCities = (() => {
+    if (!country || !selectedRegion) return [];
+    return getCitiesInCountry(selectedRegion, country);
+  })();
+
+  // Filtered cities based on search
+  const filteredCities = availableCities.filter(c =>
+    c.name.toLowerCase().includes(citySearch.toLowerCase())
+  );
+
+  // Get neighborhoods for the selected city
+  const availableNeighborhoods = (() => {
+    if (!city) return [];
+    const cityData = getCityByName(city);
+    return cityData?.city.neighborhoods || [];
+  })();
+
+  // Find region for a country
+  const findRegionForCountry = (countryName: string): string => {
+    const regions = getRegions();
+    for (const region of regions) {
+      const countriesInRegion = getCountriesInRegion(region);
+      if (countriesInRegion.includes(countryName)) {
+        return region;
+      }
+    }
+    return '';
+  };
+
+  // Handle country change
+  const handleCountryChange = (newCountry: string) => {
+    setCountry(newCountry);
+    setCountrySearch('');
+    setCity('');
+    setNeighborhood('');
+    setCitySearch('');
+    setLatitude(null);
+    setLongitude(null);
+
+    const region = findRegionForCountry(newCountry);
+    setSelectedRegion(region);
+  };
+
+  // Handle city change
+  const handleCityChange = (newCity: string) => {
+    setCity(newCity);
+    setCitySearch('');
+    setNeighborhood('');
+
+    const cityData = getCityByName(newCity);
+    if (cityData?.city.coordinates) {
+      setLatitude(cityData.city.coordinates.lat);
+      setLongitude(cityData.city.coordinates.lng);
+    }
+  };
+
   useEffect(() => {
     if (!data) return;
     setName(data.name ?? '');
@@ -148,6 +237,21 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
     setDietaryPreferences((data as any).dietary_preferences ?? []);
     setPersonalityTraits((data as any).personality_traits ?? []);
     setInterestCategories((data as any).interest_categories ?? []);
+
+    // Load location fields
+    const loadedCountry = (data as any).country ?? '';
+    const loadedCity = (data as any).city ?? '';
+    setCountry(loadedCountry);
+    setCity(loadedCity);
+    setNeighborhood((data as any).neighborhood ?? '');
+    setLatitude((data as any).latitude ?? null);
+    setLongitude((data as any).longitude ?? null);
+
+    // Find and set the region for the loaded country
+    if (loadedCountry) {
+      const region = findRegionForCountry(loadedCountry);
+      setSelectedRegion(region);
+    }
   }, [data]);
 
   const handleImageUpload = async (file: File): Promise<string> => {
@@ -209,6 +313,13 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
       dietary_preferences: dietaryPreferences,
       personality_traits: personalityTraits,
       interest_categories: interestCategories,
+
+      // Location fields
+      country: country || null,
+      city: city || null,
+      neighborhood: neighborhood || null,
+      latitude: latitude,
+      longitude: longitude,
     };
 
     try {
@@ -361,6 +472,137 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
                   </Select>
                 </div>
               </div>
+            </div>
+
+            {/* Location Section */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">📍 Your Location</Label>
+              <p className="text-white/60 text-xs sm:text-sm -mt-2">Where are you looking to rent or buy?</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Country Select */}
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Country *</Label>
+                  <Select value={country} onValueChange={handleCountryChange}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400">
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white max-h-72">
+                      <div className="p-2 sticky top-0 bg-slate-800 border-b border-white/10 z-10">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/50" />
+                          <Input
+                            placeholder="Search countries..."
+                            value={countrySearch}
+                            onChange={(e) => setCountrySearch(e.target.value)}
+                            className="h-8 pl-8 text-sm bg-white/5 border-white/20 text-white placeholder:text-white/50"
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredCountries.length > 0 ? (
+                          filteredCountries.map((c) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))
+                        ) : (
+                          <div className="p-2 text-center text-white/50 text-sm">
+                            No countries found
+                          </div>
+                        )}
+                      </div>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* City Select */}
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">City *</Label>
+                  <Select value={city} onValueChange={handleCityChange} disabled={!country}>
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400 disabled:opacity-50">
+                      <SelectValue placeholder={country ? 'Select a city' : 'Select country first'} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white max-h-72">
+                      {availableCities.length > 0 && (
+                        <div className="p-2 sticky top-0 bg-slate-800 border-b border-white/10 z-10">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/50" />
+                            <Input
+                              placeholder="Search cities..."
+                              value={citySearch}
+                              onChange={(e) => setCitySearch(e.target.value)}
+                              className="h-8 pl-8 text-sm bg-white/5 border-white/20 text-white placeholder:text-white/50"
+                              onClick={(e) => e.stopPropagation()}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredCities.length > 0 ? (
+                          filteredCities.map((c) => (
+                            <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                          ))
+                        ) : availableCities.length > 0 ? (
+                          <div className="p-2 text-center text-white/50 text-sm">
+                            No cities found
+                          </div>
+                        ) : (
+                          <div className="p-2 text-center text-white/50 text-sm">
+                            {country ? 'No cities available' : 'Select a country first'}
+                          </div>
+                        )}
+                      </div>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Neighborhood Select */}
+                <div className="space-y-2">
+                  <Label className="text-white/90 text-sm sm:text-base">Neighborhood</Label>
+                  <Select
+                    value={neighborhood}
+                    onValueChange={setNeighborhood}
+                    disabled={!city || availableNeighborhoods.length === 0}
+                  >
+                    <SelectTrigger className="h-12 text-base bg-white/5 border-white/20 text-white focus:border-red-400 disabled:opacity-50">
+                      <SelectValue placeholder={
+                        !city ? 'Select city first' :
+                        availableNeighborhoods.length === 0 ? 'No neighborhoods' :
+                        'Select (optional)'
+                      } />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/20 text-white max-h-60">
+                      {availableNeighborhoods.map((n) => (
+                        <SelectItem key={n} value={n}>{n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Selected Location Display */}
+              {(city || country) && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {country && (
+                    <Badge variant="secondary" className="text-xs py-0.5 bg-white/10 text-white/80">
+                      {country}
+                    </Badge>
+                  )}
+                  {city && (
+                    <Badge className="text-xs py-0.5 bg-gradient-to-r from-red-600 to-red-500 text-white">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {city}
+                    </Badge>
+                  )}
+                  {neighborhood && (
+                    <Badge variant="outline" className="text-xs py-0.5 border-white/20 text-white/80">
+                      {neighborhood}
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Demographics & Background Section */}
