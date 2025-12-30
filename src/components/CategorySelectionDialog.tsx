@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Home, Anchor, Bike, CircleDot, Car, ArrowRight, Sparkles } from "lucide-react";
+import { Home, Anchor, Bike, CircleDot, Car, ArrowRight, Sparkles, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -11,12 +11,12 @@ import { cn } from "@/lib/utils";
 interface CategorySelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCategorySelect?: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle', mode: 'rent' | 'sale' | 'both') => void;
+  onCategorySelect?: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker', mode: 'rent' | 'sale' | 'both') => void;
   navigateToNewPage?: boolean;
 }
 
 interface Category {
-  id: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle';
+  id: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker';
   name: string;
   description: string;
   icon: React.ReactNode;
@@ -67,6 +67,14 @@ const categories: Category[] = [
     gradient: 'from-blue-500/20 via-blue-500/5 to-transparent',
     iconColor: 'text-blue-500 bg-blue-500/10',
   },
+  {
+    id: 'worker',
+    name: 'Jobs & Services',
+    description: 'Chef, cleaner, nanny, handyman, and more',
+    icon: <Briefcase className="w-7 h-7" />,
+    gradient: 'from-amber-500/20 via-amber-500/5 to-transparent',
+    iconColor: 'text-amber-500 bg-amber-500/10',
+  },
 ];
 
 const modes = [
@@ -87,6 +95,23 @@ export function CategorySelectionDialog({
 
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);
+    // Workers/services don't need rent/sale mode - go directly to form
+    if (category.id === 'worker') {
+      if (navigateToNewPage) {
+        navigate(`/owner/listings/new?category=${category.id}&mode=rent`);
+        onOpenChange(false);
+      } else {
+        if (onCategorySelect) {
+          onCategorySelect(category.id, 'rent');
+        }
+        onOpenChange(false);
+      }
+      setTimeout(() => {
+        setSelectedCategory(null);
+        setStep('category');
+      }, 300);
+      return;
+    }
     setStep('mode');
   };
 
