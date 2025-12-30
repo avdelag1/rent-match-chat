@@ -126,6 +126,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
             <Input
               id="city"
               {...register('city', { required: true })}
+              onChange={(e) => onDataChange({ ...formData, city: e.target.value })}
               placeholder="e.g. Tulum, Playa del Carmen"
             />
           </div>
