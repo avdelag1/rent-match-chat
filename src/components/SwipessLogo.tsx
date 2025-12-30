@@ -18,7 +18,7 @@ function SwipessLogoComponent({ size = 'md', className }: SwipessLogoProps) {
   return (
     <span
       className={cn(
-        'swipess-logo font-bold italic select-none',
+        'swipess-logo font-bold italic select-none overflow-visible',
         sizeClasses[size],
         className
       )}
