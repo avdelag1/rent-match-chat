@@ -35,7 +35,7 @@ interface MessagingInterfaceProps {
     address?: string;
     city?: string;
   };
-  currentUserRole?: 'client' | 'owner';
+  currentUserRole?: 'client' | 'owner' | 'admin';
   onBack: () => void;
 }
 

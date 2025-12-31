@@ -34,7 +34,7 @@ interface ChatPreviewSheetProps {
   onClose: () => void;
   otherUser: OtherUser;
   listing?: Listing;
-  currentUserRole: 'client' | 'owner';
+  currentUserRole: 'client' | 'owner' | 'admin';
 }
 
 const getCategoryIcon = (category?: string) => {
@@ -65,7 +65,7 @@ export function ChatPreviewSheet({
   currentUserRole
 }: ChatPreviewSheetProps) {
   const navigate = useNavigate();
-  const isOwner = currentUserRole === 'owner';
+  const isOwner = currentUserRole === 'owner' || currentUserRole === 'admin';
   const isClient = currentUserRole === 'client';
 
   const handleViewFullProfile = () => {

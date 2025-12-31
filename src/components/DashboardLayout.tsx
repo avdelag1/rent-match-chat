@@ -37,7 +37,7 @@ import { useClientProfiles } from "@/hooks/useClientProfiles"
 
 interface DashboardLayoutProps {
   children: ReactNode
-  userRole: 'client' | 'owner'
+  userRole: 'client' | 'owner' | 'admin'
 }
 
 export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {

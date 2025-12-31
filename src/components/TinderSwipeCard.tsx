@@ -458,17 +458,17 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
         </div>
       </motion.div>
 
-      {/* Action Buttons - FIXED at bottom, OUTSIDE the draggable card */}
+      {/* Action Buttons - Floating over card, hide when bottom sheet expanded */}
       <AnimatePresence>
-        {isTop && !hideActions && (
+        {isTop && !hideActions && !isBottomSheetExpanded && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="flex-shrink-0 flex justify-center items-center py-3 px-4"
+            className="absolute bottom-28 left-0 right-0 flex justify-center items-center z-40 pointer-events-none"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 pointer-events-auto">
               {/* Dislike Button */}
               <motion.button
                 whileTap={{ scale: 0.85 }}
@@ -477,7 +477,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                   e.stopPropagation();
                   handleButtonSwipe('left');
                 }}
-                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike shadow-lg"
+                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike"
                 title="Dislike"
               >
                 <X className="w-7 h-7" strokeWidth={3} />
@@ -492,7 +492,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                     triggerHaptic('light');
                     onInsights();
                   }}
-                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights shadow-lg"
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights"
                   title="View Insights"
                 >
                   <Eye className="w-5 h-5" />
@@ -508,7 +508,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                     triggerHaptic('light');
                     onShare();
                   }}
-                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share shadow-lg"
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share"
                   title="Share"
                 >
                   <Share2 className="w-5 h-5" />
@@ -523,7 +523,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                   e.stopPropagation();
                   handleButtonSwipe('right');
                 }}
-                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart shadow-lg"
+                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart"
                 title="Like"
               >
                 <Flame className="w-7 h-7" fill="currentColor" />

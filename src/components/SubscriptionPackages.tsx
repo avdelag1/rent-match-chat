@@ -11,7 +11,7 @@ interface SubscriptionPackagesProps {
   isOpen?: boolean;
   onClose?: () => void;
   reason?: string;
-  userRole?: 'client' | 'owner';
+  userRole?: 'client' | 'owner' | 'admin';
   showAsPage?: boolean;
 }
 
