@@ -30,7 +30,7 @@ interface MessageActivationPackagesProps {
   isOpen?: boolean;
   onClose?: () => void;
   showAsPage?: boolean;
-  userRole?: 'client' | 'owner';
+  userRole?: 'client' | 'owner' | 'admin';
 }
 
 export function MessageActivationPackages({ 

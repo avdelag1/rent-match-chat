@@ -7,7 +7,7 @@ interface MessageQuotaDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onUpgrade: () => void;
-  userRole: 'client' | 'owner';
+  userRole: 'client' | 'owner' | 'admin';
 }
 
 export function MessageQuotaDialog({ isOpen, onClose, onUpgrade, userRole }: MessageQuotaDialogProps) {

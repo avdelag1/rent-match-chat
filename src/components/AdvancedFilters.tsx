@@ -17,7 +17,7 @@ import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
 interface AdvancedFiltersProps {
   isOpen: boolean;
   onClose: () => void;
-  userRole: 'client' | 'owner';
+  userRole: 'client' | 'owner' | 'admin';
   onApplyFilters: (filters: any) => void;
   currentFilters?: any;
 }

@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface SupportDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  userRole: 'client' | 'owner';
+  userRole: 'client' | 'owner' | 'admin';
 }
 
 export function SupportDialog({ isOpen, onClose, userRole }: SupportDialogProps) {

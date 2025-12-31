@@ -6,7 +6,7 @@ import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { springConfigs } from '@/utils/springConfigs';
 
 interface BottomNavigationProps {
-  userRole: 'client' | 'owner';
+  userRole: 'client' | 'owner' | 'admin';
   onFilterClick?: () => void;
   onAddListingClick?: () => void;
   onListingsClick?: () => void;

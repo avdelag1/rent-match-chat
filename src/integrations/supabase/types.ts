@@ -698,7 +698,9 @@ export type Database = {
         Row: {
           age: number | null
           bio: string | null
+          city: string | null
           cleanliness_level: string | null
+          country: string | null
           created_at: string | null
           dietary_preferences: string[] | null
           drinking_habit: string | null
@@ -708,9 +710,12 @@ export type Database = {
           interest_categories: string[] | null
           interests: string[] | null
           languages: string[] | null
+          latitude: number | null
           location: Json | null
+          longitude: number | null
           name: string | null
           nationality: string | null
+          neighborhood: string | null
           noise_tolerance: string | null
           personality_traits: string[] | null
           preferred_activities: string[] | null
@@ -724,7 +729,9 @@ export type Database = {
         Insert: {
           age?: number | null
           bio?: string | null
+          city?: string | null
           cleanliness_level?: string | null
+          country?: string | null
           created_at?: string | null
           dietary_preferences?: string[] | null
           drinking_habit?: string | null
@@ -734,9 +741,12 @@ export type Database = {
           interest_categories?: string[] | null
           interests?: string[] | null
           languages?: string[] | null
+          latitude?: number | null
           location?: Json | null
+          longitude?: number | null
           name?: string | null
           nationality?: string | null
+          neighborhood?: string | null
           noise_tolerance?: string | null
           personality_traits?: string[] | null
           preferred_activities?: string[] | null
@@ -750,7 +760,9 @@ export type Database = {
         Update: {
           age?: number | null
           bio?: string | null
+          city?: string | null
           cleanliness_level?: string | null
+          country?: string | null
           created_at?: string | null
           dietary_preferences?: string[] | null
           drinking_habit?: string | null
@@ -760,9 +772,12 @@ export type Database = {
           interest_categories?: string[] | null
           interests?: string[] | null
           languages?: string[] | null
+          latitude?: number | null
           location?: Json | null
+          longitude?: number | null
           name?: string | null
           nationality?: string | null
+          neighborhood?: string | null
           noise_tolerance?: string | null
           personality_traits?: string[] | null
           preferred_activities?: string[] | null
