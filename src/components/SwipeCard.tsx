@@ -1,10 +1,58 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Bed, Bath, Square, Flame, MessageCircle, Eye, X } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
+
+// Progressive image component with blur placeholder for iOS-like feel
+const ProgressiveImage = memo(({
+  src,
+  alt,
+  className = '',
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="relative w-full h-full">
+      {/* Blur placeholder - shows while loading */}
+      {!isLoaded && !hasError && (
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-muted/60 via-muted/40 to-muted/60"
+          style={{ backdropFilter: 'blur(20px)' }}
+        >
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
+            style={{ backgroundSize: '200% 100%' }}
+          />
+        </div>
+      )}
+
+      {/* Actual image with fade-in */}
+      <img
+        src={hasError ? '/placeholder.svg' : src}
+        alt={alt}
+        className={`${className} transition-opacity duration-200 ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        draggable={false}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setIsLoaded(true)}
+        onError={() => {
+          setHasError(true);
+          setIsLoaded(true);
+        }}
+      />
+    </div>
+  );
+});
 
 interface SwipeCardProps {
   listing: Listing;
@@ -177,13 +225,12 @@ export function SwipeCard({
           />
         )}
         
-        {/* Image */}
+        {/* Image with progressive loading */}
         <div className="relative h-3/5 overflow-hidden rounded-t-3xl">
-          <img
+          <ProgressiveImage
             src={primaryImage}
             alt={listing.title || 'Property'}
-            className="w-full h-full object-cover rounded-3xl"
-            draggable={false}
+            className="w-full h-full object-cover rounded-3xl absolute inset-0"
           />
           
           {/* Text-only Swipe Indicators - LIKE/DISLIKE badges */}
