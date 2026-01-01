@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error('User already registered') };
       }
 
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = 'https://swipess.com/';
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -380,7 +380,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         access_type: 'offline',
       };
 
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = 'https://swipess.com/';
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
