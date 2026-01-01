@@ -19,49 +19,47 @@ export function useOwnerStats() {
     queryFn: async (): Promise<OwnerStats> => {
       if (!user) throw new Error('User not authenticated');
 
-      // Get active properties count
-      const { count: activeProperties } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact', head: true })
-        .eq('owner_id', user.id)
-        .eq('is_active', true);
+      // Run all queries in parallel for faster loading
+      const [
+        propertiesResult,
+        matchesResult,
+        conversationsResult,
+        listingsResult
+      ] = await Promise.all([
+        supabase
+          .from('listings')
+          .select('*', { count: 'exact', head: true })
+          .eq('owner_id', user.id)
+          .eq('is_active', true),
+        supabase
+          .from('matches')
+          .select('*', { count: 'exact', head: true })
+          .eq('owner_id', user.id),
+        supabase
+          .from('conversations')
+          .select('*', { count: 'exact', head: true })
+          .eq('owner_id', user.id)
+          .eq('status', 'active'),
+        supabase
+          .from('listings')
+          .select('view_count, likes')
+          .eq('owner_id', user.id)
+      ]);
 
-      // Get total matches/inquiries
-      const { count: totalMatches } = await supabase
-        .from('matches')
-        .select('*', { count: 'exact', head: true })
-        .eq('owner_id', user.id);
+      const activeProperties = propertiesResult.count || 0;
+      const totalMatches = matchesResult.count || 0;
+      const activeConversations = conversationsResult.count || 0;
+      
+      const totalViews = listingsResult.data?.reduce((sum, listing) => sum + (listing.view_count || 0), 0) || 0;
+      const totalLikes = listingsResult.data?.reduce((sum, listing) => sum + (listing.likes || 0), 0) || 0;
 
-      // Get active conversations
-      const { count: activeConversations } = await supabase
-        .from('conversations')
-        .select('*', { count: 'exact', head: true })
-        .eq('owner_id', user.id)
-        .eq('status', 'active');
-
-      // Get total views from all properties
-      const { data: viewsData } = await supabase
-        .from('listings')
-        .select('view_count')
-        .eq('owner_id', user.id);
-
-      const totalViews = viewsData?.reduce((sum, listing) => sum + (listing.view_count || 0), 0) || 0;
-
-      // Get total likes from all properties
-      const { data: likesData } = await supabase
-        .from('listings')
-        .select('likes')
-        .eq('owner_id', user.id);
-
-      const totalLikes = likesData?.reduce((sum, listing) => sum + (listing.likes || 0), 0) || 0;
-
-      // Calculate response rate (simplified - based on active conversations vs total matches)
-      const responseRate = totalMatches > 0 ? Math.round((activeConversations || 0) * 100 / totalMatches) : 0;
+      // Calculate response rate
+      const responseRate = totalMatches > 0 ? Math.round(activeConversations * 100 / totalMatches) : 0;
 
       return {
-        activeProperties: activeProperties || 0,
-        totalInquiries: totalMatches || 0,
-        activeMatches: activeConversations || 0,
+        activeProperties,
+        totalInquiries: totalMatches,
+        activeMatches: activeConversations,
         totalViews,
         totalLikes,
         responseRate

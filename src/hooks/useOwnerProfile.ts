@@ -16,8 +16,9 @@ export type OwnerProfile = {
 type OwnerProfileUpdate = Omit<OwnerProfile, 'id' | 'user_id'>;
 
 async function fetchOwnProfile() {
-  const { data: auth } = await supabase.auth.getUser();
-  const uid = auth.user?.id;
+  // Use getSession for faster auth check (cached locally)
+  const { data: { session } } = await supabase.auth.getSession();
+  const uid = session?.user?.id;
   if (!uid) return null;
 
   const { data, error } = await supabase

@@ -24,12 +24,9 @@ export type ClientProfileLite = {
 type ClientProfileUpdate = Omit<ClientProfileLite, 'id' | 'user_id'>;
 
 async function fetchOwnProfile() {
-  const { data: auth, error: authError } = await supabase.auth.getUser();
-  if (authError) {
-    console.error('Error fetching authenticated user:', authError);
-    throw authError;
-  }
-  const uid = auth.user?.id;
+  // Use getSession for faster auth check (cached locally)
+  const { data: { session } } = await supabase.auth.getSession();
+  const uid = session?.user?.id;
   if (!uid) return null;
 
   const { data, error } = await supabase
