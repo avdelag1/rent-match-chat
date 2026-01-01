@@ -327,7 +327,8 @@ export function useSmartListingMatching(
           .from('listings')
           .select('*')
           .eq('status', 'active')
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .order('created_at', { ascending: false }); // Newest first
 
         // Apply filter-based query constraints
         if (filters) {
@@ -469,8 +470,8 @@ export function useSmartListingMatching(
             return b.matchPercentage - a.matchPercentage;
           });
 
-        // Randomize the order to prevent users from seeing the same cards in the same order
-        // Group by premium tier and shuffle within each tier to maintain premium advantage
+        // Sort by newest first within each premium tier to show fresh listings first
+        // Group by premium tier and sort by date within each tier
         const tierGroups: Record<string, MatchedListing[]> = {
           unlimited: [],
           premium_plus: [],
@@ -485,13 +486,19 @@ export function useSmartListingMatching(
           tierGroups[tier].push(listing);
         });
 
-        // Shuffle each tier group and concatenate
+        // Sort each tier by created_at (newest first) instead of shuffling
+        const sortByDate = (a: MatchedListing, b: MatchedListing) => {
+          const dateA = new Date(a.created_at || 0).getTime();
+          const dateB = new Date(b.created_at || 0).getTime();
+          return dateB - dateA; // Descending (newest first)
+        };
+
         const randomizedListings = [
-          ...shuffleArray(tierGroups.unlimited),
-          ...shuffleArray(tierGroups.premium_plus),
-          ...shuffleArray(tierGroups.premium),
-          ...shuffleArray(tierGroups.basic),
-          ...shuffleArray(tierGroups.free)
+          ...tierGroups.unlimited.sort(sortByDate),
+          ...tierGroups.premium_plus.sort(sortByDate),
+          ...tierGroups.premium.sort(sortByDate),
+          ...tierGroups.basic.sort(sortByDate),
+          ...tierGroups.free.sort(sortByDate)
         ];
 
         // Fallback: if no matches found but we have listings, show them all with default score

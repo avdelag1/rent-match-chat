@@ -103,7 +103,8 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
           .from('listings')
           .select('*')
           .eq('status', 'active')
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .order('created_at', { ascending: false }); // Newest first
 
         // Filter by listing types (rent/buy) based on user preferences
         if (preferredListingTypes.length > 0 && !preferredListingTypes.includes('both')) {
