@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProfileSetup } from './useProfileSetup';
 import { useAccountLinking } from './useAccountLinking';
 import { useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/utils/prodLogger';
 
 interface AuthContextType {
   user: User | null;
@@ -74,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!isMounted) return;
 
-        console.log('[Auth] State change:', event, session?.user?.email);
+        logger.log('[Auth] State change:', event, session?.user?.email);
 
         // Update state immediately
         setSession(session);
