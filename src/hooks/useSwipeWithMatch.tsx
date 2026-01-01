@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { PG_ERROR_CODES } from '@/utils/retryUtils';
+import { logger } from '@/utils/prodLogger';
 
 interface SwipeWithMatchOptions {
   onMatch?: (clientProfile: any, ownerProfile: any) => void;
@@ -25,7 +26,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       // Defensive auth check
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser?.id || !user?.id) {
-        console.error('Auth check failed:', { currentUser: currentUser?.id, user: user?.id });
+        logger.error('Auth check failed:', { currentUser: currentUser?.id, user: user?.id });
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
@@ -45,7 +46,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         .single();
 
       if (likeError) {
-        console.error('Error saving like:', likeError);
+        logger.error('Error saving like:', likeError);
         throw likeError;
       }
 
@@ -65,7 +66,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             .maybeSingle();
 
           if (!listing) {
-            console.error('Listing not found');
+            logger.error('Listing not found');
             return like;
           }
 
@@ -149,7 +150,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               break;
             }
 
-            console.error(`[useSwipeWithMatch] Match creation attempt ${attempt}/3 failed:`, matchError);
+            logger.error(`[useSwipeWithMatch] Match creation attempt ${attempt}/3 failed:`, matchError);
             
             if (attempt < 3) {
               // Exponential backoff: 300ms, 600ms
@@ -158,7 +159,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           }
 
           if (!matchCreated) {
-            console.error('[useSwipeWithMatch] Failed to create match after 3 attempts');
+            logger.error('[useSwipeWithMatch] Failed to create match after 3 attempts');
             toast.error("Match creation failed. Please try again.");
           } else if (match) {
             // Create conversation explicitly after match is created
@@ -176,7 +177,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               });
 
             if (conversationError) {
-              console.error('[useSwipeWithMatch] Error creating conversation:', conversationError);
+              logger.error('[useSwipeWithMatch] Error creating conversation:', conversationError);
             }
 
             // Get profiles for match celebration with error handling
@@ -203,7 +204,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
                 description: "You both liked each other!"
               });
             } catch (profileError) {
-              console.error('Error fetching profiles for match:', profileError);
+              logger.error('Error fetching profiles for match:', profileError);
               toast.success("🎉 It's a Match!", {
                 description: "You both liked each other!"
               });
@@ -224,7 +225,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       queryClient.invalidateQueries({ queryKey: ['listings'] });
     },
     onError: (error) => {
-      console.error('Swipe error:', error);
+      logger.error('Swipe error:', error);
       toast.error("Something went wrong. Please try again.");
     }
   });
