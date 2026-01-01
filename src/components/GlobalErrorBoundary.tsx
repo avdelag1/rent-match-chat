@@ -1,7 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Copy, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, RefreshCw, Copy, Check, Home } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -58,69 +56,63 @@ Timestamp: ${new Date().toISOString()}
     }
   };
 
+  private handleGoHome = () => {
+    window.location.href = '/';
+  };
+
   public render() {
     if (this.state.hasError) {
       const { error, copied } = this.state;
       
+      // iOS-style minimal error UI with proper spacing
       return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-gray-900/90 border-white/20">
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
-                <AlertTriangle className="w-8 h-8 text-red-400" />
-              </div>
-              <CardTitle className="text-xl text-white">Something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-white/70 text-center">
-                We encountered an unexpected error. Please reload the page to continue.
-              </p>
-              
-              {import.meta.env.DEV && error && (
-                <div className="bg-black/40 border border-white/10 p-3 rounded-lg text-xs font-mono text-red-300 overflow-auto max-h-32">
-                  <strong>Error:</strong> {error.message}
-                  {error.stack && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer hover:text-red-200">Stack trace</summary>
-                      <pre className="mt-2 text-xs whitespace-pre-wrap break-all">{error.stack}</pre>
-                    </details>
-                  )}
-                </div>
-              )}
-              
-              <div className="flex flex-col gap-2">
-                <Button 
-                  onClick={this.handleReload} 
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Reload Page
-                </Button>
-                
-                <Button 
-                  onClick={this.handleCopyDetails} 
-                  variant="outline" 
-                  className="w-full border-white/20 text-white hover:bg-white/10"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-4 h-4 mr-2" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copy Error Details
-                    </>
-                  )}
-                </Button>
-              </div>
-              
-              <p className="text-xs text-white/50 text-center mt-4">
-                If this problem persists, please share the error details with support.
-              </p>
-            </CardContent>
-          </Card>
+        <div className="min-h-screen min-h-dvh bg-background flex flex-col items-center justify-center p-6 safe-area-inset">
+          {/* Icon */}
+          <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mb-6">
+            <AlertTriangle className="w-10 h-10 text-destructive" />
+          </div>
+          
+          {/* Title */}
+          <h1 className="text-xl font-semibold text-foreground mb-2 text-center">
+            Something went wrong
+          </h1>
+          
+          {/* Subtitle */}
+          <p className="text-muted-foreground text-center mb-8 max-w-xs">
+            We encountered an unexpected error. Please try again.
+          </p>
+          
+          {/* Dev error details */}
+          {import.meta.env.DEV && error && (
+            <div className="w-full max-w-sm bg-muted/50 border border-border p-3 rounded-xl text-xs font-mono text-destructive overflow-auto max-h-24 mb-6">
+              {error.message}
+            </div>
+          )}
+          
+          {/* Action buttons - iOS style */}
+          <div className="w-full max-w-xs space-y-3">
+            <button 
+              onClick={this.handleReload}
+              className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium text-base active:scale-[0.98] transition-transform"
+            >
+              Try Again
+            </button>
+            
+            <button 
+              onClick={this.handleGoHome}
+              className="w-full h-12 bg-secondary text-secondary-foreground rounded-xl font-medium text-base active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              Go Home
+            </button>
+            
+            <button 
+              onClick={this.handleCopyDetails}
+              className="w-full h-10 text-muted-foreground text-sm active:opacity-70 transition-opacity"
+            >
+              {copied ? 'Copied!' : 'Copy Error Details'}
+            </button>
+          </div>
         </div>
       );
     }

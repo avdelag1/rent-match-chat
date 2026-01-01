@@ -431,6 +431,7 @@ const App = () => (
               <RadioBubble />
               <RadioOverlays />
               <PWAInstallBanner />
+              <PerformanceMonitor />
             </NotificationWrapper>
             </RadioPlayerProvider>
             </ResponsiveProvider>
@@ -438,7 +439,6 @@ const App = () => (
           </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>
-      <PerformanceMonitor />
     </QueryClientProvider>
   </GlobalErrorBoundary>
 );
