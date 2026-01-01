@@ -40,8 +40,8 @@ export function useCreateShare() {
         throw new Error('Must specify either sharedListingId or sharedProfileId');
       }
 
-      // Generate share URL
-      const baseUrl = window.location.origin;
+      // Generate share URL - always use production domain for sharing
+      const baseUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com';
       let shareUrl = '';
       if (params.sharedListingId) {
         shareUrl = `${baseUrl}/listing/${params.sharedListingId}`;
@@ -89,9 +89,9 @@ export function useIncrementShareClicks() {
   });
 }
 
-// Generate shareable URL
+// Generate shareable URL - always use production domain
 export function generateShareUrl(params: ShareUrlParams): string {
-  const baseUrl = window.location.origin;
+  const baseUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com';
   if (params.listingId) {
     return `${baseUrl}/listing/${params.listingId}`;
   } else if (params.profileId) {

@@ -73,7 +73,7 @@ export function PWAInstallBanner() {
     const shareData = {
       title: 'Swipess',
       text: 'Check out Swipess - Find your perfect match for properties, vehicles & more!',
-      url: window.location.origin,
+      url: import.meta.env.VITE_APP_URL || 'https://swipess.com',
     };
 
     try {
