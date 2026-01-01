@@ -65,31 +65,38 @@ function getRouteDepth(path: string): number {
   return Math.min(path.split('/').filter(Boolean).length, 3);
 }
 
+/**
+ * iOS-style navigation transitions
+ * - Forward: New page slides in from right, current fades out slightly
+ * - Back: Current page slides out to right, previous fades in from left
+ * - Same level: Cross-fade
+ */
 function getTransitionVariant(fromPath: string, toPath: string) {
   const fromDepth = getRouteDepth(fromPath);
   const toDepth = getRouteDepth(toPath);
 
-  // Use opacity-only transitions to prevent page shifting
-  // The x transforms were causing horizontal layout shifts
+  // iOS-style slide amount (subtle to avoid layout shift feel)
+  const slideAmount = 30; // 30px slide - enough to feel directional
+
   if (toDepth > fromDepth) {
-    // Going deeper (forward navigation) - subtle scale fade
+    // Going deeper (forward navigation) - iOS push style
     return {
-      initial: { opacity: 0, scale: 0.98 },
-      animate: { opacity: 1, scale: 1 },
-      exit: { opacity: 0, scale: 1.02 },
+      initial: { opacity: 0, x: slideAmount },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: -slideAmount / 2 },
     };
   }
 
   if (toDepth < fromDepth) {
-    // Going back (backward navigation) - subtle scale fade
+    // Going back (backward navigation) - iOS pop style
     return {
-      initial: { opacity: 0, scale: 1.02 },
-      animate: { opacity: 1, scale: 1 },
-      exit: { opacity: 0, scale: 0.98 },
+      initial: { opacity: 0, x: -slideAmount / 2 },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: slideAmount },
     };
   }
 
-  // Same level navigation - simple fade
+  // Same level navigation - simple cross-fade
   return {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
@@ -152,8 +159,19 @@ export function AppLayout({ children }: AppLayoutProps) {
   // This prevents flash when swipe completes and page transitions
   const combinedOpacity = isTransitioning ? 1 : swipeOpacity;
 
-  // INSTANT page transitions - game-like speed
-  const transitionDuration = responsive.isMobile ? 0.08 : 0.1;
+  // iOS-style spring timing for natural feel
+  const springTransition = {
+    type: "spring" as const,
+    stiffness: 400,
+    damping: 35,
+    mass: 0.8,
+  };
+
+  // Faster timing for quick navigations
+  const fastTransition = {
+    duration: responsive.isMobile ? 0.15 : 0.18,
+    ease: [0.32, 0.72, 0, 1], // iOS-like snappy easing
+  };
 
   return (
     <div className="min-h-screen min-h-dvh w-full bg-background overflow-x-hidden">
@@ -169,17 +187,15 @@ export function AppLayout({ children }: AppLayoutProps) {
             initial={transitionVariant.initial}
             animate={transitionVariant.animate}
             exit={transitionVariant.exit}
-            transition={{
-              duration: transitionDuration,
-              ease: [0.32, 0.72, 0, 1], // iOS-like snappy easing
-            }}
+            transition={fastTransition}
             className="w-full min-h-screen min-h-dvh overflow-x-hidden"
             style={{
-              // Removed x transform to prevent horizontal page shifts
-              // swipeX was causing the page to move left/right unexpectedly
               opacity: combinedOpacity,
-              willChange: 'opacity',
+              willChange: 'opacity, transform',
               transformOrigin: 'center center',
+              // GPU acceleration for smooth slide
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
             }}
             layout={false}
             onAnimationComplete={() => {

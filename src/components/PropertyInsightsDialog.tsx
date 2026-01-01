@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle, TrendingUp, Clock, Shield, Star, CheckCircle, Home, Sparkles, Anchor, Bike, Car, Zap, Fuel, Gauge, Users, Ruler, Settings, AlertCircle, ThumbsUp, Eye, Phone, Mail } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { PropertyImageGallery } from './PropertyImageGallery';
@@ -10,6 +11,65 @@ import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
 import { useState, useMemo } from 'react';
+
+/**
+ * iOS-grade skeleton loader for dialog content
+ * Shows content structure while data loads
+ */
+function PropertyInsightsSkeleton() {
+  return (
+    <div className="space-y-4 py-3 px-4">
+      {/* Title and badge skeleton */}
+      <div className="space-y-2">
+        <Skeleton className="h-6 w-3/4" />
+        <div className="flex gap-2">
+          <Skeleton className="h-5 w-20 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+
+      {/* Description skeleton */}
+      <div className="p-4 bg-muted/30 rounded-xl space-y-2">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+
+      {/* Stats grid skeleton */}
+      <div className="grid grid-cols-2 gap-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="p-3 bg-muted/20 rounded-lg">
+            <Skeleton className="h-4 w-16 mb-2" />
+            <Skeleton className="h-6 w-12" />
+          </div>
+        ))}
+      </div>
+
+      {/* Amenities skeleton */}
+      <div className="space-y-2">
+        <Skeleton className="h-5 w-24" />
+        <div className="flex flex-wrap gap-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-6 w-16 rounded-full" />
+          ))}
+        </div>
+      </div>
+
+      {/* Analytics skeleton */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="p-3 bg-muted/20 rounded-lg text-center">
+            <Skeleton className="h-5 w-5 mx-auto mb-2 rounded-full" />
+            <Skeleton className="h-6 w-12 mx-auto" />
+            <Skeleton className="h-3 w-16 mx-auto mt-1" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // Category icons and labels
 const CATEGORY_CONFIG: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
@@ -112,8 +172,6 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   }
 
-  if (!listing) return null;
-
   const handleMessage = async () => {
     if (!listing.owner_id) {
       toast({
@@ -163,6 +221,12 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
           <DialogTitle className="text-sm sm:text-base">Property Insights</DialogTitle>
         </DialogHeader>
 
+        {/* Show skeleton while listing is loading */}
+        {!listing ? (
+          <ScrollArea className="flex-1 h-full overflow-x-hidden">
+            <PropertyInsightsSkeleton />
+          </ScrollArea>
+        ) : (
         <ScrollArea className="flex-1 h-full overflow-x-hidden">
           <div className="space-y-3 sm:space-y-4 py-3 px-3 sm:px-4 pb-4 sm:pb-6 w-full max-w-full overflow-x-hidden">
             {/* Hot Listing Alert */}
@@ -725,11 +789,12 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
             )}
           </div>
         </ScrollArea>
-        
+        )}
+
         <DialogFooter className="px-6 py-4 border-t shrink-0">
           <Button
             onClick={handleMessage}
-            disabled={isCreatingConversation}
+            disabled={isCreatingConversation || !listing}
             className="w-full"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
@@ -739,7 +804,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
       </DialogContent>
 
       {/* Full Screen Image Gallery */}
-      {listing.images && listing.images.length > 0 && (
+      {listing?.images && listing.images.length > 0 && (
         <PropertyImageGallery
           images={listing.images}
           alt={listing.title}
