@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('[Auth] Session retrieval error:', error);
+          logger.error('[Auth] Session retrieval error:', error);
         }
 
         if (isMounted) {
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
         }
       } catch (error) {
-        console.error('[Auth] Failed to initialize auth:', error);
+        logger.error('[Auth] Failed to initialize auth:', error);
         if (isMounted) {
           setLoading(false);
         }
@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Create profile if missing
           await createProfileIfMissing(user, finalRole);
         } else {
-          console.error('[Auth] OAuth account linking failed');
+          logger.error('[Auth] OAuth account linking failed');
         }
       } else {
         // Try metadata role
@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error) {
-      console.error('[Auth] OAuth setup error:', error);
+      logger.error('[Auth] OAuth setup error:', error);
       toast({
         title: 'Profile Setup Failed',
         description: 'Failed to complete your profile setup. Please try signing in again.',
@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error('User already registered') };
       }
 
-      const redirectUrl = 'https://swipess.com/';
+      const redirectUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com/';
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -217,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('[Auth] Sign up error:', error);
+        logger.error('[Auth] Sign up error:', error);
         throw error;
       }
 
@@ -236,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profileResult = await createProfileIfMissing(data.user, role);
 
         if (!profileResult) {
-          console.error('[Auth] Profile creation failed');
+          logger.error('[Auth] Profile creation failed');
           await supabase.auth.signOut();
           toast({
             title: "Setup Failed",
@@ -287,7 +287,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('[Auth] Sign in error:', error);
+        logger.error('[Auth] Sign in error:', error);
         throw error;
       }
 
@@ -300,7 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (roleError) {
-          console.error('[Auth] Role check error:', roleError);
+          logger.error('[Auth] Role check error:', roleError);
           throw new Error('Failed to verify user role');
         }
 
@@ -334,7 +334,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // No role found
-        console.error('[Auth] No role found for existing user');
+        logger.error('[Auth] No role found for existing user');
         await supabase.auth.signOut();
 
         throw new Error('Account setup incomplete. Please contact support or sign up again.');
@@ -342,7 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null };
     } catch (error: any) {
-      console.error('[Auth] Sign in error:', error);
+      logger.error('[Auth] Sign in error:', error);
       let errorMessage = 'Failed to sign in. Please try again.';
 
       if (error.message === 'Invalid login credentials') {
@@ -380,7 +380,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         access_type: 'offline',
       };
 
-      const redirectUrl = 'https://swipess.com/';
+      const redirectUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com/';
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -392,7 +392,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error(`[Auth] ${provider} OAuth error:`, error);
+        logger.error(`[Auth] ${provider} OAuth error:`, error);
         localStorage.removeItem('pendingOAuthRole');
         throw error;
       }
@@ -451,7 +451,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        console.error('[Auth] Sign out error:', error);
+        logger.error('[Auth] Sign out error:', error);
         toast({
           title: "Sign Out Failed",
           description: error.message,
@@ -472,7 +472,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Navigate to home
       navigate('/', { replace: true });
     } catch (error) {
-      console.error('[Auth] Unexpected sign out error:', error);
+      logger.error('[Auth] Unexpected sign out error:', error);
       toast({
         title: "Sign Out Error",
         description: "An unexpected error occurred during sign out.",
