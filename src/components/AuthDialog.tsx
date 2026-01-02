@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
   Eye, EyeOff, Flame, Mail, Lock, User, ArrowLeft, Loader,
-  Home, Building2, Check, X, Shield, Sparkles
+  Home, Building2, Check, X, Shield, Sparkles, Gift
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +17,7 @@ import { FaGoogle } from 'react-icons/fa';
 import { loginSchema, signupSchema, forgotPasswordSchema } from '@/schemas/auth';
 import { Capacitor } from '@capacitor/core';
 import { SwipessLogo } from './SwipessLogo';
+import { useReferralFromUrl } from '@/hooks/useReferralCode';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -54,7 +56,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
   const { signIn, signUp, signInWithOAuth } = useAuth();
+  const { referralCodeFromUrl, getStoredReferralCode } = useReferralFromUrl();
 
   // Check if running on a native platform (iOS/Android)
   const isNativePlatform = Capacitor.isNativePlatform();
@@ -107,8 +111,18 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       setIsLogin(true);
       setIsForgotPassword(false);
       setShowPassword(false);
+
+      // Check for referral code from URL or storage
+      const storedRef = getStoredReferralCode();
+      const refCode = referralCodeFromUrl || storedRef || '';
+      setReferralCode(refCode);
+
+      // If there's a referral code, default to signup mode
+      if (refCode) {
+        setIsLogin(false);
+      }
     }
-  }, [isOpen, role]);
+  }, [isOpen, role, referralCodeFromUrl, getStoredReferralCode]);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,6 +198,12 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         }
 
         const validated = signupSchema.parse({ name, email, password });
+
+        // Store referral code in sessionStorage to process after signup
+        if (referralCode.trim()) {
+          sessionStorage.setItem('referral_code', referralCode.trim().toUpperCase());
+        }
+
         const { error } = await signUp(validated.email, validated.password, role, validated.name);
         if (!error) {
           localStorage.removeItem(getStorageKey(role, 'email'));
@@ -503,6 +523,46 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                             </a>
                           </span>
                         </label>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Referral Code (Sign Up Only) */}
+                  <AnimatePresence>
+                    {!isLogin && !isForgotPassword && (
+                      <motion.div
+                        className="space-y-2"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <Label htmlFor="referral" className="text-sm font-medium text-white/60">
+                          Referral Code (optional)
+                        </Label>
+                        <div className="relative group">
+                          <Gift className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/30 group-focus-within:text-green-400 transition-colors" />
+                          <Input
+                            id="referral"
+                            type="text"
+                            value={referralCode}
+                            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                            maxLength={12}
+                            className="pl-12 h-14 text-base bg-transparent border-0 border-b border-white/10 rounded-none text-white placeholder:text-white/20 focus:border-green-500/50 focus:ring-0 uppercase tracking-widest font-mono"
+                            placeholder="ABCD1234"
+                          />
+                        </div>
+                        {referralCode && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-2 mt-2"
+                          >
+                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                              <Gift className="w-3 h-3 mr-1" />
+                              Both you and your friend get 1 free message!
+                            </Badge>
+                          </motion.div>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
