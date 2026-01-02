@@ -23,7 +23,6 @@ const routeImports: Record<string, RouteImport> = {
   '/owner/contracts': () => import('@/pages/OwnerContracts'),
   '/messages': () => import('@/pages/MessagingDashboard').then(m => ({ default: m.MessagingDashboard })),
   '/notifications': () => import('@/pages/NotificationsPage'),
-  '/radio': () => import('@/pages/RadioPage'),
   '/subscription-packages': () => import('@/pages/SubscriptionPackagesPage'),
 };
 

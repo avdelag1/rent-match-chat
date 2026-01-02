@@ -1,10 +1,9 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings, Radio, Users, User, Briefcase, ChevronDown, RotateCcw } from 'lucide-react';
+import { Bell, Settings, Users, User, Briefcase, ChevronDown, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
-import { useNavigate } from 'react-router-dom';
 import { SwipessLogo } from './SwipessLogo';
 
 export type OwnerClientGender = 'female' | 'male' | 'any';
@@ -153,7 +152,6 @@ function TopBarComponent({
   onOwnerFiltersChange
 }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
-  const navigate = useNavigate();
 
   const hasActiveFilters = showOwnerFilters && (
     (ownerFilters?.clientGender && ownerFilters.clientGender !== 'any') ||
@@ -269,29 +267,6 @@ function TopBarComponent({
                   </motion.span>
                 )}
               </AnimatePresence>
-            </Button>
-          </motion.div>
-
-          {/* Radio moved before filters */}
-
-          {/* Radio */}
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.17, type: 'spring', stiffness: 500 }}
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                navigate('/radio');
-              }}
-              aria-label="Radio"
-            >
-              <Radio className="h-5 w-5 text-foreground/80" />
             </Button>
           </motion.div>
 

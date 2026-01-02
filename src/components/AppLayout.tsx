@@ -8,7 +8,6 @@ import { useErrorReporting } from '@/hooks/useErrorReporting';
 import { useViewTransitions } from '@/hooks/useViewTransitions';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useResponsiveContext } from '@/contexts/ResponsiveContext';
-import { springConfigs } from '@/utils/springConfigs';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -20,7 +19,6 @@ const routeDepthMap: Record<string, number> = {
   '/client/dashboard': 1,
   '/owner/dashboard': 1,
   '/messages': 2,
-  '/radio': 2,
   '/notifications': 2,
   '/client/profile': 2,
   '/owner/profile': 2,
@@ -66,37 +64,38 @@ function getRouteDepth(path: string): number {
 }
 
 /**
- * iOS-style navigation transitions
- * - Forward: New page slides in from right, current fades out slightly
- * - Back: Current page slides out to right, previous fades in from left
- * - Same level: Cross-fade
+ * Ultra-fast iOS-style navigation transitions
+ * Lightning fast with zero perceptible delay
+ * - Forward: Instant slide from right
+ * - Back: Instant slide to right
+ * - Same level: Instant cross-fade
  */
 function getTransitionVariant(fromPath: string, toPath: string) {
   const fromDepth = getRouteDepth(fromPath);
   const toDepth = getRouteDepth(toPath);
 
-  // iOS-style slide amount (subtle to avoid layout shift feel)
-  const slideAmount = 30; // 30px slide - enough to feel directional
+  // Minimal slide for speed - just enough to convey direction
+  const slideAmount = 20;
 
   if (toDepth > fromDepth) {
-    // Going deeper (forward navigation) - iOS push style
+    // Going deeper (forward navigation) - instant push
     return {
       initial: { opacity: 0, x: slideAmount },
       animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: -slideAmount / 2 },
+      exit: { opacity: 0, x: -slideAmount / 3 },
     };
   }
 
   if (toDepth < fromDepth) {
-    // Going back (backward navigation) - iOS pop style
+    // Going back (backward navigation) - instant pop
     return {
-      initial: { opacity: 0, x: -slideAmount / 2 },
+      initial: { opacity: 0, x: -slideAmount / 3 },
       animate: { opacity: 1, x: 0 },
       exit: { opacity: 0, x: slideAmount },
     };
   }
 
-  // Same level navigation - simple cross-fade
+  // Same level navigation - instant cross-fade
   return {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
@@ -146,10 +145,10 @@ export function AppLayout({ children }: AppLayoutProps) {
     // Update ref immediately for next calculation
     prevLocationRef.current = location.pathname;
 
-    // End transition quickly - match animation duration (120ms mobile, 150ms desktop)
+    // End transition instantly - match ultra-fast animation duration
     // Using RAF ensures smooth frame timing
     const timer = requestAnimationFrame(() => {
-      setTimeout(() => setIsTransitioning(false), responsive.isMobile ? 120 : 150);
+      setTimeout(() => setIsTransitioning(false), responsive.isMobile ? 80 : 100);
     });
 
     return () => cancelAnimationFrame(timer);
@@ -159,18 +158,10 @@ export function AppLayout({ children }: AppLayoutProps) {
   // This prevents flash when swipe completes and page transitions
   const combinedOpacity = isTransitioning ? 1 : swipeOpacity;
 
-  // iOS-style spring timing for natural feel
-  const springTransition = {
-    type: "spring" as const,
-    stiffness: 400,
-    damping: 35,
-    mass: 0.8,
-  };
-
-  // Faster timing for quick navigations
+  // Ultra-fast transition - imperceptible delay
   const fastTransition = {
-    duration: responsive.isMobile ? 0.15 : 0.18,
-    ease: [0.32, 0.72, 0, 1] as const, // iOS-like snappy easing
+    duration: responsive.isMobile ? 0.08 : 0.1,
+    ease: [0.25, 0.8, 0.25, 1] as const, // Ultra-snappy easing
   };
 
   return (

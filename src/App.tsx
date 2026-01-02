@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
-import { RadioPlayerProvider } from "@/hooks/useRadioPlayer";
 import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -20,8 +19,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Lazy load non-critical overlay components to reduce initial bundle size
-const RadioBubble = lazy(() => import("@/components/radio").then(m => ({ default: m.RadioBubble })));
-const RadioOverlays = lazy(() => import("@/components/radio/RadioOverlays").then(m => ({ default: m.RadioOverlays })));
 const PWAInstallBanner = lazy(() => import("@/components/PWAInstallBanner").then(m => ({ default: m.PWAInstallBanner })));
 const PerformanceMonitor = lazy(() => import("@/components/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
 
@@ -72,9 +69,6 @@ const OwnerProfileCamera = lazy(() => import("./pages/OwnerProfileCamera"));
 const PublicProfilePreview = lazy(() => import("./pages/PublicProfilePreview"));
 const PublicListingPreview = lazy(() => import("./pages/PublicListingPreview"));
 
-// Radio page (accessible to both roles)
-const RadioPage = lazy(() => import("./pages/RadioPage"));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -112,7 +106,6 @@ const App = () => (
           <AuthProvider>
           <ThemeProvider>
             <ResponsiveProvider>
-            <RadioPlayerProvider>
             <NotificationWrapper>
               <AppLayout>
                 <TooltipProvider>
@@ -407,16 +400,6 @@ const App = () => (
                       }
                     />
 
-                    {/* Radio Page - Both Roles */}
-                    <Route
-                      path="/radio"
-                      element={
-                        <ProtectedRoute>
-                          <RadioPage />
-                        </ProtectedRoute>
-                      }
-                    />
-
                     {/* Legal Pages - Public Access */}
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="/terms-of-service" element={<TermsOfService />} />
@@ -432,13 +415,10 @@ const App = () => (
               </AppLayout>
               {/* Lazy-loaded overlay components - loaded after initial render */}
               <Suspense fallback={null}>
-                <RadioBubble />
-                <RadioOverlays />
                 <PWAInstallBanner />
                 <PerformanceMonitor />
               </Suspense>
             </NotificationWrapper>
-            </RadioPlayerProvider>
             </ResponsiveProvider>
           </ThemeProvider>
           </AuthProvider>
