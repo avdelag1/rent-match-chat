@@ -227,20 +227,7 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
       });
     }
 
-    // Track AI usage
-    try {
-      const { data: user } = await supabase.auth.getUser();
-      if (user.user) {
-        await supabase.from('ai_generation_usage').insert({
-          user_id: user.user.id,
-          category: selectedCategory,
-          generation_method: 'ai',
-          success: true,
-        });
-      }
-    } catch (e) {
-      // Ignore tracking errors
-    }
+    // AI usage tracking removed - table doesn't exist
 
     setGeneratedData(baseData);
     setIsGenerating(false);

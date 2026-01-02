@@ -35,7 +35,8 @@ function LegendaryLandingPage() {
   const SWIPE_THRESHOLD = 120;
 
   const handleDrag = useCallback((role: 'client' | 'owner', info: { offset: { x: number } }) => {
-    const progress = Math.min(Math.max(info.offset.x / SWIPE_THRESHOLD, 0), 1);
+    // Track absolute progress for fade/scale effect (works both directions)
+    const progress = Math.min(Math.abs(info.offset.x) / SWIPE_THRESHOLD, 1);
     setSwipeProgress(prev => ({ ...prev, [role]: progress }));
     setIsDragging(prev => ({ ...prev, [role]: true }));
   }, []);
@@ -44,17 +45,28 @@ function LegendaryLandingPage() {
     const controls = role === 'client' ? clientControls : ownerControls;
     setIsDragging(prev => ({ ...prev, [role]: false }));
 
-    if (info.offset.x >= SWIPE_THRESHOLD * 0.8 || info.velocity.x > 400) {
-      controls.start({ x: SWIPE_THRESHOLD + 20, transition: { type: "spring", stiffness: 400, damping: 30 } });
+    // Check absolute values for both left and right swipes
+    const absOffset = Math.abs(info.offset.x);
+    const absVelocity = Math.abs(info.velocity.x);
+    const direction = info.offset.x > 0 ? 1 : -1;
+
+    if (absOffset >= SWIPE_THRESHOLD * 0.8 || absVelocity > 400) {
+      // Animate out in swipe direction with scale and opacity
+      controls.start({ 
+        x: (SWIPE_THRESHOLD + 50) * direction, 
+        scale: 0.85,
+        opacity: 0,
+        transition: { type: "spring", stiffness: 400, damping: 30 } 
+      });
       setSwipeProgress(prev => ({ ...prev, [role]: 1 }));
 
       setTimeout(() => {
         setSwipeProgress(prev => ({ ...prev, [role]: 0 }));
-        controls.start({ x: 0, transition: { type: "spring", stiffness: 300, damping: 25 } });
+        controls.start({ x: 0, scale: 1, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 25 } });
         openAuthDialog(role);
       }, 150);
     } else {
-      controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 25 } });
+      controls.start({ x: 0, scale: 1, opacity: 1, transition: { type: "spring", stiffness: 400, damping: 25 } });
       setSwipeProgress(prev => ({ ...prev, [role]: 0 }));
     }
   }, [clientControls, ownerControls]);
@@ -126,18 +138,19 @@ function LegendaryLandingPage() {
             <motion.button
               onClick={() => !isDragging.client && openAuthDialog('client')}
               drag="x"
-              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD + 50 }}
-              dragSnapToOrigin={true}
-              dragElastic={0.2}
+              dragConstraints={{ left: -(SWIPE_THRESHOLD + 50), right: SWIPE_THRESHOLD + 50 }}
+              dragElastic={0.15}
+              animate={clientControls}
               onDrag={(_, info) => handleDrag('client', info)}
               onDragEnd={(_, info) => handleDragEnd('client', info)}
-              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y active:scale-[0.98] transition-transform"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
                 background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1)',
-                boxShadow: '0 4px 20px rgba(6,182,212,0.4)'
+                boxShadow: '0 4px 20px rgba(6,182,212,0.4)',
+                scale: 1 - (swipeProgress.client * 0.1),
+                opacity: 1 - (swipeProgress.client * 0.25),
               }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 10, scale: 1 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <UserCircle className="w-5 h-5" />
@@ -173,18 +186,19 @@ function LegendaryLandingPage() {
             <motion.button
               onClick={() => !isDragging.owner && openAuthDialog('owner')}
               drag="x"
-              dragConstraints={{ left: 0, right: SWIPE_THRESHOLD + 50 }}
-              dragSnapToOrigin={true}
-              dragElastic={0.2}
+              dragConstraints={{ left: -(SWIPE_THRESHOLD + 50), right: SWIPE_THRESHOLD + 50 }}
+              dragElastic={0.15}
+              animate={ownerControls}
               onDrag={(_, info) => handleDrag('owner', info)}
               onDragEnd={(_, info) => handleDragEnd('owner', info)}
-              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y active:scale-[0.98] transition-transform"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
               style={{
                 background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7)',
-                boxShadow: '0 4px 20px rgba(236,72,153,0.4)'
+                boxShadow: '0 4px 20px rgba(236,72,153,0.4)',
+                scale: 1 - (swipeProgress.owner * 0.1),
+                opacity: 1 - (swipeProgress.owner * 0.25),
               }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 10, scale: 1 }}
               transition={{ duration: 0.3, delay: 0.3 }}
             >
               <Key className="w-5 h-5" />
