@@ -139,28 +139,8 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: false, // Disable sourcemaps in production
-    // Use terser for production for smaller bundles (slightly slower build but better compression)
-    minify: mode === 'production' ? 'terser' : false,
-    // Terser options for aggressive minification
-    terserOptions: mode === 'production' ? {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        passes: 2, // Run compression multiple passes for better results
-        pure_getters: true,
-        pure_funcs: ['console.log', 'console.debug'],
-        // REMOVED: unsafe options break React hooks and context
-        // unsafe: true,
-        // unsafe_methods: true,
-      },
-      mangle: {
-        // REMOVED: property mangling breaks React internals starting with _
-        // properties: { regex: /^_/ },
-      },
-      format: {
-        comments: false,
-      },
-    } : undefined,
+    // Use esbuild for minification - safer for React than terser
+    minify: 'esbuild',
     // Inline assets smaller than 8KB to reduce HTTP requests (was 4KB)
     assetsInlineLimit: 8192,
     // Report compressed (gzip) sizes in build output
@@ -292,12 +272,9 @@ export default defineConfig(({ mode }) => ({
           }
         }
       },
-      // Aggressive tree shaking for maximum bundle size reduction
+      // Safe tree shaking - don't break React context
       treeshake: {
-        moduleSideEffects: 'no-external',
-        propertyReadSideEffects: false,
-        tryCatchDeoptimization: false,
-        preset: 'safest', // Keep safest preset to avoid runtime issues
+        preset: 'safest',
       },
     },
     // Warn on chunks larger than 500KB instead of 1000KB for mobile optimization
