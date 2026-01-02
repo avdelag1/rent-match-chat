@@ -12,6 +12,7 @@ import {
   Volume2,
   VolumeX,
   Radio,
+  Disc3,
 } from 'lucide-react';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
@@ -549,30 +550,40 @@ export const RadioBubble: React.FC = () => {
               {/* Overlay gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/60 via-primary/70 to-primary/90" />
 
-              {/* Icon/Animation */}
+              {/* Icon/Animation - Spinning Vinyl */}
               <div className="relative z-10">
                 {isLoading ? (
                   <div className="w-7 h-7 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                ) : isPlaying ? (
-                  <div className="flex items-center gap-[3px]">
-                    {[1, 2, 3, 4].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-[4px] bg-white rounded-full"
-                        animate={{ height: [6, 20, 10, 16, 6] }}
-                        transition={{
-                          duration: 0.8,
-                          repeat: Infinity,
-                          delay: i * 0.12,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    ))}
-                  </div>
                 ) : (
-                  <Headphones className="w-7 h-7 text-white drop-shadow-lg" strokeWidth={2.5} />
+                  <motion.div
+                    animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
+                    transition={
+                      isPlaying
+                        ? { duration: 3, repeat: Infinity, ease: "linear" }
+                        : { duration: 0.5 }
+                    }
+                  >
+                    <Disc3 className="w-6 h-6 text-white drop-shadow-lg" strokeWidth={2} />
+                  </motion.div>
                 )}
               </div>
+
+              {/* Close button - top right corner */}
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  stopPlayback();
+                  setIsBubbleVisible(false);
+                  saveBubbleVisibility(false);
+                }}
+                className="absolute -top-1 -right-1 z-20 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center shadow-lg border border-white/20 transition-colors"
+              >
+                <X className="w-3 h-3 text-white" strokeWidth={3} />
+              </motion.button>
 
               {/* Subtle inner shadow */}
               <div className="absolute inset-0 rounded-2xl shadow-inner pointer-events-none" />
