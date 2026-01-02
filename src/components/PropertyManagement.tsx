@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon, Share2, Wand2 } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon, Share2, Upload } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
@@ -325,20 +325,12 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
-              variant="outline"
-              className="gap-2 border-primary/30 text-primary hover:bg-primary/10 flex-1 sm:flex-initial"
+              className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold shadow-lg shadow-primary/25 flex-1 sm:flex-initial"
               onClick={() => setShowAIAssistant(true)}
             >
-              <Wand2 className="w-4 h-4" />
-              <span className="hidden sm:inline">AI Assistant</span>
-              <span className="sm:hidden">AI</span>
-            </Button>
-            <Button
-              className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold shadow-lg shadow-primary/25 flex-1 sm:flex-initial"
-              onClick={handleAddProperty}
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Listing</span>
+              <Upload className="w-4 h-4" />
+              <span className="hidden sm:inline">Upload Your Listing</span>
+              <span className="sm:hidden">Upload</span>
             </Button>
           </div>
         </motion.div>
@@ -632,10 +624,10 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                       {!searchTerm && (
                         <Button
                           className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                          onClick={handleAddProperty}
+                          onClick={() => setShowAIAssistant(true)}
                         >
-                          <Plus className="w-4 h-4" />
-                          Add Your First Listing
+                          <Upload className="w-4 h-4" />
+                          Upload Your First Listing
                         </Button>
                       )}
                     </CardContent>
