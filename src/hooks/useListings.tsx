@@ -1,5 +1,6 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Listing {
@@ -139,7 +140,9 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
 
 // Hook for owners to view their own listings (no filtering by listing type)
 export function useOwnerListings() {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ['owner-listings'],
     queryFn: async () => {
       try {
@@ -170,6 +173,47 @@ export function useOwnerListings() {
     retry: 3,
     retryDelay: 1000,
   });
+
+  // Set up real-time subscription for listing changes
+  useEffect(() => {
+    let subscription: ReturnType<typeof supabase.channel> | null = null;
+
+    const setupSubscription = async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      // Subscribe to changes on the listings table for this user
+      subscription = supabase
+        .channel('owner-listings-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+            schema: 'public',
+            table: 'listings',
+            filter: `owner_id=eq.${user.user.id}`,
+          },
+          (payload) => {
+            console.log('Real-time listing change:', payload);
+
+            // Invalidate and refetch the listings query
+            queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
+          }
+        )
+        .subscribe();
+    };
+
+    setupSubscription();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  }, [queryClient]);
+
+  return query;
 }
 
 export function useSwipedListings() {

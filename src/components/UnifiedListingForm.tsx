@@ -63,13 +63,18 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         lng: editingProperty.longitude
       });
     } else if (editingProperty?.category) {
-      // New listing with pre-selected category from CategoryDialog
+      // New listing with pre-selected category (from CategoryDialog or AI Assistant)
       setEditingId(null);
       setSelectedCategory(editingProperty.category);
       setSelectedMode(editingProperty.mode || 'rent');
-      setImages([]);
-      setFormData({ mode: editingProperty.mode || 'rent' }); // Include mode in formData!
-      setLocation({});
+      // Load images from AI assistant if present
+      setImages(editingProperty.images || []);
+      // Load all form data from AI assistant or just mode
+      setFormData(editingProperty.images ? editingProperty : { mode: editingProperty.mode || 'rent' });
+      setLocation({
+        lat: editingProperty.latitude,
+        lng: editingProperty.longitude
+      });
     } else {
       // Completely new listing - reset everything
       setEditingId(null);

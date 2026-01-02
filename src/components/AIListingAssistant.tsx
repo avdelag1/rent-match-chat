@@ -270,7 +270,7 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-2xl h-[90vh] sm:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
         <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
@@ -319,8 +319,8 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="p-6">
+        <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
+          <div className="p-6 pb-8">
             <AnimatePresence mode="wait">
               {/* Step 1: Category Selection */}
               {step === 'category' && (

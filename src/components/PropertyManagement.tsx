@@ -148,7 +148,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const handleDeleteProperty = async (listing: any) => {
     try {
       // Optimistically update the UI by removing the property immediately
-      queryClient.setQueryData(['listings'], (oldData: any[]) => {
+      queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
         if (!oldData) return oldData;
         return oldData.filter(item => item.id !== listing.id);
       });
@@ -174,12 +174,14 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
       });
 
       // Invalidate and refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
 
     } catch (error: any) {
       console.error('Error deleting property:', error);
 
       // Revert the optimistic update if deletion failed
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
 
       toast({
@@ -193,7 +195,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const handleToggleAvailability = async (listing: any, newStatus: string) => {
     try {
       // Optimistically update the UI
-      queryClient.setQueryData(['listings'], (oldData: any[]) => {
+      queryClient.setQueryData(['owner-listings'], (oldData: any[]) => {
         if (!oldData) return oldData;
         return oldData.map(item =>
           item.id === listing.id
@@ -230,12 +232,14 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
       });
 
       // Invalidate and refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
 
     } catch (error: any) {
       console.error('Error updating availability:', error);
 
       // Revert the optimistic update if update failed
+      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
 
       toast({
