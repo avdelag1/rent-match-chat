@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Radio,
+  Headphones,
   Play,
   Pause,
   SkipForward,
@@ -11,10 +11,12 @@ import {
   ChevronUp,
   Volume2,
   VolumeX,
+  Radio,
 } from 'lucide-react';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { cn } from '@/lib/utils';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '@/hooks/useTheme';
 
 const BUBBLE_SIZE = 64;
 const MARGIN = 16;
@@ -502,34 +504,86 @@ export const RadioBubble: React.FC = () => {
                       <Shuffle className="w-5 h-5 text-primary" /><span className="text-sm font-medium">Shuffle Play</span>
                     </button>
                     <button onClick={(e) => handleGoToRadio(e)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors">
-                      <Radio className="w-5 h-5" /><span className="text-sm font-medium">Open Radio</span>
+                      <Headphones className="w-5 h-5" /><span className="text-sm font-medium">Open Radio</span>
                     </button>
                   </div>
                 </div>
               </motion.div>
             )
           ) : (
-            // Collapsed Bubble View
+            // Collapsed Bubble View - Modern Glassmorphism Design
             <motion.div
               key="collapsed"
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              className={cn("relative w-16 h-16 rounded-full flex items-center justify-center", "bg-black/50 backdrop-blur-xl", "border-2 border-white/30", "shadow-xl shadow-black/30", "select-none")}
+              className={cn(
+                "relative w-16 h-16 rounded-2xl flex items-center justify-center",
+                "bg-gradient-to-br from-primary/90 via-primary to-primary/80",
+                "backdrop-blur-2xl",
+                "border border-white/20",
+                "shadow-2xl shadow-primary/40",
+                "select-none",
+                "overflow-hidden"
+              )}
             >
-              {currentStation && <div className="absolute inset-2 rounded-full bg-cover bg-center opacity-70" style={{ backgroundImage: `url(${currentStation.artwork})` }} />}
-              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/20 to-black/30" />
+              {/* Animated background glow */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-white/10"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
+
+              {/* Album art background when playing */}
+              {currentStation && (
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-40"
+                  style={{ backgroundImage: `url(${currentStation.artwork})` }}
+                />
+              )}
+
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/60 via-primary/70 to-primary/90" />
+
+              {/* Icon/Animation */}
               <div className="relative z-10">
                 {isLoading ? (
-                  <div className="w-6 h-6 border-2 border-white/90 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-7 h-7 border-3 border-white border-t-transparent rounded-full animate-spin" />
                 ) : isPlaying ? (
-                  <div className="flex items-center gap-0.5">{[1, 2, 3].map((i) => (<motion.div key={i} className="w-1.5 bg-white/95 rounded-full" animate={{ height: [8, 18, 8] }} transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }} />))}</div>
+                  <div className="flex items-center gap-[3px]">
+                    {[1, 2, 3, 4].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-[4px] bg-white rounded-full"
+                        animate={{ height: [6, 20, 10, 16, 6] }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          delay: i * 0.12,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    ))}
+                  </div>
                 ) : (
-                  <Radio className="w-6 h-6 text-white/95" />
+                  <Headphones className="w-7 h-7 text-white drop-shadow-lg" strokeWidth={2.5} />
                 )}
               </div>
-              {currentStation?.isLive && isPlaying && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white/50 animate-pulse" />}
+
+              {/* Subtle inner shadow */}
+              <div className="absolute inset-0 rounded-2xl shadow-inner pointer-events-none" />
+
+              {/* Live indicator */}
+              {currentStation?.isLive && isPlaying && (
+                <motion.span
+                  className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-white rounded-full border-2 border-primary flex items-center justify-center"
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full" />
+                </motion.span>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

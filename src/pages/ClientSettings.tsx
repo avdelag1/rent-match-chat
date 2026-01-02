@@ -3,9 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientProfileSettings } from "@/components/ClientProfileSettings";
 import { ClientProfilePreview } from "@/components/ClientProfilePreview";
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
+import { ThemeSelector } from "@/components/ThemeSelector";
+import { FilterColorPreferences } from "@/components/FilterColorPreferences";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Flame, Home, Bike, Ship, Eye } from "lucide-react";
+import { Flame, Home, Bike, Ship, Eye, Palette } from "lucide-react";
 import { Car } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -18,7 +20,7 @@ const ClientSettings = () => {
   // Support deep-linking to specific tabs via URL parameter
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["profile", "preferences"].includes(tab)) {
+    if (tab && ["profile", "preferences", "appearance"].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -36,9 +38,13 @@ const ClientSettings = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               {/* Horizontally scrollable tabs on mobile */}
               <div className="relative -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto scrollbar-hide">
-                <TabsList className="w-max sm:w-full flex sm:grid sm:grid-cols-2 gap-1 p-1 bg-card/80 backdrop-blur-sm rounded-xl border border-border">
+                <TabsList className="w-max sm:w-full flex sm:grid sm:grid-cols-3 gap-1 p-1 bg-card/80 backdrop-blur-sm rounded-xl border border-border">
                   <TabsTrigger value="profile" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg font-medium transition-all whitespace-nowrap px-3 sm:px-4">Profile</TabsTrigger>
                   <TabsTrigger value="preferences" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg font-medium transition-all whitespace-nowrap px-3 sm:px-4">Preferences</TabsTrigger>
+                  <TabsTrigger value="appearance" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg font-medium transition-all whitespace-nowrap px-3 sm:px-4">
+                    <Palette className="w-3.5 h-3.5 mr-1.5" />
+                    Appearance
+                  </TabsTrigger>
                 </TabsList>
               </div>
 
@@ -116,6 +122,16 @@ const ClientSettings = () => {
                       Set My Preferences
                     </Button>
                   </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="appearance" className="mt-4 sm:mt-6">
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Theme Selector */}
+                  <ThemeSelector />
+
+                  {/* Filter Color Preferences */}
+                  <FilterColorPreferences />
                 </div>
               </TabsContent>
 
