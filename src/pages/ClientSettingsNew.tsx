@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, Bookmark, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, Bookmark, ChevronRight, Gift } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
@@ -10,6 +10,8 @@ import { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { SwipeNavigationWrapper } from "@/components/SwipeNavigationWrapper";
 import { clientSettingsRoutes } from "@/config/swipeNavigationRoutes";
+import { ReferralCodeCard } from "@/components/ReferralCodeCard";
+import { ReferralShareDialog } from "@/components/ReferralShareDialog";
 
 const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
@@ -17,6 +19,7 @@ const ClientSettingsNew = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [showReferralDialog, setShowReferralDialog] = useState(false);
 
   // Handle hash fragment navigation (e.g., #subscription)
   useEffect(() => {
@@ -28,24 +31,31 @@ const ClientSettingsNew = () => {
 
   const settingsItems = [
     {
+      icon: Gift,
+      label: 'Invite Friends',
+      description: 'Share your referral code and earn free messages',
+      color: 'text-green-500',
+      section: 'referral'
+    },
+    {
       icon: Shield,
       label: 'Security',
       description: 'Password, 2FA, and account security',
-      color: 'text-green-500',
+      color: 'text-blue-500',
       section: 'security'
     },
     {
       icon: Bell,
       label: 'Notifications',
       description: 'Manage notification preferences',
-      color: 'text-blue-500',
+      color: 'text-purple-500',
       action: () => navigate('/notifications')
     },
     {
       icon: Bookmark,
       label: 'Saved Searches',
       description: 'View your saved property searches',
-      color: 'text-purple-500',
+      color: 'text-indigo-500',
       action: () => navigate('/client/saved-searches')
     },
     {
@@ -77,6 +87,45 @@ const ClientSettingsNew = () => {
       action: () => alert('Support - Coming soon')
     },
   ];
+
+  if (activeSection === 'referral') {
+    return (
+      <DashboardLayout userRole="client">
+        <SwipeNavigationWrapper routes={clientSettingsRoutes}>
+          <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
+            <div className="max-w-3xl mx-auto">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveSection(null)}
+                className="mb-4 text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Settings
+              </Button>
+
+              <PageHeader
+                title="Invite Friends"
+                subtitle="Share your referral code and earn free messages"
+              />
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={fastSpring}
+              >
+                <ReferralCodeCard onShareClick={() => setShowReferralDialog(true)} />
+              </motion.div>
+            </div>
+          </div>
+        </SwipeNavigationWrapper>
+        <ReferralShareDialog
+          isOpen={showReferralDialog}
+          onClose={() => setShowReferralDialog(false)}
+        />
+      </DashboardLayout>
+    );
+  }
 
   if (activeSection === 'security') {
     return (
