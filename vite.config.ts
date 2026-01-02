@@ -149,13 +149,13 @@ export default defineConfig(({ mode }) => ({
         passes: 2, // Run compression multiple passes for better results
         pure_getters: true,
         pure_funcs: ['console.log', 'console.debug'],
-        unsafe: true,
-        unsafe_methods: true,
+        // REMOVED: unsafe options break React hooks and context
+        // unsafe: true,
+        // unsafe_methods: true,
       },
       mangle: {
-        properties: {
-          regex: /^_/,
-        },
+        // REMOVED: property mangling breaks React internals starting with _
+        // properties: { regex: /^_/ },
       },
       format: {
         comments: false,
