@@ -54,7 +54,7 @@ function preloadPlugin(): import('vite').Plugin {
     transformIndexHtml(html, ctx) {
       if (!ctx.bundle) return html;
 
-      // Find critical chunks to preload
+      // Find critical chunks to preload - only the most essential
       const criticalChunks = ['react-vendor', 'react-router'];
       const preloadLinks: string[] = [];
 
@@ -62,12 +62,36 @@ function preloadPlugin(): import('vite').Plugin {
         if (chunk.type === 'chunk') {
           const isCritical = criticalChunks.some(name => fileName.includes(name));
           if (isCritical) {
-            preloadLinks.push(`<link rel="modulepreload" href="/${fileName}">`);
+            preloadLinks.push(`<link rel="modulepreload" href="/${fileName}" fetchpriority="high">`);
           }
         }
       }
 
+      // Add CSS preload for critical stylesheet
+      for (const [fileName] of Object.entries(ctx.bundle)) {
+        if (fileName.endsWith('.css') && fileName.includes('index')) {
+          preloadLinks.push(`<link rel="preload" href="/${fileName}" as="style" fetchpriority="high">`);
+        }
+      }
+
       return html.replace('</head>', `${preloadLinks.join('\n')}\n</head>`);
+    }
+  };
+}
+
+// Resource hints plugin - adds fetchpriority and loading hints
+function resourceHintsPlugin(): import('vite').Plugin {
+  return {
+    name: 'resource-hints-plugin',
+    enforce: 'post',
+    transformIndexHtml(html) {
+      // Add fetchpriority to critical resources
+      return html
+        // Mark main script as high priority
+        .replace(
+          /<script type="module" src="\/src\/main\.tsx">/,
+          '<script type="module" src="/src/main.tsx" fetchpriority="high">'
+        );
     }
   };
 }
@@ -83,6 +107,7 @@ export default defineConfig(({ mode }) => ({
     buildVersionPlugin(),
     cssOptimizationPlugin(),
     preloadPlugin(),
+    resourceHintsPlugin(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
@@ -168,6 +193,14 @@ export default defineConfig(({ mode }) => ({
           // Scheduler (React dependency) - keep with react
           if (id.includes('node_modules/scheduler')) {
             return 'react-vendor';
+          }
+          // clsx and tailwind-merge - utility libs used everywhere, keep small
+          if (id.includes('node_modules/clsx') || id.includes('node_modules/tailwind-merge')) {
+            return 'utils';
+          }
+          // class-variance-authority - UI styling utility
+          if (id.includes('node_modules/class-variance-authority')) {
+            return 'utils';
           }
 
           // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

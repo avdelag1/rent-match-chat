@@ -9,12 +9,20 @@ const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
 const IMAGE_CACHE = `${CACHE_NAME}-images`;
 
-// Critical assets to precache immediately
+// Critical assets to precache immediately for offline-first experience
 const urlsToCache = [
   '/',
   '/manifest.json',
   '/index.html'
 ];
+
+// Cache TTL settings (in seconds)
+const CACHE_TTL = {
+  immutable: 31536000, // 1 year - for hashed assets
+  static: 2592000,     // 30 days - for static assets
+  dynamic: 604800,     // 7 days - for dynamic content
+  api: 300,            // 5 minutes - for API responses
+};
 
 // Maximum cache sizes (number of items)
 const MAX_DYNAMIC_CACHE_SIZE = 100;
@@ -98,19 +106,22 @@ self.addEventListener('fetch', (event) => {
               // Add cache control headers for optimal caching
               const newHeaders = new Headers(responseClone.headers);
 
-              // Different cache durations based on asset type
-              if (request.url.includes('/assets/')) {
-                // Hashed assets can be cached indefinitely (1 year)
-                newHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+              // Different cache durations based on asset type - optimized for repeat visits
+              if (request.url.includes('/assets/') && request.url.match(/-[a-f0-9]{8}\./)) {
+                // Hashed assets can be cached indefinitely (1 year) - immutable
+                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.immutable}, immutable`);
               } else if (request.destination === 'style' || request.destination === 'script') {
-                // Unhashed CSS/JS: cache for 30 days
-                newHeaders.set('Cache-Control', 'public, max-age=2592000');
+                // CSS/JS: cache for 30 days with stale-while-revalidate
+                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.static}, stale-while-revalidate=86400`);
               } else if (request.destination === 'image') {
-                // Images: cache for 30 days
-                newHeaders.set('Cache-Control', 'public, max-age=2592000');
+                // Images: cache for 30 days with stale-while-revalidate
+                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.static}, stale-while-revalidate=86400`);
+              } else if (request.destination === 'font') {
+                // Fonts: cache for 1 year (they rarely change)
+                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.immutable}, immutable`);
               } else {
-                // Other assets: cache for 7 days
-                newHeaders.set('Cache-Control', 'public, max-age=604800');
+                // Other assets: cache for 7 days with stale-while-revalidate
+                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.dynamic}, stale-while-revalidate=86400`);
               }
 
               const newResponse = new Response(responseClone.body, {

@@ -5,9 +5,6 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { RadioPlayerProvider } from "@/hooks/useRadioPlayer";
 import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
-import { RadioBubble } from "@/components/radio";
-import { RadioOverlays } from "@/components/radio/RadioOverlays";
-import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
@@ -21,7 +18,12 @@ import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { PerformanceMonitor } from "@/components/PerformanceMonitor";
+
+// Lazy load non-critical overlay components to reduce initial bundle size
+const RadioBubble = lazy(() => import("@/components/radio").then(m => ({ default: m.RadioBubble })));
+const RadioOverlays = lazy(() => import("@/components/radio/RadioOverlays").then(m => ({ default: m.RadioOverlays })));
+const PWAInstallBanner = lazy(() => import("@/components/PWAInstallBanner").then(m => ({ default: m.PWAInstallBanner })));
+const PerformanceMonitor = lazy(() => import("@/components/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
 
 // Lazy load pages that are not immediately needed
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -428,10 +430,13 @@ const App = () => (
                   </Routes>
                 </Suspense>
               </AppLayout>
-              <RadioBubble />
-              <RadioOverlays />
-              <PWAInstallBanner />
-              <PerformanceMonitor />
+              {/* Lazy-loaded overlay components - loaded after initial render */}
+              <Suspense fallback={null}>
+                <RadioBubble />
+                <RadioOverlays />
+                <PWAInstallBanner />
+                <PerformanceMonitor />
+              </Suspense>
             </NotificationWrapper>
             </RadioPlayerProvider>
             </ResponsiveProvider>

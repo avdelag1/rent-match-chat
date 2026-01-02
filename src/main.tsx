@@ -8,6 +8,15 @@ import { ErrorBoundaryWrapper } from './components/ErrorBoundaryWrapper'
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PERFORMANCE: Render React app immediately - fastest possible FCP
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Remove initial loader immediately when React starts rendering
+const initialLoader = document.getElementById('initial-loader');
+if (initialLoader) {
+  initialLoader.style.opacity = '0';
+  initialLoader.style.transition = 'opacity 150ms ease-out';
+  setTimeout(() => initialLoader.remove(), 150);
+}
+
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <StrictMode>
