@@ -170,7 +170,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Faster timing for quick navigations
   const fastTransition = {
     duration: responsive.isMobile ? 0.15 : 0.18,
-    ease: [0.32, 0.72, 0, 1], // iOS-like snappy easing
+    ease: [0.32, 0.72, 0, 1] as const, // iOS-like snappy easing
   };
 
   return (
