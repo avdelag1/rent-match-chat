@@ -1,16 +1,11 @@
-import { useTheme } from "@/hooks/useTheme"
 import { Toaster as Sonner, toast } from "sonner"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
-// Map custom matte themes to Sonner's theme values
-const getToasterTheme = (theme: string): "light" | "dark" => {
-  return theme === "white-matte" ? "light" : "dark"
-}
-
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme } = useTheme()
-  const toasterTheme = getToasterTheme(theme)
+  // Use system preference instead of context to avoid circular dependency issues
+  // during initial render (ThemeProvider depends on AuthProvider)
+  const toasterTheme = "dark" as const
 
   return (
     <Sonner
