@@ -4,8 +4,6 @@ import { Toaster as Sonner, toast } from "sonner";
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  // Use system preference instead of context to avoid circular dependency issues
-  // during initial render (ThemeProvider depends on AuthProvider)
   const toasterTheme = "dark" as const;
 
   return (
