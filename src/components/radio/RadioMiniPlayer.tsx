@@ -56,9 +56,10 @@ const getSavedPosition = (): { left: number; top: number } => {
     // Ignore errors
   }
 
-  // Default: bottom left, above bottom nav, accounting for safe areas
+  // Default: centered horizontally, near bottom above nav, accounting for safe areas
+  const centerLeft = (window.innerWidth - PLAYER_WIDTH) / 2;
   return {
-    left: safeArea.left + MARGIN,
+    left: Math.max(safeArea.left + MARGIN, centerLeft),
     top: window.innerHeight - safeArea.bottom - PLAYER_HEIGHT - 140,
   };
 };
@@ -85,7 +86,8 @@ export const RadioMiniPlayer: React.FC = () => {
     isPlaying,
     isLoading,
     togglePlayPause,
-    expandPlayer
+    expandPlayer,
+    stopPlayback
   } = useRadioPlayer();
 
   // Handle viewport resize
@@ -297,6 +299,19 @@ export const RadioMiniPlayer: React.FC = () => {
                 className="w-9 h-9"
               >
                 <ChevronUp className="w-5 h-5" />
+              </Button>
+
+              {/* Close */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  stopPlayback();
+                }}
+                className="w-9 h-9"
+              >
+                <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
