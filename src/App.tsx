@@ -5,8 +5,6 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
 import { useNotifications } from "@/hooks/useNotifications";
-import { useReferralProcessor } from "@/hooks/useReferralProcessor";
-import { useNativePushNotifications } from "@/hooks/useNativePushNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -92,8 +90,6 @@ const queryClient = new QueryClient({
 
 function NotificationWrapper({ children }: { children: React.ReactNode }) {
   useNotifications();
-  useReferralProcessor(); // Process referral codes after signup
-  useNativePushNotifications(); // Register for native push notifications
   return <>{children}</>;
 }
 

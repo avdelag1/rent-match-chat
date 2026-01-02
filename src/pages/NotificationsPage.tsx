@@ -9,15 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Bell, MessageSquare, Flame, Star, Sparkles, Trash2,
   CheckCheck, Filter, MoreHorizontal, Archive, Eye,
-  Home, Ship, Bike, Car, Lock, Crown
+  Home, Ship, Bike, Car
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
-import { usePremiumLikesVisibility } from '@/hooks/usePremiumLikesVisibility';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -98,36 +96,6 @@ const NotificationIconBg = ({ type }: { type: string }) => {
   );
 };
 
-// Helper to check if notification is a like type
-const isLikeNotification = (type: string): boolean => {
-  return ['new_like', 'like', 'super_like'].includes(type);
-};
-
-// Helper to get display content based on premium status
-const getLikeNotificationContent = (
-  notification: Notification,
-  canSeeWhoLiked: boolean
-): { title: string; message: string; showUpgrade: boolean } => {
-  if (!isLikeNotification(notification.type)) {
-    return { title: notification.title, message: notification.message, showUpgrade: false };
-  }
-
-  if (canSeeWhoLiked) {
-    // Premium user - show full details
-    return { title: notification.title, message: notification.message, showUpgrade: false };
-  }
-
-  // Non-premium user - hide who liked them
-  const isSuperLike = notification.type === 'super_like';
-  return {
-    title: isSuperLike ? 'Super Like!' : 'New Like',
-    message: isSuperLike
-      ? 'Someone gave you a Super Like! Upgrade to see who.'
-      : 'Someone liked your profile! Upgrade to see who.',
-    showUpgrade: true,
-  };
-};
-
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -137,8 +105,6 @@ export default function NotificationsPage() {
   const [deletingAll, setDeletingAll] = useState(false);
   const { user } = useAuth();
   const { data: userRole } = useUserRole(user?.id);
-  const { canSeeWhoLiked } = usePremiumLikesVisibility();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user?.id) return;
@@ -488,11 +454,7 @@ export default function NotificationsPage() {
                 <ScrollArea className="h-[calc(100vh-320px)]">
                   <AnimatePresence mode="popLayout">
                     <div className="space-y-3">
-                      {filteredNotifications.map((notification, index) => {
-                        // Apply premium visibility for like notifications
-                        const displayContent = getLikeNotificationContent(notification, canSeeWhoLiked);
-
-                        return (
+                      {filteredNotifications.map((notification, index) => (
                         <motion.div
                           key={notification.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -500,51 +462,32 @@ export default function NotificationsPage() {
                           exit={{ opacity: 0, x: -100 }}
                           transition={{ delay: index * 0.05 }}
                         >
-                          <Card
+                          <Card 
                             className={`
                               group cursor-pointer transition-all duration-300 border overflow-hidden
                               hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5
-                              ${!notification.read
-                                ? 'bg-gradient-to-r from-primary/5 via-card to-card border-primary/20'
+                              ${!notification.read 
+                                ? 'bg-gradient-to-r from-primary/5 via-card to-card border-primary/20' 
                                 : 'hover:bg-accent/30 border-border/50'
                               }
-                              ${displayContent.showUpgrade ? 'border-amber-500/30 bg-gradient-to-r from-amber-500/5 via-card to-card' : ''}
                             `}
-                            onClick={() => {
-                              markAsRead(notification.id);
-                              if (displayContent.showUpgrade) {
-                                navigate('/subscription-packages');
-                              }
-                            }}
+                            onClick={() => markAsRead(notification.id)}
                           >
                             <CardContent className="p-4 sm:p-5">
                               <div className="flex items-start gap-4">
-                                <div className="relative">
-                                  <NotificationIconBg type={notification.type} />
-                                  {displayContent.showUpgrade && (
-                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
-                                      <Lock className="w-3 h-3 text-white" />
-                                    </div>
-                                  )}
-                                </div>
-
+                                <NotificationIconBg type={notification.type} />
+                                
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-3 mb-1">
                                     <div className="flex items-center gap-2">
                                       <h4 className="font-semibold text-foreground">
-                                        {displayContent.title}
+                                        {notification.title}
                                       </h4>
                                       {!notification.read && (
                                         <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                                       )}
-                                      {displayContent.showUpgrade && (
-                                        <Badge className="text-xs bg-amber-500/20 text-amber-600 border-amber-500/30">
-                                          <Crown className="w-3 h-3 mr-1" />
-                                          Premium
-                                        </Badge>
-                                      )}
                                     </div>
-
+                                    
                                     <Button
                                       variant="ghost"
                                       size="sm"
@@ -557,11 +500,11 @@ export default function NotificationsPage() {
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
                                   </div>
-
+                                  
                                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                                    {displayContent.message}
+                                    {notification.message}
                                   </p>
-
+                                  
                                   <div className="flex items-center gap-3">
                                     <span className="text-xs text-muted-foreground/70 font-medium">
                                       {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
@@ -571,18 +514,13 @@ export default function NotificationsPage() {
                                         New
                                       </Badge>
                                     )}
-                                    {displayContent.showUpgrade && (
-                                      <span className="text-xs text-amber-600 font-medium">
-                                        Tap to unlock
-                                      </span>
-                                    )}
                                   </div>
                                 </div>
                               </div>
                             </CardContent>
                           </Card>
                         </motion.div>
-                      );})}
+                      ))}
                     </div>
                   </AnimatePresence>
                 </ScrollArea>
