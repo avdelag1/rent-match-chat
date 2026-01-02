@@ -9,7 +9,7 @@ import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, Mail, Calendar, Building2, Eye, MessageCircle,
-  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera, ArrowLeft
+  LogOut, Settings, Shield, Bell, Crown, ChevronRight, Camera, Radio, ArrowLeft
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -45,9 +45,16 @@ const OwnerProfile = () => {
     );
   }
 
+  const handleRadioClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/radio');
+  };
+
   const menuItems = [
     { icon: User, label: 'Edit Profile', action: (_e: React.MouseEvent) => setShowEditDialog(true), color: 'text-blue-500' },
     { icon: Building2, label: 'Manage Listings', action: (_e: React.MouseEvent) => navigate('/owner/properties'), color: 'text-primary' },
+    { icon: Radio, label: 'Radio', action: handleRadioClick, color: 'text-cyan-500' },
     { icon: Crown, label: 'Subscription', action: (_e: React.MouseEvent) => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Settings, label: 'Settings', action: (_e: React.MouseEvent) => navigate('/owner/settings'), color: 'text-gray-500' },
     { icon: Shield, label: 'Security', action: (_e: React.MouseEvent) => navigate('/owner/security'), color: 'text-green-500' },

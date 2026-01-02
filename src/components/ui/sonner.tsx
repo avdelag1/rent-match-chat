@@ -1,10 +1,11 @@
-import * as React from "react";
-import { Toaster as Sonner, toast } from "sonner";
+import { Toaster as Sonner, toast } from "sonner"
 
-type ToasterProps = React.ComponentProps<typeof Sonner>;
+type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const toasterTheme = "dark" as const;
+  // Use system preference instead of context to avoid circular dependency issues
+  // during initial render (ThemeProvider depends on AuthProvider)
+  const toasterTheme = "dark" as const
 
   return (
     <Sonner
@@ -15,13 +16,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
           toast:
             "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
           description: "group-[.toast]:text-muted-foreground",
-          actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
-          cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+          actionButton:
+            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton:
+            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
         },
       }}
       {...props}
     />
-  );
-};
+  )
+}
 
-export { Toaster, toast };
+export { Toaster, toast }

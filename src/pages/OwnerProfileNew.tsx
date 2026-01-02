@@ -11,7 +11,7 @@ import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, LogOut, Building2, Eye, MessageCircle,
-  Camera, ArrowLeft, Crown, Settings as SettingsIcon,
+  Camera, Radio, ArrowLeft, Crown, Settings as SettingsIcon,
   Flame, Filter, Users
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -48,6 +48,12 @@ const OwnerProfileNew = () => {
       </DashboardLayout>
     );
   }
+
+  const handleRadioClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/radio');
+  };
 
   return (
     <DashboardLayout userRole="owner">
@@ -196,6 +202,13 @@ const OwnerProfileNew = () => {
           >
             <Card className="bg-card border-border">
               <CardContent className="p-0">
+                <button
+                  onClick={handleRadioClick}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
+                >
+                  <Radio className="w-5 h-5 text-cyan-500" />
+                  <span className="flex-1 text-left text-foreground">Radio</span>
+                </button>
                 <button
                   onClick={() => navigate('/owner/properties')}
                   className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
