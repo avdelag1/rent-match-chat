@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,7 +11,6 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { validateImageFile } from '@/utils/fileValidation';
 import {
-  Sparkles,
   Upload,
   Camera,
   X,
@@ -23,12 +21,11 @@ import {
   Ship,
   Wrench,
   ChevronRight,
-  Image as ImageIcon,
-  MessageSquare,
   DollarSign,
   MapPin,
-  Zap,
   CheckCircle2,
+  Save,
+  Edit,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -62,25 +59,21 @@ interface AIListingAssistantProps {
 }
 
 export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAssistantProps) {
-  const [step, setStep] = useState<'category' | 'photos' | 'details' | 'generating' | 'review'>('category');
+  const [step, setStep] = useState<'category' | 'photos' | 'details' | 'review'>('category');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [location, setLocation] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedData, setGeneratedData] = useState<Record<string, unknown> | null>(null);
+  const [listingData, setListingData] = useState<Record<string, unknown> | null>(null);
 
   const resetState = () => {
     setStep('category');
     setSelectedCategory(null);
     setImages([]);
-    setDescription('');
     setPrice('');
     setLocation('');
-    setGeneratedData(null);
-    setIsGenerating(false);
+    setListingData(null);
   };
 
   const handleClose = () => {
@@ -164,32 +157,26 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const generateListing = async () => {
+  const createListing = () => {
     if (!selectedCategory || images.length === 0) return;
 
-    setIsGenerating(true);
-    setStep('generating');
-
-    // Simulate AI generation (in production, this would call an AI API)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Generate smart defaults based on category and user input
+    // Create listing data based on category
     const baseData: Record<string, unknown> = {
-      title: generateTitle(selectedCategory, description),
+      title: getDefaultTitle(selectedCategory),
       price: price ? parseFloat(price) : undefined,
       city: location || undefined,
       mode: 'rent',
     };
 
-    // Add category-specific fields
+    // Add category-specific default fields
     if (selectedCategory === 'property') {
       Object.assign(baseData, {
         property_type: 'apartment',
-        beds: 2,
+        beds: 1,
         baths: 1,
-        furnished: true,
+        furnished: false,
         pet_friendly: false,
-        amenities: ['wifi', 'kitchen', 'washer'],
+        amenities: [],
       });
     } else if (selectedCategory === 'vehicle') {
       Object.assign(baseData, {
@@ -203,20 +190,20 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
       Object.assign(baseData, {
         motorcycle_type: 'sport',
         vehicle_condition: 'good',
-        includes_helmet: true,
+        includes_helmet: false,
       });
     } else if (selectedCategory === 'bicycle') {
       Object.assign(baseData, {
         bicycle_type: 'city',
         vehicle_condition: 'good',
-        includes_lock: true,
-        includes_lights: true,
+        includes_lock: false,
+        includes_lights: false,
       });
     } else if (selectedCategory === 'yacht') {
       Object.assign(baseData, {
         yacht_type: 'motorboat',
-        vehicle_condition: 'excellent',
-        crew_option: 'available',
+        vehicle_condition: 'good',
+        crew_option: 'not_available',
       });
     } else if (selectedCategory === 'worker') {
       Object.assign(baseData, {
@@ -227,46 +214,36 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
       });
     }
 
-    // AI usage tracking removed - table doesn't exist
-
-    setGeneratedData(baseData);
-    setIsGenerating(false);
+    setListingData(baseData);
     setStep('review');
   };
 
-  const generateTitle = (category: Category, desc: string): string => {
-    const categoryTitles: Record<Category, string[]> = {
-      property: ['Cozy Apartment', 'Modern Space', 'Beautiful Home', 'Charming Room'],
-      vehicle: ['Reliable Car', 'Well-Maintained Vehicle', 'Quality Ride'],
-      motorcycle: ['Sport Bike', 'Cruiser Motorcycle', 'Adventure Bike'],
-      bicycle: ['City Bike', 'Mountain Bicycle', 'Electric Bike'],
-      yacht: ['Luxury Yacht', 'Motor Boat', 'Sailing Vessel'],
-      worker: ['Professional Service', 'Expert Help', 'Quality Work'],
+  const getDefaultTitle = (category: Category): string => {
+    const categoryTitles: Record<Category, string> = {
+      property: 'New Property Listing',
+      vehicle: 'Vehicle for Rent',
+      motorcycle: 'Motorcycle for Rent',
+      bicycle: 'Bicycle for Rent',
+      yacht: 'Yacht for Rent',
+      worker: 'Service Listing',
     };
-
-    if (desc.trim()) {
-      // Use first 50 chars of description as title base
-      return desc.slice(0, 50) + (desc.length > 50 ? '...' : '');
-    }
-
-    const titles = categoryTitles[category];
-    return titles[Math.floor(Math.random() * titles.length)];
+    return categoryTitles[category];
   };
 
-  const handleComplete = () => {
-    if (!selectedCategory || !generatedData) return;
+  const handleComplete = (continueEditing: boolean = false) => {
+    if (!selectedCategory || !listingData) return;
 
     onComplete({
       category: selectedCategory,
       images,
-      formData: generatedData,
+      formData: { ...listingData, continueEditing },
     });
 
     handleClose();
   };
 
   const canProceedToDetails = images.length >= 1;
-  const canGenerate = description.trim() || price.trim();
+  const canProceedToReview = price.trim() || location.trim();
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -274,12 +251,12 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
         <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
+              <Upload className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <DialogTitle className="text-xl">AI Listing Assistant</DialogTitle>
+              <DialogTitle className="text-xl">Upload Your Listing</DialogTitle>
               <DialogDescription>
-                Upload photos and let AI help create your listing
+                Add photos and details to create your listing
               </DialogDescription>
             </div>
           </div>
@@ -293,12 +270,12 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
                     "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
                     step === s
                       ? "bg-primary text-primary-foreground"
-                      : ['category', 'photos', 'details', 'generating', 'review'].indexOf(step) > i
+                      : ['category', 'photos', 'details', 'review'].indexOf(step) > i
                       ? "bg-primary/20 text-primary"
                       : "bg-secondary text-muted-foreground"
                   )}
                 >
-                  {['category', 'photos', 'details', 'generating', 'review'].indexOf(step) > i ? (
+                  {['category', 'photos', 'details', 'review'].indexOf(step) > i ? (
                     <CheckCircle2 className="w-4 h-4" />
                   ) : (
                     i + 1
@@ -308,7 +285,7 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
                   <div
                     className={cn(
                       "w-8 h-0.5 mx-1",
-                      ['category', 'photos', 'details', 'generating', 'review'].indexOf(step) > i
+                      ['category', 'photos', 'details', 'review'].indexOf(step) > i
                         ? "bg-primary"
                         : "bg-secondary"
                     )}
@@ -443,92 +420,50 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-4"
                 >
-                  <h3 className="text-lg font-semibold">Tell us about it</h3>
+                  <h3 className="text-lg font-semibold">Basic Information</h3>
                   <p className="text-sm text-muted-foreground">
-                    Just provide some basic info - AI will help fill in the rest!
+                    Add the essential details for your listing
                   </p>
 
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4" />
-                        Brief Description
+                        <DollarSign className="w-4 h-4" />
+                        Price
                       </Label>
-                      <Textarea
-                        placeholder="e.g., '2 bedroom apartment near downtown, recently renovated, has parking'"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="min-h-[100px]"
+                      <Input
+                        type="number"
+                        placeholder="Enter the price"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                          <DollarSign className="w-4 h-4" />
-                          Price (optional)
-                        </Label>
-                        <Input
-                          type="number"
-                          placeholder="Monthly rent/price"
-                          value={price}
-                          onChange={(e) => setPrice(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
-                          Location (optional)
-                        </Label>
-                        <Input
-                          placeholder="City or area"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        Location
+                      </Label>
+                      <Input
+                        placeholder="City or area"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                      />
                     </div>
                   </div>
 
-                  <Card className="bg-primary/5 border-primary/20">
-                    <CardContent className="p-4 flex items-start gap-3">
-                      <Zap className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">AI will auto-fill the rest</p>
-                        <p className="text-xs text-muted-foreground">
-                          Based on your photos and description, we'll suggest title, features, and more.
-                          You can edit everything before publishing.
-                        </p>
-                      </div>
+                  <Card className="bg-muted/50 border-muted">
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground">
+                        You'll be able to add more details like bedrooms, amenities, and features in the next step.
+                      </p>
                     </CardContent>
                   </Card>
                 </motion.div>
               )}
 
-              {/* Generating State */}
-              {step === 'generating' && (
-                <motion.div
-                  key="generating"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="py-12 flex flex-col items-center justify-center gap-4"
-                >
-                  <motion.div
-                    className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Sparkles className="w-10 h-10 text-primary-foreground" />
-                  </motion.div>
-                  <h3 className="text-xl font-bold">Creating your listing...</h3>
-                  <p className="text-muted-foreground text-center max-w-xs">
-                    AI is analyzing your photos and generating the perfect listing details
-                  </p>
-                </motion.div>
-              )}
-
               {/* Step 4: Review */}
-              {step === 'review' && generatedData && (
+              {step === 'review' && listingData && (
                 <motion.div
                   key="review"
                   initial={{ opacity: 0, x: 20 }}
@@ -538,7 +473,7 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
                 >
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    <h3 className="text-lg font-semibold">Listing Ready!</h3>
+                    <h3 className="text-lg font-semibold">Listing Preview</h3>
                   </div>
 
                   <Card>
@@ -560,24 +495,24 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
                         )}
                       </div>
 
-                      {/* Generated Details */}
+                      {/* Listing Details */}
                       <div className="space-y-2">
-                        <p className="font-semibold text-lg">{generatedData.title as string}</p>
-                        {generatedData.price && (
+                        <p className="font-semibold text-lg">{listingData.title as string}</p>
+                        {listingData.price && (
                           <p className="text-primary font-bold">
-                            ${(generatedData.price as number).toLocaleString()}/month
+                            ${(listingData.price as number).toLocaleString()}/month
                           </p>
                         )}
-                        {generatedData.city && (
+                        {listingData.city && (
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            {generatedData.city as string}
+                            {listingData.city as string}
                           </p>
                         )}
                       </div>
 
                       <p className="text-sm text-muted-foreground">
-                        You can edit all details after proceeding to the full form.
+                        Choose to save now or continue editing to add more details.
                       </p>
                     </CardContent>
                   </Card>
@@ -623,22 +558,31 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
 
           {step === 'details' && (
             <Button
-              onClick={generateListing}
-              disabled={isGenerating}
+              onClick={createListing}
               className="gap-2 bg-gradient-to-r from-primary to-primary/80"
             >
-              <Sparkles className="w-4 h-4" />
-              Generate with AI
+              Preview Listing <ChevronRight className="w-4 h-4" />
             </Button>
           )}
 
           {step === 'review' && (
-            <Button
-              onClick={handleComplete}
-              className="gap-2"
-            >
-              Continue to Edit <ChevronRight className="w-4 h-4" />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => handleComplete(true)}
+                className="gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Keep Editing
+              </Button>
+              <Button
+                onClick={() => handleComplete(false)}
+                className="gap-2 bg-gradient-to-r from-green-600 to-green-500"
+              >
+                <Save className="w-4 h-4" />
+                Save Listing
+              </Button>
+            </div>
           )}
         </div>
       </DialogContent>

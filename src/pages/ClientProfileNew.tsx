@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import {
   LogOut, User, Camera, Sparkles, Crown,
-  Share2, Radio, ArrowLeft, Flame, MessageCircle, Filter,
+  Share2, ArrowLeft, Flame, MessageCircle, Filter,
   Settings as SettingsIcon, Home, Bike, Ship, Car
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -35,12 +35,6 @@ const ClientProfileNew = () => {
     setSelectedPhotoIndex(index);
     setShowPhotoPreview(true);
   }, []);
-
-  const handleRadioClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigate('/radio');
-  }, [navigate]);
 
   // Calculate profile completion
   const calculateCompletion = () => {
@@ -278,13 +272,6 @@ const ClientProfileNew = () => {
           >
             <Card className="bg-card border-border">
               <CardContent className="p-0">
-                <button
-                  onClick={handleRadioClick}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
-                >
-                  <Radio className="w-5 h-5 text-cyan-500" />
-                  <span className="flex-1 text-left text-foreground">Radio</span>
-                </button>
                 <button
                   onClick={() => setShowShareDialog(true)}
                   className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
