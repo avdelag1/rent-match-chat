@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { ChevronRight, Shuffle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RadioGenre } from '@/data/radioStations';
@@ -11,13 +11,13 @@ interface RadioGenreSectionProps {
   onViewAll: () => void;
 }
 
-export const RadioGenreSection: React.FC<RadioGenreSectionProps> = ({ genre, onViewAll }) => {
+const RadioGenreSectionComponent: React.FC<RadioGenreSectionProps> = ({ genre, onViewAll }) => {
   const { shufflePlayGenre } = useRadioPlayer();
 
-  const handleShuffle = (e: React.MouseEvent) => {
+  const handleShuffle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     shufflePlayGenre(genre.id);
-  };
+  }, [shufflePlayGenre, genre.id]);
 
   return (
     <section className="space-y-3">
@@ -86,3 +86,9 @@ export const RadioGenreSection: React.FC<RadioGenreSectionProps> = ({ genre, onV
     </section>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export const RadioGenreSection = memo(RadioGenreSectionComponent, (prevProps, nextProps) => {
+  // Only re-render if genre id changes or onViewAll reference changes
+  return prevProps.genre.id === nextProps.genre.id && prevProps.onViewAll === nextProps.onViewAll;
+});

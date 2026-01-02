@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Radio,
@@ -461,13 +461,17 @@ const RadioPage: React.FC = () => {
         </motion.div>
 
         {/* Genre Sections - No duplicate featured card */}
-        {radioGenres.map((genre) => (
-          <RadioGenreSection
-            key={genre.id}
-            genre={genre}
-            onViewAll={() => setSelectedGenre(genre.id)}
-          />
-        ))}
+        {radioGenres.map((genre) => {
+          // Use a stable callback reference to prevent re-renders
+          const handleViewAll = () => setSelectedGenre(genre.id);
+          return (
+            <RadioGenreSection
+              key={genre.id}
+              genre={genre}
+              onViewAll={handleViewAll}
+            />
+          );
+        })}
       </div>
     );
   };
