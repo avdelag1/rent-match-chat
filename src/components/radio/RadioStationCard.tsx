@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Heart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ interface RadioStationCardProps {
   showRemoveButton?: boolean;
 }
 
-export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, compact = false, showRemoveButton = false }) => {
+const RadioStationCardComponent: React.FC<RadioStationCardProps> = ({ station, compact = false, showRemoveButton = false }) => {
   const {
     currentStation,
     isPlaying,
@@ -28,32 +28,32 @@ export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, com
   const isCurrentlyPlaying = isCurrentStation && isPlaying;
   const isFav = isFavorite(station.id);
 
-  const handlePlayClick = (e: React.MouseEvent) => {
+  const handlePlayClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (isCurrentlyPlaying) {
       pause();
     } else {
       play(station);
     }
-  };
+  }, [isCurrentlyPlaying, pause, play, station]);
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     toggleFavorite(station.id);
-  };
+  }, [toggleFavorite, station.id]);
 
-  const handleRemoveClick = (e: React.MouseEvent) => {
+  const handleRemoveClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     toggleFavorite(station.id);
-  };
+  }, [toggleFavorite, station.id]);
 
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     if (!isCurrentStation) {
       play(station);
     }
     // Always expand the player when clicking a station
     expandPlayer();
-  };
+  }, [isCurrentStation, play, station, expandPlayer]);
 
   if (compact) {
     return (
@@ -74,6 +74,8 @@ export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, com
             src={station.artwork}
             alt={station.name}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
           {isCurrentStation && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -186,6 +188,8 @@ export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, com
           src={station.artwork}
           alt={station.name}
           className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
@@ -252,3 +256,13 @@ export const RadioStationCard: React.FC<RadioStationCardProps> = ({ station, com
     </motion.div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export const RadioStationCard = memo(RadioStationCardComponent, (prevProps, nextProps) => {
+  // Only re-render if station, compact, or showRemoveButton props change
+  return (
+    prevProps.station.id === nextProps.station.id &&
+    prevProps.compact === nextProps.compact &&
+    prevProps.showRemoveButton === nextProps.showRemoveButton
+  );
+});

@@ -380,7 +380,7 @@ export const RadioBubble: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Bubble - Uses absolute left/top positioning */}
+      {/* Floating Bubble - Uses absolute left/top positioning when collapsed, centered when expanded */}
       <motion.div
         className={cn(
           "fixed z-[70]",
@@ -388,14 +388,15 @@ export const RadioBubble: React.FC = () => {
           isDragging ? "cursor-grabbing" : "cursor-grab"
         )}
         style={{
-          left: position.left,
-          top: position.top,
+          left: isExpanded ? '50%' : position.left,
+          top: isExpanded ? '50%' : position.top,
+          transform: isExpanded ? 'translate(-50%, -50%)' : undefined,
           width: isExpanded ? 272 : BUBBLE_SIZE,
           height: isExpanded ? 'auto' : BUBBLE_SIZE,
         }}
         initial={{ scale: 0, opacity: 0 }}
-        animate={{ 
-          scale: isDragging ? 1.1 : 1, 
+        animate={{
+          scale: isDragging ? 1.1 : 1,
           opacity: 1,
         }}
         exit={{ scale: 0, opacity: 0 }}
@@ -528,12 +529,14 @@ export const RadioBubble: React.FC = () => {
                 "overflow-hidden"
               )}
             >
-              {/* Animated background glow */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-white/10"
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
+              {/* Animated background glow - only when playing */}
+              {isPlaying && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-white/10"
+                  animate={{ opacity: [0.3, 0.5, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+              )}
 
               {/* Album art background when playing */}
               {currentStation && (
