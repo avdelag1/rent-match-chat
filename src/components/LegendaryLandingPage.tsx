@@ -29,44 +29,78 @@ function LegendaryLandingPage() {
 
   const [swipeProgress, setSwipeProgress] = useState<{ client: number; owner: number }>({ client: 0, owner: 0 });
   const [isDragging, setIsDragging] = useState<{ client: boolean; owner: boolean }>({ client: false, owner: false });
+  const [dragPosition, setDragPosition] = useState<{ client: { x: number; rotate: number }; owner: { x: number; rotate: number } }>({
+    client: { x: 0, rotate: 0 },
+    owner: { x: 0, rotate: 0 }
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const clientControls = useAnimation();
   const ownerControls = useAnimation();
-  const SWIPE_THRESHOLD = 120;
+  const SWIPE_THRESHOLD = 150;
+  const MAX_ROTATION = 15; // degrees
+
+  const handleDragStart = useCallback((role: 'client' | 'owner') => {
+    setIsDragging(prev => ({ ...prev, [role]: true }));
+  }, []);
 
   const handleDrag = useCallback((role: 'client' | 'owner', info: { offset: { x: number } }) => {
-    // Track absolute progress for fade/scale effect (works both directions)
+    // Calculate rotation based on drag distance (like Tinder cards)
+    const rotation = (info.offset.x / SWIPE_THRESHOLD) * MAX_ROTATION;
+    const clampedRotation = Math.max(-MAX_ROTATION, Math.min(MAX_ROTATION, rotation));
+
+    // Update real-time position and rotation
+    setDragPosition(prev => ({
+      ...prev,
+      [role]: { x: info.offset.x, rotate: clampedRotation }
+    }));
+
+    // Track progress for background fill
     const progress = Math.min(Math.abs(info.offset.x) / SWIPE_THRESHOLD, 1);
     setSwipeProgress(prev => ({ ...prev, [role]: progress }));
-    setIsDragging(prev => ({ ...prev, [role]: true }));
   }, []);
 
   const handleDragEnd = useCallback((role: 'client' | 'owner', info: { offset: { x: number }; velocity: { x: number } }) => {
     const controls = role === 'client' ? clientControls : ownerControls;
     setIsDragging(prev => ({ ...prev, [role]: false }));
 
-    // Check absolute values for both left and right swipes
     const absOffset = Math.abs(info.offset.x);
     const absVelocity = Math.abs(info.velocity.x);
     const direction = info.offset.x > 0 ? 1 : -1;
 
-    if (absOffset >= SWIPE_THRESHOLD * 0.8 || absVelocity > 400) {
-      // Animate out in swipe direction with scale and opacity
-      controls.start({ 
-        x: (SWIPE_THRESHOLD + 50) * direction, 
-        scale: 0.85,
+    // Swipe threshold met - trigger action
+    if (absOffset >= SWIPE_THRESHOLD || absVelocity > 500) {
+      const finalX = 400 * direction;
+      const finalRotation = MAX_ROTATION * direction * 1.5;
+
+      // Animate off-screen with rotation
+      controls.start({
+        x: finalX,
+        rotate: finalRotation,
         opacity: 0,
-        transition: { type: "spring", stiffness: 400, damping: 30 } 
+        transition: { type: "spring", stiffness: 300, damping: 25 }
       });
+
       setSwipeProgress(prev => ({ ...prev, [role]: 1 }));
 
       setTimeout(() => {
         setSwipeProgress(prev => ({ ...prev, [role]: 0 }));
-        controls.start({ x: 0, scale: 1, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 25 } });
+        setDragPosition(prev => ({ ...prev, [role]: { x: 0, rotate: 0 } }));
+        controls.start({
+          x: 0,
+          rotate: 0,
+          opacity: 1,
+          transition: { type: "spring", stiffness: 300, damping: 25 }
+        });
         openAuthDialog(role);
-      }, 150);
+      }, 200);
     } else {
-      controls.start({ x: 0, scale: 1, opacity: 1, transition: { type: "spring", stiffness: 400, damping: 25 } });
+      // Snap back to center with smooth spring
+      controls.start({
+        x: 0,
+        rotate: 0,
+        transition: { type: "spring", stiffness: 500, damping: 30 }
+      });
+      setDragPosition(prev => ({ ...prev, [role]: { x: 0, rotate: 0 } }));
       setSwipeProgress(prev => ({ ...prev, [role]: 0 }));
     }
   }, [clientControls, ownerControls]);
@@ -138,19 +172,24 @@ function LegendaryLandingPage() {
             <motion.button
               onClick={() => !isDragging.client && openAuthDialog('client')}
               drag="x"
-              dragConstraints={{ left: -(SWIPE_THRESHOLD + 50), right: SWIPE_THRESHOLD + 50 }}
-              dragElastic={0.15}
+              dragConstraints={{ left: -300, right: 300 }}
+              dragElastic={0.7}
+              dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
               animate={clientControls}
+              onDragStart={() => handleDragStart('client')}
               onDrag={(_, info) => handleDrag('client', info)}
               onDragEnd={(_, info) => handleDragEnd('client', info)}
-              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-visible cursor-grab active:cursor-grabbing touch-pan-y select-none"
               style={{
                 background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1)',
-                boxShadow: '0 4px 20px rgba(6,182,212,0.4)',
-                scale: 1 - (swipeProgress.client * 0.1),
-                opacity: 1 - (swipeProgress.client * 0.25),
+                boxShadow: isDragging.client
+                  ? '0 8px 30px rgba(6,182,212,0.6)'
+                  : '0 4px 20px rgba(6,182,212,0.4)',
+                rotate: dragPosition.client.rotate,
               }}
-              initial={{ opacity: 0, y: 10, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <UserCircle className="w-5 h-5" />
@@ -186,19 +225,24 @@ function LegendaryLandingPage() {
             <motion.button
               onClick={() => !isDragging.owner && openAuthDialog('owner')}
               drag="x"
-              dragConstraints={{ left: -(SWIPE_THRESHOLD + 50), right: SWIPE_THRESHOLD + 50 }}
-              dragElastic={0.15}
+              dragConstraints={{ left: -300, right: 300 }}
+              dragElastic={0.7}
+              dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
               animate={ownerControls}
+              onDragStart={() => handleDragStart('owner')}
               onDrag={(_, info) => handleDrag('owner', info)}
               onDragEnd={(_, info) => handleDragEnd('owner', info)}
-              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
+              className="w-full py-3 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-visible cursor-grab active:cursor-grabbing touch-pan-y select-none"
               style={{
                 background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7)',
-                boxShadow: '0 4px 20px rgba(236,72,153,0.4)',
-                scale: 1 - (swipeProgress.owner * 0.1),
-                opacity: 1 - (swipeProgress.owner * 0.25),
+                boxShadow: isDragging.owner
+                  ? '0 8px 30px rgba(236,72,153,0.6)'
+                  : '0 4px 20px rgba(236,72,153,0.4)',
+                rotate: dragPosition.owner.rotate,
               }}
-              initial={{ opacity: 0, y: 10, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3, delay: 0.3 }}
             >
               <Key className="w-5 h-5" />
