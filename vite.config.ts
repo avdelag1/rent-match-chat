@@ -211,10 +211,6 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('data/worldLocations') || id.includes('data/mexicanLocations')) {
             return 'data-locations';
           }
-          // Radio stations data - only needed for radio page
-          if (id.includes('data/radioStations')) {
-            return 'data-radio';
-          }
 
           // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           // FEATURE CHUNKS - Lazy loaded per feature
