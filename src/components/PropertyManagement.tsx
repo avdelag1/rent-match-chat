@@ -11,12 +11,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon, Share2 } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon, Share2, Wand2 } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { OwnerListingsStats } from '@/components/OwnerListingsStats';
 import { ShareDialog } from '@/components/ShareDialog';
+import { AIListingAssistant } from '@/components/AIListingAssistant';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -58,6 +59,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const [editingProperty, setEditingProperty] = useState<any>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [sharingListing, setSharingListing] = useState<any>(null);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const queryClient = useQueryClient();
 
   // Auto-open form when category is provided via URL params
@@ -94,6 +96,18 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     setEditingProperty(null);
     setShowCategoryDialog(true);
     // Open form directly
+    setIsFormOpen(true);
+  };
+
+  const handleAIComplete = (data: { category: string; images: string[]; formData: Record<string, unknown> }) => {
+    // Set the editing property with AI-generated data and open the form
+    setEditingProperty({
+      category: data.category,
+      mode: data.formData.mode || 'rent',
+      images: data.images,
+      ...data.formData,
+    });
+    setShowAIAssistant(false);
     setIsFormOpen(true);
   };
 
@@ -305,13 +319,24 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
               <p className="text-xs sm:text-sm text-white/60">Manage and track all your rental properties</p>
             </div>
           </div>
-          <Button
-            className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold shadow-lg shadow-primary/25 w-full sm:w-auto"
-            onClick={handleAddProperty}
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Listing</span>
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="gap-2 border-primary/30 text-primary hover:bg-primary/10 flex-1 sm:flex-initial"
+              onClick={() => setShowAIAssistant(true)}
+            >
+              <Wand2 className="w-4 h-4" />
+              <span className="hidden sm:inline">AI Assistant</span>
+              <span className="sm:hidden">AI</span>
+            </Button>
+            <Button
+              className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold shadow-lg shadow-primary/25 flex-1 sm:flex-initial"
+              onClick={handleAddProperty}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Listing</span>
+            </Button>
+          </div>
         </motion.div>
 
         {/* Statistics Dashboard */}
@@ -654,6 +679,13 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
           listingId={sharingListing?.id}
           title={sharingListing?.title || 'Listing'}
           description={`Check out this ${sharingListing?.category || 'property'} on Zwipes: ${sharingListing?.title}${sharingListing?.price ? ` - $${sharingListing.price.toLocaleString()}` : ''}`}
+        />
+
+        {/* AI Listing Assistant */}
+        <AIListingAssistant
+          isOpen={showAIAssistant}
+          onClose={() => setShowAIAssistant(false)}
+          onComplete={handleAIComplete}
         />
       </div>
     </div>

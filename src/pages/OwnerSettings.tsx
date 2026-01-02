@@ -3,10 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { PropertyManagement } from "@/components/PropertyManagement";
+import { ThemeSelector } from "@/components/ThemeSelector";
+import { FilterColorPreferences } from "@/components/FilterColorPreferences";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
-import { Building2, Mail, MapPin, Phone, Edit, Camera } from "lucide-react";
+import { Building2, Mail, MapPin, Phone, Edit, Camera, Palette } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,7 +22,7 @@ const OwnerSettings = () => {
   // Support deep-linking to specific tabs via URL parameter
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["profile", "security", "properties"].includes(tab)) {
+    if (tab && ["profile", "security", "properties", "appearance"].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -37,10 +39,14 @@ const OwnerSettings = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             {/* Horizontally scrollable tabs on mobile */}
             <div className="relative -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto scrollbar-hide">
-              <TabsList className="w-max sm:w-full flex sm:grid sm:grid-cols-3 gap-1 p-1 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50">
+              <TabsList className="w-max sm:w-full flex sm:grid sm:grid-cols-4 gap-1 p-1 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50">
                 <TabsTrigger value="profile" className="text-xs sm:text-sm text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all whitespace-nowrap px-3 sm:px-4">Profile</TabsTrigger>
                 <TabsTrigger value="security" className="text-xs sm:text-sm text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all whitespace-nowrap px-3 sm:px-4">Security</TabsTrigger>
                 <TabsTrigger value="properties" className="text-xs sm:text-sm text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all whitespace-nowrap px-3 sm:px-4">Properties</TabsTrigger>
+                <TabsTrigger value="appearance" className="text-xs sm:text-sm text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-500 data-[state=active]:text-white rounded-lg font-medium transition-all whitespace-nowrap px-3 sm:px-4 flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5" />
+                  Appearance
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -155,6 +161,16 @@ const OwnerSettings = () => {
             <TabsContent value="properties" className="mt-4 sm:mt-6">
               <div className="rounded-xl overflow-hidden">
                 <PropertyManagement />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="appearance" className="mt-4 sm:mt-6">
+              <div className="space-y-4 sm:space-y-6">
+                {/* Theme Selector */}
+                <ThemeSelector />
+
+                {/* Filter Color Preferences */}
+                <FilterColorPreferences />
               </div>
             </TabsContent>
           </Tabs>
