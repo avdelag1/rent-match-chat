@@ -8,19 +8,10 @@ import { useMessageActivationCount } from '@/hooks/useMessageActivationCount';
 import { SwipessLogo } from './SwipessLogo';
 import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 
-// Colorful gradient text for "Activation" button
-const ActivationText = () => (
-  <span className="font-bold text-xs tracking-tight">
-    <span className="text-orange-400">A</span>
-    <span className="text-pink-400">c</span>
-    <span className="text-purple-400">t</span>
-    <span className="text-blue-400">i</span>
-    <span className="text-cyan-400">v</span>
-    <span className="text-green-400">a</span>
-    <span className="text-yellow-400">t</span>
-    <span className="text-orange-400">i</span>
-    <span className="text-pink-400">o</span>
-    <span className="text-purple-400">n</span>
+// Colorful gradient text for "Message Activation" button - Red/Orange theme
+const MessageActivationText = () => (
+  <span className="font-bold text-xs tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+    Message Activation
   </span>
 );
 
@@ -113,7 +104,7 @@ function TopBarComponent({
               onClick={onMessageActivationsClick}
               aria-label={`Message activations (${activationCount} remaining)`}
             >
-              <ActivationText />
+              <MessageActivationText />
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

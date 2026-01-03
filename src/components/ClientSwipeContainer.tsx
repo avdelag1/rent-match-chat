@@ -252,8 +252,8 @@ export function ClientSwipeContainer({
 
   return (
     <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto">
-      {/* Card Container - Full height, edge-to-edge */}
-      <div className="relative flex-1 w-full min-h-0 overflow-hidden">
+      {/* Card Container - Full height, edge-to-edge, overflow visible for smooth swipe animation */}
+      <div className="relative flex-1 w-full min-h-0 overflow-visible">
         <AnimatePresence mode="popLayout">
           {currentClient && (
             <motion.div
