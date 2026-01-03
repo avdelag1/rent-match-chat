@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface ThemeOption {
-  id: 'grey-matte' | 'black-matte' | 'white-matte' | 'red-matte';
+  id: 'black-matte' | 'red-matte' | 'amber-matte' | 'white-matte';
   name: string;
   description: string;
   icon: string;
@@ -21,17 +21,6 @@ interface ThemeOption {
 
 const themeOptions: ThemeOption[] = [
   {
-    id: 'grey-matte',
-    name: 'Grey Matte',
-    description: 'Modern & sophisticated',
-    icon: '⚫',
-    colors: {
-      primary: '#2F2F2F',
-      secondary: '#3A3A3A',
-      accent: '#D32F2F'
-    }
-  },
-  {
     id: 'black-matte',
     name: 'Black Matte',
     description: 'Deep & elegant',
@@ -40,17 +29,6 @@ const themeOptions: ThemeOption[] = [
       primary: '#0D0D0D',
       secondary: '#1A1A1A',
       accent: '#E53935'
-    }
-  },
-  {
-    id: 'white-matte',
-    name: 'White Matte',
-    description: 'Clean & minimalist',
-    icon: '⬜',
-    colors: {
-      primary: '#F8F8F8',
-      secondary: '#FFFFFF',
-      accent: '#C62828'
     }
   },
   {
@@ -63,6 +41,28 @@ const themeOptions: ThemeOption[] = [
       secondary: '#3D1414',
       accent: '#FF3D3D'
     }
+  },
+  {
+    id: 'amber-matte',
+    name: 'Amber Matte',
+    description: 'Warm & inviting',
+    icon: '🟠',
+    colors: {
+      primary: '#1A1200',
+      secondary: '#2D2000',
+      accent: '#F59E0B'
+    }
+  },
+  {
+    id: 'white-matte',
+    name: 'White',
+    description: 'Clean & minimalist',
+    icon: '⬜',
+    colors: {
+      primary: '#F8F8F8',
+      secondary: '#FFFFFF',
+      accent: '#C62828'
+    }
   }
 ];
 
@@ -74,7 +74,7 @@ interface ThemeSelectorProps {
 export function ThemeSelector({ compact = false, showTitle = true }: ThemeSelectorProps) {
   const { theme, setTheme } = useTheme();
 
-  const handleThemeChange = (newTheme: 'grey-matte' | 'black-matte' | 'white-matte' | 'red-matte') => {
+  const handleThemeChange = (newTheme: 'black-matte' | 'red-matte' | 'amber-matte' | 'white-matte') => {
     setTheme(newTheme);
     const themeName = themeOptions.find(t => t.id === newTheme)?.name || newTheme;
     toast.success(`Theme changed to ${themeName}`, {

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 // New Matte Theme System - Premium AI app aesthetic
-type Theme = 'grey-matte' | 'black-matte' | 'white-matte' | 'red-matte';
+type Theme = 'black-matte' | 'red-matte' | 'amber-matte' | 'white-matte';
 
 interface ThemeContextType {
   theme: Theme;
@@ -13,7 +13,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('grey-matte');
+  const [theme, setThemeState] = useState<Theme>('black-matte');
   const { user } = useAuth();
 
   // Load theme from database when user logs in
@@ -30,11 +30,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           if (error) throw error;
 
           // Support both old and new theme names for backwards compatibility
-          const validThemes = ['grey-matte', 'black-matte', 'white-matte', 'red-matte'];
+          const validThemes = ['black-matte', 'red-matte', 'amber-matte', 'white-matte'];
           const legacyThemeMap: Record<string, Theme> = {
-            'default': 'grey-matte',
+            'default': 'black-matte',
             'dark': 'black-matte',
-            'amber': 'white-matte',
+            'grey-matte': 'black-matte',
+            'amber': 'amber-matte',
             'red': 'red-matte'
           };
 
@@ -48,13 +49,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           }
         } catch (error) {
           console.error('Failed to load theme preference:', error);
-          setThemeState('grey-matte');
+          setThemeState('black-matte');
         }
       };
       loadUserTheme();
     } else {
-      // Reset to grey-matte when logged out
-      setThemeState('grey-matte');
+      // Reset to black-matte when logged out
+      setThemeState('black-matte');
     }
   }, [user?.id]);
 
@@ -62,17 +63,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const root = window.document.documentElement;
     // Remove all theme classes
-    root.classList.remove('grey-matte', 'black-matte', 'white-matte', 'red-matte', 'dark', 'amber', 'red');
+    root.classList.remove('grey-matte', 'black-matte', 'white-matte', 'red-matte', 'amber-matte', 'dark', 'amber', 'red');
 
     // Add current theme class
     root.classList.add(theme);
 
     // Update status bar color based on theme
     const themeColors: Record<string, string> = {
-      'grey-matte': '#1a1a1a',
       'black-matte': '#000000',
-      'white-matte': '#f5f5f5',
       'red-matte': '#7f1d1d',
+      'amber-matte': '#78350f',
+      'white-matte': '#f5f5f5',
     };
 
     const color = themeColors[theme] || '#1a1a1a';
