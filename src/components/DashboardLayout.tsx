@@ -32,6 +32,7 @@ const CategorySelectionDialog = lazy(() => import('@/components/CategorySelectio
 const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog').then(m => ({ default: m.SavedSearchesDialog })))
 const MessageActivationPackages = lazy(() => import('@/components/MessageActivationPackages').then(m => ({ default: m.MessageActivationPackages })))
 const PushNotificationPrompt = lazy(() => import('@/components/PushNotificationPrompt').then(m => ({ default: m.PushNotificationPrompt })))
+const WelcomeNotification = lazy(() => import('@/components/WelcomeNotification').then(m => ({ default: m.WelcomeNotification })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -69,6 +70,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
   const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [showMessageActivations, setShowMessageActivations] = useState(false)
+  const [showWelcomeNotification, setShowWelcomeNotification] = useState(false)
+  const [welcomeChecked, setWelcomeChecked] = useState(false)
 
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
   const [quickFilters, setQuickFilters] = useState<QuickFilters>({
@@ -136,6 +139,36 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
     checkOnboardingStatus();
   }, [user?.id, onboardingChecked]);
+
+  // Check if this is a first-time user and show welcome notification
+  useEffect(() => {
+    if (!user?.id || welcomeChecked) return;
+
+    const checkWelcomeStatus = () => {
+      const welcomeKey = `hasSeenWelcome_${user.id}`;
+      const hasSeenWelcome = localStorage.getItem(welcomeKey);
+
+      setWelcomeChecked(true);
+
+      if (!hasSeenWelcome) {
+        // Small delay to let the dashboard load first
+        setTimeout(() => {
+          setShowWelcomeNotification(true);
+        }, 500);
+      }
+    };
+
+    checkWelcomeStatus();
+  }, [user?.id, welcomeChecked]);
+
+  // Handle welcome notification close
+  const handleWelcomeClose = useCallback(() => {
+    if (user?.id) {
+      const welcomeKey = `hasSeenWelcome_${user.id}`;
+      localStorage.setItem(welcomeKey, 'true');
+    }
+    setShowWelcomeNotification(false);
+  }, [user?.id]);
 
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
@@ -492,6 +525,14 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       {/* Push Notification Permission Prompt */}
       <Suspense fallback={null}>
         <PushNotificationPrompt />
+      </Suspense>
+
+      {/* Welcome Notification for First-Time Users */}
+      <Suspense fallback={null}>
+        <WelcomeNotification
+          isOpen={showWelcomeNotification}
+          onClose={handleWelcomeClose}
+        />
       </Suspense>
     </div>
   )
