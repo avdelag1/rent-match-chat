@@ -1,12 +1,28 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings, MessageCircle } from 'lucide-react';
+import { Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 import { useMessageActivationCount } from '@/hooks/useMessageActivationCount';
 import { SwipessLogo } from './SwipessLogo';
-import { CollapsibleFilterButton, QuickFilters } from './CollapsibleFilterButton';
+import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
+
+// Colorful gradient text for "Activation" button
+const ActivationText = () => (
+  <span className="font-bold text-xs tracking-tight">
+    <span className="text-orange-400">A</span>
+    <span className="text-pink-400">c</span>
+    <span className="text-purple-400">t</span>
+    <span className="text-blue-400">i</span>
+    <span className="text-cyan-400">v</span>
+    <span className="text-green-400">a</span>
+    <span className="text-yellow-400">t</span>
+    <span className="text-orange-400">i</span>
+    <span className="text-pink-400">o</span>
+    <span className="text-purple-400">n</span>
+  </span>
+);
 
 export type OwnerClientGender = 'female' | 'male' | 'any';
 export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
@@ -73,9 +89,9 @@ function TopBarComponent({
             <SwipessLogo size="sm" />
           </motion.div>
 
-          {/* Collapsible Filter Button */}
+          {/* Quick Filter Dropdown */}
           {showFilters && filters && onFiltersChange && userRole && (
-            <CollapsibleFilterButton
+            <QuickFilterDropdown
               filters={filters}
               onChange={onFiltersChange}
               userRole={userRole}
@@ -85,7 +101,7 @@ function TopBarComponent({
 
         {/* Right side: Actions */}
         <div className="flex items-center gap-1">
-          {/* Message Activations Button */}
+          {/* Message Activations Button - Colorful Text */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -93,17 +109,16 @@ function TopBarComponent({
           >
             <Button
               variant="ghost"
-              size="icon"
-              className="relative h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
+              className="relative h-10 px-3 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center gap-1"
               onClick={onMessageActivationsClick}
               aria-label={`Message activations (${activationCount} remaining)`}
             >
-              <MessageCircle className="h-5 w-5 text-foreground/80" />
+              <ActivationText />
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 className={cn(
-                  "absolute -top-0.5 -right-0.5 text-white text-[10px] font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg ring-2 ring-background bg-gradient-to-br",
+                  "text-white text-[10px] font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg ring-2 ring-background bg-gradient-to-br ml-1",
                   getActivationBadgeColor()
                 )}
               >

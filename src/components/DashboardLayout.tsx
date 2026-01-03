@@ -10,7 +10,7 @@ import { useResponsiveContext } from '@/contexts/ResponsiveContext'
 import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
-import { QuickFilters, QuickFilterCategory } from '@/components/CollapsibleFilterButton'
+import { QuickFilters, QuickFilterCategory } from '@/components/QuickFilterDropdown'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
 const SubscriptionPackages = lazy(() => import("@/components/SubscriptionPackages").then(m => ({ default: m.SubscriptionPackages })))
