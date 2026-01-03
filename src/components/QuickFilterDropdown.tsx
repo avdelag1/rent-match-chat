@@ -78,21 +78,10 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
   { id: 'buy', label: 'Buying', icon: <Briefcase className="w-4 h-4" />, color: 'from-green-500 to-emerald-500' },
 ];
 
-// Colorful "Quick Filter" text
+// Pink/Mexican color "Quick Filter" text
 const QuickFilterText = () => (
-  <span className="font-semibold text-xs tracking-tight whitespace-nowrap">
-    <span className="text-orange-400">Q</span>
-    <span className="text-pink-400">u</span>
-    <span className="text-purple-400">i</span>
-    <span className="text-blue-400">c</span>
-    <span className="text-cyan-400">k</span>
-    <span className="text-white mx-0.5"> </span>
-    <span className="text-green-400">F</span>
-    <span className="text-yellow-400">i</span>
-    <span className="text-orange-400">l</span>
-    <span className="text-pink-400">t</span>
-    <span className="text-purple-400">e</span>
-    <span className="text-blue-400">r</span>
+  <span className="font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+    Quick Filter
   </span>
 );
 
