@@ -23,7 +23,17 @@ class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Global Error Boundary caught error:', error, errorInfo);
+    // ALWAYS log errors to console (production + dev) for debugging
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('🚨 Global Error Boundary caught error:');
+    console.error('Error:', error);
+    console.error('Message:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('Component Stack:', errorInfo?.componentStack);
+    console.error('URL:', window.location.href);
+    console.error('User Agent:', navigator.userAgent);
+    console.error('Timestamp:', new Date().toISOString());
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     this.setState({ errorInfo });
   }
 
