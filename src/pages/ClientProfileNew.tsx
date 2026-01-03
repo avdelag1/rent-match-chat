@@ -3,6 +3,7 @@ import { ClientProfileDialog } from "@/components/ClientProfileDialog";
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
 import { ShareDialog } from "@/components/ShareDialog";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -258,6 +259,28 @@ const ClientProfileNew = () => {
                   <Sparkles className="w-4 h-4 mr-2" />
                   Set My Preferences
                 </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Filter Colors / Theme Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.25 }}
+          >
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-primary" />
+                  <CardTitle>Filter Colors</CardTitle>
+                </div>
+                <CardDescription>
+                  Customize your app appearance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ThemeSelector compact showTitle={false} />
               </CardContent>
             </Card>
           </motion.div>

@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
 import { OwnerClientFilterDialog } from "@/components/OwnerClientFilterDialog";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -182,6 +183,28 @@ const OwnerProfileNew = () => {
                   </div>
                   <div className="text-lg font-bold text-foreground">0</div>
                 </button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Filter Colors / Theme Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.2 }}
+          >
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-primary" />
+                  <CardTitle>Filter Colors</CardTitle>
+                </div>
+                <CardDescription>
+                  Customize your app appearance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ThemeSelector compact showTitle={false} />
               </CardContent>
             </Card>
           </motion.div>

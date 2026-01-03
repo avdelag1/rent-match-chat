@@ -559,6 +559,48 @@ body {
     --shadow-glow: 0 0 30px rgba(255, 61, 61, 0.5);
     --overlay: rgba(45, 10, 10, 0.7);
   }
+
+  /* THEME 5: AMBER MATTE (Warm & inviting) */
+  .amber-matte {
+    /* Background colors - Deep amber-black palette */
+    --background: 35 65% 7%;
+    --foreground: 40 100% 92%;
+    --card: 35 65% 11%;
+    --card-foreground: 40 100% 92%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 35 65% 15%;
+    --secondary-foreground: 40 100% 92%;
+    --muted: 35 65% 15%;
+    --muted-foreground: 40 100% 73%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35 50% 18%;
+    --input: 35 50% 18%;
+    --ring: 38 92% 50%;
+
+    /* Modern theme variables */
+    --bg-primary: 35 65% 7%;
+    --bg-secondary: 35 65% 11%;
+    --bg-tertiary: 35 65% 15%;
+    --text-primary: 40 100% 92%;
+    --text-secondary: 40 100% 73%;
+    --text-tertiary: 40 100% 53%;
+    --border-primary: 35 50% 18%;
+    --border-secondary: 35 50% 23%;
+    --accent-primary: 38 92% 50%;
+    --accent-secondary: 38 92% 60%;
+
+    /* Shadows - Amber-tinted shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(120, 53, 15, 0.2);
+    --shadow-lg: 0 8px 32px rgba(120, 53, 15, 0.3);
+    --shadow-card: 0 20px 40px rgba(120, 53, 15, 0.4);
+    --shadow-glow: 0 0 30px rgba(245, 158, 11, 0.5);
+    --overlay: rgba(26, 18, 0, 0.7);
+  }
 }
 
 @layer base {
