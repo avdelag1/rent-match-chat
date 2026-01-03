@@ -37,7 +37,7 @@ export function useNotifications() {
               .maybeSingle();
 
             if (convError) {
-              console.error('Error fetching conversation for notification:', convError);
+              if (import.meta.env.DEV) console.error('Error fetching conversation for notification:', convError);
               return;
             }
             if (!conversation) return;
@@ -52,7 +52,7 @@ export function useNotifications() {
                 .maybeSingle();
 
               if (profileError) {
-                console.error('Error fetching sender profile for notification:', profileError);
+                if (import.meta.env.DEV) console.error('Error fetching sender profile for notification:', profileError);
               }
 
               const senderName = senderProfile?.full_name || 'Someone';

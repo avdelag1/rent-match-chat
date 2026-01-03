@@ -92,7 +92,7 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
             .maybeSingle();
 
           if (prefError) {
-            console.error('Error fetching filter preferences:', prefError);
+            if (import.meta.env.DEV) console.error('Error fetching filter preferences:', prefError);
           }
 
           if (preferences?.preferred_listing_types?.length) {
@@ -121,13 +121,13 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
 
         const { data: listings, error } = await query;
         if (error) {
-          console.error('Listings query error:', error);
+          if (import.meta.env.DEV) console.error('Listings query error:', error);
           throw error;
         }
 
         return (listings as Listing[]) || [];
       } catch (error) {
-        console.error('Error in useListings:', error);
+        if (import.meta.env.DEV) console.error('Error in useListings:', error);
         // Return empty array instead of throwing to prevent UI crash
         return [];
       }
@@ -160,13 +160,13 @@ export function useOwnerListings() {
           .limit(100); // Prevent loading too many listings at once
 
         if (error) {
-          console.error('Owner listings query error:', error);
+          if (import.meta.env.DEV) console.error('Owner listings query error:', error);
           throw error;
         }
 
         return (listings as Listing[]) || [];
       } catch (error) {
-        console.error('Error in useOwnerListings:', error);
+        if (import.meta.env.DEV) console.error('Error in useOwnerListings:', error);
         return [];
       }
     },
@@ -194,7 +194,7 @@ export function useOwnerListings() {
             filter: `owner_id=eq.${user.user.id}`,
           },
           (payload) => {
-            console.log('Real-time listing change:', payload);
+            if (import.meta.env.DEV) console.log('Real-time listing change:', payload);
 
             // Invalidate and refetch the listings query
             queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
@@ -234,13 +234,13 @@ export function useSwipedListings() {
           .gte('created_at', oneDayAgo);
 
         if (error) {
-          console.error('Swipes query error:', error);
+          if (import.meta.env.DEV) console.error('Swipes query error:', error);
           return [];
         }
-        
+
         return likes?.map(l => l.target_id) || [];
       } catch (error) {
-        console.error('Error in useSwipedListings:', error);
+        if (import.meta.env.DEV) console.error('Error in useSwipedListings:', error);
         return [];
       }
     },

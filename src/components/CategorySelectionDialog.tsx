@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Home, Anchor, Bike, CircleDot, Car, ArrowRight, Sparkles, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface CategorySelectionDialogProps {
@@ -92,6 +92,16 @@ export function CategorySelectionDialog({
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [step, setStep] = useState<'category' | 'mode'>('category');
+  const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);
@@ -106,7 +116,8 @@ export function CategorySelectionDialog({
         }
         onOpenChange(false);
       }
-      setTimeout(() => {
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
+      resetTimeoutRef.current = setTimeout(() => {
         setSelectedCategory(null);
         setStep('category');
       }, 300);
@@ -129,7 +140,8 @@ export function CategorySelectionDialog({
     }
     
     // Reset state
-    setTimeout(() => {
+    if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
+    resetTimeoutRef.current = setTimeout(() => {
       setSelectedCategory(null);
       setStep('category');
     }, 300);
@@ -143,7 +155,8 @@ export function CategorySelectionDialog({
   const handleClose = (open: boolean) => {
     onOpenChange(open);
     if (!open) {
-      setTimeout(() => {
+      if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
+      resetTimeoutRef.current = setTimeout(() => {
         setSelectedCategory(null);
         setStep('category');
       }, 300);

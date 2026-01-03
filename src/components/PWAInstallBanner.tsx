@@ -88,8 +88,7 @@ export function PWAInstallBanner() {
         });
       }
     } catch (error) {
-      // User cancelled or error
-      console.log('Share cancelled or failed:', error);
+      // User cancelled or error - silently ignore
     }
   }, []);
 
@@ -104,7 +103,7 @@ export function PWAInstallBanner() {
         }
         setDeferredPrompt(null);
       } catch (error) {
-        console.error('Install prompt error:', error);
+        if (import.meta.env.DEV) console.error('Install prompt error:', error);
       }
       return;
     }

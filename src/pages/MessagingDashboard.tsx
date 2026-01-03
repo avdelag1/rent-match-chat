@@ -1,5 +1,5 @@
 import { PageTransition } from '@/components/PageTransition';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,8 +60,11 @@ export function MessagingDashboard() {
   // Mark messages as read when viewing conversation
   useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.other_user?.full_name?.toLowerCase()?.includes(searchQuery.toLowerCase())
+  const filteredConversations = useMemo(() =>
+    conversations.filter(conv =>
+      conv.other_user?.full_name?.toLowerCase()?.includes(searchQuery.toLowerCase())
+    ),
+    [conversations, searchQuery]
   );
 
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
@@ -156,7 +159,7 @@ export function MessagingDashboard() {
         }
       }
     } catch (error) {
-      console.error('[MessagingDashboard] Error opening conversation:', error);
+      if (import.meta.env.DEV) console.error('[MessagingDashboard] Error opening conversation:', error);
       toast({
         title: '❌ Could not open conversation',
         description: 'The conversation may not exist. Try refreshing the page.',
@@ -221,7 +224,7 @@ export function MessagingDashboard() {
         setIsStartingConversation(false);
       }
     } catch (error: any) {
-      console.error('Error auto-starting conversation:', error);
+      if (import.meta.env.DEV) console.error('Error auto-starting conversation:', error);
 
       if (error?.message === 'QUOTA_EXCEEDED') {
         setShowUpgradeDialog(true);
