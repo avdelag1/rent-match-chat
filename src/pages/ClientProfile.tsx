@@ -8,7 +8,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut, User, Settings, Shield, Bell, Flame,
-  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Share2, Radio, ArrowLeft
+  MessageCircle, Camera, ChevronRight, Sparkles, Crown, Share2, ArrowLeft
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -31,12 +31,6 @@ const ClientProfile = () => {
     setSelectedPhotoIndex(index);
     setShowPhotoPreview(true);
   }, []);
-
-  const handleRadioClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigate('/radio');
-  }, [navigate]);
 
   // Calculate profile completion
   const calculateCompletion = () => {
@@ -76,7 +70,6 @@ const ClientProfile = () => {
   const menuItems = [
     { icon: User, label: 'Edit Profile', action: (_e: React.MouseEvent) => setShowEditDialog(true), color: 'text-blue-500' },
     { icon: Share2, label: 'Share Profile', action: (_e: React.MouseEvent) => setShowShareDialog(true), color: 'text-purple-500' },
-    { icon: Radio, label: 'Radio', action: handleRadioClick, color: 'text-cyan-500' },
     { icon: Settings, label: 'Preferences', action: (_e: React.MouseEvent) => navigate('/client/settings'), color: 'text-gray-500' },
     { icon: Crown, label: 'Subscription', action: (_e: React.MouseEvent) => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Shield, label: 'Security', action: (_e: React.MouseEvent) => navigate('/client/security'), color: 'text-green-500' },

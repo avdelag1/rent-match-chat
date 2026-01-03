@@ -447,30 +447,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear React Query cache
       queryClient.clear();
 
+      // Clear local state FIRST to ensure UI updates immediately
+      setUser(null);
+      setSession(null);
+
       // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
 
       if (error) {
         logger.error('[Auth] Sign out error:', error);
-        toast({
-          title: "Sign Out Failed",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
+        // Still navigate to home even if there's an error
       }
-
-      // Clear local state
-      setUser(null);
-      setSession(null);
 
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",
       });
 
-      // Navigate to home
-      navigate('/', { replace: true });
+      // Force navigation to landing page with full page refresh
+      // This ensures a clean state and shows the landing page immediately
+      window.location.href = '/';
     } catch (error) {
       logger.error('[Auth] Unexpected sign out error:', error);
       toast({
@@ -478,6 +474,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "An unexpected error occurred during sign out.",
         variant: "destructive"
       });
+      // Even on error, try to redirect to home
+      window.location.href = '/';
     }
   };
 
