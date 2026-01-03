@@ -10,7 +10,7 @@ import { useResponsiveContext } from '@/contexts/ResponsiveContext'
 import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
-import { QuickFilterBar, QuickFilters, QuickFilterCategory } from '@/components/QuickFilterBar'
+import { QuickFilters, QuickFilterCategory } from '@/components/CollapsibleFilterButton'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
 const SubscriptionPackages = lazy(() => import("@/components/SubscriptionPackages").then(m => ({ default: m.SubscriptionPackages })))
@@ -30,6 +30,7 @@ const NotificationsDialog = lazy(() => import('@/components/NotificationsDialog'
 const OnboardingFlow = lazy(() => import('@/components/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })))
 const CategorySelectionDialog = lazy(() => import('@/components/CategorySelectionDialog').then(m => ({ default: m.CategorySelectionDialog })))
 const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog').then(m => ({ default: m.SavedSearchesDialog })))
+const MessageActivationPackages = lazy(() => import('@/components/MessageActivationPackages').then(m => ({ default: m.MessageActivationPackages })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -66,6 +67,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [onboardingChecked, setOnboardingChecked] = useState(false)
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
   const [showSavedSearches, setShowSavedSearches] = useState(false)
+  const [showMessageActivations, setShowMessageActivations] = useState(false)
 
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
   const [quickFilters, setQuickFilters] = useState<QuickFilters>({
@@ -183,6 +185,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     navigate(userRole === 'client' ? '/client/settings' : '/owner/settings')
   }, [navigate, userRole])
 
+  const handleMessageActivationsClick = useCallback(() => {
+    setShowMessageActivations(true)
+  }, [])
+
   const handleMenuItemClick = useCallback((action: string) => {
     switch (action) {
       case 'add-listing':
@@ -291,14 +297,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     });
   }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
 
-  // Check if we're on a page that should show quick filters (client discovery page only)
-  // Owner filters are now shown in the TopBar
-  const showQuickFilters = userRole === 'client' && location.pathname === '/client/dashboard';
-  const showOwnerFiltersInTopBar = userRole === 'owner' && location.pathname === '/owner/dashboard';
+  // Check if we're on a discovery page where filters should be shown
+  const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
+                            (userRole === 'owner' && location.pathname === '/owner/dashboard');
 
   // Calculate responsive layout values
   const topBarHeight = responsive.isMobile ? 52 : 56;
-  const quickFilterHeight = showQuickFilters ? (responsive.isMobile ? 48 : 52) : 0;
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
 
   return (
@@ -309,50 +313,25 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <TopBar
         onNotificationsClick={handleNotificationsClick}
         onSettingsClick={handleSettingsClick}
-        showOwnerFilters={showOwnerFiltersInTopBar}
-        ownerFilters={{
-          clientGender: quickFilters.clientGender,
-          clientType: quickFilters.clientType,
-        }}
-        onOwnerFiltersChange={(filters) => {
-          setQuickFilters(prev => ({
-            ...prev,
-            clientGender: filters.clientGender,
-            clientType: filters.clientType,
-          }));
-        }}
+        onMessageActivationsClick={handleMessageActivationsClick}
+        showFilters={isOnDiscoveryPage}
+        filters={quickFilters}
+        onFiltersChange={handleQuickFilterChange}
+        userRole={userRole === 'admin' ? 'client' : userRole}
       />
-
-      {/* Quick Filter Bar - For clients and owners on discovery pages */}
-      {showQuickFilters && (
-        <div
-          className="fixed left-0 right-0 z-40"
-          style={{
-            top: `calc(${topBarHeight}px + var(--safe-top))`,
-          }}
-        >
-          <QuickFilterBar
-            filters={quickFilters}
-            onChange={handleQuickFilterChange}
-            userRole={userRole}
-          />
-        </div>
-      )}
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       <main
         className="fixed inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
-          paddingTop: `calc(${topBarHeight + quickFilterHeight}px + var(--safe-top))`,
+          paddingTop: `calc(${topBarHeight}px + var(--safe-top))`,
           paddingBottom: `calc(${bottomNavHeight}px + var(--safe-bottom))`,
           paddingLeft: 'max(var(--safe-left), 0px)',
           paddingRight: 'max(var(--safe-right), 0px)',
           width: '100%',
           maxWidth: '100vw',
-          // Prevent layout shifts by ensuring stable dimensions
           boxSizing: 'border-box',
-          transform: 'translateZ(0)', // Force GPU layer for stability
-          // Prevent flickering with smooth transitions
+          transform: 'translateZ(0)',
           WebkitOverflowScrolling: 'touch',
           willChange: 'contents',
         }}
@@ -384,6 +363,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onClose={() => setShowSubscriptionPackages(false)}
           reason={subscriptionReason}
           userRole={userRole}
+        />
+      </Suspense>
+
+      {/* Message Activations Packages */}
+      <Suspense fallback={null}>
+        <MessageActivationPackages
+          isOpen={showMessageActivations}
+          onClose={() => setShowMessageActivations(false)}
+          userRole={userRole === 'admin' ? 'client' : userRole}
         />
       </Suspense>
 
