@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Key, Shield, Sparkles, UserCircle, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
@@ -19,6 +19,27 @@ function LegendaryLandingPage() {
     isOpen: false,
     role: 'client'
   });
+
+  // Lantern sweep animation cycle state
+  // Button A animates first, Button B 1 second later, then wait ~10 seconds
+  const [sweepCycle, setSweepCycle] = useState(0);
+
+  useEffect(() => {
+    // Initial delay before first animation
+    const initialDelay = setTimeout(() => {
+      setSweepCycle(1);
+    }, 1500);
+
+    // Repeat cycle every 12 seconds (1.2s animation + 1s delay + ~10s wait)
+    const interval = setInterval(() => {
+      setSweepCycle(prev => prev + 1);
+    }, 12000);
+
+    return () => {
+      clearTimeout(initialDelay);
+      clearInterval(interval);
+    };
+  }, []);
 
   const openAuthDialog = (role: 'client' | 'owner') => setAuthDialog({ isOpen: true, role });
   const closeAuthDialog = () => setAuthDialog({ isOpen: false, role: 'client' });
@@ -49,12 +70,13 @@ function LegendaryLandingPage() {
           </p>
         </motion.div>
 
-        {/* Buttons Container (tap only; swipe effects removed) */}
+        {/* Buttons Container with Lantern Sweep Animation */}
         <div className="space-y-3 mt-8">
           <motion.button
+            key={`client-btn-${sweepCycle}`}
             type="button"
             onClick={() => openAuthDialog('client')}
-            className="w-full max-w-sm mx-auto h-14 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden"
+            className="w-full max-w-sm mx-auto h-14 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden lantern-sweep"
             style={{
               background: 'linear-gradient(135deg, #06b6d4, #0ea5e9, #3b82f6, #6366f1)',
               boxShadow: '0 4px 20px rgba(6,182,212,0.4)'
@@ -63,15 +85,33 @@ function LegendaryLandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <UserCircle className="w-5 h-5" />
-            <span className="drop-shadow-lg">I'm a Client</span>
-            <ChevronRight className="w-5 h-5" />
+            {/* Lantern sweep overlay for Button A - animates first */}
+            <span
+              key={`sweep-a-${sweepCycle}`}
+              className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
+              style={{
+                animation: sweepCycle > 0 ? 'lantern-sweep 1.2s ease-in-out forwards' : 'none',
+              }}
+            >
+              <span
+                className="absolute top-0 left-0 w-1/2 h-full"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 75%, transparent 100%)',
+                  transform: 'skewX(-15deg)',
+                  animation: sweepCycle > 0 ? 'lantern-sweep 1.2s ease-in-out forwards' : 'none',
+                }}
+              />
+            </span>
+            <UserCircle className="w-5 h-5 relative z-10" />
+            <span className="drop-shadow-lg relative z-10">I'm a Client</span>
+            <ChevronRight className="w-5 h-5 relative z-10" />
           </motion.button>
 
           <motion.button
+            key={`owner-btn-${sweepCycle}`}
             type="button"
             onClick={() => openAuthDialog('owner')}
-            className="w-full max-w-sm mx-auto h-14 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden"
+            className="w-full max-w-sm mx-auto h-14 px-8 text-white font-bold text-base sm:text-lg rounded-xl flex items-center justify-center gap-3 backdrop-blur-sm border border-white/40 relative overflow-hidden lantern-sweep"
             style={{
               background: 'linear-gradient(135deg, #f43f5e, #ec4899, #d946ef, #a855f7)',
               boxShadow: '0 4px 20px rgba(236,72,153,0.4)'
@@ -80,9 +120,23 @@ function LegendaryLandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.3 }}
           >
-            <Key className="w-5 h-5" />
-            <span className="drop-shadow-lg">I'm an Owner</span>
-            <ChevronRight className="w-5 h-5" />
+            {/* Lantern sweep overlay for Button B - animates 1 second after A */}
+            <span
+              key={`sweep-b-${sweepCycle}`}
+              className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
+            >
+              <span
+                className="absolute top-0 left-0 w-1/2 h-full"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 75%, transparent 100%)',
+                  transform: 'skewX(-15deg)',
+                  animation: sweepCycle > 0 ? 'lantern-sweep 1.2s ease-in-out 1s forwards' : 'none',
+                }}
+              />
+            </span>
+            <Key className="w-5 h-5 relative z-10" />
+            <span className="drop-shadow-lg relative z-10">I'm an Owner</span>
+            <ChevronRight className="w-5 h-5 relative z-10" />
           </motion.button>
         </div>
 
