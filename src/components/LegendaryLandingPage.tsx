@@ -64,8 +64,8 @@ function LegendaryLandingPage() {
           transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="space-y-4"
         >
-          <SwipessLogo size="2xl" />
-          <p className="text-white/80 text-lg sm:text-xl font-medium px-4 max-w-md mx-auto">
+          <SwipessLogo size="3xl" />
+          <p className="text-white/80 text-2xl sm:text-3xl font-medium px-4 max-w-md mx-auto">
             Swipe and find your perfect deal
           </p>
         </motion.div>
