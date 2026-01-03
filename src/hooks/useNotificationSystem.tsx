@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
-type NotificationType = 'like' | 'message' | 'super_like' | 'match' | 'new_user';
+type NotificationType = 'like' | 'message' | 'super_like' | 'match' | 'new_user' | 'premium_purchase' | 'activation_purchase';
 
 interface Notification {
   id: string;
@@ -56,7 +56,10 @@ export function useNotificationSystem() {
           type: (notif.type as NotificationType) || 'like',
           title: notif.type === 'like' ? 'New Like' :
                  notif.type === 'match' ? 'New Match' :
-                 notif.type === 'message' ? 'New Message' : 'Notification',
+                 notif.type === 'message' ? 'New Message' :
+                 notif.type === 'super_like' ? 'Super Like' :
+                 notif.type === 'premium_purchase' ? 'Premium Package' :
+                 notif.type === 'activation_purchase' ? 'Message Activations' : 'Notification',
           message: notif.message || '',
           timestamp: new Date(notif.created_at),
           read: notif.read || false,

@@ -31,6 +31,7 @@ const OnboardingFlow = lazy(() => import('@/components/OnboardingFlow').then(m =
 const CategorySelectionDialog = lazy(() => import('@/components/CategorySelectionDialog').then(m => ({ default: m.CategorySelectionDialog })))
 const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog').then(m => ({ default: m.SavedSearchesDialog })))
 const MessageActivationPackages = lazy(() => import('@/components/MessageActivationPackages').then(m => ({ default: m.MessageActivationPackages })))
+const PushNotificationPrompt = lazy(() => import('@/components/PushNotificationPrompt').then(m => ({ default: m.PushNotificationPrompt })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -181,10 +182,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     setShowNotifications(true)
   }, [])
 
-  const handleSettingsClick = useCallback(() => {
-    navigate(userRole === 'client' ? '/client/settings' : '/owner/settings')
-  }, [navigate, userRole])
-
   const handleMessageActivationsClick = useCallback(() => {
     setShowMessageActivations(true)
   }, [])
@@ -312,7 +309,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       {/* Top Bar - Fixed with safe-area-top */}
       <TopBar
         onNotificationsClick={handleNotificationsClick}
-        onSettingsClick={handleSettingsClick}
         onMessageActivationsClick={handleMessageActivationsClick}
         showFilters={isOnDiscoveryPage}
         filters={quickFilters}
@@ -491,6 +487,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               });
           }}
         />
+      </Suspense>
+
+      {/* Push Notification Permission Prompt */}
+      <Suspense fallback={null}>
+        <PushNotificationPrompt />
       </Suspense>
     </div>
   )

@@ -6,6 +6,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, Crown, Zap, Star } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { STORAGE } from '@/constants/app';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SubscriptionPackagesProps {
   isOpen?: boolean;
@@ -139,11 +141,13 @@ const getPackageColor = (packageName: string) => {
 };
 
 export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole = 'client', showAsPage = false }: SubscriptionPackagesProps) {
+  const { user } = useAuth();
+
   if (!showAsPage && !isOpen) return null;
 
   const plans = userRole === 'owner' ? ownerPlans : clientPlans;
 
-  const handleSubscribe = (plan: Plan) => {
+  const handleSubscribe = async (plan: Plan) => {
     // Store selected plan locally (can persist to Supabase upon your approval)
     const selection = { role: userRole, planId: plan.id, name: plan.name, price: plan.price, at: new Date().toISOString() };
     localStorage.setItem(STORAGE.SELECTED_PLAN_KEY, JSON.stringify(selection));
@@ -156,6 +160,31 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
       title: 'Redirecting to PayPal',
       description: `Selected: ${plan.name} (${plan.price})`,
     });
+
+    // Save notification for premium package purchase
+    if (user?.id) {
+      await supabase.from('notifications').insert([{
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        type: 'premium_purchase',
+        message: `You selected the ${plan.name} package (${plan.price}). Complete payment to activate your premium benefits!`,
+        read: false
+      }]).then(
+        () => { /* Notification saved successfully */ },
+        () => { /* Notification save failed - non-critical */ }
+      );
+
+      // Show browser notification if permission granted
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        const notification = new Notification('Premium Package Selected!', {
+          body: `${plan.name} (${plan.price}) - Complete payment to unlock premium features`,
+          icon: '/favicon.ico',
+          tag: `premium-${plan.id}`,
+          badge: '/favicon.ico',
+        });
+        setTimeout(() => notification.close(), 5000);
+      }
+    }
   };
 
   return (
