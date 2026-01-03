@@ -56,7 +56,7 @@ function TopBarComponent({
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      className={cn('app-header bg-background/80 backdrop-blur-2xl border-b border-white/5', className)}
+      className={cn('app-header bg-background/95 border-b border-white/5 shadow-sm', className)}
     >
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
         {/* Left side: Logo + Filters */}

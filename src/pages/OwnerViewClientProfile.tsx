@@ -628,7 +628,7 @@ export default function OwnerViewClientProfile() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 sm:gap-3 sticky bottom-20 sm:bottom-6 bg-background/95 backdrop-blur-sm py-3 -mx-3 sm:-mx-4 px-3 sm:px-4">
+          <div className="flex gap-2 sm:gap-3 sticky bottom-20 sm:bottom-6 bg-background/98 py-3 -mx-3 sm:-mx-4 px-3 sm:px-4 border-t border-border/50">
             <Button onClick={handleConnect} className="flex-1 text-sm sm:text-base" size="lg">
               <MessageCircle className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               <span className="hidden sm:inline">Start Conversation</span>

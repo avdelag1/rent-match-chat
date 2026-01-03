@@ -179,7 +179,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
           ...springConfigs.snappy,
           delay: 0.1
         }}
-        className="flex items-center justify-center gap-2 px-4 py-3 pointer-events-auto bg-background/80 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] mx-auto max-w-fit"
+        className="flex items-center justify-center gap-2 px-4 py-3 pointer-events-auto bg-background/95 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] mx-auto max-w-fit"
       >
         {navItems.map((item, index) => {
           const Icon = item.icon;

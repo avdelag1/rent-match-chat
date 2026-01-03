@@ -31,7 +31,7 @@ export function PhotoPreview({ photos, isOpen, onClose, initialIndex = 0 }: Phot
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] bg-background/98"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -97,7 +97,7 @@ export function PhotoPreview({ photos, isOpen, onClose, initialIndex = 0 }: Phot
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-background/20 hover:bg-background/40 text-foreground backdrop-blur-sm"
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-background/80 hover:bg-background/90 text-foreground"
                     onClick={(e) => {
                       e.stopPropagation();
                       handlePrevious();
@@ -105,11 +105,11 @@ export function PhotoPreview({ photos, isOpen, onClose, initialIndex = 0 }: Phot
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </Button>
-                  
+
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-background/20 hover:bg-background/40 text-foreground backdrop-blur-sm"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-background/80 hover:bg-background/90 text-foreground"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleNext();
@@ -124,7 +124,7 @@ export function PhotoPreview({ photos, isOpen, onClose, initialIndex = 0 }: Phot
             {/* Photo counter */}
             {photos.length > 1 && (
               <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                <div className="bg-background/20 backdrop-blur-sm text-foreground px-3 py-1 rounded-full text-sm">
+                <div className="bg-background/85 text-foreground px-3 py-1 rounded-full text-sm">
                   {currentIndex + 1} / {photos.length}
                 </div>
               </div>

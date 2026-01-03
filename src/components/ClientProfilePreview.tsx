@@ -117,7 +117,7 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
         <CardContent className="p-6">
           <div className="flex items-start gap-4 mb-6">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={profileData.avatar_url || images[0]} />
+              <AvatarImage src={profileData.avatar_url || (images.length > 0 ? images[0] : undefined)} />
               <AvatarFallback>
                 <User className="h-10 w-10" />
               </AvatarFallback>

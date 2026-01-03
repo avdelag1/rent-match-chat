@@ -242,7 +242,7 @@ const OwnerClientTinderCardComponent = ({
                 {images.map((_, index) => (
                   <div
                     key={`image-dot-${index}`}
-                    className="flex-1 h-1 rounded-full bg-white/40 backdrop-blur-sm overflow-hidden shadow-sm"
+                    className="flex-1 h-1 rounded-full bg-white/60 overflow-hidden shadow-sm"
                   >
                     <div
                       className={`h-full bg-white shadow-lg transition-all duration-200 ${
@@ -280,7 +280,7 @@ const OwnerClientTinderCardComponent = ({
             {/* Verified Badge */}
             {profile.verified && (
               <div className="absolute top-20 right-4 z-20">
-                <Badge className="bg-blue-500/90 backdrop-blur-sm border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5">
+                <Badge className="bg-blue-500/95 border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5 shadow-lg">
                   <CheckCircle className="w-4 h-4" />
                   <span className="text-sm font-medium">Verified</span>
                 </Badge>
@@ -290,7 +290,7 @@ const OwnerClientTinderCardComponent = ({
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
           <motion.div
-            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+            className="absolute bottom-0 left-0 right-0 bg-black/85 rounded-t-[24px] shadow-2xl border-t border-white/10"
             animate={{
               height: isBottomSheetExpanded ? 'min(55%, 320px)' : 'min(18%, 110px)',
               y: 0

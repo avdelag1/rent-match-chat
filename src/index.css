@@ -818,7 +818,7 @@ body {
 
   .dynamic-card {
     background: var(--gradient-surface);
-    backdrop-filter: blur(20px);
+    /* backdrop-filter: blur(20px); REMOVED for Android performance */
     border: 2px solid transparent;
     background-clip: padding-box;
     position: relative;
@@ -930,19 +930,21 @@ body {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Glassmorphism utilities */
+  /* Glassmorphism utilities - OPTIMIZED for Android performance */
   .glass-effect {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.97);
+    /* backdrop-filter: blur(20px); REMOVED - kills Android performance */
+    /* -webkit-backdrop-filter: blur(20px); REMOVED - kills Android performance */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
 
   .glass-dark {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.85);
+    /* backdrop-filter: blur(20px); REMOVED - kills Android performance */
+    /* -webkit-backdrop-filter: blur(20px); REMOVED - kills Android performance */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
   /* Performance optimizations */
@@ -987,16 +989,17 @@ body {
     transform: perspective(1000px) rotateX(2deg) rotateY(2deg) translateZ(10px);
   }
 
-  /* Smooth blur on scroll */
+  /* Smooth fade on scroll - OPTIMIZED (no blur for performance) */
   .blur-on-scroll {
-    transition: backdrop-filter 0.3s ease, background-color 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .blur-on-scroll.scrolled {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    background-color: rgba(255, 255, 255, 0.8);
+    /* backdrop-filter: blur(20px); REMOVED - kills Android performance */
+    /* -webkit-backdrop-filter: blur(20px); REMOVED - kills Android performance */
+    background-color: rgba(255, 255, 255, 0.95);
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   .dark .blur-on-scroll.scrolled {

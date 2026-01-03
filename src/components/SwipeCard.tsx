@@ -21,12 +21,9 @@ const ProgressiveImage = memo(({
 
   return (
     <div className="relative w-full h-full">
-      {/* Blur placeholder - shows while loading */}
+      {/* Shimmer placeholder - shows while loading (NO BLUR for performance) */}
       {!isLoaded && !hasError && (
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-muted/60 via-muted/40 to-muted/60"
-          style={{ backdropFilter: 'blur(20px)' }}
-        >
+        <div className="absolute inset-0 bg-gradient-to-br from-muted/90 via-muted/70 to-muted/90">
           <div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
             style={{ backgroundSize: '200% 100%' }}
