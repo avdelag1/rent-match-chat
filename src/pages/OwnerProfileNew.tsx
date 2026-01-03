@@ -13,7 +13,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, LogOut, Building2, Eye, MessageCircle,
   Camera, ArrowLeft, Crown, Settings as SettingsIcon,
-  Flame, Filter, Users
+  Flame, Filter, Users, Palette
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";

@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   LogOut, User, Camera, Sparkles, Crown,
   Share2, ArrowLeft, Flame, MessageCircle, Filter,
-  Settings as SettingsIcon, Home, Bike, Ship, Car
+  Settings as SettingsIcon, Home, Bike, Ship, Car, Palette
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
