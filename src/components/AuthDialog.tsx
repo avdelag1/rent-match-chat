@@ -222,10 +222,20 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
     <DialogPrimitive.Root open={isOpen} onOpenChange={onClose}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm animate-fade-in" />
-        <DialogPrimitive.Content className="fixed inset-0 z-50 w-full h-full overflow-y-auto bg-black">
+        <DialogPrimitive.Content className="fixed inset-0 z-50 w-full h-full overflow-hidden bg-black">
 
-          <div className="min-h-full flex items-center justify-center p-4 sm:p-6 relative z-10">
-            <div className="w-full max-w-md animate-fade-in">
+          {/* Single-screen layout - no scrolling */}
+          <div className="h-full flex flex-col justify-center p-4 sm:p-5 relative z-10 safe-area-pt safe-area-pb">
+            {/* Back Button - Top Left Only */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 left-4 safe-area-pt flex items-center gap-1.5 text-white/70 hover:text-white transition-all duration-200 group active:scale-95 z-20"
+            >
+              <ArrowLeft className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-1" />
+              <span className="text-sm font-medium">Exit</span>
+            </button>
+
+            <div className="w-full max-w-sm mx-auto animate-fade-in">
               <DialogTitle className="sr-only">
                 {isLogin ? 'Sign In' : 'Sign Up'} as {role}
               </DialogTitle>
@@ -233,153 +243,118 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 {isLogin ? 'Sign in to your account' : 'Create a new account'}
               </DialogDescription>
 
-              {/* Back Button */}
-              <button
-                onClick={onClose}
-                className="mb-6 flex items-center gap-2 text-white/70 hover:text-white transition-all duration-200 group active:scale-95"
-              >
-                <ArrowLeft className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-1" />
-                <span className="text-sm font-medium">Back</span>
-              </button>
-
-              {/* Role Badge */}
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${theme.accentBg} ${theme.border} border mb-6`}>
-                <RoleIcon className={`w-4 h-4 ${theme.accent}`} />
-                <span className={`text-sm font-semibold ${theme.accent}`}>{theme.title}</span>
-              </div>
-
-              {/* Header */}
-              <div className="text-center mb-8">
-                <div className="mb-4">
-                  <SwipessLogo size="md" />
+              {/* Centered Minimal Header */}
+              <div className="text-center mb-4">
+                <SwipessLogo size="sm" />
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <RoleIcon className={`w-3.5 h-3.5 ${theme.accent}`} />
+                  <span className={`text-xs font-semibold ${theme.accent}`}>{theme.title}</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-2">
+                <h2 className="text-xl font-bold text-white mt-2">
                   {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
                 </h2>
-                <p className="text-white/50">
-                  {isForgotPassword
-                    ? 'Enter your email to receive a reset link'
-                    : theme.description
-                  }
-                </p>
               </div>
 
-              {/* Main Card - Minimal black design */}
-              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8">
+              {/* Main Card - Compact design */}
+              <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-5">
                 {!isForgotPassword && !isNativePlatform && (
                   <>
                     {/* Google OAuth Button */}
-                    <div>
-                      <Button
-                        type="button"
-                        onClick={(e) => handleOAuthSignIn(e, 'google')}
-                        disabled={isLoading}
-                        variant="outline"
-                        className="w-full h-14 border border-white/10 bg-white/[0.02] font-semibold text-base text-white hover:bg-white/[0.05] hover:border-white/20 transition-all"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader className="w-5 h-5 mr-3 animate-spin" />
-                            Connecting to Google...
-                          </>
-                        ) : (
-                          <>
-                            <FaGoogle className="w-5 h-5 mr-3 text-white" />
-                            Continue with Google
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      onClick={(e) => handleOAuthSignIn(e, 'google')}
+                      disabled={isLoading}
+                      variant="outline"
+                      className="w-full h-11 border border-white/10 bg-white/[0.02] font-semibold text-sm text-white hover:bg-white/[0.05] hover:border-white/20 transition-all"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader className="w-4 h-4 mr-2 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <FaGoogle className="w-4 h-4 mr-2 text-white" />
+                          Continue with Google
+                        </>
+                      )}
+                    </Button>
 
-                    {/* Divider */}
-                    <div className="relative flex items-center my-8">
+                    {/* Compact Divider */}
+                    <div className="relative flex items-center my-4">
                       <div className="flex-grow border-t border-white/10"></div>
-                      <span className="flex-shrink mx-4 text-white/30 text-sm font-medium">or continue with email</span>
+                      <span className="flex-shrink mx-3 text-white/30 text-xs font-medium">or</span>
                       <div className="flex-grow border-t border-white/10"></div>
                     </div>
                   </>
                 )}
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Compact Form */}
+                <form onSubmit={handleSubmit} className="space-y-3">
                   {/* Name Field (Sign Up Only) */}
                   {!isLogin && !isForgotPassword && (
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-medium text-white/60">
-                        Full Name
-                      </Label>
-                      <div className="relative group">
-                        <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/30 group-focus-within:text-orange-400 transition-colors" />
-                        <Input
-                          id="name"
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required
-                          className="pl-12 h-14 text-base bg-transparent border-0 border-b border-white/10 rounded-none text-white placeholder:text-white/20 focus:border-orange-500/50 focus:ring-0"
-                          placeholder="John Doe"
-                        />
-                      </div>
+                    <div className="relative group">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-orange-400 transition-colors" />
+                      <Input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        className="pl-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-orange-500/50 focus:ring-0"
+                        placeholder="Full Name"
+                      />
                     </div>
                   )}
 
                   {/* Email Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-white/60">
-                      Email
-                    </Label>
-                    <div className="relative group">
-                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/30 group-focus-within:text-orange-400 transition-colors" />
-                      <Input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="pl-12 h-14 text-base bg-transparent border-0 border-b border-white/10 rounded-none text-white placeholder:text-white/20 focus:border-orange-500/50 focus:ring-0"
-                        placeholder="you@example.com"
-                      />
-                    </div>
+                  <div className="relative group">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-orange-400 transition-colors" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="pl-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-orange-500/50 focus:ring-0"
+                      placeholder="Email"
+                    />
                   </div>
 
                   {/* Password Field */}
                   {!isForgotPassword && (
-                    <div className="space-y-2">
-                      <Label htmlFor="password" className="text-sm font-medium text-white/60">
-                        Password
-                      </Label>
+                    <div>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/30 group-focus-within:text-orange-400 transition-colors" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-orange-400 transition-colors" />
                         <Input
                           id="password"
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="pl-12 pr-12 h-14 text-base bg-transparent border-0 border-b border-white/10 rounded-none text-white placeholder:text-white/20 focus:border-orange-500/50 focus:ring-0"
-                          placeholder="••••••••"
+                          className="pl-10 pr-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-orange-500/50 focus:ring-0"
+                          placeholder="Password"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                         >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
 
-                      {/* Password Strength Indicator (Sign Up Only) */}
+                      {/* Compact Password Strength Indicator (Sign Up Only) */}
                       {!isLogin && password && (
-                        <div className="space-y-3 pt-2">
-                          {/* Strength Bar */}
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div className="mt-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
                               <div
                                 className={`h-full ${passwordStrength.color} rounded-full transition-all duration-300`}
                                 style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
                               />
                             </div>
-                            <span className={`text-xs font-medium ${
+                            <span className={`text-[10px] font-medium ${
                               passwordStrength.score <= 1 ? 'text-red-400' :
                               passwordStrength.score === 2 ? 'text-orange-400' :
                               passwordStrength.score === 3 ? 'text-yellow-400' : 'text-green-400'
@@ -387,74 +362,32 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                               {passwordStrength.label}
                             </span>
                           </div>
-
-                          {/* Requirements Checklist */}
-                          <div className="grid grid-cols-2 gap-2">
-                            {[
-                              { key: 'length', label: '8+ characters' },
-                              { key: 'lowercase', label: 'Lowercase' },
-                              { key: 'uppercase', label: 'Uppercase' },
-                              { key: 'number', label: 'Number' },
-                            ].map(({ key, label }) => (
-                              <div
-                                key={key}
-                                className={`flex items-center gap-2 text-xs ${
-                                  passwordStrength.checks[key as keyof typeof passwordStrength.checks]
-                                    ? 'text-green-400'
-                                    : 'text-white/40'
-                                }`}
-                              >
-                                {passwordStrength.checks[key as keyof typeof passwordStrength.checks] ? (
-                                  <Check className="w-3.5 h-3.5" />
-                                ) : (
-                                  <X className="w-3.5 h-3.5" />
-                                )}
-                                <span>{label}</span>
-                              </div>
-                            ))}
-                          </div>
                         </div>
                       )}
                     </div>
                   )}
 
-                  {/* Terms and Conditions (Sign Up Only) */}
+                  {/* Compact Terms (Sign Up Only) */}
                   {!isLogin && !isForgotPassword && (
-                    <div className="space-y-3 pt-2">
-                      <label className="flex items-start gap-3 cursor-pointer group">
-                        <div className="relative mt-0.5">
-                          <input
-                            type="checkbox"
-                            checked={agreeToTerms}
-                            onChange={(e) => setAgreeToTerms(e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-5 h-5 rounded-md border-2 border-white/30 bg-white/5 peer-checked:bg-orange-500 peer-checked:border-transparent transition-all flex items-center justify-center">
-                            {agreeToTerms && <Check className="w-3.5 h-3.5 text-white" />}
-                          </div>
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={agreeToTerms}
+                          onChange={(e) => setAgreeToTerms(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-4 h-4 rounded border-2 border-white/30 bg-white/5 peer-checked:bg-orange-500 peer-checked:border-transparent transition-all flex items-center justify-center">
+                          {agreeToTerms && <Check className="w-2.5 h-2.5 text-white" />}
                         </div>
-                        <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors leading-relaxed">
-                          I agree to the{' '}
-                          <a
-                            href="/terms-of-service"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`${theme.accent} hover:underline font-medium`}
-                          >
-                            Terms of Service
-                          </a>
-                          {' '}and{' '}
-                          <a
-                            href="/privacy-policy"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`${theme.accent} hover:underline font-medium`}
-                          >
-                            Privacy Policy
-                          </a>
-                        </span>
-                      </label>
-                    </div>
+                      </div>
+                      <span className="text-xs text-white/50">
+                        I agree to the{' '}
+                        <a href="/terms-of-service" target="_blank" className={`${theme.accent} underline`}>Terms</a>
+                        {' & '}
+                        <a href="/privacy-policy" target="_blank" className={`${theme.accent} underline`}>Privacy</a>
+                      </span>
+                    </label>
                   )}
 
                   {/* Remember Me & Forgot Password */}
@@ -484,58 +417,38 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     </div>
                   )}
 
-                  {/* Submit Button */}
-                  <div>
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full h-14 text-base font-bold bg-gradient-to-r from-orange-500 via-red-500 to-rose-500 text-white transition-all mt-4 relative overflow-hidden group hover:opacity-90"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader className="w-5 h-5 mr-2 animate-spin" />
-                          Please wait...
-                        </>
-                      ) : (
-                        <span className="flex items-center gap-2 relative z-10">
-                          {isForgotPassword ? (
-                            <>
-                              <Mail className="w-5 h-5" />
-                              Send Reset Link
-                            </>
-                          ) : isLogin ? (
-                            <>
-                              <Shield className="w-5 h-5" />
-                              Sign In
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-5 h-5" />
-                              Create Account
-                            </>
-                          )}
-                        </span>
-                      )}
-                    </Button>
-                  </div>
+                  {/* Compact Submit Button */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-11 text-sm font-bold bg-gradient-to-r from-orange-500 via-red-500 to-rose-500 text-white transition-all mt-2 hover:opacity-90"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader className="w-4 h-4 mr-2 animate-spin" />
+                        Please wait...
+                      </>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
+                      </span>
+                    )}
+                  </Button>
                 </form>
 
-                {/* Toggle Sign In/Up */}
-                <div className="text-center mt-8">
+                {/* Compact Toggle */}
+                <div className="text-center mt-4">
                   {isForgotPassword ? (
                     <button
                       type="button"
-                      onClick={() => {
-                        setIsForgotPassword(false);
-                        setEmail('');
-                      }}
-                      className="text-sm text-white/60 hover:text-white transition-colors flex items-center gap-2 mx-auto"
+                      onClick={() => { setIsForgotPassword(false); setEmail(''); }}
+                      className="text-xs text-white/50 hover:text-white transition-colors flex items-center gap-1 mx-auto"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <ArrowLeft className="w-3 h-3" />
                       Back to Sign In
                     </button>
                   ) : (
-                    <p className="text-sm text-white/60">
+                    <p className="text-xs text-white/50">
                       {isLogin ? "Don't have an account? " : "Already have an account? "}
                       <button
                         type="button"
@@ -554,12 +467,6 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                     </p>
                   )}
                 </div>
-              </div>
-
-              {/* Security Notice */}
-              <div className="flex items-center justify-center gap-2 mt-6 text-white/30">
-                <Shield className="w-4 h-4" />
-                <span className="text-xs">Secured with industry-standard encryption</span>
               </div>
             </div>
           </div>

@@ -2122,3 +2122,208 @@ html[data-navigation-direction="back"] {
     transparent 100%
   );
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  LANTERN SWEEP ANIMATION - Subtle Light Glow Effect                   */
+/*  Instagram-like soft sweep for premium landing page buttons           */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@keyframes lantern-sweep {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+    opacity: 0;
+  }
+}
+
+/* Lantern sweep overlay for buttons */
+.lantern-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.08) 75%,
+    transparent 100%
+  );
+  transform: skewX(-15deg);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Animation class - Button A (first, no delay) */
+.lantern-sweep-a::before {
+  animation: lantern-sweep 1.2s ease-in-out infinite;
+  animation-delay: 0s;
+  animation-iteration-count: 1;
+}
+
+/* Animation class - Button B (1 second after A) */
+.lantern-sweep-b::before {
+  animation: lantern-sweep 1.2s ease-in-out infinite;
+  animation-delay: 1s;
+  animation-iteration-count: 1;
+}
+
+/* Staggered repeat animation - plays once then waits */
+.lantern-sweep-cycle-a::before {
+  animation: lantern-sweep 1.2s ease-in-out;
+}
+
+.lantern-sweep-cycle-b::before {
+  animation: lantern-sweep 1.2s ease-in-out;
+  animation-delay: 1s;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  WHITE/LIGHT THEME CONTRAST FIXES                                     */
+/*  Ensure text remains readable on light backgrounds                    */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Light theme specific text contrast improvements */
+.white-matte .insights-dialog-content,
+.white-matte [data-dialog-content] {
+  color: hsl(0 0% 10%);
+}
+
+.white-matte .insights-stat-value {
+  color: hsl(0 0% 5%) !important;
+  font-weight: 700;
+}
+
+.white-matte .insights-stat-label {
+  color: hsl(0 0% 30%) !important;
+}
+
+.white-matte .card-title,
+.white-matte h3,
+.white-matte h4 {
+  color: hsl(0 0% 8%);
+}
+
+.white-matte .card-description,
+.white-matte .text-muted-foreground {
+  color: hsl(0 0% 35%);
+}
+
+/* Swipe card text contrast on light theme */
+.white-matte .swipe-card-title {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.white-matte .swipe-card-price {
+  color: hsl(0 100% 45%);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge contrast on light theme */
+.white-matte .badge-stat {
+  background: hsl(0 0% 95%);
+  border: 1px solid hsl(0 0% 85%);
+  color: hsl(0 0% 15%);
+}
+
+/* Dialog content contrast */
+.white-matte [role="dialog"] {
+  --foreground: 0 0% 8%;
+  --muted-foreground: 0 0% 35%;
+}
+
+/* Insights dialog specific fixes */
+.white-matte .bg-gradient-to-br,
+.white-matte .bg-gradient-to-r {
+  color: hsl(0 0% 10%);
+}
+
+.white-matte .bg-muted\/50,
+.white-matte .bg-muted\/30 {
+  background: hsl(0 0% 93%);
+  color: hsl(0 0% 15%);
+}
+
+/* Stats cards on light theme */
+.white-matte .stats-card {
+  background: hsl(0 0% 98%);
+  border: 1px solid hsl(0 0% 88%);
+}
+
+.white-matte .stats-card-value {
+  color: hsl(0 0% 5%);
+  font-weight: 700;
+}
+
+/* Progress bars on light theme */
+.white-matte .progress-bar-bg {
+  background: hsl(0 0% 88%);
+}
+
+/* Ensure all text in dialog is dark on light theme */
+.white-matte [class*="Dialog"] p,
+.white-matte [class*="Dialog"] span,
+.white-matte [class*="Dialog"] div {
+  color: inherit;
+}
+
+/* Fix colored stat cards text on light theme */
+.white-matte .text-green-600,
+.white-matte .text-green-400 {
+  color: hsl(142 76% 30%) !important;
+}
+
+.white-matte .text-blue-600,
+.white-matte .text-blue-400 {
+  color: hsl(217 91% 35%) !important;
+}
+
+.white-matte .text-purple-600,
+.white-matte .text-purple-400 {
+  color: hsl(271 81% 40%) !important;
+}
+
+.white-matte .text-yellow-600,
+.white-matte .text-yellow-400 {
+  color: hsl(45 93% 35%) !important;
+}
+
+.white-matte .text-red-600,
+.white-matte .text-red-400 {
+  color: hsl(0 72% 45%) !important;
+}
+
+.white-matte .text-orange-600,
+.white-matte .text-orange-400 {
+  color: hsl(25 95% 45%) !important;
+}
+
+.white-matte .text-cyan-600,
+.white-matte .text-cyan-400 {
+  color: hsl(188 94% 35%) !important;
+}
+
+/* Dark text on light backgrounds in insight cards */
+.white-matte [class*="-500/10"],
+.white-matte [class*="-500/5"] {
+  color: hsl(0 0% 15%);
+}
+
+.white-matte [class*="-500/10"] .text-lg,
+.white-matte [class*="-500/10"] .text-xl,
+.white-matte [class*="-500/10"] .text-2xl,
+.white-matte [class*="-500/10"] .font-bold {
+  color: inherit;
+}
