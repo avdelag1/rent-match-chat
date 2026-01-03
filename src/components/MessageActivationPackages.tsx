@@ -134,7 +134,7 @@ export function MessageActivationPackages({
     });
   };
 
-  const handlePurchase = (pkg: MessagePackage) => {
+  const handlePurchase = async (pkg: MessagePackage) => {
     // Store selection for post-payment processing
     localStorage.setItem(STORAGE.PENDING_ACTIVATION_KEY, JSON.stringify({
       packageId: pkg.id,
@@ -149,6 +149,31 @@ export function MessageActivationPackages({
         title: "Redirecting to PayPal",
         description: `Processing ${pkg.name} package (${formatPriceMXN(pkg.price)})`,
       });
+
+      // Save notification for message activation purchase
+      if (user?.id) {
+        await supabase.from('notifications').insert([{
+          id: crypto.randomUUID(),
+          user_id: user.id,
+          type: 'activation_purchase',
+          message: `You selected the ${pkg.name} package with ${pkg.activations} message activations (${formatPriceMXN(pkg.price)}). Complete payment to activate!`,
+          read: false
+        }]).then(
+          () => { /* Notification saved successfully */ },
+          () => { /* Notification save failed - non-critical */ }
+        );
+
+        // Show browser notification if permission granted
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          const notification = new Notification('Message Activations Selected!', {
+            body: `${pkg.activations} activations (${formatPriceMXN(pkg.price)}) - Complete payment to start messaging`,
+            icon: '/favicon.ico',
+            tag: `activation-${pkg.id}`,
+            badge: '/favicon.ico',
+          });
+          setTimeout(() => notification.close(), 5000);
+        }
+      }
     } else {
       toast({
         title: "Payment link unavailable",

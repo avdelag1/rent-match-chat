@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, MessageSquare, Flame, CheckCheck, Trash2, Star, Sparkles, Eye } from 'lucide-react';
+import { Bell, MessageSquare, Flame, CheckCheck, Trash2, Star, Sparkles, Eye, Crown, MessageCircle } from 'lucide-react';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,21 +18,29 @@ interface NotificationsDialogProps {
 
 const NotificationIconBg = ({ type }: { type: string }) => {
   const configs: Record<string, { bg: string; icon: React.ReactNode }> = {
-    'message': { 
-      bg: 'bg-blue-500/10', 
-      icon: <MessageSquare className="w-5 h-5 text-blue-500" /> 
+    'message': {
+      bg: 'bg-blue-500/10',
+      icon: <MessageSquare className="w-5 h-5 text-blue-500" />
     },
     'like': {
       bg: 'bg-orange-500/10',
       icon: <Flame className="w-5 h-5 text-orange-500" />
     },
-    'match': { 
-      bg: 'bg-amber-500/10', 
-      icon: <Sparkles className="w-5 h-5 text-amber-500" /> 
+    'match': {
+      bg: 'bg-amber-500/10',
+      icon: <Sparkles className="w-5 h-5 text-amber-500" />
     },
-    'super_like': { 
-      bg: 'bg-yellow-500/10', 
-      icon: <Star className="w-5 h-5 text-yellow-500" /> 
+    'super_like': {
+      bg: 'bg-yellow-500/10',
+      icon: <Star className="w-5 h-5 text-yellow-500" />
+    },
+    'premium_purchase': {
+      bg: 'bg-purple-500/10',
+      icon: <Crown className="w-5 h-5 text-purple-500" />
+    },
+    'activation_purchase': {
+      bg: 'bg-green-500/10',
+      icon: <MessageCircle className="w-5 h-5 text-green-500" />
     },
   };
 

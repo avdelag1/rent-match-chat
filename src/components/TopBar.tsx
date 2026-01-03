@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -24,7 +24,6 @@ export interface OwnerFilters {
 
 interface TopBarProps {
   onNotificationsClick?: () => void;
-  onSettingsClick?: () => void;
   onMessageActivationsClick?: () => void;
   className?: string;
   // Filter props
@@ -36,7 +35,6 @@ interface TopBarProps {
 
 function TopBarComponent({
   onNotificationsClick,
-  onSettingsClick,
   onMessageActivationsClick,
   className,
   showFilters,
@@ -125,28 +123,6 @@ function TopBarComponent({
                   </motion.span>
                 )}
               </AnimatePresence>
-            </Button>
-          </motion.div>
-
-          {/* Settings */}
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 500 }}
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
-              onClick={onSettingsClick}
-              aria-label="Settings menu"
-            >
-              <motion.div
-                whileHover={{ rotate: 90 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-              >
-                <Settings className="h-5 w-5 text-foreground/80" />
-              </motion.div>
             </Button>
           </motion.div>
         </div>
