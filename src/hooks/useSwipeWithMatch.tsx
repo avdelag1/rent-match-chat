@@ -30,24 +30,54 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
-      // Use atomic upsert to prevent race conditions
-      // onConflict on user_id,target_id ensures only ONE swipe per user-target pair
-      const { data: like, error: likeError } = await supabase
-        .from('likes')
-        .upsert({
-          user_id: user.id,
-          target_id: targetId,
-          direction
-        }, {
-          onConflict: 'user_id,target_id',
-          ignoreDuplicates: false
-        })
-        .select()
-        .single();
+      let like: any;
 
-      if (likeError) {
-        logger.error('Error saving like:', likeError);
-        throw likeError;
+      if (targetType === 'profile') {
+        // Owner swiping on a client profile - save to owner_likes table
+        if (direction === 'right') {
+          const { data: ownerLike, error: ownerLikeError } = await supabase
+            .from('owner_likes')
+            .upsert({
+              owner_id: user.id,
+              client_id: targetId,
+              is_super_like: false
+            }, {
+              onConflict: 'owner_id,client_id',
+              ignoreDuplicates: false
+            })
+            .select()
+            .single();
+
+          if (ownerLikeError) {
+            logger.error('Error saving owner like:', ownerLikeError);
+            throw ownerLikeError;
+          }
+          like = ownerLike;
+        } else {
+          // For left swipes, we don't need to save anything special
+          // Just return early with a placeholder
+          like = { id: 'skipped', direction };
+        }
+      } else {
+        // Client swiping on a listing - save to likes table
+        const { data: clientLike, error: likeError } = await supabase
+          .from('likes')
+          .upsert({
+            user_id: user.id,
+            target_id: targetId,
+            direction
+          }, {
+            onConflict: 'user_id,target_id',
+            ignoreDuplicates: false
+          })
+          .select()
+          .single();
+
+        if (likeError) {
+          logger.error('Error saving like:', likeError);
+          throw likeError;
+        }
+        like = clientLike;
       }
 
       // If it's a right swipe, check for mutual likes
@@ -74,13 +104,12 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           matchOwnerId = listing.owner_id;  // Listing owner
           matchListingId = targetId;  // The listing
 
-          // Check if owner liked this client
+          // Check if owner liked this client (in owner_likes table)
           const { data: ownerLike } = await supabase
-            .from('likes')
+            .from('owner_likes')
             .select('*')
-            .eq('user_id', listing.owner_id)
-            .eq('target_id', user.id)
-            .eq('direction', 'right')
+            .eq('owner_id', listing.owner_id)
+            .eq('client_id', user.id)
             .maybeSingle();
 
           mutualLike = ownerLike;
@@ -88,18 +117,33 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           // Owner swiping on a client profile
           matchClientId = targetId;  // Target is the client
           matchOwnerId = user.id;  // Current user is the owner
-          matchListingId = null;  // No specific listing
 
-          // Check if client liked this owner
-          const { data: clientLike } = await supabase
-            .from('likes')
-            .select('*')
-            .eq('user_id', targetId)
-            .eq('target_id', user.id)
-            .eq('direction', 'right')
-            .maybeSingle();
+          // Get owner's listings to check if client liked any of them
+          const { data: ownerListings } = await supabase
+            .from('listings')
+            .select('id')
+            .eq('owner_id', user.id);
 
-          mutualLike = clientLike;
+          if (ownerListings && ownerListings.length > 0) {
+            const listingIds = ownerListings.map(l => l.id);
+
+            // Check if client liked any of the owner's listings
+            const { data: clientLike } = await supabase
+              .from('likes')
+              .select('*')
+              .eq('user_id', targetId)
+              .in('target_id', listingIds)
+              .eq('direction', 'right')
+              .limit(1)
+              .maybeSingle();
+
+            mutualLike = clientLike;
+            // Use the listing that was liked for the match
+            matchListingId = clientLike?.target_id || null;
+          } else {
+            matchListingId = null;
+            mutualLike = null;
+          }
         }
 
         if (mutualLike) {
@@ -218,6 +262,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
   onSuccess: () => {
       // Invalidate relevant queries for instant UI updates
       queryClient.invalidateQueries({ queryKey: ['likes'] });
+      queryClient.invalidateQueries({ queryKey: ['owner-likes'] });
       queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
       queryClient.invalidateQueries({ queryKey: ['liked-clients'] });
       queryClient.invalidateQueries({ queryKey: ['client-profiles'] });

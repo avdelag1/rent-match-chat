@@ -4,7 +4,6 @@ import { Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
-import { useMessageActivationCount } from '@/hooks/useMessageActivationCount';
 import { SwipessLogo } from './SwipessLogo';
 import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 
@@ -46,14 +45,6 @@ function TopBarComponent({
   userRole,
 }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
-  const { count: activationCount } = useMessageActivationCount();
-
-  // Badge color based on activation count
-  const getActivationBadgeColor = () => {
-    if (activationCount > 5) return 'from-green-500 to-emerald-500 shadow-green-500/50';
-    if (activationCount > 0) return 'from-orange-500 to-amber-500 shadow-orange-500/50';
-    return 'from-red-500 to-rose-500 shadow-red-500/50';
-  };
 
   const defaultFilters: QuickFilters = {
     categories: [],
@@ -92,7 +83,7 @@ function TopBarComponent({
 
         {/* Right side: Actions */}
         <div className="flex items-center gap-1">
-          {/* Message Activations Button - Colorful Text */}
+          {/* Message Activations Button - Colorful Text (no badge) */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -100,21 +91,11 @@ function TopBarComponent({
           >
             <Button
               variant="ghost"
-              className="relative h-10 px-3 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center gap-1"
+              className="relative h-10 px-3 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
               onClick={onMessageActivationsClick}
-              aria-label={`Message activations (${activationCount} remaining)`}
+              aria-label="Message activations"
             >
               <MessageActivationText />
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className={cn(
-                  "text-white text-[10px] font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg ring-2 ring-background bg-gradient-to-br ml-1",
-                  getActivationBadgeColor()
-                )}
-              >
-                {activationCount > 99 ? '99+' : activationCount}
-              </motion.span>
             </Button>
           </motion.div>
 
