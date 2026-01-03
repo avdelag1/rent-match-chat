@@ -1,98 +1,87 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import './styles/responsive.css'
-import { ErrorBoundaryWrapper } from './components/ErrorBoundaryWrapper'
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+import "./styles/responsive.css";
+import { ErrorBoundaryWrapper } from "@/components/ErrorBoundaryWrapper";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// PERFORMANCE: Render React app immediately - fastest possible FCP
+// FAST INITIAL RENDER - Quita el loader apenas carga la página
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-// Remove initial loader immediately when React starts rendering
-const initialLoader = document.getElementById('initial-loader');
+const initialLoader = document.getElementById("initial-loader");
 if (initialLoader) {
-  initialLoader.style.opacity = '0';
-  initialLoader.style.transition = 'opacity 150ms ease-out';
+  initialLoader.style.opacity = "0";
+  initialLoader.style.transition = "opacity 150ms ease-out";
   setTimeout(() => initialLoader.remove(), 150);
 }
 
+// Arranca la app normalmente
 const root = createRoot(document.getElementById("root")!);
 root.render(
-  <StrictMode>
+  <React.StrictMode>
     <ErrorBoundaryWrapper>
       <App />
     </ErrorBoundaryWrapper>
-  </StrictMode>
+  </React.StrictMode>,
 );
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DEFERRED INITIALIZATION
-// Non-critical operations run after main render completes
+// DEFERRED INITIALIZATION - Todo lo pesado se carga DESPUÉS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-// Use requestIdleCallback for non-critical init, fallback to setTimeout
 const deferredInit = (callback: () => void, timeout = 3000) => {
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(callback, { timeout });
+  if ("requestIdleCallback" in window) {
+    (window as any).requestIdleCallback(callback, { timeout });
   } else {
-    setTimeout(callback, 100);
+    setTimeout(callback, timeout);
   }
 };
 
-// Priority 1: Route prefetching for instant navigation (runs first)
+// Priority 1: Prefetch de rutas importantes
 deferredInit(async () => {
-  const { prefetchCriticalRoutes } = await import('./utils/routePrefetcher');
-  prefetchCriticalRoutes();
+  try {
+    const { prefetchCriticalRoutes } = await import("@/utils/routePrefetcher");
+    prefetchCriticalRoutes();
+  } catch {}
 }, 1000);
 
-// Priority 2: Performance monitoring and cache management
+// Priority 2: Herramientas de rendimiento
 deferredInit(async () => {
-  // Dynamic imports for non-critical modules
-  const [
-    { logBundleSize },
-    { setupUpdateChecker, checkAppVersion },
-    { initPerformanceOptimizations },
-    { initWebVitalsMonitoring }
-  ] = await Promise.all([
-    import('./utils/performance'),
-    import('./utils/cacheManager'),
-    import('./utils/performanceMonitor'),
-    import('./utils/webVitals')
-  ]);
-
-  // Initialize performance monitoring
-  logBundleSize();
-  checkAppVersion();
-  setupUpdateChecker();
-  initPerformanceOptimizations();
-  initWebVitalsMonitoring();
+  try {
+    const [
+      { logBundleSize },
+      { setupUpdateChecker, checkAppVersion },
+      { initPerformanceOptimizations },
+      { initWebVitalsMonitoring },
+    ] = await Promise.all([
+      import("@/utils/performance"),
+      import("@/utils/cacheManager"),
+      import("@/utils/performanceMonitor"),
+      import("@/utils/webVitals"),
+    ]);
+    logBundleSize();
+    checkAppVersion();
+    setupUpdateChecker();
+    initPerformanceOptimizations();
+    initWebVitalsMonitoring();
+  } catch {}
 }, 3000);
 
-// Priority 3: Capacitor StatusBar - only on native platforms
+// Priority 3: Configuración nativa (solo en app móvil)
 deferredInit(async () => {
-  const { Capacitor } = await import('@capacitor/core');
-
-  if (Capacitor.isNativePlatform()) {
-    try {
-      const { StatusBar, Style } = await import('@capacitor/status-bar');
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    if (Capacitor.isNativePlatform()) {
+      const { StatusBar, Style } = await import("@capacitor/status-bar");
       await StatusBar.setOverlaysWebView({ overlay: false });
       await StatusBar.setStyle({ style: Style.Light });
-      await StatusBar.setBackgroundColor({ color: '#FF0000' });
-    } catch {
-      // StatusBar initialization errors are non-critical
+      await StatusBar.setBackgroundColor({ color: "#FF0000" });
     }
-  }
+  } catch {}
 }, 5000);
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SERVICE WORKER REGISTRATION
-// Register SW for offline support and faster repeat visits
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Service worker registration failed - non-critical
-    });
+// Service Worker solo en producción
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
   });
 }
