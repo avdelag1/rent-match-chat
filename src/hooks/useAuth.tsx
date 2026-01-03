@@ -178,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const result = await Promise.race([checkPromise, timeoutPromise]);
         existingProfile = result.profile;
       } catch (checkError) {
-        console.log('[Auth] Existing account check skipped:', checkError);
+        if (import.meta.env.DEV) console.log('[Auth] Existing account check skipped:', checkError);
       }
 
       if (existingProfile) {
@@ -257,7 +257,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null };
     } catch (error: any) {
-      console.error('[Auth] Sign up error:', error);
+      if (import.meta.env.DEV) console.error('[Auth] Sign up error:', error);
       let errorMessage = "Failed to create account. Please try again.";
 
       if (error.message?.includes('User already registered')) {
@@ -399,7 +399,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null };
     } catch (error: any) {
-      console.error(`[Auth] ${provider} OAuth error:`, error);
+      if (import.meta.env.DEV) console.error(`[Auth] ${provider} OAuth error:`, error);
       localStorage.removeItem('pendingOAuthRole');
 
       let errorMessage = `Failed to sign in with ${provider}. Please try again.`;

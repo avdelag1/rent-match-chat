@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Flame, MessageCircle, Star, User, Bell } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -28,7 +28,7 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
   const [isExpanded, setIsExpanded] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  const unreadNotifications = notifications.filter(n => !n.read);
+  const unreadNotifications = useMemo(() => notifications.filter(n => !n.read), [notifications]);
   const hasUnread = unreadNotifications.length > 0;
 
   useEffect(() => {

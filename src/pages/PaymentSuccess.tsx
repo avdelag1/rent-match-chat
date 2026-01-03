@@ -42,7 +42,7 @@ const ConfettiParticle = ({ delay, color }: { delay: number; color: string }) =>
 // Confetti container
 const Confetti = ({ isActive }: { isActive: boolean }) => {
   const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
-  const particles = Array.from({ length: 50 }, (_, i) => ({
+  const particles = Array.from({ length: 25 }, (_, i) => ({
     id: i,
     delay: Math.random() * 2,
     color: colors[Math.floor(Math.random() * colors.length)],
@@ -245,7 +245,7 @@ export default function PaymentSuccess() {
         }, 4000);
 
       } catch (error) {
-        console.error('Payment processing error:', error);
+        if (import.meta.env.DEV) console.error('Payment processing error:', error);
         if (isMounted) {
           setError('Failed to process payment. Please contact support with your PayPal receipt.');
           setProcessing(false);

@@ -1,4 +1,4 @@
-import { useState, useRef, memo, useCallback } from 'react';
+import { useState, useRef, memo, useCallback, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,16 @@ const ClientProfileCardComponent = ({
   const [imageIndex, setImageIndex] = useState(0);
   const [tapFlash, setTapFlash] = useState<'left' | 'right' | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const tapFlashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (tapFlashTimeoutRef.current) {
+        clearTimeout(tapFlashTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
@@ -90,15 +100,18 @@ const ClientProfileCardComponent = ({
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (!isTop) return;
-    
+
     const rect = cardRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
+
     const clickX = e.clientX - rect.left;
     const side = clickX < rect.width / 2 ? 'left' : 'right';
-    
+
     setTapFlash(side);
-    setTimeout(() => setTapFlash(null), 160);
+    if (tapFlashTimeoutRef.current) {
+      clearTimeout(tapFlashTimeoutRef.current);
+    }
+    tapFlashTimeoutRef.current = setTimeout(() => setTapFlash(null), 160);
   }, [isTop]);
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
