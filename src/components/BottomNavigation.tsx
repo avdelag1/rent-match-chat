@@ -199,7 +199,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               whileTap={{ scale: 0.9, transition: springConfigs.instant }}
               className="relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl"
             >
-              {/* Notification Badge - Animated dot */}
+              {/* Notification Badge - Shows unread count number */}
               <AnimatePresence>
                 {item.badge && item.badge > 0 && (
                   <motion.span
@@ -207,15 +207,11 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 rounded-full h-3.5 w-3.5 flex items-center justify-center shadow-lg ring-2 ring-background",
+                      "absolute -top-1 -right-1 rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-lg ring-2 ring-background text-[10px] font-bold text-white px-1",
                       item.id === 'messages' ? 'bg-blue-500' : 'bg-orange-500'
                     )}
                   >
-                    <motion.span
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="w-full h-full rounded-full bg-current opacity-50"
-                    />
+                    {item.badge > 99 ? '99+' : item.badge}
                   </motion.span>
                 )}
               </AnimatePresence>
