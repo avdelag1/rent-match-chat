@@ -251,14 +251,21 @@ export function useConversations() {
   };
 }
 
-export function useConversationMessages(conversationId: string) {
+export function useConversationMessages(conversationId: string, limit = 100) {
   return useQuery({
     queryKey: ['conversation-messages', conversationId],
     queryFn: async () => {
+      // OPTIMIZED: Select only needed columns, add limit for initial load
       const { data, error } = await supabase
         .from('conversation_messages')
         .select(`
-          *,
+          id,
+          conversation_id,
+          sender_id,
+          message_text,
+          message_type,
+          created_at,
+          is_read,
           sender:profiles!conversation_messages_sender_id_fkey (
             id,
             full_name,
@@ -266,12 +273,15 @@ export function useConversationMessages(conversationId: string) {
           )
         `)
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false }) // Get newest first for pagination
+        .limit(limit);
 
       if (error) throw error;
-      return data || [];
+      // Reverse to show oldest first in UI
+      return (data || []).reverse();
     },
     enabled: !!conversationId,
+    staleTime: 30000, // 30 seconds cache
   });
 }
 
