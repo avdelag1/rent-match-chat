@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+type NotificationType = 'like' | 'message' | 'super_like' | 'match' | 'new_user' | 'premium_purchase' | 'activation_purchase';
+
 interface Notification {
   id: string;
-  type: 'like' | 'message' | 'super_like' | 'match' | 'new_user';
+  type: NotificationType;
   title: string;
   message: string;
   avatar?: string;

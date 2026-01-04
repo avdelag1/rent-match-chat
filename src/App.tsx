@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SuspenseFallback } from "@/components/ui/suspense-fallback";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
@@ -112,7 +113,7 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                 </TooltipProvider>
-                <Suspense fallback={null}>
+                <Suspense fallback={<SuspenseFallback />}>
                   <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
