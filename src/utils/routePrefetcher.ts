@@ -1,19 +1,23 @@
 /**
- * Ultra-Fast Route Prefetcher
- * Preloads routes on hover/focus for instant navigation
- * Uses Intersection Observer for viewport-based prefetching
+ * Ultra-Fast Route Prefetcher - Instagram/Tinder Speed
+ * Aggressively preloads ALL routes for instant navigation
+ * No delays, no waiting - everything loads immediately
  */
 
 type RouteImport = () => Promise<{ default: React.ComponentType }>;
 
-// Route mapping for prefetching
+// Route mapping for prefetching - ALL app routes
 const routeImports: Record<string, RouteImport> = {
+  // Client routes
   '/client/dashboard': () => import('@/pages/ClientDashboard'),
   '/client/profile': () => import('@/pages/ClientProfileNew'),
   '/client/settings': () => import('@/pages/ClientSettingsNew'),
   '/client/liked-properties': () => import('@/pages/ClientLikedProperties'),
   '/client/contracts': () => import('@/pages/ClientContracts'),
   '/client/services': () => import('@/pages/ClientWorkerDiscovery'),
+  '/client/saved-searches': () => import('@/pages/ClientSavedSearches'),
+  '/client/security': () => import('@/pages/ClientSecurity'),
+  // Owner routes
   '/owner/dashboard': () => import('@/components/EnhancedOwnerDashboard'),
   '/owner/profile': () => import('@/pages/OwnerProfileNew'),
   '/owner/settings': () => import('@/pages/OwnerSettingsNew'),
@@ -21,6 +25,14 @@ const routeImports: Record<string, RouteImport> = {
   '/owner/listings/new': () => import('@/pages/OwnerNewListing'),
   '/owner/liked-clients': () => import('@/pages/OwnerLikedClients'),
   '/owner/contracts': () => import('@/pages/OwnerContracts'),
+  '/owner/saved-searches': () => import('@/pages/OwnerSavedSearches'),
+  '/owner/security': () => import('@/pages/OwnerSecurity'),
+  '/owner/clients/property': () => import('@/pages/OwnerPropertyClientDiscovery'),
+  '/owner/clients/vehicle': () => import('@/pages/OwnerVehicleClientDiscovery'),
+  '/owner/clients/moto': () => import('@/pages/OwnerMotoClientDiscovery'),
+  '/owner/clients/bicycle': () => import('@/pages/OwnerBicycleClientDiscovery'),
+  '/owner/clients/yacht': () => import('@/pages/OwnerYachtClientDiscovery'),
+  // Shared routes
   '/messages': () => import('@/pages/MessagingDashboard').then(m => ({ default: m.MessagingDashboard })),
   '/notifications': () => import('@/pages/NotificationsPage'),
   '/subscription-packages': () => import('@/pages/SubscriptionPackagesPage'),
@@ -28,120 +40,109 @@ const routeImports: Record<string, RouteImport> = {
 
 // Cache for prefetched routes
 const prefetchedRoutes = new Set<string>();
-const prefetchQueue: string[] = [];
-let isPrefetching = false;
 
 /**
- * Prefetch a route's JavaScript chunk
+ * Immediately prefetch a route - no waiting
  */
-export function prefetchRoute(path: string): void {
-  // Skip if already prefetched or no import defined
-  if (prefetchedRoutes.has(path)) return;
+export function prefetchRoute(path: string): Promise<void> {
+  if (prefetchedRoutes.has(path)) return Promise.resolve();
 
   const routeImport = routeImports[path];
-  if (!routeImport) return;
+  if (!routeImport) return Promise.resolve();
 
-  // Add to queue and process
-  if (!prefetchQueue.includes(path)) {
-    prefetchQueue.push(path);
-    processPrefetchQueue();
+  prefetchedRoutes.add(path);
+
+  return routeImport()
+    .then(() => {})
+    .catch(() => {
+      prefetchedRoutes.delete(path);
+    });
+}
+
+/**
+ * Prefetch multiple routes in parallel - instant loading
+ */
+function prefetchRoutesParallel(routes: string[]): void {
+  Promise.all(routes.map(route => prefetchRoute(route))).catch(() => {});
+}
+
+/**
+ * Prefetch routes based on user role - AGGRESSIVE
+ */
+export function prefetchRoleRoutes(role: 'client' | 'owner'): void {
+  if (role === 'client') {
+    prefetchRoutesParallel([
+      '/client/dashboard',
+      '/client/profile',
+      '/client/settings',
+      '/client/liked-properties',
+      '/client/services',
+      '/messages',
+      '/notifications',
+    ]);
+  } else {
+    prefetchRoutesParallel([
+      '/owner/dashboard',
+      '/owner/profile',
+      '/owner/settings',
+      '/owner/properties',
+      '/owner/liked-clients',
+      '/owner/clients/property',
+      '/messages',
+      '/notifications',
+    ]);
   }
 }
 
 /**
- * Process prefetch queue with idle callback
- */
-function processPrefetchQueue(): void {
-  if (isPrefetching || prefetchQueue.length === 0) return;
-  isPrefetching = true;
-
-  const prefetchNext = () => {
-    const path = prefetchQueue.shift();
-    if (!path) {
-      isPrefetching = false;
-      return;
-    }
-
-    const routeImport = routeImports[path];
-    if (routeImport && !prefetchedRoutes.has(path)) {
-      prefetchedRoutes.add(path);
-
-      // Use requestIdleCallback for non-blocking prefetch
-      const doPrefetch = () => {
-        routeImport()
-          .then(() => {
-            // Small delay before next prefetch to avoid network congestion
-            setTimeout(prefetchNext, 50);
-          })
-          .catch(() => {
-            // Remove from cache on error so we can retry
-            prefetchedRoutes.delete(path);
-            prefetchNext();
-          });
-      };
-
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(doPrefetch, { timeout: 2000 });
-      } else {
-        setTimeout(doPrefetch, 100);
-      }
-    } else {
-      prefetchNext();
-    }
-  };
-
-  prefetchNext();
-}
-
-/**
- * Prefetch routes based on user role
- */
-export function prefetchRoleRoutes(role: 'client' | 'owner'): void {
-  const routes = role === 'client'
-    ? ['/client/dashboard', '/client/profile', '/messages', '/notifications']
-    : ['/owner/dashboard', '/owner/profile', '/owner/properties', '/messages'];
-
-  routes.forEach(prefetchRoute);
-}
-
-/**
- * Create hover prefetch handler for links
+ * Create hover prefetch handler - INSTANT, no debounce
  */
 export function createHoverPrefetch(path: string): {
   onMouseEnter: () => void;
   onFocus: () => void;
+  onTouchStart: () => void;
 } {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
   return {
-    onMouseEnter: () => {
-      // Debounce to avoid prefetching on quick mouse movements
-      timeoutId = setTimeout(() => prefetchRoute(path), 50);
-    },
-    onFocus: () => {
-      prefetchRoute(path);
-    },
+    onMouseEnter: () => prefetchRoute(path),
+    onFocus: () => prefetchRoute(path),
+    onTouchStart: () => prefetchRoute(path),
   };
 }
 
 /**
- * Prefetch critical routes on app load
+ * Prefetch ALL critical routes immediately on app load
+ * This is the key for instant navigation - preload everything
  */
 export function prefetchCriticalRoutes(): void {
-  // Use idle callback to not block initial render
-  const doPrefetch = () => {
-    // Prefetch messaging first (most common navigation)
-    prefetchRoute('/messages');
+  // Batch 1: Most critical routes - load immediately
+  const criticalRoutes = [
+    '/client/dashboard',
+    '/owner/dashboard',
+    '/messages',
+    '/notifications',
+  ];
+  prefetchRoutesParallel(criticalRoutes);
 
-    // Then notifications
-    setTimeout(() => prefetchRoute('/notifications'), 200);
-  };
+  // Batch 2: Secondary routes - load after 100ms
+  setTimeout(() => {
+    const secondaryRoutes = [
+      '/client/profile',
+      '/client/settings',
+      '/client/liked-properties',
+      '/owner/profile',
+      '/owner/settings',
+      '/owner/properties',
+    ];
+    prefetchRoutesParallel(secondaryRoutes);
+  }, 100);
 
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(doPrefetch, { timeout: 5000 });
-  } else {
-    setTimeout(doPrefetch, 2000);
-  }
+  // Batch 3: All remaining routes - load after 300ms
+  setTimeout(() => {
+    const remainingRoutes = Object.keys(routeImports).filter(
+      route => !prefetchedRoutes.has(route)
+    );
+    prefetchRoutesParallel(remainingRoutes);
+  }, 300);
 }
 
 /**
@@ -163,27 +164,32 @@ export function createLinkObserver(): IntersectionObserver | null {
       });
     },
     {
-      rootMargin: '100px', // Prefetch when link is 100px from viewport
+      rootMargin: '200px', // Prefetch when link is 200px from viewport
       threshold: 0,
     }
   );
 }
 
 /**
- * Prefetch next likely route based on current location
+ * Prefetch next likely route based on current location - INSTANT
  */
 export function prefetchNextLikelyRoute(currentPath: string): void {
   const nextRouteMap: Record<string, string[]> = {
-    '/client/dashboard': ['/messages', '/client/liked-properties'],
-    '/owner/dashboard': ['/messages', '/owner/properties', '/owner/liked-clients'],
+    '/client/dashboard': ['/messages', '/client/liked-properties', '/client/profile', '/client/services'],
+    '/owner/dashboard': ['/messages', '/owner/properties', '/owner/liked-clients', '/owner/profile'],
     '/owner/properties': ['/owner/listings/new'],
     '/': ['/client/dashboard', '/owner/dashboard'],
   };
 
   const nextRoutes = nextRouteMap[currentPath];
   if (nextRoutes) {
-    nextRoutes.forEach((route, index) => {
-      setTimeout(() => prefetchRoute(route), index * 100);
-    });
+    prefetchRoutesParallel(nextRoutes);
   }
+}
+
+/**
+ * Check if a route is already prefetched
+ */
+export function isRoutePrefetched(path: string): boolean {
+  return prefetchedRoutes.has(path);
 }
