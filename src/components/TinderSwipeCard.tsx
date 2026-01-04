@@ -75,8 +75,9 @@ const InstantImageGallery = memo(({
       )}
 
       {/* Current image - NO transition delay for instant feel */}
+      {/* FIX: Removed key={currentIndex} to prevent remounting on tap (causes delay/flicker) */}
+      {/* FIX: Removed contentVisibility: 'auto' which can delay painting on mobile */}
       <img
-        key={currentIndex}
         src={optimizedCurrentSrc}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
@@ -90,7 +91,6 @@ const InstantImageGallery = memo(({
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           transform: 'translateZ(0)',
-          contentVisibility: 'auto',
         }}
         onLoad={() => {
           if (!loadedImagesRef.current.has(optimizedCurrentSrc)) {
@@ -345,18 +345,23 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
           </div>
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
+          {/* FIX: Use translateY instead of height animation for GPU-friendly transforms (no reflow) */}
           <motion.div
-            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden"
             animate={{
-              height: isBottomSheetExpanded ? 'min(60%, 350px)' : 'min(18%, 120px)',
-              y: 0
+              y: isBottomSheetExpanded ? 0 : 230
             }}
             transition={{
               type: "spring",
               stiffness: 400,
               damping: 32
             }}
-            style={{ willChange: 'height', maxHeight: 'calc(100% - 60px)' }}
+            style={{
+              height: 350,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+            }}
           >
             {/* Drag Handle */}
             <div className="flex justify-center py-2 pointer-events-none">
