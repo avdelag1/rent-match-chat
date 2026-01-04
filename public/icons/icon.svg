@@ -1,97 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Background gradient - Pink/Orange/Magenta -->
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF1493"/>
-      <stop offset="30%" stop-color="#FF6B6B"/>
-      <stop offset="50%" stop-color="#FF8E53"/>
-      <stop offset="70%" stop-color="#FF6B9D"/>
-      <stop offset="100%" stop-color="#E040FB"/>
-    </linearGradient>
-
-    <!-- S letter gradient - Yellow/Gold to Purple/Blue -->
+    <!-- S letter gradient - Magenta/Pink to Orange to Yellow -->
     <linearGradient id="sGradient" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="20%" stop-color="#FFC947"/>
-      <stop offset="40%" stop-color="#FF8E53"/>
-      <stop offset="60%" stop-color="#FF6B9D"/>
-      <stop offset="80%" stop-color="#9C7CF4"/>
-      <stop offset="100%" stop-color="#7B68EE"/>
+      <stop offset="0%" stop-color="#FF00FF"/>
+      <stop offset="15%" stop-color="#FF2DBA"/>
+      <stop offset="35%" stop-color="#FF6B8A"/>
+      <stop offset="55%" stop-color="#FF8E53"/>
+      <stop offset="75%" stop-color="#FFB833"/>
+      <stop offset="100%" stop-color="#FFE600"/>
     </linearGradient>
 
-    <!-- Highlight gradient for 3D effect -->
-    <linearGradient id="highlightGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.4"/>
-      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.1"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
-    </linearGradient>
-
-    <!-- Shadow for depth -->
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="8" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.3"/>
-    </filter>
-
-    <!-- Inner shadow for 3D depth -->
-    <filter id="innerGlow">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
-      <feOffset in="blur" dx="4" dy="4" result="offsetBlur"/>
-      <feComposite in="SourceGraphic" in2="offsetBlur" operator="over"/>
+    <!-- Subtle glow effect -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
 
-  <!-- Background with rounded corners -->
-  <rect width="1024" height="1024" rx="224" fill="url(#bgGradient)"/>
+  <!-- Dark navy background with rounded corners -->
+  <rect width="1024" height="1024" rx="224" fill="#0F172A"/>
 
-  <!-- Subtle inner highlight on background -->
-  <rect x="40" y="40" width="944" height="944" rx="200" fill="url(#highlightGradient)" opacity="0.3"/>
-
-  <!-- Main S shape - 3D stylized -->
-  <g filter="url(#shadow)">
-    <!-- S letter - thick flowing shape -->
+  <!-- Main S shape - smooth flowing design -->
+  <g filter="url(#glow)">
     <path
-      d="M680 280
-         C680 280, 620 200, 480 200
-         C320 200, 220 280, 220 400
-         C220 500, 300 560, 420 600
-         L580 660
-         C680 690, 760 750, 760 860
-         C760 980, 640 1040, 500 1040
-         C360 1040, 260 980, 200 900
-
-         L200 900
-         C260 1020, 380 1100, 520 1100
-         C700 1100, 840 1000, 840 840
-         C840 720, 740 640, 600 590
-         L440 530
-         C340 500, 280 450, 280 380
-         C280 300, 360 250, 480 250
-         C600 250, 680 300, 720 360"
+      d="M640 260
+         C640 260, 590 190, 470 190
+         C330 190, 250 270, 250 370
+         C250 470, 330 520, 430 560
+         L550 610
+         C650 650, 720 710, 720 810
+         C720 920, 620 990, 490 990
+         C370 990, 280 930, 230 860"
       fill="none"
       stroke="url(#sGradient)"
-      stroke-width="100"
+      stroke-width="110"
       stroke-linecap="round"
       stroke-linejoin="round"
-      transform="translate(40, -80)"
+      transform="translate(50, 20)"
     />
   </g>
-
-  <!-- Highlight stroke on S for 3D effect -->
-  <path
-    d="M680 280
-       C680 280, 620 200, 480 200
-       C320 200, 220 280, 220 400
-       C220 500, 300 560, 420 600
-       L580 660
-       C680 690, 760 750, 760 860
-       C760 980, 640 1040, 500 1040
-       C360 1040, 260 980, 200 900"
-    fill="none"
-    stroke="url(#highlightGradient)"
-    stroke-width="40"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    transform="translate(30, -90)"
-    opacity="0.6"
-  />
 </svg>
