@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // Build version injector plugin for automatic cache busting
 function buildVersionPlugin() {
@@ -96,6 +97,9 @@ function resourceHintsPlugin(): import('vite').Plugin {
   };
 }
 
+// Determine if we should analyze the bundle
+const isAnalyze = process.env.ANALYZE === 'true';
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -109,6 +113,14 @@ export default defineConfig(({ mode }) => ({
     preloadPlugin(),
     resourceHintsPlugin(),
     mode === 'development' && componentTagger(),
+    // Bundle analyzer - generates dist/stats.html when ANALYZE=true
+    isAnalyze && visualizer({
+      filename: 'dist/stats.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap', // sunburst, treemap, network
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {

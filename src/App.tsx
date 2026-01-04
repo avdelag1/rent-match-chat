@@ -112,7 +112,7 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                 </TooltipProvider>
-                <Suspense fallback={null}>
+                <Suspense fallback={<div className="flex items-center justify-center min-h-[200px]"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
                   <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
@@ -414,7 +414,7 @@ const App = () => (
                 </Suspense>
               </AppLayout>
               {/* Lazy-loaded overlay components - loaded after initial render */}
-              <Suspense fallback={null}>
+              <Suspense fallback={<></>}>
                 <PWAInstallBanner />
                 <PerformanceMonitor />
               </Suspense>
