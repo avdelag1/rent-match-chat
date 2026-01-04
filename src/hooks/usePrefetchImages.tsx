@@ -8,14 +8,18 @@ interface PrefetchOptions {
 }
 
 /**
- * Ultra-aggressive image prefetching - Instagram/Tinder speed
- * Prefetches next 5 profiles with ALL their images
- * Images appear INSTANTLY on swipe - zero delay
+ * Optimized image prefetching - balances speed with mobile performance
+ *
+ * FIX: Reduced from aggressive "all images for 5 profiles" to:
+ * - Only next 2 profiles (not 5)
+ * - Only first 2 images per profile (hero + next)
+ * - Uses requestIdleCallback for non-critical prefetches
+ * - No aggressive decode() (let browser handle it naturally)
  */
 export function usePrefetchImages({
   currentIndex,
   profiles,
-  prefetchCount = 5 // Increased to 5 for maximum prefetching
+  prefetchCount = 2 // Reduced from 5 to prevent network saturation
 }: PrefetchOptions) {
   const prefetchedIndices = useRef(new Set<number>());
   const imageCache = useRef(new Map<string, HTMLImageElement>());
@@ -27,7 +31,7 @@ export function usePrefetchImages({
       currentIndex + 1 + prefetchCount
     );
 
-    // Prefetch images for each profile IN PARALLEL
+    // Prefetch images for each profile
     profilesToPrefetch.forEach((profile, offset) => {
       const profileIndex = currentIndex + 1 + offset;
 
@@ -37,70 +41,67 @@ export function usePrefetchImages({
       // Mark as prefetched
       prefetchedIndices.current.add(profileIndex);
 
-      // Collect ALL images from this profile
+      // FIX: Only collect first 2 images (hero + next), not ALL images
       const imagesToPrefetch: string[] = [];
 
-      // Main profile image
-      if (profile.avatar_url) {
+      // For property listings - only first 2 images
+      if (profile.images && Array.isArray(profile.images)) {
+        imagesToPrefetch.push(...profile.images.slice(0, 2));
+      }
+      // Fallback to avatar if no property images
+      else if (profile.avatar_url) {
         imagesToPrefetch.push(profile.avatar_url);
       }
 
-      // Gallery images - prefetch ALL of them for instant viewing
-      if (profile.profile_images && Array.isArray(profile.profile_images)) {
-        imagesToPrefetch.push(...profile.profile_images);
-      }
+      // FIX: Use idle callback for non-first-profile prefetches
+      const prefetchImages = () => {
+        imagesToPrefetch.forEach((imageUrl, imgIndex) => {
+          if (imageUrl && imageUrl !== '/placeholder.svg' && imageUrl !== '/placeholder-avatar.svg') {
+            const optimizedUrl = getCardImageUrl(imageUrl);
 
-      // For property listings - prefetch ALL property images
-      if (profile.images && Array.isArray(profile.images)) {
-        imagesToPrefetch.push(...profile.images);
-      }
+            // Skip if already in cache
+            if (imageCache.current.has(optimizedUrl)) return;
 
-      // Prefetch each image with maximum priority
-      imagesToPrefetch.forEach((imageUrl, imgIndex) => {
-        if (imageUrl && imageUrl !== '/placeholder.svg' && imageUrl !== '/placeholder-avatar.svg') {
-          const optimizedUrl = getCardImageUrl(imageUrl);
+            const img = new Image();
 
-          // Skip if already in cache
-          if (imageCache.current.has(optimizedUrl)) return;
+            // Only first image of first profile gets high priority
+            img.fetchPriority = (offset === 0 && imgIndex === 0) ? 'high' : 'low';
+            img.decoding = 'async';
 
-          const img = new Image();
+            // Store in cache to prevent re-fetching
+            imageCache.current.set(optimizedUrl, img);
+            img.src = optimizedUrl;
 
-          // First 3 images of first 2 profiles get HIGH priority
-          if (offset < 2 && imgIndex < 3) {
-            img.fetchPriority = 'high';
-          } else {
-            img.fetchPriority = 'low';
+            // FIX: Removed aggressive decode() - let browser handle naturally
+            // This prevents CPU spikes during swipe interactions
           }
+        });
+      };
 
-          // Decode async for better performance
-          img.decoding = 'async';
-
-          // Store in cache to prevent re-fetching
-          imageCache.current.set(optimizedUrl, img);
-
-          img.src = optimizedUrl;
-
-          // Force decode to ensure image is ready in cache
-          if ('decode' in img) {
-            img.decode().catch(() => {});
-          }
-        }
-      });
+      // First profile prefetches immediately, others use idle time
+      if (offset === 0) {
+        prefetchImages();
+      } else if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(prefetchImages, { timeout: 2000 });
+      } else {
+        // Fallback: delay non-critical prefetches
+        setTimeout(prefetchImages, 100 * offset);
+      }
     });
 
     // Clean up old prefetched indices to prevent memory leak
-    if (prefetchedIndices.current.size > 100) {
+    if (prefetchedIndices.current.size > 50) {
       const indicesToKeep = new Set<number>();
-      for (let i = Math.max(0, currentIndex - 5); i < currentIndex + prefetchCount + 10; i++) {
+      for (let i = Math.max(0, currentIndex - 2); i < currentIndex + prefetchCount + 5; i++) {
         indicesToKeep.add(i);
       }
       prefetchedIndices.current = indicesToKeep;
     }
 
-    // Clean up old cached images (keep last 100)
-    if (imageCache.current.size > 100) {
+    // Clean up old cached images (keep last 30, reduced from 100)
+    if (imageCache.current.size > 30) {
       const keys = Array.from(imageCache.current.keys());
-      const toRemove = keys.slice(0, keys.length - 100);
+      const toRemove = keys.slice(0, keys.length - 30);
       toRemove.forEach(key => imageCache.current.delete(key));
     }
   }, [currentIndex, profiles, prefetchCount]);
