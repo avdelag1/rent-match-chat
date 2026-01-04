@@ -6,6 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, X, Image, Star, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
+import imageCompression from 'browser-image-compression';
+
+// Compression options for optimal balance between quality and file size
+const COMPRESSION_OPTIONS = {
+  maxSizeMB: 1, // Max 1MB after compression
+  maxWidthOrHeight: 1920, // Max dimension
+  useWebWorker: true, // Use web worker to avoid blocking UI
+  fileType: 'image/webp', // Convert to WebP for smaller size
+  initialQuality: 0.85, // 85% quality
+};
 
 interface PhotoUploadManagerProps {
   maxPhotos: number; // 30 for properties, 10 for clients
@@ -95,10 +105,25 @@ export function PhotoUploadManager({
     try {
 
       const uploadPromises = validFiles.map(async ({ file }) => {
+        // Compress image before upload for faster uploads and less storage
+        let fileToUpload = file;
+        try {
+          // Only compress if file is larger than 500KB
+          if (file.size > 500 * 1024) {
+            fileToUpload = await imageCompression(file, COMPRESSION_OPTIONS);
+            if (import.meta.env.DEV) {
+              console.log(`[PhotoUpload] Compressed ${file.name}: ${(file.size / 1024).toFixed(0)}KB → ${(fileToUpload.size / 1024).toFixed(0)}KB`);
+            }
+          }
+        } catch (compressionError) {
+          // If compression fails, use original file
+          console.warn('[PhotoUpload] Compression failed, using original:', compressionError);
+        }
+
         if (onUpload) {
           // Add timeout to prevent hanging uploads
           const uploadWithTimeout = Promise.race([
-            onUpload(file),
+            onUpload(fileToUpload),
             new Promise<string>((_, reject) =>
               setTimeout(() => reject(new Error('Upload timeout')), 30000)
             )
@@ -106,7 +131,7 @@ export function PhotoUploadManager({
           return uploadWithTimeout;
         } else {
           // Fallback: create object URL for demo
-          return URL.createObjectURL(file);
+          return URL.createObjectURL(fileToUpload);
         }
       });
 
@@ -214,6 +239,8 @@ export function PhotoUploadManager({
                     src={photo}
                     alt={`${uploadType} photo ${index + 1}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                   
                   {/* Main Photo Badge */}
