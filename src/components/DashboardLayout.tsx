@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useResponsiveContext } from '@/contexts/ResponsiveContext'
+import { prefetchRoleRoutes } from '@/utils/routePrefetcher'
 
 // New Mobile Navigation Components
 import { TopBar } from '@/components/TopBar'
@@ -85,6 +86,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const location = useLocation()
   const { user } = useAuth()
   const responsive = useResponsiveContext()
+
+  // Preload routes for the user's role on mount - enables instant navigation
+  useEffect(() => {
+    if (userRole === 'client' || userRole === 'owner') {
+      prefetchRoleRoutes(userRole);
+    }
+  }, [userRole]);
 
   // Lazy load listings and profiles only when insights dialogs are opened
   // This prevents unnecessary API calls on every page load

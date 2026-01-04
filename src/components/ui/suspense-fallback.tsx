@@ -1,6 +1,6 @@
 /**
- * Lightweight loading fallback for Suspense boundaries
- * Used instead of null to provide visual feedback on slow connections
+ * Ultra-lightweight loading fallback for Suspense boundaries
+ * Designed to be nearly invisible - routes should already be prefetched
  */
 
 import { cn } from '@/lib/utils';
@@ -11,20 +11,23 @@ interface SuspenseFallbackProps {
 }
 
 export function SuspenseFallback({ className, minimal = false }: SuspenseFallbackProps) {
-  if (minimal) {
-    return (
-      <div className={cn('flex items-center justify-center p-4', className)}>
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
+  // Always use minimal fallback - routes should be preloaded
+  // This only shows briefly if route wasn't prefetched
   return (
-    <div className={cn('flex items-center justify-center min-h-[200px]', className)}>
-      <div className="text-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </div>
+    <div
+      className={cn(
+        'flex items-center justify-center',
+        minimal ? 'p-2' : 'min-h-[100px]',
+        className
+      )}
+    >
+      {/* Tiny, subtle spinner - barely visible */}
+      <div
+        className="w-5 h-5 border-2 border-primary/20 border-t-primary/60 rounded-full animate-spin"
+        style={{
+          animationDuration: '0.6s',
+        }}
+      />
     </div>
   );
 }

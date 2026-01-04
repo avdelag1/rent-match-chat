@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo, memo } from 'react';
+import { useState, useCallback, useRef, useMemo, memo, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,58 +8,95 @@ import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
+import { getCardImageUrl } from '@/utils/imageOptimization';
 
-// Progressive image component with blur placeholder
-const ProgressiveImage = memo(({
-  src,
+// Ultra-fast image gallery with aggressive preloading - Instagram/Tinder speed
+const InstantImageGallery = memo(({
+  images,
+  currentIndex,
   alt,
-  isTop,
-  currentImageIndex
+  isTop
 }: {
-  src: string;
+  images: string[];
+  currentIndex: number;
   alt: string;
   isTop: boolean;
-  currentImageIndex: number;
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  // Track which images are loaded - persists across renders
+  const loadedImagesRef = useRef<Set<string>>(new Set());
+  const [, forceUpdate] = useState(0);
+
+  // Preload ALL images immediately when card mounts - Instagram-style
+  useEffect(() => {
+    if (!isTop) return;
+
+    images.forEach((src, idx) => {
+      if (!src || src === '/placeholder.svg') return;
+
+      const optimizedSrc = getCardImageUrl(src);
+      if (loadedImagesRef.current.has(optimizedSrc)) return;
+
+      const img = new Image();
+      img.decoding = 'async';
+      // First 3 images get high priority
+      img.fetchPriority = idx < 3 ? 'high' : 'auto';
+
+      img.onload = () => {
+        loadedImagesRef.current.add(optimizedSrc);
+        // Force re-render only for current image
+        if (idx === currentIndex) {
+          forceUpdate(n => n + 1);
+        }
+      };
+
+      img.src = optimizedSrc;
+
+      // Force decode for instant display
+      if ('decode' in img) {
+        img.decode().catch(() => {});
+      }
+    });
+  }, [images, isTop]);
+
+  const currentSrc = images[currentIndex] || '/placeholder.svg';
+  const optimizedCurrentSrc = currentSrc !== '/placeholder.svg' ? getCardImageUrl(currentSrc) : currentSrc;
+  const isCurrentLoaded = loadedImagesRef.current.has(optimizedCurrentSrc) || currentSrc === '/placeholder.svg';
 
   return (
     <>
-      {/* Blur placeholder - shows while loading */}
-      {!isLoaded && !hasError && (
+      {/* Minimal placeholder - only shows briefly on first load */}
+      {!isCurrentLoaded && (
         <div
-          className="absolute inset-0 bg-gradient-to-br from-muted/60 via-muted/40 to-muted/60 animate-pulse"
+          className="absolute inset-0 bg-muted/40"
           style={{
-            backdropFilter: 'blur(20px)',
+            backgroundImage: 'linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%)'
           }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"
-               style={{ backgroundSize: '200% 100%' }} />
-        </div>
+        />
       )}
 
-      {/* Actual image */}
+      {/* Current image - NO transition delay for instant feel */}
       <img
-        src={hasError ? '/placeholder.svg' : src}
+        key={currentIndex}
+        src={optimizedCurrentSrc}
         alt={alt}
-        className={`absolute inset-0 w-full h-full object-cover rounded-3xl transition-opacity duration-300 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="absolute inset-0 w-full h-full object-cover rounded-3xl"
         draggable={false}
-        loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
+        loading="eager"
         decoding="async"
-        fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
+        fetchPriority="high"
         style={{
-          willChange: 'transform',
+          opacity: isCurrentLoaded ? 1 : 0,
+          willChange: 'auto',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
-          transform: 'translateZ(0)'
+          transform: 'translateZ(0)',
+          contentVisibility: 'auto',
         }}
-        onLoad={() => setIsLoaded(true)}
-        onError={() => {
-          setHasError(true);
-          setIsLoaded(true);
+        onLoad={() => {
+          if (!loadedImagesRef.current.has(optimizedCurrentSrc)) {
+            loadedImagesRef.current.add(optimizedCurrentSrc);
+            forceUpdate(n => n + 1);
+          }
         }}
       />
     </>
@@ -279,12 +316,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
               </div>
             )}
 
-            {/* Image with Gradient Overlay - Progressive Loading */}
-            <ProgressiveImage
-              src={images[Math.min(currentImageIndex, imageCount - 1)]}
+            {/* Image Gallery - Instant Loading with aggressive preload */}
+            <InstantImageGallery
+              images={images}
+              currentIndex={Math.min(currentImageIndex, imageCount - 1)}
               alt={listing.title}
               isTop={isTop}
-              currentImageIndex={currentImageIndex}
             />
 
             {/* Bottom gradient - Lighter for better photo visibility */}

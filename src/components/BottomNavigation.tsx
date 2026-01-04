@@ -4,6 +4,7 @@ import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Buildi
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { springConfigs } from '@/utils/springConfigs';
+import { prefetchRoute } from '@/utils/routePrefetcher';
 
 interface BottomNavigationProps {
   userRole: 'client' | 'owner' | 'admin';
@@ -195,6 +196,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 delay: 0.15 + index * 0.05
               }}
               onClick={() => handleNavClick(item)}
+              onMouseEnter={() => item.path && prefetchRoute(item.path)}
+              onTouchStart={() => item.path && prefetchRoute(item.path)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9, transition: springConfigs.instant }}
               className="relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl"

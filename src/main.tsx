@@ -36,13 +36,14 @@ const deferredInit = (callback: () => void, timeout = 3000) => {
   }
 };
 
-// Priority 1: Prefetch de rutas importantes
-deferredInit(async () => {
+// Priority 1: Prefetch routes IMMEDIATELY for instant navigation
+// No delay - start loading routes right after render
+setTimeout(async () => {
   try {
     const { prefetchCriticalRoutes } = await import("@/utils/routePrefetcher");
     prefetchCriticalRoutes();
   } catch {}
-}, 1000);
+}, 0);
 
 // Priority 2: Herramientas de rendimiento
 deferredInit(async () => {
