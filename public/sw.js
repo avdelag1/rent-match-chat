@@ -145,23 +145,30 @@ self.addEventListener('activate', (event) => {
     Promise.all([
       // Take control of all clients immediately
       self.clients.claim(),
-      
-      // Clean up old caches - only delete app-related caches with tinderent prefix
+
+      // FIX: Clean up old caches - use correct prefix 'tinderent-' (was 'swipematch-')
+      // Also include IMAGE_CACHE in the exclusion list
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             // Only delete caches that belong to this app and are not the current ones
-            if (cacheName.startsWith('swipematch-') &&
+            if (cacheName.startsWith('tinderent-') &&
                 cacheName !== STATIC_CACHE &&
-                cacheName !== DYNAMIC_CACHE) {
+                cacheName !== DYNAMIC_CACHE &&
+                cacheName !== IMAGE_CACHE) {
+              console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
-      })
+      }),
+
+      // FIX: Enforce cache size limits to prevent bloat
+      enforceImageCacheLimit(),
+      enforceDynamicCacheLimit()
     ])
   );
-  
+
   // Notify clients about the update
   self.clients.matchAll().then(clients => {
     clients.forEach(client => {
@@ -172,3 +179,33 @@ self.addEventListener('activate', (event) => {
     });
   });
 });
+
+// FIX: Implement cache eviction for images (LRU-style - delete oldest first)
+async function enforceImageCacheLimit() {
+  try {
+    const cache = await caches.open(IMAGE_CACHE);
+    const keys = await cache.keys();
+    if (keys.length > MAX_IMAGE_CACHE_SIZE) {
+      const toDelete = keys.slice(0, keys.length - MAX_IMAGE_CACHE_SIZE);
+      await Promise.all(toDelete.map(key => cache.delete(key)));
+      console.log(`[SW] Evicted ${toDelete.length} images from cache`);
+    }
+  } catch (e) {
+    // Ignore cache eviction errors
+  }
+}
+
+// FIX: Implement cache eviction for dynamic content
+async function enforceDynamicCacheLimit() {
+  try {
+    const cache = await caches.open(DYNAMIC_CACHE);
+    const keys = await cache.keys();
+    if (keys.length > MAX_DYNAMIC_CACHE_SIZE) {
+      const toDelete = keys.slice(0, keys.length - MAX_DYNAMIC_CACHE_SIZE);
+      await Promise.all(toDelete.map(key => cache.delete(key)));
+      console.log(`[SW] Evicted ${toDelete.length} items from dynamic cache`);
+    }
+  } catch (e) {
+    // Ignore cache eviction errors
+  }
+}
