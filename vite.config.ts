@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // Build version injector plugin for automatic cache busting
 function buildVersionPlugin() {
@@ -109,6 +110,14 @@ export default defineConfig(({ mode }) => ({
     preloadPlugin(),
     resourceHintsPlugin(),
     mode === 'development' && componentTagger(),
+    // Bundle analyzer - generates stats.html in dist folder
+    mode === 'production' && visualizer({
+      filename: 'dist/stats.html',
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap',
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {

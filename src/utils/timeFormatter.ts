@@ -4,9 +4,10 @@
  * Uses browser's Intl.RelativeTimeFormat API
  */
 
-export function formatDistanceToNow(date: Date, options?: { addSuffix?: boolean }): string {
+export function formatDistanceToNow(date: Date | string, options?: { addSuffix?: boolean }): string {
   const now = new Date();
-  const diffMs = now.getTime() - new Date(date).getTime();
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const diffMs = now.getTime() - dateObj.getTime();
   const diffSecs = Math.floor(diffMs / 1000);
   const diffMins = Math.floor(diffSecs / 60);
   const diffHours = Math.floor(diffMins / 60);

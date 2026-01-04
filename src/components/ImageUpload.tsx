@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { motion, Reorder } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
+import { compressImage, LISTING_COMPRESSION } from '@/utils/imageCompression';
 
 interface ImageUploadProps {
   images: string[];
@@ -35,15 +36,18 @@ export function ImageUpload({
         throw new Error(validation.error);
       }
 
+      // Compress image before upload for better performance
+      const compressedFile = await compressImage(file, LISTING_COMPRESSION);
+
       // Generate unique filename using crypto for security
-      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileExt = compressedFile.name.split('.').pop() || 'webp';
       const uniqueId = crypto.randomUUID();
       const fileName = `${folder}/${uniqueId}.${fileExt}`;
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file, {
+        .upload(fileName, compressedFile, {
           cacheControl: '3600',
           upsert: false
         });
@@ -54,6 +58,8 @@ export function ImageUpload({
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
         .getPublicUrl(data.path);
+
+      return publicUrl;
 
       return publicUrl;
     } catch (error: unknown) {
@@ -228,6 +234,8 @@ export function ImageUpload({
                     src={image}
                     alt={`Upload ${index + 1}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
 
                   {/* Main Badge */}
