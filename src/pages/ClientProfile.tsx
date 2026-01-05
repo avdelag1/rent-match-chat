@@ -210,9 +210,9 @@ const ClientProfile = () => {
                 <CardContent className="p-4">
                   <h3 className="text-sm font-medium text-muted-foreground mb-2">Interests</h3>
                   <div className="flex flex-wrap gap-2">
-                    {profile.interests.map((interest, index) => (
-                      <span 
-                        key={index} 
+                    {profile.interests.map((interest) => (
+                      <span
+                        key={`interest-${interest}`}
                         className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm"
                       >
                         {interest}

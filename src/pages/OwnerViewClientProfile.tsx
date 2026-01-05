@@ -188,8 +188,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Property Types</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.property_types.map((type, idx) => (
-                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            {preferences.property_types.map((type) => (
+                              <Badge key={`prop-type-${type}`} variant="secondary">{type}</Badge>
                             ))}
                           </div>
                         </div>
@@ -211,8 +211,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Preferred Locations</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.location_zones.map((zone, idx) => (
-                              <Badge key={idx} variant="outline">{zone}</Badge>
+                            {preferences.location_zones.map((zone) => (
+                              <Badge key={`zone-${zone}`} variant="outline">{zone}</Badge>
                             ))}
                           </div>
                         </div>
@@ -252,8 +252,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Types</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.moto_types.map((type, idx) => (
-                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            {preferences.moto_types.map((type) => (
+                              <Badge key={`moto-type-${type}`} variant="secondary">{type}</Badge>
                             ))}
                           </div>
                         </div>
@@ -294,8 +294,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Transmission</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.moto_transmission.map((trans, idx) => (
-                              <Badge key={idx} variant="outline">{trans}</Badge>
+                            {preferences.moto_transmission.map((trans) => (
+                              <Badge key={`moto-trans-${trans}`} variant="outline">{trans}</Badge>
                             ))}
                           </div>
                         </div>
@@ -305,8 +305,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Condition</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.moto_condition.map((cond, idx) => (
-                              <Badge key={idx} variant="outline">{cond}</Badge>
+                            {preferences.moto_condition.map((cond) => (
+                              <Badge key={`moto-cond-${cond}`} variant="outline">{cond}</Badge>
                             ))}
                           </div>
                         </div>
@@ -316,8 +316,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Fuel Types</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.moto_fuel_types.map((fuel, idx) => (
-                              <Badge key={idx} variant="outline">{fuel}</Badge>
+                            {preferences.moto_fuel_types.map((fuel) => (
+                              <Badge key={`moto-fuel-${fuel}`} variant="outline">{fuel}</Badge>
                             ))}
                           </div>
                         </div>
@@ -328,8 +328,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Desired Features</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.moto_features.map((feat, idx) => (
-                              <Badge key={idx} variant="secondary">{feat}</Badge>
+                            {preferences.moto_features.map((feat) => (
+                              <Badge key={`moto-feat-${feat}`} variant="secondary">{feat}</Badge>
                             ))}
                           </div>
                         </div>
@@ -365,8 +365,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Types</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.bicycle_types.map((type, idx) => (
-                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            {preferences.bicycle_types.map((type) => (
+                              <Badge key={`bike-type-${type}`} variant="secondary">{type}</Badge>
                             ))}
                           </div>
                         </div>
@@ -387,8 +387,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Wheel Sizes</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.bicycle_wheel_sizes.map((size, idx) => (
-                              <Badge key={idx} variant="outline">{size}</Badge>
+                            {preferences.bicycle_wheel_sizes.map((size) => (
+                              <Badge key={`bike-wheel-${size}`} variant="outline">{size}</Badge>
                             ))}
                           </div>
                         </div>
@@ -398,8 +398,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Suspension Type</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.bicycle_suspension_type.map((susp, idx) => (
-                              <Badge key={idx} variant="outline">{susp}</Badge>
+                            {preferences.bicycle_suspension_type.map((susp) => (
+                              <Badge key={`bike-susp-${susp}`} variant="outline">{susp}</Badge>
                             ))}
                           </div>
                         </div>
@@ -409,8 +409,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Frame Material</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.bicycle_material.map((mat, idx) => (
-                              <Badge key={idx} variant="outline">{mat}</Badge>
+                            {preferences.bicycle_material.map((mat) => (
+                              <Badge key={`bike-mat-${mat}`} variant="outline">{mat}</Badge>
                             ))}
                           </div>
                         </div>
@@ -438,8 +438,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Condition</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.bicycle_condition.map((cond, idx) => (
-                              <Badge key={idx} variant="outline">{cond}</Badge>
+                            {preferences.bicycle_condition.map((cond) => (
+                              <Badge key={`bike-cond-${cond}`} variant="outline">{cond}</Badge>
                             ))}
                           </div>
                         </div>
@@ -477,8 +477,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Types</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.yacht_types.map((type, idx) => (
-                              <Badge key={idx} variant="secondary">{type}</Badge>
+                            {preferences.yacht_types.map((type) => (
+                              <Badge key={`yacht-type-${type}`} variant="secondary">{type}</Badge>
                             ))}
                           </div>
                         </div>
@@ -536,8 +536,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Condition</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.yacht_condition.map((cond, idx) => (
-                              <Badge key={idx} variant="outline">{cond}</Badge>
+                            {preferences.yacht_condition.map((cond) => (
+                              <Badge key={`yacht-cond-${cond}`} variant="outline">{cond}</Badge>
                             ))}
                           </div>
                         </div>
@@ -547,8 +547,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Fuel Types</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.yacht_fuel_types.map((fuel, idx) => (
-                              <Badge key={idx} variant="outline">{fuel}</Badge>
+                            {preferences.yacht_fuel_types.map((fuel) => (
+                              <Badge key={`yacht-fuel-${fuel}`} variant="outline">{fuel}</Badge>
                             ))}
                           </div>
                         </div>
@@ -583,8 +583,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Hull Material</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.yacht_hull_material.map((mat, idx) => (
-                              <Badge key={idx} variant="outline">{mat}</Badge>
+                            {preferences.yacht_hull_material.map((mat) => (
+                              <Badge key={`yacht-mat-${mat}`} variant="outline">{mat}</Badge>
                             ))}
                           </div>
                         </div>
@@ -595,8 +595,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Water Activities</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.yacht_water_activities.map((act, idx) => (
-                              <Badge key={idx} variant="secondary">{act}</Badge>
+                            {preferences.yacht_water_activities.map((act) => (
+                              <Badge key={`yacht-act-${act}`} variant="secondary">{act}</Badge>
                             ))}
                           </div>
                         </div>
@@ -607,8 +607,8 @@ export default function OwnerViewClientProfile() {
                         <div>
                           <h4 className="font-medium mb-2">Navigation Equipment</h4>
                           <div className="flex flex-wrap gap-2">
-                            {preferences.yacht_navigation_equipment.map((nav, idx) => (
-                              <Badge key={idx} variant="secondary">{nav}</Badge>
+                            {preferences.yacht_navigation_equipment.map((nav) => (
+                              <Badge key={`yacht-nav-${nav}`} variant="secondary">{nav}</Badge>
                             ))}
                           </div>
                         </div>

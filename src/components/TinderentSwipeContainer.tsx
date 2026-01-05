@@ -345,8 +345,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
             {/* Story dots skeleton */}
             <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
-              {[1, 2, 3, 4].map((_, index) => (
-                <div key={index} className="flex-1 h-1 rounded-full bg-white/20" />
+              {[1, 2, 3, 4].map((num) => (
+                <div key={`skeleton-dot-${num}`} className="flex-1 h-1 rounded-full bg-white/20" />
               ))}
             </div>
 

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { logger } from '@/utils/prodLogger';
 
 export interface ClientProfile {
   id: number;
@@ -87,7 +88,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
         return filteredProfiles;
 
       } catch (error) {
-        console.error('Error fetching client profiles:', error);
+        logger.error('Error fetching client profiles:', error);
         return [];
       }
     },
@@ -116,12 +117,12 @@ export function useSwipedClientProfiles() {
           .gte('created_at', oneDayAgo);
 
         if (error) {
-          console.error('Error fetching owner swipes:', error);
+          logger.error('Error fetching owner swipes:', error);
           return [];
         }
         return likes?.map(l => l.target_id) || [];
       } catch (error) {
-        console.error('Failed to fetch swiped client profiles:', error);
+        logger.error('Failed to fetch swiped client profiles:', error);
         return [];
       }
     },

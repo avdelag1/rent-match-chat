@@ -569,9 +569,9 @@ export function LikedClients() {
 
                   {client.interests && client.interests.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {client.interests.slice(0, 3).map((interest, idx) => (
+                      {client.interests.slice(0, 3).map((interest) => (
                         <span
-                          key={idx}
+                          key={`interest-${interest}`}
                           className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
                         >
                           {interest}

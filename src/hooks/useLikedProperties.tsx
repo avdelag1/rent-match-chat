@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from './useListings';
+import { logger } from '@/utils/prodLogger';
 
 export function useLikedProperties() {
   return useQuery<Listing[]>({
@@ -19,7 +20,7 @@ export function useLikedProperties() {
         .order('created_at', { ascending: false });
 
       if (likesError) {
-        console.error('[useLikedProperties] Error fetching likes:', likesError);
+        logger.error('[useLikedProperties] Error fetching likes:', likesError);
         throw likesError;
       }
 
@@ -32,7 +33,7 @@ export function useLikedProperties() {
           .order('created_at', { ascending: false });
 
         if (swipesError) {
-          console.error('[useLikedProperties] Error fetching swipes:', swipesError);
+          logger.error('[useLikedProperties] Error fetching swipes:', swipesError);
           throw swipesError;
         }
 
@@ -46,7 +47,7 @@ export function useLikedProperties() {
             .eq('is_active', true);
 
           if (listingsError) {
-            console.error('[useLikedProperties] Error fetching listings from swipes:', listingsError);
+            logger.error('[useLikedProperties] Error fetching listings from swipes:', listingsError);
             throw listingsError;
           }
 
@@ -66,7 +67,7 @@ export function useLikedProperties() {
         .eq('is_active', true);
 
       if (listingsError) {
-        console.error('[useLikedProperties] Error fetching listings:', listingsError);
+        logger.error('[useLikedProperties] Error fetching listings:', listingsError);
         throw listingsError;
       }
 

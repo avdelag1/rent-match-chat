@@ -207,8 +207,8 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
                   Languages
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.languages.map((lang: string, idx: number) => (
-                    <Badge key={idx} variant="secondary">{lang}</Badge>
+                  {profileData.languages.map((lang: string) => (
+                    <Badge key={`lang-${lang}`} variant="secondary">{lang}</Badge>
                   ))}
                 </div>
               </div>
@@ -311,8 +311,8 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
                   Personality Traits
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.personality_traits.map((trait: string, idx: number) => (
-                    <Badge key={idx} variant="outline">{trait}</Badge>
+                  {profileData.personality_traits.map((trait: string) => (
+                    <Badge key={`trait-${trait}`} variant="outline">{trait}</Badge>
                   ))}
                 </div>
               </div>
@@ -324,8 +324,8 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
                   Dietary Preferences
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.dietary_preferences.map((pref: string, idx: number) => (
-                    <Badge key={idx} variant="outline">{pref}</Badge>
+                  {profileData.dietary_preferences.map((pref: string) => (
+                    <Badge key={`diet-${pref}`} variant="outline">{pref}</Badge>
                   ))}
                 </div>
               </div>
@@ -337,8 +337,8 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
                   Interest Categories
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.interest_categories.map((interest: string, idx: number) => (
-                    <Badge key={idx} variant="secondary">{interest}</Badge>
+                  {profileData.interest_categories.map((interest: string) => (
+                    <Badge key={`cat-${interest}`} variant="secondary">{interest}</Badge>
                   ))}
                 </div>
               </div>
@@ -361,8 +361,8 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
               <div>
                 <h4 className="font-medium mb-2">Interests</h4>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.interests.map((interest: string, idx: number) => (
-                    <Badge key={idx} variant="secondary">{interest}</Badge>
+                  {profileData.interests.map((interest: string) => (
+                    <Badge key={`int-${interest}`} variant="secondary">{interest}</Badge>
                   ))}
                 </div>
               </div>
@@ -371,8 +371,8 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
               <div>
                 <h4 className="font-medium mb-2">Preferred Activities</h4>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.preferred_activities.map((activity: string, idx: number) => (
-                    <Badge key={idx} variant="outline">{activity}</Badge>
+                  {profileData.preferred_activities.map((activity: string) => (
+                    <Badge key={`act-${activity}`} variant="outline">{activity}</Badge>
                   ))}
                 </div>
               </div>
@@ -381,8 +381,8 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
               <div>
                 <h4 className="font-medium mb-2">Lifestyle</h4>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.lifestyle_tags.map((tag: string, idx: number) => (
-                    <Badge key={idx} variant="outline">{tag}</Badge>
+                  {profileData.lifestyle_tags.map((tag: string) => (
+                    <Badge key={`tag-${tag}`} variant="outline">{tag}</Badge>
                   ))}
                 </div>
               </div>

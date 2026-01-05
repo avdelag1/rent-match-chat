@@ -1,6 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 export type ClientProfileLite = {
   id?: number;
@@ -36,7 +37,7 @@ async function fetchOwnProfile() {
     .maybeSingle();
 
   if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching profile:', error);
+    logger.error('Error fetching profile:', error);
     throw error;
   }
 
@@ -59,7 +60,7 @@ export function useSaveClientProfile() {
     mutationFn: async (updates: ClientProfileUpdate) => {
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (authError) {
-        console.error('Error fetching authenticated user:', authError);
+        logger.error('Error fetching authenticated user:', authError);
         throw authError;
       }
       const uid = auth.user?.id;
@@ -72,7 +73,7 @@ export function useSaveClientProfile() {
         .maybeSingle();
       
       if (existingError && existingError.code !== 'PGRST116') {
-        console.error('Error checking existing profile:', existingError);
+        logger.error('Error checking existing profile:', existingError);
         throw existingError;
       }
 
@@ -86,7 +87,7 @@ export function useSaveClientProfile() {
           .select()
           .single();
         if (error) {
-          console.error('Error updating profile:', error);
+          logger.error('Error updating profile:', error);
           throw error;
         }
         profileData = data as ClientProfileLite;
@@ -97,7 +98,7 @@ export function useSaveClientProfile() {
           .select()
           .single();
         if (error) {
-          console.error('Error creating profile:', error);
+          logger.error('Error creating profile:', error);
           throw error;
         }
         profileData = data as ClientProfileLite;
@@ -157,7 +158,7 @@ export function useSaveClientProfile() {
           .select();
 
         if (syncError) {
-          console.error('❌ [PROFILE SYNC] Error:', syncError);
+          logger.error('❌ [PROFILE SYNC] Error:', syncError);
         } else {
           // Invalidate profiles_public cache immediately after sync
           qc.invalidateQueries({ queryKey: ['profiles_public'] });

@@ -748,8 +748,8 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                     <div className="mt-3">
                       <p className="text-xs text-muted-foreground mb-2">Compatible lifestyles:</p>
                       <div className="flex flex-wrap gap-1">
-                        {listing.lifestyle_compatible.slice(0, 5).map((lifestyle, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">{lifestyle}</Badge>
+                        {listing.lifestyle_compatible.slice(0, 5).map((lifestyle) => (
+                          <Badge key={`lifestyle-${lifestyle}`} variant="outline" className="text-xs">{lifestyle}</Badge>
                         ))}
                       </div>
                     </div>
@@ -765,22 +765,22 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                   <span className="text-lg">📸</span> Property Photos ({listing.images.length})
                 </h4>
                 <div className="grid grid-cols-3 gap-2">
-                  {listing.images.map((image, index) => (
+                  {listing.images.map((image, idx) => (
                     <button
-                      key={index}
+                      key={`property-image-${image}`}
                       onClick={() => {
-                        setSelectedImageIndex(index);
+                        setSelectedImageIndex(idx);
                         setGalleryOpen(true);
                       }}
                       className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
                     >
                       <img
                         src={image}
-                        alt={`Property ${index + 1}`}
+                        alt={`Property ${idx + 1}`}
                         className="w-full h-full object-cover"
-                        loading={index < 3 ? "eager" : "lazy"}
+                        loading={idx < 3 ? "eager" : "lazy"}
                         decoding="async"
-                        fetchPriority={index === 0 ? "high" : "auto"}
+                        fetchPriority={idx === 0 ? "high" : "auto"}
                       />
                     </button>
                   ))}

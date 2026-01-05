@@ -2,6 +2,7 @@
  * Centralized localStorage utility with error handling
  * Prevents silent failures and quota exceeded errors
  */
+import { logger } from '@/utils/prodLogger';
 
 /**
  * Safely get item from localStorage
@@ -13,9 +14,9 @@ export function getStorageItem(key: string): string | null {
   } catch (error) {
     if (error instanceof Error) {
       if (error.name === 'QuotaExceededError') {
-        console.error(`localStorage quota exceeded when reading ${key}`);
+        logger.error(`localStorage quota exceeded when reading ${key}`);
       } else {
-        console.error(`Failed to read from localStorage (${key}):`, error.message);
+        logger.error(`Failed to read from localStorage (${key}):`, error.message);
       }
     }
     return null;
@@ -34,13 +35,13 @@ export function getStorageJSON<T>(key: string, defaultValue: T): T {
   } catch (error) {
     if (error instanceof Error) {
       if (error instanceof SyntaxError) {
-        console.error(`Invalid JSON in localStorage (${key}): ${error.message}`);
+        logger.error(`Invalid JSON in localStorage (${key}): ${error.message}`);
         // Clear corrupted data
         removeStorageItem(key);
       } else if (error.name === 'QuotaExceededError') {
-        console.error(`localStorage quota exceeded when reading ${key}`);
+        logger.error(`localStorage quota exceeded when reading ${key}`);
       } else {
-        console.error(`Failed to read JSON from localStorage (${key}):`, error.message);
+        logger.error(`Failed to read JSON from localStorage (${key}):`, error.message);
       }
     }
     return defaultValue;
@@ -58,18 +59,18 @@ export function setStorageItem(key: string, value: string): boolean {
   } catch (error) {
     if (error instanceof Error) {
       if (error.name === 'QuotaExceededError') {
-        console.error(`localStorage quota exceeded. Failed to save ${key}`);
+        logger.error(`localStorage quota exceeded. Failed to save ${key}`);
         // Attempt to clear old data
         try {
           clearOldestStorageEntries(key);
           localStorage.setItem(key, value);
           return true;
         } catch {
-          console.error(`Failed to recover from quota exceeded for ${key}`);
+          logger.error(`Failed to recover from quota exceeded for ${key}`);
           return false;
         }
       } else {
-        console.error(`Failed to write to localStorage (${key}):`, error.message);
+        logger.error(`Failed to write to localStorage (${key}):`, error.message);
       }
     }
     return false;
@@ -85,7 +86,7 @@ export function setStorageJSON<T>(key: string, value: T): boolean {
     const json = JSON.stringify(value);
     return setStorageItem(key, json);
   } catch (error) {
-    console.error(`Failed to stringify value for localStorage (${key}):`, error);
+    logger.error(`Failed to stringify value for localStorage (${key}):`, error);
     return false;
   }
 }
@@ -97,7 +98,7 @@ export function removeStorageItem(key: string): void {
   try {
     localStorage.removeItem(key);
   } catch (error) {
-    console.error(`Failed to remove from localStorage (${key}):`, error);
+    logger.error(`Failed to remove from localStorage (${key}):`, error);
   }
 }
 
@@ -108,7 +109,7 @@ export function clearStorage(): void {
   try {
     localStorage.clear();
   } catch (error) {
-    console.error('Failed to clear localStorage:', error);
+    logger.error('Failed to clear localStorage:', error);
   }
 }
 

@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { retryWithBackoff } from '@/utils/retryUtils';
+import { logger } from '@/utils/prodLogger';
 
 interface CreateProfileData {
   id: string;
@@ -23,7 +24,7 @@ export function useProfileSetup() {
 
     // Prevent concurrent profile creation for the same user
     if (profileCreationInProgress.has(user.id)) {
-      if (import.meta.env.DEV) console.log('[ProfileSetup] Profile creation already in progress for user:', user.id);
+      if (import.meta.env.DEV) logger.log('[ProfileSetup] Profile creation already in progress for user:', user.id);
       return null;
     }
 
@@ -55,7 +56,7 @@ export function useProfileSetup() {
           }
           
           lastRoleError = roleError;
-          if (import.meta.env.DEV) console.error(`[ProfileSetup] Role upsert attempt ${attempt}/3 failed:`, roleError.message);
+          if (import.meta.env.DEV) logger.error(`[ProfileSetup] Role upsert attempt ${attempt}/3 failed:`, roleError.message);
           
           if (attempt < 3) {
             // Exponential backoff: 500ms, 1000ms
@@ -64,7 +65,7 @@ export function useProfileSetup() {
         }
         
         if (!roleCreated) {
-          if (import.meta.env.DEV) console.error('[ProfileSetup] Failed to upsert role after 3 attempts:', lastRoleError);
+          if (import.meta.env.DEV) logger.error('[ProfileSetup] Failed to upsert role after 3 attempts:', lastRoleError);
           toast({
             title: "Role Update Failed",
             description: "Could not update user role. Please refresh the page.",
@@ -111,7 +112,7 @@ export function useProfileSetup() {
         }
 
         lastProfileError = error;
-        if (import.meta.env.DEV) console.error(`[ProfileSetup] Profile creation attempt ${attempt}/3 failed:`, {
+        if (import.meta.env.DEV) logger.error(`[ProfileSetup] Profile creation attempt ${attempt}/3 failed:`, {
           message: error.message,
           code: error.code,
           details: error.details
@@ -128,7 +129,7 @@ export function useProfileSetup() {
           ? 'Permission denied. Please try signing out and back in.'
           : lastProfileError?.message || 'Unknown error';
 
-        if (import.meta.env.DEV) console.error('[ProfileSetup] Failed to create profile after 3 attempts:', lastProfileError);
+        if (import.meta.env.DEV) logger.error('[ProfileSetup] Failed to create profile after 3 attempts:', lastProfileError);
         toast({
           title: "Profile Creation Failed",
           description: errorMsg,
@@ -156,7 +157,7 @@ export function useProfileSetup() {
         }
 
         lastRoleError = roleError;
-        if (import.meta.env.DEV) console.error(`[ProfileSetup] Role creation attempt ${attempt}/3 failed:`, {
+        if (import.meta.env.DEV) logger.error(`[ProfileSetup] Role creation attempt ${attempt}/3 failed:`, {
           message: roleError.message,
           code: roleError.code,
           details: roleError.details
@@ -169,7 +170,7 @@ export function useProfileSetup() {
       }
 
       if (!roleCreated) {
-        if (import.meta.env.DEV) console.error('[ProfileSetup] Failed to create role after 3 attempts:', lastRoleError);
+        if (import.meta.env.DEV) logger.error('[ProfileSetup] Failed to create role after 3 attempts:', lastRoleError);
         toast({
           title: "Role Setup Failed",
           description: "Profile created but role assignment failed. Please contact support.",
@@ -187,7 +188,7 @@ export function useProfileSetup() {
       return newProfile;
 
     } catch (error) {
-      if (import.meta.env.DEV) console.error('[ProfileSetup] Unexpected error in profile setup:', error);
+      if (import.meta.env.DEV) logger.error('[ProfileSetup] Unexpected error in profile setup:', error);
       toast({
         title: "Setup Error",
         description: "An unexpected error occurred. Please try again.",
