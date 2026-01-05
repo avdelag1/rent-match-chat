@@ -33,7 +33,7 @@ const CategorySelectionDialog = lazy(() => import('@/components/CategorySelectio
 const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog').then(m => ({ default: m.SavedSearchesDialog })))
 const MessageActivationPackages = lazy(() => import('@/components/MessageActivationPackages').then(m => ({ default: m.MessageActivationPackages })))
 const PushNotificationPrompt = lazy(() => import('@/components/PushNotificationPrompt').then(m => ({ default: m.PushNotificationPrompt })))
-const WelcomeNotification = lazy(() => import('@/components/WelcomeNotification').then(m => ({ default: m.WelcomeNotification })))
+const FloatingWelcome = lazy(() => import('@/components/FloatingWelcome').then(m => ({ default: m.FloatingWelcome })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -535,11 +535,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <PushNotificationPrompt />
       </Suspense>
 
-      {/* Welcome Notification for First-Time Users */}
+      {/* Floating Welcome for First-Time Users */}
       <Suspense fallback={null}>
-        <WelcomeNotification
+        <FloatingWelcome
           isOpen={showWelcomeNotification}
           onClose={handleWelcomeClose}
+          userRole={userRole === 'admin' ? 'client' : userRole}
         />
       </Suspense>
     </div>
