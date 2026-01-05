@@ -516,7 +516,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {images.map((img, index) => (
-                  <div key={index} className="relative aspect-square">
+                  <div key={`img-${img}-${index}`} className="relative aspect-square">
                     <img src={img} alt={`Upload ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
                     <Button
                       variant="destructive"

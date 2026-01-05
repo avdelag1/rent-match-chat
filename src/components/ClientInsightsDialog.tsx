@@ -9,7 +9,7 @@ import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
-import { useState, memo, useMemo } from 'react';
+import { useState, memo, useMemo, useCallback } from 'react';
 
 // Interest category icons for visual display
 const INTEREST_ICONS: Record<string, React.ReactNode> = {
@@ -162,21 +162,25 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
     };
   }, [profile]);
 
-  // Early return after all hooks
-  if (!profile) return null;
-
-  const handleImageClick = (index: number) => {
+  // Memoized callback for image clicks
+  const handleImageClick = useCallback((index: number) => {
     setSelectedImageIndex(index);
     setGalleryOpen(true);
-  };
+  }, []);
 
   // Calculate recommendation score based on profile completeness and activity
-  const recommendationScore = Math.min(5, Math.round(
-    (getProfileCompleteness(profile) / 20) + 
-    ((profile.interests?.length || 0) / 5)
-  ));
-  
-  const handleMessage = async () => {
+  const recommendationScore = useMemo(() => {
+    if (!profile) return 0;
+    return Math.min(5, Math.round(
+      (getProfileCompleteness(profile) / 20) +
+      ((profile.interests?.length || 0) / 5)
+    ));
+  }, [profile]);
+
+  // Memoized callback for starting conversation
+  const handleMessage = useCallback(async () => {
+    if (!profile) return;
+
     setIsCreatingConversation(true);
     try {
       toast({
@@ -206,7 +210,10 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
     } finally {
       setIsCreatingConversation(false);
     }
-  };
+  }, [profile, startConversation, navigate, onOpenChange]);
+
+  // Early return after all hooks
+  if (!profile) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -314,7 +321,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2">
                   {profile.profile_images.slice(0, 6).map((image, index) => (
                     <div
-                      key={index}
+                      key={`profile-image-${image}`}
                       className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
                       onClick={() => handleImageClick(index)}
                     >
@@ -722,8 +729,8 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   <div>
                     <h5 className="text-sm font-medium text-muted-foreground mb-2">Property & Housing</h5>
                     <div className="flex flex-wrap gap-2">
-                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], PROPERTY_TAGS).map((tag, index) => (
-                        <Badge key={index} className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], PROPERTY_TAGS).map((tag) => (
+                        <Badge key={`property-${tag}`} className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
                           {tag}
                         </Badge>
                       ))}
@@ -736,8 +743,8 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   <div>
                     <h5 className="text-sm font-medium text-muted-foreground mb-2">Transportation & Mobility</h5>
                     <div className="flex flex-wrap gap-2">
-                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], TRANSPORTATION_TAGS).map((tag, index) => (
-                        <Badge key={index} className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], TRANSPORTATION_TAGS).map((tag) => (
+                        <Badge key={`transport-${tag}`} className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">
                           {tag}
                         </Badge>
                       ))}
@@ -750,8 +757,8 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   <div>
                     <h5 className="text-sm font-medium text-muted-foreground mb-2">Lifestyle & Preferences</h5>
                     <div className="flex flex-wrap gap-2">
-                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], LIFESTYLE_TAGS).map((tag, index) => (
-                        <Badge key={index} className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], LIFESTYLE_TAGS).map((tag) => (
+                        <Badge key={`lifestyle-${tag}`} className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
                           {tag}
                         </Badge>
                       ))}
@@ -764,8 +771,8 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   <div>
                     <h5 className="text-sm font-medium text-muted-foreground mb-2">Financial & Verification</h5>
                     <div className="flex flex-wrap gap-2">
-                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], FINANCIAL_TAGS).map((tag, index) => (
-                        <Badge key={index} className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
+                      {filterTagsByCategory([...(profile.interests || []), ...(profile.preferred_activities || [])], FINANCIAL_TAGS).map((tag) => (
+                        <Badge key={`financial-${tag}`} className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
                           {tag}
                         </Badge>
                       ))}
