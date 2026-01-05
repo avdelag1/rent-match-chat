@@ -136,11 +136,6 @@ export async function diagnoseOAuthSetup(): Promise<OAuthDiagnostics> {
 
     // Check current URL configuration
     const currentUrl = window.location.origin;
-    const expectedUrls = [
-      'https://686673c3-e550-4efd-907e-ac52efe85ffc.lovableproject.com',
-      'http://localhost:3000',
-      currentUrl,
-    ];
 
     diagnostics.warnings.push(
       `Current URL: ${currentUrl}. Ensure this is added to Supabase redirect URLs.`
@@ -176,8 +171,8 @@ export async function runOAuthDiagnostics() {
   return results;
 }
 
-// Make it available globally for easy testing
-if (typeof window !== 'undefined') {
+// FIX: Only expose globally in development mode (security)
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   (window as any).runOAuthDiagnostics = runOAuthDiagnostics;
   (window as any).diagnoseOAuthSetup = diagnoseOAuthSetup;
 }

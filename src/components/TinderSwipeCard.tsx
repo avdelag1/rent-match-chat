@@ -26,11 +26,20 @@ const InstantImageGallery = memo(({
   const loadedImagesRef = useRef<Set<string>>(new Set());
   const [, forceUpdate] = useState(0);
 
-  // Preload ALL images immediately when card mounts - Instagram-style
+  // FIX: Preload only current + next + prev images (not all)
+  // This prevents network saturation and CPU decode pipeline overload on mobile
   useEffect(() => {
     if (!isTop) return;
 
-    images.forEach((src, idx) => {
+    // Calculate which images to preload: current, next, and previous
+    const indicesToPreload = [
+      currentIndex,
+      (currentIndex + 1) % images.length,
+      currentIndex > 0 ? currentIndex - 1 : images.length - 1
+    ].filter((idx, i, arr) => arr.indexOf(idx) === i); // Remove duplicates
+
+    indicesToPreload.forEach((idx) => {
+      const src = images[idx];
       if (!src || src === '/placeholder.svg') return;
 
       const optimizedSrc = getCardImageUrl(src);
@@ -38,8 +47,8 @@ const InstantImageGallery = memo(({
 
       const img = new Image();
       img.decoding = 'async';
-      // First 3 images get high priority
-      img.fetchPriority = idx < 3 ? 'high' : 'auto';
+      // Current image gets high priority, adjacent images get auto
+      img.fetchPriority = idx === currentIndex ? 'high' : 'auto';
 
       img.onload = () => {
         loadedImagesRef.current.add(optimizedSrc);
@@ -51,12 +60,12 @@ const InstantImageGallery = memo(({
 
       img.src = optimizedSrc;
 
-      // Force decode for instant display
-      if ('decode' in img) {
+      // Force decode only for current image (reduces CPU load)
+      if (idx === currentIndex && 'decode' in img) {
         img.decode().catch(() => {});
       }
     });
-  }, [images, isTop]);
+  }, [images, isTop, currentIndex]); // FIX: Added currentIndex to dependencies
 
   const currentSrc = images[currentIndex] || '/placeholder.svg';
   const optimizedCurrentSrc = currentSrc !== '/placeholder.svg' ? getCardImageUrl(currentSrc) : currentSrc;
@@ -75,8 +84,9 @@ const InstantImageGallery = memo(({
       )}
 
       {/* Current image - NO transition delay for instant feel */}
+      {/* FIX: Removed key={currentIndex} to prevent remounting on tap (causes delay/flicker) */}
+      {/* FIX: Removed contentVisibility: 'auto' which can delay painting on mobile */}
       <img
-        key={currentIndex}
         src={optimizedCurrentSrc}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
@@ -90,7 +100,6 @@ const InstantImageGallery = memo(({
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           transform: 'translateZ(0)',
-          contentVisibility: 'auto',
         }}
         onLoad={() => {
           if (!loadedImagesRef.current.has(optimizedCurrentSrc)) {
@@ -145,18 +154,18 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    // Left 30% = previous, Center 40% = expand details, Right 30% = next
+    // Left 30% = previous, Right 30% = next
+    // FIX: Center tap no longer toggles bottom sheet (accidental triggers cause layout jumps)
+    // Use the dedicated chevron button or drag handle for bottom sheet control
     if (clickX < width * 0.3 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
       triggerHaptic('light');
     } else if (clickX > width * 0.7 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === imageCount - 1 ? 0 : prev + 1);
       triggerHaptic('light');
-    } else {
-      setIsBottomSheetExpanded(!isBottomSheetExpanded);
-      triggerHaptic('medium');
     }
-  }, [isTop, imageCount, isBottomSheetExpanded]);
+    // Center tap intentionally does nothing - prevents accidental UI state changes
+  }, [isTop, imageCount]);
 
   // Handle bottom sheet drag gestures
   const handleSheetDragEnd = useCallback((event: any, info: PanInfo) => {
@@ -345,18 +354,23 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
           </div>
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
+          {/* FIX: Use translateY instead of height animation for GPU-friendly transforms (no reflow) */}
           <motion.div
-            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10"
+            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden"
             animate={{
-              height: isBottomSheetExpanded ? 'min(60%, 350px)' : 'min(18%, 120px)',
-              y: 0
+              y: isBottomSheetExpanded ? 0 : 230
             }}
             transition={{
               type: "spring",
               stiffness: 400,
               damping: 32
             }}
-            style={{ willChange: 'height', maxHeight: 'calc(100% - 60px)' }}
+            style={{
+              height: 350,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+            }}
           >
             {/* Drag Handle */}
             <div className="flex justify-center py-2 pointer-events-none">

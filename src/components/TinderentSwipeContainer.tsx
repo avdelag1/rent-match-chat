@@ -89,7 +89,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set()); // Track swiped listings
+  // FIX: Move swipedIds to ref to avoid re-renders on every swipe
+  const swipedIdsRef = useRef<Set<string>>(new Set());
+  const [, forceUpdate] = useState(0); // Only used when we need to refresh the visible list
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshMode, setIsRefreshMode] = useState(false); // When true, show disliked listings within cooldown
 
@@ -120,17 +122,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     refetch: refetchRegular
   } = useListings([], { enabled: false }); // Disabled, only used for refetch
 
-  // Use accumulated listings - memoized with length checks and filter out swiped items
-  // IMPORTANT: Only use smartListings which properly filters liked items
+  // FIX: Optimized listings derivation
+  // - Uses ref for swipedIds (no re-render on swipe)
+  // - Only re-computes when allListings or smartListings actually change
   const listings = useMemo(() => {
-    let baseListings = allListings.length > 0 ? allListings : smartListings;
-    // Filter out any listings that have been swiped in this session
-    // This provides immediate UI feedback before the server catches up
-    if (swipedIds.size > 0) {
-      baseListings = baseListings.filter(l => !swipedIds.has(l.id));
-    }
-    return baseListings;
-  }, [allListings, smartListings, swipedIds]);
+    const baseListings = allListings.length > 0 ? allListings : smartListings;
+    // Filter out swiped items using ref (doesn't trigger re-renders)
+    return baseListings.filter(l => !swipedIdsRef.current.has(l.id));
+  }, [allListings, smartListings]);
 
   const isLoading = smartLoading;
   const error = smartError;
@@ -161,13 +160,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   });
 
   // Add newly fetched listings to the stack - with guard to prevent unnecessary updates
+  // FIX: Cap at 50 listings to prevent memory bloat and expensive filtering
   useEffect(() => {
     if (smartListings.length > 0 && !isLoading) {
       setAllListings(prev => {
         const existingIds = new Set(prev.map(l => l.id));
         const newListings = smartListings.filter(l => !existingIds.has(l.id));
         if (newListings.length > 0) {
-          return [...prev, ...newListings];
+          const combined = [...prev, ...newListings];
+          // Cap at 50 listings - remove oldest ones first
+          return combined.length > 50 ? combined.slice(-50) : combined;
         }
         return prev; // Don't update if no new listings
       });
@@ -182,8 +184,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     setSwipeDirection(direction);
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-    // Immediately add to swiped IDs to prevent re-showing
-    setSwipedIds(prev => new Set(prev).add(currentListing.id));
+    // FIX: Use ref instead of state to avoid re-render cascade
+    swipedIdsRef.current.add(currentListing.id);
 
     swipeMutation.mutate({
       targetId: currentListing.id,
@@ -218,7 +220,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // - NEVER show liked listings (they stay saved forever)
     // - NEVER show listings past 3-day cooldown (permanently hidden)
     setCurrentIndex(0);
-    setSwipedIds(new Set()); // Clear session swiped IDs
+    swipedIdsRef.current.clear(); // FIX: Clear ref instead of state
     setAllListings([]);
     setPage(0);
 
