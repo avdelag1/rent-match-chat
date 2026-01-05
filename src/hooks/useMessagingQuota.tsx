@@ -3,6 +3,7 @@ import { useUserSubscription } from './useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/utils/logger';
 
 type PlanLimits = {
   messages_per_month: number;
@@ -42,7 +43,7 @@ export function useMessagingQuota() {
         .eq('is_mutual', true);
       
       if (error) {
-        console.error('Error fetching free messaging matches:', error);
+        logger.error('[useMessagingQuota] Error fetching free messaging matches:', error);
         return [];
       }
       
@@ -73,7 +74,7 @@ export function useMessagingQuota() {
         .gte('created_at', startOfMonth.toISOString());
       
       if (error) {
-        console.error('Error fetching conversations count:', error);
+        logger.error('[useMessagingQuota] Error fetching conversations count:', error);
         return 0;
       }
       
@@ -91,7 +92,7 @@ export function useMessagingQuota() {
         .order('created_at', { ascending: true });
 
       if (msgError) {
-        console.error('Error fetching first messages:', msgError);
+        logger.error('[useMessagingQuota] Error fetching first messages:', msgError);
         return 0;
       }
 

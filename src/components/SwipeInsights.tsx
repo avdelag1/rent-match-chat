@@ -118,8 +118,8 @@ export function SwipeInsights({ userRole, isOpen, onClose }: SwipeInsightsProps)
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {dailyData.map((day, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                {dailyData.map((day) => (
+                  <div key={`day-${day.date}`} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                     <div className="flex-1">
                       <div className="font-medium text-white">
                         {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
@@ -153,8 +153,8 @@ export function SwipeInsights({ userRole, isOpen, onClose }: SwipeInsightsProps)
               <div>
                 <span className="text-white/70 text-sm">Top Categories</span>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {metrics?.topCategories?.map((category, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
+                  {metrics?.topCategories?.map((category) => (
+                    <Badge key={`cat-${category}`} variant="secondary" className="text-xs">
                       {category}
                     </Badge>
                   ))}
@@ -170,8 +170,8 @@ export function SwipeInsights({ userRole, isOpen, onClose }: SwipeInsightsProps)
                 <CardTitle className="text-white">Insights & Tips</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {insights.map((insight, index) => (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-white/5 rounded-lg">
+                {insights.map((insight) => (
+                  <div key={`insight-${insight.title}`} className="flex items-start gap-3 p-4 bg-white/5 rounded-lg">
                     {getInsightIcon(insight.type)}
                     <div className="flex-1">
                       <h4 className="font-medium text-white mb-1">{insight.title}</h4>

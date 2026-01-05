@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { retryWithBackoff, PG_ERROR_CODES } from '@/utils/retryUtils';
+import { logger } from '@/utils/logger';
 
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -16,11 +17,11 @@ export function useSwipe() {
       // OPTIMIZED: Defensive auth check
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) {
-        console.error('[useSwipe] Auth error:', authError);
+        logger.error('[useSwipe] Auth error:', authError);
         throw new Error('Authentication error. Please refresh the page.');
       }
       if (!user?.id) {
-        console.error('[useSwipe] No user found');
+        logger.error('[useSwipe] No user found');
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
@@ -39,7 +40,7 @@ export function useSwipe() {
         .select();
 
       if (error) {
-        console.error('[useSwipe] Database error:', error);
+        logger.error('[useSwipe] Database error:', error);
         throw error;
       }
 
@@ -69,7 +70,7 @@ export function useSwipe() {
             }] as any);
           }
         } catch (notifError) {
-          console.error('[useSwipe] Failed to send notification:', notifError);
+          logger.error('[useSwipe] Failed to send notification:', notifError);
         }
       }
       
@@ -125,7 +126,7 @@ export function useSwipe() {
                   break;
                 }
 
-                console.error(`[useSwipe] Match creation attempt ${attempt}/3 failed:`, matchError);
+                logger.error(`[useSwipe] Match creation attempt ${attempt}/3 failed:`, matchError);
                 
                 if (attempt < 3) {
                   // Exponential backoff: 300ms, 600ms
@@ -216,7 +217,7 @@ export function useSwipe() {
                   break;
                 }
 
-                console.error(`[useSwipe] Match creation attempt ${attempt}/3 failed:`, matchError);
+                logger.error(`[useSwipe] Match creation attempt ${attempt}/3 failed:`, matchError);
                 
                 if (attempt < 3) {
                   // Exponential backoff: 300ms, 600ms
@@ -271,7 +272,7 @@ export function useSwipe() {
           // Match detection errors are non-critical - the swipe itself was successful
           // User can still see matches via the matches page even if notification fails
           if (import.meta.env.DEV) {
-            console.warn('[useSwipe] Match detection error (non-critical):', matchError);
+            logger.warn('[useSwipe] Match detection error (non-critical):', matchError);
           }
         }
       }
@@ -294,7 +295,7 @@ export function useSwipe() {
       // Skip invalidations on dislike - no UI changes needed
     },
     onError: (error: any) => {
-      console.error('[useSwipe] Mutation error:', error);
+      logger.error('[useSwipe] Mutation error:', error);
       toast({
         title: 'Error Saving',
         description: error?.message || 'Failed to save your preference. Please try again.',

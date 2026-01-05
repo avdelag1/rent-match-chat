@@ -163,8 +163,8 @@ export function PropertyPreviewDialog({
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">Amenities</h3>
               <div className="flex flex-wrap gap-2">
-                {property.amenities.map((amenity: string, index: number) => (
-                  <Badge key={index} variant="outline" className="text-sm px-3 py-1">
+                {property.amenities.map((amenity: string) => (
+                  <Badge key={`amenity-${amenity}`} variant="outline" className="text-sm px-3 py-1">
                     {amenity}
                   </Badge>
                 ))}

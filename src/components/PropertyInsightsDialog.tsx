@@ -10,7 +10,7 @@ import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 
 /**
  * iOS-grade skeleton loader for dialog content
@@ -85,7 +85,7 @@ interface PropertyInsightsDialogProps {
   listing: Listing | null;
 }
 
-export function PropertyInsightsDialog({ open, onOpenChange, listing }: PropertyInsightsDialogProps) {
+function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: PropertyInsightsDialogProps) {
   const navigate = useNavigate();
   const startConversation = useStartConversation();
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
@@ -172,8 +172,9 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   }
 
-  const handleMessage = async () => {
-    if (!listing.owner_id) {
+  // Memoized callback to start conversation
+  const handleMessage = useCallback(async () => {
+    if (!listing?.owner_id) {
       toast({
         title: 'Error',
         description: 'Property owner information not available',
@@ -212,7 +213,7 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
     } finally {
       setIsCreatingConversation(false);
     }
-  };
+  }, [listing, startConversation, navigate, onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -452,8 +453,8 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
               <div>
                 <h4 className="font-semibold mb-2">Equipment Included</h4>
                 <div className="flex flex-wrap gap-2">
-                  {listing.equipment.map((item, index) => (
-                    <Badge key={index} variant="outline" className="bg-cyan-500/5 border-cyan-500/20">
+                  {listing.equipment.map((item) => (
+                    <Badge key={`equip-${item}`} variant="outline" className="bg-cyan-500/5 border-cyan-500/20">
                       <CheckCircle className="w-3 h-3 mr-1 text-cyan-500" />
                       {item}
                     </Badge>
@@ -480,8 +481,8 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
               <div>
                 <h4 className="font-semibold mb-2">Amenities</h4>
                 <div className="flex flex-wrap gap-2">
-                  {listing.amenities.map((amenity, index) => (
-                    <Badge key={index} variant="outline">{amenity}</Badge>
+                  {listing.amenities.map((amenity) => (
+                    <Badge key={`amenity-${amenity}`} variant="outline">{amenity}</Badge>
                   ))}
                 </div>
               </div>
@@ -816,3 +817,11 @@ export function PropertyInsightsDialog({ open, onOpenChange, listing }: Property
     </Dialog>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export const PropertyInsightsDialog = memo(PropertyInsightsDialogComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.listing?.id === nextProps.listing?.id &&
+    prevProps.open === nextProps.open
+  );
+});

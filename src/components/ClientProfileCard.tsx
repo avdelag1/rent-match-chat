@@ -295,7 +295,7 @@ const ClientProfileCardComponent = ({
                   }
 
                   return (
-                    <Badge key={index} variant="outline" className={`${badgeClass} px-3 py-1.5 rounded-lg`}>
+                    <Badge key={`tag-${tag}`} variant="outline" className={`${badgeClass} px-3 py-1.5 rounded-lg`}>
                       {tag}
                     </Badge>
                   );

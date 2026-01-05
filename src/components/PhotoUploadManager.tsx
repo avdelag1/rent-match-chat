@@ -208,7 +208,7 @@ export function PhotoUploadManager({
           
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
             {currentPhotos.map((photo, index) => (
-              <div key={index} className="relative group">
+              <div key={`photo-${photo}-${index}`} className="relative group">
                 <div className="aspect-square relative rounded-lg overflow-hidden border-2 border-white/20">
                   <img
                     src={photo}

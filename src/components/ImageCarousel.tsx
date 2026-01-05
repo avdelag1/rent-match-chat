@@ -112,7 +112,7 @@ export function ImageCarousel({ images, alt }: ImageCarouselProps) {
         <div className="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-thin">
           {images.map((image, index) => (
             <button
-              key={index}
+              key={`thumb-${image}-${index}`}
               onClick={() => setCurrentIndex(index)}
               className={`flex-shrink-0 w-16 h-12 rounded border-2 overflow-hidden transition-all duration-200 ${
                 index === currentIndex ? 'border-primary scale-105' : 'border-transparent hover:border-primary/50'
