@@ -327,8 +327,8 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                         <span className="text-lg">✨</span> Interests & Lifestyle
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {profile.interests.slice(0, 10).map((interest, idx) => (
-                          <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-xs bg-primary/10 hover:bg-primary/20 border-primary/20 transition-colors">
+                        {profile.interests.slice(0, 10).map((interest) => (
+                          <Badge key={`interest-${interest}`} variant="secondary" className="px-3 py-1.5 text-xs bg-primary/10 hover:bg-primary/20 border-primary/20 transition-colors">
                             {interest}
                           </Badge>
                         ))}
@@ -385,8 +385,8 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                         Why They're a Great Match
                       </h4>
                       <div className="space-y-2">
-                        {profile.matchReasons.slice(0, 4).map((reason, idx) => (
-                          <div key={idx} className="flex items-start gap-2">
+                        {profile.matchReasons.slice(0, 4).map((reason) => (
+                          <div key={`reason-${reason}`} className="flex items-start gap-2">
                             <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                             <span className="text-sm">{reason}</span>
                           </div>
@@ -714,8 +714,8 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                         <span className="break-words">{insights.isVehicle ? 'Equipment & Features' : 'Amenities Included'}</span>
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {[...(listing.amenities || []), ...(listing.equipment || [])].slice(0, 8).map((item, idx) => (
-                          <div key={idx} className="flex items-start gap-2 p-2 bg-muted/30 rounded-lg">
+                        {[...(listing.amenities || []), ...(listing.equipment || [])].slice(0, 8).map((item) => (
+                          <div key={`amenity-${item}`} className="flex items-start gap-2 p-2 bg-muted/30 rounded-lg">
                             <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                             <span className="text-xs sm:text-sm capitalize break-words">{item}</span>
                           </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { User } from '@supabase/supabase-js';
+import { logger } from '@/utils/prodLogger';
 
 export interface ExistingProfile {
   id: string;
@@ -34,7 +35,7 @@ export function useAccountLinking() {
 
       if (error && error.code !== 'PGRST116') {
         if (import.meta.env.DEV) {
-          console.error('Error checking existing account:', error);
+          logger.error('Error checking existing account:', error);
         }
         return { profile: null, hasConflict: false };
       }
@@ -56,7 +57,7 @@ export function useAccountLinking() {
       };
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('Error in checkExistingAccount:', error);
+        logger.error('Error in checkExistingAccount:', error);
       }
       return { profile: null, hasConflict: false };
     }
@@ -142,7 +143,7 @@ export function useAccountLinking() {
         }]);
       } catch (auditError) {
         if (import.meta.env.DEV) {
-          console.error('Audit log failed:', auditError);
+          logger.error('Audit log failed:', auditError);
         }
       }
 
@@ -161,7 +162,7 @@ export function useAccountLinking() {
 
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('Error linking OAuth to existing account:', error);
+        logger.error('Error linking OAuth to existing account:', error);
       }
       toast({
         title: "Account Linking Failed",
@@ -203,7 +204,7 @@ export function useAccountLinking() {
 
       if (error) {
         if (import.meta.env.DEV) {
-          console.error('Error creating OAuth profile:', error);
+          logger.error('Error creating OAuth profile:', error);
         }
         throw error;
       }
@@ -221,7 +222,7 @@ export function useAccountLinking() {
 
       if (roleError) {
         if (import.meta.env.DEV) {
-          console.error('Error creating role:', roleError);
+          logger.error('Error creating role:', roleError);
         }
         throw roleError;
       }
@@ -249,7 +250,7 @@ export function useAccountLinking() {
 
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('Error creating OAuth profile:', error);
+        logger.error('Error creating OAuth profile:', error);
       }
       toast({
         title: "Account Creation Failed", 
