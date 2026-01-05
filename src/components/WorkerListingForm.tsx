@@ -627,7 +627,7 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.languages.map((lang, index) => (
                   <span
-                    key={index}
+                    key={`lang-${lang}-${index}`}
                     className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm cursor-pointer hover:bg-primary/20"
                     onClick={() => handleRemoveLanguage(index)}
                   >

@@ -130,8 +130,8 @@ export function SettingsBottomSheet({
             Menu
           </h3>
           <div className="space-y-1">
-            {menuItems.map((item, index) => (
-              <div key={index}>
+            {menuItems.map((item) => (
+              <div key={`menu-${item.title}`}>
                 {item.children ? (
                   // Parent item with children
                   <div className="space-y-1">
@@ -141,9 +141,9 @@ export function SettingsBottomSheet({
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="pl-8 space-y-1">
-                      {item.children.map((child, childIndex) => (
+                      {item.children.map((child) => (
                         <Button
-                          key={childIndex}
+                          key={`child-${child.title}`}
                           variant="ghost"
                           className="w-full justify-start gap-3 h-12"
                           onClick={() => handleItemClick(child)}

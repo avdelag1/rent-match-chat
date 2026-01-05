@@ -166,7 +166,7 @@ export function ThemeSelector({ compact = false, showTitle = true }: ThemeSelect
                     <div className="flex gap-1.5">
                       {Object.values(option.colors).map((color, index) => (
                         <motion.div
-                          key={index}
+                          key={`color-${color}-${index}`}
                           className="w-5 h-5 rounded-full border-2 border-border/50 shadow-sm"
                           style={{ backgroundColor: color }}
                           whileHover={{ scale: 1.2 }}

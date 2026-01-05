@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react';
@@ -12,7 +12,7 @@ interface PropertyImageGalleryProps {
   initialIndex?: number;
 }
 
-export function PropertyImageGallery({
+function PropertyImageGalleryComponent({
   images,
   alt,
   isOpen,
@@ -22,39 +22,102 @@ export function PropertyImageGallery({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isZoomed, setIsZoomed] = useState(false);
 
-  // Prefetch adjacent images for instant navigation
+  // Track loaded images for instant display
+  const loadedImagesRef = useRef<Set<string>>(new Set());
+  const [, forceUpdate] = useState(0);
+
+  // Preload ALL images when gallery opens for instant navigation
   useEffect(() => {
     if (!isOpen || !images.length) return;
 
-    const nextIndex = (currentIndex + 1) % images.length;
-    const prevIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1;
+    // Preload current image first (high priority)
+    const currentUrl = getFullImageUrl(images[currentIndex]);
+    if (!loadedImagesRef.current.has(currentUrl)) {
+      const img = new Image();
+      img.fetchPriority = 'high';
+      img.decoding = 'async';
+      img.onload = () => {
+        loadedImagesRef.current.add(currentUrl);
+        forceUpdate(n => n + 1);
+      };
+      img.src = currentUrl;
+    }
 
-    // Prefetch next and previous images (failures are intentionally silent - preloading is best-effort)
-    preloadImage(getFullImageUrl(images[nextIndex])).catch(() => { /* Preload failure is non-critical */ });
-    preloadImage(getFullImageUrl(images[prevIndex])).catch(() => { /* Preload failure is non-critical */ });
+    // Preload adjacent images immediately
+    const adjacentIndices = [
+      (currentIndex + 1) % images.length,
+      currentIndex === 0 ? images.length - 1 : currentIndex - 1
+    ];
+
+    adjacentIndices.forEach(idx => {
+      const url = getFullImageUrl(images[idx]);
+      if (!loadedImagesRef.current.has(url)) {
+        const img = new Image();
+        img.fetchPriority = 'high';
+        img.decoding = 'async';
+        img.onload = () => loadedImagesRef.current.add(url);
+        img.src = url;
+      }
+    });
+
+    // Preload remaining images in background
+    images.forEach((image, idx) => {
+      if (idx !== currentIndex && !adjacentIndices.includes(idx)) {
+        const url = getFullImageUrl(image);
+        if (!loadedImagesRef.current.has(url)) {
+          requestIdleCallback?.(() => {
+            const img = new Image();
+            img.decoding = 'async';
+            img.onload = () => loadedImagesRef.current.add(url);
+            img.src = url;
+          }) || setTimeout(() => {
+            const img = new Image();
+            img.decoding = 'async';
+            img.onload = () => loadedImagesRef.current.add(url);
+            img.src = url;
+          }, 100);
+        }
+      }
+    });
   }, [currentIndex, images, isOpen]);
 
-  if (!images || images.length === 0) return null;
+  // Reset index when dialog opens with new initialIndex
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentIndex(initialIndex);
+      setIsZoomed(false);
+    }
+  }, [isOpen, initialIndex]);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     setIsZoomed(false);
-  };
+  }, [images.length]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     setIsZoomed(false);
-  };
+  }, [images.length]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') goToPrevious();
     if (e.key === 'ArrowRight') goToNext();
     if (e.key === 'Escape') onClose();
-  };
+  }, [goToPrevious, goToNext, onClose]);
+
+  const handleThumbnailClick = useCallback((index: number) => {
+    setCurrentIndex(index);
+    setIsZoomed(false);
+  }, []);
+
+  if (!images || images.length === 0) return null;
+
+  const currentImageUrl = getFullImageUrl(images[currentIndex]);
+  const isCurrentLoaded = loadedImagesRef.current.has(currentImageUrl);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
+      <DialogContent
         className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 bg-black/95"
         onKeyDown={handleKeyDown}
       >
@@ -86,16 +149,26 @@ export function PropertyImageGallery({
             </div>
           </div>
 
-          {/* Main Image */}
+          {/* Main Image - NO TRANSITIONS for instant feel */}
           <div className="flex-1 flex items-center justify-center p-4 pt-16">
             <div className="relative max-w-full max-h-full">
+              {/* Loading placeholder */}
+              {!isCurrentLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </div>
+              )}
               <img
-                src={getFullImageUrl(images[currentIndex])}
+                src={currentImageUrl}
                 alt={`${alt} ${currentIndex + 1}`}
-                className={`max-w-full max-h-full object-contain transition-transform duration-75 ${
+                className={`max-w-full max-h-full object-contain ${
                   isZoomed ? 'scale-150 cursor-grab' : 'cursor-zoom-in'
                 }`}
-                style={{ willChange: 'transform' }}
+                style={{
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                }}
                 onClick={() => setIsZoomed(!isZoomed)}
                 draggable={false}
                 loading="eager"
@@ -127,22 +200,20 @@ export function PropertyImageGallery({
             </>
           )}
 
-          {/* Thumbnail Strip */}
+          {/* Thumbnail Strip - Use image URL as key */}
           {images.length > 1 && (
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
               <div className="flex gap-2 justify-center overflow-x-auto max-w-full">
                 {images.map((image, index) => (
                   <button
-                    key={index}
-                    onClick={() => {
-                      setCurrentIndex(index);
-                      setIsZoomed(false);
-                    }}
-                    className={`flex-shrink-0 w-16 h-12 rounded border-2 overflow-hidden transition-all ${
-                      index === currentIndex 
-                        ? 'border-white scale-110' 
+                    key={`thumb-${image}-${index}`}
+                    onClick={() => handleThumbnailClick(index)}
+                    className={`flex-shrink-0 w-16 h-12 rounded border-2 overflow-hidden ${
+                      index === currentIndex
+                        ? 'border-white scale-110'
                         : 'border-white/30 hover:border-white/60'
                     }`}
+                    style={{ transform: 'translateZ(0)' }}
                   >
                     <img
                       src={getThumbnailUrl(image)}
@@ -166,3 +237,6 @@ export function PropertyImageGallery({
     </Dialog>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export const PropertyImageGallery = memo(PropertyImageGalleryComponent);
