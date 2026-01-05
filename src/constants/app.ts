@@ -71,9 +71,20 @@ export const STORAGE = {
   SEARCH_HISTORY_KEY: 'searchHistory',
   SELECTED_PLAN_KEY: 'swipes_selected_plan',
   PENDING_ACTIVATION_KEY: 'pendingActivationPurchase',
+  // Referral system
+  REFERRAL_CODE_KEY: 'referral_code',
+  // Payment return location
+  PAYMENT_RETURN_PATH_KEY: 'payment_return_path',
 
   // localStorage limits
   MAX_HISTORY_ITEMS: 50,
+} as const;
+
+// Referral configuration
+export const REFERRAL = {
+  FREE_MESSAGES_PER_REFERRAL: 1,
+  REFERRAL_EXPIRY_DAYS: 7, // How long referral code stays valid in localStorage
+  MAX_REFERRAL_MESSAGES: 30, // Maximum free messages from referrals
 } as const;
 
 // Image placeholders

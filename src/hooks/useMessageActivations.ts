@@ -6,11 +6,11 @@ export function useMessageActivations() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  // Fetch available activations (pay-per-use + monthly)
+  // Fetch available activations (pay-per-use + monthly + referral bonuses)
   const { data: activations, isLoading } = useQuery({
     queryKey: ['message-activations', user?.id],
     queryFn: async () => {
-      if (!user?.id) return { payPerUse: [], monthly: [], totalRemaining: 0 };
+      if (!user?.id) return { payPerUse: [], monthly: [], referralBonus: [], totalRemaining: 0 };
 
       // Get active pay-per-use credits (not expired)
       const { data: payPerUse, error: payPerUseError } = await supabase
@@ -21,7 +21,7 @@ export function useMessageActivations() {
         .gt('expires_at', new Date().toISOString())
         .gt('remaining_activations', 0)
         .order('expires_at', { ascending: true }); // Use oldest credits first
-      
+
       if (payPerUseError) throw payPerUseError;
 
       // Get monthly subscription activations
@@ -32,13 +32,33 @@ export function useMessageActivations() {
         .eq('activation_type', 'monthly_subscription')
         .gte('reset_date', new Date().toISOString().split('T')[0])
         .gt('remaining_activations', 0);
-      
+
       if (monthlyError) throw monthlyError;
 
-      const totalRemaining = [...(payPerUse || []), ...(monthly || [])]
-        .reduce((sum, act) => sum + (act.remaining_activations || 0), 0);
-      
-      return { payPerUse: payPerUse || [], monthly: monthly || [], totalRemaining };
+      // Get referral bonus activations (not expired)
+      const { data: referralBonus, error: referralError } = await supabase
+        .from('message_activations')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('activation_type', 'referral_bonus')
+        .gt('expires_at', new Date().toISOString())
+        .gt('remaining_activations', 0)
+        .order('expires_at', { ascending: true }); // Use oldest credits first
+
+      if (referralError) throw referralError;
+
+      const totalRemaining = [
+        ...(payPerUse || []),
+        ...(monthly || []),
+        ...(referralBonus || [])
+      ].reduce((sum, act) => sum + (act.remaining_activations || 0), 0);
+
+      return {
+        payPerUse: payPerUse || [],
+        monthly: monthly || [],
+        referralBonus: referralBonus || [],
+        totalRemaining
+      };
     },
     enabled: !!user?.id,
   });
@@ -47,10 +67,13 @@ export function useMessageActivations() {
   const useActivation = useMutation({
     mutationFn: async ({ conversationId }: { conversationId: string }) => {
       if (!user?.id) throw new Error('User not authenticated');
-      
-      // Prioritize expiring pay-per-use credits first
-      const activation = activations?.payPerUse?.[0] || activations?.monthly?.[0];
-      
+
+      // Prioritize: referral bonus first (use free ones), then pay-per-use, then monthly
+      const activation =
+        activations?.referralBonus?.[0] ||
+        activations?.payPerUse?.[0] ||
+        activations?.monthly?.[0];
+
       if (!activation) throw new Error('No activations available');
       
       // Increment used_activations
@@ -87,5 +110,6 @@ export function useMessageActivations() {
     isLoading,
     payPerUseCount: activations?.payPerUse?.length || 0,
     monthlyCount: activations?.monthly?.length || 0,
+    referralBonusCount: activations?.referralBonus?.length || 0,
   };
 }

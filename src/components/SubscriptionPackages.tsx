@@ -152,6 +152,9 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
     const selection = { role: userRole, planId: plan.id, name: plan.name, price: plan.price, at: new Date().toISOString() };
     localStorage.setItem(STORAGE.SELECTED_PLAN_KEY, JSON.stringify(selection));
 
+    // Save return path for silent redirect after payment
+    localStorage.setItem(STORAGE.PAYMENT_RETURN_PATH_KEY, `/${userRole}/dashboard`);
+
     // Open PayPal in a new tab
     window.open(plan.paypalUrl, '_blank');
 

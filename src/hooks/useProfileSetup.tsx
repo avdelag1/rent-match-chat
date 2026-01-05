@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { User } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { retryWithBackoff } from '@/utils/retryUtils';
 import { logger } from '@/utils/prodLogger';
+import { STORAGE, REFERRAL } from '@/constants/app';
 
 interface CreateProfileData {
   id: string;
@@ -18,6 +20,100 @@ const profileCreationInProgress = new Set<string>();
 export function useProfileSetup() {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const queryClient = useQueryClient();
+
+  // Process referral reward for the referrer
+  const processReferralReward = useCallback(async (newUserId: string) => {
+    try {
+      // Get stored referral code
+      const storedData = localStorage.getItem(STORAGE.REFERRAL_CODE_KEY);
+      if (!storedData) return;
+
+      const referralData = JSON.parse(storedData);
+      const referrerId = referralData.code;
+
+      // Validate: not self-referral, referrer exists
+      if (!referrerId || referrerId === newUserId) {
+        localStorage.removeItem(STORAGE.REFERRAL_CODE_KEY);
+        return;
+      }
+
+      // Check expiry
+      const capturedAt = referralData.capturedAt || 0;
+      const expiryMs = REFERRAL.REFERRAL_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+      if (Date.now() - capturedAt > expiryMs) {
+        localStorage.removeItem(STORAGE.REFERRAL_CODE_KEY);
+        return;
+      }
+
+      // Verify referrer exists
+      const { data: referrerProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', referrerId)
+        .maybeSingle();
+
+      if (!referrerProfile) {
+        localStorage.removeItem(STORAGE.REFERRAL_CODE_KEY);
+        return;
+      }
+
+      // Check if reward already granted (prevent abuse)
+      const { data: existingReward } = await supabase
+        .from('message_activations')
+        .select('id')
+        .eq('user_id', referrerId)
+        .eq('activation_type', 'referral_bonus')
+        .like('notes', `%referred_user:${newUserId}%`)
+        .maybeSingle();
+
+      if (existingReward) {
+        localStorage.removeItem(STORAGE.REFERRAL_CODE_KEY);
+        return;
+      }
+
+      // Grant referral bonus activation
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 60);
+
+      const { error: activError } = await supabase
+        .from('message_activations')
+        .insert({
+          user_id: referrerId,
+          activation_type: 'referral_bonus',
+          total_activations: REFERRAL.FREE_MESSAGES_PER_REFERRAL,
+          remaining_activations: REFERRAL.FREE_MESSAGES_PER_REFERRAL,
+          used_activations: 0,
+          expires_at: expiresAt.toISOString(),
+          notes: `Referral reward - referred_user:${newUserId}`,
+        });
+
+      if (!activError) {
+        // Create notification for referrer (silent, non-blocking)
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: referrerId,
+            type: 'referral_reward',
+            message: 'You earned 1 free message for inviting a new user!',
+            read: false,
+          })
+          .catch(() => {});
+
+        if (import.meta.env.DEV) {
+          logger.log('[ProfileSetup] Referral reward granted to:', referrerId);
+        }
+      }
+
+      // Clear referral code
+      localStorage.removeItem(STORAGE.REFERRAL_CODE_KEY);
+
+      // Invalidate queries for referrer
+      queryClient.invalidateQueries({ queryKey: ['message-activations', referrerId] });
+    } catch (error) {
+      logger.error('[ProfileSetup] Error processing referral:', error);
+      localStorage.removeItem(STORAGE.REFERRAL_CODE_KEY);
+    }
+  }, [queryClient]);
 
   const createProfileIfMissing = async (user: User, role: 'client' | 'owner') => {
     if (!user) return null;
@@ -181,10 +277,16 @@ export function useProfileSetup() {
       
       // Invalidate role cache now that role is fully created
       queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
-      
+
       // Add small delay to ensure cache invalidation propagates
       await new Promise(resolve => setTimeout(resolve, 150));
-      
+
+      // Process referral reward for the referrer (non-blocking, runs in background)
+      // This grants the referrer 1 free message activation for the successful signup
+      processReferralReward(user.id).catch(() => {
+        // Silently handle any referral processing errors
+      });
+
       return newProfile;
 
     } catch (error) {

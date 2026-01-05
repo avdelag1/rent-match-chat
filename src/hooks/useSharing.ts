@@ -22,6 +22,7 @@ interface CreateShareParams {
 interface ShareUrlParams {
   listingId?: string;
   profileId?: string;
+  referralId?: string;
 }
 
 export function useCreateShare() {
@@ -89,15 +90,23 @@ export function useIncrementShareClicks() {
   });
 }
 
-// Generate shareable URL - always use production domain
+// Generate shareable URL - always use production domain with referral tracking
 export function generateShareUrl(params: ShareUrlParams): string {
   const baseUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com';
+  let url = baseUrl;
+
   if (params.listingId) {
-    return `${baseUrl}/listing/${params.listingId}`;
+    url = `${baseUrl}/listing/${params.listingId}`;
   } else if (params.profileId) {
-    return `${baseUrl}/profile/${params.profileId}`;
+    url = `${baseUrl}/profile/${params.profileId}`;
   }
-  return baseUrl;
+
+  // Add referral ID if provided
+  if (params.referralId) {
+    url += `?ref=${params.referralId}`;
+  }
+
+  return url;
 }
 
 // Copy link to clipboard
