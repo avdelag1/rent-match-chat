@@ -444,7 +444,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                       <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory scrollbar-hide">
                         {profile.profile_images.map((image, index) => (
                           <button
-                            key={index}
+                            key={`profile-img-${image}-${index}`}
                             onClick={() => {
                               setSelectedImageIndex(index);
                               setGalleryOpen(true);
@@ -741,7 +741,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                       <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory scrollbar-hide">
                         {listing.images.map((image, index) => (
                           <button
-                            key={index}
+                            key={`listing-img-${image}-${index}`}
                             onClick={() => {
                               setSelectedImageIndex(index);
                               setGalleryOpen(true);

@@ -408,7 +408,7 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
                   {images.length > 0 && (
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {images.map((img, index) => (
-                        <div key={index} className="relative aspect-square group">
+                        <div key={`ai-img-${img}-${index}`} className="relative aspect-square group">
                           <img
                             src={img}
                             alt={`Upload ${index + 1}`}
@@ -547,7 +547,7 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
                       <div className="flex gap-2 overflow-x-auto pb-2">
                         {images.slice(0, 4).map((img, i) => (
                           <img
-                            key={i}
+                            key={`preview-${img}-${i}`}
                             src={img}
                             alt={`Preview ${i}`}
                             className="w-20 h-20 object-cover rounded-lg shrink-0"

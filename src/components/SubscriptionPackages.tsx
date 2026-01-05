@@ -231,8 +231,8 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
 
                 <CardContent className="pt-0 flex-1 flex flex-col px-3 sm:px-4 pb-4">
                   <div className="space-y-1.5 sm:space-y-2 mb-4 flex-1">
-                    {pkg.benefits.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-1.5 sm:gap-2">
+                    {pkg.benefits.map((feature) => (
+                      <div key={`benefit-${feature}`} className="flex items-start gap-1.5 sm:gap-2">
                         <Check className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0 mt-0.5" />
                         <span className="text-xs sm:text-sm text-foreground leading-tight">
                           {feature}
