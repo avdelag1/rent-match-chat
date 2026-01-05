@@ -4,6 +4,8 @@
  */
 import { logger } from '@/utils/prodLogger';
 
+import { logger } from './prodLogger';
+
 /**
  * Safely get item from localStorage
  * Returns null if key doesn't exist or localStorage is unavailable

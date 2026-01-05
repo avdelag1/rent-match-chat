@@ -18,6 +18,7 @@ import { RotateCcw, RefreshCw, Home, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/utils/prodLogger';
 
 // Debounce utility for preventing rapid-fire actions
 function useDebounce<T extends (...args: any[]) => any>(
@@ -314,7 +315,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       }
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('[TinderentSwipe] Error starting conversation:', error);
+        logger.error('[TinderentSwipe] Error starting conversation:', error);
       }
       toast({
         title: 'Error',

@@ -195,7 +195,6 @@ const ClientLikedProperties = () => {
       }
       
     } catch (error) {
-      console.error('❌ Failed to start conversation:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to start conversation';
       toast({
         title: "Unable to start conversation",
@@ -397,7 +396,7 @@ const ClientLikedProperties = () => {
                       {property.amenities && property.amenities.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {property.amenities.slice(0, 3).map((amenity) => (
-                            <span key={`amenity-${amenity}`} className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">
+                            <span key={`${property.id}-amenity-${amenity}`} className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">
                               {amenity}
                             </span>
                           ))}

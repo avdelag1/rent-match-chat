@@ -19,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { MessageActivationPackages } from '@/components/MessageActivationPackages';
 import { useMessageActivations } from '@/hooks/useMessageActivations';
+import { logger } from '@/utils/prodLogger';
 
 export function MessagingDashboard() {
   const navigate = useNavigate();
@@ -159,7 +160,7 @@ export function MessagingDashboard() {
         }
       }
     } catch (error) {
-      if (import.meta.env.DEV) console.error('[MessagingDashboard] Error opening conversation:', error);
+      if (import.meta.env.DEV) logger.error('[MessagingDashboard] Error opening conversation:', error);
       toast({
         title: '❌ Could not open conversation',
         description: 'The conversation may not exist. Try refreshing the page.',
@@ -224,7 +225,7 @@ export function MessagingDashboard() {
         setIsStartingConversation(false);
       }
     } catch (error: any) {
-      if (import.meta.env.DEV) console.error('Error auto-starting conversation:', error);
+      if (import.meta.env.DEV) logger.error('Error auto-starting conversation:', error);
 
       if (error?.message === 'QUOTA_EXCEEDED') {
         setShowUpgradeDialog(true);

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 interface ProfileView {
   id: string;
@@ -70,7 +71,7 @@ export function usePermanentlyExcludedProfiles(viewType: 'profile' | 'listing' =
         .gte('created_at', oneDayAgo);
 
       if (error) {
-        console.error('Error fetching permanently excluded profiles:', error);
+        logger.error('Error fetching permanently excluded profiles:', error);
         return [];
       }
 
@@ -136,7 +137,7 @@ export function useTemporarilyExcludedProfiles(viewType: 'profile' | 'listing' =
         .gte('created_at', oneDayAgo);
 
       if (error) {
-        console.error('Error fetching temporarily excluded profiles:', error);
+        logger.error('Error fetching temporarily excluded profiles:', error);
         return [];
       }
 
@@ -173,7 +174,7 @@ export function useUserSwipePatterns(viewType: 'profile' | 'listing' = 'profile'
         .in('action', ['like', 'pass']);
 
       if (error) {
-        console.error('Error fetching swipe patterns:', error);
+        logger.error('Error fetching swipe patterns:', error);
         return { liked: [], disliked: [] };
       }
 
@@ -204,7 +205,7 @@ export function useRecycledProfiles(viewType: 'profile' | 'listing' = 'profile')
         .lt('created_at', oneDayAgo);
 
       if (error) {
-        console.error('Error fetching recycled profiles:', error);
+        logger.error('Error fetching recycled profiles:', error);
         return [];
       }
 

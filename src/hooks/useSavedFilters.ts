@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Database, Json } from '@/integrations/supabase/types';
+import { logger } from '@/utils/prodLogger';
 
 export type SavedFilterRow = Database['public']['Tables']['saved_filters']['Row'];
 
@@ -55,7 +56,7 @@ export function useSavedFilters() {
         setActiveFilter(active || null);
       }
     } catch (error) {
-      console.error('Error loading saved filters:', error);
+      logger.error('Error loading saved filters:', error);
       toast({
         title: 'Error',
         description: 'Failed to load saved filters',
@@ -162,7 +163,7 @@ export function useSavedFilters() {
       await loadSavedFilters();
     } catch (error: unknown) {
       const err = error as Error;
-      console.error('Error saving filter:', err);
+      logger.error('Error saving filter:', err);
       toast({
         title: 'Error',
         description: err.message || 'Failed to save filter',
@@ -187,7 +188,7 @@ export function useSavedFilters() {
 
       await loadSavedFilters();
     } catch (error) {
-      console.error('Error deleting filter:', error);
+      logger.error('Error deleting filter:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete filter',
@@ -244,7 +245,7 @@ export function useSavedFilters() {
 
       await loadSavedFilters();
     } catch (error) {
-      console.error('Error setting active filter:', error);
+      logger.error('Error setting active filter:', error);
       toast({
         title: 'Error',
         description: 'Failed to activate filter',

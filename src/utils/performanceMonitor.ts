@@ -1,5 +1,5 @@
 // Performance monitoring and optimization utilities
-
+import { logger } from './prodLogger';
 // Track component render times
 export function trackRenderTime(componentName: string, startTime: number) {
   if (import.meta.env.DEV) {
@@ -83,7 +83,7 @@ export function monitorWebVitals(): () => void {
       observers.forEach(observer => observer.disconnect());
     };
   } catch (error) {
-    console.error('Failed to initialize Web Vitals monitoring:', error);
+    logger.error('Failed to initialize Web Vitals monitoring:', error);
     return () => {};
   }
 }

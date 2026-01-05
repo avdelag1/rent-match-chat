@@ -158,7 +158,7 @@ export function useSaveClientProfile() {
           .select();
 
         if (syncError) {
-          logger.error('❌ [PROFILE SYNC] Error:', syncError);
+          logger.error('[PROFILE SYNC] Error:', syncError);
         } else {
           // Invalidate profiles_public cache immediately after sync
           qc.invalidateQueries({ queryKey: ['profiles_public'] });

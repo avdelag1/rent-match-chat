@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
 import { useState, useMemo, useCallback, memo } from 'react';
+import { logger } from '@/utils/prodLogger';
 
 /**
  * iOS-grade skeleton loader for dialog content
@@ -203,7 +204,7 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
       }
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('Error starting conversation:', error);
+        logger.error('Error starting conversation:', error);
       }
       toast({
         title: 'Could not start conversation',
@@ -767,7 +768,7 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                 <div className="grid grid-cols-3 gap-2">
                   {listing.images.map((image, idx) => (
                     <button
-                      key={`property-image-${image}`}
+                      key={`image-${listing.id}-${index}`}
                       onClick={() => {
                         setSelectedImageIndex(idx);
                         setGalleryOpen(true);
