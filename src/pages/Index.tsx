@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import LegendaryLandingPage from "@/components/LegendaryLandingPage";
@@ -7,12 +7,31 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { logger } from "@/utils/prodLogger";
+import { STORAGE } from "@/constants/app";
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const hasShownError = useRef(false);
+
+  // Capture referral code from URL if present (works for app-wide referral links)
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode && refCode.length > 0) {
+      // Don't capture if it's the current user's own referral
+      if (user?.id && user.id === refCode) return;
+
+      // Store referral code with timestamp
+      const referralData = {
+        code: refCode,
+        capturedAt: Date.now(),
+        source: '/',
+      };
+      localStorage.setItem(STORAGE.REFERRAL_CODE_KEY, JSON.stringify(referralData));
+    }
+  }, [searchParams, user?.id]);
 
   const userAgeMs = useMemo(() => {
     if (!user?.created_at) return Infinity;

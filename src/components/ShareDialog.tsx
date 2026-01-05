@@ -16,6 +16,7 @@ import {
   shareViaSMS,
   generateShareUrl,
 } from '@/hooks/useSharing';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ShareDialogProps {
   open: boolean;
@@ -37,8 +38,10 @@ export function ShareDialog({
   const [copied, setCopied] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState('');
   const createShare = useCreateShare();
+  const { user } = useAuth();
 
-  const shareUrl = generateShareUrl({ listingId, profileId });
+  // Include user's ID as referral ID for tracking
+  const shareUrl = generateShareUrl({ listingId, profileId, referralId: user?.id });
   const shareText = description || `Check out ${title} on Zwipes!`;
 
   const handleCopyLink = async () => {

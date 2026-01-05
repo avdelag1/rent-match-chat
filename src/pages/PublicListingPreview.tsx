@@ -1,5 +1,6 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,11 +14,30 @@ import {
   Calendar, CheckCircle, Users
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { STORAGE } from '@/constants/app';
 
 export default function PublicListingPreview() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Capture referral code from URL if present
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode && refCode.length > 0) {
+      // Don't capture if it's the current user's own referral
+      if (user?.id && user.id === refCode) return;
+
+      // Store referral code with timestamp
+      const referralData = {
+        code: refCode,
+        capturedAt: Date.now(),
+        source: `/listing/${id}`,
+      };
+      localStorage.setItem(STORAGE.REFERRAL_CODE_KEY, JSON.stringify(referralData));
+    }
+  }, [searchParams, id, user?.id]);
 
   // Fetch listing data
   const { data: listing, isLoading, error } = useQuery({

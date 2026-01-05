@@ -143,6 +143,9 @@ export function MessageActivationPackages({
       package_category: pkg.package_category,
     }));
 
+    // Save return path for silent redirect after payment
+    localStorage.setItem(STORAGE.PAYMENT_RETURN_PATH_KEY, `/${currentUserRole}/dashboard`);
+
     if (pkg.paypalUrl) {
       window.open(pkg.paypalUrl, '_blank');
       toast({
