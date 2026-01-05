@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useMessagingQuota } from '@/hooks/useMessagingQuota';
+import { logger } from '@/utils/prodLogger';
 
 interface Conversation {
   id: string;
@@ -62,7 +63,7 @@ export function useConversations() {
 
         if (error) {
           if (import.meta.env.DEV) {
-            console.error('[useConversations] Error loading conversations:', error);
+            logger.error('[useConversations] Error loading conversations:', error);
           }
           // Gracefully handle auth errors
           if (error.code === '42501' || error.code === 'PGRST301') {
@@ -87,7 +88,7 @@ export function useConversations() {
           .order('created_at', { ascending: false });
 
         if (messagesError) {
-          console.error('Error fetching conversation messages:', messagesError);
+          logger.error('Error fetching conversation messages:', messagesError);
         }
 
         // Create a map of conversation_id to last message
@@ -143,7 +144,7 @@ export function useConversations() {
         const err = error as { message?: string };
         // Better error handling with user-friendly messages
         if (import.meta.env.DEV) {
-          console.error('[useConversations] Error fetching conversations:', err?.message);
+          logger.error('[useConversations] Error fetching conversations:', err?.message);
         }
 
         // For temporary auth issues, return empty array to avoid blocking UI
@@ -198,7 +199,7 @@ export function useConversations() {
 
       if (error || !data) {
         if (import.meta.env.DEV) {
-          console.error('[useConversations] Error fetching single conversation:', error);
+          logger.error('[useConversations] Error fetching single conversation:', error);
         }
         return null;
       }
@@ -238,7 +239,7 @@ export function useConversations() {
       };
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('[useConversations] Error fetching single conversation:', error);
+        logger.error('[useConversations] Error fetching single conversation:', error);
       }
       return null;
     }
@@ -301,7 +302,7 @@ export function useStartConversation() {
 
       if (existingError) {
         if (import.meta.env.DEV) {
-          console.error('Error checking existing conversations:', existingError);
+          logger.error('Error checking existing conversations:', existingError);
         }
         throw new Error('Failed to check existing conversations');
       }
@@ -408,7 +409,7 @@ export function useStartConversation() {
         .eq('id', conversationId);
 
       if (updateError) {
-        console.error('Error updating conversation timestamp:', updateError);
+        logger.error('Error updating conversation timestamp:', updateError);
       }
 
       return { conversationId, message };
@@ -494,7 +495,7 @@ export function useSendMessage() {
 
       if (error) {
         // Add more context to the error for debugging
-        console.error('Message insert error:', {
+        logger.error('Message insert error:', {
           code: error.code,
           message: error.message,
           details: error.details,
@@ -510,7 +511,7 @@ export function useSendMessage() {
         .eq('id', conversationId);
 
       if (updateTimestampError) {
-        console.error('Error updating conversation timestamp:', updateTimestampError);
+        logger.error('Error updating conversation timestamp:', updateTimestampError);
       }
 
       return data;

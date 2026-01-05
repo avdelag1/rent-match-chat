@@ -1,6 +1,6 @@
 import { useClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { logger } from '@/utils/prodLogger';
 
 export function useAutoSaveListingTypes() {
   const { updatePreferences } = useClientFilterPreferences();
@@ -12,7 +12,7 @@ export function useAutoSaveListingTypes() {
       // Refresh listings to apply new filter
       queryClient.invalidateQueries({ queryKey: ['listings'] });
     } catch (error) {
-      console.error('Failed to save listing type preferences:', error);
+      logger.error('Failed to save listing type preferences:', error);
     }
   };
 

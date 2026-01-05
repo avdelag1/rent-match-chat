@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 export interface UserSecuritySettings {
   id: string;
@@ -87,7 +88,7 @@ export function useSecuritySettings() {
         .maybeSingle();
 
       if (existingError && existingError.code !== 'PGRST116') {
-        console.error('Error checking existing security settings:', existingError);
+        logger.error('Error checking existing security settings:', existingError);
         throw existingError;
       }
 
@@ -126,7 +127,7 @@ export function useSecuritySettings() {
       });
     },
     onError: (error) => {
-      console.error('Error updating security settings:', error);
+      logger.error('Error updating security settings:', error);
       toast({
         title: 'Error',
         description: 'Failed to update security settings. Please try again.',

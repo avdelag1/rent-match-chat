@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Copy, Check, Home } from 'lucide-react';
+import { logger } from '@/utils/prodLogger';
 
 interface Props {
   children: ReactNode;
@@ -23,17 +24,17 @@ class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // ALWAYS log errors to console (production + dev) for debugging
-    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.error('🚨 Global Error Boundary caught error:');
-    console.error('Error:', error);
-    console.error('Message:', error.message);
-    console.error('Stack:', error.stack);
-    console.error('Component Stack:', errorInfo?.componentStack);
-    console.error('URL:', window.location.href);
-    console.error('User Agent:', navigator.userAgent);
-    console.error('Timestamp:', new Date().toISOString());
-    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    // ALWAYS log errors (production + dev) for debugging
+    logger.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    logger.error('🚨 Global Error Boundary caught error:');
+    logger.error('Error:', error);
+    logger.error('Message:', error.message);
+    logger.error('Stack:', error.stack);
+    logger.error('Component Stack:', errorInfo?.componentStack);
+    logger.error('URL:', window.location.href);
+    logger.error('User Agent:', navigator.userAgent);
+    logger.error('Timestamp:', new Date().toISOString());
+    logger.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     this.setState({ errorInfo });
   }
 
@@ -62,7 +63,7 @@ Timestamp: ${new Date().toISOString()}
       this.setState({ copied: true });
       setTimeout(() => this.setState({ copied: false }), 2000);
     } catch (err) {
-      console.error('Failed to copy error details:', err);
+      logger.error('Failed to copy error details:', err);
     }
   };
 

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useMonthlySubscriptionBenefits } from './useMonthlySubscriptionBenefits';
+import { logger } from '@/utils/prodLogger';
 
 /**
  * Hook to enforce monthly message limits for subscription users
@@ -32,7 +33,7 @@ export function useMonthlyMessageLimits() {
         .lte('created_at', monthEnd.toISOString());
 
       if (error) {
-        console.error('Error fetching message count:', error);
+        logger.error('Error fetching message count:', error);
         // Be conservative on error - deny messaging to prevent abuse
         return {
           used: benefits.messageLimit,

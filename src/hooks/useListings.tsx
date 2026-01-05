@@ -2,6 +2,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 export interface Listing {
   id: string;
@@ -92,7 +93,7 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
             .maybeSingle();
 
           if (prefError) {
-            if (import.meta.env.DEV) console.error('Error fetching filter preferences:', prefError);
+            if (import.meta.env.DEV) logger.error('Error fetching filter preferences:', prefError);
           }
 
           if (preferences?.preferred_listing_types?.length) {
@@ -121,13 +122,13 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
 
         const { data: listings, error } = await query;
         if (error) {
-          if (import.meta.env.DEV) console.error('Listings query error:', error);
+          if (import.meta.env.DEV) logger.error('Listings query error:', error);
           throw error;
         }
 
         return (listings as Listing[]) || [];
       } catch (error) {
-        if (import.meta.env.DEV) console.error('Error in useListings:', error);
+        if (import.meta.env.DEV) logger.error('Error in useListings:', error);
         // Return empty array instead of throwing to prevent UI crash
         return [];
       }
@@ -160,13 +161,13 @@ export function useOwnerListings() {
           .limit(100); // Prevent loading too many listings at once
 
         if (error) {
-          if (import.meta.env.DEV) console.error('Owner listings query error:', error);
+          if (import.meta.env.DEV) logger.error('Owner listings query error:', error);
           throw error;
         }
 
         return (listings as Listing[]) || [];
       } catch (error) {
-        if (import.meta.env.DEV) console.error('Error in useOwnerListings:', error);
+        if (import.meta.env.DEV) logger.error('Error in useOwnerListings:', error);
         return [];
       }
     },
@@ -194,7 +195,7 @@ export function useOwnerListings() {
             filter: `owner_id=eq.${user.user.id}`,
           },
           (payload) => {
-            if (import.meta.env.DEV) console.log('Real-time listing change:', payload);
+            if (import.meta.env.DEV) logger.log('Real-time listing change:', payload);
 
             // Invalidate and refetch the listings query
             queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
@@ -234,13 +235,13 @@ export function useSwipedListings() {
           .gte('created_at', oneDayAgo);
 
         if (error) {
-          if (import.meta.env.DEV) console.error('Swipes query error:', error);
+          if (import.meta.env.DEV) logger.error('Swipes query error:', error);
           return [];
         }
 
         return likes?.map(l => l.target_id) || [];
       } catch (error) {
-        if (import.meta.env.DEV) console.error('Error in useSwipedListings:', error);
+        if (import.meta.env.DEV) logger.error('Error in useSwipedListings:', error);
         return [];
       }
     },
