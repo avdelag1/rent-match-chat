@@ -1,3 +1,5 @@
+import { logger } from './prodLogger';
+
 export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error') => {
   // Check if device supports haptics
   if ('vibrate' in navigator) {
@@ -28,7 +30,7 @@ export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | '
     try {
       (window as any).Haptics.impact({ style: type });
     } catch (e) {
-      console.error('iOS haptics error:', e);
+      logger.error('iOS haptics error:', e);
     }
   }
 };

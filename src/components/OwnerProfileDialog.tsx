@@ -9,6 +9,7 @@ import { PhotoUploadManager } from '@/components/PhotoUploadManager';
 import { useOwnerProfile, useSaveOwnerProfile } from '@/hooks/useOwnerProfile';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 // Owner profile is for business information only
 
@@ -58,7 +59,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
 
       return publicUrl;
     } catch (error) {
-      console.error('Error uploading image:', error);
+      logger.error('Error uploading image:', error);
       throw error;
     }
   };
@@ -77,7 +78,7 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
       toast({ title: 'Owner Profile Saved', description: 'Your business information has been updated.' });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving owner profile:', error);
+      logger.error('Error saving owner profile:', error);
       toast({
         title: 'Error saving profile',
         description: error instanceof Error ? error.message : 'Please try again',
