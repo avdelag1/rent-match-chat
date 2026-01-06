@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/utils/prodLogger';
 
 export type ShareMethod =
   | 'link_copied'
@@ -73,7 +74,7 @@ export function useCreateShare() {
       // Silently track share success
     },
     onError: (error: Error) => {
-      console.error('Error tracking share:', error);
+      logger.error('Error tracking share:', error);
       // Don't show error toast as sharing can still work even if tracking fails
     },
   });
@@ -129,13 +130,13 @@ export async function copyToClipboard(text: string): Promise<boolean> {
         textArea.remove();
         return true;
       } catch (error) {
-        console.error('Fallback: Could not copy text: ', error);
+        logger.error('Fallback: Could not copy text: ', error);
         textArea.remove();
         return false;
       }
     }
   } catch (error) {
-    console.error('Failed to copy to clipboard:', error);
+    logger.error('Failed to copy to clipboard:', error);
     return false;
   }
 }

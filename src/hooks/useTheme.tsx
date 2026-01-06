@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-
-// New Matte Theme System - Premium AI app aesthetic
+import { logger } from '@/utils/prodLogger';
 type Theme = 'black-matte' | 'red-matte' | 'amber-matte' | 'white-matte';
 
 interface ThemeContextType {
@@ -48,7 +47,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (error) {
-          console.error('Failed to load theme preference:', error);
+          logger.error('Failed to load theme preference:', error);
           setThemeState('black-matte');
         }
       };
@@ -101,7 +100,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
         if (error) throw error;
       } catch (error) {
-        console.error('Failed to save theme preference:', error);
+        logger.error('Failed to save theme preference:', error);
       }
     }
   };

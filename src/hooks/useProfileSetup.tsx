@@ -89,15 +89,16 @@ export function useProfileSetup() {
 
       if (!activError) {
         // Create notification for referrer (silent, non-blocking)
-        await supabase
+        supabase
           .from('notifications')
-          .insert({
+          .insert([{
+            id: crypto.randomUUID(),
             user_id: referrerId,
             type: 'referral_reward',
             message: 'You earned 1 free message for inviting a new user!',
             read: false,
-          })
-          .catch(() => {});
+          }])
+          .then(() => {});
 
         if (import.meta.env.DEV) {
           logger.log('[ProfileSetup] Referral reward granted to:', referrerId);

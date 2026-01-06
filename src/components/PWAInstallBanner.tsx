@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Share, Plus, Share2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -103,7 +104,7 @@ export function PWAInstallBanner() {
         }
         setDeferredPrompt(null);
       } catch (error) {
-        if (import.meta.env.DEV) console.error('Install prompt error:', error);
+        if (import.meta.env.DEV) logger.error('Install prompt error:', error);
       }
       return;
     }

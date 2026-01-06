@@ -8,6 +8,7 @@ import { DigitalSignaturePad } from '@/components/DigitalSignaturePad';
 import { useSignContract } from '@/hooks/useContracts';
 import { FileText, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/utils/prodLogger';
 
 interface ContractSigningDialogProps {
   contractId: string;
@@ -60,7 +61,7 @@ export const ContractSigningDialog: React.FC<ContractSigningDialogProps> = ({
       });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error signing contract:', error);
+      logger.error('Error signing contract:', error);
     }
   };
 
@@ -83,7 +84,7 @@ export const ContractSigningDialog: React.FC<ContractSigningDialogProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading contract:', error);
+      logger.error('Error downloading contract:', error);
       toast.error('Failed to download contract');
     }
   };

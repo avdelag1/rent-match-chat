@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 export function useNotifications() {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export function useNotifications() {
               .maybeSingle();
 
             if (convError) {
-              if (import.meta.env.DEV) console.error('Error fetching conversation for notification:', convError);
+              if (import.meta.env.DEV) logger.error('Error fetching conversation for notification:', convError);
               return;
             }
             if (!conversation) return;
@@ -52,7 +53,7 @@ export function useNotifications() {
                 .maybeSingle();
 
               if (profileError) {
-                if (import.meta.env.DEV) console.error('Error fetching sender profile for notification:', profileError);
+                if (import.meta.env.DEV) logger.error('Error fetching sender profile for notification:', profileError);
               }
 
               const senderName = senderProfile?.full_name || 'Someone';

@@ -6,6 +6,7 @@
 
 import { STORAGE, LIMITS } from '@/constants/app';
 import { getStorageJSON, setStorageJSON, removeStorageItem } from '@/utils/storage';
+import { logger } from '@/utils/prodLogger';
 
 export interface VitalMetric {
   name: 'LCP' | 'FID' | 'CLS' | 'TTFB';
@@ -106,7 +107,7 @@ export function monitorLCP() {
   try {
     observer.observe({ entryTypes: ['largest-contentful-paint'] });
   } catch (e) {
-    console.error('LCP monitoring error:', e);
+    logger.error('LCP monitoring error:', e);
   }
 }
 
@@ -139,7 +140,7 @@ export function monitorFID() {
   try {
     observer.observe({ entryTypes: ['first-input'] });
   } catch (e) {
-    console.error('FID monitoring error:', e);
+    logger.error('FID monitoring error:', e);
   }
 }
 
@@ -172,7 +173,7 @@ export function monitorCLS() {
   try {
     observer.observe({ entryTypes: ['layout-shift'] });
   } catch (e) {
-    console.error('CLS monitoring error:', e);
+    logger.error('CLS monitoring error:', e);
   }
 }
 

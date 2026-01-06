@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { logger } from '@/utils/prodLogger';
 
 export interface DigitalContract {
   id: string;
@@ -141,7 +142,7 @@ export function useCreateContract() {
       toast.success('Contract created successfully!');
     },
     onError: (error) => {
-      console.error('Error creating contract:', error);
+      logger.error('Error creating contract:', error);
       toast.error('Failed to create contract');
     }
   });
@@ -239,7 +240,7 @@ export function useSignContract() {
       toast.success('Contract signed successfully!');
     },
     onError: (error) => {
-      console.error('Error signing contract:', error);
+      logger.error('Error signing contract:', error);
       toast.error('Failed to sign contract');
     }
   });
@@ -310,7 +311,7 @@ export function useCreateDisputeReport() {
       toast.success('Dispute report submitted successfully!');
     },
     onError: (error) => {
-      console.error('Error creating dispute report:', error);
+      logger.error('Error creating dispute report:', error);
       toast.error('Failed to submit dispute report');
     }
   });

@@ -7,6 +7,7 @@ import { motion, Reorder } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
 import { compressImage, LISTING_COMPRESSION } from '@/utils/imageCompression';
+import { logger } from '@/utils/prodLogger';
 
 interface ImageUploadProps {
   images: string[];
@@ -64,7 +65,7 @@ export function ImageUpload({
       return publicUrl;
     } catch (error: unknown) {
       const err = error as Error;
-      console.error('Image upload error:', err);
+      logger.error('Image upload error:', err);
       toast({
         title: 'Upload failed',
         description: err.message || 'Failed to upload image',

@@ -5,6 +5,7 @@ import { CapturedPhoto } from '@/hooks/useCamera';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 // Upload timeout in milliseconds (60 seconds for multiple photos)
 const UPLOAD_TIMEOUT = 60000;
@@ -95,7 +96,7 @@ export default function OwnerListingCamera() {
           });
 
         if (uploadError) {
-          console.error('Error uploading photo:', uploadError);
+          logger.error('Error uploading photo:', uploadError);
           continue;
         }
 
