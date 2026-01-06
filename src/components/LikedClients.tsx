@@ -14,6 +14,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import { useStartConversation } from "@/hooks/useConversations";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
+import { logger } from "@/utils/prodLogger";
 import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
 import {
   DropdownMenu,
@@ -107,7 +108,7 @@ export function LikedClients() {
         .order('created_at', { ascending: false });
 
       if (likesError) {
-        console.error('[LikedClients] Error fetching owner likes:', likesError);
+        logger.error('[LikedClients] Error fetching owner likes:', likesError);
         throw likesError;
       }
       if (!ownerLikes || ownerLikes.length === 0) return [];
@@ -136,7 +137,7 @@ export function LikedClients() {
           .in('id', targetIds);
 
         if (allProfilesError) {
-          console.error('[LikedClients] Error fetching profiles:', allProfilesError);
+          logger.error('[LikedClients] Error fetching profiles:', allProfilesError);
           throw allProfilesError;
         }
 
@@ -225,7 +226,7 @@ export function LikedClients() {
 
       if (error) {
         // If table doesn't exist, just log it - in production you'd create the table
-        console.error('Report submission error:', error);
+        logger.error('Report submission error:', error);
       }
     },
     onSuccess: () => {
@@ -251,7 +252,7 @@ export function LikedClients() {
         });
 
       if (blockError && !blockError.message.includes('duplicate')) {
-        console.error('Block error:', blockError);
+        logger.error('Block error:', blockError);
       }
 
       // Also remove from owner_likes
@@ -291,7 +292,7 @@ export function LikedClients() {
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      logger.error('Error starting conversation:', error);
       toast.error('Could not start conversation', { id: 'start-conv' });
     } finally {
       setIsCreatingConversation(false);

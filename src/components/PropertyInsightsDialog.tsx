@@ -768,7 +768,7 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                 <div className="grid grid-cols-3 gap-2">
                   {listing.images.map((image, idx) => (
                     <button
-                      key={`image-${listing.id}-${index}`}
+                      key={`image-${listing.id}-${idx}`}
                       onClick={() => {
                         setSelectedImageIndex(idx);
                         setGalleryOpen(true);

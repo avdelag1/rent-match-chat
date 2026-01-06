@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 export type OwnerProfile = {
   id?: string;
@@ -28,7 +29,7 @@ async function fetchOwnProfile() {
     .maybeSingle();
 
   if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching owner profile:', error);
+    logger.error('Error fetching owner profile:', error);
     throw error;
   }
 
@@ -69,7 +70,7 @@ export function useSaveOwnerProfile() {
           .select()
           .single();
         if (error) {
-          console.error('Error updating owner profile:', error);
+          logger.error('Error updating owner profile:', error);
           throw error;
         }
         profileData = data as OwnerProfile;
@@ -80,7 +81,7 @@ export function useSaveOwnerProfile() {
           .select()
           .single();
         if (error) {
-          console.error('Error creating owner profile:', error);
+          logger.error('Error creating owner profile:', error);
           throw error;
         }
         profileData = data as OwnerProfile;

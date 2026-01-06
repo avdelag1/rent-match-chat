@@ -17,6 +17,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -169,7 +170,7 @@ export default function NotificationsPage() {
         .eq('user_id', user.id)
         .eq('read', false);
     } catch (error) {
-      console.error('Error auto-marking as read:', error);
+      logger.error('Error auto-marking as read:', error);
     }
   };
 
@@ -204,7 +205,7 @@ export default function NotificationsPage() {
 
       setNotifications(formattedNotifications);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      logger.error('Error fetching notifications:', error);
     } finally {
       setIsLoading(false);
     }
@@ -221,7 +222,7 @@ export default function NotificationsPage() {
         prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
       );
     } catch (error) {
-      console.error('Error marking as read:', error);
+      logger.error('Error marking as read:', error);
     }
   };
 
@@ -242,7 +243,7 @@ export default function NotificationsPage() {
         description: 'Your notifications have been updated.',
       });
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      logger.error('Error marking all as read:', error);
     }
   };
 
@@ -262,7 +263,7 @@ export default function NotificationsPage() {
         description: 'The notification has been removed.',
       });
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      logger.error('Error deleting notification:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete notification.',
@@ -290,7 +291,7 @@ export default function NotificationsPage() {
         description: 'Your notifications have been cleared.',
       });
     } catch (error) {
-      console.error('Error deleting all notifications:', error);
+      logger.error('Error deleting all notifications:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete notifications.',

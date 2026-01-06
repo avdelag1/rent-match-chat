@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/utils/prodLogger";
 
 interface OwnerSettingsDialogProps {
   open: boolean;
@@ -47,7 +48,7 @@ export function OwnerSettingsDialog({ open, onOpenChange }: OwnerSettingsDialogP
       await supabase.auth.signOut();
       navigate('/', { replace: true });
     } catch (error: any) {
-      console.error('Delete account error:', error);
+      logger.error('Delete account error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete account. Please try again.',

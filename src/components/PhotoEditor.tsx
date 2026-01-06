@@ -21,6 +21,7 @@ import {
   RectangleHorizontal,
   RectangleVertical,
 } from 'lucide-react';
+import { logger } from '@/utils/prodLogger';
 import {
   FilterType,
   CAMERA_FILTERS,
@@ -194,7 +195,7 @@ export function PhotoEditor({ imageDataUrl, onSave, onCancel }: PhotoEditorProps
       const editedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
       onSave(editedDataUrl);
     } catch (error) {
-      console.error('Error saving edited photo:', error);
+      logger.error('Error saving edited photo:', error);
     } finally {
       setIsSaving(false);
     }

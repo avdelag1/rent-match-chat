@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { SwipessLogo } from './SwipessLogo';
+import { logger } from '@/utils/prodLogger';
 
 const NATIONALITY_OPTIONS = [
   'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'France', 'Spain', 'Italy',
@@ -78,7 +79,7 @@ const steps = [
         });
 
       if (error) {
-        console.error('Supabase upload error:', error);
+        logger.error('Supabase upload error:', error);
         // Provide more helpful error messages
         if (error.message.includes('size')) {
           throw new Error('Image file is too large. Please use a smaller image (max 10MB).');
@@ -96,7 +97,7 @@ const steps = [
 
       return publicUrl;
     } catch (error) {
-      console.error('Error uploading image:', error);
+      logger.error('Error uploading image:', error);
       throw error;
     }
   };
@@ -449,7 +450,7 @@ const steps = [
 
       onComplete();
     } catch (error) {
-      console.error('Error skipping onboarding:', error);
+      logger.error('Error skipping onboarding:', error);
       onComplete(); // Still close even if update fails
     }
   };

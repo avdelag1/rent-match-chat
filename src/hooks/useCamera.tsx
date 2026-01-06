@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Camera, CameraResultType, CameraSource, CameraDirection, Photo } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 export interface CameraSettings {
   quality: number;
@@ -123,7 +124,7 @@ export function useCamera(options: UseCameraOptions) {
         return false;
       }
     } catch (error) {
-      console.error('Error checking camera permissions:', error);
+      logger.error('Error checking camera permissions:', error);
       setHasPermission(false);
       return false;
     }
@@ -149,7 +150,7 @@ export function useCamera(options: UseCameraOptions) {
         return await checkPermissions();
       }
     } catch (error) {
-      console.error('Error requesting camera permissions:', error);
+      logger.error('Error requesting camera permissions:', error);
       setHasPermission(false);
       return false;
     }
@@ -203,7 +204,7 @@ export function useCamera(options: UseCameraOptions) {
 
       return true;
     } catch (error) {
-      console.error('Error starting camera stream:', error);
+      logger.error('Error starting camera stream:', error);
       onError?.(error as Error);
       return false;
     }
@@ -262,7 +263,7 @@ export function useCamera(options: UseCameraOptions) {
       }
       return null;
     } catch (error) {
-      console.error('Error capturing photo:', error);
+      logger.error('Error capturing photo:', error);
       onError?.(error as Error);
       toast({
         title: 'Capture Failed',
@@ -338,7 +339,7 @@ export function useCamera(options: UseCameraOptions) {
 
       return capturedPhoto;
     } catch (error) {
-      console.error('Error capturing from stream:', error);
+      logger.error('Error capturing from stream:', error);
       onError?.(error as Error);
       return null;
     } finally {
@@ -405,7 +406,7 @@ export function useCamera(options: UseCameraOptions) {
       }
       return null;
     } catch (error) {
-      console.error('Error picking from gallery:', error);
+      logger.error('Error picking from gallery:', error);
       onError?.(error as Error);
       return null;
     } finally {
