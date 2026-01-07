@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useRef } from 'react';
+import { logger } from '@/utils/prodLogger';
 
 export function useUnreadMessageCount() {
   const { user } = useAuth();
@@ -40,7 +41,7 @@ export function useUnreadMessageCount() {
         // Return count of unread conversations (capped to avoid performance issues)
         return Math.min(count || 0, 99);
       } catch (error) {
-        console.error('[UnreadCount] Error:', error);
+        logger.error('[UnreadCount] Error:', error);
         return 0;
       }
     },

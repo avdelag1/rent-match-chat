@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { logger } from '@/utils/prodLogger';
 
 export function useMarkMessagesAsRead(conversationId: string, isActive: boolean) {
   const { user } = useAuth();
@@ -18,7 +19,7 @@ export function useMarkMessagesAsRead(conversationId: string, isActive: boolean)
         .eq('is_read', false);
 
       if (error && import.meta.env.DEV) {
-        console.error('[MarkAsRead] Error:', error);
+        logger.error('[MarkAsRead] Error:', error);
       }
     };
 
@@ -45,7 +46,7 @@ export function useMarkMessagesAsRead(conversationId: string, isActive: boolean)
               .eq('id', payload.new.id)
               .then(({ error }) => {
                 if (error && import.meta.env.DEV) {
-                  console.error('[MarkAsRead] Error marking new message as read:', error);
+                  logger.error('[MarkAsRead] Error marking new message as read:', error);
                 }
               }, () => {
                 // Non-critical error - message may still be marked as read

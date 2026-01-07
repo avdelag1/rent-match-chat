@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 interface ErrorReport {
   error: Error;
@@ -17,7 +18,7 @@ export function useErrorReporting() {
     };
 
     // Log to console for development
-    console.error('Error Report:', errorReport);
+    logger.error('Error Report:', errorReport);
     
     // Show user-friendly toast
     toast({

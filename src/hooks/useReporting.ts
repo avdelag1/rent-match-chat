@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/utils/prodLogger';
 
 export type ReportType =
   | 'fake_profile'
@@ -84,7 +85,7 @@ export function useCreateReport() {
       });
     },
     onError: (error: Error) => {
-      console.error('Error creating report:', error);
+      logger.error('Error creating report:', error);
       toast.error('Failed to submit report', {
         description: error.message || 'Please try again later',
       });
@@ -105,7 +106,7 @@ export function useCheckExistingReport() {
       });
 
       if (error) {
-        console.error('Error checking existing report:', error);
+        logger.error('Error checking existing report:', error);
         return false;
       }
 

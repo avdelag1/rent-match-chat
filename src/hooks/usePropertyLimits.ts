@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useUserSubscription } from './useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { logger } from '@/utils/prodLogger';
 
 type PropertyLimits = {
   max_listings: number;
@@ -38,7 +39,7 @@ export function usePropertyLimits() {
         .eq('status', 'active');
       
       if (error) {
-        console.error('Error fetching property count:', error);
+        logger.error('Error fetching property count:', error);
         return 0;
       }
       

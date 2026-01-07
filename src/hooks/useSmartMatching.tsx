@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { Listing } from './useListings';
 import { ClientFilterPreferences } from './useClientFilterPreferences';
 import { useVisibilityRanking } from './useVisibilityRanking';
+import { logger } from '@/utils/prodLogger';
 
 // Fisher-Yates shuffle algorithm for randomizing array order
 function shuffleArray<T>(array: T[]): T[] {
@@ -393,7 +394,7 @@ export function useSmartListingMatching(
         if (error) {
           // Only log non-RLS errors to avoid console spam
           if (error.code !== '42501' && error.code !== 'PGRST301') {
-            console.error('[SmartMatching] Error fetching listings:', error.message);
+            logger.error('[SmartMatching] Error fetching listings:', error.message);
           }
           throw error;
         }
@@ -514,7 +515,7 @@ export function useSmartListingMatching(
 
         return randomizedListings;
       } catch (error) {
-        console.error('Error in smart listing matching:', error);
+        logger.error('Error in smart listing matching:', error);
         return [];
       }
     },
@@ -1063,7 +1064,7 @@ export function useSmartClientMatching(
 
         return randomizedClients;
       } catch (error) {
-        console.error('[useSmartClientMatching] Error loading client profiles', error);
+        logger.error('[useSmartClientMatching] Error loading client profiles', error);
         return [] as MatchedClientProfile[];
       }
     },

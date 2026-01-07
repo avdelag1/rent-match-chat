@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 // Lightweight types to avoid deep Supabase type inference and match DB shapes
 type SubscriptionPackageLite = {
@@ -54,7 +55,7 @@ export function useUserSubscription() {
     queryFn: async (): Promise<UserSubscriptionLite> => {
       const { data: user, error: authError } = await supabase.auth.getUser();
       if (authError) {
-        console.error('Error fetching authenticated user:', authError);
+        logger.error('Error fetching authenticated user:', authError);
         throw authError;
       }
       if (!user.user) return null;
