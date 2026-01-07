@@ -1,6 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 export type ClientFilterPreferences = {
   id?: string;
@@ -114,7 +115,7 @@ type ClientFilterPreferencesUpdate = Omit<ClientFilterPreferences, 'id' | 'user_
 async function fetchOwnFilterPreferences() {
   const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError) {
-    console.error('Error fetching authenticated user:', authError);
+    logger.error('Error fetching authenticated user:', authError);
     throw authError;
   }
   const uid = auth.user?.id;
@@ -142,7 +143,7 @@ export function useClientFilterPreferences() {
     mutationFn: async (updates: ClientFilterPreferencesUpdate) => {
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (authError) {
-        console.error('Error fetching authenticated user:', authError);
+        logger.error('Error fetching authenticated user:', authError);
         throw authError;
       }
       const uid = auth.user?.id;
@@ -156,7 +157,7 @@ export function useClientFilterPreferences() {
         .maybeSingle();
 
       if (existingError && existingError.code !== 'PGRST116') {
-        console.error('Error checking existing filter preferences:', existingError);
+        logger.error('Error checking existing filter preferences:', existingError);
         throw existingError;
       }
 

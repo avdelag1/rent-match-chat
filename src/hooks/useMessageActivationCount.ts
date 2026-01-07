@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { logger } from '@/utils/prodLogger';
 
 export function useMessageActivationCount() {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ export function useMessageActivationCount() {
         .gt('remaining_activations', 0);
 
       if (payPerUseError) {
-        console.error('Error fetching pay-per-use activations:', payPerUseError);
+        logger.error('Error fetching pay-per-use activations:', payPerUseError);
         return 0;
       }
 
@@ -37,7 +38,7 @@ export function useMessageActivationCount() {
         .gt('remaining_activations', 0);
 
       if (monthlyError) {
-        console.error('Error fetching monthly activations:', monthlyError);
+        logger.error('Error fetching monthly activations:', monthlyError);
         return 0;
       }
 

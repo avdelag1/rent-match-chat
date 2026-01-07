@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 interface LastSwipe {
   targetId: string;
@@ -52,7 +53,7 @@ export function useSwipeUndo() {
 
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) {
-        console.error('Error fetching authenticated user:', authError);
+        logger.error('Error fetching authenticated user:', authError);
         throw authError;
       }
       if (!user) throw new Error('User not authenticated');
@@ -98,7 +99,7 @@ export function useSwipeUndo() {
       });
     },
     onError: (error) => {
-      console.error('Failed to undo swipe:', error);
+      logger.error('Failed to undo swipe:', error);
       toast({
         title: "Failed to undo",
         description: "Something went wrong. Please try again.",

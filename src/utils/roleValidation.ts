@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 export type UserRole = 'client' | 'owner' | 'admin';
 
@@ -16,7 +17,7 @@ export async function validateUserRole(
   });
 
   if (error) {
-    console.error('Role validation error:', error);
+    logger.error('Role validation error:', error);
     return false;
   }
 
@@ -34,7 +35,7 @@ export async function getUserRole(userId: string): Promise<UserRole | null> {
     .maybeSingle();
 
   if (error) {
-    console.error('Error fetching user role:', error);
+    logger.error('Error fetching user role:', error);
     return null;
   }
 

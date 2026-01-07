@@ -6,6 +6,7 @@ import { Camera, User, Upload, Image } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -112,7 +113,7 @@ export function ProfilePhotoUpload({
       });
 
       if (metadataError) {
-        console.error('Error updating user metadata:', metadataError);
+        logger.error('Error updating user metadata:', metadataError);
       }
 
       setPhotoUrl(publicUrl);
@@ -124,7 +125,7 @@ export function ProfilePhotoUpload({
       });
 
     } catch (error) {
-      console.error('Error uploading photo:', error);
+      logger.error('Error uploading photo:', error);
       toast({
         title: 'Error',
         description: 'Failed to upload photo. Please try again.',

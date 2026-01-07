@@ -226,6 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           title: "Welcome to Zwipes!",
           description: "Please check your email to verify your account.",
         });
+        return { error: null };
       } else if (data.user) {
         toast({
           title: "Creating your account...",
@@ -247,12 +248,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Brief wait for DB consistency
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         toast({
           title: "Welcome to Zwipes!",
           description: "Redirecting to your dashboard...",
         });
+
+        // CRITICAL FIX: Force navigation after successful signup
+        const targetPath = role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+        navigate(targetPath, { replace: true });
       }
 
       return { error: null };
@@ -329,6 +334,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             title: "Welcome back!",
             description: `Redirecting to your ${actualRole} dashboard...`,
           });
+
+          // CRITICAL FIX: Force navigation after successful signin
+          const targetPath = actualRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
+          navigate(targetPath, { replace: true });
 
           return { error: null };
         }

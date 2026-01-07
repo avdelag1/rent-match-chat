@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/utils/prodLogger';
 
 interface TypingUser {
   userId: string;
@@ -125,7 +126,7 @@ export function useRealtimeChat(conversationId: string) {
             .maybeSingle();
 
           if (profileError) {
-            console.error('Error fetching sender profile in realtime:', profileError);
+            logger.error('Error fetching sender profile in realtime:', profileError);
           }
 
           const completeMessage = {

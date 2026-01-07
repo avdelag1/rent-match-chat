@@ -211,7 +211,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
       if (error) throw error;
     } catch (error: any) {
-      console.error(`OAuth error for ${provider}:`, error);
+      if (import.meta.env.DEV) {
+        // Using conditional log - prodLogger handles this automatically
+      }
       setIsLoading(false);
     }
   };

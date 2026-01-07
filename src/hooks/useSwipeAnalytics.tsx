@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 interface SwipeMetrics {
   totalSwipes: number;
@@ -47,7 +48,7 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
     try {
       patterns = JSON.parse(stored);
     } catch (error) {
-      console.error('Failed to parse swipePatterns:', error);
+      logger.error('Failed to parse swipePatterns:', error);
       localStorage.removeItem('swipePatterns');
       patterns = [];
     }
@@ -70,7 +71,7 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
       try {
         patterns = JSON.parse(stored);
       } catch (error) {
-        console.error('Failed to parse swipePatterns:', error);
+        logger.error('Failed to parse swipePatterns:', error);
         localStorage.removeItem('swipePatterns');
       }
       
@@ -142,7 +143,7 @@ export function useSwipeAnalytics(userRole: 'client' | 'owner') {
     try {
       patterns = JSON.parse(stored);
     } catch (error) {
-      console.error('Failed to parse swipePatterns:', error);
+      logger.error('Failed to parse swipePatterns:', error);
       localStorage.removeItem('swipePatterns');
     }
 

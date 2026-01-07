@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
 import { useState, memo, useMemo, useCallback } from 'react';
+import { logger } from '@/utils/prodLogger';
 
 // Interest category icons for visual display
 const INTEREST_ICONS: Record<string, React.ReactNode> = {
@@ -200,7 +201,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
       }
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('Error starting conversation:', error);
+        logger.error('Error starting conversation:', error);
       }
       toast({
         title: 'Could not start conversation',
