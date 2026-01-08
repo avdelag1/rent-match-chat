@@ -16,6 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { MessageActivationPackages } from '@/components/MessageActivationPackages';
 import { SubscriptionPackages } from '@/components/SubscriptionPackages';
 import { ChatPreviewSheet } from '@/components/ChatPreviewSheet';
+import { logger } from '@/utils/prodLogger';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -192,10 +193,9 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
     } catch (error: unknown) {
       const err = error as { message?: string; code?: string };
       if (import.meta.env.DEV) {
-        console.error('Failed to send message:', error);
+        logger.error('Failed to send message:', error);
       }
 
-      // Provide more helpful error messages for debugging
       const errorMessage = err?.message || 'Unknown error occurred';
 
       if (import.meta.env.DEV) {
@@ -205,15 +205,14 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
           conversationId,
           timestamp: new Date().toISOString()
         };
-        console.error('Send error details:', errorDetails);
+        logger.error('Send error details:', errorDetails);
 
-        // Help identify common issues
         if (errorMessage.includes('message_text')) {
-          console.error('❌ Database schema issue detected - message_text column may not exist');
+          logger.error('❌ Database schema issue detected - message_text column may not exist');
         } else if (errorMessage.includes('receiver_id')) {
-          console.error('❌ Conversation error - receiver_id could not be determined');
+          logger.error('❌ Conversation error - receiver_id could not be determined');
         } else if (errorMessage.includes('RLS') || errorMessage.includes('policy')) {
-          console.error('❌ Permission error - Row Level Security policy may be blocking the insert');
+          logger.error('❌ Permission error - Row Level Security policy may be blocking the insert');
         }
       }
 

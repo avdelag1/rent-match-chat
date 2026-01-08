@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, memo, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, memo, useRef } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
@@ -28,7 +28,6 @@ function useDebounce<T extends (...args: any[]) => any>(
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const callbackRef = useRef(callback);
 
-  // Keep callback ref updated
   useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
@@ -50,7 +49,6 @@ function useNavigationGuard() {
 
   const canNavigate = useCallback(() => {
     const now = Date.now();
-    // Prevent navigation if already navigating or within 300ms cooldown
     if (isNavigatingRef.current || now - lastNavigationRef.current < 300) {
       return false;
     }
@@ -83,69 +81,27 @@ interface TinderentSwipeContainerProps {
 }
 
 const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageClick, locationFilter, filters }: TinderentSwipeContainerProps) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [page, setPage] = useState(0);
-  const [allListings, setAllListings] = useState<any[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [insightsModalOpen, setInsightsModalOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  // FIX: Move swipedIds to ref to avoid re-renders on every swipe
-  const swipedIdsRef = useRef<Set<string>>(new Set());
-  const [, forceUpdate] = useState(0); // Only used when we need to refresh the visible list
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isRefreshMode, setIsRefreshMode] = useState(false); // When true, show disliked listings within cooldown
+  const [isRefreshMode, setIsRefreshMode] = useState(false);
 
-  // Fetch guards to prevent infinite loops
+  // CONSTANT-TIME SWIPE DECK: Use refs for queue management (no re-renders on swipe)
+  const deckQueueRef = useRef<any[]>([]);
+  const currentIndexRef = useRef(0);
+  const swipedIdsRef = useRef<Set<string>>(new Set());
+  const [renderKey, setRenderKey] = useState(0); // Force update trigger
+
+  // Fetch guards
   const isFetchingMore = useRef(false);
-  const lastFetchedPage = useRef(-1);
 
-  // Navigation guard to prevent double-tap issues
+  // Navigation guard
   const { canNavigate, startNavigation, endNavigation } = useNavigationGuard();
 
-  // Get listings with filters applied and pagination
-  // isRefreshMode = true shows disliked listings within 3-day cooldown, but NEVER liked listings
-  // Smart matching properly filters out:
-  // - Liked items (right swipes) - NEVER shown again
-  // - Disliked items (left swipes) - hidden normally, can be refreshed within 3 days
-  // - Permanently hidden items (dislikes > 3 days old) - NEVER shown again
-  const {
-    data: smartListings = [],
-    isLoading: smartLoading,
-    error: smartError,
-    isRefetching: smartRefetching,
-    refetch: refetchSmart
-  } = useSmartListingMatching([], filters, page, 10, isRefreshMode);
-
-  // Note: We no longer use regularListings as fallback because it doesn't
-  // properly filter out liked/disliked items. Smart matching is the sole source.
-  const {
-    refetch: refetchRegular
-  } = useListings([], { enabled: false }); // Disabled, only used for refetch
-
-  // FIX: Optimized listings derivation
-  // - Uses ref for swipedIds (no re-render on swipe)
-  // - Only re-computes when allListings or smartListings actually change
-  const listings = useMemo(() => {
-    const baseListings = allListings.length > 0 ? allListings : smartListings;
-    // Filter out swiped items using ref (doesn't trigger re-renders)
-    return baseListings.filter(l => !swipedIdsRef.current.has(l.id));
-  }, [allListings, smartListings]);
-
-  const isLoading = smartLoading;
-  const error = smartError;
-  const isRefetching = smartRefetching;
-
-  // Debounced refetch to prevent rapid-fire calls
-  const refetchCore = useCallback(() => {
-    setCurrentIndex(0);
-    setPage(0);
-    setAllListings([]);
-    refetchSmart();
-  }, [refetchSmart]);
-
-  const refetch = useDebounce(refetchCore, 300);
-  
+  // Hooks for functionality
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
@@ -153,85 +109,104 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
 
-  // Prefetch images for next 2 listings (massively improves perceived performance)
+  // Get listings with filters
+  const {
+    data: smartListings = [],
+    isLoading: smartLoading,
+    error: smartError,
+    refetch: refetchSmart
+  } = useSmartListingMatching([], filters, page, 10, isRefreshMode);
+
+  const isLoading = smartLoading;
+  const error = smartError;
+
+  // Prefetch images for next cards
   usePrefetchImages({
-    currentIndex,
-    profiles: allListings,
+    currentIndex: currentIndexRef.current,
+    profiles: deckQueueRef.current,
     prefetchCount: 2
   });
 
-  // Add newly fetched listings to the stack - with guard to prevent unnecessary updates
-  // FIX: Cap at 50 listings to prevent memory bloat and expensive filtering
+  // CONSTANT-TIME: Append new unique listings to queue
   useEffect(() => {
     if (smartListings.length > 0 && !isLoading) {
-      setAllListings(prev => {
-        const existingIds = new Set(prev.map(l => l.id));
-        const newListings = smartListings.filter(l => !existingIds.has(l.id));
-        if (newListings.length > 0) {
-          const combined = [...prev, ...newListings];
-          // Cap at 50 listings - remove oldest ones first
-          return combined.length > 50 ? combined.slice(-50) : combined;
+      const existingIds = new Set(deckQueueRef.current.map(l => l.id));
+      const newListings = smartListings.filter(l => 
+        !existingIds.has(l.id) && !swipedIdsRef.current.has(l.id)
+      );
+      
+      if (newListings.length > 0) {
+        deckQueueRef.current = [...deckQueueRef.current, ...newListings];
+        // Cap at 50 listings
+        if (deckQueueRef.current.length > 50) {
+          const offset = deckQueueRef.current.length - 50;
+          deckQueueRef.current = deckQueueRef.current.slice(offset);
+          currentIndexRef.current = Math.max(0, currentIndexRef.current - offset);
         }
-        return prev; // Don't update if no new listings
-      });
-      isFetchingMore.current = false; // Reset fetch guard
+        setRenderKey(n => n + 1);
+      }
+      isFetchingMore.current = false;
     }
   }, [smartListings, isLoading]);
 
+  // Get current visible cards for 3-card stack
+  const currentIndex = currentIndexRef.current;
+  const deckQueue = deckQueueRef.current;
+  const topCard = deckQueue[currentIndex];
+  const nextCard = deckQueue[currentIndex + 1];
+  const thirdCard = deckQueue[currentIndex + 2];
+
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
-    const currentListing = listings[currentIndex];
-    if (!currentListing) return;
+    const listing = deckQueueRef.current[currentIndexRef.current];
+    if (!listing) return;
 
     setSwipeDirection(direction);
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-    // FIX: Use ref instead of state to avoid re-render cascade
-    swipedIdsRef.current.add(currentListing.id);
+    // CONSTANT-TIME: Just mark as swiped and advance pointer
+    swipedIdsRef.current.add(listing.id);
+    currentIndexRef.current += 1;
 
     swipeMutation.mutate({
-      targetId: currentListing.id,
+      targetId: listing.id,
       direction,
       targetType: 'listing'
     });
 
-    recordSwipe(currentListing.id, 'listing', direction === 'right' ? 'like' : 'pass');
+    recordSwipe(listing.id, 'listing', direction === 'right' ? 'like' : 'pass');
     recordProfileView.mutate({
-      profileId: currentListing.id,
+      profileId: listing.id,
       viewType: 'listing',
       action: direction === 'right' ? 'like' : 'pass'
     });
 
-    // Instant update - no delay for real-time feel
-    setCurrentIndex(prev => prev + 1);
     setSwipeDirection(null);
-  }, [currentIndex, listings, swipeMutation, recordSwipe, recordProfileView]);
-
-  const handleButtonSwipe = (direction: 'left' | 'right') => {
-    handleSwipe(direction);
-  };
+    setRenderKey(n => n + 1);
+    
+    // Fetch more if running low
+    if (currentIndexRef.current >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
+      isFetchingMore.current = true;
+      setPage(p => p + 1);
+    }
+  }, [swipeMutation, recordSwipe, recordProfileView]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    setIsRefreshMode(true); // Enable refresh mode to show disliked listings within cooldown
+    setIsRefreshMode(true);
     triggerHaptic('medium');
 
-    // Reset state for refresh
-    // NOTE: isRefreshMode = true will:
-    // - Show disliked listings still within 3-day cooldown (random order)
-    // - NEVER show liked listings (they stay saved forever)
-    // - NEVER show listings past 3-day cooldown (permanently hidden)
-    setCurrentIndex(0);
-    swipedIdsRef.current.clear(); // FIX: Clear ref instead of state
-    setAllListings([]);
+    currentIndexRef.current = 0;
+    deckQueueRef.current = [];
+    swipedIdsRef.current.clear();
     setPage(0);
 
     try {
-      await refetch();
+      await refetchSmart();
       toast({
         title: 'Properties Refreshed',
         description: 'Showing properties you passed on. Liked ones stay saved!',
       });
-    } catch (error) {
+    } catch (err) {
       toast({
         title: 'Refresh Failed',
         description: 'Please try again.',
@@ -241,7 +216,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       setIsRefreshing(false);
     }
   };
-
 
   const handleInsights = () => {
     setInsightsModalOpen(true);
@@ -254,14 +228,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   };
 
   const handleMessage = async () => {
-    const currentListing = listings[currentIndex];
+    const listing = deckQueueRef.current[currentIndexRef.current];
 
-    // Navigation guard - prevent double-tap
-    if (!canNavigate()) {
-      return;
-    }
+    if (!canNavigate()) return;
 
-    if (!currentListing?.owner_id || isCreatingConversation) {
+    if (!listing?.owner_id || isCreatingConversation) {
       toast({
         title: 'Cannot Start Conversation',
         description: 'Owner information not available.',
@@ -297,9 +268,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       });
 
       const result = await startConversation.mutateAsync({
-        otherUserId: currentListing.owner_id,
-        listingId: currentListing.id,
-        initialMessage: `Hi! I'm interested in your property: ${currentListing.title}`,
+        otherUserId: listing.owner_id,
+        listingId: listing.id,
+        initialMessage: `Hi! I'm interested in your property: ${listing.title}`,
         canStartNewConversation: true,
       });
 
@@ -308,18 +279,15 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           title: 'Conversation created!',
           description: 'Opening chat...'
         });
-
-        // Navigate immediately - the mutation already completed successfully
-        // No need for setTimeout hack since we awaited the mutation
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
-    } catch (error) {
+    } catch (err) {
       if (import.meta.env.DEV) {
-        logger.error('[TinderentSwipe] Error starting conversation:', error);
+        logger.error('[TinderentSwipe] Error starting conversation:', err);
       }
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Could not start conversation',
+        description: err instanceof Error ? err.message : 'Could not start conversation',
         variant: 'destructive'
       });
     } finally {
@@ -328,30 +296,23 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
   };
 
-  const progress = listings.length > 0 ? ((currentIndex + 1) / listings.length) * 100 : 0;
+  const progress = deckQueue.length > 0 ? ((currentIndex + 1) / deckQueue.length) * 100 : 0;
 
-  // Only show loading on initial load, not during background refetch
-  // Use skeleton screen instead of spinner for professional feel
-  if (isLoading && listings.length === 0) {
+  // Loading state
+  if (isLoading && deckQueue.length === 0) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
-        {/* Skeleton Card - Matches TinderSwipeCard layout */}
         <div className="relative flex-1 w-full">
           <div className="absolute inset-0 rounded-3xl overflow-hidden bg-muted/30 animate-pulse">
-            {/* Image skeleton with gradient shimmer */}
             <div className="absolute inset-0 bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
                    style={{ animationDuration: '1.5s', backgroundSize: '200% 100%' }} />
             </div>
-
-            {/* Story dots skeleton */}
             <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
               {[1, 2, 3, 4].map((num) => (
                 <div key={`skeleton-dot-${num}`} className="flex-1 h-1 rounded-full bg-white/20" />
               ))}
             </div>
-
-            {/* Bottom sheet skeleton */}
             <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-xl rounded-t-[24px] p-4 pt-6">
               <div className="flex justify-center mb-2">
                 <div className="w-10 h-1.5 bg-white/30 rounded-full" />
@@ -374,8 +335,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
             </div>
           </div>
         </div>
-
-        {/* Action buttons skeleton */}
         <div className="flex-shrink-0 flex justify-center items-center py-3 px-4">
           <div className="flex items-center gap-3">
             <Skeleton className="w-14 h-14 rounded-full bg-muted/40" />
@@ -388,6 +347,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
@@ -395,11 +355,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
           <p className="text-muted-foreground mb-4">We couldn't load properties right now.</p>
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2"
-          >
+          <Button onClick={handleRefresh} variant="outline" className="gap-2">
             <RotateCcw className="w-4 h-4" />
             Try Again
           </Button>
@@ -408,7 +364,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
-  if (listings.length === 0) {
+  // Empty state
+  if (deckQueue.length === 0) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -417,40 +374,34 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className="text-center space-y-6 p-8"
         >
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
+          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
               <Home className="w-12 h-12 text-primary" />
             </div>
           </motion.div>
-
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">No Properties Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               Try adjusting your filters or refresh to discover new listings
             </p>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Loading...' : 'Refresh Properties'}
-              </Button>
-            </motion.div>
-          </div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Loading...' : 'Refresh Properties'}
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     );
   }
 
-  if (currentIndex >= listings.length) {
+  // All caught up state
+  if (currentIndex >= deckQueue.length) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -459,39 +410,20 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className="text-center space-y-6 p-8"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}
-          >
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}>
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              >
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
                 <Search className="w-12 h-12 text-green-500" />
               </motion.div>
             </div>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-2"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               You've seen all available properties. Check back later or refresh for new listings.
             </p>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col gap-3"
-          >
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col gap-3">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={handleRefresh}
@@ -502,27 +434,55 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 {isRefreshing ? 'Finding Properties...' : 'Discover More'}
               </Button>
             </motion.div>
-
-            <p className="text-xs text-muted-foreground">
-              New properties are added daily
-            </p>
+            <p className="text-xs text-muted-foreground">New properties are added daily</p>
           </motion.div>
         </motion.div>
       </div>
     );
   }
 
-  const currentListing = listings[currentIndex];
-
+  // Main swipe view with 3-card stack
   return (
     <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3">
-      {/* Card Container - Full height, no clipping */}
       <div className="relative flex-1 w-full">
+        {/* 3-CARD STACK: Render next-next, next, then current on top */}
+        {/* Third card (behind) - static, minimal styling */}
+        {thirdCard && (
+          <div
+            key={`third-${thirdCard.id}`}
+            className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+            style={{
+              transform: 'scale(0.9) translateY(16px)',
+              opacity: 0.5,
+              zIndex: 1,
+              pointerEvents: 'none',
+            }}
+          >
+            <div className="w-full h-full bg-muted/50 rounded-3xl" />
+          </div>
+        )}
+
+        {/* Second card (behind current) - static, light styling */}
+        {nextCard && (
+          <div
+            key={`next-${nextCard.id}`}
+            className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
+            style={{
+              transform: 'scale(0.95) translateY(8px)',
+              opacity: 0.7,
+              zIndex: 2,
+              pointerEvents: 'none',
+            }}
+          >
+            <div className="w-full h-full bg-muted/30 rounded-3xl" />
+          </div>
+        )}
+
+        {/* Current card on top - fully interactive */}
         <AnimatePresence mode="popLayout">
-          {/* Current card on top */}
-          {currentListing && (
+          {topCard && (
             <motion.div
-              key={currentListing.id}
+              key={topCard.id}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
@@ -530,26 +490,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 opacity: 0,
                 rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
                 scale: 0.85,
-                transition: {
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 35,
-                  mass: 0.5
-                }
+                transition: { type: "spring", stiffness: 500, damping: 35, mass: 0.5 }
               }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 35,
-                mass: 0.5
-              }}
+              transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.5 }}
               className="w-full h-full absolute inset-0"
-              style={{ willChange: 'transform, opacity' }}
+              style={{ willChange: 'transform, opacity', zIndex: 10 }}
             >
               <TinderSwipeCard
-                listing={currentListing}
+                listing={topCard}
                 onSwipe={handleSwipe}
-                onTap={() => onListingTap(currentListing.id)}
+                onTap={() => onListingTap(topCard.id)}
                 onUndo={canUndo ? () => undoLastSwipe() : undefined}
                 onInsights={handleInsights}
                 onShare={handleShare}
@@ -566,16 +516,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       <SwipeInsightsModal
         open={insightsModalOpen}
         onOpenChange={setInsightsModalOpen}
-        listing={currentListing}
+        listing={topCard}
       />
 
       {/* Share Dialog */}
       <ShareDialog
         open={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
-        listingId={currentListing?.id}
-        title={currentListing?.title || 'Check out this listing'}
-        description={currentListing?.description}
+        listingId={topCard?.id}
+        title={topCard?.title || 'Check out this listing'}
+        description={topCard?.description}
       />
     </div>
   );
