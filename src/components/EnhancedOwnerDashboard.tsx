@@ -1,6 +1,4 @@
-import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState, memo } from 'react';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
@@ -12,7 +10,6 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { NotificationSystem } from '@/components/NotificationSystem';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw } from 'lucide-react';
 
 interface EnhancedOwnerDashboardProps {
   onClientInsights?: (clientId: string) => void;
@@ -31,50 +28,13 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   }>({ isOpen: false });
   
   const navigate = useNavigate();
-  const { data: clientProfiles = [], isLoading, error, refetch } = useSmartClientMatching();
+  // PERFORMANCE: Let ClientSwipeContainer handle its own data fetching and skeleton loading
+  // This eliminates the double loading state and provides instant skeleton rendering
+  const { data: clientProfiles = [] } = useSmartClientMatching();
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
-  
+
   // Initialize notifications
   useNotifications();
-
-  // Show loading state - Use a simpler loading state to reduce flickering
-  if (isLoading) {
-    return (
-      <DashboardLayout userRole="owner">
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="text-center">
-            <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">Loading profiles...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <DashboardLayout userRole="owner">
-        <div className="flex items-center justify-center min-h-screen px-4">
-          <Card className="p-8 max-w-md w-full">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <RefreshCw className="w-8 h-8 text-destructive" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Unable to Load Clients</h3>
-              <p className="text-muted-foreground mb-6">
-                We're having trouble loading client profiles. Please try again.
-              </p>
-              <Button onClick={() => refetch()} size="lg" className="w-full">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   const handleClientTap = (clientId: string) => {
     setSelectedClientId(clientId);
@@ -143,4 +103,5 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   );
 };
 
-export default EnhancedOwnerDashboard;
+// Memoize to prevent re-renders from parent state changes
+export default memo(EnhancedOwnerDashboard);

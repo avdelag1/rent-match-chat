@@ -156,6 +156,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, [user?.id, onboardingChecked]);
 
   // Check if this is a first-time user and show welcome notification
+  // FIX: Set the "seen" flag IMMEDIATELY when deciding to show (not only on close)
+  // This ensures welcome shows only on first signup, never on subsequent sign-ins
   useEffect(() => {
     if (!user?.id || welcomeChecked) return;
 
@@ -166,6 +168,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       setWelcomeChecked(true);
 
       if (!hasSeenWelcome) {
+        // CRITICAL FIX: Set the flag IMMEDIATELY before showing
+        // This prevents welcome from showing on every login if user closes app before dismissing
+        localStorage.setItem(welcomeKey, 'true');
+
         // Small delay to let the dashboard load first
         setTimeout(() => {
           setShowWelcomeNotification(true);
