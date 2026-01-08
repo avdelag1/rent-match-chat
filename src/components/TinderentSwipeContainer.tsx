@@ -11,7 +11,7 @@ import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
-import { useSwipePrefetch } from '@/hooks/usePrefetchManager';
+import { useSwipePrefetch, usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -136,6 +136,25 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     deckQueueRef.current.length,
     filters
   );
+
+  // PERFORMANCE: Prefetch next listing details when viewing current card
+  // This pre-loads the data for the insights dialog
+  const { prefetchListingDetails } = usePrefetchManager();
+  useEffect(() => {
+    const nextListing = deckQueueRef.current[currentIndexRef.current + 1];
+    if (nextListing?.id) {
+      // Use requestIdleCallback for non-blocking prefetch
+      if ('requestIdleCallback' in window) {
+        (window as Window).requestIdleCallback(() => {
+          prefetchListingDetails(nextListing.id);
+        }, { timeout: 2000 });
+      } else {
+        setTimeout(() => {
+          prefetchListingDetails(nextListing.id);
+        }, 100);
+      }
+    }
+  }, [currentIndexRef.current, prefetchListingDetails]);
 
   // CONSTANT-TIME: Append new unique listings to queue
   useEffect(() => {

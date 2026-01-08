@@ -19,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { MessageActivationPackages } from '@/components/MessageActivationPackages';
 import { useMessageActivations } from '@/hooks/useMessageActivations';
+import { usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { logger } from '@/utils/prodLogger';
 
 export function MessagingDashboard() {
@@ -45,6 +46,43 @@ export function MessagingDashboard() {
   const { data: stats } = useConversationStats();
   const startConversation = useStartConversation();
   const { totalActivations, canSendMessage } = useMessageActivations();
+
+  // PERFORMANCE: Prefetch top conversations on mount
+  // Pre-warms cache for likely-to-open threads
+  const { prefetchTopConversations, prefetchTopConversationMessages } = usePrefetchManager();
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Prefetch in idle time
+    if ('requestIdleCallback' in window) {
+      (window as Window).requestIdleCallback(() => {
+        prefetchTopConversations(user.id, 3);
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        prefetchTopConversations(user.id, 3);
+      }, 100);
+    }
+  }, [user?.id, prefetchTopConversations]);
+
+  // PERFORMANCE: Prefetch messages for top 2 conversations when list loads
+  useEffect(() => {
+    if (conversations.length >= 2) {
+      // Prefetch messages for top 2 conversations
+      const topConversations = conversations.slice(0, 2);
+      topConversations.forEach(conv => {
+        if ('requestIdleCallback' in window) {
+          (window as Window).requestIdleCallback(() => {
+            prefetchTopConversationMessages(conv.id);
+          }, { timeout: 3000 });
+        } else {
+          setTimeout(() => {
+            prefetchTopConversationMessages(conv.id);
+          }, 200);
+        }
+      });
+    }
+  }, [conversations, prefetchTopConversationMessages]);
 
   // Debounced refetch to prevent excessive queries on rapid real-time events
   const refetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
