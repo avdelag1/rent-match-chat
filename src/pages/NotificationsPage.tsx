@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Bell, MessageSquare, Flame, Star, Sparkles, Trash2,
@@ -18,6 +17,8 @@ import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/prodLogger';
+import { VirtualizedNotificationList } from '@/components/VirtualizedNotificationList';
+import { usePrefetchManager } from '@/hooks/usePrefetchManager';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,6 +107,31 @@ export default function NotificationsPage() {
   const [deletingAll, setDeletingAll] = useState(false);
   const { user } = useAuth();
   const { data: userRole } = useUserRole(user?.id);
+  const { prefetchNextNotificationsPage } = usePrefetchManager();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const hasPrefetchedRef = useRef(false);
+
+  // Prefetch next page when scrolling near bottom
+  const handleScroll = useCallback(() => {
+    if (!scrollContainerRef.current || !user?.id || hasPrefetchedRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
+
+    if (isNearBottom && notifications.length >= 50) {
+      hasPrefetchedRef.current = true;
+      // Use requestIdleCallback for non-blocking prefetch
+      if ('requestIdleCallback' in window) {
+        (window as Window).requestIdleCallback(() => {
+          prefetchNextNotificationsPage(user.id, notifications.length);
+        }, { timeout: 2000 });
+      } else {
+        setTimeout(() => {
+          prefetchNextNotificationsPage(user.id, notifications.length);
+        }, 100);
+      }
+    }
+  }, [user?.id, notifications.length, prefetchNextNotificationsPage]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -452,79 +478,13 @@ export default function NotificationsPage() {
                   </p>
                 </motion.div>
               ) : (
-                <ScrollArea className="h-[calc(100vh-320px)]">
-                  <AnimatePresence mode="popLayout">
-                    <div className="space-y-3">
-                      {filteredNotifications.map((notification, index) => (
-                        <motion.div
-                          key={notification.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -100 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <Card 
-                            className={`
-                              group cursor-pointer transition-all duration-300 border overflow-hidden
-                              hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5
-                              ${!notification.read 
-                                ? 'bg-gradient-to-r from-primary/5 via-card to-card border-primary/20' 
-                                : 'hover:bg-accent/30 border-border/50'
-                              }
-                            `}
-                            onClick={() => markAsRead(notification.id)}
-                          >
-                            <CardContent className="p-4 sm:p-5">
-                              <div className="flex items-start gap-4">
-                                <NotificationIconBg type={notification.type} />
-                                
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between gap-3 mb-1">
-                                    <div className="flex items-center gap-2">
-                                      <h4 className="font-semibold text-foreground">
-                                        {notification.title}
-                                      </h4>
-                                      {!notification.read && (
-                                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                      )}
-                                    </div>
-                                    
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        confirmDelete(notification.id);
-                                      }}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                  
-                                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                                    {notification.message}
-                                  </p>
-                                  
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-xs text-muted-foreground/70 font-medium">
-                                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                                    </span>
-                                    {!notification.read && (
-                                      <Badge className="text-xs px-2 py-0.5 h-5 bg-primary/10 text-primary border-0">
-                                        New
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </AnimatePresence>
-                </ScrollArea>
+                <div ref={scrollContainerRef} onScroll={handleScroll}>
+                  <VirtualizedNotificationList
+                    notifications={filteredNotifications}
+                    onMarkAsRead={markAsRead}
+                    onDelete={confirmDelete}
+                  />
+                </div>
               )}
             </TabsContent>
           </Tabs>

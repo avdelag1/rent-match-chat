@@ -6,6 +6,7 @@ import { toast } from '@/hooks/use-toast'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useResponsiveContext } from '@/contexts/ResponsiveContext'
 import { prefetchRoleRoutes } from '@/utils/routePrefetcher'
+import { logger } from '@/utils/prodLogger'
 
 // New Mobile Navigation Components
 import { TopBar } from '@/components/TopBar'
@@ -103,11 +104,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     enabled: showClientInsights
   });
 
-  if (listingsError && (showPropertyInsights || showClientInsights)) {
-    console.error('DashboardLayout - Listings error:', listingsError);
-  }
-  if (profilesError && showClientInsights) {
-    console.error('DashboardLayout - Profiles error:', profilesError);
+  if (import.meta.env.DEV) {
+    if (listingsError && (showPropertyInsights || showClientInsights)) {
+      logger.error('DashboardLayout - Listings error:', listingsError);
+    }
+    if (profilesError && showClientInsights) {
+      logger.error('DashboardLayout - Profiles error:', profilesError);
+    }
   }
 
   // Check onboarding status and show flow if not completed
@@ -123,7 +126,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           .maybeSingle();
 
         if (error) {
-          console.error('Error checking onboarding status:', error);
+          if (import.meta.env.DEV) {
+            logger.error('Error checking onboarding status:', error);
+          }
           return;
         }
 
@@ -141,7 +146,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           setShowOnboarding(true);
         }
       } catch (error) {
-        console.error('Error in onboarding check:', error);
+        if (import.meta.env.DEV) {
+          logger.error('Error in onboarding check:', error);
+        }
       }
     };
 

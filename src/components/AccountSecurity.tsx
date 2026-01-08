@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useSecuritySettings } from '@/hooks/useSecuritySettings';
+import { logger } from '@/utils/prodLogger';
 
 interface AccountSecurityProps {
   userRole: 'client' | 'owner';
@@ -132,7 +133,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      console.error('Password change error:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Password change error:', error);
+      }
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to update password. Please try again.',
@@ -201,7 +204,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        console.error('Delete account error:', result.error);
+        if (import.meta.env.DEV) {
+          logger.error('Delete account error:', result.error);
+        }
 
         toast({
           title: 'Deletion Failed',
@@ -222,7 +227,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       // Navigate to home page
       navigate('/');
     } catch (error) {
-      console.error('Error deleting account:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error deleting account:', error);
+      }
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to delete account. Please contact support.',

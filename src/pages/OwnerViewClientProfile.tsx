@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { ClientFilterPreferences } from '@/hooks/useClientFilterPreferences';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useState as useReactState } from 'react';
+import { logger } from '@/utils/prodLogger';
 
 export default function OwnerViewClientProfile() {
   const { clientId } = useParams();
@@ -32,7 +33,9 @@ export default function OwnerViewClientProfile() {
         .maybeSingle();
 
       if (profileError) {
-        console.error('[OwnerViewClientProfile] Profile fetch error:', profileError);
+        if (import.meta.env.DEV) {
+          logger.error('[OwnerViewClientProfile] Profile fetch error:', profileError);
+        }
         throw profileError;
       }
 
@@ -109,7 +112,9 @@ export default function OwnerViewClientProfile() {
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error starting conversation:', error);
+      }
       toast.error('Could not start conversation', { id: 'start-conv' });
     } finally {
       setIsCreatingConversation(false);

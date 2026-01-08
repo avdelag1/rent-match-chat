@@ -19,6 +19,7 @@ import {
   getCitiesInCountry,
   getCityByName,
 } from '@/data/worldLocations';
+import { logger } from '@/utils/prodLogger';
 
 // Predefined tag categories
 const PROPERTY_TAGS = [
@@ -270,7 +271,9 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
         .upload(filePath, file);
 
       if (error) {
-        console.error('Storage upload error:', error);
+        if (import.meta.env.DEV) {
+          logger.error('Storage upload error:', error);
+        }
         throw error;
       }
 
@@ -281,7 +284,9 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
 
       return publicUrl;
     } catch (error) {
-      console.error('Error uploading image:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error uploading image:', error);
+      }
       throw error;
     }
   };
@@ -327,7 +332,9 @@ export function ClientProfileDialog({ open, onOpenChange }: Props) {
       toast({ title: 'Profile saved', description: 'Your comprehensive profile has been updated.' });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error saving profile:', error);
+      }
       toast({
         title: 'Error saving profile',
         description: error instanceof Error ? error.message : 'Please try again',

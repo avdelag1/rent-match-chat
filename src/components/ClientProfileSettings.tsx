@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getStates, getCitiesForState, getNeighborhoodsForCity } from '@/data/mexicanLocations';
+import { logger } from '@/utils/prodLogger';
 
 export function ClientProfileSettings() {
   const { user } = useAuth();
@@ -112,7 +113,9 @@ export function ClientProfileSettings() {
       await supabase.auth.signOut();
       navigate('/', { replace: true });
     } catch (error: any) {
-      console.error('Delete account error:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Delete account error:', error);
+      }
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete account. Please try again.',

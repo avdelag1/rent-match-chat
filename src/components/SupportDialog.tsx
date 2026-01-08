@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 interface SupportDialogProps {
   isOpen: boolean;
@@ -85,7 +86,9 @@ export function SupportDialog({ isOpen, onClose, userRole }: SupportDialogProps)
       });
     },
     onError: (error) => {
-      console.error('Error creating ticket:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error creating ticket:', error);
+      }
       toast({
         title: "Error",
         description: "Failed to create support ticket. Please try again.",

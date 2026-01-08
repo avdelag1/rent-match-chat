@@ -20,6 +20,7 @@ import { ShareDialog } from '@/components/ShareDialog';
 import { AIListingAssistant } from '@/components/AIListingAssistant';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/prodLogger';
 
 
 interface PropertyManagementProps {
@@ -178,7 +179,9 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
       queryClient.invalidateQueries({ queryKey: ['listings'] });
 
     } catch (error: any) {
-      console.error('Error deleting property:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error deleting property:', error);
+      }
 
       // Revert the optimistic update if deletion failed
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
@@ -236,7 +239,9 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
       queryClient.invalidateQueries({ queryKey: ['listings'] });
 
     } catch (error: any) {
-      console.error('Error updating availability:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error updating availability:', error);
+      }
 
       // Revert the optimistic update if update failed
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });

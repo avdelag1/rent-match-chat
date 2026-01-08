@@ -11,6 +11,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
 
 // Ultra-fast image gallery with aggressive preloading - Instagram/Tinder speed
+// Fixed aspect ratio container prevents layout shifts
 const InstantImageGallery = memo(({
   images,
   currentIndex,
@@ -24,59 +25,96 @@ const InstantImageGallery = memo(({
 }) => {
   // Track which images are loaded - persists across renders
   const loadedImagesRef = useRef<Set<string>>(new Set());
+  const decodedImagesRef = useRef<Set<string>>(new Set());
   const [, forceUpdate] = useState(0);
 
-  // FIX: Preload only current + next + prev images (not all)
-  // This prevents network saturation and CPU decode pipeline overload on mobile
+  // Preload current image immediately, decode adjacent images in idle time
   useEffect(() => {
     if (!isTop) return;
 
-    // Calculate which images to preload: current, next, and previous
-    const indicesToPreload = [
-      currentIndex,
+    // Current image: load immediately with high priority
+    const currentSrc = images[currentIndex];
+    if (currentSrc && currentSrc !== '/placeholder.svg') {
+      const optimizedCurrentSrc = getCardImageUrl(currentSrc);
+      if (!loadedImagesRef.current.has(optimizedCurrentSrc)) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.fetchPriority = 'high';
+        img.onload = () => {
+          loadedImagesRef.current.add(optimizedCurrentSrc);
+          forceUpdate(n => n + 1);
+          // Decode current image immediately
+          if ('decode' in img) {
+            img.decode().then(() => {
+              decodedImagesRef.current.add(optimizedCurrentSrc);
+            }).catch(() => {});
+          }
+        };
+        img.src = optimizedCurrentSrc;
+      }
+    }
+
+    // Adjacent images: preload + decode using requestIdleCallback (non-blocking)
+    const adjacentIndices = [
       (currentIndex + 1) % images.length,
       currentIndex > 0 ? currentIndex - 1 : images.length - 1
-    ].filter((idx, i, arr) => arr.indexOf(idx) === i); // Remove duplicates
+    ].filter((idx, i, arr) => arr.indexOf(idx) === i && idx !== currentIndex);
 
-    indicesToPreload.forEach((idx) => {
-      const src = images[idx];
-      if (!src || src === '/placeholder.svg') return;
+    const preloadAdjacent = () => {
+      adjacentIndices.forEach((idx) => {
+        const src = images[idx];
+        if (!src || src === '/placeholder.svg') return;
 
-      const optimizedSrc = getCardImageUrl(src);
-      if (loadedImagesRef.current.has(optimizedSrc)) return;
-
-      const img = new Image();
-      img.decoding = 'async';
-      // Current image gets high priority, adjacent images get auto
-      img.fetchPriority = idx === currentIndex ? 'high' : 'auto';
-
-      img.onload = () => {
-        loadedImagesRef.current.add(optimizedSrc);
-        // Force re-render only for current image
-        if (idx === currentIndex) {
-          forceUpdate(n => n + 1);
+        const optimizedSrc = getCardImageUrl(src);
+        if (loadedImagesRef.current.has(optimizedSrc)) {
+          // Already loaded, try to decode if not already decoded
+          if (!decodedImagesRef.current.has(optimizedSrc)) {
+            const img = new Image();
+            img.src = optimizedSrc;
+            if ('decode' in img) {
+              img.decode().then(() => {
+                decodedImagesRef.current.add(optimizedSrc);
+              }).catch(() => {});
+            }
+          }
+          return;
         }
-      };
 
-      img.src = optimizedSrc;
+        const img = new Image();
+        img.decoding = 'async';
+        img.fetchPriority = 'low';
+        img.onload = () => {
+          loadedImagesRef.current.add(optimizedSrc);
+          // Decode in idle time for instant display when user taps
+          if ('decode' in img) {
+            img.decode().then(() => {
+              decodedImagesRef.current.add(optimizedSrc);
+            }).catch(() => {});
+          }
+        };
+        img.src = optimizedSrc;
+      });
+    };
 
-      // Force decode only for current image (reduces CPU load)
-      if (idx === currentIndex && 'decode' in img) {
-        img.decode().catch(() => {});
-      }
-    });
-  }, [images, isTop, currentIndex]); // FIX: Added currentIndex to dependencies
+    // Use requestIdleCallback for adjacent image preload + decode
+    if ('requestIdleCallback' in window) {
+      (window as Window).requestIdleCallback(preloadAdjacent, { timeout: 2000 });
+    } else {
+      setTimeout(preloadAdjacent, 100);
+    }
+  }, [images, isTop, currentIndex]);
 
   const currentSrc = images[currentIndex] || '/placeholder.svg';
   const optimizedCurrentSrc = currentSrc !== '/placeholder.svg' ? getCardImageUrl(currentSrc) : currentSrc;
   const isCurrentLoaded = loadedImagesRef.current.has(optimizedCurrentSrc) || currentSrc === '/placeholder.svg';
 
   return (
-    <>
-      {/* Minimal placeholder - only shows briefly on first load */}
+    // Fixed aspect ratio container - prevents layout shifts
+    <div className="absolute inset-0 w-full h-full" style={{ aspectRatio: '4/5', minHeight: '100%' }}>
+      {/* Skeleton placeholder - fixed size, no layout shift */}
       {!isCurrentLoaded && (
         <div
-          className="absolute inset-0 bg-muted/40"
+          className="absolute inset-0 bg-muted/40 rounded-3xl"
           style={{
             backgroundImage: 'linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%)'
           }}
@@ -84,8 +122,6 @@ const InstantImageGallery = memo(({
       )}
 
       {/* Current image - NO transition delay for instant feel */}
-      {/* FIX: Removed key={currentIndex} to prevent remounting on tap (causes delay/flicker) */}
-      {/* FIX: Removed contentVisibility: 'auto' which can delay painting on mobile */}
       <img
         src={optimizedCurrentSrc}
         alt={alt}
@@ -108,7 +144,7 @@ const InstantImageGallery = memo(({
           }
         }}
       />
-    </>
+    </div>
   );
 });
 

@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Home, Flame, Loader2 } from 'lucide-react';
+import { logger } from '@/utils/prodLogger';
 
 interface LikeNotificationPreviewProps {
   likerId: string;
@@ -105,7 +106,9 @@ export function LikeNotificationPreview({
           });
         }
       } catch (err) {
-        console.error('[LikeNotificationPreview] Error fetching liker info:', err);
+        if (import.meta.env.DEV) {
+          logger.error('[LikeNotificationPreview] Error fetching liker info:', err);
+        }
         setError('Could not load preview');
       } finally {
         setLoading(false);

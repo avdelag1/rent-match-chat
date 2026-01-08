@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSmartClientMatching, ClientFilters } from '@/hooks/useSmartMatching';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast as sonnerToast } from 'sonner';
+import { logger } from '@/utils/prodLogger';
 
 export default function OwnerPropertyClientDiscovery() {
   const navigate = useNavigate();
@@ -115,7 +116,9 @@ export default function OwnerPropertyClientDiscovery() {
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error starting conversation:', error);
+      }
       sonnerToast.error('Could not start conversation', { id: 'start-conv' });
     } finally {
       setIsCreatingConversation(false);

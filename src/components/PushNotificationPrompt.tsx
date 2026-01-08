@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Bell, BellRing, MessageSquare, Flame, Crown, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 const NOTIFICATION_PROMPT_KEY = 'notification_prompt_dismissed';
 const PROMPT_DELAY_DAYS = 7; // Days before showing prompt again if dismissed
@@ -67,7 +68,9 @@ export function PushNotificationPrompt() {
         });
       }
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error requesting notification permission:', error);
+      }
     }
 
     setIsOpen(false);
