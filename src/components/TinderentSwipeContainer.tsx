@@ -11,6 +11,7 @@ import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
+import { useSwipePrefetch } from '@/hooks/usePrefetchManager';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -126,6 +127,15 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     profiles: deckQueueRef.current,
     prefetchCount: 2
   });
+
+  // Prefetch next batch of listings when approaching end of current batch
+  // Uses requestIdleCallback internally for non-blocking prefetch
+  useSwipePrefetch(
+    currentIndexRef.current,
+    page,
+    deckQueueRef.current.length,
+    filters
+  );
 
   // CONSTANT-TIME: Append new unique listings to queue
   useEffect(() => {

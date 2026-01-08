@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AppError } from './AppError';
+import { logger } from '@/utils/prodLogger';
 
 interface Props {
   children: ReactNode;
@@ -20,7 +21,9 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    if (import.meta.env.DEV) {
+      logger.error('Uncaught error:', error, errorInfo);
+    }
   }
 
   private handleReset = () => {

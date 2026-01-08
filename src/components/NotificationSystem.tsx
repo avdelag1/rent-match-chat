@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/utils/prodLogger';
 
 export function NotificationSystem() {
   const { user } = useAuth();
@@ -130,7 +131,7 @@ export function NotificationSystem() {
           } catch (error) {
             // Notification handling error - non-critical, don't break the app
             if (import.meta.env.DEV) {
-              console.error('[NotificationSystem] Error handling message notification:', error);
+              logger.error('[NotificationSystem] Error handling message notification:', error);
             }
           }
         }
@@ -203,7 +204,7 @@ export function NotificationSystem() {
           } catch (error) {
             // Like notification handling error - non-critical
             if (import.meta.env.DEV) {
-              console.error('[NotificationSystem] Error handling like notification:', error);
+              logger.error('[NotificationSystem] Error handling like notification:', error);
             }
           }
         }

@@ -1,4 +1,5 @@
 // Cache management utilities for immediate updates
+import { logger } from '@/utils/prodLogger';
 
 export function clearAllCaches(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -11,7 +12,9 @@ export function clearAllCaches(): Promise<void> {
           resolve();
         })
         .catch((error) => {
-          console.error('Failed to clear caches:', error);
+          if (import.meta.env.DEV) {
+            logger.error('Failed to clear caches:', error);
+          }
           resolve(); // Resolve anyway to not block app flow
         });
     } else {

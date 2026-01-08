@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/prodLogger';
 
 interface ClientLocationSelectorProps {
   latitude?: number;
@@ -171,7 +172,9 @@ export function ClientLocationSelector({
           setIsLoading(false);
         },
         (error) => {
-          console.error('Geolocation error:', error);
+          if (import.meta.env.DEV) {
+            logger.error('Geolocation error:', error);
+          }
           toast({
             title: "Location Access Denied",
             description: "Please enable location services and try again.",
@@ -182,7 +185,9 @@ export function ClientLocationSelector({
         { enableHighAccuracy: true, timeout: 10000 }
       );
     } catch (error) {
-      console.error('Error getting location:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error getting location:', error);
+      }
       toast({
         title: "Error",
         description: "Failed to get your location. Please try again.",
@@ -220,7 +225,9 @@ export function ClientLocationSelector({
         locationType: selectedTab,
       });
     } catch (error) {
-      console.error('Reverse geocoding error:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Reverse geocoding error:', error);
+      }
     }
   };
 
@@ -300,7 +307,9 @@ export function ClientLocationSelector({
         setIsLoading(false);
       });
     } catch (error) {
-      console.error('Search error:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Search error:', error);
+      }
       toast({
         title: "Search Failed",
         description: "An error occurred during search.",

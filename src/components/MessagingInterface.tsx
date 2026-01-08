@@ -17,6 +17,8 @@ import { MessageActivationPackages } from '@/components/MessageActivationPackage
 import { SubscriptionPackages } from '@/components/SubscriptionPackages';
 import { ChatPreviewSheet } from '@/components/ChatPreviewSheet';
 import { logger } from '@/utils/prodLogger';
+import { VirtualizedMessageList } from '@/components/VirtualizedMessageList';
+import { usePrefetchManager } from '@/hooks/usePrefetchManager';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -131,6 +133,25 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
 
   // Mark messages as read when viewing this conversation
   useMarkMessagesAsRead(conversationId, true);
+
+  // Prefetch manager for conversation messages
+  const { prefetchTopConversationMessages } = usePrefetchManager();
+
+  // Prefetch messages on mount for faster subsequent loads
+  useEffect(() => {
+    if (conversationId) {
+      // Use requestIdleCallback for non-blocking prefetch
+      if ('requestIdleCallback' in window) {
+        (window as Window).requestIdleCallback(() => {
+          prefetchTopConversationMessages(conversationId);
+        }, { timeout: 2000 });
+      } else {
+        setTimeout(() => {
+          prefetchTopConversationMessages(conversationId);
+        }, 100);
+      }
+    }
+  }, [conversationId, prefetchTopConversationMessages]);
 
   // Debounce showing "Connecting" message to prevent flicker
   useEffect(() => {
@@ -343,52 +364,34 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
         </div>
       )}
 
-      {/* Messages - iOS-style */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-3 bg-[#000000]">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
-              otherUser.role === 'owner'
-                ? 'bg-[#FF6B35]/20'
-                : 'bg-[#007AFF]/20'
-            }`}>
-              <Send className={`w-7 h-7 ${
-                otherUser.role === 'owner' ? 'text-[#FF6B35]' : 'text-[#007AFF]'
-              }`} />
-            </div>
-            <p className="text-sm font-medium text-white mb-1">
-              Start the conversation
-            </p>
-            <p className="text-xs text-[#8E8E93] max-w-[200px]">
-              Say hello to {otherUser.full_name?.split(' ')?.[0] || 'your match'}!
-            </p>
+      {/* Messages - iOS-style with Virtualization for 60fps */}
+      {messages.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-12 text-center bg-[#000000]">
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+            otherUser.role === 'owner'
+              ? 'bg-[#FF6B35]/20'
+              : 'bg-[#007AFF]/20'
+          }`}>
+            <Send className={`w-7 h-7 ${
+              otherUser.role === 'owner' ? 'text-[#FF6B35]' : 'text-[#007AFF]'
+            }`} />
           </div>
-        ) : (
-          <div className="space-y-1">
-            {messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                isMyMessage={message.sender_id === user?.id}
-                otherUserRole={otherUser.role}
-              />
-            ))}
-          </div>
-        )}
-        {/* iOS-style Typing indicator */}
-        {typingUsers.length > 0 && (
-          <div className="flex justify-start items-end gap-2 mt-1">
-            <div className="px-4 py-3 bg-[#3A3A3C] rounded-[20px] rounded-bl-[6px]">
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-2 h-2 bg-[#8E8E93] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          <p className="text-sm font-medium text-white mb-1">
+            Start the conversation
+          </p>
+          <p className="text-xs text-[#8E8E93] max-w-[200px]">
+            Say hello to {otherUser.full_name?.split(' ')?.[0] || 'your match'}!
+          </p>
+        </div>
+      ) : (
+        <VirtualizedMessageList
+          messages={messages}
+          currentUserId={user?.id || ''}
+          otherUserRole={otherUser.role}
+          typingUsers={typingUsers}
+        />
+      )}
+      <div ref={messagesEndRef} />
 
       {/* iOS-style Limit Warning */}
       {hasMonthlyLimit && isAtLimit && (

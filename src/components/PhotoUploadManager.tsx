@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, X, Image, Star, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
+import { logger } from '@/utils/prodLogger';
 
 interface PhotoUploadManagerProps {
   maxPhotos: number; // 30 for properties, 10 for clients
@@ -123,7 +124,9 @@ export function PhotoUploadManager({
           successCount++;
         } else {
           failCount++;
-          console.error(`Failed to upload ${validFiles[index].file.name}:`, result.reason);
+          if (import.meta.env.DEV) {
+            logger.error(`Failed to upload ${validFiles[index].file.name}:`, result.reason);
+          }
         }
       });
 
@@ -153,7 +156,9 @@ export function PhotoUploadManager({
         });
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Upload error:', error);
+      }
       toast({
         title: "Upload Error",
         description: "An unexpected error occurred. Please try again.",

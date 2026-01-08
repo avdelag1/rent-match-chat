@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
+import { logger } from '@/utils/prodLogger';
 
 interface Props {
   children: ReactNode;
@@ -21,7 +22,9 @@ class SignupErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Signup flow error:', error, errorInfo);
+    if (import.meta.env.DEV) {
+      logger.error('Signup flow error:', error, errorInfo);
+    }
   }
 
   private handleRetry = () => {

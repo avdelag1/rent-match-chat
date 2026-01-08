@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreateContract } from '@/hooks/useContracts';
 import { toast } from '@/hooks/use-toast';
 import { Upload, FileText } from 'lucide-react';
+import { logger } from '@/utils/prodLogger';
 
 interface ContractUploadDialogProps {
   open: boolean;
@@ -94,7 +95,9 @@ export const ContractUploadDialog: React.FC<ContractUploadDialogProps> = ({
         description: "Your contract has been created successfully.",
       });
     } catch (error) {
-      console.error('Error creating contract:', error);
+      if (import.meta.env.DEV) {
+        logger.error('Error creating contract:', error);
+      }
       toast({
         title: "Failed to create contract",
         description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
