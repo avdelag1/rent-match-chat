@@ -1,8 +1,8 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { PageTransition } from '@/components/PageTransition';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DashboardLayout } from "@/components/DashboardLayout";
 import { useContracts, useActiveDeals } from "@/hooks/useContracts";
 import { FileText, Clock, CheckCircle, AlertTriangle, Eye, Plus } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -41,7 +41,7 @@ const OwnerContracts = () => {
 
   if (contractsLoading || dealsLoading) {
     return (
-      <DashboardLayout userRole="owner">
+      <>
         <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
           <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8 flex items-center justify-center">
             <div className="text-center">
@@ -50,12 +50,12 @@ const OwnerContracts = () => {
             </div>
           </div>
         </SwipeNavigationWrapper>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
         <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8">
         <div className="max-w-6xl mx-auto">
@@ -199,7 +199,7 @@ const OwnerContracts = () => {
           onOpenChange={() => setSelectedContract(null)}
         />
       )}
-    </DashboardLayout>
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Sparkles, Home, Bike, Ship, Car, CircleDot, Briefcase, RotateCcw } from 'lucide-react';
@@ -66,7 +66,7 @@ export default function OwnerFiltersExplore() {
   const totalActiveFilters = Object.values(filterCounts).reduce((a, b) => a + b, 0);
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <div className="min-h-full bg-gradient-to-b from-background via-background to-background/95">
         {/* Page Header */}
         <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -206,6 +206,6 @@ export default function OwnerFiltersExplore() {
           </motion.div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

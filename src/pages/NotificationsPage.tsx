@@ -1,5 +1,5 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useState, useEffect, useCallback } from 'react';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -342,7 +342,7 @@ export default function NotificationsPage() {
   const swipeRoutes = userRole === 'owner' || userRole === 'admin' ? ownerSettingsRoutes : clientSettingsRoutes;
 
   return (
-    <DashboardLayout userRole={(userRole === 'admin' ? 'owner' : userRole) || 'client'}>
+    <>
       <SwipeNavigationWrapper routes={swipeRoutes}>
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 pb-24 overflow-y-auto">
         <div className="p-4 sm:p-6 lg:p-8">
@@ -502,6 +502,6 @@ export default function NotificationsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </DashboardLayout>
+    </>
   );
 }

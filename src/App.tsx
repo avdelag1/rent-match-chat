@@ -14,6 +14,9 @@ import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
+// SPEED OF LIGHT: Persistent layout wrapper - mounted ONCE, never remounts
+import { PersistentDashboardLayout } from "@/components/PersistentDashboardLayout";
+
 // Import UI components directly (not lazy) to avoid useContext issues with ThemeProvider
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -121,62 +124,27 @@ const App = () => (
                       </SignupErrorBoundary>
                     } />
                     <Route path="/reset-password" element={<ResetPassword />} />
-                    
-                    <Route
-                      path="/client/dashboard" 
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    <Route 
-                      path="/client/profile" 
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientProfile />
-                        </ProtectedRoute>
-                      } 
-                    />
 
-                    <Route 
-                      path="/client/settings" 
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientSettings />
-                        </ProtectedRoute>
-                      } 
-                    />
+                    {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        SPEED OF LIGHT: Client routes with PERSISTENT layout
+                        DashboardLayout is mounted ONCE and never remounts
+                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+                    <Route element={
+                      <ProtectedRoute requiredRole="client">
+                        <PersistentDashboardLayout requiredRole="client" />
+                      </ProtectedRoute>
+                    }>
+                      <Route path="/client/dashboard" element={<ClientDashboard />} />
+                      <Route path="/client/profile" element={<ClientProfile />} />
+                      <Route path="/client/settings" element={<ClientSettings />} />
+                      <Route path="/client/liked-properties" element={<ClientLikedProperties />} />
+                      <Route path="/client/saved-searches" element={<ClientSavedSearches />} />
+                      <Route path="/client/security" element={<ClientSecurity />} />
+                      <Route path="/client/services" element={<ClientWorkerDiscovery />} />
+                      <Route path="/client/contracts" element={<ClientContracts />} />
+                    </Route>
 
-                    <Route 
-                      path="/client/liked-properties" 
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientLikedProperties />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route
-                      path="/client/saved-searches"
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientSavedSearches />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    <Route
-                      path="/client/security"
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientSecurity />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    {/* Client Camera */}
+                    {/* Client Camera - outside layout (fullscreen) */}
                     <Route
                       path="/client/camera"
                       element={
@@ -186,154 +154,34 @@ const App = () => (
                       }
                     />
 
-                    {/* Client Services/Workers Discovery */}
-                    <Route
-                      path="/client/services"
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientWorkerDiscovery />
-                        </ProtectedRoute>
-                      }
-                    />
+                    {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        SPEED OF LIGHT: Owner routes with PERSISTENT layout
+                        DashboardLayout is mounted ONCE and never remounts
+                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+                    <Route element={
+                      <ProtectedRoute requiredRole="owner">
+                        <PersistentDashboardLayout requiredRole="owner" />
+                      </ProtectedRoute>
+                    }>
+                      <Route path="/owner/dashboard" element={<EnhancedOwnerDashboard />} />
+                      <Route path="/owner/profile" element={<OwnerProfile />} />
+                      <Route path="/owner/settings" element={<OwnerSettings />} />
+                      <Route path="/owner/properties" element={<OwnerProperties />} />
+                      <Route path="/owner/listings/new" element={<OwnerNewListing />} />
+                      <Route path="/owner/liked-clients" element={<OwnerLikedClients />} />
+                      <Route path="/owner/clients/property" element={<OwnerPropertyClientDiscovery />} />
+                      <Route path="/owner/clients/moto" element={<OwnerMotoClientDiscovery />} />
+                      <Route path="/owner/clients/bicycle" element={<OwnerBicycleClientDiscovery />} />
+                      <Route path="/owner/clients/yacht" element={<OwnerYachtClientDiscovery />} />
+                      <Route path="/owner/clients/vehicle" element={<OwnerVehicleClientDiscovery />} />
+                      <Route path="/owner/view-client/:clientId" element={<OwnerViewClientProfile />} />
+                      <Route path="/owner/filters-explore" element={<OwnerFiltersExplore />} />
+                      <Route path="/owner/saved-searches" element={<OwnerSavedSearches />} />
+                      <Route path="/owner/security" element={<OwnerSecurity />} />
+                      <Route path="/owner/contracts" element={<OwnerContracts />} />
+                    </Route>
 
-                    <Route
-                      path="/owner/dashboard" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <EnhancedOwnerDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/profile" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerProfile />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/settings" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerSettings />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/properties" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerProperties />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/listings/new" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerNewListing />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/liked-clients" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerLikedClients />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/clients/property" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerPropertyClientDiscovery />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    <Route 
-                      path="/owner/clients/moto" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerMotoClientDiscovery />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    <Route 
-                      path="/owner/clients/bicycle" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerBicycleClientDiscovery />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    <Route
-                      path="/owner/clients/yacht"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerYachtClientDiscovery />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    <Route
-                      path="/owner/clients/vehicle"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerVehicleClientDiscovery />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    <Route
-                      path="/owner/view-client/:clientId" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerViewClientProfile />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route
-                      path="/owner/filters-explore"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerFiltersExplore />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    {/* Owner services route removed - workers are now managed through listings */}
-
-                    <Route
-                      path="/owner/saved-searches"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerSavedSearches />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    <Route
-                      path="/owner/security"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerSecurity />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    {/* Owner Camera Routes */}
+                    {/* Owner Camera Routes - outside layout (fullscreen) */}
                     <Route
                       path="/owner/camera"
                       element={
@@ -342,7 +190,6 @@ const App = () => (
                         </ProtectedRoute>
                       }
                     />
-
                     <Route
                       path="/owner/camera/listing"
                       element={
@@ -352,54 +199,22 @@ const App = () => (
                       }
                     />
 
-                    <Route
-                      path="/messages" 
-                      element={
-                        <ProtectedRoute>
-                          <MessagingDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
+                    {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        Shared routes (both roles) with PERSISTENT layout
+                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+                    <Route element={
+                      <ProtectedRoute>
+                        <PersistentDashboardLayout />
+                      </ProtectedRoute>
+                    }>
+                      <Route path="/messages" element={<MessagingDashboard />} />
+                      <Route path="/notifications" element={<NotificationsPage />} />
+                      <Route path="/subscription-packages" element={<SubscriptionPackagesPage />} />
+                    </Route>
 
-                    <Route 
-                      path="/client/contracts" 
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientContracts />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/owner/contracts" 
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerContracts />
-                        </ProtectedRoute>
-                      } 
-                    />
-
-                    <Route 
-                      path="/subscription-packages" 
-                      element={
-                        <ProtectedRoute>
-                          <SubscriptionPackagesPage />
-                        </ProtectedRoute>
-                      } 
-                    />
-
+                    {/* Payment routes - outside layout */}
                     <Route path="/payment/success" element={<PaymentSuccess />} />
                     <Route path="/payment/cancel" element={<PaymentCancel />} />
-
-                    {/* Notifications Page - Both Roles */}
-                    <Route
-                      path="/notifications"
-                      element={
-                        <ProtectedRoute>
-                          <NotificationsPage />
-                        </ProtectedRoute>
-                      }
-                    />
 
                     {/* Legal Pages - Public Access */}
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />

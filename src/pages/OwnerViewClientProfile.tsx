@@ -1,8 +1,8 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { PageTransition } from '@/components/PageTransition';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -123,17 +123,17 @@ export default function OwnerViewClientProfile() {
 
   if (isLoading) {
     return (
-      <DashboardLayout userRole="owner">
+      <>
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   if (!client) {
     return (
-      <DashboardLayout userRole="owner">
+      <>
         <div className="min-h-screen flex flex-col items-center justify-center">
           <h2 className="text-2xl font-bold mb-4">Client not found</h2>
           <Button onClick={() => navigate(-1)}>
@@ -141,14 +141,14 @@ export default function OwnerViewClientProfile() {
             Go Back
           </Button>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   const images = client.images || [];
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <div className="bg-background">
         {/* Header */}
         <div className="border-b bg-card sticky top-0 z-10">
@@ -645,6 +645,6 @@ export default function OwnerViewClientProfile() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

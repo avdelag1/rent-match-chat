@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,7 @@ const OwnerSettingsNew = () => {
 
   if (activeSection === 'security') {
     return (
-      <DashboardLayout userRole="owner">
+      <>
         <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
           <div className="w-full px-4 sm:px-5 py-4" style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom, 0px))' }}>
             <div className="max-w-3xl mx-auto">
@@ -104,12 +104,12 @@ const OwnerSettingsNew = () => {
             </div>
           </div>
         </SwipeNavigationWrapper>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
         <div className="w-full px-4 sm:px-5 py-4" style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom, 0px))' }}>
           <div className="max-w-3xl mx-auto space-y-6">
@@ -175,7 +175,7 @@ const OwnerSettingsNew = () => {
           </div>
         </div>
       </SwipeNavigationWrapper>
-    </DashboardLayout>
+    </>
   );
 };
 

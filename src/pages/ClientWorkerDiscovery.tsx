@@ -1,10 +1,10 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -233,7 +233,7 @@ export default function ClientWorkerDiscovery() {
   };
 
   return (
-    <DashboardLayout userRole="client">
+    <>
       <div className="min-h-screen pb-24">
         {/* Header */}
         <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-4">
@@ -389,6 +389,6 @@ export default function ClientWorkerDiscovery() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

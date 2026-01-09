@@ -1,11 +1,11 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { LikedClients } from "@/components/LikedClients";
 
 const OwnerLikedClients = () => {
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <LikedClients />
-    </DashboardLayout>
+    </>
   );
 };
 

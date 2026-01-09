@@ -1,8 +1,8 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useState, memo } from 'react';
 import { ClientSwipeContainer } from '@/components/ClientSwipeContainer';
 import { ClientInsightsDialog } from '@/components/ClientInsightsDialog';
 import { MatchCelebration } from '@/components/MatchCelebration';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { NotificationBar } from '@/components/NotificationBar';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -60,7 +60,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
   const selectedClient = clientProfiles.find(c => c.user_id === selectedClientId);
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <NotificationSystem />
       <NotificationBar
         notifications={notifications}
@@ -99,7 +99,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
         onOpenChange={setShowCategoryDialog}
         onCategorySelect={handleCategorySelect}
       />
-    </DashboardLayout>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { ClientProfileDialog } from "@/components/ClientProfileDialog";
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
@@ -54,7 +54,7 @@ const ClientProfileNew = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout userRole="client">
+      <>
         <div className="w-full p-4 pb-32">
           <div className="max-w-lg mx-auto space-y-4">
             <div className="flex items-center gap-4 mb-6">
@@ -68,12 +68,12 @@ const ClientProfileNew = () => {
             <Skeleton className="h-32 rounded-xl" />
           </div>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout userRole="client">
+    <>
       <div className="w-full px-5 py-4 pb-24">
         <div className="max-w-lg mx-auto space-y-4">
           {/* Back Button */}
@@ -365,7 +365,7 @@ const ClientProfileNew = () => {
         title={profile?.name || 'My Profile'}
         description={`Check out ${profile?.name || 'this profile'} on Zwipes! See their interests, lifestyle, and more.`}
       />
-    </DashboardLayout>
+    </>
   );
 };
 

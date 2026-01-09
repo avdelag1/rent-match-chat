@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +12,11 @@ interface ClientDashboardProps {
   filters?: ListingFilters; // Filters passed from DashboardLayout
 }
 
+/**
+ * SPEED OF LIGHT: Client Dashboard
+ * DashboardLayout is now rendered ONCE at route level via PersistentDashboardLayout
+ * This component only renders its inner content
+ */
 export default function ClientDashboard({ onPropertyInsights, onMessageClick, filters }: ClientDashboardProps) {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
@@ -42,7 +46,7 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick, fi
   }, [onPropertyInsights]);
 
   return (
-    <DashboardLayout userRole="client">
+    <>
       <TinderentSwipeContainer
         onListingTap={handleListingTap}
         onInsights={handleListingTap}
@@ -55,6 +59,6 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick, fi
         onOpenChange={setInsightsOpen}
         listing={selectedListing ?? null}
       />
-    </DashboardLayout>
+    </>
   );
 }

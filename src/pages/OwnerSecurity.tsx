@@ -1,11 +1,11 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { SwipeNavigationWrapper } from "@/components/SwipeNavigationWrapper";
 import { ownerSettingsRoutes } from "@/config/swipeNavigationRoutes";
 
 const OwnerSecurity = () => {
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <SwipeNavigationWrapper routes={ownerSettingsRoutes}>
         <div className="w-full">
           <div className="p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
@@ -15,7 +15,7 @@ const OwnerSecurity = () => {
           </div>
         </div>
       </SwipeNavigationWrapper>
-    </DashboardLayout>
+    </>
   );
 };
 

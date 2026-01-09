@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog";
 import { PropertyDetails } from "@/components/PropertyDetails";
 import { PropertyImageGallery } from "@/components/PropertyImageGallery";
@@ -219,7 +219,7 @@ const ClientLikedProperties = () => {
   const currentCategory = categories.find(c => c.id === selectedCategory) || categories[0];
 
   return (
-    <DashboardLayout userRole="client">
+    <>
       <div className="w-full pb-24 bg-background">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-6xl mx-auto">
@@ -522,7 +522,7 @@ const ClientLikedProperties = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </DashboardLayout>
+    </>
   );
 };
 
