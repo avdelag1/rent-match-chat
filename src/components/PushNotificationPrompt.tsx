@@ -14,30 +14,14 @@ export function PushNotificationPrompt() {
   const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
-    // Check if notifications are supported
+    // SPEED OF LIGHT: Do NOT auto-show notification prompt on startup
+    // This prompt should only be triggered by user action (settings button)
+    // Just track if notifications are supported for the settings UI
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setIsSupported(true);
-
-      // Only show prompt if permission is default (not yet asked)
-      if (Notification.permission === 'default') {
-        // Check if user dismissed recently
-        const dismissedAt = localStorage.getItem(NOTIFICATION_PROMPT_KEY);
-        if (dismissedAt) {
-          const dismissedDate = new Date(dismissedAt);
-          const daysSinceDismissed = (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
-          if (daysSinceDismissed < PROMPT_DELAY_DAYS) {
-            return; // Don't show yet
-          }
-        }
-
-        // Show prompt after a short delay to not overwhelm user on page load
-        const timer = setTimeout(() => {
-          setIsOpen(true);
-        }, 3000);
-
-        return () => clearTimeout(timer);
-      }
     }
+    // REMOVED: Auto-show timer that was blocking user experience
+    // Permission is now requested only from settings
   }, []);
 
   const handleEnableNotifications = async () => {

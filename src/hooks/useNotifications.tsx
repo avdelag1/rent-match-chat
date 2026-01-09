@@ -10,10 +10,9 @@ export function useNotifications() {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Request notification permission
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
+    // SPEED OF LIGHT: Do NOT request notification permission on startup
+    // Permission should only be requested from user action (settings button)
+    // Silently subscribe to messages without prompting
 
     // Subscribe to messages for this user
     const channel = supabase
