@@ -297,56 +297,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Check actual role from user_roles table
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .maybeSingle();
+        // SPEED OF LIGHT: Navigate IMMEDIATELY after successful auth
+        // Role validation happens async in background - never block the UI
+        const targetPath = role === 'client' ? '/client/dashboard' : '/owner/dashboard';
 
-        if (roleError) {
-          logger.error('[Auth] Role check error:', roleError);
-          throw new Error('Failed to verify user role');
-        }
+        toast({
+          title: "Welcome back!",
+          description: "Loading your dashboard...",
+        });
 
-        if (roleData) {
-          const actualRole = roleData.role as 'client' | 'owner';
+        // Navigate immediately - don't wait for role check
+        navigate(targetPath, { replace: true });
 
-          // Reject if wrong page
-          if (actualRole !== role) {
-            await supabase.auth.signOut();
+        // Run role validation and profile setup in background (non-blocking)
+        // Use setTimeout(0) to ensure navigation completes first
+        setTimeout(() => {
+          validateRoleInBackground(data.user!, role);
+        }, 0);
 
-            const correctPage = actualRole === 'client' ? 'Client' : 'Owner';
-
-            toast({
-              title: "Wrong Login Page",
-              description: `This email is registered as a ${actualRole.toUpperCase()} account. Please go to the ${correctPage} login page to sign in.`,
-              variant: "destructive"
-            });
-
-            throw new Error(`ROLE_MISMATCH: This is a ${actualRole} account, not a ${role} account.`);
-          }
-
-          // Ensure profile exists
-          await createProfileIfMissing(data.user, actualRole);
-
-          toast({
-            title: "Welcome back!",
-            description: `Redirecting to your ${actualRole} dashboard...`,
-          });
-
-          // CRITICAL FIX: Force navigation after successful signin
-          const targetPath = actualRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
-          navigate(targetPath, { replace: true });
-
-          return { error: null };
-        }
-
-        // No role found
-        logger.error('[Auth] No role found for existing user');
-        await supabase.auth.signOut();
-
-        throw new Error('Account setup incomplete. Please contact support or sign up again.');
+        return { error: null };
       }
 
       return { error: null };
@@ -372,6 +341,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive"
       });
       return { error };
+    }
+  };
+
+  // Background role validation - runs after navigation, never blocks UI
+  const validateRoleInBackground = async (user: User, expectedRole: 'client' | 'owner') => {
+    try {
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (roleError) {
+        logger.error('[Auth] Background role check error:', roleError);
+        return; // Don't disrupt the user, they're already in the dashboard
+      }
+
+      if (roleData) {
+        const actualRole = roleData.role as 'client' | 'owner';
+
+        // If role mismatch, redirect to correct dashboard (no logout)
+        if (actualRole !== expectedRole) {
+          const correctPath = actualRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
+
+          toast({
+            title: "Redirecting",
+            description: `Switching to your ${actualRole} dashboard.`,
+          });
+
+          navigate(correctPath, { replace: true });
+          return;
+        }
+
+        // Ensure profile exists (background)
+        createProfileIfMissing(user, actualRole);
+      } else {
+        // No role found - try to create one based on expected role
+        // This handles edge cases where user_roles trigger didn't fire
+        createProfileIfMissing(user, expectedRole);
+      }
+    } catch (error) {
+      logger.error('[Auth] Background validation error:', error);
+      // Silent fail - user is already in dashboard, don't disrupt
     }
   };
 
