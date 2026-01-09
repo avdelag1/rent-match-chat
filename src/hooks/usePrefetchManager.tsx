@@ -19,8 +19,7 @@ export function usePrefetchManager() {
    * Called when user reaches card index 2-3 of current batch
    */
   const prefetchNextSwipeBatch = useCallback(async (
-    currentPage: number,
-    filters?: Record<string, unknown>
+    currentPage: number
   ) => {
     const key = `swipe-batch-${currentPage + 1}`;
     if (prefetchedKeys.current.has(key)) return;
@@ -28,7 +27,7 @@ export function usePrefetchManager() {
     prefetchedKeys.current.add(key);
 
     await queryClient.prefetchQuery({
-      queryKey: ['smart-listings', filters, currentPage + 1],
+      queryKey: ['smart-listings', currentPage + 1],
       queryFn: async () => {
         const { data } = await supabase
           .from('listings')
@@ -192,7 +191,7 @@ export function useSwipePrefetch(
   currentIndex: number,
   currentPage: number,
   totalInBatch: number,
-  filters?: Record<string, unknown>
+  _filters?: unknown // Kept for backward compatibility but not used in queryKey
 ) {
   const { prefetchNextSwipeBatch } = usePrefetchManager();
 
@@ -204,14 +203,14 @@ export function useSwipePrefetch(
     if (remainingInBatch <= 5 && remainingInBatch > 0) {
       // Use requestIdleCallback to avoid blocking UI
       if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => {
-          prefetchNextSwipeBatch(currentPage, filters);
+        (window as Window).requestIdleCallback(() => {
+          prefetchNextSwipeBatch(currentPage);
         }, { timeout: 2000 });
       } else {
         setTimeout(() => {
-          prefetchNextSwipeBatch(currentPage, filters);
+          prefetchNextSwipeBatch(currentPage);
         }, 100);
       }
     }
-  }, [currentIndex, currentPage, totalInBatch, filters, prefetchNextSwipeBatch]);
+  }, [currentIndex, currentPage, totalInBatch, prefetchNextSwipeBatch]);
 }

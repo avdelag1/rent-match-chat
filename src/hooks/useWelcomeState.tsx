@@ -7,10 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
  * Problem: localStorage can be reset by Lovable preview URLs, causing
  * welcome to show on every login instead of just first signup.
  *
- * Solution: Use profiles.has_seen_welcome column (server-side boolean)
- * - On load, check DB for has_seen_welcome flag
- * - If false: show welcome, then immediately update to true
- * - If true: never show again
+ * Solution: Use profiles.created_at to determine if user is new
+ * - If created_at is within 2 minutes, user is new → show welcome once
+ * - Use localStorage as a backup to prevent showing again in same session
  *
  * The welcome should ONLY show once per user, ever.
  */
@@ -26,10 +25,18 @@ export function useWelcomeState(userId: string | undefined) {
 
     const checkWelcomeStatus = async () => {
       try {
-        // Check server-side flag directly - no localStorage dependency
+        // Check localStorage first - if marked as seen, skip DB check
+        const localKey = `welcome_seen_${userId}`;
+        if (localStorage.getItem(localKey) === 'true') {
+          setIsChecking(false);
+          setShouldShowWelcome(false);
+          return;
+        }
+
+        // Check server-side created_at to determine if user is truly new
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('has_seen_welcome, created_at')
+          .select('created_at')
           .eq('id', userId)
           .single();
 
@@ -40,37 +47,29 @@ export function useWelcomeState(userId: string | undefined) {
           return;
         }
 
-        // If has_seen_welcome is true, never show again
-        if (profile?.has_seen_welcome === true) {
-          setIsChecking(false);
-          setShouldShowWelcome(false);
-          return;
-        }
-
-        // Check if user is "old" (created more than 10 minutes ago)
-        // If so, they've definitely seen the welcome before (flag might not have been set)
+        // Check if user is "new" (created within 2 minutes)
         if (profile?.created_at) {
           const createdAt = new Date(profile.created_at);
           const now = new Date();
           const ageMs = now.getTime() - createdAt.getTime();
-          const tenMinutesMs = 10 * 60 * 1000;
+          const twoMinutesMs = 2 * 60 * 1000;
 
-          if (ageMs > tenMinutesMs) {
+          if (ageMs > twoMinutesMs) {
             // User is not new - mark as seen and don't show
-            markWelcomeAsSeen(userId);
+            localStorage.setItem(localKey, 'true');
             setIsChecking(false);
             setShouldShowWelcome(false);
             return;
           }
         }
 
-        // User is new and hasn't seen welcome - show it!
+        // User is new - show welcome once
         // Mark as seen IMMEDIATELY (optimistic) to prevent double-showing
-        markWelcomeAsSeen(userId);
+        localStorage.setItem(localKey, 'true');
         setIsChecking(false);
         setShouldShowWelcome(true);
 
-      } catch (error) {
+      } catch {
         // On any error, don't show welcome (fail safe)
         setIsChecking(false);
         setShouldShowWelcome(false);
@@ -80,22 +79,10 @@ export function useWelcomeState(userId: string | undefined) {
     checkWelcomeStatus();
   }, [userId]);
 
-  // Mark welcome as seen in the database (server-side)
-  const markWelcomeAsSeen = async (uid: string) => {
-    try {
-      await supabase
-        .from('profiles')
-        .update({ has_seen_welcome: true })
-        .eq('id', uid);
-    } catch (error) {
-      // Silent fail - best effort
-    }
-  };
-
   const dismissWelcome = useCallback(() => {
     if (userId) {
-      // Already marked as seen when we decided to show it
-      // This is just for UI state
+      // Mark as seen in localStorage
+      localStorage.setItem(`welcome_seen_${userId}`, 'true');
     }
     setShouldShowWelcome(false);
   }, [userId]);
