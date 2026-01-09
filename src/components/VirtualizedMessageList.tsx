@@ -17,11 +17,16 @@ interface MessageType {
   };
 }
 
+interface TypingUser {
+  userId: string;
+  userName: string;
+}
+
 interface VirtualizedMessageListProps {
   messages: MessageType[];
   currentUserId: string;
   otherUserRole: string;
-  typingUsers: string[];
+  typingUsers: TypingUser[];
 }
 
 // iOS-style message bubble colors based on conversation type

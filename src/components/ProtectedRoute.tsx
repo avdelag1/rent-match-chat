@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +79,10 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const navigate = useNavigate();
   const location = useLocation();
   const didNavigateRef = useRef(false);
+  
+  // SPEED OF LIGHT: Track if we've ever shown valid content
+  // Once shown, NEVER go back to skeleton (prevents flicker on refresh)
+  const [hasShownContent, setHasShownContent] = useState(false);
 
   // Calculate user age to handle new users whose role row might not exist yet
   const userAgeMs = useMemo(() => {
@@ -131,6 +135,13 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     refetchOnMount: true,
   });
 
+  // Mark that we've shown valid content once
+  useEffect(() => {
+    if (user && userRole && !roleLoading) {
+      setHasShownContent(true);
+    }
+  }, [user, userRole, roleLoading]);
+
   useEffect(() => {
     // Prevent duplicate navigations
     if (didNavigateRef.current) return;
@@ -174,6 +185,12 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     navigate,
     location,
   ]);
+
+  // SPEED OF LIGHT: If we've shown content before, keep showing children
+  // This prevents flicker during token refresh or re-renders
+  if (hasShownContent) {
+    return <>{children}</>;
+  }
 
   // Show skeleton while auth is loading - prevents flash
   if (loading) return <ProtectedRouteLoadingSkeleton />;

@@ -3338,6 +3338,7 @@ export type Database = {
           has_kids: boolean | null
           has_pets: boolean | null
           has_references: boolean | null
+          has_seen_welcome: boolean | null
           height: number | null
           hobbies_interests: string[] | null
           id: string
@@ -3483,6 +3484,7 @@ export type Database = {
           has_kids?: boolean | null
           has_pets?: boolean | null
           has_references?: boolean | null
+          has_seen_welcome?: boolean | null
           height?: number | null
           hobbies_interests?: string[] | null
           id: string
@@ -3628,6 +3630,7 @@ export type Database = {
           has_kids?: boolean | null
           has_pets?: boolean | null
           has_references?: boolean | null
+          has_seen_welcome?: boolean | null
           height?: number | null
           hobbies_interests?: string[] | null
           id?: string

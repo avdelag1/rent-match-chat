@@ -75,6 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!isMounted) return;
 
+        // SPEED OF LIGHT: TOKEN_REFRESHED should NEVER trigger loading or redirects
+        // Just silently update the session/user
+        if (event === 'TOKEN_REFRESHED') {
+          setSession(session);
+          setUser(session?.user ?? null);
+          // Do NOT set loading, do NOT navigate, do NOT do anything else
+          return;
+        }
+
         logger.log('[Auth] State change:', event, session?.user?.email);
 
         // Update state immediately

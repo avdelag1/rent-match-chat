@@ -134,7 +134,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     currentIndexRef.current,
     page,
     deckQueueRef.current.length,
-    filters
+    filters as unknown
   );
 
   // PERFORMANCE: Prefetch next listing details when viewing current card

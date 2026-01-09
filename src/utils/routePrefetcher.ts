@@ -3,9 +3,10 @@
  * Optimized for instant navigation WITHOUT blocking first render
  *
  * Key optimizations:
- * - Only preload 2-3 most likely routes initially
+ * - Only preload 1-2 most likely routes initially  
  * - Use requestIdleCallback to never compete with first paint
- * - Defer secondary routes until browser is truly idle
+ * - Batch prefetches one at a time to avoid main thread blocking
+ * - NO automatic "prefetch all" on mobile
  */
 
 type RouteImport = () => Promise<{ default: React.ComponentType }>;
@@ -46,14 +47,14 @@ const routeImports: Record<string, RouteImport> = {
 const prefetchedRoutes = new Set<string>();
 
 /**
- * Safe requestIdleCallback with fallback
+ * Safe requestIdleCallback with fallback - LONG delay to avoid blocking
  */
-const scheduleIdle = (callback: () => void, timeout = 2000): void => {
+const scheduleIdle = (callback: () => void, timeout = 5000): void => {
   if (typeof requestIdleCallback !== 'undefined') {
     requestIdleCallback(callback, { timeout });
   } else {
-    // Fallback for Safari - use setTimeout with longer delay
-    setTimeout(callback, 100);
+    // Fallback for Safari - use longer delay to not block main thread
+    setTimeout(callback, 300);
   }
 };
 
@@ -76,49 +77,63 @@ export function prefetchRoute(path: string): Promise<void> {
 }
 
 /**
- * Prefetch multiple routes in parallel
+ * Prefetch routes ONE AT A TIME with idle scheduling between each
+ * This prevents main thread blocking on mobile
  */
-function prefetchRoutesParallel(routes: string[]): void {
-  Promise.all(routes.map(route => prefetchRoute(route))).catch(() => {});
+function prefetchRoutesSequentially(routes: string[]): void {
+  let index = 0;
+  
+  const prefetchNext = () => {
+    if (index >= routes.length) return;
+    
+    const route = routes[index];
+    index++;
+    
+    prefetchRoute(route).finally(() => {
+      // Schedule next prefetch only after current one completes
+      if (index < routes.length) {
+        scheduleIdle(prefetchNext, 3000);
+      }
+    });
+  };
+  
+  // Start the first one
+  if (routes.length > 0) {
+    prefetchNext();
+  }
 }
 
 /**
  * SPEED OF LIGHT: Prefetch routes based on user role
- * Only prefetch 2-3 most critical routes, use requestIdleCallback
+ * Only prefetch 1-2 critical routes, use long idle delays
  */
 export function prefetchRoleRoutes(role: 'client' | 'owner'): void {
-  // Only start preloading when browser is idle - never compete with first paint
+  // Wait for complete idle before even starting - never compete with first paint
   scheduleIdle(() => {
     if (role === 'client') {
-      // Critical: Only the 2-3 most likely next routes
-      prefetchRoutesParallel([
-        '/messages',
-        '/client/liked-properties',
-      ]);
-
-      // Secondary routes - defer even more (3 seconds after idle)
+      // Only the single most likely next route first
+      prefetchRoute('/messages');
+      
+      // Secondary routes - much later, one at a time
       scheduleIdle(() => {
-        prefetchRoutesParallel([
-          '/client/profile',
+        prefetchRoutesSequentially([
+          '/client/liked-properties',
           '/notifications',
         ]);
-      }, 3000);
+      }, 5000);
     } else {
-      // Critical: Only the 2-3 most likely next routes
-      prefetchRoutesParallel([
-        '/messages',
-        '/owner/properties',
-      ]);
-
-      // Secondary routes - defer even more (3 seconds after idle)
+      // Only the single most likely next route first
+      prefetchRoute('/messages');
+      
+      // Secondary routes - much later, one at a time
       scheduleIdle(() => {
-        prefetchRoutesParallel([
-          '/owner/profile',
+        prefetchRoutesSequentially([
+          '/owner/properties',
           '/notifications',
         ]);
-      }, 3000);
+      }, 5000);
     }
-  }, 1000); // 1 second timeout to ensure first paint completes
+  }, 2000); // 2 second delay to ensure first paint is complete
 }
 
 /**
@@ -137,18 +152,12 @@ export function createHoverPrefetch(path: string): {
 }
 
 /**
- * Prefetch critical routes - use requestIdleCallback
- * This is called on app load, but defers work to idle time
+ * Prefetch critical routes - DISABLED by default
+ * Only call this explicitly when needed, not on app load
  */
 export function prefetchCriticalRoutes(): void {
-  // Don't preload anything immediately - wait for idle
-  scheduleIdle(() => {
-    // Only preload the two dashboards as absolute essentials
-    prefetchRoutesParallel([
-      '/client/dashboard',
-      '/owner/dashboard',
-    ]);
-  }, 2000); // 2 second timeout ensures first paint is complete
+  // Do nothing on app load - let role-based prefetching handle it
+  // This prevents blocking the main thread during initial render
 }
 
 /**
@@ -164,13 +173,14 @@ export function createLinkObserver(): IntersectionObserver | null {
           const link = entry.target as HTMLAnchorElement;
           const href = link.getAttribute('href');
           if (href && href.startsWith('/')) {
-            prefetchRoute(href);
+            // Use idle callback for viewport prefetching too
+            scheduleIdle(() => prefetchRoute(href), 1000);
           }
         }
       });
     },
     {
-      rootMargin: '200px', // Prefetch when link is 200px from viewport
+      rootMargin: '100px', // Reduced from 200px
       threshold: 0,
     }
   );
@@ -183,17 +193,17 @@ export function createLinkObserver(): IntersectionObserver | null {
 export function prefetchNextLikelyRoute(currentPath: string): void {
   scheduleIdle(() => {
     const nextRouteMap: Record<string, string[]> = {
-      '/client/dashboard': ['/messages', '/client/liked-properties'],
-      '/owner/dashboard': ['/messages', '/owner/properties'],
+      '/client/dashboard': ['/messages'],
+      '/owner/dashboard': ['/messages'],
       '/owner/properties': ['/owner/listings/new'],
-      '/': ['/client/dashboard', '/owner/dashboard'],
     };
 
     const nextRoutes = nextRouteMap[currentPath];
-    if (nextRoutes) {
-      prefetchRoutesParallel(nextRoutes);
+    if (nextRoutes && nextRoutes.length > 0) {
+      // Only prefetch one route at a time
+      prefetchRoute(nextRoutes[0]);
     }
-  }, 500);
+  }, 1000);
 }
 
 /**
