@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -108,29 +108,12 @@ export default function NotificationsPage() {
   const { user } = useAuth();
   const { data: userRole } = useUserRole(user?.id);
   const { prefetchNextNotificationsPage } = usePrefetchManager();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const hasPrefetchedRef = useRef(false);
 
-  // Prefetch next page when scrolling near bottom
-  const handleScroll = useCallback(() => {
-    if (!scrollContainerRef.current || !user?.id || hasPrefetchedRef.current) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
-
-    if (isNearBottom && notifications.length >= 50) {
-      hasPrefetchedRef.current = true;
-      // Use requestIdleCallback for non-blocking prefetch
-      if ('requestIdleCallback' in window) {
-        (window as Window).requestIdleCallback(() => {
-          prefetchNextNotificationsPage(user.id, notifications.length);
-        }, { timeout: 2000 });
-      } else {
-        setTimeout(() => {
-          prefetchNextNotificationsPage(user.id, notifications.length);
-        }, 100);
-      }
-    }
+  // PERFORMANCE FIX: Prefetch is now triggered from INSIDE VirtualizedNotificationList
+  // via onEndReached prop - this is more reliable than outer scroll detection
+  const handleEndReached = useCallback(() => {
+    if (!user?.id || notifications.length < 50) return;
+    prefetchNextNotificationsPage(user.id, notifications.length);
   }, [user?.id, notifications.length, prefetchNextNotificationsPage]);
 
   useEffect(() => {
@@ -478,13 +461,14 @@ export default function NotificationsPage() {
                   </p>
                 </motion.div>
               ) : (
-                <div ref={scrollContainerRef} onScroll={handleScroll}>
-                  <VirtualizedNotificationList
-                    notifications={filteredNotifications}
-                    onMarkAsRead={markAsRead}
-                    onDelete={confirmDelete}
-                  />
-                </div>
+                // PERFORMANCE FIX: Removed outer scroll wrapper - prefetch now handled
+                // inside VirtualizedNotificationList via onEndReached prop
+                <VirtualizedNotificationList
+                  notifications={filteredNotifications}
+                  onMarkAsRead={markAsRead}
+                  onDelete={confirmDelete}
+                  onEndReached={handleEndReached}
+                />
               )}
             </TabsContent>
           </Tabs>

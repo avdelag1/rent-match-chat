@@ -108,6 +108,67 @@ export function usePrefetchManager() {
   }, [queryClient]);
 
   /**
+   * PERFORMANCE: Prefetch top N conversations when entering messaging
+   * Called on messaging screen mount to warm cache for likely-to-open threads
+   */
+  const prefetchTopConversations = useCallback(async (
+    userId: string,
+    topN: number = 3
+  ) => {
+    const key = `top-conversations-${userId}`;
+    if (prefetchedKeys.current.has(key)) return;
+
+    prefetchedKeys.current.add(key);
+
+    // Prefetch conversation list
+    await queryClient.prefetchQuery({
+      queryKey: ['conversations', userId],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from('conversations')
+          .select(`
+            id,
+            last_message_at,
+            client_id,
+            owner_id,
+            listing_id
+          `)
+          .or(`client_id.eq.${userId},owner_id.eq.${userId}`)
+          .order('last_message_at', { ascending: false })
+          .limit(topN);
+        return data || [];
+      },
+      staleTime: 30 * 1000,
+    });
+  }, [queryClient]);
+
+  /**
+   * PERFORMANCE: Prefetch next listing details when card becomes "next up"
+   * Called when user is on card N, prefetch card N+1 details
+   */
+  const prefetchListingDetails = useCallback(async (
+    listingId: string
+  ) => {
+    const key = `listing-detail-${listingId}`;
+    if (prefetchedKeys.current.has(key)) return;
+
+    prefetchedKeys.current.add(key);
+
+    await queryClient.prefetchQuery({
+      queryKey: ['listing-detail', listingId],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('id', listingId)
+          .single();
+        return data;
+      },
+      staleTime: 5 * 60 * 1000,
+    });
+  }, [queryClient]);
+
+  /**
    * Clear prefetch cache when navigating away
    */
   const clearPrefetchCache = useCallback(() => {
@@ -118,6 +179,8 @@ export function usePrefetchManager() {
     prefetchNextSwipeBatch,
     prefetchTopConversationMessages,
     prefetchNextNotificationsPage,
+    prefetchTopConversations,
+    prefetchListingDetails,
     clearPrefetchCache,
   };
 }

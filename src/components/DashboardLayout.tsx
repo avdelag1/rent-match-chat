@@ -39,6 +39,7 @@ const FloatingWelcome = lazy(() => import('@/components/FloatingWelcome').then(m
 // Hooks
 import { useListings } from "@/hooks/useListings"
 import { useClientProfiles } from "@/hooks/useClientProfiles"
+import { useWelcomeState } from "@/hooks/useWelcomeState"
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -72,8 +73,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
   const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [showMessageActivations, setShowMessageActivations] = useState(false)
-  const [showWelcomeNotification, setShowWelcomeNotification] = useState(false)
-  const [welcomeChecked, setWelcomeChecked] = useState(false)
 
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
   const [quickFilters, setQuickFilters] = useState<QuickFilters>({
@@ -87,6 +86,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const location = useLocation()
   const { user } = useAuth()
   const responsive = useResponsiveContext()
+
+  // PERFORMANCE FIX: Welcome state with DB-backed persistence
+  // Shows welcome only on first signup, not every login (survives localStorage clears)
+  const { shouldShowWelcome, dismissWelcome } = useWelcomeState(user?.id)
 
   // Preload routes for the user's role on mount - enables instant navigation
   useEffect(() => {
@@ -155,41 +158,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     checkOnboardingStatus();
   }, [user?.id, onboardingChecked]);
 
-  // Check if this is a first-time user and show welcome notification
-  // FIX: Set the "seen" flag IMMEDIATELY when deciding to show (not only on close)
+  // PERFORMANCE FIX: Welcome check now handled by useWelcomeState hook
   // This ensures welcome shows only on first signup, never on subsequent sign-ins
-  useEffect(() => {
-    if (!user?.id || welcomeChecked) return;
-
-    const checkWelcomeStatus = () => {
-      const welcomeKey = `hasSeenWelcome_${user.id}`;
-      const hasSeenWelcome = localStorage.getItem(welcomeKey);
-
-      setWelcomeChecked(true);
-
-      if (!hasSeenWelcome) {
-        // CRITICAL FIX: Set the flag IMMEDIATELY before showing
-        // This prevents welcome from showing on every login if user closes app before dismissing
-        localStorage.setItem(welcomeKey, 'true');
-
-        // Small delay to let the dashboard load first
-        setTimeout(() => {
-          setShowWelcomeNotification(true);
-        }, 500);
-      }
-    };
-
-    checkWelcomeStatus();
-  }, [user?.id, welcomeChecked]);
-
-  // Handle welcome notification close
-  const handleWelcomeClose = useCallback(() => {
-    if (user?.id) {
-      const welcomeKey = `hasSeenWelcome_${user.id}`;
-      localStorage.setItem(welcomeKey, 'true');
-    }
-    setShowWelcomeNotification(false);
-  }, [user?.id]);
+  // (survives localStorage clears from Lovable preview URLs)
 
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
@@ -551,8 +522,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       {/* Floating Welcome for First-Time Users */}
       <Suspense fallback={null}>
         <FloatingWelcome
-          isOpen={showWelcomeNotification}
-          onClose={handleWelcomeClose}
+          isOpen={shouldShowWelcome}
+          onClose={dismissWelcome}
           userRole={userRole === 'admin' ? 'client' : userRole}
         />
       </Suspense>

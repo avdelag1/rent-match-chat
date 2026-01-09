@@ -1,4 +1,4 @@
-import { memo, useRef, useCallback } from 'react';
+import { memo, useRef, useCallback, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,6 +33,8 @@ interface VirtualizedNotificationListProps {
   onMarkAsRead: (id: string) => void;
   onDelete: (id: string) => void;
   onNavigate?: (url: string) => void;
+  /** Called when scroll reaches near the end of the list (within 5 items) */
+  onEndReached?: () => void;
 }
 
 const NotificationIcon = memo(({ type, className = "w-5 h-5" }: { type: string; className?: string }) => {
@@ -179,14 +181,19 @@ NotificationRow.displayName = 'NotificationRow';
 /**
  * Virtualized notification list - only renders visible rows
  * Maintains 60fps scrolling even with 100+ notifications
+ *
+ * PERFORMANCE FIX: onEndReached is detected INSIDE the virtualizer,
+ * not from outer wrapper scroll events. This ensures prefetch triggers reliably.
  */
 export const VirtualizedNotificationList = memo(({
   notifications,
   onMarkAsRead,
   onDelete,
   onNavigate,
+  onEndReached,
 }: VirtualizedNotificationListProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
+  const isFetchingMoreRef = useRef(false);
 
   const virtualizer = useVirtualizer({
     count: notifications.length,
@@ -196,6 +203,36 @@ export const VirtualizedNotificationList = memo(({
   });
 
   const items = virtualizer.getVirtualItems();
+
+  // PERFORMANCE FIX: Detect end-of-list from INSIDE virtualizer
+  // This ensures prefetch triggers reliably (scroll events on outer wrapper don't fire)
+  useEffect(() => {
+    if (!onEndReached || items.length === 0 || isFetchingMoreRef.current) return;
+
+    // Get the last visible item index
+    const lastVisibleIndex = items[items.length - 1]?.index ?? 0;
+    const totalItems = notifications.length;
+    const threshold = 5; // Trigger when within 5 items of end
+
+    // Check if we're near the end
+    if (totalItems > threshold && lastVisibleIndex >= totalItems - threshold) {
+      isFetchingMoreRef.current = true;
+
+      // Use requestIdleCallback for non-blocking prefetch
+      if ('requestIdleCallback' in window) {
+        (window as Window).requestIdleCallback(() => {
+          onEndReached();
+          // Reset after a short delay to allow re-triggering if needed
+          setTimeout(() => { isFetchingMoreRef.current = false; }, 2000);
+        }, { timeout: 2000 });
+      } else {
+        setTimeout(() => {
+          onEndReached();
+          setTimeout(() => { isFetchingMoreRef.current = false; }, 2000);
+        }, 100);
+      }
+    }
+  }, [items, notifications.length, onEndReached]);
 
   return (
     <div
