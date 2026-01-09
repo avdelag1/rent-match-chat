@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
 import { OwnerClientFilterDialog } from "@/components/OwnerClientFilterDialog";
 import { ThemeSelector } from "@/components/ThemeSelector";
@@ -32,7 +32,7 @@ const OwnerProfileNew = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout userRole="owner">
+      <>
         <div className="w-full p-4 pb-32">
           <div className="max-w-lg mx-auto space-y-4">
             <div className="flex items-center gap-4 mb-6">
@@ -46,12 +46,12 @@ const OwnerProfileNew = () => {
             <Skeleton className="h-32 rounded-xl" />
           </div>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <div className="w-full px-5 py-4 pb-24">
         <div className="max-w-lg mx-auto space-y-4">
           {/* Back Button */}
@@ -274,7 +274,7 @@ const OwnerProfileNew = () => {
         open={showClientFilterDialog}
         onOpenChange={setShowClientFilterDialog}
       />
-    </DashboardLayout>
+    </>
   );
 };
 

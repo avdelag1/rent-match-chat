@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { UnifiedListingForm } from "@/components/UnifiedListingForm";
 import { useEffect, useState } from "react";
@@ -32,22 +32,22 @@ const OwnerNewListing = () => {
 
   if (!initialData) {
     return (
-      <DashboardLayout userRole="owner">
+      <>
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <UnifiedListingForm
         isOpen={isFormOpen}
         onClose={handleClose}
         editingProperty={initialData}
       />
-    </DashboardLayout>
+    </>
   );
 };
 

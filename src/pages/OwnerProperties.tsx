@@ -1,6 +1,6 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useState, useEffect } from 'react';
 import { PropertyManagement } from "@/components/PropertyManagement";
-import { DashboardLayout } from "@/components/DashboardLayout";
 import { useSearchParams, useLocation } from "react-router-dom";
 
 const OwnerProperties = () => {
@@ -27,11 +27,11 @@ const OwnerProperties = () => {
   }, [searchParams, location.hash]);
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <div className="w-full overflow-x-hidden">
         <PropertyManagement initialCategory={initialCategory} initialMode={initialMode} />
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

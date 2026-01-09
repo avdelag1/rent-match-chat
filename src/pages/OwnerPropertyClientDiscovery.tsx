@@ -1,5 +1,5 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useState, useMemo } from 'react';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -126,7 +126,7 @@ export default function OwnerPropertyClientDiscovery() {
   };
 
   return (
-    <DashboardLayout userRole="owner">
+    <>
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="border-b bg-card">
@@ -314,6 +314,6 @@ export default function OwnerPropertyClientDiscovery() {
           </Sheet>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { PageTransition } from '@/components/PageTransition';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -16,7 +17,6 @@ import { MessagingInterface } from '@/components/MessagingInterface';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { DashboardLayout } from '@/components/DashboardLayout';
 import { MessageActivationPackages } from '@/components/MessageActivationPackages';
 import { useMessageActivations } from '@/hooks/useMessageActivations';
 import { usePrefetchManager } from '@/hooks/usePrefetchManager';
@@ -322,7 +322,7 @@ export function MessagingDashboard() {
     const listing = conversation?.listing;
 
     return (
-      <DashboardLayout userRole={userRole}>
+      <>
         <div className="w-full flex flex-col pb-24">
           <div className="w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col">
             {otherUser ? (
@@ -358,12 +358,12 @@ export function MessagingDashboard() {
             )}
           </div>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout userRole={userRole}>
+    <>
       <div className="w-full pb-24 bg-[#000000]">
         <div className="w-full max-w-4xl mx-auto p-3 sm:p-4">
           {/* Vibrant Header */}
@@ -538,6 +538,6 @@ export function MessagingDashboard() {
         onClose={() => setShowUpgradeDialog(false)}
         userRole={userRole}
       />
-    </DashboardLayout>
+    </>
   );
 }

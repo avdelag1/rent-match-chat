@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ const ClientSettingsNew = () => {
 
   if (activeSection === 'security') {
     return (
-      <DashboardLayout userRole="client">
+      <>
         <SwipeNavigationWrapper routes={clientSettingsRoutes}>
           <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
             <div className="max-w-3xl mx-auto">
@@ -113,12 +113,12 @@ const ClientSettingsNew = () => {
             </div>
           </div>
         </SwipeNavigationWrapper>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout userRole="client">
+    <>
       <SwipeNavigationWrapper routes={clientSettingsRoutes}>
         <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
           <div className="max-w-3xl mx-auto space-y-6">
@@ -184,7 +184,7 @@ const ClientSettingsNew = () => {
           </div>
         </div>
       </SwipeNavigationWrapper>
-    </DashboardLayout>
+    </>
   );
 };
 
