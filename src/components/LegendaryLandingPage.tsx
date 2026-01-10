@@ -7,6 +7,10 @@ import { SwipessLogo } from './SwipessLogo';
 // Background color themes that cycle on tap
 const BACKGROUND_COLORS = [
   { 
+    bg: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)', // Black
+    statusBar: '#0a0a0a'
+  },
+  { 
     bg: 'linear-gradient(135deg, #FF4458 0%, #FE3C72 50%, #FF6B6B 100%)', // Tinder pink/coral
     statusBar: '#FF4458'
   },
