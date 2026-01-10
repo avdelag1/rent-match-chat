@@ -28,8 +28,8 @@ function buildVersionPlugin() {
     // This hook runs after files are copied to dist, allowing us to modify sw.js
     writeBundle: {
       sequential: true,
-      order: 'post',
-      async handler(options) {
+      order: 'post' as const,
+      async handler(options: { dir?: string }) {
         const fs = await import('fs');
         const nodePath = await import('path');
         const outDir = options.dir || 'dist';
