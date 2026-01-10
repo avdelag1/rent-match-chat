@@ -41,7 +41,7 @@ const deferredInit = (callback: () => void, timeout = 3000) => {
 // Route prefetching now happens inside DashboardLayout ONLY after first paint
 // via requestIdleCallback. This ensures initial render is never blocked.
 
-// Priority 2: Herramientas de rendimiento
+// Priority 2: Herramientas de rendimiento + Offline Sync
 deferredInit(async () => {
   try {
     const [
@@ -49,17 +49,20 @@ deferredInit(async () => {
       { setupUpdateChecker, checkAppVersion },
       { initPerformanceOptimizations },
       { initWebVitalsMonitoring },
+      { initOfflineSync },
     ] = await Promise.all([
       import("@/utils/performance"),
       import("@/utils/cacheManager"),
       import("@/utils/performanceMonitor"),
       import("@/utils/webVitals"),
+      import("@/utils/offlineSwipeQueue"),
     ]);
     logBundleSize();
     checkAppVersion();
     setupUpdateChecker();
     initPerformanceOptimizations();
     initWebVitalsMonitoring();
+    initOfflineSync(); // PERF: Sync queued swipes when back online
   } catch {}
 }, 3000);
 

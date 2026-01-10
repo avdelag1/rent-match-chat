@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { retryWithBackoff, PG_ERROR_CODES } from '@/utils/retryUtils';
 import { logger } from '@/utils/logger';
+import { isOffline, queueSwipe } from '@/utils/offlineSwipeQueue';
 
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -14,6 +15,12 @@ export function useSwipe() {
       direction: 'left' | 'right';
       targetType?: 'listing' | 'profile';
     }) => {
+      // OFFLINE SUPPORT: Queue swipe if offline, sync later
+      if (isOffline()) {
+        queueSwipe({ targetId, direction, targetType });
+        return { success: true, queued: true };
+      }
+
       // OPTIMIZED: Defensive auth check
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) {
@@ -280,6 +287,17 @@ export function useSwipe() {
       return { success: true };
     },
     onSuccess: (data, variables) => {
+      // OFFLINE SUPPORT: Show toast for queued swipes
+      if ((data as any)?.queued) {
+        if (variables.direction === 'right') {
+          toast({
+            title: "📱 Saved Offline",
+            description: "Your like will sync when you're back online.",
+          });
+        }
+        return; // Don't invalidate queries for queued swipes
+      }
+
       // OPTIMIZED: Only invalidate relevant queries based on swipe type
       const isLike = variables.direction === 'right';
 
