@@ -107,11 +107,27 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Local state for immediate UI updates (synced with store)
   const [renderKey, setRenderKey] = useState(0); // Force update trigger
 
+  // SYNCHRONOUS HYDRATION: Initialize refs immediately from store/session for instant render
+  // This prevents the "dark card" flash by having data ready on first render
+  const getInitialDeck = () => {
+    // Try session storage first (faster, tab-scoped)
+    const sessionItems = getDeckFromSession('client', 'listings');
+    if (sessionItems.length > 0) {
+      return sessionItems;
+    }
+    // Fallback to store items (persisted across sessions)
+    if (clientDeck.deckItems.length > 0) {
+      return clientDeck.deckItems;
+    }
+    return [];
+  };
+
   // CONSTANT-TIME SWIPE DECK: Use refs for queue management (no re-renders on swipe)
-  const deckQueueRef = useRef<any[]>([]);
-  const currentIndexRef = useRef(0);
-  const swipedIdsRef = useRef<Set<string>>(new Set());
-  const initializedRef = useRef(false);
+  // Initialize synchronously from persisted state to prevent dark/empty cards
+  const deckQueueRef = useRef<any[]>(getInitialDeck());
+  const currentIndexRef = useRef(clientDeck.currentIndex);
+  const swipedIdsRef = useRef<Set<string>>(new Set(clientDeck.swipedIds));
+  const initializedRef = useRef(deckQueueRef.current.length > 0);
 
   // Fetch guards
   const isFetchingMore = useRef(false);
@@ -119,26 +135,19 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Navigation guard
   const { canNavigate, startNavigation, endNavigation } = useNavigationGuard();
 
-  // HYDRATION: On mount, restore from store/session if available
+  // HYDRATION SYNC: Ensure refs stay in sync with store updates (for page refresh scenarios)
   useEffect(() => {
-    if (!initializedRef.current) {
+    if (!initializedRef.current && (clientDeck.deckItems.length > 0 || getDeckFromSession('client', 'listings').length > 0)) {
       initializedRef.current = true;
-      // Try to restore from session storage first (faster)
-      const sessionItems = getDeckFromSession('client', 'listings');
-      if (sessionItems.length > 0) {
-        deckQueueRef.current = sessionItems;
-        currentIndexRef.current = clientDeck.currentIndex;
-        swipedIdsRef.current = new Set(clientDeck.swipedIds);
-        setRenderKey(n => n + 1);
-      } else if (clientDeck.deckItems.length > 0) {
-        // Fallback to store items
-        deckQueueRef.current = clientDeck.deckItems;
+      const items = getInitialDeck();
+      if (items.length > 0 && deckQueueRef.current.length === 0) {
+        deckQueueRef.current = items;
         currentIndexRef.current = clientDeck.currentIndex;
         swipedIdsRef.current = new Set(clientDeck.swipedIds);
         setRenderKey(n => n + 1);
       }
     }
-  }, []);
+  }, [clientDeck.deckItems.length]);
 
   // Hooks for functionality
   const swipeMutation = useSwipe();

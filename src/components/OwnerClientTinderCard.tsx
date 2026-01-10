@@ -1,10 +1,125 @@
-import { useState, useCallback, useMemo, memo } from 'react';
+import { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
 import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
+
+// FALLBACK: Known good placeholder for failed/missing images
+const FALLBACK_PLACEHOLDER = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1200&fit=crop&auto=format';
+
+// Client Profile Image Gallery with skeleton loading and fallback chain
+const ClientImageGallery = memo(({
+  images,
+  currentIndex,
+  alt,
+  isTop
+}: {
+  images: string[];
+  currentIndex: number;
+  alt: string;
+  isTop: boolean;
+}) => {
+  const loadedImagesRef = useRef<Set<string>>(new Set());
+  const failedImagesRef = useRef<Set<string>>(new Set());
+  const [, forceUpdate] = useState(0);
+
+  // Get current image with fallback chain
+  const getCurrentSrc = useCallback(() => {
+    const src = images[currentIndex];
+    if (src && !failedImagesRef.current.has(src)) {
+      return src;
+    }
+    // Try other images
+    for (let i = 0; i < images.length; i++) {
+      const fallback = images[(currentIndex + i) % images.length];
+      if (fallback && !failedImagesRef.current.has(fallback)) {
+        return fallback;
+      }
+    }
+    return FALLBACK_PLACEHOLDER;
+  }, [images, currentIndex]);
+
+  const displaySrc = getCurrentSrc();
+  const isLoaded = loadedImagesRef.current.has(displaySrc) || displaySrc === FALLBACK_PLACEHOLDER;
+
+  // Preload active image
+  useEffect(() => {
+    if (!isTop || !displaySrc || displaySrc === FALLBACK_PLACEHOLDER) return;
+    if (loadedImagesRef.current.has(displaySrc) || failedImagesRef.current.has(displaySrc)) return;
+
+    const img = new Image();
+    img.decoding = 'async';
+    (img as any).fetchPriority = 'high';
+    img.onload = () => {
+      loadedImagesRef.current.add(displaySrc);
+      forceUpdate(n => n + 1);
+    };
+    img.onerror = () => {
+      failedImagesRef.current.add(displaySrc);
+      forceUpdate(n => n + 1);
+    };
+    img.src = displaySrc;
+  }, [displaySrc, isTop]);
+
+  return (
+    <div className="absolute inset-0 w-full h-full">
+      {/* Skeleton placeholder - matches card dimensions */}
+      <div
+        className="absolute inset-0 rounded-3xl overflow-hidden"
+        style={{
+          opacity: isLoaded ? 0 : 1,
+          transition: 'opacity 150ms ease-out',
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        }}
+      >
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"
+          style={{ backgroundSize: '200% 100%', animationDuration: '1.5s' }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+            <svg className="w-8 h-8 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Actual image - eager for active card */}
+      <img
+        src={displaySrc}
+        alt={alt}
+        className="absolute inset-0 w-full h-full object-cover rounded-3xl"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
+        draggable={false}
+        style={{
+          opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 150ms ease-out',
+          willChange: 'auto',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+        }}
+        onLoad={() => {
+          if (!loadedImagesRef.current.has(displaySrc)) {
+            loadedImagesRef.current.add(displaySrc);
+            forceUpdate(n => n + 1);
+          }
+        }}
+        onError={() => {
+          if (!failedImagesRef.current.has(displaySrc)) {
+            failedImagesRef.current.add(displaySrc);
+            forceUpdate(n => n + 1);
+          }
+        }}
+      />
+    </div>
+  );
+});
 
 interface ClientProfile {
   user_id: string;
@@ -254,24 +369,12 @@ const OwnerClientTinderCardComponent = ({
               </div>
             )}
 
-            {/* Image with Gradient Overlay */}
-            <img
-              src={images[Math.min(currentImageIndex, images.length - 1)]}
+            {/* Image Gallery with skeleton loading and fallback chain */}
+            <ClientImageGallery
+              images={images}
+              currentIndex={Math.min(currentImageIndex, images.length - 1)}
               alt={profile.name}
-              className="absolute inset-0 w-full h-full object-cover rounded-3xl"
-              loading={isTop && currentImageIndex < 2 ? "eager" : "lazy"}
-              decoding="async"
-              fetchPriority={isTop && currentImageIndex === 0 ? "high" : "auto"}
-              draggable={false}
-              style={{
-                willChange: 'transform',
-                backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden',
-                transform: 'translateZ(0)'
-              }}
-              onError={(e) => {
-                e.currentTarget.src = '/placeholder-avatar.svg';
-              }}
+              isTop={isTop}
             />
 
             {/* Bottom gradient - Lighter for better photo visibility */}

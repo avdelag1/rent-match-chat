@@ -68,37 +68,46 @@ const ClientSwipeContainerComponent = ({
   // Local state for immediate UI updates (synced with store)
   const [renderKey, setRenderKey] = useState(0); // Force update trigger
 
+  // SYNCHRONOUS HYDRATION: Initialize refs immediately from store/session for instant render
+  // This prevents the "dark card" flash by having data ready on first render
+  const getInitialDeck = () => {
+    // Try session storage first (faster, tab-scoped)
+    const sessionItems = getDeckFromSession('owner', category);
+    if (sessionItems.length > 0) {
+      return sessionItems;
+    }
+    // Fallback to store items (persisted across sessions)
+    if (currentDeck.deckItems.length > 0) {
+      return currentDeck.deckItems;
+    }
+    return [];
+  };
+
   // CONSTANT-TIME SWIPE DECK: Use refs for queue management (no re-renders on swipe)
-  const deckQueueRef = useRef<any[]>([]);
-  const currentIndexRef = useRef(0);
-  const swipedIdsRef = useRef<Set<string>>(new Set());
-  const initializedRef = useRef(false);
+  // Initialize synchronously from persisted state to prevent dark/empty cards
+  const deckQueueRef = useRef<any[]>(getInitialDeck());
+  const currentIndexRef = useRef(currentDeck.currentIndex);
+  const swipedIdsRef = useRef<Set<string>>(new Set(currentDeck.swipedIds));
+  const initializedRef = useRef(deckQueueRef.current.length > 0);
 
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const [isRefreshMode, setIsRefreshMode] = useState(false);
   const [page, setPage] = useState(0);
   const isFetchingMore = useRef(false);
 
-  // HYDRATION: On mount, restore from store/session if available
+  // HYDRATION SYNC: Ensure refs stay in sync with store updates (for page refresh scenarios)
   useEffect(() => {
-    if (!initializedRef.current) {
+    if (!initializedRef.current && (currentDeck.deckItems.length > 0 || getDeckFromSession('owner', category).length > 0)) {
       initializedRef.current = true;
-      // Try to restore from session storage first (faster)
-      const sessionItems = getDeckFromSession('owner', category);
-      if (sessionItems.length > 0) {
-        deckQueueRef.current = sessionItems;
-        currentIndexRef.current = currentDeck.currentIndex;
-        swipedIdsRef.current = new Set(currentDeck.swipedIds);
-        setRenderKey(n => n + 1);
-      } else if (currentDeck.deckItems.length > 0) {
-        // Fallback to store items
-        deckQueueRef.current = currentDeck.deckItems;
+      const items = getInitialDeck();
+      if (items.length > 0 && deckQueueRef.current.length === 0) {
+        deckQueueRef.current = items;
         currentIndexRef.current = currentDeck.currentIndex;
         swipedIdsRef.current = new Set(currentDeck.swipedIds);
         setRenderKey(n => n + 1);
       }
     }
-  }, [category]);
+  }, [currentDeck.deckItems.length, category]);
 
   // PERF: pass userId to avoid getUser() inside queryFn
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(user?.id, undefined, page, 50, isRefreshMode);

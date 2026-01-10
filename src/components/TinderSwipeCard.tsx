@@ -10,8 +10,12 @@ import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
 
+// PLACEHOLDER FALLBACK: Known good placeholder for failed/missing images
+const FALLBACK_PLACEHOLDER = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=1200&fit=crop&auto=format';
+
 // Ultra-fast image gallery with aggressive preloading - Instagram/Tinder speed
 // Fixed aspect ratio container prevents layout shifts
+// NEVER shows dark/empty card - always shows skeleton or fallback
 const InstantImageGallery = memo(({
   images,
   currentIndex,
@@ -26,20 +30,44 @@ const InstantImageGallery = memo(({
   // Track which images are loaded - persists across renders
   const loadedImagesRef = useRef<Set<string>>(new Set());
   const decodedImagesRef = useRef<Set<string>>(new Set());
+  const failedImagesRef = useRef<Set<string>>(new Set());
   const [, forceUpdate] = useState(0);
+
+  // Get current image source with fallback chain
+  const getCurrentSrc = useCallback(() => {
+    const currentSrc = images[currentIndex];
+
+    // If current image failed, try next image in array
+    if (currentSrc && failedImagesRef.current.has(getCardImageUrl(currentSrc))) {
+      // Try to find a non-failed image
+      for (let i = 0; i < images.length; i++) {
+        const fallbackIdx = (currentIndex + i) % images.length;
+        const fallbackSrc = images[fallbackIdx];
+        if (fallbackSrc && !failedImagesRef.current.has(getCardImageUrl(fallbackSrc))) {
+          return fallbackSrc;
+        }
+      }
+      // All images failed, use placeholder
+      return FALLBACK_PLACEHOLDER;
+    }
+
+    return currentSrc || FALLBACK_PLACEHOLDER;
+  }, [images, currentIndex]);
 
   // Preload current image immediately, decode adjacent images in idle time
   useEffect(() => {
     if (!isTop) return;
 
     // Current image: load immediately with high priority
-    const currentSrc = images[currentIndex];
+    const currentSrc = getCurrentSrc();
     if (currentSrc && currentSrc !== '/placeholder.svg') {
-      const optimizedCurrentSrc = getCardImageUrl(currentSrc);
-      if (!loadedImagesRef.current.has(optimizedCurrentSrc)) {
+      const optimizedCurrentSrc = currentSrc.startsWith('http') && !currentSrc.includes('supabase')
+        ? currentSrc
+        : getCardImageUrl(currentSrc);
+      if (!loadedImagesRef.current.has(optimizedCurrentSrc) && !failedImagesRef.current.has(optimizedCurrentSrc)) {
         const img = new Image();
         img.decoding = 'async';
-        img.fetchPriority = 'high';
+        (img as any).fetchPriority = 'high';
         img.onload = () => {
           loadedImagesRef.current.add(optimizedCurrentSrc);
           forceUpdate(n => n + 1);
@@ -49,6 +77,11 @@ const InstantImageGallery = memo(({
               decodedImagesRef.current.add(optimizedCurrentSrc);
             }).catch(() => {});
           }
+        };
+        img.onerror = () => {
+          // Mark as failed and force update to try fallback
+          failedImagesRef.current.add(optimizedCurrentSrc);
+          forceUpdate(n => n + 1);
         };
         img.src = optimizedCurrentSrc;
       }
@@ -66,9 +99,9 @@ const InstantImageGallery = memo(({
         if (!src || src === '/placeholder.svg') return;
 
         const optimizedSrc = getCardImageUrl(src);
-        if (loadedImagesRef.current.has(optimizedSrc)) {
-          // Already loaded, try to decode if not already decoded
-          if (!decodedImagesRef.current.has(optimizedSrc)) {
+        if (loadedImagesRef.current.has(optimizedSrc) || failedImagesRef.current.has(optimizedSrc)) {
+          // Already loaded or failed, try to decode if loaded and not already decoded
+          if (loadedImagesRef.current.has(optimizedSrc) && !decodedImagesRef.current.has(optimizedSrc)) {
             const img = new Image();
             img.src = optimizedSrc;
             if ('decode' in img) {
@@ -82,7 +115,7 @@ const InstantImageGallery = memo(({
 
         const img = new Image();
         img.decoding = 'async';
-        img.fetchPriority = 'low';
+        (img as any).fetchPriority = 'low';
         img.onload = () => {
           loadedImagesRef.current.add(optimizedSrc);
           // Decode in idle time for instant display when user taps
@@ -91,6 +124,9 @@ const InstantImageGallery = memo(({
               decodedImagesRef.current.add(optimizedSrc);
             }).catch(() => {});
           }
+        };
+        img.onerror = () => {
+          failedImagesRef.current.add(optimizedSrc);
         };
         img.src = optimizedSrc;
       });
@@ -102,28 +138,50 @@ const InstantImageGallery = memo(({
     } else {
       setTimeout(preloadAdjacent, 100);
     }
-  }, [images, isTop, currentIndex]);
+  }, [images, isTop, currentIndex, getCurrentSrc]);
 
-  const currentSrc = images[currentIndex] || '/placeholder.svg';
-  const optimizedCurrentSrc = currentSrc !== '/placeholder.svg' ? getCardImageUrl(currentSrc) : currentSrc;
+  const currentSrc = getCurrentSrc();
+  const optimizedCurrentSrc = currentSrc !== '/placeholder.svg'
+    ? (currentSrc.startsWith('http') && !currentSrc.includes('supabase') ? currentSrc : getCardImageUrl(currentSrc))
+    : currentSrc;
   const isCurrentLoaded = loadedImagesRef.current.has(optimizedCurrentSrc) || currentSrc === '/placeholder.svg';
+  const isCurrentFailed = failedImagesRef.current.has(optimizedCurrentSrc);
+
+  // If current image failed, show placeholder immediately
+  const displaySrc = isCurrentFailed ? FALLBACK_PLACEHOLDER : optimizedCurrentSrc;
+  const showImage = isCurrentLoaded || isCurrentFailed;
 
   return (
     // Fixed aspect ratio container - prevents layout shifts
     <div className="absolute inset-0 w-full h-full" style={{ aspectRatio: '4/5', minHeight: '100%' }}>
-      {/* Skeleton placeholder - fixed size, no layout shift */}
-      {!isCurrentLoaded && (
+      {/* Skeleton placeholder - fixed size, matches card dimensions exactly */}
+      {/* Always visible until image loads - prevents dark/empty state */}
+      <div
+        className="absolute inset-0 rounded-3xl overflow-hidden"
+        style={{
+          opacity: showImage ? 0 : 1,
+          transition: 'opacity 150ms ease-out',
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        }}
+      >
+        {/* Shimmer animation for loading state */}
         <div
-          className="absolute inset-0 bg-muted/40 rounded-3xl"
-          style={{
-            backgroundImage: 'linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%)'
-          }}
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"
+          style={{ backgroundSize: '200% 100%', animationDuration: '1.5s' }}
         />
-      )}
+        {/* Placeholder icon */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+            <svg className="w-8 h-8 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
-      {/* Current image - NO transition delay for instant feel */}
+      {/* Current image - EAGER loading for active card, NO transition delay */}
       <img
-        src={optimizedCurrentSrc}
+        src={displaySrc}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
         draggable={false}
@@ -131,15 +189,23 @@ const InstantImageGallery = memo(({
         decoding="async"
         fetchPriority="high"
         style={{
-          opacity: isCurrentLoaded ? 1 : 0,
+          opacity: showImage ? 1 : 0,
+          transition: 'opacity 150ms ease-out',
           willChange: 'auto',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           transform: 'translateZ(0)',
         }}
         onLoad={() => {
-          if (!loadedImagesRef.current.has(optimizedCurrentSrc)) {
-            loadedImagesRef.current.add(optimizedCurrentSrc);
+          if (!loadedImagesRef.current.has(displaySrc)) {
+            loadedImagesRef.current.add(displaySrc);
+            forceUpdate(n => n + 1);
+          }
+        }}
+        onError={() => {
+          // Mark as failed and try fallback
+          if (!failedImagesRef.current.has(displaySrc)) {
+            failedImagesRef.current.add(displaySrc);
             forceUpdate(n => n + 1);
           }
         }}
