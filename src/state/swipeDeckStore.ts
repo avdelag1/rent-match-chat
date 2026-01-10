@@ -319,14 +319,33 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
       name: 'swipe-deck-store',
       storage: createJSONStorage(() => customStorage as any),
       partialize: (state) => ({
-        // Only persist essential data, not full deck items (those are refetched)
+        // INSTANT DECK CACHE: Persist minimal deck items for instant render on return
+        // Store first 20 items with minimal fields needed for card render
         clientDeck: {
           currentIndex: state.clientDeck.currentIndex,
           currentPage: state.clientDeck.currentPage,
           isHydrated: state.clientDeck.isHydrated,
           swipedIds: state.clientDeck.swipedIds,
-          // Keep deck items in session only (via separate sessionStorage logic if needed)
-          deckItems: [],
+          // CRITICAL: Persist minimal deck items for instant render (no dark cards)
+          deckItems: state.clientDeck.deckItems.slice(0, 20).map(item => ({
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            city: item.city,
+            neighborhood: item.neighborhood,
+            images: item.images?.slice(0, 3), // First 3 images only
+            beds: item.beds,
+            baths: item.baths,
+            square_footage: item.square_footage,
+            category: item.category,
+            listing_type: item.listing_type,
+            owner_id: item.owner_id,
+            brand: item.brand,
+            model: item.model,
+            year: item.year,
+            mileage: item.mileage,
+            amenities: item.amenities?.slice(0, 5), // First 5 amenities
+          })),
           lastFetchAt: state.clientDeck.lastFetchAt,
         },
         ownerDecks: Object.fromEntries(
@@ -337,7 +356,23 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
               currentPage: deck.currentPage,
               isHydrated: deck.isHydrated,
               swipedIds: deck.swipedIds,
-              deckItems: [],
+              // CRITICAL: Persist minimal deck items for instant render (no dark cards)
+              deckItems: deck.deckItems.slice(0, 20).map(item => ({
+                id: item.id || item.user_id,
+                user_id: item.user_id,
+                name: item.name,
+                full_name: item.full_name,
+                age: item.age,
+                city: item.city,
+                images: item.images?.slice(0, 3), // First 3 images only
+                profile_images: item.profile_images?.slice(0, 3),
+                avatar_url: item.avatar_url,
+                verified: item.verified,
+                budget_max: item.budget_max,
+                budget_min: item.budget_min,
+                interests: item.interests?.slice(0, 5),
+                lifestyle_tags: item.lifestyle_tags?.slice(0, 5),
+              })),
               lastFetchAt: deck.lastFetchAt,
             }
           ])

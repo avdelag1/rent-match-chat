@@ -1,3 +1,4 @@
+import { startTransition } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart, Filter } from 'lucide-react';
@@ -111,7 +112,11 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     if (item.onClick) {
       item.onClick();
     } else if (item.path) {
-      navigate(item.path);
+      // INSTANT NAVIGATION: Use startTransition to keep current UI responsive
+      // while React prepares the new route - feels like native app
+      startTransition(() => {
+        navigate(item.path!);
+      });
     }
   };
 
