@@ -14,13 +14,28 @@ interface ImageTransformOptions {
 /**
  * Optimize Supabase storage image URL with transformation parameters
  * Reduces file size and improves load times dramatically
+ *
+ * CRITICAL: Handles signed URLs correctly - preserves token parameter
+ * Signed URLs contain auth tokens that must not be corrupted
  */
 export function optimizeImageUrl(
   url: string,
   options: ImageTransformOptions = {}
 ): string {
-  // Skip if not a Supabase storage URL
-  if (!url || !url.includes('supabase.co/storage')) {
+  // Skip if not a valid URL or not a Supabase storage URL
+  if (!url || typeof url !== 'string') {
+    return url;
+  }
+
+  // Skip non-Supabase URLs entirely (external images, placeholders, data URIs)
+  if (!url.includes('supabase.co/storage')) {
+    return url;
+  }
+
+  // CRITICAL: Skip signed URLs - they have token parameter that cannot be modified
+  // Supabase signed URLs include ?token= which must remain intact
+  // Modifying query params on signed URLs will invalidate the signature
+  if (url.includes('token=')) {
     return url;
   }
 
@@ -32,21 +47,26 @@ export function optimizeImageUrl(
     resize = 'cover'
   } = options;
 
-  // Parse the URL
-  const urlObj = new URL(url);
+  try {
+    // Parse the URL safely
+    const urlObj = new URL(url);
 
-  // Add transformation parameters
-  const params = new URLSearchParams(urlObj.search);
+    // Preserve existing params and add transformation params
+    const params = new URLSearchParams(urlObj.search);
 
-  if (width) params.set('width', width.toString());
-  if (height) params.set('height', height.toString());
-  params.set('quality', quality.toString());
-  params.set('format', format);
-  params.set('resize', resize);
+    if (width) params.set('width', width.toString());
+    if (height) params.set('height', height.toString());
+    params.set('quality', quality.toString());
+    params.set('format', format);
+    params.set('resize', resize);
 
-  // Return optimized URL
-  urlObj.search = params.toString();
-  return urlObj.toString();
+    // Return optimized URL
+    urlObj.search = params.toString();
+    return urlObj.toString();
+  } catch {
+    // If URL parsing fails, return original URL unchanged
+    return url;
+  }
 }
 
 /**
@@ -89,7 +109,8 @@ export function getFullImageUrl(url: string): string {
  * Creates a tiny blurred placeholder while full image loads
  */
 export function getBlurDataUrl(url: string): string {
-  if (!url || !url.includes('supabase.co/storage')) {
+  // Return SVG placeholder for non-Supabase or signed URLs
+  if (!url || !url.includes('supabase.co/storage') || url.includes('token=')) {
     return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjwvc3ZnPg==';
   }
 
@@ -177,9 +198,11 @@ export const imagePreloadQueue = new ImagePreloadQueue();
 
 /**
  * Create responsive srcset for optimal image loading
+ * Returns empty string for signed URLs (cannot be transformed)
  */
 export function createSrcSet(url: string): string {
-  if (!url || !url.includes('supabase.co/storage')) {
+  // Skip non-Supabase or signed URLs - cannot generate srcset
+  if (!url || !url.includes('supabase.co/storage') || url.includes('token=')) {
     return '';
   }
 

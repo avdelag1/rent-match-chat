@@ -18,11 +18,35 @@ function buildVersionPlugin() {
       return html.replace('</head>', `${preconnects}\n</head>`);
     },
     transform(code: string, id: string) {
-      // Replace __BUILD_TIME__ in service worker
+      // Replace __BUILD_TIME__ in service worker (for src/ files)
       if (id.endsWith('sw.js') || id.includes('service-worker')) {
         return code.replace(/__BUILD_TIME__/g, buildTime);
       }
       return code;
+    },
+    // FIX: Process public/sw.js during build - Vite doesn't transform public/ files
+    // This hook runs after files are copied to dist, allowing us to modify sw.js
+    writeBundle: {
+      sequential: true,
+      order: 'post',
+      async handler(options) {
+        const fs = await import('fs');
+        const nodePath = await import('path');
+        const outDir = options.dir || 'dist';
+        const swPath = nodePath.default.join(outDir, 'sw.js');
+
+        try {
+          if (fs.existsSync(swPath)) {
+            let swContent = fs.readFileSync(swPath, 'utf-8');
+            // Replace BUILD_TIME placeholder with actual build timestamp
+            swContent = swContent.replace(/__BUILD_TIME__/g, buildTime);
+            fs.writeFileSync(swPath, swContent, 'utf-8');
+            console.log(`[build-version-injector] sw.js updated with version: ${buildTime}`);
+          }
+        } catch (e) {
+          console.error('[build-version-injector] Failed to process sw.js:', e);
+        }
+      }
     }
   };
 }
