@@ -3,7 +3,6 @@ import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { ShareDialog } from './ShareDialog';
-import { useListings } from '@/hooks/useListings';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
@@ -12,6 +11,7 @@ import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipePrefetch, usePrefetchManager } from '@/hooks/usePrefetchManager';
+import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -90,17 +90,51 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshMode, setIsRefreshMode] = useState(false);
 
+  // PERSISTENT DECK STORE - survives navigation, prevents blank deck on return
+  const {
+    clientDeck,
+    setClientDeck,
+    setClientIndex,
+    markClientSwiped,
+    resetClientDeck,
+    isClientHydrated,
+  } = useSwipeDeckStore();
+
+  // Local state for immediate UI updates (synced with store)
+  const [renderKey, setRenderKey] = useState(0); // Force update trigger
+
   // CONSTANT-TIME SWIPE DECK: Use refs for queue management (no re-renders on swipe)
   const deckQueueRef = useRef<any[]>([]);
   const currentIndexRef = useRef(0);
   const swipedIdsRef = useRef<Set<string>>(new Set());
-  const [renderKey, setRenderKey] = useState(0); // Force update trigger
+  const initializedRef = useRef(false);
 
   // Fetch guards
   const isFetchingMore = useRef(false);
 
   // Navigation guard
   const { canNavigate, startNavigation, endNavigation } = useNavigationGuard();
+
+  // HYDRATION: On mount, restore from store/session if available
+  useEffect(() => {
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      // Try to restore from session storage first (faster)
+      const sessionItems = getDeckFromSession('client', 'listings');
+      if (sessionItems.length > 0) {
+        deckQueueRef.current = sessionItems;
+        currentIndexRef.current = clientDeck.currentIndex;
+        swipedIdsRef.current = new Set(clientDeck.swipedIds);
+        setRenderKey(n => n + 1);
+      } else if (clientDeck.deckItems.length > 0) {
+        // Fallback to store items
+        deckQueueRef.current = clientDeck.deckItems;
+        currentIndexRef.current = clientDeck.currentIndex;
+        swipedIdsRef.current = new Set(clientDeck.swipedIds);
+        setRenderKey(n => n + 1);
+      }
+    }
+  }, []);
 
   // Hooks for functionality
   const swipeMutation = useSwipe();
@@ -156,14 +190,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
   }, [currentIndexRef.current, prefetchListingDetails]);
 
-  // CONSTANT-TIME: Append new unique listings to queue
+  // CONSTANT-TIME: Append new unique listings to queue AND persist to store
   useEffect(() => {
     if (smartListings.length > 0 && !isLoading) {
       const existingIds = new Set(deckQueueRef.current.map(l => l.id));
-      const newListings = smartListings.filter(l => 
+      const newListings = smartListings.filter(l =>
         !existingIds.has(l.id) && !swipedIdsRef.current.has(l.id)
       );
-      
+
       if (newListings.length > 0) {
         deckQueueRef.current = [...deckQueueRef.current, ...newListings];
         // Cap at 50 listings
@@ -172,11 +206,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           deckQueueRef.current = deckQueueRef.current.slice(offset);
           currentIndexRef.current = Math.max(0, currentIndexRef.current - offset);
         }
+
+        // PERSIST: Save to store and session for navigation survival
+        setClientDeck(deckQueueRef.current, true);
+        persistDeckToSession('client', 'listings', deckQueueRef.current);
+
         setRenderKey(n => n + 1);
       }
       isFetchingMore.current = false;
     }
-  }, [smartListings, isLoading]);
+  }, [smartListings, isLoading, setClientDeck]);
 
   // Get current visible cards for 3-card stack
   const currentIndex = currentIndexRef.current;
@@ -196,6 +235,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     swipedIdsRef.current.add(listing.id);
     currentIndexRef.current += 1;
 
+    // PERSIST: Update store with swiped state
+    markClientSwiped(listing.id);
+
     swipeMutation.mutate({
       targetId: listing.id,
       direction,
@@ -211,23 +253,27 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     setSwipeDirection(null);
     setRenderKey(n => n + 1);
-    
+
     // Fetch more if running low
     if (currentIndexRef.current >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
     }
-  }, [swipeMutation, recordSwipe, recordProfileView]);
+  }, [swipeMutation, recordSwipe, recordProfileView, markClientSwiped]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     setIsRefreshMode(true);
     triggerHaptic('medium');
 
+    // Reset local refs
     currentIndexRef.current = 0;
     deckQueueRef.current = [];
     swipedIdsRef.current.clear();
     setPage(0);
+
+    // Reset store
+    resetClientDeck();
 
     try {
       await refetchSmart();
@@ -327,8 +373,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   const progress = deckQueue.length > 0 ? ((currentIndex + 1) / deckQueue.length) * 100 : 0;
 
-  // Loading state
-  if (isLoading && deckQueue.length === 0) {
+  // Check if we have hydrated data (from store/session) - prevents blank deck flash
+  const hasHydratedData = isClientHydrated() || deckQueue.length > 0;
+
+  // STABLE LOADING SHELL: Only show full skeleton if NOT hydrated AND loading
+  // Once hydrated, never show full skeleton again (use placeholderData from query)
+  if (!hasHydratedData && isLoading) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
         <div className="relative flex-1 w-full">

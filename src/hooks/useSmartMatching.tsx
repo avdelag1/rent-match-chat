@@ -246,8 +246,17 @@ export function useSmartListingMatching(
   pageSize: number = 10,
   isRefreshMode: boolean = false // When true, show disliked items within cooldown
 ) {
+  // Memoize filters key to prevent unnecessary cache misses
+  const filtersKey = filters ? JSON.stringify({
+    category: filters.category,
+    categories: filters.categories,
+    listingType: filters.listingType,
+    priceRange: filters.priceRange,
+    propertyType: filters.propertyType,
+  }) : '';
+
   return useQuery({
-    queryKey: ['smart-listings', filters?.category, filters?.categories, filters?.listingType, filters, page, isRefreshMode], // Include category filters in query key
+    queryKey: ['smart-listings', filtersKey, page, isRefreshMode], // Stable query key
     queryFn: async () => {
       try {
         // Get current user's preferences
@@ -516,14 +525,21 @@ export function useSmartListingMatching(
         return randomizedListings;
       } catch (error) {
         logger.error('Error in smart listing matching:', error);
+        // Return empty array only if there's no previous data
+        // The placeholderData option will preserve previous results
         return [];
       }
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    // STABLE CACHING: Prevent blank UI and aggressive refetching
+    staleTime: 120000, // 2 minutes - data considered fresh
+    gcTime: 600000, // 10 minutes - keep in cache
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
-    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
-    retry: 3,
+    refetchOnMount: false, // Don't refetch when component remounts (navigation)
+    refetchInterval: false, // No automatic refetching
+    retry: 1, // Retry only once on failure
     retryDelay: 1000,
+    // CRITICAL: Keep previous data during refetch - prevents blank UI
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -1058,22 +1074,27 @@ export function useSmartClientMatching(
         // Sort by match percentage
         const sortedClients = matchedClients.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
-        // Randomize the order to prevent users from seeing the same cards in the same order
-        // This keeps engagement high and prevents boredom from seeing the same sequence
-        const randomizedClients = shuffleArray(sortedClients);
-
-        return randomizedClients;
+        // Sort by match percentage only - no random shuffle during normal loads
+        // Shuffling causes visual instability when returning to dashboard
+        // Order is stable within a session, provides predictable UX
+        return sortedClients;
       } catch (error) {
         logger.error('[useSmartClientMatching] Error loading client profiles', error);
+        // Return empty array only if there's no previous data
+        // The placeholderData option will preserve previous results
         return [] as MatchedClientProfile[];
       }
     },
     enabled: true,
-    staleTime: 2 * 60 * 1000, // 2 minutes - prevents excessive refetches while keeping data reasonably fresh
-    gcTime: 5 * 60 * 1000, // 5 minutes - cache for longer to improve performance
+    // STABLE CACHING: Prevent blank UI and aggressive refetching
+    staleTime: 120000, // 2 minutes - data considered fresh
+    gcTime: 600000, // 10 minutes - keep in cache
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
+    refetchOnMount: false, // Don't refetch when component remounts (navigation)
     refetchInterval: false, // Disable automatic refetching - only refetch when filters change
-    retry: 3,
+    retry: 1, // Retry only once on failure
     retryDelay: 1000,
+    // CRITICAL: Keep previous data during refetch - prevents blank UI
+    placeholderData: (previousData) => previousData,
   });
 }
