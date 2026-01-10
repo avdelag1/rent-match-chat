@@ -1,19 +1,41 @@
-import { memo, useEffect, useState, useCallback } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Key, Shield, Sparkles, UserCircle, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 import { SwipessLogo } from './SwipessLogo';
 
+// Background color themes that cycle on tap
+const BACKGROUND_COLORS = [
+  { 
+    bg: 'linear-gradient(135deg, #FF4458 0%, #FE3C72 50%, #FF6B6B 100%)', // Tinder pink/coral
+    statusBar: '#FF4458'
+  },
+  { 
+    bg: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #FFA500 100%)', // Yellow to orange
+    statusBar: '#FF8C00'
+  },
+  { 
+    bg: 'linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)', // Orange to red
+    statusBar: '#f97316'
+  },
+  { 
+    bg: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%)', // Warm orange
+    statusBar: '#FF6B35'
+  },
+];
+
 function LegendaryLandingPage() {
-  // Set orange status bar for landing page
+  const [colorIndex, setColorIndex] = useState(0);
+  
+  // Update status bar color when background changes
   useEffect(() => {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) metaThemeColor.setAttribute('content', '#f97316');
+    if (metaThemeColor) metaThemeColor.setAttribute('content', BACKGROUND_COLORS[colorIndex].statusBar);
 
     return () => {
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#1a1a1a');
     };
-  }, []);
+  }, [colorIndex]);
 
   const [authDialog, setAuthDialog] = useState<{ isOpen: boolean; role: 'client' | 'owner' }>({
     isOpen: false,
@@ -21,16 +43,13 @@ function LegendaryLandingPage() {
   });
 
   // Lantern sweep animation cycle state
-  // Button A animates first, Button B 1 second later, then wait ~10 seconds
   const [sweepCycle, setSweepCycle] = useState(0);
 
   useEffect(() => {
-    // Initial delay before first animation
     const initialDelay = setTimeout(() => {
       setSweepCycle(1);
     }, 1500);
 
-    // Repeat cycle every 12 seconds (1.2s animation + 1s delay + ~10s wait)
     const interval = setInterval(() => {
       setSweepCycle(prev => prev + 1);
     }, 12000);
@@ -44,14 +63,24 @@ function LegendaryLandingPage() {
   const openAuthDialog = (role: 'client' | 'owner') => setAuthDialog({ isOpen: true, role });
   const closeAuthDialog = () => setAuthDialog({ isOpen: false, role: 'client' });
 
+  // Handle tap on background to change color (not on buttons)
+  const handleBackgroundTap = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only change color if clicking on background, not on buttons
+    if ((e.target as HTMLElement).closest('button')) return;
+    setColorIndex(prev => (prev + 1) % BACKGROUND_COLORS.length);
+  };
+
   return (
-    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-      {/* Static mesh gradient - no animation for performance */}
+    <div 
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden transition-all duration-500 ease-out cursor-pointer"
+      style={{ background: BACKGROUND_COLORS[colorIndex].bg }}
+      onClick={handleBackgroundTap}
+    >
+      {/* Subtle overlay for depth */}
       <div
-        className="absolute inset-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
-          background:
-            'radial-gradient(ellipse at 20% 30%, rgba(249, 115, 22, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(239, 68, 68, 0.1) 0%, transparent 50%)'
+          background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.3) 0%, transparent 60%)'
         }}
       />
 
@@ -65,7 +94,7 @@ function LegendaryLandingPage() {
           className="space-y-4"
         >
           <SwipessLogo size="3xl" />
-          <p className="text-white/80 text-2xl sm:text-3xl font-medium px-4 max-w-md mx-auto">
+          <p className="text-white text-xl sm:text-2xl font-medium whitespace-nowrap">
             Swipe and find your perfect deal
           </p>
         </motion.div>
@@ -85,7 +114,6 @@ function LegendaryLandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            {/* Lantern sweep overlay for Button A - animates first */}
             <span
               key={`sweep-a-${sweepCycle}`}
               className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
@@ -120,7 +148,6 @@ function LegendaryLandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.3 }}
           >
-            {/* Lantern sweep overlay for Button B - animates 1 second after A */}
             <span
               key={`sweep-b-${sweepCycle}`}
               className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
@@ -148,19 +175,22 @@ function LegendaryLandingPage() {
           className="pt-4 space-y-2"
         >
           <div className="flex flex-wrap items-center justify-center gap-1.5">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-white/70 text-xs font-medium">Perfect Deals</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/10 rounded-full border border-white/20">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+              <span className="text-white/90 text-xs font-medium">Perfect Deals</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10">
-              <Shield className="w-3.5 h-3.5 text-green-400" />
-              <span className="text-white/70 text-xs font-medium">Secure Chat</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/10 rounded-full border border-white/20">
+              <Shield className="w-3.5 h-3.5 text-white" />
+              <span className="text-white/90 text-xs font-medium">Secure Chat</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10">
-              <Users className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-white/70 text-xs font-medium">Instant Connect</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/10 rounded-full border border-white/20">
+              <Users className="w-3.5 h-3.5 text-white" />
+              <span className="text-white/90 text-xs font-medium">Instant Connect</span>
             </div>
           </div>
+          
+          {/* Tap hint */}
+          <p className="text-white/50 text-xs mt-4">Tap anywhere to change color</p>
         </motion.div>
       </div>
 
