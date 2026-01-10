@@ -139,6 +139,7 @@ const App = () => (
                     {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                         SPEED OF LIGHT: Client routes with PERSISTENT layout
                         DashboardLayout is mounted ONCE and never remounts
+                        Camera routes are INSIDE layout to prevent remount on navigation back
                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
                     <Route element={
                       <ProtectedRoute requiredRole="client">
@@ -153,21 +154,14 @@ const App = () => (
                       <Route path="/client/security" element={<ClientSecurity />} />
                       <Route path="/client/services" element={<ClientWorkerDiscovery />} />
                       <Route path="/client/contracts" element={<ClientContracts />} />
+                      {/* Camera INSIDE layout - prevents dashboard remount on navigate back */}
+                      <Route path="/client/camera" element={<ClientSelfieCamera />} />
                     </Route>
-
-                    {/* Client Camera - outside layout (fullscreen) */}
-                    <Route
-                      path="/client/camera"
-                      element={
-                        <ProtectedRoute requiredRole="client">
-                          <ClientSelfieCamera />
-                        </ProtectedRoute>
-                      }
-                    />
 
                     {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                         SPEED OF LIGHT: Owner routes with PERSISTENT layout
                         DashboardLayout is mounted ONCE and never remounts
+                        Camera routes are INSIDE layout to prevent remount on navigation back
                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
                     <Route element={
                       <ProtectedRoute requiredRole="owner">
@@ -190,25 +184,10 @@ const App = () => (
                       <Route path="/owner/saved-searches" element={<OwnerSavedSearches />} />
                       <Route path="/owner/security" element={<OwnerSecurity />} />
                       <Route path="/owner/contracts" element={<OwnerContracts />} />
+                      {/* Camera routes INSIDE layout - prevents dashboard remount on navigate back */}
+                      <Route path="/owner/camera" element={<OwnerProfileCamera />} />
+                      <Route path="/owner/camera/listing" element={<OwnerListingCamera />} />
                     </Route>
-
-                    {/* Owner Camera Routes - outside layout (fullscreen) */}
-                    <Route
-                      path="/owner/camera"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerProfileCamera />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/owner/camera/listing"
-                      element={
-                        <ProtectedRoute requiredRole="owner">
-                          <OwnerListingCamera />
-                        </ProtectedRoute>
-                      }
-                    />
 
                     {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                         Shared routes (both roles) with PERSISTENT layout

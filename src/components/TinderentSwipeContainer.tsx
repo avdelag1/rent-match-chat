@@ -186,6 +186,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // PERFORMANCE: Prefetch next listing details when viewing current card
   // This pre-loads the data for the insights dialog
+  // FIX: Use renderKey (state-driven) instead of currentIndexRef.current (ref doesn't trigger re-runs)
   const { prefetchListingDetails } = usePrefetchManager();
   useEffect(() => {
     const nextListing = deckQueueRef.current[currentIndexRef.current + 1];
@@ -201,7 +202,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         }, 100);
       }
     }
-  }, [currentIndexRef.current, prefetchListingDetails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderKey, prefetchListingDetails]); // renderKey updates on each swipe, triggering reliable prefetch
 
   // CONSTANT-TIME: Append new unique listings to queue AND persist to store
   useEffect(() => {
