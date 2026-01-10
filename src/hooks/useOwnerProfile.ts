@@ -40,6 +40,8 @@ export function useOwnerProfile() {
   return useQuery({
     queryKey: ['owner-profile-own'],
     queryFn: fetchOwnProfile,
+    // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
+    placeholderData: (prev) => prev,
     staleTime: 5 * 60 * 1000, // 5 minutes - profile data doesn't change often
     gcTime: 10 * 60 * 1000, // 10 minutes cache
   });

@@ -10,6 +10,8 @@ export function useUnreadMessageCount() {
 
   const query = useQuery({
     queryKey: ['unread-message-count', user?.id],
+    // INSTANT NAVIGATION: Keep previous data during refetch to prevent badge flickering
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       if (!user?.id) return 0;
 

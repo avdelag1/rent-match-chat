@@ -43,6 +43,8 @@ export function useConversations() {
 
   const query = useQuery({
     queryKey: ['conversations', user?.id],
+    // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       if (!user?.id) {
         return [];

@@ -34,40 +34,46 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SPEED OF LIGHT: Critical routes are DIRECT IMPORTS (not lazy)
-// These are the most frequently accessed pages - they must be instant
+// INSTANT NAVIGATION: ALL core routes are DIRECT IMPORTS
+// Lazy loading causes delay on first tap - we want INSTANT navigation
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Client routes - ALL direct imports for instant navigation
 import ClientDashboard from "./pages/ClientDashboard";
+import ClientProfile from "./pages/ClientProfileNew";
+import ClientSettings from "./pages/ClientSettingsNew";
+import ClientLikedProperties from "./pages/ClientLikedProperties";
+import ClientSavedSearches from "./pages/ClientSavedSearches";
+import ClientSecurity from "./pages/ClientSecurity";
+import ClientWorkerDiscovery from "./pages/ClientWorkerDiscovery";
+import ClientContracts from "./pages/ClientContracts";
+
+// Owner routes - ALL direct imports for instant navigation
 import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
+import OwnerProfile from "./pages/OwnerProfileNew";
+import OwnerSettings from "./pages/OwnerSettingsNew";
+import OwnerProperties from "./pages/OwnerProperties";
+import OwnerNewListing from "./pages/OwnerNewListing";
+import OwnerLikedClients from "./pages/OwnerLikedClients";
+import OwnerContracts from "./pages/OwnerContracts";
+import OwnerSavedSearches from "./pages/OwnerSavedSearches";
+import OwnerSecurity from "./pages/OwnerSecurity";
+import OwnerPropertyClientDiscovery from "./pages/OwnerPropertyClientDiscovery";
+import OwnerMotoClientDiscovery from "./pages/OwnerMotoClientDiscovery";
+import OwnerBicycleClientDiscovery from "./pages/OwnerBicycleClientDiscovery";
+import OwnerYachtClientDiscovery from "./pages/OwnerYachtClientDiscovery";
+import OwnerVehicleClientDiscovery from "./pages/OwnerVehicleClientDiscovery";
+import OwnerViewClientProfile from "./pages/OwnerViewClientProfile";
+import OwnerFiltersExplore from "./pages/OwnerFiltersExplore";
+
+// Shared routes - direct imports for instant navigation
 import { MessagingDashboard } from "./pages/MessagingDashboard";
 import NotificationsPage from "./pages/NotificationsPage";
-import ClientProfile from "./pages/ClientProfileNew";
-import OwnerProfile from "./pages/OwnerProfileNew";
-import ClientLikedProperties from "./pages/ClientLikedProperties";
-import OwnerLikedClients from "./pages/OwnerLikedClients";
+import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
 
-// Secondary routes - lazy loaded (less frequently accessed)
-const ClientSettings = lazy(() => import("./pages/ClientSettingsNew"));
-const ClientSavedSearches = lazy(() => import("./pages/ClientSavedSearches"));
-const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
-const OwnerSettings = lazy(() => import("./pages/OwnerSettingsNew"));
-const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
-const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
-const OwnerProperties = lazy(() => import("./pages/OwnerProperties"));
-const OwnerNewListing = lazy(() => import("./pages/OwnerNewListing"));
-const ClientContracts = lazy(() => import("./pages/ClientContracts"));
-const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
-const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
+// Rare pages - lazy loaded (payment, camera, legal, public previews)
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/PaymentCancel"));
-const OwnerPropertyClientDiscovery = lazy(() => import("./pages/OwnerPropertyClientDiscovery"));
-const OwnerMotoClientDiscovery = lazy(() => import("./pages/OwnerMotoClientDiscovery"));
-const OwnerBicycleClientDiscovery = lazy(() => import("./pages/OwnerBicycleClientDiscovery"));
-const OwnerYachtClientDiscovery = lazy(() => import("./pages/OwnerYachtClientDiscovery"));
-const OwnerVehicleClientDiscovery = lazy(() => import("./pages/OwnerVehicleClientDiscovery"));
-const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
-const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
-const ClientWorkerDiscovery = lazy(() => import("./pages/ClientWorkerDiscovery"));
 
 // Camera pages
 const ClientSelfieCamera = lazy(() => import("./pages/ClientSelfieCamera"));

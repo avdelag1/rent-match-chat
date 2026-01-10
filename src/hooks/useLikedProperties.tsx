@@ -7,6 +7,8 @@ import { logger } from '@/utils/prodLogger';
 export function useLikedProperties() {
   return useQuery<Listing[]>({
     queryKey: ['liked-properties'],
+    // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return [];
