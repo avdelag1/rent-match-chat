@@ -121,8 +121,15 @@ function resourceHintsPlugin(): import('vite').Plugin {
   };
 }
 
+// Build timestamp for cache versioning (used by SW registration)
+const BUILD_TIME = Date.now().toString();
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Define global constants available in app code
+  define: {
+    'import.meta.env.VITE_BUILD_TIME': JSON.stringify(BUILD_TIME),
+  },
   server: {
     host: "::",
     port: 8080,
