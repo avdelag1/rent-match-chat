@@ -197,7 +197,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               }}
               onClick={() => handleNavClick(item)}
               onMouseEnter={() => item.path && prefetchRoute(item.path)}
-              onTouchStart={() => item.path && prefetchRoute(item.path)}
+              onFocus={() => item.path && prefetchRoute(item.path)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9, transition: springConfigs.instant }}
               className="relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl"
