@@ -215,20 +215,20 @@ export function LikedClients() {
 
   const reportClientMutation = useMutation({
     mutationFn: async ({ clientId, reason, details }: { clientId: string; reason: string; details: string }) => {
-      // Insert report into reports table (table may need to be created)
-      const { error } = await (supabase as any)
-        .from('reports')
+      // Insert report into user_reports table (correct schema table name)
+      const { error } = await supabase
+        .from('user_reports')
         .insert({
           reporter_id: user?.id,
           reported_user_id: clientId,
-          reason: reason,
-          details: details,
+          report_reason: reason,
+          report_details: details,
           status: 'pending'
         });
 
       if (error) {
-        // If table doesn't exist, just log it - in production you'd create the table
         logger.error('Report submission error:', error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -245,9 +245,9 @@ export function LikedClients() {
 
   const blockClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
-      // Insert block record and remove from likes (table may need to be created)
-      const { error: blockError } = await (supabase as any)
-        .from('blocked_users')
+      // Insert block record into user_blocks table (correct schema table name)
+      const { error: blockError } = await supabase
+        .from('user_blocks')
         .insert({
           blocker_id: user?.id,
           blocked_id: clientId
@@ -255,6 +255,7 @@ export function LikedClients() {
 
       if (blockError && !blockError.message.includes('duplicate')) {
         logger.error('Block error:', blockError);
+        throw blockError;
       }
 
       // Also remove from owner_likes
