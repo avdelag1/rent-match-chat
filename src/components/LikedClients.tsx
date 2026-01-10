@@ -97,6 +97,8 @@ export function LikedClients() {
 
   const { data: likedClients = [], isLoading, refetch } = useQuery({
     queryKey: ['liked-clients', user?.id],
+    // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       if (!user?.id) return [];
 

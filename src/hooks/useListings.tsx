@@ -79,6 +79,8 @@ export interface Listing {
 export function useListings(excludeSwipedIds: string[] = [], options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ['listings', excludeSwipedIds, 'with-filters'],
+    // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       try {
         // Get current user's filter preferences for listing types
@@ -145,6 +147,8 @@ export function useOwnerListings() {
 
   const query = useQuery({
     queryKey: ['owner-listings'],
+    // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       try {
         const { data: user } = await supabase.auth.getUser();

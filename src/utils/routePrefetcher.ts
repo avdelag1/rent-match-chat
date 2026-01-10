@@ -137,17 +137,18 @@ export function prefetchRoleRoutes(role: 'client' | 'owner'): void {
 }
 
 /**
- * Create hover prefetch handler - INSTANT, no debounce
+ * Create hover prefetch handler - DESKTOP ONLY
+ * onTouchStart is REMOVED - mobile taps must be pure navigation
+ * Prefetching on tap causes delay and blocks the main thread
  */
 export function createHoverPrefetch(path: string): {
   onMouseEnter: () => void;
   onFocus: () => void;
-  onTouchStart: () => void;
 } {
   return {
     onMouseEnter: () => prefetchRoute(path),
     onFocus: () => prefetchRoute(path),
-    onTouchStart: () => prefetchRoute(path),
+    // NO onTouchStart - mobile navigation must be instant
   };
 }
 
