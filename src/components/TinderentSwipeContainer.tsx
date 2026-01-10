@@ -18,7 +18,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw, RefreshCw, Home, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
 
@@ -190,8 +190,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // PERFORMANCE: Prefetch next listing details when viewing current card
   // This pre-loads the data for the insights dialog
   // FIX: Use renderKey (state-driven) instead of currentIndexRef.current (ref doesn't trigger re-runs)
+  // PERF: Guard with route check - skip expensive work when navigated away
+  const location = useLocation();
+  const isDashboard = location.pathname.includes('/dashboard');
   const { prefetchListingDetails } = usePrefetchManager();
   useEffect(() => {
+    // Skip expensive prefetch when not on dashboard - reduces CPU during route transitions
+    if (!isDashboard) return;
+
     const nextListing = deckQueueRef.current[currentIndexRef.current + 1];
     if (nextListing?.id) {
       // Use requestIdleCallback for non-blocking prefetch
@@ -206,7 +212,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderKey, prefetchListingDetails]); // renderKey updates on each swipe, triggering reliable prefetch
+  }, [renderKey, prefetchListingDetails, isDashboard]); // renderKey updates on each swipe, triggering reliable prefetch
 
   // CONSTANT-TIME: Append new unique listings to queue AND persist to store
   useEffect(() => {

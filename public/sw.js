@@ -119,53 +119,76 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static assets (JS, CSS, images) with network fallback
-  event.respondWith(
-    caches.match(request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-
-        return fetch(request)
-          .then(response => {
-            // Cache successful responses (200 status code)
-            if (response.status === 200) {
-              const responseClone = response.clone();
-
-              // Add cache control headers for optimal caching
-              const newHeaders = new Headers(responseClone.headers);
-
-              // Different cache durations based on asset type - optimized for repeat visits
-              if (request.url.includes('/assets/') && request.url.match(/-[a-f0-9]{8}\./)) {
-                // Hashed assets can be cached indefinitely (1 year) - immutable
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.immutable}, immutable`);
-              } else if (request.destination === 'style' || request.destination === 'script') {
-                // CSS/JS: cache for 30 days with stale-while-revalidate
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.static}, stale-while-revalidate=86400`);
-              } else if (request.destination === 'image') {
-                // Images: cache for 30 days with stale-while-revalidate
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.static}, stale-while-revalidate=86400`);
-              } else if (request.destination === 'font') {
-                // Fonts: cache for 1 year (they rarely change)
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.immutable}, immutable`);
-              } else {
-                // Other assets: cache for 7 days with stale-while-revalidate
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.dynamic}, stale-while-revalidate=86400`);
-              }
-
-              const newResponse = new Response(responseClone.body, {
-                status: responseClone.status,
-                statusText: responseClone.statusText,
-                headers: newHeaders
-              });
-
-              caches.open(DYNAMIC_CACHE)
-                .then(cache => cache.put(request, newResponse));
+  // STALE-WHILE-REVALIDATE for JS/CSS - instant from cache, update in background
+  // This is the key to "instant" feel on repeat visits
+  if (request.destination === 'script' || request.destination === 'style') {
+    event.respondWith(
+      caches.open(DYNAMIC_CACHE).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          // Always fetch fresh version in background
+          const fetchPromise = fetch(request).then(networkResponse => {
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
             }
-            return response;
-          });
+            return networkResponse;
+          }).catch(() => cachedResponse); // Fallback to cache on network error
+
+          // Return cached immediately if available, otherwise wait for network
+          return cachedResponse || fetchPromise;
+        });
       })
+    );
+    return;
+  }
+
+  // STALE-WHILE-REVALIDATE for images - instant display, update in background
+  if (request.destination === 'image') {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          const fetchPromise = fetch(request).then(networkResponse => {
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse);
+
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for fonts (they never change)
+  if (request.destination === 'font') {
+    event.respondWith(
+      caches.match(request).then(response => {
+        if (response) return response;
+        return fetch(request).then(networkResponse => {
+          if (networkResponse.ok) {
+            caches.open(STATIC_CACHE).then(cache => {
+              cache.put(request, networkResponse.clone());
+            });
+          }
+          return networkResponse;
+        });
+      })
+    );
+    return;
+  }
+
+  // Network-first for other requests with cache fallback
+  event.respondWith(
+    fetch(request)
+      .then(response => {
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
 

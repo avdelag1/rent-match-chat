@@ -558,11 +558,12 @@ export function useSmartListingMatching(
     },
     // PERF: Only run query when userId is available
     enabled: !!userId,
-    // STABLE CACHING: Prevent blank UI and aggressive refetching
-    staleTime: 60000, // 1 minute - data considered fresh (dashboard perf)
-    gcTime: 300000, // 5 minutes - keep in cache
+    // AGGRESSIVE CACHING: Maximum stability for instant dashboard feel
+    staleTime: 5 * 60 * 1000, // 5 minutes - data fresh for entire browsing session
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep in memory for fast re-entry
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     refetchOnMount: false, // Don't refetch when component remounts (navigation)
+    refetchOnReconnect: false, // Don't refetch on network reconnect
     refetchInterval: false, // No automatic refetching
     retry: 1, // Retry only once on failure
     retryDelay: 1000,
@@ -1132,11 +1133,12 @@ export function useSmartClientMatching(
     },
     // PERF: Only run query when userId is available
     enabled: !!userId,
-    // STABLE CACHING: Prevent blank UI and aggressive refetching
-    staleTime: 60000, // 1 minute - data considered fresh (dashboard perf)
-    gcTime: 300000, // 5 minutes - keep in cache
+    // AGGRESSIVE CACHING: Maximum stability for instant dashboard feel
+    staleTime: 5 * 60 * 1000, // 5 minutes - data fresh for entire browsing session
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep in memory for fast re-entry
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     refetchOnMount: false, // Don't refetch when component remounts (navigation)
+    refetchOnReconnect: false, // Don't refetch on network reconnect
     refetchInterval: false, // Disable automatic refetching - only refetch when filters change
     retry: 1, // Retry only once on failure
     retryDelay: 1000,
