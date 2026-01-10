@@ -10,9 +10,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Search, Filter, MessageCircle, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSmartClientMatching, ClientFilters } from '@/hooks/useSmartMatching';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function OwnerBicycleClientDiscovery() {
   const navigate = useNavigate();
+  // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
 
@@ -45,7 +48,8 @@ export default function OwnerBicycleClientDiscovery() {
     return Object.keys(mapped).length > 0 ? mapped : undefined;
   }, [filters]);
 
-  const { data: clients = [], refetch } = useSmartClientMatching('bicycle', 0, 10, false, clientFilters);
+  // PERF: pass userId to avoid getUser() inside queryFn
+  const { data: clients = [], refetch } = useSmartClientMatching(user?.id, 'bicycle', 0, 10, false, clientFilters);
 
   const filteredClients = (clients || []).filter(client =>
     client.name?.toLowerCase()?.includes(searchQuery.toLowerCase())

@@ -240,6 +240,7 @@ export interface ListingFilters {
 }
 
 export function useSmartListingMatching(
+  userId: string | undefined, // PERF: Accept userId to avoid getUser() inside queryFn
   excludeSwipedIds: string[] = [],
   filters?: ListingFilters,
   page: number = 0,
@@ -256,24 +257,23 @@ export function useSmartListingMatching(
   }) : '';
 
   return useQuery({
-    queryKey: ['smart-listings', filtersKey, page, isRefreshMode], // Stable query key
+    queryKey: ['smart-listings', userId, filtersKey, page, isRefreshMode], // Stable query key with userId
     queryFn: async () => {
+      // PERF: userId is passed in, no need for async getUser() call
+      if (!userId) return [];
       try {
-        // Get current user's preferences
-        const { data: user } = await supabase.auth.getUser();
-        if (!user.user) return [];
 
         const { data: preferences } = await supabase
           .from('client_filter_preferences')
           .select('*')
-          .eq('user_id', user.user.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
         // Fetch liked items (right swipes) - these are NEVER shown again
         const { data: likedListings, error: likesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id)
+          .eq('user_id', userId)
           .eq('direction', 'right');
 
         const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
@@ -285,7 +285,7 @@ export function useSmartListingMatching(
         const { data: leftSwipes } = await supabase
           .from('likes')
           .select('target_id, created_at')
-          .eq('user_id', user.user.id)
+          .eq('user_id', userId)
           .eq('direction', 'left');
 
         // Build sets for dislike handling:
@@ -530,9 +530,11 @@ export function useSmartListingMatching(
         return [];
       }
     },
+    // PERF: Only run query when userId is available
+    enabled: !!userId,
     // STABLE CACHING: Prevent blank UI and aggressive refetching
-    staleTime: 120000, // 2 minutes - data considered fresh
-    gcTime: 600000, // 10 minutes - keep in cache
+    staleTime: 60000, // 1 minute - data considered fresh (dashboard perf)
+    gcTime: 300000, // 5 minutes - keep in cache
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     refetchOnMount: false, // Don't refetch when component remounts (navigation)
     refetchInterval: false, // No automatic refetching
@@ -805,6 +807,7 @@ function calculateClientMatch(ownerPrefs: any, clientProfile: any): {
 }
 
 export function useSmartClientMatching(
+  userId?: string, // PERF: Accept userId to avoid getUser() inside queryFn
   category?: 'property' | 'moto' | 'bicycle' | 'yacht',
   page: number = 0,
   pageSize: number = 10,
@@ -815,19 +818,19 @@ export function useSmartClientMatching(
   const filtersKey = filters ? JSON.stringify(filters) : '';
 
   return useQuery<MatchedClientProfile[]>({
-    queryKey: ['smart-clients', category, page, isRefreshMode, filtersKey],
+    queryKey: ['smart-clients', userId, category, page, isRefreshMode, filtersKey],
     queryFn: async () => {
+      // PERF: userId is passed in, no need for async getUser() call
+      if (!userId) {
+        return [] as MatchedClientProfile[];
+      }
       try {
-        const { data: user } = await supabase.auth.getUser();
-        if (!user.user) {
-          return [] as MatchedClientProfile[];
-        }
 
         // Fetch liked profiles (right swipes) - these are NEVER shown again
         const { data: likedProfiles, error: likesError } = await supabase
           .from('likes')
           .select('target_id')
-          .eq('user_id', user.user.id)
+          .eq('user_id', userId)
           .eq('direction', 'right');
 
         const likedIds = new Set<string>();
@@ -846,7 +849,7 @@ export function useSmartClientMatching(
         const { data: leftSwipes } = await supabase
           .from('likes')
           .select('target_id, created_at')
-          .eq('user_id', user.user.id)
+          .eq('user_id', userId)
           .eq('direction', 'left');
 
         // Build sets for dislike handling:
@@ -903,7 +906,7 @@ export function useSmartClientMatching(
             user_roles!inner(role)
           ` as any
           )
-          .neq('id', user.user.id)
+          .neq('id', userId)
           .eq('user_roles.role', 'client')
           .range(start, end);
 
@@ -1085,10 +1088,11 @@ export function useSmartClientMatching(
         return [] as MatchedClientProfile[];
       }
     },
-    enabled: true,
+    // PERF: Only run query when userId is available
+    enabled: !!userId,
     // STABLE CACHING: Prevent blank UI and aggressive refetching
-    staleTime: 120000, // 2 minutes - data considered fresh
-    gcTime: 600000, // 10 minutes - keep in cache
+    staleTime: 60000, // 1 minute - data considered fresh (dashboard perf)
+    gcTime: 300000, // 5 minutes - keep in cache
     refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
     refetchOnMount: false, // Don't refetch when component remounts (navigation)
     refetchInterval: false, // Disable automatic refetching - only refetch when filters change

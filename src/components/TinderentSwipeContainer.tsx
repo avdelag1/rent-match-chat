@@ -4,6 +4,7 @@ import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { ShareDialog } from './ShareDialog';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
+import { useAuth } from '@/hooks/useAuth';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
@@ -90,6 +91,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshMode, setIsRefreshMode] = useState(false);
 
+  // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
+  const { user } = useAuth();
+
   // PERSISTENT DECK STORE - survives navigation, prevents blank deck on return
   const {
     clientDeck,
@@ -144,13 +148,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
 
-  // Get listings with filters
+  // Get listings with filters - PERF: pass userId to avoid getUser() inside queryFn
   const {
     data: smartListings = [],
     isLoading: smartLoading,
     error: smartError,
     refetch: refetchSmart
-  } = useSmartListingMatching([], filters, page, 10, isRefreshMode);
+  } = useSmartListingMatching(user?.id, [], filters, page, 10, isRefreshMode);
 
   const isLoading = smartLoading;
   const error = smartError;
