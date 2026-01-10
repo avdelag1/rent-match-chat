@@ -1,15 +1,14 @@
 import { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
-import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart } from 'lucide-react';
+import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart, Star, Sparkles, UserCheck, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
 
-// FALLBACK: Instant inline SVG - NEVER fails, loads in 0ms
-// Using inline data URI eliminates network dependency for fallback
-// This prevents dark cards when external fallback URLs fail
-const FALLBACK_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjEyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWExYTJlIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiMxNjIxM2UiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwZjM0NjAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNDUwIiByPSIxMDAiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjxjaXJjbGUgY3g9IjQwMCIgY3k9IjQyMCIgcj0iNDAiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xNSkiLz48cmVjdCB4PSIzMzAiIHk9IjUwMCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSI0MCIgcng9IjIwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L3N2Zz4=';
+// FALLBACK: Inline SVG with neutral colors (light slate gradient - matches TinderSwipeCard)
+// Using a light gradient that works in both light and dark mode
+const FALLBACK_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjEyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZTJlOGYwIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNjYmQ1ZTEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM5NGEzYjgiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNTAwIiByPSI4MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjQpIi8+PHBhdGggZD0iTTM3MCA0NjBoNjB2NDBjMCAxNi41NjktMTMuNDMxIDMwLTMwIDMwcy0zMC0xMy40MzEtMzAtMzB2LTQweiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNDUwIiByPSIzMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PC9zdmc+';
 
 // Client Profile Image Gallery with skeleton loading and fallback chain
 const ClientImageGallery = memo(({
@@ -67,22 +66,22 @@ const ClientImageGallery = memo(({
 
   return (
     <div className="absolute inset-0 w-full h-full">
-      {/* Skeleton placeholder - matches card dimensions */}
+      {/* Skeleton placeholder - light slate gradient (matches TinderSwipeCard) */}
       <div
         className="absolute inset-0 rounded-3xl overflow-hidden"
         style={{
           opacity: isLoaded ? 0 : 1,
           transition: 'opacity 150ms ease-out',
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+          background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)',
         }}
       >
         <div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
           style={{ backgroundSize: '200% 100%', animationDuration: '1.5s' }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-            <svg className="w-8 h-8 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-16 h-16 rounded-full bg-white/30 flex items-center justify-center">
+            <svg className="w-8 h-8 text-slate-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
@@ -391,6 +390,51 @@ const OwnerClientTinderCardComponent = ({
                 </Badge>
               </div>
             )}
+
+            {/* Photo Insights Overlay - Quick info badges on top of photo */}
+            <div className="absolute top-12 left-3 z-20 flex flex-col gap-2">
+              {/* Match Percentage Badge - shows how well client matches your listing */}
+              {profile.matchPercentage !== undefined && profile.matchPercentage > 0 && (
+                <Badge
+                  className={`
+                    backdrop-blur-md shadow-lg border flex items-center gap-1.5 px-2.5 py-1
+                    ${profile.matchPercentage >= 85
+                      ? 'bg-gradient-to-r from-emerald-500/95 to-green-500/95 border-emerald-400 text-white'
+                      : profile.matchPercentage >= 70
+                        ? 'bg-gradient-to-r from-blue-500/95 to-cyan-500/95 border-blue-400 text-white'
+                        : profile.matchPercentage >= 50
+                          ? 'bg-gradient-to-r from-amber-500/95 to-yellow-500/95 border-amber-400 text-white'
+                          : 'bg-black/60 border-white/20 text-white/90'
+                    }
+                  `}
+                >
+                  {profile.matchPercentage >= 85 ? (
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                  ) : profile.matchPercentage >= 70 ? (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  ) : null}
+                  <span className="text-xs font-bold">{profile.matchPercentage}% Match</span>
+                </Badge>
+              )}
+
+              {/* Ready Renter Badge - shows for clients with complete profiles */}
+              {profile.profile_images && profile.profile_images.length >= 3 &&
+               profile.interests && profile.interests.length >= 3 && (
+                <Badge className="bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-md border-purple-400 text-white shadow-lg flex items-center gap-1.5 px-2.5 py-1">
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span className="text-xs font-bold">Ready Renter</span>
+                </Badge>
+              )}
+
+              {/* High Interest Badge - shows for highly engaged clients */}
+              {profile.preferred_listing_types && profile.preferred_listing_types.length >= 2 &&
+               profile.budget_max && profile.budget_max > 0 && (
+                <Badge className="bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-md border-orange-400 text-white shadow-lg flex items-center gap-1.5 px-2.5 py-1">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span className="text-xs font-bold">High Interest</span>
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}

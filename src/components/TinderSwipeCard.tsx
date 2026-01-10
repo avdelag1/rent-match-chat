@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, Eye, Flame, Share2 } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, Eye, Flame, Share2, Star, TrendingUp, Sparkles } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -578,6 +578,43 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                 </Badge>
               </div>
             )}
+
+            {/* Photo Insights Overlay - Quick info badges on top of photo */}
+            <div className="absolute top-12 left-3 z-20 flex flex-col gap-2">
+              {/* Match Percentage Badge - shows how well listing matches preferences */}
+              {(listing as MatchedListing).matchPercentage !== undefined && (listing as MatchedListing).matchPercentage > 0 && (
+                <Badge
+                  className={`
+                    backdrop-blur-md shadow-lg border flex items-center gap-1.5 px-2.5 py-1
+                    ${(listing as MatchedListing).matchPercentage >= 85
+                      ? 'bg-gradient-to-r from-emerald-500/95 to-green-500/95 border-emerald-400 text-white'
+                      : (listing as MatchedListing).matchPercentage >= 70
+                        ? 'bg-gradient-to-r from-blue-500/95 to-cyan-500/95 border-blue-400 text-white'
+                        : (listing as MatchedListing).matchPercentage >= 50
+                          ? 'bg-gradient-to-r from-amber-500/95 to-yellow-500/95 border-amber-400 text-white'
+                          : 'bg-black/60 border-white/20 text-white/90'
+                    }
+                  `}
+                >
+                  {(listing as MatchedListing).matchPercentage >= 85 ? (
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                  ) : (listing as MatchedListing).matchPercentage >= 70 ? (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  ) : null}
+                  <span className="text-xs font-bold">{(listing as MatchedListing).matchPercentage}% Match</span>
+                </Badge>
+              )}
+
+              {/* Hot Listing Badge - shows for high quality listings */}
+              {listing.images && listing.images.length >= 5 &&
+               listing.amenities && listing.amenities.length >= 5 &&
+               listing.status === 'available' && (
+                <Badge className="bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-md border-orange-400 text-white shadow-lg flex items-center gap-1.5 px-2.5 py-1">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span className="text-xs font-bold">Hot Listing</span>
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
