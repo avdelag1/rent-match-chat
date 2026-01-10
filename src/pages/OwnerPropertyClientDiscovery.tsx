@@ -10,12 +10,15 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Search, Filter, MessageCircle, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSmartClientMatching, ClientFilters } from '@/hooks/useSmartMatching';
+import { useAuth } from '@/hooks/useAuth';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast as sonnerToast } from 'sonner';
 import { logger } from '@/utils/prodLogger';
 
 export default function OwnerPropertyClientDiscovery() {
   const navigate = useNavigate();
+  // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
@@ -80,7 +83,8 @@ export default function OwnerPropertyClientDiscovery() {
     return Object.keys(mapped).length > 0 ? mapped : undefined;
   }, [filters]);
 
-  const { data: clients = [], refetch } = useSmartClientMatching('property', 0, 10, false, clientFilters);
+  // PERF: pass userId to avoid getUser() inside queryFn
+  const { data: clients = [], refetch } = useSmartClientMatching(user?.id, 'property', 0, 10, false, clientFilters);
   const startConversation = useStartConversation();
 
   const filteredClients = (clients || []).filter(client =>

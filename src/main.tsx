@@ -16,13 +16,14 @@ if (initialLoader) {
 }
 
 // Arranca la app normalmente
+// NOTE: StrictMode REMOVED intentionally for production-like performance
+// StrictMode double-mounts components causing: dashboard flicker, duplicate fetches,
+// delayed UI completion, subscription thrash. Preview must match production behavior.
 const root = createRoot(document.getElementById("root")!);
 root.render(
-  <React.StrictMode>
-    <ErrorBoundaryWrapper>
-      <App />
-    </ErrorBoundaryWrapper>
-  </React.StrictMode>,
+  <ErrorBoundaryWrapper>
+    <App />
+  </ErrorBoundaryWrapper>,
 );
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

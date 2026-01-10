@@ -91,10 +91,17 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Shows welcome only on first signup, not every login (survives localStorage clears)
   const { shouldShowWelcome, dismissWelcome } = useWelcomeState(user?.id)
 
-  // Preload routes for the user's role on mount - enables instant navigation
+  // PERF: Defer route prefetching until after first paint using requestIdleCallback
+  // This ensures dashboard renders instantly without blocking on prefetch
   useEffect(() => {
     if (userRole === 'client' || userRole === 'owner') {
-      prefetchRoleRoutes(userRole);
+      if ('requestIdleCallback' in window) {
+        const idleId = (window as any).requestIdleCallback(() => prefetchRoleRoutes(userRole), { timeout: 2000 });
+        return () => (window as any).cancelIdleCallback(idleId);
+      } else {
+        const timeoutId = setTimeout(() => prefetchRoleRoutes(userRole), 1000);
+        return () => clearTimeout(timeoutId);
+      }
     }
   }, [userRole]);
 
@@ -116,11 +123,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     }
   }
 
-  // Check onboarding status and show flow if not completed
+  // PERF: Defer onboarding check until after first paint using requestIdleCallback
+  // This prevents blocking the main thread during dashboard load
   useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      if (!user?.id || onboardingChecked) return;
+    if (!user?.id || onboardingChecked) return;
 
+    const checkOnboardingStatus = async () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -155,7 +163,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       }
     };
 
-    checkOnboardingStatus();
+    // PERF: Defer DB check until browser is idle (2-5 second timeout)
+    // This ensures dashboard renders instantly, onboarding check happens later
+    if ('requestIdleCallback' in window) {
+      const idleId = (window as any).requestIdleCallback(checkOnboardingStatus, { timeout: 3000 });
+      return () => (window as any).cancelIdleCallback(idleId);
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      const timeoutId = setTimeout(checkOnboardingStatus, 2000);
+      return () => clearTimeout(timeoutId);
+    }
   }, [user?.id, onboardingChecked]);
 
   // PERFORMANCE FIX: Welcome check now handled by useWelcomeState hook

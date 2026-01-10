@@ -6,6 +6,7 @@ import { MatchCelebration } from '@/components/MatchCelebration';
 import { NotificationBar } from '@/components/NotificationBar';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
+import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { NotificationSystem } from '@/components/NotificationSystem';
@@ -19,18 +20,20 @@ interface EnhancedOwnerDashboardProps {
 const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOwnerDashboardProps) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
-  
+
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
     clientProfile?: any;
     ownerProfile?: any;
   }>({ isOpen: false });
-  
+
   const navigate = useNavigate();
+  // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
+  const { user } = useAuth();
   // PERFORMANCE: Let ClientSwipeContainer handle its own data fetching and skeleton loading
   // This eliminates the double loading state and provides instant skeleton rendering
-  const { data: clientProfiles = [] } = useSmartClientMatching();
+  const { data: clientProfiles = [] } = useSmartClientMatching(user?.id);
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
 
   // Initialize notifications

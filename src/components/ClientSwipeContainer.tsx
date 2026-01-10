@@ -4,6 +4,7 @@ import { OwnerClientTinderCard } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
+import { useAuth } from '@/hooks/useAuth';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
@@ -40,6 +41,8 @@ const ClientSwipeContainerComponent = ({
   category = 'default'
 }: ClientSwipeContainerProps) => {
   const navigate = useNavigate();
+  // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
+  const { user } = useAuth();
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
@@ -97,7 +100,8 @@ const ClientSwipeContainerComponent = ({
     }
   }, [category]);
 
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(undefined, page, 50, isRefreshMode);
+  // PERF: pass userId to avoid getUser() inside queryFn
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(user?.id, undefined, page, 50, isRefreshMode);
 
   const clientProfiles = externalProfiles || internalProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
