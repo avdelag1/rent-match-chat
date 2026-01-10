@@ -33,22 +33,28 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
-// Lazy load all dashboard and authenticated pages for better performance
-const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
-const ClientProfile = lazy(() => import("./pages/ClientProfileNew"));
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SPEED OF LIGHT: Critical routes are DIRECT IMPORTS (not lazy)
+// These are the most frequently accessed pages - they must be instant
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import ClientDashboard from "./pages/ClientDashboard";
+import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
+import { MessagingDashboard } from "./pages/MessagingDashboard";
+import NotificationsPage from "./pages/NotificationsPage";
+import ClientProfile from "./pages/ClientProfileNew";
+import OwnerProfile from "./pages/OwnerProfileNew";
+import ClientLikedProperties from "./pages/ClientLikedProperties";
+import OwnerLikedClients from "./pages/OwnerLikedClients";
+
+// Secondary routes - lazy loaded (less frequently accessed)
 const ClientSettings = lazy(() => import("./pages/ClientSettingsNew"));
-const ClientLikedProperties = lazy(() => import("./pages/ClientLikedProperties"));
 const ClientSavedSearches = lazy(() => import("./pages/ClientSavedSearches"));
 const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
-const EnhancedOwnerDashboard = lazy(() => import("./components/EnhancedOwnerDashboard"));
-const OwnerProfile = lazy(() => import("./pages/OwnerProfileNew"));
 const OwnerSettings = lazy(() => import("./pages/OwnerSettingsNew"));
 const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
 const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
-const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })));
 const OwnerProperties = lazy(() => import("./pages/OwnerProperties"));
 const OwnerNewListing = lazy(() => import("./pages/OwnerNewListing"));
-const OwnerLikedClients = lazy(() => import("./pages/OwnerLikedClients"));
 const ClientContracts = lazy(() => import("./pages/ClientContracts"));
 const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
 const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
@@ -62,7 +68,6 @@ const OwnerVehicleClientDiscovery = lazy(() => import("./pages/OwnerVehicleClien
 const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
 const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
 const ClientWorkerDiscovery = lazy(() => import("./pages/ClientWorkerDiscovery"));
-const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 
 // Camera pages
 const ClientSelfieCamera = lazy(() => import("./pages/ClientSelfieCamera"));

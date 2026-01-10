@@ -60,15 +60,23 @@ export function PersistentDashboardLayout({ requiredRole }: PersistentDashboardL
   const { user } = useAuth();
   const { data: userRole, isLoading: roleLoading } = useUserRole(user?.id);
 
-  // Determine the role to use
-  // If requiredRole is specified, use it (for role-specific routes)
-  // Otherwise, use the fetched role
-  const effectiveRole = requiredRole || userRole || 'client';
+  // SPEED OF LIGHT: If requiredRole is specified, use it immediately
+  // This avoids any loading state for role-specific routes
+  if (requiredRole) {
+    return (
+      <DashboardLayout userRole={requiredRole}>
+        <Outlet />
+      </DashboardLayout>
+    );
+  }
 
-  // Show skeleton briefly while role loads (only on first mount)
+  // For shared routes (messages, notifications), we need the actual role
+  // Show skeleton only on first load when no cached role exists
   if (roleLoading && !userRole) {
     return <RoleLoadingSkeleton />;
   }
+
+  const effectiveRole = userRole || 'client';
 
   return (
     <DashboardLayout userRole={effectiveRole as 'client' | 'owner' | 'admin'}>
