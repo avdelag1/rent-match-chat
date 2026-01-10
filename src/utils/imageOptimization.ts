@@ -32,10 +32,22 @@ export function optimizeImageUrl(
     return url;
   }
 
-  // CRITICAL: Skip signed URLs - they have token parameter that cannot be modified
-  // Supabase signed URLs include ?token= which must remain intact
+  // CRITICAL: Skip signed URLs - they have auth parameters that cannot be modified
   // Modifying query params on signed URLs will invalidate the signature
-  if (url.includes('token=')) {
+  // Common signed URL patterns:
+  // - Supabase: ?token=...
+  // - AWS S3: ?Signature=... or ?X-Amz-Signature=...
+  // - Google Cloud: ?Signature=... or ?X-Goog-Signature=...
+  // - Azure Blob: ?sig=... or ?sv=...
+  const signedUrlPatterns = [
+    'token=',           // Supabase
+    'Signature=',       // AWS S3, GCS
+    'X-Amz-Signature=', // AWS S3 v4
+    'X-Goog-Signature=',// Google Cloud Storage
+    'sig=',             // Azure Blob
+    'sv=',              // Azure Blob (version)
+  ];
+  if (signedUrlPatterns.some(pattern => url.includes(pattern))) {
     return url;
   }
 
@@ -109,8 +121,14 @@ export function getFullImageUrl(url: string): string {
  * Creates a tiny blurred placeholder while full image loads
  */
 export function getBlurDataUrl(url: string): string {
-  // Return SVG placeholder for non-Supabase or signed URLs
-  if (!url || !url.includes('supabase.co/storage') || url.includes('token=')) {
+  // Return SVG placeholder for non-Supabase URLs
+  if (!url || !url.includes('supabase.co/storage')) {
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjwvc3ZnPg==';
+  }
+
+  // Check for signed URLs - cannot transform, return placeholder
+  const signedUrlPatterns = ['token=', 'Signature=', 'X-Amz-Signature=', 'X-Goog-Signature=', 'sig=', 'sv='];
+  if (signedUrlPatterns.some(pattern => url.includes(pattern))) {
     return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjwvc3ZnPg==';
   }
 
@@ -201,8 +219,14 @@ export const imagePreloadQueue = new ImagePreloadQueue();
  * Returns empty string for signed URLs (cannot be transformed)
  */
 export function createSrcSet(url: string): string {
-  // Skip non-Supabase or signed URLs - cannot generate srcset
-  if (!url || !url.includes('supabase.co/storage') || url.includes('token=')) {
+  // Skip non-Supabase URLs - cannot generate srcset
+  if (!url || !url.includes('supabase.co/storage')) {
+    return '';
+  }
+
+  // Check for signed URLs - cannot transform
+  const signedUrlPatterns = ['token=', 'Signature=', 'X-Amz-Signature=', 'X-Goog-Signature=', 'sig=', 'sv='];
+  if (signedUrlPatterns.some(pattern => url.includes(pattern))) {
     return '';
   }
 

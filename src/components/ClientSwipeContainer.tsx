@@ -131,10 +131,13 @@ const ClientSwipeContainerComponent = ({
   const recordProfileView = useRecordProfileView();
 
   // Prefetch images for next cards
+  // PERF FIX: Pass renderKey as trigger to ensure prefetch runs on each swipe
+  // (currentIndexRef.current and deckQueueRef.current are refs that don't trigger re-renders)
   usePrefetchImages({
     currentIndex: currentIndexRef.current,
     profiles: deckQueueRef.current,
-    prefetchCount: 2
+    prefetchCount: 2,
+    trigger: renderKey
   });
 
   // CONSTANT-TIME: Append new unique profiles to queue AND persist to store
