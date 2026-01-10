@@ -28,7 +28,7 @@ const CACHE_TTL = {
 const MAX_DYNAMIC_CACHE_SIZE = 100;
 const MAX_IMAGE_CACHE_SIZE = 200;
 
-// Message handler for version requests
+// Message handler for version requests and update control
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({
@@ -36,9 +36,26 @@ self.addEventListener('message', (event) => {
       version: CACHE_VERSION
     });
   }
-  
+
   if (event.data && event.data.type === 'CHECK_UPDATE') {
     self.registration.update();
+  }
+
+  // CRITICAL: Allow app to force skip waiting for immediate update
+  // This enables instant app refresh when user accepts update prompt
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  // Clear all caches on demand (for cache corruption recovery)
+  if (event.data && event.data.type === 'CLEAR_CACHES') {
+    caches.keys().then(names => {
+      return Promise.all(names.map(name => caches.delete(name)));
+    }).then(() => {
+      if (event.ports[0]) {
+        event.ports[0].postMessage({ type: 'CACHES_CLEARED' });
+      }
+    });
   }
 });
 
@@ -74,17 +91,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Network-first for HTML pages to ensure fresh content
+  // Network-first for HTML pages to ensure fresh content after deploys
+  // Uses cache: 'no-cache' to bypass browser HTTP cache and CDN caches
   if (request.destination === 'document') {
     event.respondWith(
-      fetch(request)
+      fetch(request, {
+        // CRITICAL: Force revalidation to ensure fresh HTML after deploy
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      })
         .then(response => {
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE)
-            .then(cache => cache.put(request, responseClone));
+          // Only cache successful responses
+          if (response.ok) {
+            const responseClone = response.clone();
+            caches.open(DYNAMIC_CACHE)
+              .then(cache => cache.put(request, responseClone));
+          }
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(() => {
+          // Offline fallback - serve from cache
+          return caches.match(request);
+        })
     );
     return;
   }
