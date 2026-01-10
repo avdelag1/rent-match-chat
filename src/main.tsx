@@ -41,7 +41,7 @@ const deferredInit = (callback: () => void, timeout = 3000) => {
 // Route prefetching now happens inside DashboardLayout ONLY after first paint
 // via requestIdleCallback. This ensures initial render is never blocked.
 
-// Priority 2: Herramientas de rendimiento
+// Priority 2: Herramientas de rendimiento + Offline Sync
 deferredInit(async () => {
   try {
     const [
@@ -49,17 +49,20 @@ deferredInit(async () => {
       { setupUpdateChecker, checkAppVersion },
       { initPerformanceOptimizations },
       { initWebVitalsMonitoring },
+      { initOfflineSync },
     ] = await Promise.all([
       import("@/utils/performance"),
       import("@/utils/cacheManager"),
       import("@/utils/performanceMonitor"),
       import("@/utils/webVitals"),
+      import("@/utils/offlineSwipeQueue"),
     ]);
     logBundleSize();
     checkAppVersion();
     setupUpdateChecker();
     initPerformanceOptimizations();
     initWebVitalsMonitoring();
+    initOfflineSync(); // PERF: Sync queued swipes when back online
   } catch {}
 }, 3000);
 
@@ -76,9 +79,44 @@ deferredInit(async () => {
   } catch {}
 }, 5000);
 
-// Service Worker solo en producción
+// Service Worker with proper versioning and update handling
+// Version is passed as URL param since /public/ isn't processed by Vite
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    // Use build timestamp for cache versioning
+    // In production, this changes with each deploy, ensuring cache busting
+    const swVersion = import.meta.env.VITE_BUILD_TIME || Date.now().toString();
+
+    navigator.serviceWorker
+      .register(`/sw.js?v=${swVersion}`)
+      .then((registration) => {
+        // Check for updates periodically (every 5 minutes)
+        setInterval(() => registration.update(), 300000);
+
+        // Handle new SW waiting to activate
+        registration.addEventListener("updatefound", () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener("statechange", () => {
+              // New SW is installed and waiting - tell it to activate
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                // Skip waiting to activate the new SW immediately
+                newWorker.postMessage({ type: "SKIP_WAITING" });
+              }
+            });
+          }
+        });
+      })
+      .catch(() => {});
+
+    // CRITICAL: Reload page when new SW takes control
+    // This ensures the app uses fresh assets after deploy
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
   });
 }

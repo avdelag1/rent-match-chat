@@ -1,9 +1,17 @@
 /**
  * Ultra-Fast Service Worker - Optimized for lightning-speed loading
- * Cache version is injected at build time for proper cache busting
+ *
+ * CACHE VERSIONING FIX:
+ * Version is now extracted from the registration URL query param (?v=...)
+ * This ensures cache busting works correctly since /public/ files aren't processed by Vite.
+ * The version is passed at registration time from main.tsx using the build timestamp.
  */
-const BUILD_TIME = '__BUILD_TIME__';
-const CACHE_VERSION = `tinderent-v${BUILD_TIME}`;
+
+// Extract version from SW registration URL (e.g., /sw.js?v=1234567890)
+// Fallback to installation timestamp if no version provided
+const SW_URL = new URL(self.location);
+const URL_VERSION = SW_URL.searchParams.get('v') || Date.now().toString();
+const CACHE_VERSION = `tinderent-v${URL_VERSION}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
@@ -12,8 +20,7 @@ const IMAGE_CACHE = `${CACHE_NAME}-images`;
 // Critical assets to precache immediately for offline-first experience
 const urlsToCache = [
   '/',
-  '/manifest.json',
-  '/index.html'
+  '/manifest.json'
 ];
 
 // Cache TTL settings (in seconds)
@@ -59,14 +66,12 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Install service worker with immediate activation
+// Install service worker - DO NOT skipWaiting() here to allow controlled update flow
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Force immediate activation
-  
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
-        return cache.addAll(urlsToCache.map(url => 
+        return cache.addAll(urlsToCache.map(url =>
           new Request(url, { cache: 'reload' })
         ));
       })
@@ -78,10 +83,10 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Skip non-GET requests
   if (request.method !== 'GET') return;
-  
+
   // Network-first for Supabase API calls (always fetch fresh data)
   if (url.hostname.includes('supabase')) {
     event.respondWith(
@@ -90,20 +95,15 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-  
-  // Network-first for HTML pages to ensure fresh content after deploys
-  // Uses cache: 'no-cache' to bypass browser HTTP cache and CDN caches
-  if (request.destination === 'document') {
+
+  // NETWORK-FIRST for HTML navigation requests
+  // This is CRITICAL to ensure fresh HTML after deploy (new asset hashes)
+  if (request.mode === 'navigate' || request.destination === 'document') {
     event.respondWith(
       fetch(request, {
-        // CRITICAL: Force revalidation to ensure fresh HTML after deploy
-        cache: 'no-cache',
-        headers: {
-          'Cache-Control': 'no-cache',
-        }
+        cache: 'no-store', // Bypass ALL caches for navigation
       })
         .then(response => {
-          // Only cache successful responses
           if (response.ok) {
             const responseClone = response.clone();
             caches.open(DYNAMIC_CACHE)
@@ -118,54 +118,77 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-  
-  // Cache-first for static assets (JS, CSS, images) with network fallback
-  event.respondWith(
-    caches.match(request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
 
-        return fetch(request)
-          .then(response => {
-            // Cache successful responses (200 status code)
-            if (response.status === 200) {
-              const responseClone = response.clone();
-
-              // Add cache control headers for optimal caching
-              const newHeaders = new Headers(responseClone.headers);
-
-              // Different cache durations based on asset type - optimized for repeat visits
-              if (request.url.includes('/assets/') && request.url.match(/-[a-f0-9]{8}\./)) {
-                // Hashed assets can be cached indefinitely (1 year) - immutable
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.immutable}, immutable`);
-              } else if (request.destination === 'style' || request.destination === 'script') {
-                // CSS/JS: cache for 30 days with stale-while-revalidate
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.static}, stale-while-revalidate=86400`);
-              } else if (request.destination === 'image') {
-                // Images: cache for 30 days with stale-while-revalidate
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.static}, stale-while-revalidate=86400`);
-              } else if (request.destination === 'font') {
-                // Fonts: cache for 1 year (they rarely change)
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.immutable}, immutable`);
-              } else {
-                // Other assets: cache for 7 days with stale-while-revalidate
-                newHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL.dynamic}, stale-while-revalidate=86400`);
-              }
-
-              const newResponse = new Response(responseClone.body, {
-                status: responseClone.status,
-                statusText: responseClone.statusText,
-                headers: newHeaders
-              });
-
-              caches.open(DYNAMIC_CACHE)
-                .then(cache => cache.put(request, newResponse));
+  // STALE-WHILE-REVALIDATE for JS/CSS - instant from cache, update in background
+  // This is the key to "instant" feel on repeat visits
+  if (request.destination === 'script' || request.destination === 'style') {
+    event.respondWith(
+      caches.open(DYNAMIC_CACHE).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          // Always fetch fresh version in background
+          const fetchPromise = fetch(request).then(networkResponse => {
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
             }
-            return response;
-          });
+            return networkResponse;
+          }).catch(() => cachedResponse); // Fallback to cache on network error
+
+          // Return cached immediately if available, otherwise wait for network
+          return cachedResponse || fetchPromise;
+        });
       })
+    );
+    return;
+  }
+
+  // STALE-WHILE-REVALIDATE for images - instant display, update in background
+  if (request.destination === 'image') {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          const fetchPromise = fetch(request).then(networkResponse => {
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse);
+
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for fonts (they never change)
+  if (request.destination === 'font') {
+    event.respondWith(
+      caches.match(request).then(response => {
+        if (response) return response;
+        return fetch(request).then(networkResponse => {
+          if (networkResponse.ok) {
+            caches.open(STATIC_CACHE).then(cache => {
+              cache.put(request, networkResponse.clone());
+            });
+          }
+          return networkResponse;
+        });
+      })
+    );
+    return;
+  }
+
+  // Network-first for other requests with cache fallback
+  event.respondWith(
+    fetch(request)
+      .then(response => {
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
 
@@ -176,8 +199,7 @@ self.addEventListener('activate', (event) => {
       // Take control of all clients immediately
       self.clients.claim(),
 
-      // FIX: Clean up old caches - use correct prefix 'tinderent-' (was 'swipematch-')
-      // Also include IMAGE_CACHE in the exclusion list
+      // Clean up old caches - delete any cache that doesn't match current version
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
@@ -193,13 +215,13 @@ self.addEventListener('activate', (event) => {
         );
       }),
 
-      // FIX: Enforce cache size limits to prevent bloat
+      // Enforce cache size limits to prevent bloat
       enforceImageCacheLimit(),
       enforceDynamicCacheLimit()
     ])
   );
 
-  // Notify clients about the update
+  // Notify clients about the update so they can refresh
   self.clients.matchAll().then(clients => {
     clients.forEach(client => {
       client.postMessage({
@@ -210,7 +232,7 @@ self.addEventListener('activate', (event) => {
   });
 });
 
-// FIX: Implement cache eviction for images (LRU-style - delete oldest first)
+// Implement cache eviction for images (LRU-style - delete oldest first)
 async function enforceImageCacheLimit() {
   try {
     const cache = await caches.open(IMAGE_CACHE);
@@ -225,7 +247,7 @@ async function enforceImageCacheLimit() {
   }
 }
 
-// FIX: Implement cache eviction for dynamic content
+// Implement cache eviction for dynamic content
 async function enforceDynamicCacheLimit() {
   try {
     const cache = await caches.open(DYNAMIC_CACHE);
