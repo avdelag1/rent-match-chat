@@ -340,30 +340,40 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
                             (userRole === 'owner' && location.pathname === '/owner/dashboard');
 
+  // PERF FIX: Detect camera routes to hide TopBar/BottomNav (fullscreen camera UX)
+  // Camera routes are now INSIDE layout to prevent dashboard remount on navigate back
+  const isCameraRoute = location.pathname.includes('/camera');
+
   // Calculate responsive layout values
   const topBarHeight = responsive.isMobile ? 52 : 56;
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
 
   return (
     <div className="app-root bg-background min-h-screen min-h-dvh overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-      <NotificationSystem />
+      {/* PERF FIX: NotificationSystem has its own Suspense boundary to never suspend dashboard paint */}
+      <Suspense fallback={null}>
+        <NotificationSystem />
+      </Suspense>
 
-      {/* Top Bar - Fixed with safe-area-top */}
-      <TopBar
-        onNotificationsClick={handleNotificationsClick}
-        onMessageActivationsClick={handleMessageActivationsClick}
-        showFilters={isOnDiscoveryPage}
-        filters={quickFilters}
-        onFiltersChange={handleQuickFilterChange}
-        userRole={userRole === 'admin' ? 'client' : userRole}
-      />
+      {/* Top Bar - Fixed with safe-area-top. Hidden on camera routes for fullscreen UX */}
+      {!isCameraRoute && (
+        <TopBar
+          onNotificationsClick={handleNotificationsClick}
+          onMessageActivationsClick={handleMessageActivationsClick}
+          showFilters={isOnDiscoveryPage}
+          filters={quickFilters}
+          onFiltersChange={handleQuickFilterChange}
+          userRole={userRole === 'admin' ? 'client' : userRole}
+        />
+      )}
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
+      {/* When on camera route, use full screen (no padding for TopBar/BottomNav) */}
       <main
         className="fixed inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
-          paddingTop: `calc(${topBarHeight}px + var(--safe-top))`,
-          paddingBottom: `calc(${bottomNavHeight}px + var(--safe-bottom))`,
+          paddingTop: isCameraRoute ? 'var(--safe-top)' : `calc(${topBarHeight}px + var(--safe-top))`,
+          paddingBottom: isCameraRoute ? 'var(--safe-bottom)' : `calc(${bottomNavHeight}px + var(--safe-bottom))`,
           paddingLeft: 'max(var(--safe-left), 0px)',
           paddingRight: 'max(var(--safe-right), 0px)',
           width: '100%',
@@ -377,13 +387,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         {enhancedChildren}
       </main>
 
-      {/* Bottom Navigation - Fixed with safe-area-bottom */}
-      <BottomNavigation
-        userRole={userRole}
-        onFilterClick={handleFilterClick}
-        onAddListingClick={handleAddListingClick}
-        onListingsClick={handleListingsClick}
-      />
+      {/* Bottom Navigation - Fixed with safe-area-bottom. Hidden on camera routes for fullscreen UX */}
+      {!isCameraRoute && (
+        <BottomNavigation
+          userRole={userRole}
+          onFilterClick={handleFilterClick}
+          onAddListingClick={handleAddListingClick}
+          onListingsClick={handleListingsClick}
+        />
+      )}
 
       {/* Advanced Filters Dialog */}
       <AdvancedFilters

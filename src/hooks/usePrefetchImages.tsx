@@ -5,6 +5,13 @@ interface PrefetchOptions {
   currentIndex: number;
   profiles: any[];
   prefetchCount?: number;
+  /**
+   * PERF FIX: State-driven trigger to force effect re-run.
+   * Parent components using refs for currentIndex/profiles must pass
+   * a state value (like renderKey) that updates on each swipe.
+   * Without this, the effect won't re-run because refs don't trigger re-renders.
+   */
+  trigger?: number;
 }
 
 /**
@@ -16,11 +23,13 @@ interface PrefetchOptions {
  * - Uses requestIdleCallback for non-critical prefetches
  * - Tracks by item ID (not index) to handle deck truncation correctly
  * - No aggressive decode() - let browser handle naturally
+ * - Added trigger parameter to ensure effect runs when refs change
  */
 export function usePrefetchImages({
   currentIndex,
   profiles,
-  prefetchCount = 2
+  prefetchCount = 2,
+  trigger = 0
 }: PrefetchOptions) {
   // FIX: Track by item ID, not index - handles deck truncation correctly
   const prefetchedItemIds = useRef(new Set<string>());
@@ -122,5 +131,6 @@ export function usePrefetchImages({
       const toRemove = keys.slice(0, keys.length - 40);
       toRemove.forEach(key => imageCache.current.delete(key));
     }
-  }, [currentIndex, profiles, prefetchCount, nextProfileIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, profiles, prefetchCount, nextProfileIds, trigger]);
 }
