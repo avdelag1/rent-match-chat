@@ -10,14 +10,46 @@ import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
 
-// PLACEHOLDER FALLBACK: Instant inline SVG - NEVER fails, loads in 0ms
-// Using inline data URI eliminates network dependency for fallback
-// This prevents dark cards when external fallback URLs fail
-const FALLBACK_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjEyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWExYTJlIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiMxNjIxM2UiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwZjM0NjAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNTAwIiByPSI4MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PHBhdGggZD0iTTM2MCA0ODBsMjAgMjAgNDAtNDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxyZWN0IHg9IjM1MCIgeT0iNTIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyIiByeD0iNiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjE1KSIvPjxyZWN0IHg9IjM3MCIgeT0iNTQ1IiB3aWR0aD0iNjAiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg==';
+// PLACEHOLDER FALLBACK: Inline SVG with neutral colors (not dark/black)
+// Using a light gradient that works in both light and dark mode
+const FALLBACK_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjEyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZTJlOGYwIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNjYmQ1ZTEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM5NGEzYjgiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNTAwIiByPSI4MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjQpIi8+PHBhdGggZD0iTTM2MCA0ODBsMjAgMjAgNDAtNDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjYpIiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxyZWN0IHg9IjM1MCIgeT0iNTIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyIiByeD0iNiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PHJlY3QgeD0iMzcwIiB5PSI1NDUiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjIpIi8+PC9zdmc+';
 
-// Ultra-fast image gallery with aggressive preloading - Instagram/Tinder speed
-// Fixed aspect ratio container prevents layout shifts
-// NEVER shows dark/empty card - always shows skeleton or fallback
+// Global image cache shared across all swipe cards - persists during session
+const globalSwipeImageCache = new Map<string, {
+  loaded: boolean;
+  decoded: boolean;
+  failed: boolean;
+}>();
+
+// Async decode helper with timeout
+async function decodeImageWithTimeout(src: string, timeoutMs = 3000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const timeout = setTimeout(() => {
+      resolve(true); // Timeout = show anyway
+    }, timeoutMs);
+
+    img.onload = () => {
+      clearTimeout(timeout);
+      if ('decode' in img) {
+        img.decode()
+          .then(() => resolve(true))
+          .catch(() => resolve(true));
+      } else {
+        resolve(true);
+      }
+    };
+    img.onerror = () => {
+      clearTimeout(timeout);
+      resolve(false);
+    };
+    img.src = src;
+  });
+}
+
+// Ultra-fast image gallery with TWO-LAYER approach - never shows black/empty
+// Layer 1: Blurred previous image stays visible during transition
+// Layer 2: New image fades in only after decode
 const InstantImageGallery = memo(({
   images,
   currentIndex,
@@ -29,67 +61,136 @@ const InstantImageGallery = memo(({
   alt: string;
   isTop: boolean;
 }) => {
-  // Track which images are loaded - persists across renders
+  // Track displayed and previous images for two-layer transition
+  const [displayedSrc, setDisplayedSrc] = useState<string | null>(null);
+  const [previousSrc, setPreviousSrc] = useState<string | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showImage, setShowImage] = useState(false);
+
+  // Refs to track state without triggering re-renders
   const loadedImagesRef = useRef<Set<string>>(new Set());
-  const decodedImagesRef = useRef<Set<string>>(new Set());
   const failedImagesRef = useRef<Set<string>>(new Set());
-  const [, forceUpdate] = useState(0);
+  const decodingRef = useRef<boolean>(false);
+  const mountedRef = useRef<boolean>(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   // Get current image source with fallback chain
   const getCurrentSrc = useCallback(() => {
     const currentSrc = images[currentIndex];
+    if (!currentSrc) return FALLBACK_PLACEHOLDER;
 
-    // If current image failed, try next image in array
-    if (currentSrc && failedImagesRef.current.has(getCardImageUrl(currentSrc))) {
-      // Try to find a non-failed image
+    const optimizedSrc = getCardImageUrl(currentSrc);
+
+    // If current image failed, try to find a working one
+    if (failedImagesRef.current.has(optimizedSrc) || globalSwipeImageCache.get(optimizedSrc)?.failed) {
       for (let i = 0; i < images.length; i++) {
         const fallbackIdx = (currentIndex + i) % images.length;
         const fallbackSrc = images[fallbackIdx];
-        if (fallbackSrc && !failedImagesRef.current.has(getCardImageUrl(fallbackSrc))) {
-          return fallbackSrc;
+        if (fallbackSrc) {
+          const optFallback = getCardImageUrl(fallbackSrc);
+          if (!failedImagesRef.current.has(optFallback) && !globalSwipeImageCache.get(optFallback)?.failed) {
+            return optFallback;
+          }
         }
       }
-      // All images failed, use placeholder
       return FALLBACK_PLACEHOLDER;
     }
 
-    return currentSrc || FALLBACK_PLACEHOLDER;
+    return optimizedSrc;
   }, [images, currentIndex]);
 
-  // Preload current image immediately, decode adjacent images in idle time
+  // CORE FIX: Two-layer image loading - previous stays visible until new is ready
   useEffect(() => {
     if (!isTop) return;
 
-    // Current image: load immediately with high priority
-    const currentSrc = getCurrentSrc();
-    if (currentSrc && currentSrc !== '/placeholder.svg') {
-      const optimizedCurrentSrc = currentSrc.startsWith('http') && !currentSrc.includes('supabase')
-        ? currentSrc
-        : getCardImageUrl(currentSrc);
-      if (!loadedImagesRef.current.has(optimizedCurrentSrc) && !failedImagesRef.current.has(optimizedCurrentSrc)) {
-        const img = new Image();
-        img.decoding = 'async';
-        (img as any).fetchPriority = 'high';
-        img.onload = () => {
-          loadedImagesRef.current.add(optimizedCurrentSrc);
-          forceUpdate(n => n + 1);
-          // Decode current image immediately
-          if ('decode' in img) {
-            img.decode().then(() => {
-              decodedImagesRef.current.add(optimizedCurrentSrc);
-            }).catch(() => {});
-          }
-        };
-        img.onerror = () => {
-          // Mark as failed and force update to try fallback
-          failedImagesRef.current.add(optimizedCurrentSrc);
-          forceUpdate(n => n + 1);
-        };
-        img.src = optimizedCurrentSrc;
-      }
+    const targetSrc = getCurrentSrc();
+    if (!targetSrc || targetSrc === displayedSrc) return;
+
+    // Check global cache first - instant display if already decoded
+    const cached = globalSwipeImageCache.get(targetSrc);
+    if (cached?.decoded && !cached?.failed) {
+      setPreviousSrc(displayedSrc);
+      setDisplayedSrc(targetSrc);
+      setShowImage(true);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        if (mountedRef.current) {
+          setIsTransitioning(false);
+          setPreviousSrc(null);
+        }
+      }, 100);
+      return;
     }
 
-    // Adjacent images: preload + decode using requestIdleCallback (non-blocking)
+    // For placeholder, show immediately
+    if (targetSrc === FALLBACK_PLACEHOLDER) {
+      setDisplayedSrc(targetSrc);
+      setShowImage(true);
+      return;
+    }
+
+    // First image load - no transition needed, just decode and show
+    if (!displayedSrc) {
+      setDisplayedSrc(targetSrc);
+      decodeImageWithTimeout(targetSrc).then((success) => {
+        if (!mountedRef.current) return;
+        if (success) {
+          globalSwipeImageCache.set(targetSrc, { loaded: true, decoded: true, failed: false });
+          loadedImagesRef.current.add(targetSrc);
+          setShowImage(true);
+        } else {
+          globalSwipeImageCache.set(targetSrc, { loaded: false, decoded: false, failed: true });
+          failedImagesRef.current.add(targetSrc);
+          setDisplayedSrc(FALLBACK_PLACEHOLDER);
+          setShowImage(true);
+        }
+      });
+      return;
+    }
+
+    // Switching images - keep previous visible during decode
+    if (decodingRef.current) return;
+    decodingRef.current = true;
+    setPreviousSrc(displayedSrc);
+    setIsTransitioning(true);
+
+    decodeImageWithTimeout(targetSrc).then((success) => {
+      if (!mountedRef.current) return;
+      decodingRef.current = false;
+
+      if (success) {
+        globalSwipeImageCache.set(targetSrc, { loaded: true, decoded: true, failed: false });
+        loadedImagesRef.current.add(targetSrc);
+        setDisplayedSrc(targetSrc);
+        setShowImage(true);
+      } else {
+        globalSwipeImageCache.set(targetSrc, { loaded: false, decoded: false, failed: true });
+        failedImagesRef.current.add(targetSrc);
+        // Keep previous image if decode failed, or show placeholder
+        if (!displayedSrc || displayedSrc === FALLBACK_PLACEHOLDER) {
+          setDisplayedSrc(FALLBACK_PLACEHOLDER);
+        }
+        setShowImage(true);
+      }
+
+      // Clear transition state after fade completes
+      setTimeout(() => {
+        if (mountedRef.current) {
+          setIsTransitioning(false);
+          setPreviousSrc(null);
+        }
+      }, 150);
+    });
+  }, [images, isTop, currentIndex, getCurrentSrc, displayedSrc]);
+
+  // Preload adjacent images in idle time
+  useEffect(() => {
+    if (!isTop || images.length <= 1) return;
+
     const adjacentIndices = [
       (currentIndex + 1) % images.length,
       currentIndex > 0 ? currentIndex - 1 : images.length - 1
@@ -101,17 +202,10 @@ const InstantImageGallery = memo(({
         if (!src || src === '/placeholder.svg') return;
 
         const optimizedSrc = getCardImageUrl(src);
-        if (loadedImagesRef.current.has(optimizedSrc) || failedImagesRef.current.has(optimizedSrc)) {
-          // Already loaded or failed, try to decode if loaded and not already decoded
-          if (loadedImagesRef.current.has(optimizedSrc) && !decodedImagesRef.current.has(optimizedSrc)) {
-            const img = new Image();
-            img.src = optimizedSrc;
-            if ('decode' in img) {
-              img.decode().then(() => {
-                decodedImagesRef.current.add(optimizedSrc);
-              }).catch(() => {});
-            }
-          }
+        const cached = globalSwipeImageCache.get(optimizedSrc);
+
+        // Skip if already processed
+        if (cached || loadedImagesRef.current.has(optimizedSrc) || failedImagesRef.current.has(optimizedSrc)) {
           return;
         }
 
@@ -120,98 +214,127 @@ const InstantImageGallery = memo(({
         (img as any).fetchPriority = 'low';
         img.onload = () => {
           loadedImagesRef.current.add(optimizedSrc);
-          // Decode in idle time for instant display when user taps
+          globalSwipeImageCache.set(optimizedSrc, { loaded: true, decoded: false, failed: false });
+          // Decode in idle time
           if ('decode' in img) {
             img.decode().then(() => {
-              decodedImagesRef.current.add(optimizedSrc);
+              const entry = globalSwipeImageCache.get(optimizedSrc);
+              if (entry) entry.decoded = true;
             }).catch(() => {});
           }
         };
         img.onerror = () => {
           failedImagesRef.current.add(optimizedSrc);
+          globalSwipeImageCache.set(optimizedSrc, { loaded: false, decoded: false, failed: true });
         };
         img.src = optimizedSrc;
       });
     };
 
-    // Use requestIdleCallback for adjacent image preload + decode
     if ('requestIdleCallback' in window) {
-      (window as Window).requestIdleCallback(preloadAdjacent, { timeout: 2000 });
+      const id = (window as Window).requestIdleCallback(preloadAdjacent, { timeout: 2000 });
+      return () => (window as any).cancelIdleCallback(id);
     } else {
-      setTimeout(preloadAdjacent, 100);
+      const id = setTimeout(preloadAdjacent, 100);
+      return () => clearTimeout(id);
     }
-  }, [images, isTop, currentIndex, getCurrentSrc]);
-
-  const currentSrc = getCurrentSrc();
-  const optimizedCurrentSrc = currentSrc !== '/placeholder.svg'
-    ? (currentSrc.startsWith('http') && !currentSrc.includes('supabase') ? currentSrc : getCardImageUrl(currentSrc))
-    : currentSrc;
-  const isCurrentLoaded = loadedImagesRef.current.has(optimizedCurrentSrc) || currentSrc === '/placeholder.svg';
-  const isCurrentFailed = failedImagesRef.current.has(optimizedCurrentSrc);
-
-  // If current image failed, show placeholder immediately
-  const displaySrc = isCurrentFailed ? FALLBACK_PLACEHOLDER : optimizedCurrentSrc;
-  const showImage = isCurrentLoaded || isCurrentFailed;
+  }, [images, isTop, currentIndex]);
 
   return (
     // Fixed aspect ratio container - prevents layout shifts
     <div className="absolute inset-0 w-full h-full" style={{ aspectRatio: '4/5', minHeight: '100%' }}>
-      {/* Skeleton placeholder - fixed size, matches card dimensions exactly */}
-      {/* Always visible until image loads - prevents dark/empty state */}
+      {/* LAYER 1: Neutral gradient placeholder - NEVER black/dark
+          Uses light slate colors that work in both light and dark mode */}
       <div
         className="absolute inset-0 rounded-3xl overflow-hidden"
-        style={{
-          opacity: showImage ? 0 : 1,
-          transition: 'opacity 150ms ease-out',
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        }}
+        style={{ zIndex: 1 }}
       >
-        {/* Shimmer animation for loading state */}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)',
+          }}
+        />
+        {/* Subtle shimmer animation */}
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
           style={{ backgroundSize: '200% 100%', animationDuration: '1.5s' }}
         />
         {/* Placeholder icon */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-            <svg className="w-8 h-8 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-16 h-16 rounded-full bg-white/30 flex items-center justify-center">
+            <svg className="w-8 h-8 text-slate-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
         </div>
       </div>
 
-      {/* Current image - EAGER loading for active card, NO transition delay */}
-      <img
-        src={displaySrc}
-        alt={alt}
-        className="absolute inset-0 w-full h-full object-cover rounded-3xl"
-        draggable={false}
-        loading="eager"
-        decoding="async"
-        fetchPriority="high"
-        style={{
-          opacity: showImage ? 1 : 0,
-          transition: 'opacity 150ms ease-out',
-          willChange: 'auto',
-          backfaceVisibility: 'hidden',
-          WebkitBackfaceVisibility: 'hidden',
-          transform: 'translateZ(0)',
-        }}
-        onLoad={() => {
-          if (!loadedImagesRef.current.has(displaySrc)) {
-            loadedImagesRef.current.add(displaySrc);
-            forceUpdate(n => n + 1);
-          }
-        }}
-        onError={() => {
-          // Mark as failed and try fallback
-          if (!failedImagesRef.current.has(displaySrc)) {
-            failedImagesRef.current.add(displaySrc);
-            forceUpdate(n => n + 1);
-          }
-        }}
-      />
+      {/* LAYER 2: Blurred version of displayed image - enhanced placeholder */}
+      {displayedSrc && displayedSrc !== FALLBACK_PLACEHOLDER && showImage && (
+        <div
+          className="absolute inset-0 rounded-3xl overflow-hidden"
+          style={{
+            zIndex: 2,
+            filter: 'blur(20px)',
+            transform: 'scale(1.1)',
+          }}
+        >
+          <img
+            src={displayedSrc}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+            aria-hidden="true"
+          />
+        </div>
+      )}
+
+      {/* LAYER 3: Previous image - stays visible during transition */}
+      {previousSrc && isTransitioning && (
+        <img
+          src={previousSrc}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover rounded-3xl"
+          style={{ zIndex: 3 }}
+          draggable={false}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* LAYER 4: Current image - fades in after decode */}
+      {displayedSrc && (
+        <img
+          src={displayedSrc}
+          alt={alt}
+          className="absolute inset-0 w-full h-full object-cover rounded-3xl transition-opacity duration-150"
+          draggable={false}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          style={{
+            zIndex: 4,
+            opacity: showImage ? 1 : 0,
+            willChange: 'opacity',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+          }}
+          onLoad={() => {
+            if (!showImage && mountedRef.current) {
+              setShowImage(true);
+            }
+          }}
+          onError={() => {
+            if (displayedSrc !== FALLBACK_PLACEHOLDER && mountedRef.current) {
+              failedImagesRef.current.add(displayedSrc);
+              globalSwipeImageCache.set(displayedSrc, { loaded: false, decoded: false, failed: true });
+              setDisplayedSrc(FALLBACK_PLACEHOLDER);
+              setShowImage(true);
+            }
+          }}
+        />
+      )}
     </div>
   );
 });

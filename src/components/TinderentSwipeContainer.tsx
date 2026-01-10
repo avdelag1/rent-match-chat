@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, memo, useRef } from 'react';
+import { useState, useCallback, useEffect, memo, useRef, useMemo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
@@ -69,6 +69,48 @@ function useNavigationGuard() {
   return { canNavigate, startNavigation, endNavigation };
 }
 
+// =============================================================================
+// PERF: Throttled prefetch scheduler - prevents competing with current decode
+// Uses requestIdleCallback to ensure prefetch only runs when browser is idle
+// =============================================================================
+class PrefetchScheduler {
+  private scheduled = false;
+  private callback: (() => void) | null = null;
+  private idleHandle: number | null = null;
+
+  schedule(callback: () => void, delayMs = 300): void {
+    // Cancel any pending prefetch
+    this.cancel();
+
+    this.callback = callback;
+    this.scheduled = true;
+
+    // Wait for a brief delay to let current image decode complete
+    setTimeout(() => {
+      if (!this.scheduled || !this.callback) return;
+
+      if ('requestIdleCallback' in window) {
+        this.idleHandle = (window as any).requestIdleCallback(() => {
+          if (this.callback) this.callback();
+          this.scheduled = false;
+        }, { timeout: 2000 });
+      } else {
+        this.callback();
+        this.scheduled = false;
+      }
+    }, delayMs);
+  }
+
+  cancel(): void {
+    this.scheduled = false;
+    this.callback = null;
+    if (this.idleHandle !== null && 'cancelIdleCallback' in window) {
+      (window as any).cancelIdleCallback(this.idleHandle);
+      this.idleHandle = null;
+    }
+  }
+}
+
 interface TinderentSwipeContainerProps {
   onListingTap: (listingId: string) => void;
   onInsights?: (listingId: string) => void;
@@ -129,6 +171,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const swipedIdsRef = useRef<Set<string>>(new Set(clientDeck.swipedIds));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
 
+  // PERF: Throttled prefetch scheduler
+  const prefetchSchedulerRef = useRef(new PrefetchScheduler());
+
   // Fetch guards
   const isFetchingMore = useRef(false);
 
@@ -149,6 +194,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
   }, [clientDeck.deckItems.length]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      prefetchSchedulerRef.current.cancel();
+    };
+  }, []);
+
   // Hooks for functionality
   const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
@@ -157,13 +209,31 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
 
+  // PERF: Memoize filters to prevent unnecessary query re-runs
+  const stableFilters = useMemo(() => filters, [
+    // Only re-create when actual filter values change
+    filters?.category,
+    filters?.categories?.join(','),
+    filters?.listingType,
+    filters?.priceRange?.min,
+    filters?.priceRange?.max,
+    filters?.bedrooms?.join(','),
+    filters?.bathrooms?.join(','),
+    filters?.amenities?.join(','),
+    filters?.propertyType?.join(','),
+    filters?.petFriendly,
+    filters?.furnished,
+    filters?.verified,
+    filters?.premiumOnly,
+  ]);
+
   // Get listings with filters - PERF: pass userId to avoid getUser() inside queryFn
   const {
     data: smartListings = [],
     isLoading: smartLoading,
     error: smartError,
     refetch: refetchSmart
-  } = useSmartListingMatching(user?.id, [], filters, page, 10, isRefreshMode);
+  } = useSmartListingMatching(user?.id, [], stableFilters, page, 10, isRefreshMode);
 
   const isLoading = smartLoading;
   const error = smartError;
@@ -184,33 +254,34 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     currentIndexRef.current,
     page,
     deckQueueRef.current.length,
-    filters as unknown
+    stableFilters as unknown
   );
 
   // PERFORMANCE: Prefetch next listing details when viewing current card
   // This pre-loads the data for the insights dialog
   // FIX: Use renderKey (state-driven) instead of currentIndexRef.current (ref doesn't trigger re-runs)
   // PERF: Guard with route check - skip expensive work when navigated away
+  // PERF: Use throttled scheduler to not compete with current image decode
   const location = useLocation();
   const isDashboard = location.pathname.includes('/dashboard');
   const { prefetchListingDetails } = usePrefetchManager();
+
   useEffect(() => {
     // Skip expensive prefetch when not on dashboard - reduces CPU during route transitions
     if (!isDashboard) return;
 
     const nextListing = deckQueueRef.current[currentIndexRef.current + 1];
     if (nextListing?.id) {
-      // Use requestIdleCallback for non-blocking prefetch
-      if ('requestIdleCallback' in window) {
-        (window as Window).requestIdleCallback(() => {
-          prefetchListingDetails(nextListing.id);
-        }, { timeout: 2000 });
-      } else {
-        setTimeout(() => {
-          prefetchListingDetails(nextListing.id);
-        }, 100);
-      }
+      // PERF: Use throttled scheduler - waits 300ms then uses requestIdleCallback
+      // This ensures prefetch doesn't compete with current image decoding
+      prefetchSchedulerRef.current.schedule(() => {
+        prefetchListingDetails(nextListing.id);
+      }, 300);
     }
+
+    return () => {
+      prefetchSchedulerRef.current.cancel();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [renderKey, prefetchListingDetails, isDashboard]); // renderKey updates on each swipe, triggering reliable prefetch
 
@@ -455,7 +526,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
-          <div className="text-6xl mb-4">😞</div>
+          <div className="text-6xl mb-4">:(</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
           <p className="text-muted-foreground mb-4">We couldn't load properties right now.</p>
           <Button onClick={handleRefresh} variant="outline" className="gap-2">

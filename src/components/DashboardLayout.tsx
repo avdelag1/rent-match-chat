@@ -41,6 +41,60 @@ import { useListings } from "@/hooks/useListings"
 import { useClientProfiles } from "@/hooks/useClientProfiles"
 import { useWelcomeState } from "@/hooks/useWelcomeState"
 
+// =============================================================================
+// PERFORMANCE FIX: SessionStorage caching for dashboard checks
+// Prevents visible state changes when returning to dashboard
+// =============================================================================
+
+const ONBOARDING_CACHE_KEY = 'dashboard_onboarding_check';
+const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+
+interface OnboardingCacheEntry {
+  userId: string;
+  needsOnboarding: boolean;
+  checkedAt: number;
+}
+
+function getOnboardingCache(userId: string): OnboardingCacheEntry | null {
+  try {
+    const cached = sessionStorage.getItem(ONBOARDING_CACHE_KEY);
+    if (!cached) return null;
+
+    const entry: OnboardingCacheEntry = JSON.parse(cached);
+
+    // Validate cache: same user and not expired
+    if (entry.userId !== userId) return null;
+    if (Date.now() - entry.checkedAt > CACHE_EXPIRY_MS) return null;
+
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function setOnboardingCache(userId: string, needsOnboarding: boolean): void {
+  try {
+    const entry: OnboardingCacheEntry = {
+      userId,
+      needsOnboarding,
+      checkedAt: Date.now(),
+    };
+    sessionStorage.setItem(ONBOARDING_CACHE_KEY, JSON.stringify(entry));
+  } catch {
+    // sessionStorage full or unavailable
+  }
+}
+
+function clearOnboardingCache(): void {
+  try {
+    sessionStorage.removeItem(ONBOARDING_CACHE_KEY);
+  } catch {
+    // Ignore
+  }
+}
+
+// =============================================================================
+
 interface DashboardLayoutProps {
   children: ReactNode
   userRole: 'client' | 'owner' | 'admin'
@@ -87,6 +141,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const { user } = useAuth()
   const responsive = useResponsiveContext()
 
+  // Track if we've checked cache synchronously on mount
+  const cacheCheckedRef = useRef(false);
+
   // PERFORMANCE FIX: Welcome state with DB-backed persistence
   // Shows welcome only on first signup, not every login (survives localStorage clears)
   const { shouldShowWelcome, dismissWelcome } = useWelcomeState(user?.id)
@@ -123,10 +180,27 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     }
   }
 
-  // PERF: Defer onboarding check until after first paint using requestIdleCallback
-  // This prevents blocking the main thread during dashboard load
+  // ==========================================================================
+  // PERF FIX: Onboarding check with sessionStorage caching
+  // 1. Check cache SYNCHRONOUSLY on mount - no state change if cached
+  // 2. Only do async DB check if no valid cache exists
+  // 3. Cache result for 5 minutes to prevent re-checks on navigation
+  // ==========================================================================
   useEffect(() => {
     if (!user?.id || onboardingChecked) return;
+
+    // SYNCHRONOUS CACHE CHECK - prevents visible state change on return
+    if (!cacheCheckedRef.current) {
+      cacheCheckedRef.current = true;
+      const cached = getOnboardingCache(user.id);
+      if (cached) {
+        setOnboardingChecked(true);
+        if (cached.needsOnboarding) {
+          setShowOnboarding(true);
+        }
+        return; // Skip DB check entirely
+      }
+    }
 
     const checkOnboardingStatus = async () => {
       try {
@@ -140,10 +214,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           if (import.meta.env.DEV) {
             logger.error('Error checking onboarding status:', error);
           }
+          // Cache as "no onboarding needed" to prevent repeated failed checks
+          setOnboardingCache(user.id, false);
           return;
         }
 
         if (!data) {
+          setOnboardingCache(user.id, false);
           return;
         }
 
@@ -153,13 +230,20 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         // 1. onboarding_completed is explicitly false, AND
         // 2. User has minimal profile data (likely a new user)
         const hasMinimalData = !data?.full_name && !data?.city && !data?.age;
-        if (data?.onboarding_completed === false && hasMinimalData) {
+        const needsOnboarding = data?.onboarding_completed === false && hasMinimalData;
+
+        // CACHE THE RESULT - prevents re-check on dashboard return
+        setOnboardingCache(user.id, needsOnboarding);
+
+        if (needsOnboarding) {
           setShowOnboarding(true);
         }
       } catch (error) {
         if (import.meta.env.DEV) {
           logger.error('Error in onboarding check:', error);
         }
+        // Cache as "no onboarding needed" on error
+        setOnboardingCache(user.id, false);
       }
     };
 
@@ -182,7 +266,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const selectedListing = selectedListingId ? listings.find(l => l.id === selectedListingId) : null;
   const selectedProfile = selectedProfileId ? profiles.find(p => p.user_id === selectedProfileId) : null;
 
-  // ✅ FIX: Memoize all handler functions to prevent infinite re-renders
+  // FIX: Memoize all handler functions to prevent infinite re-renders
   const handleLikedPropertySelect = useCallback((listingId: string) => {
     setSelectedListingId(listingId)
     setShowPropertyDetails(true)
@@ -276,7 +360,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     if (convertedFilters.priceRange) activeFilterCount += 1;
 
     toast({
-      title: '✨ Filters Applied',
+      title: 'Filters Applied',
       description: activeFilterCount > 0
         ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
         : 'Showing all listings',
@@ -288,7 +372,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     setQuickFilters(newQuickFilters);
   }, []);
 
-  // Combine quick filters with applied filters
+  // Combine quick filters with applied filters - MEMOIZED to prevent identity changes
   const combinedFilters = useMemo(() => {
     const base = appliedFilters || {};
 
@@ -321,7 +405,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     };
   }, [appliedFilters, quickFilters]);
 
-  // ✅ FIX: Memoize cloned children to prevent infinite re-renders
+  // FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {
     return React.Children.map(children, (child) => {
       if (React.isValidElement(child)) {
@@ -535,6 +619,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           open={showOnboarding}
             onComplete={() => {
               setShowOnboarding(false);
+              // Clear cache so we don't show onboarding again
+              clearOnboardingCache();
               toast({
                 title: 'Profile Complete!',
                 description: 'Welcome to Swipess. Start exploring!',
