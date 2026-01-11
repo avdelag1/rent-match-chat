@@ -10,6 +10,102 @@ import { triggerHaptic } from '@/utils/haptics';
 // Using a light gradient that works in both light and dark mode
 const FALLBACK_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjEyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZTJlOGYwIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNjYmQ1ZTEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM5NGEzYjgiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNTAwIiByPSI4MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjQpIi8+PHBhdGggZD0iTTM3MCA0NjBoNjB2NDBjMCAxNi41NjktMTMuNDMxIDMwLTMwIDMwcy0zMC0xMy40MzEtMzAtMzB2LTQweiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNDUwIiByPSIzMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PC9zdmc+';
 
+// =============================================================================
+// PERF: Global session-level image cache for client profile images
+// Shared across all swipe cards to prevent re-loading on navigation
+// =============================================================================
+const globalClientImageCache = new Map<string, {
+  loaded: boolean;
+  decoded: boolean;
+  failed: boolean;
+}>();
+
+/**
+ * PERF FIX: Check if an image is already decoded in the global cache
+ * Used to determine if we can allow immediate swipe or need to wait
+ */
+export function isClientImageDecodedInCache(url: string): boolean {
+  const cached = globalClientImageCache.get(url);
+  return cached?.decoded === true && !cached?.failed;
+}
+
+/**
+ * PERF FIX: Preload a client profile image into the global cache
+ * Returns a promise that resolves when image is decoded (or fails)
+ */
+export function preloadClientImageToCache(url: string): Promise<boolean> {
+  // Already cached and decoded - instant return
+  const cached = globalClientImageCache.get(url);
+  if (cached?.decoded && !cached?.failed) {
+    return Promise.resolve(true);
+  }
+
+  // Already loading - return existing promise
+  if (cached?.loaded && !cached?.decoded && !cached?.failed) {
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        const current = globalClientImageCache.get(url);
+        if (current?.decoded || current?.failed) {
+          clearInterval(checkInterval);
+          resolve(!current?.failed);
+        }
+      }, 50);
+      // Timeout after 3 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve(false);
+      }, 3000);
+    });
+  }
+
+  // Start loading
+  globalClientImageCache.set(url, { loaded: true, decoded: false, failed: false });
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.decoding = 'async';
+    (img as any).fetchPriority = 'high';
+
+    const cleanup = () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+
+    img.onload = async () => {
+      try {
+        // Decode the image for instant display
+        if ('decode' in img) {
+          await img.decode();
+        }
+        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false });
+        cleanup();
+        resolve(true);
+      } catch {
+        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false });
+        cleanup();
+        resolve(true);
+      }
+    };
+
+    img.onerror = () => {
+      globalClientImageCache.set(url, { loaded: true, decoded: false, failed: true });
+      cleanup();
+      resolve(false);
+    };
+
+    img.src = url;
+
+    // Timeout after 3 seconds
+    setTimeout(() => {
+      if (!globalClientImageCache.get(url)?.decoded) {
+        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false });
+        cleanup();
+        resolve(true);
+      }
+    }, 3000);
+  });
+}
+
 // Client Profile Image Gallery with skeleton loading and fallback chain
 const ClientImageGallery = memo(({
   images,
@@ -22,7 +118,6 @@ const ClientImageGallery = memo(({
   alt: string;
   isTop: boolean;
 }) => {
-  const loadedImagesRef = useRef<Set<string>>(new Set());
   const failedImagesRef = useRef<Set<string>>(new Set());
   const [, forceUpdate] = useState(0);
 
@@ -43,47 +138,74 @@ const ClientImageGallery = memo(({
   }, [images, currentIndex]);
 
   const displaySrc = getCurrentSrc();
-  const isLoaded = loadedImagesRef.current.has(displaySrc) || displaySrc === FALLBACK_PLACEHOLDER;
 
-  // Preload active image
+  // Check global cache first for instant display
+  const cachedState = globalClientImageCache.get(displaySrc);
+  const isLoaded = (cachedState?.decoded && !cachedState?.failed) || displaySrc === FALLBACK_PLACEHOLDER;
+
+  // Preload active image with decode
   useEffect(() => {
     if (!isTop || !displaySrc || displaySrc === FALLBACK_PLACEHOLDER) return;
-    if (loadedImagesRef.current.has(displaySrc) || failedImagesRef.current.has(displaySrc)) return;
+    if (isClientImageDecodedInCache(displaySrc) || failedImagesRef.current.has(displaySrc)) return;
 
-    const img = new Image();
-    img.decoding = 'async';
-    (img as any).fetchPriority = 'high';
-    img.onload = () => {
-      loadedImagesRef.current.add(displaySrc);
+    preloadClientImageToCache(displaySrc).then((success) => {
+      if (!success) {
+        failedImagesRef.current.add(displaySrc);
+      }
       forceUpdate(n => n + 1);
-    };
-    img.onerror = () => {
-      failedImagesRef.current.add(displaySrc);
-      forceUpdate(n => n + 1);
-    };
-    img.src = displaySrc;
+    });
   }, [displaySrc, isTop]);
 
   return (
     <div className="absolute inset-0 w-full h-full">
-      {/* Skeleton placeholder - light slate gradient (matches TinderSwipeCard) */}
+      {/* Premium skeleton shimmer placeholder - NEVER black/dark
+          Uses light slate colors that work in both light and dark mode with animated shimmer */}
       <div
         className="absolute inset-0 rounded-3xl overflow-hidden"
         style={{
           opacity: isLoaded ? 0 : 1,
           transition: 'opacity 150ms ease-out',
-          background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)',
         }}
       >
+        {/* Base gradient - neutral light gray */}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
-          style={{ backgroundSize: '200% 100%', animationDuration: '1.5s' }}
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 35%, #cbd5e1 65%, #94a3b8 100%)',
+          }}
         />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-white/30 flex items-center justify-center">
-            <svg className="w-8 h-8 text-slate-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* Animated skeleton shimmer - sweeps across for loading effect */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 75%, transparent 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'skeleton-shimmer 1.2s ease-in-out infinite',
+            willChange: 'background-position',
+          }}
+        />
+        {/* Secondary slower shimmer for depth */}
+        <div
+          className="absolute inset-0 opacity-50"
+          style={{
+            background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+            backgroundSize: '200% 100%',
+            animation: 'skeleton-shimmer 2s ease-in-out infinite',
+            animationDelay: '0.5s',
+          }}
+        />
+        {/* Placeholder content skeleton */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+          {/* User icon placeholder */}
+          <div className="w-20 h-20 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm shadow-inner">
+            <svg className="w-10 h-10 text-slate-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
+          </div>
+          {/* Text skeleton lines */}
+          <div className="flex flex-col items-center gap-2 w-48">
+            <div className="h-4 w-full rounded-full bg-white/30" />
+            <div className="h-3 w-3/4 rounded-full bg-white/25" />
           </div>
         </div>
       </div>
@@ -106,14 +228,15 @@ const ClientImageGallery = memo(({
           transform: 'translateZ(0)',
         }}
         onLoad={() => {
-          if (!loadedImagesRef.current.has(displaySrc)) {
-            loadedImagesRef.current.add(displaySrc);
+          if (!globalClientImageCache.get(displaySrc)?.decoded) {
+            globalClientImageCache.set(displaySrc, { loaded: true, decoded: true, failed: false });
             forceUpdate(n => n + 1);
           }
         }}
         onError={() => {
           if (!failedImagesRef.current.has(displaySrc)) {
             failedImagesRef.current.add(displaySrc);
+            globalClientImageCache.set(displaySrc, { loaded: true, decoded: false, failed: true });
             forceUpdate(n => n + 1);
           }
         }}

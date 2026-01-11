@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { OwnerClientTinderCard } from './OwnerClientTinderCard';
+import { OwnerClientTinderCard, preloadClientImageToCache, isClientImageDecodedInCache } from './OwnerClientTinderCard';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -61,6 +61,8 @@ const ClientSwipeContainerComponent = ({
   const markOwnerSwiped = useSwipeDeckStore((state) => state.markOwnerSwiped);
   const resetOwnerDeck = useSwipeDeckStore((state) => state.resetOwnerDeck);
   const isOwnerHydrated = useSwipeDeckStore((state) => state.isOwnerHydrated);
+  const isOwnerReady = useSwipeDeckStore((state) => state.isOwnerReady);
+  const markOwnerReady = useSwipeDeckStore((state) => state.markOwnerReady);
 
   // Local state for immediate UI updates (synced with store)
   const [renderKey, setRenderKey] = useState(0); // Force update trigger
@@ -91,10 +93,35 @@ const ClientSwipeContainerComponent = ({
   const swipedIdsRef = useRef<Set<string>>(new Set(currentDeckState?.swipedIds || []));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
 
-  // PERF FIX: Track if we're returning to dashboard (has hydrated data)
+  // PERF FIX: Track if we're returning to dashboard (has hydrated data AND is ready)
   // When true, skip initial animations to prevent "double render" feeling
-  const isReturningRef = useRef(deckQueueRef.current.length > 0);
-  const hasAnimatedOnceRef = useRef(false);
+  // Use isReady flag from store to determine if deck is fully initialized
+  const isReturningRef = useRef(
+    deckQueueRef.current.length > 0 && useSwipeDeckStore.getState().ownerDecks[category]?.isReady
+  );
+  const hasAnimatedOnceRef = useRef(isReturningRef.current);
+
+  // PERF FIX: Eagerly preload top 3 cards' images when we have hydrated deck data
+  // This runs SYNCHRONOUSLY during component initialization (before first paint)
+  // The images will be in cache when OwnerClientTinderCard renders, preventing any flash
+  const eagerPreloadInitiatedRef = useRef(false);
+  if (!eagerPreloadInitiatedRef.current && deckQueueRef.current.length > 0) {
+    eagerPreloadInitiatedRef.current = true;
+    const currentIdx = currentIndexRef.current;
+
+    // Preload current, next, and next-next card images with decode
+    [0, 1, 2].forEach((offset) => {
+      const profile = deckQueueRef.current[currentIdx + offset];
+      const firstImage = profile?.profile_images?.[0] || profile?.avatar_url;
+      if (firstImage) {
+        preloadClientImageToCache(firstImage);
+      }
+    });
+  }
+
+  // PERF: Track if next card's image is being preloaded (prevents swipe until ready)
+  const isPreloadingNextRef = useRef(false);
+  const pendingSwipeRef = useRef<{ direction: 'left' | 'right' } | null>(null);
 
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const [isRefreshMode, setIsRefreshMode] = useState(false);
@@ -176,11 +203,17 @@ const ClientSwipeContainerComponent = ({
         setOwnerDeck(category, deckQueueRef.current, true);
         persistDeckToSession('owner', category, deckQueueRef.current);
 
+        // PERF: Mark deck as ready for instant return on re-navigation
+        // This ensures that when user returns to dashboard, we skip all initialization
+        if (!isOwnerReady(category)) {
+          markOwnerReady(category);
+        }
+
         setRenderKey(n => n + 1);
       }
       isFetchingMore.current = false;
     }
-  }, [clientProfiles, isLoading, setOwnerDeck, category]);
+  }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady]);
 
   // Get current visible cards for 3-card stack
   const currentIndex = currentIndexRef.current;
@@ -189,12 +222,12 @@ const ClientSwipeContainerComponent = ({
   const nextCard = deckQueue[currentIndex + 1];
   const thirdCard = deckQueue[currentIndex + 2];
 
-  const handleSwipe = useCallback((direction: 'left' | 'right') => {
+  // PERF: Execute the actual swipe after ensuring next card is ready
+  const executeSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];
     if (!profile) return;
 
     setSwipeDirection(direction);
-    triggerHaptic(direction === 'right' ? 'success' : 'light');
 
     // CONSTANT-TIME: Just mark as swiped and advance pointer
     swipedIdsRef.current.add(profile.user_id);
@@ -222,13 +255,67 @@ const ClientSwipeContainerComponent = ({
 
     setSwipeDirection(null);
     setRenderKey(n => n + 1);
+    isPreloadingNextRef.current = false;
+    pendingSwipeRef.current = null;
 
     // Fetch more if running low
     if (currentIndexRef.current >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
     }
+
+    // PERF: Eagerly preload the next-next card's image for smooth subsequent swipes
+    const nextNextProfile = deckQueueRef.current[currentIndexRef.current + 1];
+    const nextNextImage = nextNextProfile?.profile_images?.[0] || nextNextProfile?.avatar_url;
+    if (nextNextImage) {
+      preloadClientImageToCache(nextNextImage);
+    }
   }, [swipeMutation, recordSwipe, recordProfileView, markOwnerSwiped, category]);
+
+  const handleSwipe = useCallback((direction: 'left' | 'right') => {
+    const profile = deckQueueRef.current[currentIndexRef.current];
+    if (!profile) return;
+
+    // Immediate haptic feedback
+    triggerHaptic(direction === 'right' ? 'success' : 'light');
+
+    // PERF: Check if next card's first image is already decoded
+    const nextProfile = deckQueueRef.current[currentIndexRef.current + 1];
+    const nextCardFirstImage = nextProfile?.profile_images?.[0] || nextProfile?.avatar_url;
+
+    // If no next card or image already decoded, proceed immediately
+    if (!nextProfile || !nextCardFirstImage || isClientImageDecodedInCache(nextCardFirstImage)) {
+      executeSwipe(direction);
+      return;
+    }
+
+    // PERF: Next card image not decoded - preload and wait
+    // This prevents black flash when swiping to a card whose image isn't ready
+    if (isPreloadingNextRef.current) {
+      // Already preloading, just update the pending direction
+      pendingSwipeRef.current = { direction };
+      return;
+    }
+
+    isPreloadingNextRef.current = true;
+    pendingSwipeRef.current = { direction };
+
+    // Start preloading with high priority and decode
+    preloadClientImageToCache(nextCardFirstImage).then(() => {
+      // Execute the swipe after decode completes (or fails with timeout)
+      if (pendingSwipeRef.current) {
+        executeSwipe(pendingSwipeRef.current.direction);
+      }
+    });
+
+    // Fallback: If decode takes too long (>300ms), proceed anyway
+    // This ensures swipes never feel stuck
+    setTimeout(() => {
+      if (pendingSwipeRef.current) {
+        executeSwipe(pendingSwipeRef.current.direction);
+      }
+    }, 300);
+  }, [executeSwipe]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -299,10 +386,11 @@ const ClientSwipeContainerComponent = ({
   }, [isCreatingConversation, startConversation, navigate]);
 
   // Check if we have hydrated data (from store/session) - prevents blank deck flash
-  const hasHydratedData = isOwnerHydrated(category) || deckQueue.length > 0;
+  // isReady means we've fully initialized at least once - skip loading UI on return
+  const hasHydratedData = isOwnerHydrated(category) || isOwnerReady(category) || deckQueue.length > 0;
 
   // STABLE LOADING SHELL: Only show full skeleton if NOT hydrated AND loading
-  // Once hydrated, never show full skeleton again (use placeholderData from query)
+  // Once hydrated or ready, never show full skeleton again (use placeholderData from query)
   if (!hasHydratedData && isLoading) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
