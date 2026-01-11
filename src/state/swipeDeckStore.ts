@@ -76,14 +76,30 @@ const customStorage = {
     if (!str) return null;
     try {
       const parsed = JSON.parse(str);
-      // Convert arrays back to Sets
-      if (parsed.state?.clientDeck?.swipedIds) {
-        parsed.state.clientDeck.swipedIds = new Set(parsed.state.clientDeck.swipedIds);
+      // Convert arrays back to Sets and add default values for missing fields
+      if (parsed.state?.clientDeck) {
+        if (parsed.state.clientDeck.swipedIds) {
+          parsed.state.clientDeck.swipedIds = new Set(parsed.state.clientDeck.swipedIds);
+        }
+        // Ensure isReady has a default value (for old persisted data)
+        if (parsed.state.clientDeck.isReady === undefined) {
+          parsed.state.clientDeck.isReady = false;
+        }
+        if (parsed.state.clientDeck.isHydrated === undefined) {
+          parsed.state.clientDeck.isHydrated = false;
+        }
       }
       if (parsed.state?.ownerDecks) {
         Object.keys(parsed.state.ownerDecks).forEach(key => {
           if (parsed.state.ownerDecks[key]?.swipedIds) {
             parsed.state.ownerDecks[key].swipedIds = new Set(parsed.state.ownerDecks[key].swipedIds);
+          }
+          // Ensure isReady has a default value (for old persisted data)
+          if (parsed.state.ownerDecks[key]?.isReady === undefined) {
+            parsed.state.ownerDecks[key].isReady = false;
+          }
+          if (parsed.state.ownerDecks[key]?.isHydrated === undefined) {
+            parsed.state.ownerDecks[key].isHydrated = false;
           }
         });
       }
@@ -333,13 +349,13 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
         });
       },
 
-      // Getters
-      isClientHydrated: () => get().clientDeck.isHydrated,
-      isOwnerHydrated: (category) => get().ownerDecks[category]?.isHydrated || false,
-      isClientReady: () => get().clientDeck.isReady,
-      isOwnerReady: (category) => get().ownerDecks[category]?.isReady || false,
-      getClientDeckItems: () => get().clientDeck.deckItems,
-      getOwnerDeckItems: (category) => get().ownerDecks[category]?.deckItems || [],
+      // Getters - use ?? false to handle undefined from old persisted data
+      isClientHydrated: () => get().clientDeck.isHydrated ?? false,
+      isOwnerHydrated: (category) => get().ownerDecks[category]?.isHydrated ?? false,
+      isClientReady: () => get().clientDeck.isReady ?? false,
+      isOwnerReady: (category) => get().ownerDecks[category]?.isReady ?? false,
+      getClientDeckItems: () => get().clientDeck.deckItems ?? [],
+      getOwnerDeckItems: (category) => get().ownerDecks[category]?.deckItems ?? [],
     }),
     {
       name: 'swipe-deck-store',
