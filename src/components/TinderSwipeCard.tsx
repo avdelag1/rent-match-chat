@@ -324,12 +324,26 @@ const InstantImageGallery = memo(({
 
   return (
     // Fixed aspect ratio container - prevents layout shifts
-    <div className="absolute inset-0 w-full h-full" style={{ aspectRatio: '4/5', minHeight: '100%' }}>
+    // PERF: contain:paint prevents repaints outside this container
+    <div
+      className="absolute inset-0 w-full h-full"
+      style={{
+        aspectRatio: '4/5',
+        minHeight: '100%',
+        contain: 'paint',
+        // PERF: Force GPU layer for entire container
+        transform: 'translateZ(0)',
+      }}
+    >
       {/* LAYER 1: Premium skeleton shimmer placeholder - NEVER black/dark
           Uses light slate colors that work in both light and dark mode with animated shimmer */}
       <div
         className="absolute inset-0 rounded-3xl overflow-hidden"
-        style={{ zIndex: 1 }}
+        style={{
+          zIndex: 1,
+          // PERF: GPU acceleration for skeleton layer
+          transform: 'translateZ(0)',
+        }}
       >
         {/* Base gradient - neutral light gray */}
         <div
@@ -345,7 +359,9 @@ const InstantImageGallery = memo(({
             background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 75%, transparent 100%)',
             backgroundSize: '200% 100%',
             animation: 'skeleton-shimmer 1.2s ease-in-out infinite',
+            // PERF: Only animate background-position, not entire repaint
             willChange: 'background-position',
+            transform: 'translateZ(0)',
           }}
         />
         {/* Secondary slower shimmer for depth */}
@@ -356,12 +372,13 @@ const InstantImageGallery = memo(({
             backgroundSize: '200% 100%',
             animation: 'skeleton-shimmer 2s ease-in-out infinite',
             animationDelay: '0.5s',
+            transform: 'translateZ(0)',
           }}
         />
-        {/* Placeholder content skeleton */}
+        {/* Placeholder content skeleton - PERF: Removed backdrop-blur for 60fps */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          {/* Image icon placeholder */}
-          <div className="w-20 h-20 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm shadow-inner">
+          {/* Image icon placeholder - PERF: Removed backdrop-blur */}
+          <div className="w-20 h-20 rounded-full bg-white/50 flex items-center justify-center shadow-inner">
             <svg className="w-10 h-10 text-slate-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -381,7 +398,10 @@ const InstantImageGallery = memo(({
           style={{
             zIndex: 2,
             filter: 'blur(20px)',
-            transform: 'scale(1.1)',
+            // PERF: GPU accelerated transform
+            transform: 'scale(1.1) translateZ(0)',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
           }}
         >
           <img
@@ -400,7 +420,13 @@ const InstantImageGallery = memo(({
           src={previousSrc}
           alt=""
           className="absolute inset-0 w-full h-full object-cover rounded-3xl"
-          style={{ zIndex: 3 }}
+          style={{
+            zIndex: 3,
+            // PERF: GPU accelerated
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+          }}
           draggable={false}
           aria-hidden="true"
         />

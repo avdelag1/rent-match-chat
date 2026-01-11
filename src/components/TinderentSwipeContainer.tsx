@@ -267,16 +267,91 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     filters?.premiumOnly,
   ]);
 
+  // PERF FIX: Create stable filter signature for deck versioning
+  // This detects when filters actually changed vs just navigation return
+  const filterSignature = useMemo(() => {
+    if (!filters) return 'default';
+    return [
+      filters.category || '',
+      filters.categories?.join(',') || '',
+      filters.listingType || '',
+      filters.priceRange?.join('-') || '',
+      filters.bedrooms?.join(',') || '',
+      filters.bathrooms?.join(',') || '',
+      filters.amenities?.join(',') || '',
+      filters.propertyType?.join(',') || '',
+      filters.petFriendly ? '1' : '0',
+      filters.furnished ? '1' : '0',
+      filters.verified ? '1' : '0',
+      filters.premiumOnly ? '1' : '0',
+    ].join('|');
+  }, [filters]);
+
+  // Track previous filter signature to detect filter changes
+  const prevFilterSignatureRef = useRef<string>(filterSignature);
+  const filterChangedRef = useRef(false);
+
+  // PERF FIX: Track previous listing IDs signature to detect actual data changes
+  // Declared early so they can be used in both filter reset and data append effects
+  const prevListingIdsRef = useRef<string>('');
+  const hasNewListingsRef = useRef(false);
+
+  // Detect filter changes (not navigation)
+  if (filterSignature !== prevFilterSignatureRef.current) {
+    filterChangedRef.current = true;
+    prevFilterSignatureRef.current = filterSignature;
+  }
+
+  // PERF FIX: Reset deck ONLY when filters actually change (not on navigation return)
+  // This effect uses filterSignature as dependency to detect genuine filter changes
+  useEffect(() => {
+    // Skip on initial mount
+    if (!filterChangedRef.current) return;
+
+    // Reset the filter changed flag
+    filterChangedRef.current = false;
+
+    // Clear deck for fresh results with new filters
+    deckQueueRef.current = [];
+    currentIndexRef.current = 0;
+    swipedIdsRef.current.clear();
+    prevListingIdsRef.current = '';
+    hasNewListingsRef.current = false;
+    setPage(0);
+
+    // Clear persisted deck since filters changed
+    resetClientDeck();
+
+    // Force UI update
+    setRenderKey(n => n + 1);
+  }, [filterSignature, resetClientDeck]);
+
   // Get listings with filters - PERF: pass userId to avoid getUser() inside queryFn
   const {
     data: smartListings = [],
     isLoading: smartLoading,
+    isFetching: smartFetching,
     error: smartError,
     refetch: refetchSmart
   } = useSmartListingMatching(user?.id, [], stableFilters, page, 10, isRefreshMode);
 
   const isLoading = smartLoading;
+  const isFetching = smartFetching;
   const error = smartError;
+
+  // PERF FIX: Create stable listing IDs signature to detect actual data changes
+  // This prevents unnecessary deck updates when React Query returns same data with new reference
+  const listingIdsSignature = useMemo(() => {
+    return smartListings.map(l => l.id).join(',');
+  }, [smartListings]);
+
+  // Determine if we have genuinely new data (not just reference change)
+  if (listingIdsSignature !== prevListingIdsRef.current && listingIdsSignature.length > 0) {
+    const currentIds = new Set(deckQueueRef.current.map(l => l.id));
+    const newIds = smartListings.filter(l => !currentIds.has(l.id) && !swipedIdsRef.current.has(l.id));
+    hasNewListingsRef.current = newIds.length > 0;
+    prevListingIdsRef.current = listingIdsSignature;
+  }
 
   // Prefetch images for next cards
   // PERF FIX: Pass renderKey as trigger to ensure prefetch runs on each swipe
@@ -326,37 +401,52 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   }, [renderKey, prefetchListingDetails, isDashboard]); // renderKey updates on each swipe, triggering reliable prefetch
 
   // CONSTANT-TIME: Append new unique listings to queue AND persist to store
+  // PERF FIX: Only run when we have genuinely new listings (not just reference change)
+  // Uses listingIdsSignature for stable dependency instead of smartListings array
   useEffect(() => {
-    if (smartListings.length > 0 && !isLoading) {
-      const existingIds = new Set(deckQueueRef.current.map(l => l.id));
-      const newListings = smartListings.filter(l =>
-        !existingIds.has(l.id) && !swipedIdsRef.current.has(l.id)
-      );
-
-      if (newListings.length > 0) {
-        deckQueueRef.current = [...deckQueueRef.current, ...newListings];
-        // Cap at 50 listings
-        if (deckQueueRef.current.length > 50) {
-          const offset = deckQueueRef.current.length - 50;
-          deckQueueRef.current = deckQueueRef.current.slice(offset);
-          currentIndexRef.current = Math.max(0, currentIndexRef.current - offset);
-        }
-
-        // PERSIST: Save to store and session for navigation survival
-        setClientDeck(deckQueueRef.current, true);
-        persistDeckToSession('client', 'listings', deckQueueRef.current);
-
-        // PERF: Mark deck as ready for instant return on re-navigation
-        // This ensures that when user returns to dashboard, we skip all initialization
-        if (!isClientReady()) {
-          markClientReady();
-        }
-
-        setRenderKey(n => n + 1);
+    // Guard: Only process if we have new data and not in initial loading state
+    if (!hasNewListingsRef.current || isLoading) {
+      // Still reset the fetching flag when loading completes
+      if (!isLoading && !isFetching) {
+        isFetchingMore.current = false;
       }
-      isFetchingMore.current = false;
+      return;
     }
-  }, [smartListings, isLoading, setClientDeck, isClientReady, markClientReady]);
+
+    // Reset the new listings flag
+    hasNewListingsRef.current = false;
+
+    const existingIds = new Set(deckQueueRef.current.map(l => l.id));
+    const newListings = smartListings.filter(l =>
+      !existingIds.has(l.id) && !swipedIdsRef.current.has(l.id)
+    );
+
+    if (newListings.length > 0) {
+      deckQueueRef.current = [...deckQueueRef.current, ...newListings];
+      // Cap at 50 listings
+      if (deckQueueRef.current.length > 50) {
+        const offset = deckQueueRef.current.length - 50;
+        deckQueueRef.current = deckQueueRef.current.slice(offset);
+        currentIndexRef.current = Math.max(0, currentIndexRef.current - offset);
+      }
+
+      // PERSIST: Save to store and session for navigation survival
+      setClientDeck(deckQueueRef.current, true);
+      persistDeckToSession('client', 'listings', deckQueueRef.current);
+
+      // PERF: Mark deck as ready for instant return on re-navigation
+      // This ensures that when user returns to dashboard, we skip all initialization
+      if (!isClientReady()) {
+        markClientReady();
+      }
+
+      // PERF FIX: Only trigger render update when we actually added new cards
+      // This is the minimal state change needed to update UI
+      setRenderKey(n => n + 1);
+    }
+
+    isFetchingMore.current = false;
+  }, [listingIdsSignature, isLoading, isFetching, smartListings, setClientDeck, isClientReady, markClientReady]);
 
   // Get current visible cards for 3-card stack
   const currentIndex = currentIndexRef.current;
@@ -573,48 +663,72 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // STABLE LOADING SHELL: Only show full skeleton if NOT hydrated AND loading
   // Once hydrated or ready, never show full skeleton again (use placeholderData from query)
+  // PERF: GPU-accelerated skeleton to match card styling
   if (!hasHydratedData && isLoading) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
         <div className="relative flex-1 w-full">
-          <div className="absolute inset-0 rounded-3xl overflow-hidden bg-muted/30 animate-pulse">
-            <div className="absolute inset-0 bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
-                   style={{ animationDuration: '1.5s', backgroundSize: '200% 100%' }} />
-            </div>
+          <div
+            className="absolute inset-0 rounded-3xl overflow-hidden"
+            style={{
+              transform: 'translateZ(0)',
+              contain: 'paint',
+            }}
+          >
+            {/* Base gradient - matches TinderSwipeCard skeleton */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 35%, #cbd5e1 65%, #94a3b8 100%)',
+              }}
+            />
+            {/* Animated shimmer - GPU accelerated */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 75%, transparent 100%)',
+                backgroundSize: '200% 100%',
+                animation: 'skeleton-shimmer 1.2s ease-in-out infinite',
+                willChange: 'background-position',
+                transform: 'translateZ(0)',
+              }}
+            />
+            {/* Story dots placeholder */}
             <div className="absolute top-3 left-0 right-0 z-30 flex justify-center gap-1 px-4">
               {[1, 2, 3, 4].map((num) => (
-                <div key={`skeleton-dot-${num}`} className="flex-1 h-1 rounded-full bg-white/20" />
+                <div key={`skeleton-dot-${num}`} className="flex-1 h-1 rounded-full bg-white/30" />
               ))}
             </div>
-            <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-xl rounded-t-[24px] p-4 pt-6">
+            {/* Bottom sheet skeleton */}
+            <div className="absolute bottom-0 left-0 right-0 bg-black/70 rounded-t-[24px] p-4 pt-6">
               <div className="flex justify-center mb-2">
                 <div className="w-10 h-1.5 bg-white/30 rounded-full" />
               </div>
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-3/4 bg-white/20" />
-                  <Skeleton className="h-4 w-1/2 bg-white/15" />
+                  <div className="h-5 w-3/4 bg-white/20 rounded-lg" />
+                  <div className="h-4 w-1/2 bg-white/15 rounded-lg" />
                 </div>
                 <div className="text-right space-y-1">
-                  <Skeleton className="h-6 w-20 bg-white/20" />
-                  <Skeleton className="h-3 w-12 bg-white/15 ml-auto" />
+                  <div className="h-6 w-20 bg-white/20 rounded-lg" />
+                  <div className="h-3 w-12 bg-white/15 rounded-lg ml-auto" />
                 </div>
               </div>
               <div className="flex gap-2">
-                <Skeleton className="h-4 w-12 bg-white/15" />
-                <Skeleton className="h-4 w-12 bg-white/15" />
-                <Skeleton className="h-4 w-16 bg-white/15" />
+                <div className="h-4 w-12 bg-white/15 rounded-full" />
+                <div className="h-4 w-12 bg-white/15 rounded-full" />
+                <div className="h-4 w-16 bg-white/15 rounded-full" />
               </div>
             </div>
           </div>
         </div>
+        {/* Action buttons skeleton */}
         <div className="flex-shrink-0 flex justify-center items-center py-3 px-4">
           <div className="flex items-center gap-3">
-            <Skeleton className="w-14 h-14 rounded-full bg-muted/40" />
-            <Skeleton className="w-11 h-11 rounded-full bg-muted/30" />
-            <Skeleton className="w-11 h-11 rounded-full bg-muted/30" />
-            <Skeleton className="w-14 h-14 rounded-full bg-muted/40" />
+            <div className="w-14 h-14 rounded-full bg-muted/40 animate-pulse" />
+            <div className="w-11 h-11 rounded-full bg-muted/30 animate-pulse" />
+            <div className="w-11 h-11 rounded-full bg-muted/30 animate-pulse" />
+            <div className="w-14 h-14 rounded-full bg-muted/40 animate-pulse" />
           </div>
         </div>
       </div>
