@@ -20,6 +20,7 @@ export interface DeckState {
   currentPage: number;
   lastFetchAt: number;
   isHydrated: boolean;
+  isReady: boolean; // True when deck is fully initialized and ready for instant return
   swipedIds: Set<string>;
 }
 
@@ -36,6 +37,7 @@ export interface SwipeDeckSlice {
   markClientSwiped: (id: string) => void;
   resetClientDeck: () => void;
   hydrateClientDeck: () => void;
+  markClientReady: () => void; // Mark deck as ready for instant return
 
   // Actions for owner deck
   setOwnerDeck: (category: string, items: DeckItem[], append?: boolean) => void;
@@ -44,10 +46,13 @@ export interface SwipeDeckSlice {
   markOwnerSwiped: (category: string, id: string) => void;
   resetOwnerDeck: (category: string) => void;
   hydrateOwnerDeck: (category: string) => void;
+  markOwnerReady: (category: string) => void; // Mark deck as ready for instant return
 
-  // Get hydrated status
+  // Get hydrated/ready status
   isClientHydrated: () => boolean;
   isOwnerHydrated: (category: string) => boolean;
+  isClientReady: () => boolean;
+  isOwnerReady: (category: string) => boolean;
 
   // Get current deck items
   getClientDeckItems: () => DeckItem[];
@@ -60,6 +65,7 @@ const createEmptyDeckState = (): DeckState => ({
   currentPage: 0,
   lastFetchAt: 0,
   isHydrated: false,
+  isReady: false,
   swipedIds: new Set(),
 });
 
@@ -202,6 +208,12 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
         }));
       },
 
+      markClientReady: () => {
+        set((state) => ({
+          clientDeck: { ...state.clientDeck, isReady: true }
+        }));
+      },
+
       // Owner deck actions
       setOwnerDeck: (category, items, append = false) => {
         set((state) => {
@@ -309,9 +321,23 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
         });
       },
 
+      markOwnerReady: (category) => {
+        set((state) => {
+          const existingDeck = state.ownerDecks[category] || createEmptyDeckState();
+          return {
+            ownerDecks: {
+              ...state.ownerDecks,
+              [category]: { ...existingDeck, isReady: true }
+            }
+          };
+        });
+      },
+
       // Getters
       isClientHydrated: () => get().clientDeck.isHydrated,
       isOwnerHydrated: (category) => get().ownerDecks[category]?.isHydrated || false,
+      isClientReady: () => get().clientDeck.isReady,
+      isOwnerReady: (category) => get().ownerDecks[category]?.isReady || false,
       getClientDeckItems: () => get().clientDeck.deckItems,
       getOwnerDeckItems: (category) => get().ownerDecks[category]?.deckItems || [],
     }),
@@ -325,6 +351,7 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
           currentIndex: state.clientDeck.currentIndex,
           currentPage: state.clientDeck.currentPage,
           isHydrated: state.clientDeck.isHydrated,
+          isReady: state.clientDeck.isReady,
           swipedIds: state.clientDeck.swipedIds,
           // CRITICAL: Persist minimal deck items for instant render (no dark cards)
           deckItems: state.clientDeck.deckItems.slice(0, 20).map(item => ({
@@ -355,6 +382,7 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
               currentIndex: deck.currentIndex,
               currentPage: deck.currentPage,
               isHydrated: deck.isHydrated,
+              isReady: deck.isReady,
               swipedIds: deck.swipedIds,
               // CRITICAL: Persist minimal deck items for instant render (no dark cards)
               deckItems: deck.deckItems.slice(0, 20).map(item => ({
