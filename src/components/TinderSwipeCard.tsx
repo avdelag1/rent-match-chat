@@ -21,6 +21,52 @@ const globalSwipeImageCache = new Map<string, {
   failed: boolean;
 }>();
 
+/**
+ * PERF FIX: Exported function to preload an image into the global cache
+ * Called by TinderentSwipeContainer on hydration to ensure top card image is ready
+ * Returns a promise that resolves when image is decoded (or fails)
+ */
+export function preloadImageToCache(rawUrl: string): Promise<boolean> {
+  const optimizedUrl = getCardImageUrl(rawUrl);
+
+  // Already cached and decoded - instant return
+  const cached = globalSwipeImageCache.get(optimizedUrl);
+  if (cached?.decoded) return Promise.resolve(true);
+  if (cached?.failed) return Promise.resolve(false);
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    (img as any).fetchPriority = 'high';
+    img.decoding = 'async';
+
+    img.onload = () => {
+      globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: false, failed: false });
+      if ('decode' in img) {
+        img.decode()
+          .then(() => {
+            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+            resolve(true);
+          })
+          .catch(() => {
+            // Decode failed but image loaded - still usable
+            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+            resolve(true);
+          });
+      } else {
+        globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+        resolve(true);
+      }
+    };
+
+    img.onerror = () => {
+      globalSwipeImageCache.set(optimizedUrl, { loaded: false, decoded: false, failed: true });
+      resolve(false);
+    };
+
+    img.src = optimizedUrl;
+  });
+}
+
 // Async decode helper with timeout
 async function decodeImageWithTimeout(src: string, timeoutMs = 3000): Promise<boolean> {
   return new Promise((resolve) => {
@@ -50,6 +96,9 @@ async function decodeImageWithTimeout(src: string, timeoutMs = 3000): Promise<bo
 // Ultra-fast image gallery with TWO-LAYER approach - never shows black/empty
 // Layer 1: Blurred previous image stays visible during transition
 // Layer 2: New image fades in only after decode
+//
+// PERF FIX: Check cache SYNCHRONOUSLY on init - if image is cached, show immediately
+// This eliminates the black flash when returning to dashboard
 const InstantImageGallery = memo(({
   images,
   currentIndex,
@@ -61,17 +110,40 @@ const InstantImageGallery = memo(({
   alt: string;
   isTop: boolean;
 }) => {
+  // PERF FIX: Check cache synchronously to determine initial state
+  // This prevents the black flash by starting with showImage=true when cached
+  const getInitialImageState = () => {
+    const src = images[currentIndex];
+    if (!src) return { displayedSrc: null, showImage: false };
+
+    const optimizedSrc = getCardImageUrl(src);
+    const cached = globalSwipeImageCache.get(optimizedSrc);
+
+    // If image is already decoded, show it immediately (no fade)
+    if (cached?.decoded && !cached?.failed) {
+      return { displayedSrc: optimizedSrc, showImage: true };
+    }
+
+    // Not cached - will need to load
+    return { displayedSrc: null, showImage: false };
+  };
+
+  const initialState = getInitialImageState();
+
   // Track displayed and previous images for two-layer transition
-  const [displayedSrc, setDisplayedSrc] = useState<string | null>(null);
+  const [displayedSrc, setDisplayedSrc] = useState<string | null>(initialState.displayedSrc);
   const [previousSrc, setPreviousSrc] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showImage, setShowImage] = useState(false);
+  const [showImage, setShowImage] = useState(initialState.showImage);
 
   // Refs to track state without triggering re-renders
   const loadedImagesRef = useRef<Set<string>>(new Set());
   const failedImagesRef = useRef<Set<string>>(new Set());
   const decodingRef = useRef<boolean>(false);
   const mountedRef = useRef<boolean>(true);
+
+  // PERF FIX: Track if we started with a cached image (skip fade animation)
+  const startedCachedRef = useRef(initialState.showImage);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -302,12 +374,15 @@ const InstantImageGallery = memo(({
         />
       )}
 
-      {/* LAYER 4: Current image - fades in after decode */}
+      {/* LAYER 4: Current image - fades in after decode (or instant if cached) */}
       {displayedSrc && (
         <img
           src={displayedSrc}
           alt={alt}
-          className="absolute inset-0 w-full h-full object-cover rounded-3xl transition-opacity duration-150"
+          // PERF FIX: Skip transition when started with cached image
+          className={`absolute inset-0 w-full h-full object-cover rounded-3xl ${
+            startedCachedRef.current ? '' : 'transition-opacity duration-150'
+          }`}
           draggable={false}
           loading="eager"
           decoding="async"
@@ -315,7 +390,7 @@ const InstantImageGallery = memo(({
           style={{
             zIndex: 4,
             opacity: showImage ? 1 : 0,
-            willChange: 'opacity',
+            willChange: startedCachedRef.current ? 'auto' : 'opacity',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
             transform: 'translateZ(0)',
@@ -323,6 +398,8 @@ const InstantImageGallery = memo(({
           onLoad={() => {
             if (!showImage && mountedRef.current) {
               setShowImage(true);
+              // After first load, allow transitions for subsequent images
+              startedCachedRef.current = false;
             }
           }}
           onError={() => {
