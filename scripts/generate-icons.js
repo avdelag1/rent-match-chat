@@ -24,6 +24,21 @@ const REGULAR_SIZES = [
   { size: 180, name: 'apple-touch-icon.png' }
 ];
 
+// Apple touch icon sizes for iOS
+const APPLE_TOUCH_ICON_SIZES = [
+  { size: 57, name: 'apple-touch-icon-57x57.png' },
+  { size: 60, name: 'apple-touch-icon-60x60.png' },
+  { size: 72, name: 'apple-touch-icon-72x72.png' },
+  { size: 76, name: 'apple-touch-icon-76x76.png' },
+  { size: 114, name: 'apple-touch-icon-114x114.png' },
+  { size: 120, name: 'apple-touch-icon-120x120.png' },
+  { size: 144, name: 'apple-touch-icon-144x144.png' },
+  { size: 152, name: 'apple-touch-icon-152x152.png' },
+  { size: 167, name: 'apple-touch-icon-167x167.png' },
+  { size: 180, name: 'apple-touch-icon-180x180.png' },
+  { size: 1024, name: 'apple-touch-icon-1024x1024.png' }
+];
+
 // Maskable icons need safe zone (10% padding on all sides)
 const MASKABLE_SIZES = [
   { size: 192, name: 'maskable-192.png' },
@@ -86,6 +101,12 @@ async function main() {
   // Generate regular icons
   console.log('Regular icons:');
   for (const { size, name } of REGULAR_SIZES) {
+    await generateRegularIcon(size, name);
+  }
+
+  console.log('\nApple touch icons (for iOS):');
+  // Generate apple touch icons
+  for (const { size, name } of APPLE_TOUCH_ICON_SIZES) {
     await generateRegularIcon(size, name);
   }
 
