@@ -13,7 +13,6 @@ export default function PrivacyPolicy() {
           onClick={() => navigate(-1)}
           className="mb-6"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
 
