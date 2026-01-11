@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
-import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart, Star, Sparkles, UserCheck, TrendingUp } from 'lucide-react';
+import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart, Info, DollarSign, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -167,6 +167,7 @@ const OwnerClientTinderCardComponent = ({
 }: OwnerClientTinderCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+  const [isInsightsPanelOpen, setIsInsightsPanelOpen] = useState(false);
 
   // Motion values - GAME-LIKE INSTANT RESPONSE
   const x = useMotionValue(0);
@@ -197,7 +198,7 @@ const OwnerClientTinderCardComponent = ({
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    // Left 30% = previous, Center 40% = expand details, Right 30% = next
+    // Left 30% = previous, Center 40% = toggle insights panel, Right 30% = next
     if (clickX < width * 0.3 && images.length > 1) {
       setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
       triggerHaptic('light');
@@ -205,10 +206,11 @@ const OwnerClientTinderCardComponent = ({
       setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
       triggerHaptic('light');
     } else {
-      setIsBottomSheetExpanded(!isBottomSheetExpanded);
+      // Center tap toggles insights panel
+      setIsInsightsPanelOpen(prev => !prev);
       triggerHaptic('medium');
     }
-  }, [isTop, images.length, isBottomSheetExpanded]);
+  }, [isTop, images.length]);
 
   // BUTTON SWIPE - Animate card then trigger swipe for smooth swoosh effect
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
@@ -391,50 +393,126 @@ const OwnerClientTinderCardComponent = ({
               </div>
             )}
 
-            {/* Photo Insights Overlay - Quick info badges on top of photo */}
-            <div className="absolute top-12 left-3 z-20 flex flex-col gap-2">
-              {/* Match Percentage Badge - shows how well client matches your listing */}
-              {profile.matchPercentage !== undefined && profile.matchPercentage > 0 && (
-                <Badge
-                  className={`
-                    backdrop-blur-md shadow-lg border flex items-center gap-1.5 px-2.5 py-1
-                    ${profile.matchPercentage >= 85
-                      ? 'bg-gradient-to-r from-emerald-500/95 to-green-500/95 border-emerald-400 text-white'
-                      : profile.matchPercentage >= 70
-                        ? 'bg-gradient-to-r from-blue-500/95 to-cyan-500/95 border-blue-400 text-white'
-                        : profile.matchPercentage >= 50
-                          ? 'bg-gradient-to-r from-amber-500/95 to-yellow-500/95 border-amber-400 text-white'
-                          : 'bg-black/60 border-white/20 text-white/90'
-                    }
-                  `}
+            {/* Center-Tap Insights Panel - Shows client details when tapping center of photo */}
+            <AnimatePresence>
+              {isInsightsPanelOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  className="absolute inset-x-4 top-16 bottom-36 z-30 bg-black/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsInsightsPanelOpen(false);
+                    triggerHaptic('light');
+                  }}
                 >
-                  {profile.matchPercentage >= 85 ? (
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                  ) : profile.matchPercentage >= 70 ? (
-                    <Sparkles className="w-3.5 h-3.5" />
-                  ) : null}
-                  <span className="text-xs font-bold">{profile.matchPercentage}% Match</span>
-                </Badge>
-              )}
+                  {/* Close hint */}
+                  <div className="absolute top-2 right-2 z-10">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                      <X className="w-4 h-4 text-white/70" />
+                    </div>
+                  </div>
 
-              {/* Ready Renter Badge - shows for clients with complete profiles */}
-              {profile.profile_images && profile.profile_images.length >= 3 &&
-               profile.interests && profile.interests.length >= 3 && (
-                <Badge className="bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-md border-purple-400 text-white shadow-lg flex items-center gap-1.5 px-2.5 py-1">
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span className="text-xs font-bold">Ready Renter</span>
-                </Badge>
-              )}
+                  {/* Insights Content */}
+                  <div className="p-4 h-full overflow-y-auto">
+                    {/* Header */}
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-white truncate">
+                          {profile.name}
+                          {profile.age && <span className="text-white/60 ml-2 text-base font-normal">{profile.age}</span>}
+                        </h3>
+                        {profile.city && (
+                          <div className="flex items-center text-white/70 text-sm">
+                            <MapPin className="w-3.5 h-3.5 mr-1" />
+                            <span className="truncate">{profile.city}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-              {/* High Interest Badge - shows for highly engaged clients */}
-              {profile.preferred_listing_types && profile.preferred_listing_types.length >= 2 &&
-               profile.budget_max && profile.budget_max > 0 && (
-                <Badge className="bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-md border-orange-400 text-white shadow-lg flex items-center gap-1.5 px-2.5 py-1">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span className="text-xs font-bold">High Interest</span>
-                </Badge>
+                    {/* Budget & Verification */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {profile.budget_max && (
+                        <div className="bg-white/10 rounded-xl p-3">
+                          <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
+                            <DollarSign className="w-3.5 h-3.5" />
+                            <span>Max Budget</span>
+                          </div>
+                          <div className="text-xl font-bold text-emerald-400">${profile.budget_max.toLocaleString()}</div>
+                        </div>
+                      )}
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Status</span>
+                        </div>
+                        <div className={`text-lg font-semibold ${profile.verified ? 'text-emerald-400' : 'text-amber-400'}`}>
+                          {profile.verified ? 'Verified' : 'Pending'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Looking For */}
+                    {profile.preferred_listing_types && profile.preferred_listing_types.length > 0 && (
+                      <div className="bg-white/10 rounded-xl p-3 mb-4">
+                        <h4 className="text-white/60 text-xs mb-2 uppercase tracking-wide">Looking For</h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.preferred_listing_types.map((type, idx) => (
+                            <Badge key={`type-${idx}`} className="bg-blue-500/30 text-blue-300 border-blue-500/50 text-xs">
+                              {type}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Interests */}
+                    {profile.interests && profile.interests.length > 0 && (
+                      <div className="bg-white/10 rounded-xl p-3 mb-4">
+                        <h4 className="text-white/60 text-xs mb-2 uppercase tracking-wide">Interests</h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.interests.slice(0, 6).map((interest, idx) => (
+                            <Badge key={`interest-${idx}`} className="bg-white/10 text-white/80 border-white/20 text-xs">
+                              {interest}
+                            </Badge>
+                          ))}
+                          {profile.interests.length > 6 && (
+                            <Badge className="bg-white/5 text-white/50 border-white/10 text-xs">
+                              +{profile.interests.length - 6} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Lifestyle */}
+                    {profile.lifestyle_tags && profile.lifestyle_tags.length > 0 && (
+                      <div className="bg-purple-500/20 rounded-xl p-3">
+                        <h4 className="text-purple-400 text-xs mb-2 uppercase tracking-wide font-semibold">Lifestyle</h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.lifestyle_tags.slice(0, 4).map((tag, idx) => (
+                            <Badge key={`lifestyle-${idx}`} className="bg-purple-500/30 text-purple-300 border-purple-500/50 text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tap to close hint */}
+                    <div className="text-center mt-4 text-white/40 text-xs">
+                      Tap anywhere to close
+                    </div>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
@@ -622,9 +700,9 @@ const OwnerClientTinderCardComponent = ({
         </div>
       </motion.div>
 
-      {/* Action Buttons - Floating over card, hide when bottom sheet expanded */}
+      {/* Action Buttons - Floating over card, hide when bottom sheet expanded or insights panel open */}
       <AnimatePresence>
-        {isTop && !hideActions && !isBottomSheetExpanded && (
+        {isTop && !hideActions && !isBottomSheetExpanded && !isInsightsPanelOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
