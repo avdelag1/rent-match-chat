@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, memo, useRef, useMemo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { TinderSwipeCard } from './TinderSwipeCard';
+import { TinderSwipeCard, preloadImageToCache } from './TinderSwipeCard';
 import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { ShareDialog } from './ShareDialog';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
@@ -170,6 +170,29 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const currentIndexRef = useRef(clientDeck.currentIndex);
   const swipedIdsRef = useRef<Set<string>>(new Set(clientDeck.swipedIds));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
+
+  // PERF FIX: Track if we're returning to dashboard (has hydrated data)
+  // When true, skip initial animations to prevent "double render" feeling
+  const isReturningRef = useRef(deckQueueRef.current.length > 0);
+  const hasAnimatedOnceRef = useRef(false);
+
+  // PERF FIX: Eagerly preload top card image when we have hydrated deck data
+  // This runs SYNCHRONOUSLY during component initialization (before first paint)
+  // The image will be in cache when TinderSwipeCard renders, preventing any flash
+  const eagerPreloadInitiatedRef = useRef(false);
+  if (!eagerPreloadInitiatedRef.current && deckQueueRef.current.length > 0) {
+    eagerPreloadInitiatedRef.current = true;
+    const topCardImages = deckQueueRef.current[currentIndexRef.current]?.images;
+    if (topCardImages?.[0]) {
+      // Fire and forget - preloads to global cache
+      preloadImageToCache(topCardImages[0]);
+      // Also preload second card's first image
+      const nextCardImages = deckQueueRef.current[currentIndexRef.current + 1]?.images;
+      if (nextCardImages?.[0]) {
+        preloadImageToCache(nextCardImages[0]);
+      }
+    }
+  }
 
   // PERF: Throttled prefetch scheduler
   const prefetchSchedulerRef = useRef(new PrefetchScheduler());
@@ -653,11 +676,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         )}
 
         {/* Current card on top - fully interactive */}
-        <AnimatePresence mode="popLayout">
+        {/* PERF FIX: Skip initial animation on re-entry to prevent "double render" feeling */}
+        <AnimatePresence mode="popLayout" initial={!isReturningRef.current}>
           {topCard && (
             <motion.div
               key={topCard.id}
-              initial={{ scale: 0.95, opacity: 0 }}
+              // PERF FIX: Use false to skip animation when returning to dashboard
+              // This prevents the visible "pop-in" that makes it look like double-rendering
+              initial={isReturningRef.current && !hasAnimatedOnceRef.current ? false : { scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
@@ -669,6 +695,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.5 }}
               className="w-full h-full absolute inset-0"
               style={{ willChange: 'transform, opacity', zIndex: 10 }}
+              onAnimationComplete={() => {
+                // After first animation, allow future animations (for new cards)
+                hasAnimatedOnceRef.current = true;
+              }}
             >
               <TinderSwipeCard
                 listing={topCard}
