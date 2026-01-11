@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, Eye, Flame, Share2, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, Eye, Flame, Share2, Info, Calendar, DollarSign } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -354,6 +354,7 @@ interface TinderSwipeCardProps {
 const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights, onShare, hasPremium = false, isTop = true, hideActions = false }: TinderSwipeCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+  const [isInsightsPanelOpen, setIsInsightsPanelOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Motion values for drag - PROFESSIONAL RESPONSIVE FEEL
@@ -372,7 +373,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   }, [listing.images]);
   const imageCount = images.length;
 
-  // Photo navigation via tap zones - NO VISUAL INDICATORS
+  // Photo navigation via tap zones - Center tap opens insights panel
   const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isTop) return;
     e.stopPropagation();
@@ -381,17 +382,18 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     const clickX = e.clientX - rect.left;
     const width = rect.width;
 
-    // Left 30% = previous, Right 30% = next
-    // FIX: Center tap no longer toggles bottom sheet (accidental triggers cause layout jumps)
-    // Use the dedicated chevron button or drag handle for bottom sheet control
+    // Left 30% = previous, Right 30% = next, Center 40% = toggle insights panel
     if (clickX < width * 0.3 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
       triggerHaptic('light');
     } else if (clickX > width * 0.7 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === imageCount - 1 ? 0 : prev + 1);
       triggerHaptic('light');
+    } else {
+      // Center tap toggles insights panel
+      setIsInsightsPanelOpen(prev => !prev);
+      triggerHaptic('medium');
     }
-    // Center tap intentionally does nothing - prevents accidental UI state changes
   }, [isTop, imageCount]);
 
   // Handle bottom sheet drag gestures
@@ -579,42 +581,162 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
               </div>
             )}
 
-            {/* Photo Insights Overlay - Quick info badges on top of photo */}
-            <div className="absolute top-12 left-3 z-20 flex flex-col gap-2">
-              {/* Match Percentage Badge - shows how well listing matches preferences */}
-              {(listing as MatchedListing).matchPercentage !== undefined && (listing as MatchedListing).matchPercentage > 0 && (
-                <Badge
-                  className={`
-                    backdrop-blur-md shadow-lg border flex items-center gap-1.5 px-2.5 py-1
-                    ${(listing as MatchedListing).matchPercentage >= 85
-                      ? 'bg-gradient-to-r from-emerald-500/95 to-green-500/95 border-emerald-400 text-white'
-                      : (listing as MatchedListing).matchPercentage >= 70
-                        ? 'bg-gradient-to-r from-blue-500/95 to-cyan-500/95 border-blue-400 text-white'
-                        : (listing as MatchedListing).matchPercentage >= 50
-                          ? 'bg-gradient-to-r from-amber-500/95 to-yellow-500/95 border-amber-400 text-white'
-                          : 'bg-black/60 border-white/20 text-white/90'
-                    }
-                  `}
+            {/* Center-Tap Insights Panel - Shows listing details when tapping center of photo */}
+            <AnimatePresence>
+              {isInsightsPanelOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  className="absolute inset-x-4 top-16 bottom-36 z-30 bg-black/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsInsightsPanelOpen(false);
+                    triggerHaptic('light');
+                  }}
                 >
-                  {(listing as MatchedListing).matchPercentage >= 85 ? (
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                  ) : (listing as MatchedListing).matchPercentage >= 70 ? (
-                    <Sparkles className="w-3.5 h-3.5" />
-                  ) : null}
-                  <span className="text-xs font-bold">{(listing as MatchedListing).matchPercentage}% Match</span>
-                </Badge>
-              )}
+                  {/* Close hint */}
+                  <div className="absolute top-2 right-2 z-10">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                      <X className="w-4 h-4 text-white/70" />
+                    </div>
+                  </div>
 
-              {/* Hot Listing Badge - shows for high quality listings */}
-              {listing.images && listing.images.length >= 5 &&
-               listing.amenities && listing.amenities.length >= 5 &&
-               listing.status === 'available' && (
-                <Badge className="bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-md border-orange-400 text-white shadow-lg flex items-center gap-1.5 px-2.5 py-1">
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span className="text-xs font-bold">Hot Listing</span>
-                </Badge>
+                  {/* Insights Content */}
+                  <div className="p-4 h-full overflow-y-auto">
+                    {/* Header */}
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                        <Info className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-white truncate">{listing.title}</h3>
+                        <div className="flex items-center text-white/70 text-sm">
+                          <MapPin className="w-3.5 h-3.5 mr-1" />
+                          <span className="truncate">{listing.neighborhood}, {listing.city}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Price & Availability */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          <span>Monthly Rent</span>
+                        </div>
+                        <div className="text-xl font-bold text-white">${listing.price?.toLocaleString()}</div>
+                      </div>
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <div className="flex items-center gap-2 text-white/60 text-xs mb-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>Status</span>
+                        </div>
+                        <div className="text-lg font-semibold text-emerald-400 capitalize">{listing.status || 'Available'}</div>
+                      </div>
+                    </div>
+
+                    {/* Property Details */}
+                    <div className="bg-white/10 rounded-xl p-3 mb-4">
+                      <h4 className="text-white/60 text-xs mb-2 uppercase tracking-wide">Property Details</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {listing.category === 'vehicle' || listing.category === 'motorcycle' || listing.category === 'bicycle' || listing.category === 'yacht' ? (
+                          <>
+                            {listing.brand && (
+                              <div className="text-center">
+                                <div className="text-lg font-bold text-white">{listing.brand}</div>
+                                <div className="text-white/50 text-xs">Brand</div>
+                              </div>
+                            )}
+                            {listing.model && (
+                              <div className="text-center">
+                                <div className="text-lg font-bold text-white">{listing.model}</div>
+                                <div className="text-white/50 text-xs">Model</div>
+                              </div>
+                            )}
+                            {listing.year && (
+                              <div className="text-center">
+                                <div className="text-lg font-bold text-white">{listing.year}</div>
+                                <div className="text-white/50 text-xs">Year</div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {listing.beds && (
+                              <div className="text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <Bed className="w-4 h-4 text-white/70" />
+                                  <span className="text-lg font-bold text-white">{listing.beds}</span>
+                                </div>
+                                <div className="text-white/50 text-xs">Beds</div>
+                              </div>
+                            )}
+                            {listing.baths && (
+                              <div className="text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <Bath className="w-4 h-4 text-white/70" />
+                                  <span className="text-lg font-bold text-white">{listing.baths}</span>
+                                </div>
+                                <div className="text-white/50 text-xs">Baths</div>
+                              </div>
+                            )}
+                            {listing.square_footage && (
+                              <div className="text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <Square className="w-4 h-4 text-white/70" />
+                                  <span className="text-lg font-bold text-white">{listing.square_footage}</span>
+                                </div>
+                                <div className="text-white/50 text-xs">Sq Ft</div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Match Reasons (if available) */}
+                    {(listing as MatchedListing).matchReasons && (listing as MatchedListing).matchReasons.length > 0 && (
+                      <div className="bg-emerald-500/20 rounded-xl p-3 mb-4">
+                        <h4 className="text-emerald-400 text-xs mb-2 uppercase tracking-wide font-semibold">Why This Matches You</h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(listing as MatchedListing).matchReasons.slice(0, 4).map((reason, idx) => (
+                            <Badge key={`reason-${idx}`} className="bg-emerald-500/30 text-emerald-300 border-emerald-500/50 text-xs">
+                              {reason}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Amenities Preview */}
+                    {listing.amenities && listing.amenities.length > 0 && (
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <h4 className="text-white/60 text-xs mb-2 uppercase tracking-wide">Top Amenities</h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {listing.amenities.slice(0, 6).map((amenity, idx) => (
+                            <Badge key={`amenity-${idx}`} className="bg-white/10 text-white/80 border-white/20 text-xs">
+                              {amenity}
+                            </Badge>
+                          ))}
+                          {listing.amenities.length > 6 && (
+                            <Badge className="bg-white/5 text-white/50 border-white/10 text-xs">
+                              +{listing.amenities.length - 6} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tap to close hint */}
+                    <div className="text-center mt-4 text-white/40 text-xs">
+                      Tap anywhere to close
+                    </div>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
@@ -773,9 +895,9 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
         </div>
       </motion.div>
 
-      {/* Action Buttons - Floating over card, hide when bottom sheet expanded */}
+      {/* Action Buttons - Floating over card, hide when bottom sheet expanded or insights panel open */}
       <AnimatePresence>
-        {isTop && !hideActions && !isBottomSheetExpanded && (
+        {isTop && !hideActions && !isBottomSheetExpanded && !isInsightsPanelOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
