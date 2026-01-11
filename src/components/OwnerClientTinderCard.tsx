@@ -516,18 +516,23 @@ const OwnerClientTinderCardComponent = ({
           </div>
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
+          {/* Use translateY for GPU-friendly animation (matches TinderSwipeCard) */}
           <motion.div
-            className="absolute bottom-0 left-0 right-0 bg-black/85 rounded-t-[24px] shadow-2xl border-t border-white/10"
+            className="absolute bottom-0 left-0 right-0 bg-black/85 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden z-20"
             animate={{
-              height: isBottomSheetExpanded ? 'min(55%, 320px)' : 'min(18%, 110px)',
-              y: 0
+              y: isBottomSheetExpanded ? 0 : 230
             }}
             transition={{
               type: "spring",
               stiffness: 400,
               damping: 32
             }}
-            style={{ willChange: 'height', maxHeight: 'calc(100% - 80px)' }}
+            style={{
+              height: 350,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+            }}
           >
             {/* Drag Handle */}
             <div className="flex justify-center py-2 pointer-events-none">
@@ -626,7 +631,7 @@ const OwnerClientTinderCardComponent = ({
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
                   className="mt-4 overflow-y-auto"
-                  style={{ maxHeight: 'min(180px, 30vh)' }}
+                  style={{ maxHeight: '150px' }}
                 >
                   {/* Interests */}
                   {profile.interests && profile.interests.length > 0 && (

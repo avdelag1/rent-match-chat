@@ -742,7 +742,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
           {/* FIX: Use translateY instead of height animation for GPU-friendly transforms (no reflow) */}
           <motion.div
-            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden"
+            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden z-20"
             animate={{
               y: isBottomSheetExpanded ? 0 : 230
             }}
