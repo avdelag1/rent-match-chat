@@ -179,32 +179,31 @@
     <!-- Main application script - loaded at end of body for non-blocking render -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Defer Service Worker registration until after main content loads -->
+    <!-- Defer cache cleanup until after main content loads -->
     <script>
-      // Use requestIdleCallback to register SW during browser idle time
-      const registerSW = () => {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
-        }
-        // Cache management - runs after SW registration
-        if (localStorage.getItem('swipes_last_clear') !== '2.0.0') {
-          if ('caches' in window) {
-            caches.keys().then(names => {
-              names.forEach(name => {
-                if (name.startsWith('swipes-') || name.startsWith('swipematch-') || name.startsWith('tinderent-')) {
-                  caches.delete(name);
-                }
+      // Cache cleanup for legacy cache names (runs during idle time)
+      const cleanupCaches = () => {
+        try {
+          if (localStorage.getItem('swipes_last_clear') !== '2.0.0') {
+            if ('caches' in window) {
+              caches.keys().then((names) => {
+                names.forEach((name) => {
+                  if (name.startsWith('swipes-') || name.startsWith('swipematch-') || name.startsWith('tinderent-')) {
+                    caches.delete(name);
+                  }
+                });
               });
-            });
+            }
+            localStorage.setItem('swipes_last_clear', '2.0.0');
           }
-          localStorage.setItem('swipes_last_clear', '2.0.0');
-        }
+        } catch {}
       };
-      // Defer SW registration to not block critical rendering
+
+      // Defer cleanup to not block critical rendering
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(registerSW, { timeout: 5000 });
+        requestIdleCallback(cleanupCaches, { timeout: 5000 });
       } else {
-        setTimeout(registerSW, 3000);
+        setTimeout(cleanupCaches, 3000);
       }
     </script>
   </body>
