@@ -127,6 +127,16 @@ const Index = () => {
     }
   }, [user, userRole, loading, isLoadingRole, isError, isNewUser, navigate]);
 
+  // CRITICAL: Show loading spinner while auth is initializing
+  // This prevents the landing page from flashing before redirecting to dashboard
+  if (loading) {
+    return (
+      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+        <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   // Loading mientras espera el rol
   if (user && (isLoadingRole || (isNewUser && !userRole)) && !loadingTimeout) {
     return (
