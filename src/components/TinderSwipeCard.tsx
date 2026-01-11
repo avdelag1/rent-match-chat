@@ -22,6 +22,16 @@ const globalSwipeImageCache = new Map<string, {
 }>();
 
 /**
+ * PERF FIX: Check if an image is already decoded in the global cache
+ * Used to determine if we can allow immediate swipe or need to wait
+ */
+export function isImageDecodedInCache(rawUrl: string): boolean {
+  const optimizedUrl = getCardImageUrl(rawUrl);
+  const cached = globalSwipeImageCache.get(optimizedUrl);
+  return cached?.decoded === true && !cached?.failed;
+}
+
+/**
  * PERF FIX: Exported function to preload an image into the global cache
  * Called by TinderentSwipeContainer on hydration to ensure top card image is ready
  * Returns a promise that resolves when image is decoded (or fails)
@@ -315,29 +325,51 @@ const InstantImageGallery = memo(({
   return (
     // Fixed aspect ratio container - prevents layout shifts
     <div className="absolute inset-0 w-full h-full" style={{ aspectRatio: '4/5', minHeight: '100%' }}>
-      {/* LAYER 1: Neutral gradient placeholder - NEVER black/dark
-          Uses light slate colors that work in both light and dark mode */}
+      {/* LAYER 1: Premium skeleton shimmer placeholder - NEVER black/dark
+          Uses light slate colors that work in both light and dark mode with animated shimmer */}
       <div
         className="absolute inset-0 rounded-3xl overflow-hidden"
         style={{ zIndex: 1 }}
       >
+        {/* Base gradient - neutral light gray */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)',
+            background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 35%, #cbd5e1 65%, #94a3b8 100%)',
           }}
         />
-        {/* Subtle shimmer animation */}
+        {/* Animated skeleton shimmer - sweeps across for loading effect */}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
-          style={{ backgroundSize: '200% 100%', animationDuration: '1.5s' }}
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 75%, transparent 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'skeleton-shimmer 1.2s ease-in-out infinite',
+            willChange: 'background-position',
+          }}
         />
-        {/* Placeholder icon */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-white/30 flex items-center justify-center">
-            <svg className="w-8 h-8 text-slate-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* Secondary slower shimmer for depth */}
+        <div
+          className="absolute inset-0 opacity-50"
+          style={{
+            background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+            backgroundSize: '200% 100%',
+            animation: 'skeleton-shimmer 2s ease-in-out infinite',
+            animationDelay: '0.5s',
+          }}
+        />
+        {/* Placeholder content skeleton */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+          {/* Image icon placeholder */}
+          <div className="w-20 h-20 rounded-full bg-white/40 flex items-center justify-center backdrop-blur-sm shadow-inner">
+            <svg className="w-10 h-10 text-slate-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
+          </div>
+          {/* Text skeleton lines */}
+          <div className="flex flex-col items-center gap-2 w-48">
+            <div className="h-4 w-full rounded-full bg-white/30" />
+            <div className="h-3 w-3/4 rounded-full bg-white/25" />
           </div>
         </div>
       </div>
