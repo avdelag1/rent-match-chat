@@ -1,12 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
+import { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { SkipToMainContent, useFocusManagement } from './AccessibilityHelpers';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useOfflineDetection } from '@/hooks/useOfflineDetection';
 import { useErrorReporting } from '@/hooks/useErrorReporting';
 import { useViewTransitions } from '@/hooks/useViewTransitions';
-import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useResponsiveContext } from '@/contexts/ResponsiveContext';
 
 interface AppLayoutProps {
@@ -120,15 +119,6 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Enable View Transitions API
   useViewTransitions();
 
-  // Enable swipe back gesture - adjust edge width based on screen size
-  // Note: We only use swipeOpacity to prevent horizontal page shifts
-  // swipeX was removed as it caused the page to move left/right unexpectedly
-  const { opacity: swipeOpacity } = useSwipeBack({
-    enabled: responsive.isTouchDevice,
-    edgeWidth: responsive.isMobile ? 30 : 50,
-    threshold: responsive.isMobile ? 80 : 100,
-  });
-
   // Get dynamic transition variant based on navigation direction
   // Use ref to get prev location synchronously before it updates
   const transitionVariant = useMemo(() => {
@@ -154,10 +144,6 @@ export function AppLayout({ children }: AppLayoutProps) {
     return () => cancelAnimationFrame(timer);
   }, [location.pathname, responsive.isMobile]);
 
-  // Combine swipe opacity with transition - only apply swipe during active swipe
-  // This prevents flash when swipe completes and page transitions
-  const combinedOpacity = isTransitioning ? 1 : swipeOpacity;
-
   // Ultra-fast transition - imperceptible delay
   const fastTransition = {
     duration: responsive.isMobile ? 0.08 : 0.1,
@@ -181,7 +167,6 @@ export function AppLayout({ children }: AppLayoutProps) {
             transition={fastTransition}
             className="w-full min-h-screen min-h-dvh overflow-x-hidden"
             style={{
-              opacity: combinedOpacity,
               willChange: 'opacity, transform',
               transformOrigin: 'center center',
               // GPU acceleration for smooth slide
