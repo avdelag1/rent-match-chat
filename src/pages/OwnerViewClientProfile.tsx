@@ -137,8 +137,7 @@ export default function OwnerViewClientProfile() {
         <div className="min-h-screen flex flex-col items-center justify-center">
           <h2 className="text-2xl font-bold mb-4">Client not found</h2>
           <Button onClick={() => navigate(-1)}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Go Back
+            Back
           </Button>
         </div>
       </>
@@ -154,7 +153,6 @@ export default function OwnerViewClientProfile() {
         <div className="border-b bg-card sticky top-0 z-10">
           <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
             <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-1 sm:mb-2">
-              <ArrowLeft className="mr-1.5 sm:mr-2 h-4 w-4" />
               Back
             </Button>
           </div>

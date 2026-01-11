@@ -193,8 +193,6 @@ function LegendaryLandingPage() {
             </div>
           </div>
           
-          {/* Tap hint */}
-          <p className="text-white/50 text-xs mt-4">Tap anywhere to change color</p>
         </motion.div>
       </div>
 
