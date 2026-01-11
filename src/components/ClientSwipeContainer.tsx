@@ -11,6 +11,7 @@ import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
+import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw, Users, Search } from 'lucide-react';
@@ -53,31 +54,29 @@ const ClientSwipeContainerComponent = ({
     ownerProfile?: any;
   }>({ isOpen: false });
 
-  // PERSISTENT DECK STORE - survives navigation, prevents blank deck on return
-  const {
-    ownerDecks,
-    setOwnerDeck,
-    setOwnerIndex,
-    markOwnerSwiped,
-    resetOwnerDeck,
-    isOwnerHydrated,
-  } = useSwipeDeckStore();
-
-  const currentDeck = ownerDecks[category] || { deckItems: [], currentIndex: 0, swipedIds: new Set() };
+  // PERF: Use selective subscriptions to prevent re-renders on unrelated store changes
+  // Only subscribe to actions (stable references) - NOT to ownerDecks object
+  // This is the key fix for "double render" feeling when navigating back to dashboard
+  const setOwnerDeck = useSwipeDeckStore((state) => state.setOwnerDeck);
+  const markOwnerSwiped = useSwipeDeckStore((state) => state.markOwnerSwiped);
+  const resetOwnerDeck = useSwipeDeckStore((state) => state.resetOwnerDeck);
+  const isOwnerHydrated = useSwipeDeckStore((state) => state.isOwnerHydrated);
 
   // Local state for immediate UI updates (synced with store)
   const [renderKey, setRenderKey] = useState(0); // Force update trigger
 
-  // SYNCHRONOUS HYDRATION: Initialize refs immediately from store/session for instant render
-  // This prevents the "dark card" flash by having data ready on first render
+  // PERF: Get initial state ONCE using getState() - no subscription
+  // This is synchronous and doesn't cause re-renders when store updates
   const getInitialDeck = () => {
     // Try session storage first (faster, tab-scoped)
     const sessionItems = getDeckFromSession('owner', category);
     if (sessionItems.length > 0) {
       return sessionItems;
     }
-    // Fallback to store items (persisted across sessions)
-    if (currentDeck.deckItems.length > 0) {
+    // Fallback to store items (persisted across sessions) - non-reactive read
+    const storeState = useSwipeDeckStore.getState();
+    const currentDeck = storeState.ownerDecks[category];
+    if (currentDeck?.deckItems?.length > 0) {
       return currentDeck.deckItems;
     }
     return [];
@@ -85,29 +84,45 @@ const ClientSwipeContainerComponent = ({
 
   // CONSTANT-TIME SWIPE DECK: Use refs for queue management (no re-renders on swipe)
   // Initialize synchronously from persisted state to prevent dark/empty cards
+  // PERF: Use getState() for initial values - no subscription needed
   const deckQueueRef = useRef<any[]>(getInitialDeck());
-  const currentIndexRef = useRef(currentDeck.currentIndex);
-  const swipedIdsRef = useRef<Set<string>>(new Set(currentDeck.swipedIds));
+  const currentDeckState = useSwipeDeckStore.getState().ownerDecks[category];
+  const currentIndexRef = useRef(currentDeckState?.currentIndex || 0);
+  const swipedIdsRef = useRef<Set<string>>(new Set(currentDeckState?.swipedIds || []));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
+
+  // PERF FIX: Track if we're returning to dashboard (has hydrated data)
+  // When true, skip initial animations to prevent "double render" feeling
+  const isReturningRef = useRef(deckQueueRef.current.length > 0);
+  const hasAnimatedOnceRef = useRef(false);
 
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const [isRefreshMode, setIsRefreshMode] = useState(false);
   const [page, setPage] = useState(0);
   const isFetchingMore = useRef(false);
 
-  // HYDRATION SYNC: Ensure refs stay in sync with store updates (for page refresh scenarios)
+  // HYDRATION SYNC: One-time sync on mount if not already initialized
+  // PERF: Use getState() to check store without subscribing
+  // This effect only runs once and doesn't cause re-renders on store updates
   useEffect(() => {
-    if (!initializedRef.current && (currentDeck.deckItems.length > 0 || getDeckFromSession('owner', category).length > 0)) {
-      initializedRef.current = true;
-      const items = getInitialDeck();
-      if (items.length > 0 && deckQueueRef.current.length === 0) {
-        deckQueueRef.current = items;
-        currentIndexRef.current = currentDeck.currentIndex;
-        swipedIdsRef.current = new Set(currentDeck.swipedIds);
-        setRenderKey(n => n + 1);
+    if (!initializedRef.current) {
+      const storeState = useSwipeDeckStore.getState();
+      const currentDeck = storeState.ownerDecks[category];
+      const hasStoreData = currentDeck?.deckItems?.length > 0;
+      const hasSessionData = getDeckFromSession('owner', category).length > 0;
+
+      if (hasStoreData || hasSessionData) {
+        initializedRef.current = true;
+        const items = getInitialDeck();
+        if (items.length > 0 && deckQueueRef.current.length === 0) {
+          deckQueueRef.current = items;
+          currentIndexRef.current = currentDeck?.currentIndex || 0;
+          swipedIdsRef.current = new Set(currentDeck?.swipedIds || []);
+          setRenderKey(n => n + 1);
+        }
       }
     }
-  }, [currentDeck.deckItems.length, category]);
+  }, []); // Empty deps - only run once on mount
 
   // PERF: pass userId to avoid getUser() inside queryFn
   const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(user?.id, undefined, page, 50, isRefreshMode);
@@ -469,11 +484,14 @@ const ClientSwipeContainerComponent = ({
         )}
 
         {/* Current card on top - fully interactive */}
-        <AnimatePresence mode="popLayout">
+        {/* PERF FIX: Skip initial animation on re-entry to prevent "double render" feeling */}
+        <AnimatePresence mode="popLayout" initial={!isReturningRef.current}>
           {topCard && (
             <motion.div
               key={topCard.user_id}
-              initial={{ scale: 0.95, opacity: 0 }}
+              // PERF FIX: Use false to skip animation when returning to dashboard
+              // This prevents the visible "pop-in" that makes it look like double-rendering
+              initial={isReturningRef.current && !hasAnimatedOnceRef.current ? false : { scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{
                 x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
@@ -485,6 +503,10 @@ const ClientSwipeContainerComponent = ({
               transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.5 }}
               className="w-full h-full absolute inset-0"
               style={{ willChange: 'transform, opacity', zIndex: 10 }}
+              onAnimationComplete={() => {
+                // After first animation, allow future animations (for new cards)
+                hasAnimatedOnceRef.current = true;
+              }}
             >
               <OwnerClientTinderCard
                 profile={topCard}

@@ -73,11 +73,32 @@ const ImageCarouselComponent = ({
   showThumbnails = true
 }: ImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // PERF FIX: Check cache SYNCHRONOUSLY on init to prevent black flash
+  // If first image is already cached+decoded, show it immediately (no transition)
+  const getInitialImageState = () => {
+    const firstSrc = images?.[0];
+    if (!firstSrc) return { displayedSrc: null, showImage: false };
+
+    const cached = globalImageCache.get(firstSrc);
+    if (cached?.decoded) {
+      // Image is cached and decoded - show immediately, skip all transitions
+      return { displayedSrc: firstSrc, showImage: true };
+    }
+    return { displayedSrc: null, showImage: false };
+  };
+
+  const initialState = getInitialImageState();
+
   // Two-layer approach: previous image stays visible while next decodes
-  const [displayedSrc, setDisplayedSrc] = useState<string | null>(null);
+  const [displayedSrc, setDisplayedSrc] = useState<string | null>(initialState.displayedSrc);
   const [previousSrc, setPreviousSrc] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [hasError, setHasError] = useState(false);
+  // PERF FIX: Track if we started with a cached image to skip fade animation
+  const [showImage, setShowImage] = useState(initialState.showImage);
+  const startedCachedRef = useRef(initialState.showImage);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const decodingRef = useRef<boolean>(false);
 
@@ -96,8 +117,12 @@ const ImageCarouselComponent = ({
       // Instant switch for cached+decoded images
       setPreviousSrc(displayedSrc);
       setDisplayedSrc(currentImageSrc);
+      setShowImage(true);
       setIsTransitioning(true);
-      setTimeout(() => setIsTransitioning(false), 100);
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setPreviousSrc(null);
+      }, 100);
       return;
     }
 
@@ -107,6 +132,7 @@ const ImageCarouselComponent = ({
       decodeImage(currentImageSrc).then((success) => {
         if (success) {
           globalImageCache.set(currentImageSrc, { loaded: true, decoded: true });
+          setShowImage(true);
         }
       });
       return;
@@ -123,11 +149,13 @@ const ImageCarouselComponent = ({
         if (success) {
           globalImageCache.set(currentImageSrc, { loaded: true, decoded: true });
           setDisplayedSrc(currentImageSrc);
+          setShowImage(true);
           setHasError(false);
         } else {
           setHasError(true);
           // Still show the image even if decode failed
           setDisplayedSrc(currentImageSrc);
+          setShowImage(true);
         }
         // Brief transition then clear previous
         setTimeout(() => {
@@ -251,23 +279,35 @@ const ImageCarouselComponent = ({
           />
         )}
 
-        {/* LAYER 4: Current image - fades in after decode */}
+        {/* LAYER 4: Current image - fades in after decode (or instant if cached) */}
         {displayedSrc && (
           <img
             src={displayedSrc}
             alt={`${alt} ${currentIndex + 1}`}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-150"
+            // PERF FIX: Skip transition when started with cached image
+            className={`absolute inset-0 w-full h-full object-cover ${
+              startedCachedRef.current ? '' : 'transition-opacity duration-150'
+            }`}
             loading="eager"
             decoding="async"
             fetchPriority="high"
             style={{
               zIndex: 4,
-              opacity: isTransitioning && previousSrc ? 0 : 1,
+              // Show immediately if started cached, otherwise fade in
+              opacity: showImage && !(isTransitioning && previousSrc) ? 1 : 0,
+            }}
+            onLoad={() => {
+              if (!showImage) {
+                setShowImage(true);
+                // After first load, allow transitions for subsequent images
+                startedCachedRef.current = false;
+              }
             }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder.svg';
               setHasError(true);
+              setShowImage(true);
             }}
           />
         )}

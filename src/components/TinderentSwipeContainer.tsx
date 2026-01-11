@@ -13,6 +13,7 @@ import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipePrefetch, usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
+import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -136,39 +137,39 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
   const { user } = useAuth();
 
-  // PERSISTENT DECK STORE - survives navigation, prevents blank deck on return
-  const {
-    clientDeck,
-    setClientDeck,
-    setClientIndex,
-    markClientSwiped,
-    resetClientDeck,
-    isClientHydrated,
-  } = useSwipeDeckStore();
+  // PERF: Use selective subscriptions to prevent re-renders on unrelated store changes
+  // Only subscribe to actions (stable references) - NOT to clientDeck object
+  // This is the key fix for "double render" feeling when navigating back to dashboard
+  const setClientDeck = useSwipeDeckStore((state) => state.setClientDeck);
+  const markClientSwiped = useSwipeDeckStore((state) => state.markClientSwiped);
+  const resetClientDeck = useSwipeDeckStore((state) => state.resetClientDeck);
+  const isClientHydrated = useSwipeDeckStore((state) => state.isClientHydrated);
 
   // Local state for immediate UI updates (synced with store)
   const [renderKey, setRenderKey] = useState(0); // Force update trigger
 
-  // SYNCHRONOUS HYDRATION: Initialize refs immediately from store/session for instant render
-  // This prevents the "dark card" flash by having data ready on first render
+  // PERF: Get initial state ONCE using getState() - no subscription
+  // This is synchronous and doesn't cause re-renders when store updates
   const getInitialDeck = () => {
     // Try session storage first (faster, tab-scoped)
     const sessionItems = getDeckFromSession('client', 'listings');
     if (sessionItems.length > 0) {
       return sessionItems;
     }
-    // Fallback to store items (persisted across sessions)
-    if (clientDeck.deckItems.length > 0) {
-      return clientDeck.deckItems;
+    // Fallback to store items (persisted across sessions) - non-reactive read
+    const storeState = useSwipeDeckStore.getState();
+    if (storeState.clientDeck.deckItems.length > 0) {
+      return storeState.clientDeck.deckItems;
     }
     return [];
   };
 
   // CONSTANT-TIME SWIPE DECK: Use refs for queue management (no re-renders on swipe)
   // Initialize synchronously from persisted state to prevent dark/empty cards
+  // PERF: Use getState() for initial values - no subscription needed
   const deckQueueRef = useRef<any[]>(getInitialDeck());
-  const currentIndexRef = useRef(clientDeck.currentIndex);
-  const swipedIdsRef = useRef<Set<string>>(new Set(clientDeck.swipedIds));
+  const currentIndexRef = useRef(useSwipeDeckStore.getState().clientDeck.currentIndex);
+  const swipedIdsRef = useRef<Set<string>>(new Set(useSwipeDeckStore.getState().clientDeck.swipedIds));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
 
   // PERF FIX: Track if we're returning to dashboard (has hydrated data)
@@ -203,19 +204,27 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Navigation guard
   const { canNavigate, startNavigation, endNavigation } = useNavigationGuard();
 
-  // HYDRATION SYNC: Ensure refs stay in sync with store updates (for page refresh scenarios)
+  // HYDRATION SYNC: One-time sync on mount if not already initialized
+  // PERF: Use getState() to check store without subscribing
+  // This effect only runs once and doesn't cause re-renders on store updates
   useEffect(() => {
-    if (!initializedRef.current && (clientDeck.deckItems.length > 0 || getDeckFromSession('client', 'listings').length > 0)) {
-      initializedRef.current = true;
-      const items = getInitialDeck();
-      if (items.length > 0 && deckQueueRef.current.length === 0) {
-        deckQueueRef.current = items;
-        currentIndexRef.current = clientDeck.currentIndex;
-        swipedIdsRef.current = new Set(clientDeck.swipedIds);
-        setRenderKey(n => n + 1);
+    if (!initializedRef.current) {
+      const storeState = useSwipeDeckStore.getState();
+      const hasStoreData = storeState.clientDeck.deckItems.length > 0;
+      const hasSessionData = getDeckFromSession('client', 'listings').length > 0;
+
+      if (hasStoreData || hasSessionData) {
+        initializedRef.current = true;
+        const items = getInitialDeck();
+        if (items.length > 0 && deckQueueRef.current.length === 0) {
+          deckQueueRef.current = items;
+          currentIndexRef.current = storeState.clientDeck.currentIndex;
+          swipedIdsRef.current = new Set(storeState.clientDeck.swipedIds);
+          setRenderKey(n => n + 1);
+        }
       }
     }
-  }, [clientDeck.deckItems.length]);
+  }, []); // Empty deps - only run once on mount
 
   // Cleanup on unmount
   useEffect(() => {
