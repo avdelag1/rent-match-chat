@@ -80,15 +80,13 @@ deferredInit(async () => {
 }, 5000);
 
 // Service Worker with proper versioning and update handling
-// Version is passed as URL param since /public/ isn't processed by Vite
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    // Use build timestamp for cache versioning
-    // In production, this changes with each deploy, ensuring cache busting
-    const swVersion = import.meta.env.VITE_BUILD_TIME || Date.now().toString();
+    // Only reload on updates (not on first install)
+    const hadController = !!navigator.serviceWorker.controller;
 
     navigator.serviceWorker
-      .register(`/sw.js?v=${swVersion}`)
+      .register(`/sw.js`)
       .then((registration) => {
         // Check for updates periodically (every 5 minutes)
         setInterval(() => registration.update(), 300000);
@@ -109,11 +107,10 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
       })
       .catch(() => {});
 
-    // CRITICAL: Reload page when new SW takes control
-    // This ensures the app uses fresh assets after deploy
+    // Reload only when an updated SW takes control
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (!refreshing) {
+      if (hadController && !refreshing) {
         refreshing = true;
         window.location.reload();
       }
