@@ -287,57 +287,6 @@ export type Database = {
         }
         Relationships: []
       }
-      blockchain_identities: {
-        Row: {
-          blockchain_address: string | null
-          created_at: string | null
-          did: string | null
-          user_id: string
-          verification_status: string | null
-        }
-        Insert: {
-          blockchain_address?: string | null
-          created_at?: string | null
-          did?: string | null
-          user_id: string
-          verification_status?: string | null
-        }
-        Update: {
-          blockchain_address?: string | null
-          created_at?: string | null
-          did?: string | null
-          user_id?: string
-          verification_status?: string | null
-        }
-        Relationships: []
-      }
-      carbon_footprint_metrics: {
-        Row: {
-          carbon_emissions_kg: number | null
-          compute_region: string | null
-          energy_consumption_kwh: number | null
-          measurement_id: string
-          renewable_energy_percentage: number | null
-          timestamp: string | null
-        }
-        Insert: {
-          carbon_emissions_kg?: number | null
-          compute_region?: string | null
-          energy_consumption_kwh?: number | null
-          measurement_id?: string
-          renewable_energy_percentage?: number | null
-          timestamp?: string | null
-        }
-        Update: {
-          carbon_emissions_kg?: number | null
-          compute_region?: string | null
-          energy_consumption_kwh?: number | null
-          measurement_id?: string
-          renewable_energy_percentage?: number | null
-          timestamp?: string | null
-        }
-        Relationships: []
-      }
       channel_participants: {
         Row: {
           channel_id: string | null
@@ -1178,36 +1127,6 @@ export type Database = {
         }
         Relationships: []
       }
-      data_lake_metadata: {
-        Row: {
-          compression_type: string | null
-          data_type: string | null
-          data_volume_bytes: number | null
-          id: string
-          ingestion_timestamp: string | null
-          processing_status: string | null
-          source_system: string | null
-        }
-        Insert: {
-          compression_type?: string | null
-          data_type?: string | null
-          data_volume_bytes?: number | null
-          id?: string
-          ingestion_timestamp?: string | null
-          processing_status?: string | null
-          source_system?: string | null
-        }
-        Update: {
-          compression_type?: string | null
-          data_type?: string | null
-          data_volume_bytes?: number | null
-          id?: string
-          ingestion_timestamp?: string | null
-          processing_status?: string | null
-          source_system?: string | null
-        }
-        Relationships: []
-      }
       deal_status_tracking: {
         Row: {
           client_id: string
@@ -1367,33 +1286,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      edge_compute_nodes: {
-        Row: {
-          computational_capacity: number | null
-          last_sync: string | null
-          network_latency_ms: number | null
-          node_id: string
-          region: string | null
-          status: string | null
-        }
-        Insert: {
-          computational_capacity?: number | null
-          last_sync?: string | null
-          network_latency_ms?: number | null
-          node_id?: string
-          region?: string | null
-          status?: string | null
-        }
-        Update: {
-          computational_capacity?: number | null
-          last_sync?: string | null
-          network_latency_ms?: number | null
-          node_id?: string
-          region?: string | null
-          status?: string | null
-        }
-        Relationships: []
       }
       favorites: {
         Row: {
@@ -2401,66 +2293,6 @@ export type Database = {
           method?: string | null
           secret?: string | null
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      microservice_registry: {
-        Row: {
-          deployment_region: string | null
-          endpoint_url: string | null
-          health_status: string | null
-          last_heartbeat: string | null
-          service_id: string
-          service_name: string | null
-          version: string | null
-        }
-        Insert: {
-          deployment_region?: string | null
-          endpoint_url?: string | null
-          health_status?: string | null
-          last_heartbeat?: string | null
-          service_id?: string
-          service_name?: string | null
-          version?: string | null
-        }
-        Update: {
-          deployment_region?: string | null
-          endpoint_url?: string | null
-          health_status?: string | null
-          last_heartbeat?: string | null
-          service_id?: string
-          service_name?: string | null
-          version?: string | null
-        }
-        Relationships: []
-      }
-      ml_model_registry: {
-        Row: {
-          deployed_timestamp: string | null
-          model_id: string
-          model_name: string | null
-          model_type: string | null
-          performance_metrics: Json | null
-          training_dataset_hash: string | null
-          version: string | null
-        }
-        Insert: {
-          deployed_timestamp?: string | null
-          model_id?: string
-          model_name?: string | null
-          model_type?: string | null
-          performance_metrics?: Json | null
-          training_dataset_hash?: string | null
-          version?: string | null
-        }
-        Update: {
-          deployed_timestamp?: string | null
-          model_id?: string
-          model_name?: string | null
-          model_type?: string | null
-          performance_metrics?: Json | null
-          training_dataset_hash?: string | null
-          version?: string | null
         }
         Relationships: []
       }
@@ -4531,36 +4363,6 @@ export type Database = {
           moved_by?: string | null
           original_id?: string | null
           payload?: Json | null
-        }
-        Relationships: []
-      }
-      quantum_encryption_keys: {
-        Row: {
-          created_at: string | null
-          expiration_timestamp: string | null
-          id: string
-          key_strength: number | null
-          key_type: string | null
-          private_key_encrypted: string | null
-          public_key: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          expiration_timestamp?: string | null
-          id?: string
-          key_strength?: number | null
-          key_type?: string | null
-          private_key_encrypted?: string | null
-          public_key?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          expiration_timestamp?: string | null
-          id?: string
-          key_strength?: number | null
-          key_type?: string | null
-          private_key_encrypted?: string | null
-          public_key?: string | null
         }
         Relationships: []
       }
