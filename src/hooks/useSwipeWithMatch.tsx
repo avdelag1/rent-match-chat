@@ -220,9 +220,6 @@ async function detectAndCreateMatch({
           client_liked_at: targetType === 'profile' ? mutualLike.created_at : new Date().toISOString(),
           owner_liked_at: targetType === 'profile' ? new Date().toISOString() : mutualLike.created_at,
           status: 'accepted'
-        }, {
-          onConflict: 'client_id,owner_id,listing_id',
-          ignoreDuplicates: true
         })
         .select();
 
@@ -276,9 +273,6 @@ async function detectAndCreateMatch({
           owner_id: match.owner_id,
           listing_id: match.listing_id,
           status: 'active'
-        }, {
-          onConflict: 'client_id,owner_id',
-          ignoreDuplicates: true
         });
 
       if (conversationError) {

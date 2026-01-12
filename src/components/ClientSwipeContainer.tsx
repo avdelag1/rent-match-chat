@@ -19,6 +19,7 @@ import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/utils/prodLogger';
 
 interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
@@ -64,8 +65,8 @@ const ClientSwipeContainerComponent = ({
   const isOwnerReady = useSwipeDeckStore((state) => state.isOwnerReady);
   const markOwnerReady = useSwipeDeckStore((state) => state.markOwnerReady);
 
-  // Local state for immediate UI updates (synced with store)
-  const [renderKey, setRenderKey] = useState(0); // Force update trigger
+  // Local state for immediate UI updates - drives the swipe animation
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   // PERF: Get initial state ONCE using getState() - no subscription
   // This is synchronous and doesn't cause re-renders when store updates
@@ -92,6 +93,11 @@ const ClientSwipeContainerComponent = ({
   const currentIndexRef = useRef(currentDeckState?.currentIndex || 0);
   const swipedIdsRef = useRef<Set<string>>(new Set(currentDeckState?.swipedIds || []));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
+
+  // Sync state with ref on mount
+  useEffect(() => {
+    setCurrentIndex(currentIndexRef.current);
+  }, []);
 
   // PERF FIX: Track if we're returning to dashboard (has hydrated data AND is ready)
   // When true, skip initial animations to prevent "double render" feeling
@@ -139,9 +145,10 @@ const ClientSwipeContainerComponent = ({
         const items = getInitialDeck();
         if (items.length > 0 && deckQueueRef.current.length === 0) {
           deckQueueRef.current = items;
-          currentIndexRef.current = currentDeck?.currentIndex || 0;
+          const newIndex = currentDeck?.currentIndex || 0;
+          currentIndexRef.current = newIndex;
+          setCurrentIndex(newIndex);
           swipedIdsRef.current = new Set(currentDeck?.swipedIds || []);
-          setRenderKey(n => n + 1);
         }
       }
     }
@@ -169,13 +176,12 @@ const ClientSwipeContainerComponent = ({
   const recordProfileView = useRecordProfileView();
 
   // Prefetch images for next cards
-  // PERF FIX: Pass renderKey as trigger to ensure prefetch runs on each swipe
-  // (currentIndexRef.current and deckQueueRef.current are refs that don't trigger re-renders)
+  // PERF: Use currentIndex state as trigger (re-runs when index changes)
   usePrefetchImages({
-    currentIndex: currentIndexRef.current,
+    currentIndex: currentIndex,
     profiles: deckQueueRef.current,
     prefetchCount: 2,
-    trigger: renderKey
+    trigger: currentIndex
   });
 
   // CONSTANT-TIME: Append new unique profiles to queue AND persist to store
@@ -192,7 +198,9 @@ const ClientSwipeContainerComponent = ({
         if (deckQueueRef.current.length > 50) {
           const offset = deckQueueRef.current.length - 50;
           deckQueueRef.current = deckQueueRef.current.slice(offset);
-          currentIndexRef.current = Math.max(0, currentIndexRef.current - offset);
+          const newIndex = Math.max(0, currentIndexRef.current - offset);
+          currentIndexRef.current = newIndex;
+          setCurrentIndex(newIndex);
         }
 
         // PERSIST: Save to store and session for navigation survival
@@ -204,8 +212,6 @@ const ClientSwipeContainerComponent = ({
         if (!isOwnerReady(category)) {
           markOwnerReady(category);
         }
-
-        setRenderKey(n => n + 1);
       }
       isFetchingMore.current = false;
     }
@@ -217,48 +223,57 @@ const ClientSwipeContainerComponent = ({
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
 
-  // PERF: Execute the actual swipe after ensuring next card is ready
+  // INSTANT SWIPE: Update UI immediately, fire DB operations in background
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];
     if (!profile) return;
 
+    const newIndex = currentIndexRef.current + 1;
+
+    // 1. UPDATE UI STATE FIRST (INSTANT)
     setSwipeDirection(direction);
-
-    // CONSTANT-TIME: Just mark as swiped and advance pointer
+    currentIndexRef.current = newIndex;
+    setCurrentIndex(newIndex); // This triggers re-render with new card
     swipedIdsRef.current.add(profile.user_id);
-    currentIndexRef.current += 1;
 
-    // PERSIST: Update store with swiped state
-    markOwnerSwiped(category, profile.user_id);
+    // 2. BACKGROUND TASKS (Fire-and-forget, don't block UI)
+    // These happen AFTER UI has already updated
+    Promise.all([
+      // Persist to store
+      Promise.resolve(markOwnerSwiped(category, profile.user_id)),
 
-    // Record profile view for exclusion logic
-    recordProfileView.mutate({
-      profileId: profile.user_id,
-      viewType: 'profile',
-      action: direction === 'left' ? 'pass' : 'like'
+      // Record profile view
+      recordProfileView.mutateAsync({
+        profileId: profile.user_id,
+        viewType: 'profile',
+        action: direction === 'left' ? 'pass' : 'like'
+      }).catch(() => {}),
+
+      // Save swipe to DB with match detection
+      swipeMutation.mutateAsync({
+        targetId: profile.user_id,
+        direction,
+        targetType: 'profile'
+      }).catch(() => {}),
+
+      // Record for undo
+      Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass'))
+    ]).catch(err => {
+      // Non-critical - user already saw the swipe complete
+      logger.error('[ClientSwipeContainer] Background swipe tasks failed:', err);
     });
 
-    // Record swipe with match checking
-    swipeMutation.mutate({
-      targetId: profile.user_id,
-      direction,
-      targetType: 'profile'
-    });
-
-    // Record the swipe for undo functionality
-    recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
-
-    setSwipeDirection(null);
-    setRenderKey(n => n + 1);
+    // Clear direction for next swipe
+    setTimeout(() => setSwipeDirection(null), 300);
 
     // Fetch more if running low
-    if (currentIndexRef.current >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
+    if (newIndex >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
     }
 
-    // PERF: Eagerly preload the next-next card's image for smooth subsequent swipes
-    const nextNextProfile = deckQueueRef.current[currentIndexRef.current + 1];
+    // Eagerly preload next card's image
+    const nextNextProfile = deckQueueRef.current[newIndex + 1];
     const nextNextImage = nextNextProfile?.profile_images?.[0] || nextNextProfile?.avatar_url;
     if (nextNextImage) {
       preloadClientImageToCache(nextNextImage);
@@ -295,8 +310,9 @@ const ClientSwipeContainerComponent = ({
     setIsRefreshMode(false);
     triggerHaptic('medium');
 
-    // Reset local refs
+    // Reset local state and refs
     currentIndexRef.current = 0;
+    setCurrentIndex(0);
     deckQueueRef.current = [];
     swipedIdsRef.current.clear();
     setPage(0);
@@ -543,9 +559,9 @@ const ClientSwipeContainerComponent = ({
                 opacity: 0,
                 rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
                 scale: 0.85,
-                transition: { type: "spring", stiffness: 500, damping: 35, mass: 0.5 }
+                transition: { type: "spring", stiffness: 600, damping: 30, mass: 0.4 }
               }}
-              transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.5 }}
+              transition={{ type: "spring", stiffness: 600, damping: 30, mass: 0.4 }}
               className="w-full h-full absolute inset-0"
               style={{ willChange: 'transform, opacity', zIndex: 10 }}
               onAnimationComplete={() => {
