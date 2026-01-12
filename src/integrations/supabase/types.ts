@@ -3122,6 +3122,7 @@ export type Database = {
       profiles: {
         Row: {
           about_me: string | null
+          active_mode: string | null
           additional_notes: string | null
           age: number | null
           amenities_wanted: string[] | null
@@ -3210,7 +3211,6 @@ export type Database = {
           oauth_pending_role: string | null
           oauth_provider: string | null
           occupation: string | null
-          active_mode: string | null
           onboarding_completed: boolean | null
           owner_looking_for: string | null
           package: string | null
@@ -3269,6 +3269,7 @@ export type Database = {
         }
         Insert: {
           about_me?: string | null
+          active_mode?: string | null
           additional_notes?: string | null
           age?: number | null
           amenities_wanted?: string[] | null
@@ -3357,7 +3358,6 @@ export type Database = {
           oauth_pending_role?: string | null
           oauth_provider?: string | null
           occupation?: string | null
-          active_mode?: string | null
           onboarding_completed?: boolean | null
           owner_looking_for?: string | null
           package?: string | null
@@ -3416,6 +3416,7 @@ export type Database = {
         }
         Update: {
           about_me?: string | null
+          active_mode?: string | null
           additional_notes?: string | null
           age?: number | null
           amenities_wanted?: string[] | null
@@ -3504,7 +3505,6 @@ export type Database = {
           oauth_pending_role?: string | null
           oauth_provider?: string | null
           occupation?: string | null
-          active_mode?: string | null
           onboarding_completed?: boolean | null
           owner_looking_for?: string | null
           package?: string | null
