@@ -2327,3 +2327,211 @@ html[data-navigation-direction="back"] {
 .white-matte [class*="-500/10"] .font-bold {
   color: inherit;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  PREMIUM SWIPE CARD STYLES - Enhanced Shadows, Depth & Polish      */
+/*  Tinder/Instagram-like premium feel with subtle micro-animations   */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Premium card shadow - multi-layer depth effect */
+.premium-card-shadow {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 10px 15px -3px rgba(0, 0, 0, 0.15),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+/* Elevated card on hover/active */
+.premium-card-elevated {
+  box-shadow:
+    0 8px 12px -2px rgba(0, 0, 0, 0.15),
+    0 16px 24px -4px rgba(0, 0, 0, 0.2),
+    0 32px 48px -8px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+/* Swipe card container - enhanced depth */
+.swipe-card-premium {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.12),
+    0 16px 32px rgba(0, 0, 0, 0.08),
+    0 -2px 4px rgba(255, 255, 255, 0.02) inset;
+  /* Force GPU compositing for smooth transforms */
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Subtle glow around active swipe card */
+.swipe-card-glow {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.12),
+    0 16px 32px rgba(0, 0, 0, 0.08),
+    0 0 40px rgba(255, 165, 0, 0.08),
+    0 0 80px rgba(255, 100, 0, 0.04);
+}
+
+/* Card enter animation */
+@keyframes card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card-enter {
+  animation: card-enter 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Card exit animation */
+@keyframes card-exit-left {
+  0% {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-150%) rotate(-20deg);
+  }
+}
+
+@keyframes card-exit-right {
+  0% {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(150%) rotate(20deg);
+  }
+}
+
+.card-exit-left {
+  animation: card-exit-left 0.4s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+}
+
+.card-exit-right {
+  animation: card-exit-right 0.4s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+}
+
+/* Micro-animation: Subtle pulse for interactive elements */
+@keyframes subtle-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.pulse-subtle {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* Micro-animation: Soft breathe effect for floating elements */
+@keyframes soft-breathe {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+}
+
+.breathe-soft {
+  animation: soft-breathe 3s ease-in-out infinite;
+}
+
+/* Bottom sheet premium shadow */
+.bottom-sheet-premium {
+  box-shadow:
+    0 -4px 8px rgba(0, 0, 0, 0.04),
+    0 -8px 16px rgba(0, 0, 0, 0.08),
+    0 -16px 32px rgba(0, 0, 0, 0.04);
+}
+
+/* Mode switcher premium styling */
+.mode-switcher-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.mode-switcher-premium:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+/* Prefers reduced motion - disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .card-enter,
+  .card-exit-left,
+  .card-exit-right,
+  .pulse-subtle,
+  .breathe-soft {
+    animation: none !important;
+  }
+
+  .skeleton-shimmer,
+  .animate-shimmer {
+    animation: none !important;
+    background-position: 0 0 !important;
+  }
+}
+
+/* GPU acceleration hints for smooth 60fps animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+/* Prevent text selection during swipe */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Touch action optimization for swipe gestures */
+.swipe-optimized {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
