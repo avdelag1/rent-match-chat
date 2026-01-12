@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
+import { RoleSwitcher } from "@/components/RoleSwitcher";
 
 const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
@@ -128,6 +129,15 @@ const ClientSettingsNew = () => {
           title="Settings"
           subtitle="Manage your account and preferences"
         />
+
+        {/* Role Switcher - Switch between Seeker and Owner mode */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...fastSpring, delay: 0.05 }}
+        >
+          <RoleSwitcher />
+        </motion.div>
 
         {/* Settings Menu */}
         <motion.div
