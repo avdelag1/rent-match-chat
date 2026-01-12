@@ -86,13 +86,15 @@ export function LikedClients() {
   const startConversation = useStartConversation();
   const { canStartNewConversation } = useMessagingQuota();
 
-  // Category configuration
+  // Category configuration - matches ClientLikedProperties categories
   const categories = [
     { id: 'all', label: 'All', icon: Users },
     { id: 'property', label: 'Property', icon: Home },
-    { id: 'moto', label: 'Moto', icon: Car },
+    { id: 'vehicle', label: 'Vehicle', icon: Car },
+    { id: 'motorcycle', label: 'Moto', icon: Car },
     { id: 'bicycle', label: 'Bicycle', icon: Bike },
-    { id: 'yacht', label: 'Yacht', icon: Ship }
+    { id: 'yacht', label: 'Yacht', icon: Ship },
+    { id: 'worker', label: 'Services', icon: Users }
   ];
 
   const { data: likedClients = [], isLoading, refetch } = useQuery({
@@ -423,7 +425,7 @@ export function LikedClients() {
 
           {/* Category Tabs */}
           <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-5 h-auto">
+            <TabsList className="grid w-full grid-cols-7 h-auto overflow-x-auto">
               {categories.map(({ id, label, icon: Icon }) => (
                 <TabsTrigger
                   key={id}
