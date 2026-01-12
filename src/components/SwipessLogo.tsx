@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SwipessLogoProps {
@@ -19,6 +19,7 @@ function SwipessLogoComponent({
   const fullText = 'Swipess';
   const [displayedText, setDisplayedText] = useState(typewriter ? '' : fullText);
   const [showCursor, setShowCursor] = useState(typewriter);
+  const hasTypedRef = useRef(false); // Prevent re-typing
 
   const sizeClasses = {
     sm: 'text-xl',
@@ -29,10 +30,11 @@ function SwipessLogoComponent({
     '3xl': 'text-8xl sm:text-9xl',
   };
 
-  // Typewriter effect
+  // Typewriter effect - only runs ONCE
   useEffect(() => {
-    if (!typewriter) return;
+    if (!typewriter || hasTypedRef.current) return;
 
+    hasTypedRef.current = true; // Mark as typed to prevent re-running
     let currentIndex = 0;
     setDisplayedText('');
 
@@ -47,7 +49,8 @@ function SwipessLogoComponent({
     }, typewriterSpeed);
 
     return () => clearInterval(typingInterval);
-  }, [typewriter, typewriterSpeed, onTypingComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typewriter, typewriterSpeed]); // Removed onTypingComplete to prevent re-running
 
   // Cursor blinking effect
   useEffect(() => {
@@ -63,26 +66,28 @@ function SwipessLogoComponent({
   return (
     <span
       className={cn(
-        'swipess-logo font-bold italic select-none overflow-visible inline-flex items-center',
+        'swipess-logo font-bold italic select-none overflow-visible inline-flex items-end',
         sizeClasses[size],
         className
       )}
     >
-      {displayedText}
-      {typewriter && (
-        <span
-          className={cn(
-            'inline-block ml-1 transition-opacity duration-100',
-            showCursor ? 'opacity-100' : 'opacity-0'
-          )}
-          style={{
-            width: '0.15em',
-            height: '1em',
-            background: 'currentColor',
-            transform: 'skewX(-8deg)', // Slight tilt like italic text
-          }}
-        />
-      )}
+      <span className="inline-flex flex-col">
+        {displayedText}
+        {typewriter && (
+          <span
+            className={cn(
+              'inline-block transition-opacity duration-100 -mt-1',
+              showCursor ? 'opacity-100' : 'opacity-0'
+            )}
+            style={{
+              width: '0.6em',
+              height: '0.08em', // Thinner underline cursor
+              background: 'currentColor',
+              alignSelf: 'flex-start',
+            }}
+          />
+        )}
+      </span>
     </span>
   );
 }
