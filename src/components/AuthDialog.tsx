@@ -5,8 +5,7 @@ import { Label } from '@/components/ui/label';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
-  Eye, EyeOff, Mail, Lock, User, ArrowLeft, Loader,
-  Home, Building2, Check, X, Shield, Sparkles
+  Eye, EyeOff, Mail, Lock, User, ArrowLeft, Loader, Check
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -62,24 +61,13 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const roleTheme = useMemo(() => ({
     client: {
       accent: 'text-orange-400',
-      accentBg: 'bg-orange-500/10',
-      border: 'border-orange-500/20',
-      icon: Home,
-      title: 'Client',
-      description: 'Find your perfect rental property',
     },
     owner: {
       accent: 'text-orange-400',
-      accentBg: 'bg-orange-500/10',
-      border: 'border-orange-500/20',
-      icon: Building2,
-      title: 'Seller',
-      description: 'List properties, vehicles, or workers',
     },
   }), []);
 
   const theme = roleTheme[role];
-  const RoleIcon = theme.icon;
 
   const passwordStrength = useMemo(() => checkPasswordStrength(password), [password]);
 
@@ -248,10 +236,6 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               {/* Centered Minimal Header */}
               <div className="text-center mb-4">
                 <SwipessLogo size="sm" />
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <RoleIcon className={`w-3.5 h-3.5 ${theme.accent}`} />
-                  <span className={`text-xs font-semibold ${theme.accent}`}>{theme.title}</span>
-                </div>
                 <h2 className="text-xl font-bold text-white mt-2">
                   {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
                 </h2>
