@@ -2454,6 +2454,35 @@ html[data-navigation-direction="back"] {
   animation: soft-breathe 3s ease-in-out infinite;
 }
 
+/* Subtle shimmer sweep for Swipess logo - very minimal light reflection */
+@keyframes logo-shimmer-sweep {
+  0% {
+    background-position: -150% center;
+  }
+  100% {
+    background-position: 150% center;
+  }
+}
+
+.swipess-shimmer {
+  background: linear-gradient(
+    90deg,
+    currentColor 0%,
+    currentColor 40%,
+    rgba(255, 255, 255, 0.35) 50%,
+    currentColor 60%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.swipess-shimmer.shimmer-active {
+  animation: logo-shimmer-sweep 1.4s ease-in-out forwards;
+}
+
 /* Bottom sheet premium shadow */
 .bottom-sheet-premium {
   box-shadow:
