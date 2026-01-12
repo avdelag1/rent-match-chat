@@ -6,7 +6,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
   Eye, EyeOff, Mail, Lock, User, ArrowLeft, Loader,
-  Search, Briefcase, Check, X, Shield, Sparkles
+  Check, X, Shield, Sparkles
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -62,24 +62,13 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const roleTheme = useMemo(() => ({
     client: {
       accent: 'text-orange-400',
-      accentBg: 'bg-orange-500/10',
-      border: 'border-orange-500/20',
-      icon: Search,
-      title: 'I Need',
-      description: 'Browse deals, services, and properties',
     },
     owner: {
       accent: 'text-orange-400',
-      accentBg: 'bg-orange-500/10',
-      border: 'border-orange-500/20',
-      icon: Briefcase,
-      title: 'I Offer',
-      description: 'Share your services and listings',
     },
   }), []);
 
   const theme = roleTheme[role];
-  const RoleIcon = theme.icon;
 
   const passwordStrength = useMemo(() => checkPasswordStrength(password), [password]);
 
@@ -248,12 +237,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
               {/* Centered Minimal Header */}
               <div className="text-center mb-4">
                 <SwipessLogo size="sm" />
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <RoleIcon className={`w-3.5 h-3.5 ${theme.accent}`} />
-                  <span className={`text-xs font-semibold ${theme.accent}`}>{theme.title}</span>
-                </div>
-                <h2 className="text-xl font-bold text-white mt-2">
-                  {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create account'}
+                <h2 className="text-xl font-bold text-white mt-3">
+                  {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back to Swipess' : 'Create account'}
                 </h2>
               </div>
 
