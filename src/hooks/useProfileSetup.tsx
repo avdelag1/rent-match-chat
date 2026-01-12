@@ -282,6 +282,54 @@ export function useProfileSetup() {
       // Add small delay to ensure cache invalidation propagates
       await new Promise(resolve => setTimeout(resolve, 150));
 
+      // Grant welcome message activation for the new user
+      // This gives them 1 free message to start a conversation
+      const grantWelcomeActivation = async (userId: string) => {
+        try {
+          // Check if welcome activation already granted
+          const { data: existingWelcome } = await supabase
+            .from('message_activations')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('activation_type', 'referral_bonus')
+            .eq('notes', 'Welcome bonus - first message free')
+            .maybeSingle();
+
+          if (existingWelcome) return;
+
+          // Grant 1 free welcome message activation (expires in 90 days)
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 90);
+
+          const { error: activError } = await supabase
+            .from('message_activations')
+            .insert({
+              user_id: userId,
+              activation_type: 'referral_bonus', // Using referral_bonus type for free activations
+              total_activations: 1,
+              remaining_activations: 1,
+              used_activations: 0,
+              expires_at: expiresAt.toISOString(),
+              notes: 'Welcome bonus - first message free',
+            });
+
+          if (!activError) {
+            if (import.meta.env.DEV) {
+              logger.log('[ProfileSetup] Welcome activation granted to:', userId);
+            }
+            // Invalidate activations cache
+            queryClient.invalidateQueries({ queryKey: ['message-activations', userId] });
+          }
+        } catch (error) {
+          logger.error('[ProfileSetup] Error granting welcome activation:', error);
+        }
+      };
+
+      // Grant welcome activation (non-blocking)
+      grantWelcomeActivation(user.id).catch(() => {
+        // Silently handle any errors
+      });
+
       // Process referral reward for the referrer (non-blocking, runs in background)
       // This grants the referrer 1 free message activation for the successful signup
       processReferralReward(user.id).catch(() => {

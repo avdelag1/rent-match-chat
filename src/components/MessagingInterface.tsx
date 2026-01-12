@@ -14,6 +14,7 @@ import { useMonthlyMessageLimits } from '@/hooks/useMonthlyMessageLimits';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { useQueryClient } from '@tanstack/react-query';
 import { MessageActivationPackages } from '@/components/MessageActivationPackages';
+import { MessageActivationBanner } from '@/components/MessageActivationBanner';
 import { SubscriptionPackages } from '@/components/SubscriptionPackages';
 import { ChatPreviewSheet } from '@/components/ChatPreviewSheet';
 import { logger } from '@/utils/prodLogger';
@@ -113,6 +114,7 @@ MessageBubble.displayName = 'MessageBubble';
 export const MessagingInterface = memo(({ conversationId, otherUser, listing, currentUserRole = 'client', onBack }: MessagingInterfaceProps) => {
   const [newMessage, setNewMessage] = useState('');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showActivationBanner, setShowActivationBanner] = useState(false);
   const [showPreviewSheet, setShowPreviewSheet] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -257,9 +259,18 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
   }
 
   return (
-    <Card className="flex-1 flex flex-col h-full overflow-hidden border-0 shadow-none bg-[#1C1C1E]">
-      {/* iOS-style Header - Modernized */}
-      <div className="border-b border-[#38383A] shrink-0 bg-[#1C1C1E]/95 backdrop-blur-xl">
+    <>
+      {/* Activation Banner - shown when at message limit */}
+      <MessageActivationBanner
+        isVisible={showActivationBanner}
+        onClose={() => setShowActivationBanner(false)}
+        userRole={currentUserRole}
+        variant="activation-required"
+      />
+
+      <Card className="flex-1 flex flex-col h-full overflow-hidden border-0 shadow-none bg-[#1C1C1E]">
+        {/* iOS-style Header - Modernized */}
+        <div className="border-b border-[#38383A] shrink-0 bg-[#1C1C1E]/95 backdrop-blur-xl">
         {/* Main Header Row */}
         <div className="flex items-center gap-2 px-3 py-2.5">
           <Button
@@ -404,7 +415,10 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
             </div>
             <Button
               size="sm"
-              onClick={() => setShowUpgradeDialog(true)}
+              onClick={() => {
+                setShowActivationBanner(true);
+                setShowUpgradeDialog(true);
+              }}
               className="shrink-0 bg-[#007AFF] hover:bg-[#0056CC] text-white border-0 rounded-full px-4"
             >
               Upgrade
@@ -487,7 +501,8 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
         listing={listing}
         currentUserRole={currentUserRole}
       />
-    </Card>
+      </Card>
+    </>
   );
 });
 
