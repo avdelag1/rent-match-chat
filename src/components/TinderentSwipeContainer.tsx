@@ -202,10 +202,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // PERF: Throttled prefetch scheduler
   const prefetchSchedulerRef = useRef(new PrefetchScheduler());
 
-  // PERF: Track if next card's image is being preloaded (prevents swipe until ready)
-  const isPreloadingNextRef = useRef(false);
-  const pendingSwipeRef = useRef<{ direction: 'left' | 'right' } | null>(null);
-
   // Fetch guards
   const isFetchingMore = useRef(false);
 
@@ -339,10 +335,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const isFetching = smartFetching;
   const error = smartError;
 
-  // PERF FIX: Create stable listing IDs signature to detect actual data changes
+  // PERF FIX: Cheap signature using first ID + last ID + length (avoids expensive join)
   // This prevents unnecessary deck updates when React Query returns same data with new reference
   const listingIdsSignature = useMemo(() => {
-    return smartListings.map(l => l.id).join(',');
+    if (smartListings.length === 0) return '';
+    return `${smartListings[0]?.id || ''}_${smartListings[smartListings.length - 1]?.id || ''}_${smartListings.length}`;
   }, [smartListings]);
 
   // Determine if we have genuinely new data (not just reference change)
@@ -448,12 +445,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     isFetchingMore.current = false;
   }, [listingIdsSignature, isLoading, isFetching, smartListings, setClientDeck, isClientReady, markClientReady]);
 
-  // Get current visible cards for 3-card stack
+  // Get current visible cards for 2-card stack (top + next)
   const currentIndex = currentIndexRef.current;
   const deckQueue = deckQueueRef.current;
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
-  const thirdCard = deckQueue[currentIndex + 2];
 
   // PERF: Execute the actual swipe after ensuring next card is ready
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
@@ -484,8 +480,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     setSwipeDirection(null);
     setRenderKey(n => n + 1);
-    isPreloadingNextRef.current = false;
-    pendingSwipeRef.current = null;
 
     // Fetch more if running low
     if (currentIndexRef.current >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
@@ -507,42 +501,20 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Immediate haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-    // PERF: Check if next card's first image is already decoded
+    // INSTANT SWIPE: Always execute immediately - never block on image prefetch
+    // The next card will show with skeleton placeholder until image loads
+    executeSwipe(direction);
+
+    // BACKGROUND PREFETCH: Opportunistically prefetch next 2-3 cards in background
+    // This doesn't block the swipe - images load with graceful skeleton fallback
     const nextCard = deckQueueRef.current[currentIndexRef.current + 1];
-    const nextCardFirstImage = nextCard?.images?.[0];
-
-    // If no next card or image already decoded, proceed immediately
-    if (!nextCard || !nextCardFirstImage || isImageDecodedInCache(nextCardFirstImage)) {
-      executeSwipe(direction);
-      return;
+    if (nextCard?.images?.[0]) {
+      preloadImageToCache(nextCard.images[0]);
     }
-
-    // PERF: Next card image not decoded - preload and wait
-    // This prevents black flash when swiping to a card whose image isn't ready
-    if (isPreloadingNextRef.current) {
-      // Already preloading, just update the pending direction
-      pendingSwipeRef.current = { direction };
-      return;
+    const nextNextCard = deckQueueRef.current[currentIndexRef.current + 2];
+    if (nextNextCard?.images?.[0]) {
+      preloadImageToCache(nextNextCard.images[0]);
     }
-
-    isPreloadingNextRef.current = true;
-    pendingSwipeRef.current = { direction };
-
-    // Start preloading with high priority and decode
-    preloadImageToCache(nextCardFirstImage).then(() => {
-      // Execute the swipe after decode completes (or fails with timeout)
-      if (pendingSwipeRef.current) {
-        executeSwipe(pendingSwipeRef.current.direction);
-      }
-    });
-
-    // Fallback: If decode takes too long (>300ms), proceed anyway
-    // This ensures swipes never feel stuck
-    setTimeout(() => {
-      if (pendingSwipeRef.current) {
-        executeSwipe(pendingSwipeRef.current.direction);
-      }
-    }, 300);
   }, [executeSwipe]);
 
   const handleRefresh = async () => {
@@ -829,40 +801,24 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
-  // Main swipe view with 3-card stack
+  // Main swipe view with 2-card stack (Tinder-like)
   return (
     <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3">
       <div className="relative flex-1 w-full">
-        {/* 3-CARD STACK: Render next-next, next, then current on top */}
-        {/* Third card (behind) - static, minimal styling */}
-        {thirdCard && (
-          <div
-            key={`third-${thirdCard.id}`}
-            className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
-            style={{
-              transform: 'scale(0.9) translateY(16px)',
-              opacity: 0.5,
-              zIndex: 1,
-              pointerEvents: 'none',
-            }}
-          >
-            <div className="w-full h-full bg-muted/50 rounded-3xl" />
-          </div>
-        )}
-
-        {/* Second card (behind current) - static, light styling */}
+        {/* 2-CARD STACK: Render next card behind, current on top */}
+        {/* Next card (behind current) - static placeholder for smooth transitions */}
         {nextCard && (
           <div
             key={`next-${nextCard.id}`}
             className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
             style={{
               transform: 'scale(0.95) translateY(8px)',
-              opacity: 0.7,
+              opacity: 0.75,
               zIndex: 2,
               pointerEvents: 'none',
             }}
           >
-            <div className="w-full h-full bg-muted/30 rounded-3xl" />
+            <div className="w-full h-full bg-muted/40 rounded-3xl" />
           </div>
         )}
 
