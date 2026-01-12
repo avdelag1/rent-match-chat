@@ -449,7 +449,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   }, [listingIdsSignature, isLoading, isFetching, smartListings, setClientDeck, isClientReady, markClientReady]);
 
   // Get current visible cards for 2-card stack (top + next)
-  const currentIndex = currentIndexRef.current;
+  // Use currentIndex from state (already synced with currentIndexRef)
   const deckQueue = deckQueueRef.current;
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
