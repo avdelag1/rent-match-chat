@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveMode } from "@/hooks/useActiveMode";
 import { ArrowLeft, Sparkles, MessageCircle, Crown, Zap, Star, Check, Clock, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -187,24 +188,12 @@ const getMessageTierStyles = (tier: string) => {
 export default function SubscriptionPackagesPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  // Fetch user's role
-  const { data: userProfile, isLoading: roleLoading } = useQuery({
-    queryKey: ['user-profile-role', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
 
-  const userRole = userProfile?.role || 'client';
+  // Use active mode to determine which packages to show
+  // This switches when user toggles between client/owner mode
+  const { activeMode, isLoading: roleLoading } = useActiveMode();
+
+  const userRole = activeMode;
   const packageCategory = userRole === 'owner' ? 'owner_pay_per_use' : 'client_pay_per_use';
   const premiumPlans = userRole === 'owner' ? ownerPremiumPlans : clientPremiumPlans;
   const roleLabel = userRole === 'owner' ? 'Owner' : 'Client';

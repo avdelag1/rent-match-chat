@@ -213,6 +213,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         });
       } else if (selectedCategory === 'worker') {
         Object.assign(listingData, {
+          description: formData.description,
           service_category: formData.service_category,
           custom_service_name: formData.custom_service_name,
           pricing_unit: formData.pricing_unit,

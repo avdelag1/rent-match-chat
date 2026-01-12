@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Briefcase, DollarSign, Clock, MapPin, Globe, Award, Calendar } from 'lucide-react';
+import { Briefcase, DollarSign, Clock, MapPin, Globe, Award, Calendar, FileText } from 'lucide-react';
 
 export const SERVICE_CATEGORIES = [
   { value: 'nanny', label: 'Nanny / Childcare', icon: '👶' },
@@ -120,6 +121,7 @@ export const COMMON_SKILLS = {
 
 export interface WorkerFormData {
   title: string;
+  description?: string;  // Brief bio/description of service
   service_category: ServiceCategory | '';
   custom_service_name?: string;
   price: number | '';
@@ -159,6 +161,7 @@ interface WorkerListingFormProps {
 export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerListingFormProps) {
   const [formData, setFormData] = useState<WorkerFormData>({
     title: initialData.title || '',
+    description: initialData.description || '',
     service_category: initialData.service_category || '',
     custom_service_name: initialData.custom_service_name || '',
     price: initialData.price || '',
@@ -325,6 +328,22 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
               onChange={(e) => handleChange('title', e.target.value)}
               placeholder={selectedCategoryInfo ? `e.g., Professional ${selectedCategoryInfo.label}` : "e.g., Experienced Yoga Instructor"}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Brief Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description || ''}
+              onChange={(e) => handleChange('description', e.target.value)}
+              placeholder="Describe your service, experience, and what makes you unique (max 500 characters)"
+              maxLength={500}
+              rows={3}
+              className="resize-none"
+            />
+            <p className="text-xs text-muted-foreground text-right">
+              {(formData.description?.length || 0)}/500
+            </p>
           </div>
 
         </CardContent>
