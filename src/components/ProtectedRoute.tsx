@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useActiveMode } from "@/hooks/useActiveMode";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -39,7 +38,7 @@ function ProtectedRouteLoadingSkeleton() {
           {/* Story dots */}
           <div className="absolute top-3 left-4 right-4 flex gap-1 z-10">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="flex-1 h-1 rounded-full bg-white/20" />
+              <Skeleton key={`dot-${i}`} className="flex-1 h-1 rounded-full bg-white/20" />
             ))}
           </div>
           {/* Bottom sheet */}
@@ -67,7 +66,7 @@ function ProtectedRouteLoadingSkeleton() {
       {/* Bottom nav skeleton */}
       <div className="fixed bottom-0 left-0 right-0 h-[68px] bg-background border-t border-border/50 flex items-center justify-around px-4" style={{ paddingBottom: 'var(--safe-bottom, 0px)' }}>
         {[1, 2, 3, 4, 5].map((i) => (
-          <Skeleton key={i} className="h-10 w-10 rounded-xl" />
+          <Skeleton key={`nav-${i}`} className="h-10 w-10 rounded-xl" />
         ))}
       </div>
     </div>
@@ -76,6 +75,7 @@ function ProtectedRouteLoadingSkeleton() {
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const { activeMode, isLoading: modeLoading } = useActiveMode();
   const navigate = useNavigate();
   const location = useLocation();
   const didNavigateRef = useRef(false);
@@ -84,63 +84,12 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   // Once shown, NEVER go back to skeleton (prevents flicker on refresh)
   const [hasShownContent, setHasShownContent] = useState(false);
 
-  // Calculate user age to handle new users whose role row might not exist yet
-  const userAgeMs = useMemo(() => {
-    if (!user?.created_at) return Infinity;
-    return Date.now() - new Date(user.created_at).getTime();
-  }, [user?.created_at]);
-
-  const isNewUser = userAgeMs < 20000; // Within 20 seconds of account creation
-
-  const {
-    data: userRole,
-    isLoading: roleLoading,
-    isFetching: roleFetching,
-    isError,
-  } = useQuery({
-    queryKey: ["user-role", user?.id],
-    // CRITICAL: Only enable when auth is stable (user exists AND loading is complete)
-    enabled: !!user && !loading,
-    queryFn: async () => {
-      if (!user) return null;
-
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      // CRITICAL: Throw on error so React Query's isError works correctly
-      if (error) {
-        throw error;
-      }
-      return data?.role ?? null;
-    },
-
-    // For new users, poll briefly until role row exists (created by trigger)
-    refetchInterval: (query) => {
-      const role = query.state.data as string | null | undefined;
-      if (!user) return false;
-      if (loading) return false;
-      if (!isNewUser) return false;
-      if (role) return false; // Stop polling once we have a role
-      return 1000; // Poll every 1 second for new users
-    },
-
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
-    staleTime: 60000,
-    gcTime: 300000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
-
   // Mark that we've shown valid content once
   useEffect(() => {
-    if (user && userRole && !roleLoading) {
+    if (user && !loading && !modeLoading) {
       setHasShownContent(true);
     }
-  }, [user, userRole, roleLoading]);
+  }, [user, loading, modeLoading]);
 
   useEffect(() => {
     // Prevent duplicate navigations
@@ -156,39 +105,34 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       return;
     }
 
-    // If role query had a real error -> redirect to home
-    if (isError) {
-      didNavigateRef.current = true;
-      navigate("/", { replace: true });
-      return;
-    }
+    // Wait for mode to stabilize
+    if (modeLoading) return;
 
-    // CRITICAL FIX: While role is being resolved (loading/fetching or null for new users)
-    // DO NOT redirect. Let Index.tsx handle the loading state and initial redirect.
-    // This prevents the ping-pong: "/" -> "/dashboard" -> "/" -> "/dashboard"
-    if (roleLoading || roleFetching || !userRole) return;
-
-    // Role mismatch: redirect to the correct dashboard once
-    if (requiredRole && userRole !== requiredRole) {
+    // UNIFIED USER MODEL: Check activeMode instead of database role
+    // Mode mismatch: redirect to the correct dashboard once
+    if (requiredRole && activeMode !== requiredRole) {
       didNavigateRef.current = true;
-      const target = userRole === "client" ? "/client/dashboard" : "/owner/dashboard";
+      const target = activeMode === "client" ? "/client/dashboard" : "/owner/dashboard";
       navigate(target, { replace: true });
     }
   }, [
     user,
     loading,
-    userRole,
-    roleLoading,
-    roleFetching,
-    isError,
+    activeMode,
+    modeLoading,
     requiredRole,
     navigate,
     location,
   ]);
 
+  // Reset navigation ref when route changes (allows future navigation)
+  useEffect(() => {
+    didNavigateRef.current = false;
+  }, [location.pathname]);
+
   // SPEED OF LIGHT: If we've shown content before, keep showing children
   // This prevents flicker during token refresh or re-renders
-  if (hasShownContent) {
+  if (hasShownContent && user) {
     return <>{children}</>;
   }
 
@@ -198,11 +142,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   // Not logged in: show skeleton briefly (effect will redirect)
   if (!user) return <ProtectedRouteLoadingSkeleton />;
 
-  // Waiting for role: show skeleton (prevents blank screen)
-  if (roleLoading || roleFetching || !userRole) return <ProtectedRouteLoadingSkeleton />;
+  // Waiting for mode: show skeleton (prevents blank screen)
+  if (modeLoading) return <ProtectedRouteLoadingSkeleton />;
 
-  // Role mismatch: show skeleton briefly (effect will redirect)
-  if (requiredRole && userRole !== requiredRole) return <ProtectedRouteLoadingSkeleton />;
+  // Mode mismatch: show skeleton briefly (effect will redirect)
+  if (requiredRole && activeMode !== requiredRole) return <ProtectedRouteLoadingSkeleton />;
 
   return <>{children}</>;
 }
