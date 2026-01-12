@@ -81,7 +81,7 @@ function LegendaryLandingPage() {
         >
           {/* Logo with glow effect on hover */}
           <div className="relative">
-            <SwipessLogo size="3xl" glow={true} />
+            <SwipessLogo size="3xl" typewriter={true} typewriterSpeed={150} />
             {/* Glow effect */}
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-2xl -z-10"

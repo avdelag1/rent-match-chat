@@ -4,17 +4,22 @@ import { cn } from '@/lib/utils';
 interface SwipessLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   className?: string;
-  glow?: boolean;
+  typewriter?: boolean;
+  typewriterSpeed?: number; // milliseconds per character
+  onTypingComplete?: () => void;
 }
 
 function SwipessLogoComponent({
   size = 'md',
   className,
-  glow = true,
+  typewriter = false,
+  typewriterSpeed = 150,
+  onTypingComplete
 }: SwipessLogoProps) {
-  const [shimmerKey, setShimmerKey] = useState(0);
-  const [shimmerActive, setShimmerActive] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fullText = 'Swipess';
+  const [displayedText, setDisplayedText] = useState(typewriter ? '' : fullText);
+  const [showCursor, setShowCursor] = useState(typewriter);
+  const hasTypedRef = useRef(false); // Prevent re-typing
 
   const sizeClasses = {
     sm: 'text-xl',
@@ -25,47 +30,64 @@ function SwipessLogoComponent({
     '3xl': 'text-8xl sm:text-9xl',
   };
 
-  // Subtle shimmer effect - random intervals
+  // Typewriter effect - only runs ONCE
   useEffect(() => {
-    if (!glow) return;
+    if (!typewriter || hasTypedRef.current) return;
 
-    const triggerShimmer = () => {
-      // Increment key to restart animation
-      setShimmerKey((k) => k + 1);
-      setShimmerActive(true);
+    hasTypedRef.current = true; // Mark as typed to prevent re-running
+    let currentIndex = 0;
+    setDisplayedText('');
 
-      // Animation lasts ~1.4s
-      setTimeout(() => {
-        setShimmerActive(false);
-      }, 1400);
-
-      // Schedule next shimmer at random interval (4-8 seconds)
-      const nextDelay = 4000 + Math.random() * 4000;
-      timeoutRef.current = setTimeout(triggerShimmer, nextDelay);
-    };
-
-    // Start first shimmer after a short delay
-    const initialDelay = 1500 + Math.random() * 2000;
-    timeoutRef.current = setTimeout(triggerShimmer, initialDelay);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+    const typingInterval = setInterval(() => {
+      if (currentIndex < fullText.length) {
+        setDisplayedText(fullText.substring(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+        if (onTypingComplete) onTypingComplete();
       }
-    };
-  }, [glow]);
+    }, typewriterSpeed);
+
+    return () => clearInterval(typingInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typewriter, typewriterSpeed]); // Removed onTypingComplete to prevent re-running
+
+  // Cursor blinking effect
+  useEffect(() => {
+    if (!typewriter) return;
+
+    const cursorInterval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 530); // Blink every 530ms (standard terminal cursor speed)
+
+    return () => clearInterval(cursorInterval);
+  }, [typewriter]);
 
   return (
     <span
-      key={shimmerKey}
       className={cn(
-        'swipess-logo font-bold italic select-none overflow-visible swipess-shimmer',
+        'swipess-logo font-bold italic select-none overflow-visible inline-flex items-end',
         sizeClasses[size],
-        shimmerActive && 'shimmer-active',
         className
       )}
     >
-      Swipess
+      <span className="inline-flex flex-col">
+        {displayedText}
+        {typewriter && (
+          <span
+            className={cn(
+              'inline-block transition-opacity duration-100 -mt-1',
+              showCursor ? 'opacity-100' : 'opacity-0'
+            )}
+            style={{
+              width: '0.6em',
+              height: '0.08em', // Thinner underline cursor
+              background: 'currentColor',
+              alignSelf: 'flex-start',
+            }}
+          />
+        )}
+      </span>
     </span>
   );
 }
