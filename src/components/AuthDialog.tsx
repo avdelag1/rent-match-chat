@@ -6,7 +6,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
   Eye, EyeOff, Mail, Lock, User, ArrowLeft, Loader,
-  Home, Building2, Check, X, Shield, Sparkles
+  Search, Briefcase, Check, X, Shield, Sparkles
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -64,17 +64,17 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       accent: 'text-orange-400',
       accentBg: 'bg-orange-500/10',
       border: 'border-orange-500/20',
-      icon: Home,
-      title: 'Client',
-      description: 'Find your perfect rental property',
+      icon: Search,
+      title: 'I Need',
+      description: 'Browse deals, services, and properties',
     },
     owner: {
       accent: 'text-orange-400',
       accentBg: 'bg-orange-500/10',
       border: 'border-orange-500/20',
-      icon: Building2,
-      title: 'Seller',
-      description: 'List properties, vehicles, or workers',
+      icon: Briefcase,
+      title: 'I Offer',
+      description: 'Share your services and listings',
     },
   }), []);
 

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Building2, ArrowLeftRight, Loader2 } from 'lucide-react';
+import { Search, Briefcase, ArrowLeftRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useActiveMode, ActiveMode } from '@/hooks/useActiveMode';
 import { triggerHaptic } from '@/utils/haptics';
@@ -12,7 +12,7 @@ interface ModeSwitcherProps {
 }
 
 /**
- * ModeSwitcher - Premium mode toggle for switching between Client and Owner modes
+ * ModeSwitcher - Premium mode toggle for switching between "I Need" and "I Offer" modes
  *
  * Features:
  * - Instant visual feedback with optimistic updates
@@ -54,7 +54,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           className
         )}
         whileTap={{ scale: 0.92 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I Offer' : 'I Need'} mode`}
       >
         <AnimatePresence mode="wait">
           {isSwitching ? (
@@ -76,9 +76,9 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
               {activeMode === 'client' ? (
-                <Home className="h-4 w-4 text-primary" />
+                <Search className="h-4 w-4 text-primary" />
               ) : (
-                <Building2 className="h-4 w-4 text-emerald-500" />
+                <Briefcase className="h-4 w-4 text-emerald-500" />
               )}
             </motion.div>
           )}
@@ -102,7 +102,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           className
         )}
         whileTap={{ scale: 0.97 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I Offer' : 'I Need'} mode`}
       >
         {/* Sliding indicator */}
         <motion.div
@@ -116,22 +116,22 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           style={{ willChange: 'left, right' }}
         />
 
-        {/* Client option */}
+        {/* I Need option */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
           activeMode === 'client' ? 'text-primary' : 'text-muted-foreground'
         )}>
-          <Home className="h-3.5 w-3.5" />
-          <span className="font-medium">Client</span>
+          <Search className="h-3.5 w-3.5" />
+          <span className="font-medium">I Need</span>
         </div>
 
-        {/* Owner option */}
+        {/* I Offer option */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
           activeMode === 'owner' ? 'text-emerald-500' : 'text-muted-foreground'
         )}>
-          <Building2 className="h-3.5 w-3.5" />
-          <span className="font-medium">Owner</span>
+          <Briefcase className="h-3.5 w-3.5" />
+          <span className="font-medium">I Offer</span>
         </div>
 
         {/* Loading overlay */}
@@ -166,7 +166,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         className
       )}
       whileTap={{ scale: 0.97 }}
-      aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
+      aria-label={`Switch to ${activeMode === 'client' ? 'I Offer' : 'I Need'} mode`}
     >
       {/* Mode icon with animation */}
       <AnimatePresence mode="wait">
@@ -182,13 +182,13 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           ) : activeMode === 'client' ? (
             <>
-              <Home className="h-3.5 w-3.5 text-primary" />
-              <span className="font-semibold text-primary">Client</span>
+              <Search className="h-3.5 w-3.5 text-primary" />
+              <span className="font-semibold text-primary">I Need</span>
             </>
           ) : (
             <>
-              <Building2 className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="font-semibold text-emerald-500">Owner</span>
+              <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="font-semibold text-emerald-500">I Offer</span>
             </>
           )}
         </motion.div>

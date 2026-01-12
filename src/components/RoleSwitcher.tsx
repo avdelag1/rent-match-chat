@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Home, Building2, ArrowLeftRight, Loader2 } from 'lucide-react';
+import { Search, Briefcase, ArrowLeftRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useActiveMode, ActiveMode } from '@/hooks/useActiveMode';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,8 +15,8 @@ interface RoleSwitcherProps {
  * Role Switcher Component
  *
  * Allows users to switch between:
- * - Seeker/Client mode: Browse and discover properties
- * - Owner mode: Post listings and find clients
+ * - "I Need" mode: Browse and discover deals, services, properties
+ * - "I Offer" mode: Share services and manage listings
  *
  * One account, two modes - like Uber driver/rider toggle.
  */
@@ -43,7 +43,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <ArrowLeftRight className="w-4 h-4" />
         )}
         <span>
-          {activeMode === 'client' ? 'Switch to Owner' : 'Switch to Seeker'}
+          {activeMode === 'client' ? 'Switch to I Offer' : 'Switch to I Need'}
         </span>
       </motion.button>
     );
@@ -57,7 +57,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <div>
             <h3 className="font-semibold text-foreground">Account Mode</h3>
             <p className="text-sm text-muted-foreground">
-              Switch between seeker and owner
+              Switch between browsing and offering
             </p>
           </div>
           {isLoading && (
@@ -69,8 +69,8 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
         <div className="grid grid-cols-2 gap-3">
           <ModeOption
             mode="client"
-            icon={Home}
-            label="Seeker"
+            icon={Search}
+            label="I Need"
             description="Browse & discover"
             isActive={activeMode === 'client'}
             onClick={() => switchMode('client')}
@@ -78,9 +78,9 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           />
           <ModeOption
             mode="owner"
-            icon={Building2}
-            label="Owner"
-            description="Post & manage"
+            icon={Briefcase}
+            label="I Offer"
+            description="Share & manage"
             isActive={activeMode === 'owner'}
             onClick={() => switchMode('owner')}
             disabled={isLoading}
@@ -97,7 +97,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
             <span className="text-muted-foreground">
               Currently in{' '}
               <span className="font-medium text-foreground">
-                {activeMode === 'client' ? 'Seeker' : 'Owner'}
+                {activeMode === 'client' ? 'I Need' : 'I Offer'}
               </span>
               {' '}mode
             </span>
@@ -202,13 +202,13 @@ export function RoleIndicator({ className }: { className?: string }) {
     )}>
       {activeMode === 'client' ? (
         <>
-          <Home className="w-3 h-3" />
-          <span>Seeker</span>
+          <Search className="w-3 h-3" />
+          <span>I Need</span>
         </>
       ) : (
         <>
-          <Building2 className="w-3 h-3" />
-          <span>Owner</span>
+          <Briefcase className="w-3 h-3" />
+          <span>I Offer</span>
         </>
       )}
     </div>
