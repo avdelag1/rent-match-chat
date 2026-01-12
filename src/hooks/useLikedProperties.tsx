@@ -26,36 +26,8 @@ export function useLikedProperties() {
         throw likesError;
       }
 
-      // If no likes found, check swipes table as backup
+      // If no likes found, return empty array (removed swipes fallback - table may not exist)
       if (!likes || likes.length === 0) {
-        const { data: swipes, error: swipesError } = await supabase
-          .from('swipes')
-          .select('target_id, created_at')
-          .eq('user_id', user.user.id)
-          .order('created_at', { ascending: false });
-
-        if (swipesError) {
-          logger.error('[useLikedProperties] Error fetching swipes:', swipesError);
-          throw swipesError;
-        }
-
-        if (swipes && swipes.length > 0) {
-          const likedIds = swipes.map(s => s.target_id);
-
-          const { data: listings, error: listingsError } = await supabase
-            .from('listings')
-            .select('*')
-            .in('id', likedIds)
-            .eq('is_active', true);
-
-          if (listingsError) {
-            logger.error('[useLikedProperties] Error fetching listings from swipes:', listingsError);
-            throw listingsError;
-          }
-
-          return (listings || []) as Listing[];
-        }
-
         return [];
       }
 
