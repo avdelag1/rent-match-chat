@@ -119,10 +119,6 @@ const ClientSwipeContainerComponent = ({
     });
   }
 
-  // PERF: Track if next card's image is being preloaded (prevents swipe until ready)
-  const isPreloadingNextRef = useRef(false);
-  const pendingSwipeRef = useRef<{ direction: 'left' | 'right' } | null>(null);
-
   // Use external profiles if provided, otherwise fetch internally (fallback for standalone use)
   const [isRefreshMode, setIsRefreshMode] = useState(false);
   const [page, setPage] = useState(0);
@@ -215,12 +211,11 @@ const ClientSwipeContainerComponent = ({
     }
   }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady]);
 
-  // Get current visible cards for 3-card stack
+  // Get current visible cards for 2-card stack (top + next)
   const currentIndex = currentIndexRef.current;
   const deckQueue = deckQueueRef.current;
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
-  const thirdCard = deckQueue[currentIndex + 2];
 
   // PERF: Execute the actual swipe after ensuring next card is ready
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
@@ -255,8 +250,6 @@ const ClientSwipeContainerComponent = ({
 
     setSwipeDirection(null);
     setRenderKey(n => n + 1);
-    isPreloadingNextRef.current = false;
-    pendingSwipeRef.current = null;
 
     // Fetch more if running low
     if (currentIndexRef.current >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
@@ -279,42 +272,22 @@ const ClientSwipeContainerComponent = ({
     // Immediate haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
 
-    // PERF: Check if next card's first image is already decoded
+    // INSTANT SWIPE: Always execute immediately - never block on image prefetch
+    // The next card will show with skeleton placeholder until image loads
+    executeSwipe(direction);
+
+    // BACKGROUND PREFETCH: Opportunistically prefetch next 2-3 cards in background
+    // This doesn't block the swipe - images load with graceful skeleton fallback
     const nextProfile = deckQueueRef.current[currentIndexRef.current + 1];
-    const nextCardFirstImage = nextProfile?.profile_images?.[0] || nextProfile?.avatar_url;
-
-    // If no next card or image already decoded, proceed immediately
-    if (!nextProfile || !nextCardFirstImage || isClientImageDecodedInCache(nextCardFirstImage)) {
-      executeSwipe(direction);
-      return;
+    const nextImage = nextProfile?.profile_images?.[0] || nextProfile?.avatar_url;
+    if (nextImage) {
+      preloadClientImageToCache(nextImage);
     }
-
-    // PERF: Next card image not decoded - preload and wait
-    // This prevents black flash when swiping to a card whose image isn't ready
-    if (isPreloadingNextRef.current) {
-      // Already preloading, just update the pending direction
-      pendingSwipeRef.current = { direction };
-      return;
+    const nextNextProfile = deckQueueRef.current[currentIndexRef.current + 2];
+    const nextNextImage = nextNextProfile?.profile_images?.[0] || nextNextProfile?.avatar_url;
+    if (nextNextImage) {
+      preloadClientImageToCache(nextNextImage);
     }
-
-    isPreloadingNextRef.current = true;
-    pendingSwipeRef.current = { direction };
-
-    // Start preloading with high priority and decode
-    preloadClientImageToCache(nextCardFirstImage).then(() => {
-      // Execute the swipe after decode completes (or fails with timeout)
-      if (pendingSwipeRef.current) {
-        executeSwipe(pendingSwipeRef.current.direction);
-      }
-    });
-
-    // Fallback: If decode takes too long (>300ms), proceed anyway
-    // This ensures swipes never feel stuck
-    setTimeout(() => {
-      if (pendingSwipeRef.current) {
-        executeSwipe(pendingSwipeRef.current.direction);
-      }
-    }, 300);
   }, [executeSwipe]);
 
   const handleRefresh = useCallback(async () => {
@@ -534,40 +507,24 @@ const ClientSwipeContainerComponent = ({
     );
   }
 
-  // Main swipe view with 3-card stack
+  // Main swipe view with 2-card stack (Tinder-like)
   return (
     <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3">
       <div className="relative flex-1 w-full">
-        {/* 3-CARD STACK: Render next-next, next, then current on top */}
-        {/* Third card (behind) - static, minimal styling */}
-        {thirdCard && (
-          <div
-            key={`third-${thirdCard.user_id}`}
-            className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
-            style={{
-              transform: 'scale(0.9) translateY(16px)',
-              opacity: 0.5,
-              zIndex: 1,
-              pointerEvents: 'none',
-            }}
-          >
-            <div className="w-full h-full bg-muted/50 rounded-3xl" />
-          </div>
-        )}
-
-        {/* Second card (behind current) - static, light styling */}
+        {/* 2-CARD STACK: Render next card behind, current on top */}
+        {/* Next card (behind current) - static placeholder for smooth transitions */}
         {nextCard && (
           <div
             key={`next-${nextCard.user_id}`}
             className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
             style={{
               transform: 'scale(0.95) translateY(8px)',
-              opacity: 0.7,
+              opacity: 0.75,
               zIndex: 2,
               pointerEvents: 'none',
             }}
           >
-            <div className="w-full h-full bg-muted/30 rounded-3xl" />
+            <div className="w-full h-full bg-muted/40 rounded-3xl" />
           </div>
         )}
 
