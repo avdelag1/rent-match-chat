@@ -164,6 +164,44 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Helper to get target path for navigation
+  const getTargetPath = useCallback((newMode: ActiveMode) => {
+    const currentPath = location.pathname;
+
+    // If currently on a client or owner page, switch to equivalent page
+    if (currentPath.includes('/client/') || currentPath.includes('/owner/')) {
+      const pageMapping: Record<string, Record<string, string>> = {
+        client: {
+          dashboard: '/owner/dashboard',
+          profile: '/owner/profile',
+          settings: '/owner/settings',
+          security: '/owner/security',
+          contracts: '/owner/contracts',
+          'saved-searches': '/owner/dashboard',
+          'worker-discovery': '/owner/dashboard',
+        },
+        owner: {
+          dashboard: '/client/dashboard',
+          profile: '/client/profile',
+          settings: '/client/settings',
+          security: '/client/security',
+          contracts: '/client/contracts',
+          listings: '/client/dashboard',
+          'new-listing': '/client/dashboard',
+        },
+      };
+
+      const currentPageType = currentPath.split('/').pop() || 'dashboard';
+      const fromMode = currentPath.includes('/client/') ? 'client' : 'owner';
+
+      return pageMapping[fromMode]?.[currentPageType] ||
+             (newMode === 'client' ? '/client/dashboard' : '/owner/dashboard');
+    }
+
+    // Default to dashboard of new mode
+    return newMode === 'client' ? '/client/dashboard' : '/owner/dashboard';
+  }, [location.pathname]);
+
   // Switch mode function with navigation
   const switchMode = useCallback(async (newMode: ActiveMode) => {
     if (!user?.id || isSwitching || newMode === localMode) return;
@@ -171,62 +209,32 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
     setIsSwitching(true);
     triggerHaptic('medium');
 
+    // Navigate IMMEDIATELY (optimistically) - don't wait for database
+    const targetPath = getTargetPath(newMode);
+    navigate(targetPath, { replace: true });
+
+    // Show success toast immediately
+    toast({
+      title: `Switched to ${newMode === 'client' ? 'Seeker' : 'Owner'} Mode`,
+      description: newMode === 'client'
+        ? 'Now browsing properties and deals'
+        : 'Now managing your listings',
+    });
+
+    triggerHaptic('success');
+
     try {
-      // Update database (optimistic update already happened in onMutate)
+      // Update database in background (optimistic update in onMutate handles local state)
       await updateModeMutation.mutateAsync(newMode);
-
-      // Determine target path based on new mode
-      const currentPath = location.pathname;
-      let targetPath: string;
-
-      // If currently on a dashboard, switch to the other dashboard
-      if (currentPath.includes('/client/') || currentPath.includes('/owner/')) {
-        // Map equivalent pages between client and owner
-        const pageMapping: Record<string, Record<string, string>> = {
-          client: {
-            dashboard: '/owner/dashboard',
-            profile: '/owner/profile',
-            settings: '/owner/settings',
-            security: '/owner/security',
-          },
-          owner: {
-            dashboard: '/client/dashboard',
-            profile: '/client/profile',
-            settings: '/client/settings',
-            security: '/client/security',
-          },
-        };
-
-        // Find the current page type
-        const currentPageType = currentPath.split('/').pop() || 'dashboard';
-        const fromMode = currentPath.includes('/client/') ? 'client' : 'owner';
-
-        // Get mapped path or default to dashboard
-        targetPath = pageMapping[fromMode]?.[currentPageType] ||
-                     (newMode === 'client' ? '/client/dashboard' : '/owner/dashboard');
-      } else {
-        // Default to dashboard of new mode
-        targetPath = newMode === 'client' ? '/client/dashboard' : '/owner/dashboard';
-      }
-
-      // Navigate instantly without full page reload
-      navigate(targetPath, { replace: true });
-
-      toast({
-        title: `Switched to ${newMode === 'client' ? 'Client' : 'Owner'} Mode`,
-        description: newMode === 'client'
-          ? 'Now browsing properties and deals'
-          : 'Now managing your listings',
-      });
-
-      triggerHaptic('success');
     } catch (error) {
+      // Database update failed, but navigation already happened
+      // The onError handler will rollback local state and show error toast
       logger.error('[ActiveMode] Switch failed:', error);
       triggerHaptic('error');
     } finally {
       setIsSwitching(false);
     }
-  }, [user?.id, isSwitching, localMode, updateModeMutation, navigate, location.pathname]);
+  }, [user?.id, isSwitching, localMode, updateModeMutation, navigate, getTargetPath]);
 
   // Toggle between modes
   const toggleMode = useCallback(async () => {
