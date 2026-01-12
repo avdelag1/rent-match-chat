@@ -322,7 +322,7 @@ export default function SubscriptionPackagesPage() {
             </p>
             <div className="flex items-center justify-center gap-2 text-sm">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-              <span className="text-foreground font-medium">New users get 3 FREE activations!</span>
+              <span className="text-foreground font-medium">New users get 1 FREE welcome activation!</span>
             </div>
           </div>
 

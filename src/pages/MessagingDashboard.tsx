@@ -18,6 +18,7 @@ import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { MessageActivationPackages } from '@/components/MessageActivationPackages';
+import { MessageActivationBanner } from '@/components/MessageActivationBanner';
 import { useMessageActivations } from '@/hooks/useMessageActivations';
 import { usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { logger } from '@/utils/prodLogger';
@@ -31,6 +32,7 @@ export function MessagingDashboard() {
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [directConversationId, setDirectConversationId] = useState<string | null>(null);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showActivationBanner, setShowActivationBanner] = useState(false);
 
   // Use React Query-based hook for role - prevents menu flickering
   const { data: fetchedRole, isLoading: roleLoading } = useUserRole(user?.id);
@@ -232,6 +234,7 @@ export function MessagingDashboard() {
 
       // Check if user has activations
       if (!canSendMessage || totalActivations === 0) {
+        setShowActivationBanner(true);
         setShowUpgradeDialog(true);
         setSearchParams({}); // Clear URL param
         setIsStartingConversation(false);
@@ -266,6 +269,7 @@ export function MessagingDashboard() {
       if (import.meta.env.DEV) logger.error('Error auto-starting conversation:', error);
 
       if (error?.message === 'QUOTA_EXCEEDED') {
+        setShowActivationBanner(true);
         setShowUpgradeDialog(true);
       } else {
         toast({
@@ -300,17 +304,9 @@ export function MessagingDashboard() {
     }
   }, [searchParams, isStartingConversation, handleDirectOpenConversation, handleAutoStartConversation]);
 
-  // Show loading state while role is being fetched to prevent menu flickering
-  if (roleLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#000000]">
-        <div className="flex flex-col items-center gap-4">
-          <MessageCircle className="w-12 h-12 text-[#007AFF] animate-pulse" />
-          <p className="text-[#8E8E93]">Loading messages...</p>
-        </div>
-      </div>
-    );
-  }
+  // Don't block on role loading - show content immediately
+  // Role will update when fetched and is mainly used for UI styling
+  // This prevents the app from getting stuck on loading screen
 
   if (selectedConversationId) {
     // If we have a selected conversation ID, show the messaging interface
@@ -363,6 +359,14 @@ export function MessagingDashboard() {
 
   return (
     <>
+      {/* Activation Banner - shown when trying to message without activations */}
+      <MessageActivationBanner
+        isVisible={showActivationBanner}
+        onClose={() => setShowActivationBanner(false)}
+        userRole={userRole}
+        variant="conversation-limit"
+      />
+
       <div className="w-full pb-24 bg-[#000000]">
         <div className="w-full max-w-4xl mx-auto p-3 sm:p-4">
           {/* Vibrant Header */}
