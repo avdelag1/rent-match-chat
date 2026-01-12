@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, createContext, useContext, ReactNode, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,35 +13,57 @@ interface ActiveModeContextType {
   activeMode: ActiveMode;
   isLoading: boolean;
   isSwitching: boolean;
-  switchMode: (newMode: ActiveMode) => Promise<void>;
-  toggleMode: () => Promise<void>;
+  switchMode: (newMode: ActiveMode) => void;
+  toggleMode: () => void;
   canSwitchMode: boolean;
 }
 
 const ActiveModeContext = createContext<ActiveModeContextType | undefined>(undefined);
 
-// Session storage key for instant mode restoration
+// Local storage key for persistent mode (survives page refresh)
 const MODE_STORAGE_KEY = 'swipess_active_mode';
 
-// Get cached mode from session storage (synchronous, instant)
+// Get cached mode from localStorage (synchronous, instant, persistent)
 function getCachedMode(userId: string | undefined): ActiveMode | null {
   if (!userId) return null;
   try {
-    const cached = sessionStorage.getItem(`${MODE_STORAGE_KEY}_${userId}`);
+    const cached = localStorage.getItem(`${MODE_STORAGE_KEY}_${userId}`);
     return cached === 'client' || cached === 'owner' ? cached : null;
   } catch {
     return null;
   }
 }
 
-// Cache mode to session storage
+// Cache mode to localStorage (persistent across sessions)
 function setCachedMode(userId: string, mode: ActiveMode): void {
   try {
-    sessionStorage.setItem(`${MODE_STORAGE_KEY}_${userId}`, mode);
+    localStorage.setItem(`${MODE_STORAGE_KEY}_${userId}`, mode);
   } catch {
-    // sessionStorage unavailable
+    // localStorage unavailable
   }
 }
+
+// Page mapping for navigation between modes
+const PAGE_MAPPING: Record<string, Record<string, string>> = {
+  client: {
+    dashboard: '/owner/dashboard',
+    profile: '/owner/profile',
+    settings: '/owner/settings',
+    security: '/owner/security',
+    contracts: '/owner/contracts',
+    'saved-searches': '/owner/dashboard',
+    'worker-discovery': '/owner/dashboard',
+  },
+  owner: {
+    dashboard: '/client/dashboard',
+    profile: '/client/profile',
+    settings: '/client/settings',
+    security: '/client/security',
+    contracts: '/client/contracts',
+    listings: '/client/dashboard',
+    'new-listing': '/client/dashboard',
+  },
+};
 
 export function ActiveModeProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -49,16 +71,24 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  // PERF: Initialize from cache synchronously to prevent flash
-  const initialMode = useMemo(() => {
+  // Initialize from localStorage synchronously - instant, no flash
+  const [localMode, setLocalMode] = useState<ActiveMode>(() => {
     return getCachedMode(user?.id) || 'client';
-  }, [user?.id]);
-
-  const [localMode, setLocalMode] = useState<ActiveMode>(initialMode);
+  });
   const [isSwitching, setIsSwitching] = useState(false);
 
-  // Fetch active_mode from profiles table
-  const { data: profileMode, isLoading, isFetched } = useQuery({
+  // Update initial mode when user changes
+  useEffect(() => {
+    if (user?.id) {
+      const cached = getCachedMode(user.id);
+      if (cached && cached !== localMode) {
+        setLocalMode(cached);
+      }
+    }
+  }, [user?.id]);
+
+  // Fetch from database in background (only for initial sync)
+  const { isLoading, isFetched } = useQuery({
     queryKey: ['active-mode', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -70,38 +100,35 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (error) {
+        // Don't throw - local cache is source of truth
         logger.error('[ActiveMode] Error fetching mode:', error);
-        // Don't throw - fall back to cached/default mode
         return null;
       }
 
-      const mode = (data?.active_mode as ActiveMode) || 'client';
+      const dbMode = (data?.active_mode as ActiveMode) || 'client';
 
-      // Cache the fetched mode
-      setCachedMode(user.id, mode);
+      // Only sync from DB if we don't have a local cache
+      const cachedMode = getCachedMode(user.id);
+      if (!cachedMode) {
+        setCachedMode(user.id, dbMode);
+        setLocalMode(dbMode);
+      }
 
-      return mode;
+      return dbMode;
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: Infinity, // Never refetch automatically
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  // Sync local state with fetched data (only when fetched and different)
-  useEffect(() => {
-    if (isFetched && profileMode && profileMode !== localMode) {
-      setLocalMode(profileMode);
-    }
-  }, [isFetched, profileMode, localMode]);
+  // Save mode to database in background (fire and forget)
+  const saveModeToDatabase = useCallback(async (newMode: ActiveMode) => {
+    if (!user?.id) return;
 
-  // Mutation to update mode in database
-  const updateModeMutation = useMutation({
-    mutationFn: async (newMode: ActiveMode) => {
-      if (!user?.id) throw new Error('Not authenticated');
-
-      const { error } = await supabase
+    try {
+      await supabase
         .from('profiles')
         .update({
           active_mode: newMode,
@@ -109,111 +136,53 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
         })
         .eq('id', user.id);
 
-      if (error) {
-        logger.error('[ActiveMode] Error updating mode:', error);
-        throw error;
-      }
+      // Update query cache
+      queryClient.setQueryData(['active-mode', user.id], newMode);
+    } catch (error) {
+      // Silent fail - local cache is already updated
+      logger.error('[ActiveMode] Background save failed:', error);
+    }
+  }, [user?.id, queryClient]);
 
-      return newMode;
-    },
-    onMutate: async (newMode) => {
-      // Optimistic update - update local state immediately
-      const previousMode = localMode;
-      setLocalMode(newMode);
-
-      // Update cache
-      if (user?.id) {
-        setCachedMode(user.id, newMode);
-      }
-
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['active-mode', user?.id] });
-
-      // Snapshot the previous value
-      const previousProfileMode = queryClient.getQueryData(['active-mode', user?.id]);
-
-      // Optimistically update the cache
-      queryClient.setQueryData(['active-mode', user?.id], newMode);
-
-      return { previousMode, previousProfileMode };
-    },
-    onError: (err, newMode, context) => {
-      // Rollback on error
-      if (context?.previousMode) {
-        setLocalMode(context.previousMode);
-        if (user?.id) {
-          setCachedMode(user.id, context.previousMode);
-        }
-      }
-      if (context?.previousProfileMode) {
-        queryClient.setQueryData(['active-mode', user?.id], context.previousProfileMode);
-      }
-
-      toast({
-        title: 'Mode Switch Failed',
-        description: 'Could not switch mode. Please try again.',
-        variant: 'destructive',
-      });
-    },
-    onSuccess: (newMode) => {
-      // Invalidate queries that depend on mode
-      queryClient.invalidateQueries({ queryKey: ['active-mode', user?.id] });
-
-      // Invalidate role query to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['user-role', user?.id] });
-    },
-  });
-
-  // Helper to get target path for navigation
-  const getTargetPath = useCallback((newMode: ActiveMode) => {
+  // Get target path for navigation
+  const getTargetPath = useCallback((newMode: ActiveMode): string => {
     const currentPath = location.pathname;
 
-    // If currently on a client or owner page, switch to equivalent page
     if (currentPath.includes('/client/') || currentPath.includes('/owner/')) {
-      const pageMapping: Record<string, Record<string, string>> = {
-        client: {
-          dashboard: '/owner/dashboard',
-          profile: '/owner/profile',
-          settings: '/owner/settings',
-          security: '/owner/security',
-          contracts: '/owner/contracts',
-          'saved-searches': '/owner/dashboard',
-          'worker-discovery': '/owner/dashboard',
-        },
-        owner: {
-          dashboard: '/client/dashboard',
-          profile: '/client/profile',
-          settings: '/client/settings',
-          security: '/client/security',
-          contracts: '/client/contracts',
-          listings: '/client/dashboard',
-          'new-listing': '/client/dashboard',
-        },
-      };
-
       const currentPageType = currentPath.split('/').pop() || 'dashboard';
       const fromMode = currentPath.includes('/client/') ? 'client' : 'owner';
 
-      return pageMapping[fromMode]?.[currentPageType] ||
+      return PAGE_MAPPING[fromMode]?.[currentPageType] ||
              (newMode === 'client' ? '/client/dashboard' : '/owner/dashboard');
     }
 
-    // Default to dashboard of new mode
     return newMode === 'client' ? '/client/dashboard' : '/owner/dashboard';
   }, [location.pathname]);
 
-  // Switch mode function with navigation
-  const switchMode = useCallback(async (newMode: ActiveMode) => {
+  // FAST mode switch - everything happens synchronously
+  const switchMode = useCallback((newMode: ActiveMode) => {
     if (!user?.id || isSwitching || newMode === localMode) return;
 
+    // 1. Set switching flag
     setIsSwitching(true);
+
+    // 2. Haptic feedback
     triggerHaptic('medium');
 
-    // Navigate IMMEDIATELY (optimistically) - don't wait for database
+    // 3. Update local state IMMEDIATELY
+    setLocalMode(newMode);
+
+    // 4. Cache to localStorage IMMEDIATELY (persistent)
+    setCachedMode(user.id, newMode);
+
+    // 5. Update query cache IMMEDIATELY
+    queryClient.setQueryData(['active-mode', user.id], newMode);
+
+    // 6. Navigate IMMEDIATELY
     const targetPath = getTargetPath(newMode);
     navigate(targetPath, { replace: true });
 
-    // Show success toast immediately
+    // 7. Show success toast
     toast({
       title: `Switched to ${newMode === 'client' ? 'Seeker' : 'Owner'} Mode`,
       description: newMode === 'client'
@@ -221,29 +190,24 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
         : 'Now managing your listings',
     });
 
+    // 8. Success haptic
     triggerHaptic('success');
 
-    try {
-      // Update database in background (optimistic update in onMutate handles local state)
-      await updateModeMutation.mutateAsync(newMode);
-    } catch (error) {
-      // Database update failed, but navigation already happened
-      // The onError handler will rollback local state and show error toast
-      logger.error('[ActiveMode] Switch failed:', error);
-      triggerHaptic('error');
-    } finally {
-      setIsSwitching(false);
-    }
-  }, [user?.id, isSwitching, localMode, updateModeMutation, navigate, getTargetPath]);
+    // 9. Reset switching flag
+    setIsSwitching(false);
+
+    // 10. Save to database in background (fire and forget)
+    saveModeToDatabase(newMode);
+
+  }, [user?.id, isSwitching, localMode, queryClient, getTargetPath, navigate, saveModeToDatabase]);
 
   // Toggle between modes
-  const toggleMode = useCallback(async () => {
+  const toggleMode = useCallback(() => {
     const newMode = localMode === 'client' ? 'owner' : 'client';
-    await switchMode(newMode);
+    switchMode(newMode);
   }, [localMode, switchMode]);
 
-  // Check if user can switch modes (has both roles set up)
-  // For now, we allow all authenticated users to switch
+  // Allow all authenticated users to switch
   const canSwitchMode = !!user?.id;
 
   const value = useMemo(() => ({
@@ -270,12 +234,15 @@ export function useActiveMode() {
   return context;
 }
 
-// Standalone hook for components that just need to read the mode without the provider
-// Uses direct query - useful for isolated components
+// Standalone hook for components that just need to read the mode
 export function useActiveModeQuery(userId: string | undefined) {
   return useQuery({
     queryKey: ['active-mode', userId],
     queryFn: async () => {
+      // First check localStorage (source of truth)
+      const cached = getCachedMode(userId);
+      if (cached) return cached;
+
       if (!userId) return 'client' as ActiveMode;
 
       const { data, error } = await supabase
@@ -289,10 +256,12 @@ export function useActiveModeQuery(userId: string | undefined) {
         return 'client' as ActiveMode;
       }
 
-      return (data?.active_mode as ActiveMode) || 'client';
+      const mode = (data?.active_mode as ActiveMode) || 'client';
+      setCachedMode(userId, mode);
+      return mode;
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: Infinity,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
     initialData: getCachedMode(userId) || 'client',
