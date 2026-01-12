@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SwipessLogoProps {
@@ -12,8 +12,9 @@ function SwipessLogoComponent({
   className,
   glow = true,
 }: SwipessLogoProps) {
-  const letters = ['S', 'w', 'i', 'p', 'e', 's', 's'];
-  const [glowingIndex, setGlowingIndex] = useState<number>(-1);
+  const [shimmerKey, setShimmerKey] = useState(0);
+  const [shimmerActive, setShimmerActive] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const sizeClasses = {
     sm: 'text-xl',
@@ -24,48 +25,47 @@ function SwipessLogoComponent({
     '3xl': 'text-8xl sm:text-9xl',
   };
 
-  // Random glow effect on letters
+  // Subtle shimmer effect - random intervals
   useEffect(() => {
     if (!glow) return;
 
-    const glowInterval = setInterval(() => {
-      // Pick a random letter to glow
-      const randomIndex = Math.floor(Math.random() * letters.length);
-      setGlowingIndex(randomIndex);
+    const triggerShimmer = () => {
+      // Increment key to restart animation
+      setShimmerKey((k) => k + 1);
+      setShimmerActive(true);
 
-      // Turn off glow after a short duration
+      // Animation lasts ~1.4s
       setTimeout(() => {
-        setGlowingIndex(-1);
-      }, 400);
-    }, 800);
+        setShimmerActive(false);
+      }, 1400);
 
-    return () => clearInterval(glowInterval);
-  }, [glow, letters.length]);
+      // Schedule next shimmer at random interval (4-8 seconds)
+      const nextDelay = 4000 + Math.random() * 4000;
+      timeoutRef.current = setTimeout(triggerShimmer, nextDelay);
+    };
+
+    // Start first shimmer after a short delay
+    const initialDelay = 1500 + Math.random() * 2000;
+    timeoutRef.current = setTimeout(triggerShimmer, initialDelay);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [glow]);
 
   return (
     <span
+      key={shimmerKey}
       className={cn(
-        'swipess-logo font-bold italic select-none overflow-visible inline-flex items-baseline',
+        'swipess-logo font-bold italic select-none overflow-visible swipess-shimmer',
         sizeClasses[size],
+        shimmerActive && 'shimmer-active',
         className
       )}
     >
-      {letters.map((letter, index) => (
-        <span
-          key={index}
-          className={cn(
-            'transition-all duration-300',
-            glowingIndex === index && 'text-white'
-          )}
-          style={{
-            textShadow: glowingIndex === index
-              ? '0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(255,165,0,0.7), 0 0 30px rgba(255,100,0,0.5)'
-              : 'none',
-          }}
-        >
-          {letter}
-        </span>
-      ))}
+      Swipess
     </span>
   );
 }
