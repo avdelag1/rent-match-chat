@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 import { SwipessLogo } from './SwipessLogo';
 import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
-import { RoleIndicator } from './RoleSwitcher';
+import { ModeSwitcher } from './ModeSwitcher';
 
 // Colorful gradient text for "Message Activation" button - Red/Orange theme
 const MessageActivationText = () => (
@@ -60,7 +60,7 @@ function TopBarComponent({
       className={cn('app-header bg-background/95 border-b border-white/5 shadow-sm', className)}
     >
       <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
-        {/* Left side: Logo + Role + Filters */}
+        {/* Left side: Logo + Mode Switch + Filters */}
         <div className="flex items-center gap-2">
           <motion.div
             className="flex items-center gap-0.5 select-none"
@@ -70,14 +70,8 @@ function TopBarComponent({
             <SwipessLogo size="sm" />
           </motion.div>
 
-          {/* Current Mode Indicator */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <RoleIndicator />
-          </motion.div>
+          {/* Mode Switcher - Switch between Client and Owner modes */}
+          <ModeSwitcher variant="pill" size="sm" />
 
           {/* Quick Filter Dropdown */}
           {showFilters && filters && onFiltersChange && userRole && (

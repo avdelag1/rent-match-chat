@@ -3210,6 +3210,7 @@ export type Database = {
           oauth_pending_role: string | null
           oauth_provider: string | null
           occupation: string | null
+          active_mode: string | null
           onboarding_completed: boolean | null
           owner_looking_for: string | null
           package: string | null
@@ -3356,6 +3357,7 @@ export type Database = {
           oauth_pending_role?: string | null
           oauth_provider?: string | null
           occupation?: string | null
+          active_mode?: string | null
           onboarding_completed?: boolean | null
           owner_looking_for?: string | null
           package?: string | null
@@ -3502,6 +3504,7 @@ export type Database = {
           oauth_pending_role?: string | null
           oauth_provider?: string | null
           occupation?: string | null
+          active_mode?: string | null
           onboarding_completed?: boolean | null
           owner_looking_for?: string | null
           package?: string | null
