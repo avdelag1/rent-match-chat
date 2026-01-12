@@ -147,8 +147,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const isClientReady = useSwipeDeckStore((state) => state.isClientReady);
   const markClientReady = useSwipeDeckStore((state) => state.markClientReady);
 
-  // Local state for immediate UI updates (synced with store)
-  const [renderKey, setRenderKey] = useState(0); // Force update trigger
+  // Local state for immediate UI updates - drives the swipe animation
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   // PERF: Get initial state ONCE using getState() - no subscription
   // This is synchronous and doesn't cause re-renders when store updates
@@ -173,6 +173,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const currentIndexRef = useRef(useSwipeDeckStore.getState().clientDeck.currentIndex);
   const swipedIdsRef = useRef<Set<string>>(new Set(useSwipeDeckStore.getState().clientDeck.swipedIds));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
+
+  // Sync state with ref on mount
+  useEffect(() => {
+    setCurrentIndex(currentIndexRef.current);
+  }, []);
 
   // PERF FIX: Track if we're returning to dashboard (has hydrated data AND is ready)
   // When true, skip initial animations to prevent "double render" feeling
@@ -222,9 +227,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         const items = getInitialDeck();
         if (items.length > 0 && deckQueueRef.current.length === 0) {
           deckQueueRef.current = items;
-          currentIndexRef.current = storeState.clientDeck.currentIndex;
+          const newIndex = storeState.clientDeck.currentIndex;
+          currentIndexRef.current = newIndex;
+          setCurrentIndex(newIndex);
           swipedIdsRef.current = new Set(storeState.clientDeck.swipedIds);
-          setRenderKey(n => n + 1);
         }
       }
     }
@@ -319,7 +325,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     resetClientDeck();
 
     // Force UI update
-    setRenderKey(n => n + 1);
+    currentIndexRef.current = 0;
+    setCurrentIndex(0);
   }, [filterSignature, resetClientDeck]);
 
   // Get listings with filters - PERF: pass userId to avoid getUser() inside queryFn
@@ -351,13 +358,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   }
 
   // Prefetch images for next cards
-  // PERF FIX: Pass renderKey as trigger to ensure prefetch runs on each swipe
-  // (currentIndexRef.current and deckQueueRef.current are refs that don't trigger re-renders)
+  // PERF: Use currentIndex state as trigger (re-runs when index changes)
   usePrefetchImages({
-    currentIndex: currentIndexRef.current,
+    currentIndex: currentIndex,
     profiles: deckQueueRef.current,
     prefetchCount: 2,
-    trigger: renderKey
+    trigger: currentIndex
   });
 
   // Prefetch next batch of listings when approaching end of current batch
@@ -371,7 +377,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // PERFORMANCE: Prefetch next listing details when viewing current card
   // This pre-loads the data for the insights dialog
-  // FIX: Use renderKey (state-driven) instead of currentIndexRef.current (ref doesn't trigger re-runs)
   // PERF: Guard with route check - skip expensive work when navigated away
   // PERF: Use throttled scheduler to not compete with current image decode
   const location = useLocation();
@@ -382,7 +387,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Skip expensive prefetch when not on dashboard - reduces CPU during route transitions
     if (!isDashboard) return;
 
-    const nextListing = deckQueueRef.current[currentIndexRef.current + 1];
+    const nextListing = deckQueueRef.current[currentIndex + 1];
     if (nextListing?.id) {
       // PERF: Use throttled scheduler - waits 300ms then uses requestIdleCallback
       // This ensures prefetch doesn't compete with current image decoding
@@ -395,7 +400,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       prefetchSchedulerRef.current.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderKey, prefetchListingDetails, isDashboard]); // renderKey updates on each swipe, triggering reliable prefetch
+  }, [currentIndex, prefetchListingDetails, isDashboard]); // currentIndex updates on each swipe, triggering reliable prefetch
 
   // CONSTANT-TIME: Append new unique listings to queue AND persist to store
   // PERF FIX: Only run when we have genuinely new listings (not just reference change)
@@ -424,7 +429,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       if (deckQueueRef.current.length > 50) {
         const offset = deckQueueRef.current.length - 50;
         deckQueueRef.current = deckQueueRef.current.slice(offset);
-        currentIndexRef.current = Math.max(0, currentIndexRef.current - offset);
+        const newIndex = Math.max(0, currentIndexRef.current - offset);
+        currentIndexRef.current = newIndex;
+        setCurrentIndex(newIndex);
       }
 
       // PERSIST: Save to store and session for navigation survival
@@ -436,10 +443,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       if (!isClientReady()) {
         markClientReady();
       }
-
-      // PERF FIX: Only trigger render update when we actually added new cards
-      // This is the minimal state change needed to update UI
-      setRenderKey(n => n + 1);
     }
 
     isFetchingMore.current = false;
@@ -451,44 +454,57 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
 
-  // PERF: Execute the actual swipe after ensuring next card is ready
+  // INSTANT SWIPE: Update UI immediately, fire DB operations in background
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
     const listing = deckQueueRef.current[currentIndexRef.current];
     if (!listing) return;
 
+    const newIndex = currentIndexRef.current + 1;
+
+    // 1. UPDATE UI STATE FIRST (INSTANT)
     setSwipeDirection(direction);
-
-    // CONSTANT-TIME: Just mark as swiped and advance pointer
+    currentIndexRef.current = newIndex;
+    setCurrentIndex(newIndex); // This triggers re-render with new card
     swipedIdsRef.current.add(listing.id);
-    currentIndexRef.current += 1;
 
-    // PERSIST: Update store with swiped state
-    markClientSwiped(listing.id);
+    // 2. BACKGROUND TASKS (Fire-and-forget, don't block UI)
+    // These happen AFTER UI has already updated
+    Promise.all([
+      // Persist to store
+      Promise.resolve(markClientSwiped(listing.id)),
 
-    swipeMutation.mutate({
-      targetId: listing.id,
-      direction,
-      targetType: 'listing'
+      // Save swipe to DB with match detection
+      swipeMutation.mutateAsync({
+        targetId: listing.id,
+        direction,
+        targetType: 'listing'
+      }).catch(() => {}),
+
+      // Record for undo
+      Promise.resolve(recordSwipe(listing.id, 'listing', direction === 'right' ? 'like' : 'pass')),
+
+      // Record profile view
+      recordProfileView.mutateAsync({
+        profileId: listing.id,
+        viewType: 'listing',
+        action: direction === 'right' ? 'like' : 'pass'
+      }).catch(() => {})
+    ]).catch(err => {
+      // Non-critical - user already saw the swipe complete
+      logger.error('[TinderentSwipeContainer] Background swipe tasks failed:', err);
     });
 
-    recordSwipe(listing.id, 'listing', direction === 'right' ? 'like' : 'pass');
-    recordProfileView.mutate({
-      profileId: listing.id,
-      viewType: 'listing',
-      action: direction === 'right' ? 'like' : 'pass'
-    });
-
-    setSwipeDirection(null);
-    setRenderKey(n => n + 1);
+    // Clear direction for next swipe
+    setTimeout(() => setSwipeDirection(null), 300);
 
     // Fetch more if running low
-    if (currentIndexRef.current >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
+    if (newIndex >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
     }
 
-    // PERF: Eagerly preload the next-next card's image for smooth subsequent swipes
-    const nextNextCard = deckQueueRef.current[currentIndexRef.current + 1];
+    // Eagerly preload next card's image
+    const nextNextCard = deckQueueRef.current[newIndex + 1];
     if (nextNextCard?.images?.[0]) {
       preloadImageToCache(nextNextCard.images[0]);
     }
@@ -522,8 +538,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     setIsRefreshMode(true);
     triggerHaptic('medium');
 
-    // Reset local refs
+    // Reset local state and refs
     currentIndexRef.current = 0;
+    setCurrentIndex(0);
     deckQueueRef.current = [];
     swipedIdsRef.current.clear();
     setPage(0);
@@ -837,9 +854,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 opacity: 0,
                 rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
                 scale: 0.85,
-                transition: { type: "spring", stiffness: 500, damping: 35, mass: 0.5 }
+                transition: { type: "spring", stiffness: 600, damping: 30, mass: 0.4 }
               }}
-              transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.5 }}
+              transition={{ type: "spring", stiffness: 600, damping: 30, mass: 0.4 }}
               className="w-full h-full absolute inset-0"
               style={{ willChange: 'transform, opacity', zIndex: 10 }}
               onAnimationComplete={() => {
