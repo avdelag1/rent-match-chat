@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface FloatingWelcomeProps {
   isOpen: boolean;
   onClose: () => void;
-  userRole: 'client' | 'owner';
+  userRole?: 'client' | 'owner'; // Optional, no longer displayed
 }
 
-export function FloatingWelcome({ isOpen, onClose, userRole }: FloatingWelcomeProps) {
+export function FloatingWelcome({ isOpen, onClose }: FloatingWelcomeProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -21,8 +21,6 @@ export function FloatingWelcome({ isOpen, onClose, userRole }: FloatingWelcomePr
       return () => clearTimeout(timer);
     }
   }, [isOpen, onClose]);
-
-  const roleText = userRole === 'client' ? 'Client Side' : 'Owner Side';
 
   return (
     <AnimatePresence>
@@ -100,9 +98,9 @@ export function FloatingWelcome({ isOpen, onClose, userRole }: FloatingWelcomePr
               </span>
             </motion.div>
 
-            {/* Role text */}
+            {/* Tagline text */}
             <motion.div
-              className="text-xl sm:text-2xl font-semibold"
+              className="text-lg sm:text-xl font-medium"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -119,7 +117,7 @@ export function FloatingWelcome({ isOpen, onClose, userRole }: FloatingWelcomePr
                   textShadow: '0 0 30px rgba(251, 146, 60, 0.4)',
                 }}
               >
-                {roleText}
+                Find your perfect match
               </span>
             </motion.div>
 

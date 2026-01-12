@@ -123,7 +123,7 @@ const OwnerSettingsNew = () => {
           subtitle="Manage your account and preferences"
         />
 
-        {/* Role Switcher - Switch between Seeker and Owner mode */}
+        {/* Role Switcher - Switch between I Need and I Offer mode */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
