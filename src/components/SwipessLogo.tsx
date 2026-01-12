@@ -1,27 +1,19 @@
-import { memo, useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SwipessLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   className?: string;
-  typewriter?: boolean;
-  typewriterSpeed?: number; // milliseconds per character
-  loopDelay?: number; // milliseconds to wait before starting erase cycle (default 5000)
-  onTypingComplete?: () => void;
+  glow?: boolean;
 }
 
 function SwipessLogoComponent({
   size = 'md',
   className,
-  typewriter = false,
-  typewriterSpeed = 150,
-  loopDelay = 5000,
-  onTypingComplete
+  glow = true,
 }: SwipessLogoProps) {
-  const fullText = 'Swipess';
-  const [displayedText, setDisplayedText] = useState(typewriter ? '' : fullText);
-  const [showCursor, setShowCursor] = useState(typewriter);
-  const hasStartedRef = useRef(false);
+  const letters = ['S', 'w', 'i', 'p', 'e', 's', 's'];
+  const [glowingIndex, setGlowingIndex] = useState<number>(-1);
 
   const sizeClasses = {
     sm: 'text-xl',
@@ -32,70 +24,23 @@ function SwipessLogoComponent({
     '3xl': 'text-8xl sm:text-9xl',
   };
 
-  // Looping typewriter effect - types, waits, erases, repeats
+  // Random glow effect on letters
   useEffect(() => {
-    if (!typewriter || hasStartedRef.current) return;
+    if (!glow) return;
 
-    hasStartedRef.current = true;
-    let currentIndex = 0;
-    let isTyping = true; // true = typing, false = erasing
-    let timeoutId: NodeJS.Timeout;
-    let intervalId: NodeJS.Timeout;
+    const glowInterval = setInterval(() => {
+      // Pick a random letter to glow
+      const randomIndex = Math.floor(Math.random() * letters.length);
+      setGlowingIndex(randomIndex);
 
-    const startTyping = () => {
-      currentIndex = 0;
-      isTyping = true;
-      setDisplayedText('');
+      // Turn off glow after a short duration
+      setTimeout(() => {
+        setGlowingIndex(-1);
+      }, 400);
+    }, 800);
 
-      intervalId = setInterval(() => {
-        if (currentIndex < fullText.length) {
-          currentIndex++;
-          setDisplayedText(fullText.substring(0, currentIndex));
-        } else {
-          clearInterval(intervalId);
-          if (onTypingComplete) onTypingComplete();
-          // Wait loopDelay before starting to erase
-          timeoutId = setTimeout(startErasing, loopDelay);
-        }
-      }, typewriterSpeed);
-    };
-
-    const startErasing = () => {
-      isTyping = false;
-      currentIndex = fullText.length;
-
-      intervalId = setInterval(() => {
-        if (currentIndex > 0) {
-          currentIndex--;
-          setDisplayedText(fullText.substring(0, currentIndex));
-        } else {
-          clearInterval(intervalId);
-          // Small pause before typing again
-          timeoutId = setTimeout(startTyping, 300);
-        }
-      }, typewriterSpeed / 2); // Erase slightly faster
-    };
-
-    // Start the initial typing
-    startTyping();
-
-    return () => {
-      clearInterval(intervalId);
-      clearTimeout(timeoutId);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typewriter, typewriterSpeed, loopDelay]);
-
-  // Cursor blinking effect
-  useEffect(() => {
-    if (!typewriter) return;
-
-    const cursorInterval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 530); // Blink every 530ms (standard terminal cursor speed)
-
-    return () => clearInterval(cursorInterval);
-  }, [typewriter]);
+    return () => clearInterval(glowInterval);
+  }, [glow, letters.length]);
 
   return (
     <span
@@ -105,22 +50,22 @@ function SwipessLogoComponent({
         className
       )}
     >
-      {displayedText}
-      {typewriter && (
+      {letters.map((letter, index) => (
         <span
+          key={index}
           className={cn(
-            'inline-block transition-opacity duration-100 ml-[1px]',
-            showCursor ? 'opacity-100' : 'opacity-0'
+            'transition-all duration-300',
+            glowingIndex === index && 'text-white'
           )}
           style={{
-            width: '0.5em',
-            height: '0.12em',
-            background: 'currentColor',
-            verticalAlign: 'baseline',
-            marginBottom: '0.1em',
+            textShadow: glowingIndex === index
+              ? '0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(255,165,0,0.7), 0 0 30px rgba(255,100,0,0.5)'
+              : 'none',
           }}
-        />
-      )}
+        >
+          {letter}
+        </span>
+      ))}
     </span>
   );
 }
