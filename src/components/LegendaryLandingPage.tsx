@@ -68,7 +68,7 @@ function LegendaryLandingPage() {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 text-center space-y-8 max-w-2xl w-full px-4 safe-area-pt">
+      <div className="relative z-10 text-center space-y-6 max-w-2xl w-full px-4 safe-area-pt">
         {/* Clickable Swipess Logo - Opens Auth Dialog */}
         <motion.button
           onClick={openAuthDialog}
@@ -111,7 +111,7 @@ function LegendaryLandingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.5 }}
-          className="pt-8 space-y-2"
+          className="pt-4 space-y-2"
         >
           <div className="flex flex-wrap items-center justify-center gap-1.5">
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/10 rounded-full border border-white/20">

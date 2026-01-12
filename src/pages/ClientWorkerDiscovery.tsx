@@ -234,7 +234,7 @@ export default function ClientWorkerDiscovery() {
 
   return (
     <>
-      <div className="min-h-screen pb-24">
+      <div className="min-h-screen pb-16">
         {/* Header */}
         <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-4">
           <div className="flex items-center justify-between mb-4">
