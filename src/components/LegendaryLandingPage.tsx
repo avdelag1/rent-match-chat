@@ -28,17 +28,24 @@ const BACKGROUND_COLORS = [
   },
 ];
 
-const SWIPE_THRESHOLD = 100;
+const SWIPE_THRESHOLD = 120;
 
 function LegendaryLandingPage() {
   const [colorIndex, setColorIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const isDragging = useRef(false);
 
-  // Motion values for swipe
+  // Motion values for swipe - straight horizontal movement
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
-  const likeOpacity = useTransform(x, [0, 40, 80, 120], [0, 0.3, 0.6, 1]);
+  
+  // Fade out as it moves right (like being banished into light)
+  const logoOpacity = useTransform(x, [0, 80, 200], [1, 0.6, 0]);
+  
+  // Scale down slightly as it fades
+  const logoScale = useTransform(x, [0, 100, 200], [1, 0.95, 0.85]);
+  
+  // Blur effect increases as it moves right (like dissolving)
+  const logoBlur = useTransform(x, [0, 80, 200], [0, 4, 12]);
 
   // Update status bar color when background changes
   useEffect(() => {
@@ -72,7 +79,7 @@ function LegendaryLandingPage() {
       openAuthDialog();
     }
     
-    // Reset position
+    // Reset position smoothly
     x.set(0);
     
     // Reset dragging state after a short delay
@@ -104,46 +111,51 @@ function LegendaryLandingPage() {
 
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-6 max-w-2xl w-full px-4 safe-area-pt">
-        {/* Swipable Swipess Logo */}
+        {/* Swipable Swipess Logo - Straight horizontal, no rotation */}
         <motion.div
           data-swipe-logo
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.4}
+          dragElastic={0.9}
+          dragMomentum={false}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onClick={handleTap}
-          style={{ x, rotate }}
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          style={{ x }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="space-y-4 cursor-grab active:cursor-grabbing focus:outline-none group relative touch-pan-y"
+          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+          className="space-y-4 cursor-grab active:cursor-grabbing focus:outline-none group touch-none select-none"
         >
-          {/* Like overlay when swiping right */}
-          <motion.div
-            style={{ opacity: likeOpacity }}
-            className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none rounded-3xl overflow-hidden"
+          {/* Logo with fade/blur effect when swiping */}
+          <motion.div 
+            className="relative"
+            style={{ 
+              opacity: logoOpacity,
+              scale: logoScale,
+              filter: useTransform(logoBlur, (v) => `blur(${v}px)`)
+            }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/40 via-amber-400/30 to-yellow-600/40 backdrop-blur-sm" />
-            <span className="text-4xl font-bold text-white drop-shadow-lg tracking-wider">START</span>
-          </motion.div>
-
-          {/* Logo with glow effect on hover */}
-          <div className="relative">
             <SwipessLogo size="3xl" />
-            {/* Glow effect */}
+            {/* Glow effect on hover */}
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-2xl -z-10"
               style={{
                 background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)'
               }}
             />
-          </div>
+          </motion.div>
 
-          <p className="text-white text-xl sm:text-2xl font-medium whitespace-nowrap">
+          <motion.p 
+            className="text-white text-xl sm:text-2xl font-medium whitespace-nowrap"
+            style={{ 
+              opacity: logoOpacity,
+              filter: useTransform(logoBlur, (v) => `blur(${v * 0.5}px)`)
+            }}
+          >
             Swipe and find your perfect deal
-          </p>
+          </motion.p>
 
           {/* Swipe hint */}
           <motion.p
@@ -151,6 +163,7 @@ function LegendaryLandingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
+            style={{ opacity: useTransform(x, [0, 50], [0.6, 0]) }}
           >
             Swipe right or tap to get started →
           </motion.p>
