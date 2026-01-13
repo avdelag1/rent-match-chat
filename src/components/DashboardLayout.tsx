@@ -141,12 +141,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const { user } = useAuth()
   const responsive = useResponsiveContext()
 
+  // PERF: Extract stable userId to prevent re-renders when user object reference changes
+  // User object may get new reference on token refresh, but ID stays the same
+  const userId = user?.id
+
   // Track if we've checked cache synchronously on mount
   const cacheCheckedRef = useRef(false);
 
   // PERFORMANCE FIX: Welcome state with DB-backed persistence
   // Shows welcome only on first signup, not every login (survives localStorage clears)
-  const { shouldShowWelcome, dismissWelcome } = useWelcomeState(user?.id)
+  const { shouldShowWelcome, dismissWelcome } = useWelcomeState(userId)
 
   // PERF: Defer route prefetching until after first paint using requestIdleCallback
   // This ensures dashboard renders instantly without blocking on prefetch
@@ -187,12 +191,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // 3. Cache result for 5 minutes to prevent re-checks on navigation
   // ==========================================================================
   useEffect(() => {
-    if (!user?.id || onboardingChecked) return;
+    if (!userId || onboardingChecked) return;
 
     // SYNCHRONOUS CACHE CHECK - prevents visible state change on return
     if (!cacheCheckedRef.current) {
       cacheCheckedRef.current = true;
-      const cached = getOnboardingCache(user.id);
+      const cached = getOnboardingCache(userId);
       if (cached) {
         setOnboardingChecked(true);
         if (cached.needsOnboarding) {
@@ -207,7 +211,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         const { data, error } = await supabase
           .from('profiles')
           .select('onboarding_completed, full_name, city, age')
-          .eq('id', user.id)
+          .eq('id', userId)
           .maybeSingle();
 
         if (error) {
@@ -215,12 +219,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             logger.error('Error checking onboarding status:', error);
           }
           // Cache as "no onboarding needed" to prevent repeated failed checks
-          setOnboardingCache(user.id, false);
+          setOnboardingCache(userId, false);
           return;
         }
 
         if (!data) {
-          setOnboardingCache(user.id, false);
+          setOnboardingCache(userId, false);
           return;
         }
 
@@ -233,7 +237,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         const needsOnboarding = data?.onboarding_completed === false && hasMinimalData;
 
         // CACHE THE RESULT - prevents re-check on dashboard return
-        setOnboardingCache(user.id, needsOnboarding);
+        setOnboardingCache(userId, needsOnboarding);
 
         if (needsOnboarding) {
           setShowOnboarding(true);
@@ -243,7 +247,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           logger.error('Error in onboarding check:', error);
         }
         // Cache as "no onboarding needed" on error
-        setOnboardingCache(user.id, false);
+        setOnboardingCache(userId, false);
       }
     };
 
@@ -257,7 +261,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       const timeoutId = setTimeout(checkOnboardingStatus, 2000);
       return () => clearTimeout(timeoutId);
     }
-  }, [user?.id, onboardingChecked]);
+  }, [userId, onboardingChecked]);
 
   // PERFORMANCE FIX: Welcome check now handled by useWelcomeState hook
   // This ensures welcome shows only on first signup, never on subsequent sign-ins

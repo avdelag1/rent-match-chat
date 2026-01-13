@@ -2,11 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useActiveMode } from "@/hooks/useActiveMode";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: "client" | "owner";
 }
 
 /**
@@ -73,23 +71,33 @@ function ProtectedRouteLoadingSkeleton() {
   );
 }
 
-export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+/**
+ * SPEED OF LIGHT: Simplified ProtectedRoute
+ *
+ * This component ONLY handles authentication checking.
+ * Role/mode handling is done by the unified PersistentDashboardLayout.
+ *
+ * Key optimizations:
+ * - No activeMode dependency (prevents re-renders on mode switch)
+ * - No role checking (layout derives role from path)
+ * - Once content shown, never go back to skeleton
+ */
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
-  const { activeMode, isLoading: modeLoading } = useActiveMode();
   const navigate = useNavigate();
   const location = useLocation();
   const didNavigateRef = useRef(false);
-  
+
   // SPEED OF LIGHT: Track if we've ever shown valid content
   // Once shown, NEVER go back to skeleton (prevents flicker on refresh)
   const [hasShownContent, setHasShownContent] = useState(false);
 
   // Mark that we've shown valid content once
   useEffect(() => {
-    if (user && !loading && !modeLoading) {
+    if (user && !loading) {
       setHasShownContent(true);
     }
-  }, [user, loading, modeLoading]);
+  }, [user, loading]);
 
   useEffect(() => {
     // Prevent duplicate navigations
@@ -104,26 +112,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
       navigate("/", { replace: true, state: { from: location } });
       return;
     }
-
-    // Wait for mode to stabilize
-    if (modeLoading) return;
-
-    // UNIFIED USER MODEL: Check activeMode instead of database role
-    // Mode mismatch: redirect to the correct dashboard once
-    if (requiredRole && activeMode !== requiredRole) {
-      didNavigateRef.current = true;
-      const target = activeMode === "client" ? "/client/dashboard" : "/owner/dashboard";
-      navigate(target, { replace: true });
-    }
-  }, [
-    user,
-    loading,
-    activeMode,
-    modeLoading,
-    requiredRole,
-    navigate,
-    location,
-  ]);
+  }, [user, loading, navigate, location]);
 
   // Reset navigation ref when route changes (allows future navigation)
   useEffect(() => {
@@ -141,12 +130,6 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   // Not logged in: show skeleton briefly (effect will redirect)
   if (!user) return <ProtectedRouteLoadingSkeleton />;
-
-  // Waiting for mode: show skeleton (prevents blank screen)
-  if (modeLoading) return <ProtectedRouteLoadingSkeleton />;
-
-  // Mode mismatch: show skeleton briefly (effect will redirect)
-  if (requiredRole && activeMode !== requiredRole) return <ProtectedRouteLoadingSkeleton />;
 
   return <>{children}</>;
 }
