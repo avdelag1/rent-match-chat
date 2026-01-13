@@ -818,9 +818,30 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
+  // PREMIUM: Hover-based prefetch - prefetch next batch when user hovers near bottom of deck
+  const handleDeckHover = useCallback(() => {
+    // Only prefetch if we're running low and not already fetching
+    const remainingCards = deckQueueRef.current.length - currentIndexRef.current;
+    if (remainingCards <= 5 && !isFetchingMore.current) {
+      isFetchingMore.current = true;
+      setPage(p => p + 1);
+
+      // Also preload next 3 card images opportunistically
+      [1, 2, 3].forEach((offset) => {
+        const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
+        if (futureCard?.images?.[0]) {
+          preloadImageToCache(futureCard.images[0]);
+        }
+      });
+    }
+  }, []);
+
   // Main swipe view with 2-card stack (Tinder-like)
   return (
-    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3">
+    <div
+      className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3"
+      onMouseEnter={handleDeckHover}
+    >
       <div className="relative flex-1 w-full">
         {/* 2-CARD STACK: Render next card behind, current on top */}
         {/* Next card (behind current) - static placeholder for smooth transitions */}

@@ -12,13 +12,14 @@ interface ModeSwitcherProps {
 }
 
 /**
- * ModeSwitcher - Premium mode toggle for switching between "I Need" and "I Offer" modes
+ * ModeSwitcher - Premium mode toggle for switching between "Explore" and "Provide" modes
  *
  * Features:
  * - Instant visual feedback with optimistic updates
  * - Smooth animations without layout thrashing
  * - Haptic feedback on mobile
  * - GPU-accelerated transforms only
+ * - Micro-animations on mode switch (scale/rotate)
  */
 function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: ModeSwitcherProps) {
   const { activeMode, isSwitching, switchMode, canSwitchMode } = useActiveMode();
@@ -54,7 +55,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           className
         )}
         whileTap={{ scale: 0.92 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'I Offer' : 'I Need'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'Provide' : 'Explore'} mode`}
       >
         <AnimatePresence mode="wait">
           {isSwitching ? (
@@ -102,7 +103,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           className
         )}
         whileTap={{ scale: 0.97 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'I Offer' : 'I Need'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'Provide' : 'Explore'} mode`}
       >
         {/* Sliding indicator */}
         <motion.div
@@ -116,22 +117,22 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           style={{ willChange: 'left, right' }}
         />
 
-        {/* I Need option */}
+        {/* Explore option */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
           activeMode === 'client' ? 'text-primary' : 'text-muted-foreground'
         )}>
           <Search className="h-3.5 w-3.5" />
-          <span className="font-medium">I Need</span>
+          <span className="font-medium">Explore</span>
         </div>
 
-        {/* I Offer option */}
+        {/* Provide option */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
           activeMode === 'owner' ? 'text-emerald-500' : 'text-muted-foreground'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
-          <span className="font-medium">I Offer</span>
+          <span className="font-medium">Provide</span>
         </div>
 
         {/* Loading overlay */}
@@ -151,7 +152,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     );
   }
 
-  // Pill variant (default) - Compact with mode indicator
+  // Pill variant (default) - Compact with mode indicator + micro-animations
   return (
     <motion.button
       onClick={handleToggle}
@@ -165,8 +166,10 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         sizeClasses[size],
         className
       )}
-      whileTap={{ scale: 0.97 }}
-      aria-label={`Switch to ${activeMode === 'client' ? 'I Offer' : 'I Need'} mode`}
+      whileTap={{ scale: 0.95, rotate: activeMode === 'client' ? 3 : -3 }}
+      animate={isSwitching ? { scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] } : { scale: 1, rotate: 0 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+      aria-label={`Switch to ${activeMode === 'client' ? 'Provide' : 'Explore'} mode`}
     >
       {/* Mode icon with animation */}
       <AnimatePresence mode="wait">
@@ -183,12 +186,12 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           ) : activeMode === 'client' ? (
             <>
               <Search className="h-3.5 w-3.5 text-primary" />
-              <span className="font-semibold text-primary">I Need</span>
+              <span className="font-semibold text-primary">Explore</span>
             </>
           ) : (
             <>
               <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="font-semibold text-emerald-500">I Offer</span>
+              <span className="font-semibold text-emerald-500">Provide</span>
             </>
           )}
         </motion.div>
