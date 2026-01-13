@@ -125,7 +125,7 @@ export function ChatPreviewSheet({
                         ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
                         : 'bg-[#007AFF]/20 text-[#007AFF]'
                     }`}>
-                      {otherUser.role === 'client' ? 'Client' : 'Property Owner'}
+                      {otherUser.role === 'client' ? 'Explorer' : 'Provider'}
                     </Badge>
                     <span className="text-[10px] text-[#34C759] font-medium flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-[#34C759] rounded-full"></span>

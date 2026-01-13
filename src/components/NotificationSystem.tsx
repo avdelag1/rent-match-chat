@@ -66,19 +66,12 @@ export function NotificationSystem() {
                   .eq('id', newMessage.sender_id)
                   .maybeSingle();
 
-                const { data: senderRoleData } = await supabase
-                  .from('user_roles')
-                  .select('role')
-                  .eq('user_id', newMessage.sender_id)
-                  .maybeSingle();
-
                 const senderName = senderProfile?.full_name || 'Someone';
-                const senderRole = senderRoleData?.role === 'client' ? 'Client' : 'Property Owner';
 
                 // Show toast notification
                 const messageText = newMessage.message_text || '';
                 toast({
-                  title: `💬 New Message from ${senderRole}`,
+                  title: `💬 New Message`,
                   description: `${senderName}: ${messageText.slice(0, 60)}${messageText.length > 60 ? '...' : ''}`,
                   duration: 3000,
                 });
@@ -161,18 +154,11 @@ export function NotificationSystem() {
                 .eq('id', newLike.user_id)
                 .maybeSingle();
 
-              const { data: likerRoleData } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', newLike.user_id)
-                .maybeSingle();
-
               const likerName = likerProfile?.full_name || 'Someone';
-              const likerRole = likerRoleData?.role === 'client' ? 'Client' : 'Property Owner';
 
               // Show toast notification
               toast({
-                title: `🔥 New Flame from ${likerRole}`,
+                title: `🔥 New Flame`,
                 description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
                 duration: 3000,
               });

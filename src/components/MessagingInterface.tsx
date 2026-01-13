@@ -315,7 +315,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
                       : 'bg-[#007AFF]/20 text-[#007AFF]'
                   }`}
                 >
-                  {otherUser.role === 'client' ? 'Client' : 'Owner'}
+                  {otherUser.role === 'client' ? 'Explorer' : 'Provider'}
                 </Badge>
                 <span className="text-[10px] text-[#34C759] font-medium flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-[#34C759] rounded-full"></span>
