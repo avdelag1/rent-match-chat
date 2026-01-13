@@ -1,5 +1,5 @@
-import { memo, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { memo, useEffect, useState, useRef } from 'react';
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Shield, Sparkles, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 import { SwipessLogo } from './SwipessLogo';
@@ -28,8 +28,17 @@ const BACKGROUND_COLORS = [
   },
 ];
 
+const SWIPE_THRESHOLD = 100;
+
 function LegendaryLandingPage() {
   const [colorIndex, setColorIndex] = useState(0);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const isDragging = useRef(false);
+
+  // Motion values for swipe
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
+  const likeOpacity = useTransform(x, [0, 40, 80, 120], [0, 0.3, 0.6, 1]);
 
   // Update status bar color when background changes
   useEffect(() => {
@@ -41,16 +50,42 @@ function LegendaryLandingPage() {
     };
   }, [colorIndex]);
 
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
-
   const openAuthDialog = () => setAuthDialogOpen(true);
   const closeAuthDialog = () => setAuthDialogOpen(false);
 
   // Handle tap on background to change color (not on the logo button)
   const handleBackgroundTap = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only change color if clicking on background, not on the logo button
-    if ((e.target as HTMLElement).closest('button')) return;
+    if ((e.target as HTMLElement).closest('[data-swipe-logo]')) return;
     setColorIndex(prev => (prev + 1) % BACKGROUND_COLORS.length);
+  };
+
+  const handleDragStart = () => {
+    isDragging.current = true;
+  };
+
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const offset = info.offset.x;
+    
+    // If swiped right past threshold, open auth dialog
+    if (offset > SWIPE_THRESHOLD) {
+      openAuthDialog();
+    }
+    
+    // Reset position
+    x.set(0);
+    
+    // Reset dragging state after a short delay
+    setTimeout(() => {
+      isDragging.current = false;
+    }, 100);
+  };
+
+  const handleTap = () => {
+    // Only open if not dragging
+    if (!isDragging.current) {
+      openAuthDialog();
+    }
   };
 
   return (
@@ -69,19 +104,34 @@ function LegendaryLandingPage() {
 
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-6 max-w-2xl w-full px-4 safe-area-pt">
-        {/* Clickable Swipess Logo - Opens Auth Dialog */}
-        <motion.button
-          onClick={openAuthDialog}
+        {/* Swipable Swipess Logo */}
+        <motion.div
+          data-swipe-logo
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.4}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onClick={handleTap}
+          style={{ x, rotate }}
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="space-y-4 cursor-pointer focus:outline-none group"
+          className="space-y-4 cursor-grab active:cursor-grabbing focus:outline-none group relative touch-pan-y"
         >
+          {/* Like overlay when swiping right */}
+          <motion.div
+            style={{ opacity: likeOpacity }}
+            className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none rounded-3xl overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/40 via-amber-400/30 to-yellow-600/40 backdrop-blur-sm" />
+            <span className="text-4xl font-bold text-white drop-shadow-lg tracking-wider">START</span>
+          </motion.div>
+
           {/* Logo with glow effect on hover */}
           <div className="relative">
-            <SwipessLogo size="3xl" typewriter={true} typewriterSpeed={150} />
+            <SwipessLogo size="3xl" />
             {/* Glow effect */}
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-2xl -z-10"
@@ -95,16 +145,16 @@ function LegendaryLandingPage() {
             Swipe and find your perfect deal
           </p>
 
-          {/* Tap hint */}
+          {/* Swipe hint */}
           <motion.p
             className="text-white/60 text-sm font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            Tap to get started
+            Swipe right or tap to get started →
           </motion.p>
-        </motion.button>
+        </motion.div>
 
         {/* Bottom Info Section */}
         <motion.div
