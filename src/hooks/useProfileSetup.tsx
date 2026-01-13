@@ -286,14 +286,16 @@ export function useProfileSetup() {
       // This gives them 1 free message to start a conversation
       const grantWelcomeActivation = async (userId: string) => {
         try {
-          // Check if welcome activation already granted
-          const { data: existingWelcome } = await supabase
+          // Check if welcome activation already granted - escape deep type inference
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const welcomeResult = await (supabase as any)
             .from('message_activations')
             .select('id')
             .eq('user_id', userId)
             .eq('activation_type', 'referral_bonus')
             .eq('notes', 'Welcome bonus - first message free')
             .maybeSingle();
+          const existingWelcome = welcomeResult?.data;
 
           if (existingWelcome) return;
 
@@ -301,17 +303,18 @@ export function useProfileSetup() {
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + 90);
 
+          const insertData = {
+            user_id: userId,
+            activation_type: 'referral_bonus' as const,
+            total_activations: 1,
+            remaining_activations: 1,
+            used_activations: 0,
+            expires_at: expiresAt.toISOString(),
+            notes: 'Welcome bonus - first message free',
+          };
           const { error: activError } = await supabase
             .from('message_activations')
-            .insert({
-              user_id: userId,
-              activation_type: 'referral_bonus', // Using referral_bonus type for free activations
-              total_activations: 1,
-              remaining_activations: 1,
-              used_activations: 0,
-              expires_at: expiresAt.toISOString(),
-              notes: 'Welcome bonus - first message free',
-            });
+            .insert(insertData);
 
           if (!activError) {
             if (import.meta.env.DEV) {
