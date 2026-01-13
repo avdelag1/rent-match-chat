@@ -17,11 +17,58 @@ import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RotateCcw, RefreshCw, Home, Search } from 'lucide-react';
+import { RotateCcw, RefreshCw, Home, Search, Car, Bike, Anchor, Briefcase } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
+
+// Custom motorcycle icon
+const MotorcycleIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="5" cy="17" r="3" />
+    <circle cx="19" cy="17" r="3" />
+    <path d="M9 17h6" />
+    <path d="M19 17l-2-5h-4l-3-4H6l1 4" />
+    <path d="M14 7h3l2 5" />
+  </svg>
+);
+
+// Category configuration for dynamic empty states
+const categoryConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string; plural: string; color: string }> = {
+  property: { icon: Home, label: 'Property', plural: 'Properties', color: 'text-primary' },
+  vehicle: { icon: Car, label: 'Car', plural: 'Cars', color: 'text-blue-500' },
+  yacht: { icon: Anchor, label: 'Yacht', plural: 'Yachts', color: 'text-cyan-500' },
+  moto: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-orange-500' },
+  motorcycle: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-orange-500' },
+  bicycle: { icon: Bike, label: 'Bicycle', plural: 'Bicycles', color: 'text-green-500' },
+  services: { icon: Briefcase, label: 'Service', plural: 'Services', color: 'text-amber-500' },
+  worker: { icon: Briefcase, label: 'Worker', plural: 'Workers', color: 'text-amber-500' },
+};
+
+// Helper to get the active category display info from filters
+const getActiveCategoryInfo = (filters?: ListingFilters) => {
+  // Check for categories array first (from quick filters)
+  const categories = filters?.categories;
+  if (categories && categories.length === 1) {
+    const cat = categories[0];
+    return categoryConfig[cat] || categoryConfig.property;
+  }
+
+  // Check for single category
+  const category = filters?.category;
+  if (category) {
+    return categoryConfig[category] || categoryConfig.property;
+  }
+
+  // Check for services/workers
+  if (filters?.showHireServices) {
+    return categoryConfig.services;
+  }
+
+  // Default to properties
+  return categoryConfig.property;
+};
 
 // Debounce utility for preventing rapid-fire actions
 function useDebounce<T extends (...args: any[]) => any>(
@@ -724,14 +771,15 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
-  // Error state
+  // Error state - dynamic based on category
   if (error) {
+    const categoryInfo = getActiveCategoryInfo(filters);
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">:(</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load properties right now.</p>
+          <p className="text-muted-foreground mb-4">We couldn't load {categoryInfo.plural.toLowerCase()} right now.</p>
           <Button onClick={handleRefresh} variant="outline" className="gap-2">
             <RotateCcw className="w-4 h-4" />
             Try Again
@@ -741,8 +789,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
-  // Empty state
+  // Empty state - dynamic based on category
   if (deckQueue.length === 0) {
+    const categoryInfo = getActiveCategoryInfo(filters);
+    const CategoryIcon = categoryInfo.icon;
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -753,11 +803,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         >
           <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <Home className="w-12 h-12 text-primary" />
+              <CategoryIcon className={`w-12 h-12 ${categoryInfo.color}`} />
             </div>
           </motion.div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No Properties Found</h3>
+            <h3 className="text-xl font-semibold text-foreground">No {categoryInfo.plural} Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               Try adjusting your filters or refresh to discover new listings
             </p>
@@ -769,7 +819,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : 'Refresh Properties'}
+              {isRefreshing ? 'Loading...' : `Refresh ${categoryInfo.plural}`}
             </Button>
           </motion.div>
         </motion.div>
@@ -777,8 +827,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
-  // All caught up state
+  // All caught up state - dynamic based on category
   if (currentIndex >= deckQueue.length) {
+    const categoryInfo = getActiveCategoryInfo(filters);
+    const CategoryIcon = categoryInfo.icon;
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -790,14 +842,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}>
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
               <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                <Search className="w-12 h-12 text-green-500" />
+                <CategoryIcon className={`w-12 h-12 ${categoryInfo.color}`} />
               </motion.div>
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              You've seen all available properties. Check back later or refresh for new listings.
+              You've seen all available {categoryInfo.plural.toLowerCase()}. Check back later or refresh for new listings.
             </p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col gap-3">
@@ -808,10 +860,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Finding Properties...' : 'Discover More'}
+                {isRefreshing ? `Finding ${categoryInfo.plural}...` : 'Discover More'}
               </Button>
             </motion.div>
-            <p className="text-xs text-muted-foreground">New properties are added daily</p>
+            <p className="text-xs text-muted-foreground">New {categoryInfo.plural.toLowerCase()} are added daily</p>
           </motion.div>
         </motion.div>
       </div>
