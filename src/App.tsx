@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SuspenseFallback } from "@/components/ui/suspense-fallback";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -36,42 +36,42 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// INSTANT NAVIGATION: ALL core routes are DIRECT IMPORTS
-// Lazy loading causes delay on first tap - we want INSTANT navigation
+// PERFORMANCE: ALL routes are LAZY LOADED for smaller initial bundle
+// Preloading happens on idle to maintain instant navigation feel
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// Client routes - ALL direct imports for instant navigation
-import ClientDashboard from "./pages/ClientDashboard";
-import ClientProfile from "./pages/ClientProfileNew";
-import ClientSettings from "./pages/ClientSettingsNew";
-import ClientLikedProperties from "./pages/ClientLikedProperties";
-import ClientSavedSearches from "./pages/ClientSavedSearches";
-import ClientSecurity from "./pages/ClientSecurity";
-import ClientWorkerDiscovery from "./pages/ClientWorkerDiscovery";
-import ClientContracts from "./pages/ClientContracts";
+// Client routes - lazy loaded with preloading
+const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
+const ClientProfile = lazy(() => import("./pages/ClientProfileNew"));
+const ClientSettings = lazy(() => import("./pages/ClientSettingsNew"));
+const ClientLikedProperties = lazy(() => import("./pages/ClientLikedProperties"));
+const ClientSavedSearches = lazy(() => import("./pages/ClientSavedSearches"));
+const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
+const ClientWorkerDiscovery = lazy(() => import("./pages/ClientWorkerDiscovery"));
+const ClientContracts = lazy(() => import("./pages/ClientContracts"));
 
-// Owner routes - ALL direct imports for instant navigation
-import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
-import OwnerProfile from "./pages/OwnerProfileNew";
-import OwnerSettings from "./pages/OwnerSettingsNew";
-import OwnerProperties from "./pages/OwnerProperties";
-import OwnerNewListing from "./pages/OwnerNewListing";
-import OwnerLikedClients from "./pages/OwnerLikedClients";
-import OwnerContracts from "./pages/OwnerContracts";
-import OwnerSavedSearches from "./pages/OwnerSavedSearches";
-import OwnerSecurity from "./pages/OwnerSecurity";
-import OwnerPropertyClientDiscovery from "./pages/OwnerPropertyClientDiscovery";
-import OwnerMotoClientDiscovery from "./pages/OwnerMotoClientDiscovery";
-import OwnerBicycleClientDiscovery from "./pages/OwnerBicycleClientDiscovery";
-import OwnerYachtClientDiscovery from "./pages/OwnerYachtClientDiscovery";
-import OwnerVehicleClientDiscovery from "./pages/OwnerVehicleClientDiscovery";
-import OwnerViewClientProfile from "./pages/OwnerViewClientProfile";
-import OwnerFiltersExplore from "./pages/OwnerFiltersExplore";
+// Owner routes - lazy loaded with preloading
+const EnhancedOwnerDashboard = lazy(() => import("./components/EnhancedOwnerDashboard"));
+const OwnerProfile = lazy(() => import("./pages/OwnerProfileNew"));
+const OwnerSettings = lazy(() => import("./pages/OwnerSettingsNew"));
+const OwnerProperties = lazy(() => import("./pages/OwnerProperties"));
+const OwnerNewListing = lazy(() => import("./pages/OwnerNewListing"));
+const OwnerLikedClients = lazy(() => import("./pages/OwnerLikedClients"));
+const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
+const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
+const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
+const OwnerPropertyClientDiscovery = lazy(() => import("./pages/OwnerPropertyClientDiscovery"));
+const OwnerMotoClientDiscovery = lazy(() => import("./pages/OwnerMotoClientDiscovery"));
+const OwnerBicycleClientDiscovery = lazy(() => import("./pages/OwnerBicycleClientDiscovery"));
+const OwnerYachtClientDiscovery = lazy(() => import("./pages/OwnerYachtClientDiscovery"));
+const OwnerVehicleClientDiscovery = lazy(() => import("./pages/OwnerVehicleClientDiscovery"));
+const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
+const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
 
-// Shared routes - direct imports for instant navigation
-import { MessagingDashboard } from "./pages/MessagingDashboard";
-import NotificationsPage from "./pages/NotificationsPage";
-import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
+// Shared routes - lazy loaded with preloading
+const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
 
 // Rare pages - lazy loaded (payment, camera, legal, public previews)
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
@@ -85,6 +85,26 @@ const OwnerProfileCamera = lazy(() => import("./pages/OwnerProfileCamera"));
 // Public preview pages (shareable links)
 const PublicProfilePreview = lazy(() => import("./pages/PublicProfilePreview"));
 const PublicListingPreview = lazy(() => import("./pages/PublicListingPreview"));
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PRELOADING: Load critical routes during idle time after first paint
+// This gives us both fast startup AND instant navigation
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const preloadCriticalRoutes = () => {
+  const preload = (importFn: () => Promise<unknown>) => {
+    importFn().catch(() => { /* silently fail */ });
+  };
+
+  // Preload based on likely user flow - dashboards first
+  preload(() => import("./pages/ClientDashboard"));
+  preload(() => import("./components/EnhancedOwnerDashboard"));
+
+  // Then common navigation targets
+  preload(() => import("./pages/MessagingDashboard"));
+  preload(() => import("./pages/NotificationsPage"));
+  preload(() => import("./pages/ClientProfileNew"));
+  preload(() => import("./pages/OwnerProfileNew"));
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,6 +127,22 @@ const queryClient = new QueryClient({
 
 function NotificationWrapper({ children }: { children: React.ReactNode }) {
   useNotifications();
+
+  // Preload critical routes after first paint during idle time
+  useEffect(() => {
+    // Wait for first paint to complete, then preload during idle
+    const timeoutId = setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(preloadCriticalRoutes, { timeout: 3000 });
+      } else {
+        // Fallback for Safari/older browsers
+        preloadCriticalRoutes();
+      }
+    }, 100); // Small delay to ensure first paint is complete
+
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   return <>{children}</>;
 }
 
