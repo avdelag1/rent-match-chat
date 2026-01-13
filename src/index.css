@@ -2535,3 +2535,158 @@ html[data-navigation-direction="back"] {
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  PWA STANDALONE MODE OPTIMIZATIONS                                           */
+/*  When app is installed as PWA, disable expensive effects for smooth swiping  */
+/*                                                                              */
+/*  PWAs have different runtime constraints:                                    */
+/*  - Different rendering pipeline than browser                                 */
+/*  - More memory limits                                                        */
+/*  - Less aggressive GPU acceleration                                          */
+/*  - Different gesture handling layer                                          */
+/*  - Throttled touchmove events                                                */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* PWA Mode Detection via CSS */
+@media (display-mode: standalone), (display-mode: minimal-ui) {
+  /* Disable expensive backdrop-blur in PWA mode */
+  .backdrop-blur,
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl,
+  [class*="backdrop-blur"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Disable expensive box shadows in swipe context */
+  .swipe-card,
+  .swipe-overlay-container,
+  [class*="shadow-2xl"] {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* Disable continuous animations that hurt PWA performance */
+  .animate-ping,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none !important;
+  }
+
+  /* Faster transitions in PWA mode */
+  .transition,
+  .transition-all,
+  .transition-opacity,
+  .transition-transform {
+    transition-duration: 150ms !important;
+  }
+
+  /* Lock card dimensions to prevent layout recalculations during swipe */
+  .swipe-card {
+    contain: layout style paint;
+    content-visibility: auto;
+  }
+
+  /* Reduce skeleton animation complexity */
+  .skeleton-shimmer,
+  [class*="skeleton"] {
+    animation-duration: 2s !important;
+    background-size: 100% 100% !important;
+  }
+
+  /* Disable text shadows and glows */
+  .swipe-text-liked,
+  .swipe-text-pass {
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Simplify gradient backgrounds in overlays */
+  .like-overlay,
+  .pass-overlay {
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* Force GPU compositing on all swipe-related elements */
+  .swipe-card,
+  .swipe-overlay-container,
+  .swipe-action-btn {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Reduce image decode complexity by hinting to browser */
+  img {
+    image-rendering: auto;
+    content-visibility: auto;
+  }
+
+  /* Disable drop-shadow filters which are expensive */
+  [class*="drop-shadow"] {
+    filter: none !important;
+  }
+}
+
+/* iOS PWA specific optimizations (worst offender for PWA performance) */
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    /* iOS PWA: Even more aggressive optimization */
+    .backdrop-blur-xl,
+    .backdrop-blur-lg {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background-color: rgba(0, 0, 0, 0.85) !important;
+    }
+
+    /* iOS PWA: Disable all non-essential animations */
+    .animate-spin:not(.loading-spinner),
+    .animate-ping,
+    .animate-pulse,
+    .animate-bounce,
+    .animate-skeleton-glow {
+      animation: none !important;
+    }
+
+    /* iOS PWA: Instant transitions for critical interactions */
+    .swipe-card,
+    .swipe-action-btn {
+      transition-duration: 0ms !important;
+    }
+
+    /* iOS PWA: Simpler shadows */
+    [class*="shadow"] {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+  }
+}
+
+/* CSS class-based PWA mode (set by JavaScript detection) */
+html.pwa-mode {
+  /* Additional PWA optimizations applied via JS class */
+  --animation-speed-multiplier: 0.5;
+}
+
+html.pwa-mode .backdrop-blur-xl {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.pwa-mode .animate-ping {
+  animation: none !important;
+}
+
+html.pwa-ios {
+  /* iOS-specific PWA optimizations */
+  --animation-speed-multiplier: 0.3;
+}
+
+html.pwa-ios .swipe-card {
+  /* Even more aggressive containment for iOS PWA */
+  contain: strict;
+}

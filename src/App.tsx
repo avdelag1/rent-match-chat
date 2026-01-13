@@ -6,6 +6,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
 import { ActiveModeProvider } from "@/hooks/useActiveMode";
+import { PWAProvider } from "@/hooks/usePWAMode";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
@@ -122,6 +123,7 @@ const App = () => (
           <AuthProvider>
           <ActiveModeProvider>
           <ThemeProvider>
+            <PWAProvider>
             <ResponsiveProvider>
             <NotificationWrapper>
               <AppLayout>
@@ -210,6 +212,7 @@ const App = () => (
               </Suspense>
             </NotificationWrapper>
             </ResponsiveProvider>
+            </PWAProvider>
           </ThemeProvider>
           </ActiveModeProvider>
           </AuthProvider>
