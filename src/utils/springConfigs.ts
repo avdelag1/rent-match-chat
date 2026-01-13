@@ -2,7 +2,15 @@
  * Ultra-Fast Spring Physics Configurations
  * Lightning-fast, buttery smooth animations with zero perceptible delay
  * Optimized for instant response and seamless transitions
+ *
+ * These configs are for Framer Motion springs.
+ * For gesture physics, use the physics library: @/lib/physics
  */
+
+import { IOS_PHYSICS } from '@/lib/physics';
+
+// Re-export iOS physics constants for convenience
+export { IOS_PHYSICS };
 
 export const springConfigs = {
   // Instant - Zero perceptible delay, immediate response
@@ -146,5 +154,53 @@ export const transitions = {
   card: {
     type: 'spring' as const,
     ...springConfigs.gameLike,
+  },
+} as const;
+
+/**
+ * iOS-style gesture physics presets
+ * Based on UIScrollView deceleration rates
+ */
+export const gesturePhysics = {
+  // Normal deceleration (like UIScrollViewDecelerationRateNormal)
+  normal: {
+    decelerationRate: IOS_PHYSICS.DECELERATION_RATE,
+    springStiffness: IOS_PHYSICS.SNAP_SPRING.stiffness,
+    springDamping: IOS_PHYSICS.SNAP_SPRING.damping,
+    springMass: IOS_PHYSICS.SNAP_SPRING.mass,
+  },
+
+  // Fast deceleration (like UIScrollViewDecelerationRateFast)
+  fast: {
+    decelerationRate: IOS_PHYSICS.DECELERATION_RATE_FAST,
+    springStiffness: 500,
+    springDamping: 40,
+    springMass: 0.4,
+  },
+
+  // Heavy feel - slower to stop, more momentum
+  heavy: {
+    decelerationRate: 0.999,
+    springStiffness: 350,
+    springDamping: 30,
+    springMass: 0.7,
+  },
+
+  // Light feel - stops quickly, snappy
+  light: {
+    decelerationRate: 0.995,
+    springStiffness: 600,
+    springDamping: 45,
+    springMass: 0.3,
+  },
+
+  // Swipe cards - optimized for Tinder-style swiping
+  swipeCard: {
+    decelerationRate: 0.996,
+    springStiffness: 500,
+    springDamping: 35,
+    springMass: 0.5,
+    swipeThreshold: 120,
+    velocityThreshold: 400,
   },
 } as const;
