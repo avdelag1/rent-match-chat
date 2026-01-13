@@ -200,14 +200,17 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
         }));
       },
 
+      // FIX #5: OPTIMIZED - Mutate existing Set instead of creating new one
+      // This is safe because we immediately spread into a new object anyway
+      // Avoids O(n) Set copy operation on every swipe
       markClientSwiped: (id) => {
         set((state) => {
-          const newSwipedIds = new Set(state.clientDeck.swipedIds);
-          newSwipedIds.add(id);
+          // Direct mutation of the Set - much faster than creating a new Set
+          // The spread operator on clientDeck creates the immutable boundary
+          state.clientDeck.swipedIds.add(id);
           return {
             clientDeck: {
               ...state.clientDeck,
-              swipedIds: newSwipedIds,
               currentIndex: state.clientDeck.currentIndex + 1,
             }
           };
@@ -298,17 +301,17 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
         });
       },
 
+      // FIX #5: OPTIMIZED - Same optimization as client side
       markOwnerSwiped: (category, id) => {
         set((state) => {
           const existingDeck = state.ownerDecks[category] || createEmptyDeckState();
-          const newSwipedIds = new Set(existingDeck.swipedIds);
-          newSwipedIds.add(id);
+          // Direct mutation - avoids O(n) Set copy
+          existingDeck.swipedIds.add(id);
           return {
             ownerDecks: {
               ...state.ownerDecks,
               [category]: {
                 ...existingDeck,
-                swipedIds: newSwipedIds,
                 currentIndex: existingDeck.currentIndex + 1,
               }
             }

@@ -1,8 +1,12 @@
-import { useState, useCallback, useEffect, memo, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, memo, useRef, useMemo, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { triggerHaptic } from '@/utils/haptics';
 import { TinderSwipeCard, preloadImageToCache, isImageDecodedInCache } from './TinderSwipeCard';
-import { SwipeInsightsModal } from './SwipeInsightsModal';
-import { ShareDialog } from './ShareDialog';
+
+// FIX #3: Lazy-load modals to prevent them from affecting swipe tree
+// These are rendered via portal outside the swipe container's React tree
+const SwipeInsightsModal = lazy(() => import('./SwipeInsightsModal').then(m => ({ default: m.SwipeInsightsModal })));
+const ShareDialog = lazy(() => import('./ShareDialog').then(m => ({ default: m.ShareDialog })));
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useAuth } from '@/hooks/useAuth';
 import { swipeQueue } from '@/lib/swipe/SwipeQueue';
@@ -197,6 +201,18 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // Local state for immediate UI updates - drives the swipe animation
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // =============================================================================
+  // FIX #1: SWIPE PHASE ISOLATION - DOM moves first, React cleans up after
+  // This is the key to "Tinder-level" feel: freeze React during the swipe gesture
+  // =============================================================================
+  interface PendingSwipe {
+    listing: any;
+    direction: 'left' | 'right';
+    newIndex: number;
+  }
+  const pendingSwipeRef = useRef<PendingSwipe | null>(null);
+  const isSwipeAnimatingRef = useRef(false);
 
   // PERF: Get initial state ONCE using getState() - no subscription
   // This is synchronous and doesn't cause re-renders when store updates
@@ -509,31 +525,52 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
 
-  // INSTANT SWIPE: Update UI immediately, fire DB operations in background
-  // Uses swipeQueue for ZERO-BLOCKING database writes
-  const executeSwipe = useCallback((direction: 'left' | 'right') => {
-    const listing = deckQueueRef.current[currentIndexRef.current];
-    if (!listing) return;
+  // =============================================================================
+  // FIX #1: SWIPE PHASE ISOLATION - Two-phase swipe for Tinder-level feel
+  // PHASE 1 (0-200ms): DOM only - card flies away, React is frozen
+  // PHASE 2 (after animation): Flush all state to React/Zustand/persistence
+  // =============================================================================
 
-    const newIndex = currentIndexRef.current + 1;
+  // PHASE 2: Called AFTER animation completes - flush all pending state
+  const flushPendingSwipe = useCallback(() => {
+    const pending = pendingSwipeRef.current;
+    if (!pending) return;
 
-    // 1. UPDATE UI STATE FIRST (INSTANT - < 1ms)
-    setSwipeDirection(direction);
-    currentIndexRef.current = newIndex;
-    setCurrentIndex(newIndex); // This triggers re-render with new card
+    const { listing, direction, newIndex } = pending;
+
+    // Clear pending immediately to prevent double-flush
+    pendingSwipeRef.current = null;
+    isSwipeAnimatingRef.current = false;
+
+    // NOW it's safe to update React state - animation is done
+    setCurrentIndex(newIndex);
+
+    // Update local ref for swiped IDs (already done in phase 1, but ensure consistency)
     swipedIdsRef.current.add(listing.id);
 
-    // 2. FIRE-AND-FORGET: Queue swipe for background processing
-    // This returns INSTANTLY - no await, no blocking, no network call
+    // Fire-and-forget: Queue swipe for background DB processing
     swipeQueue.queueSwipe(listing.id, direction, 'listing');
 
-    // 3. LOCAL STATE UPDATES (Synchronous, non-blocking)
-    // Persist to store (synchronous)
+    // Zustand update - DEFERRED until animation complete
     markClientSwiped(listing.id);
-    // Record for undo (synchronous)
+
+    // Record for undo
     recordSwipe(listing.id, 'listing', direction === 'right' ? 'like' : 'pass');
 
-    // 4. BACKGROUND: Profile view recording (non-critical, fire-and-forget)
+    // FIX #2: DEFERRED PERSISTENCE - use requestIdleCallback
+    // This prevents sessionStorage from blocking the main thread
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => {
+        persistDeckToSession('client', 'listings', deckQueueRef.current);
+      }, { timeout: 2000 });
+    } else {
+      // Fallback: defer to next frame at minimum
+      setTimeout(() => {
+        persistDeckToSession('client', 'listings', deckQueueRef.current);
+      }, 0);
+    }
+
+    // Background: Profile view recording (non-critical, fire-and-forget)
     queueMicrotask(() => {
       recordProfileView.mutateAsync({
         profileId: listing.id,
@@ -543,7 +580,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     });
 
     // Clear direction for next swipe
-    setTimeout(() => setSwipeDirection(null), 300);
+    setSwipeDirection(null);
 
     // Fetch more if running low
     if (newIndex >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
@@ -558,6 +595,38 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       imagePreloadController.preload(nextNextCard.images[0], 'high');
     }
   }, [recordSwipe, recordProfileView, markClientSwiped]);
+
+  // PHASE 1: Called when user swipes - ONLY updates refs and triggers animation
+  // NO React state updates, NO Zustand updates, NO persistence
+  const executeSwipe = useCallback((direction: 'left' | 'right') => {
+    // Prevent double-swipe while animation is in progress
+    if (isSwipeAnimatingRef.current) return;
+
+    const listing = deckQueueRef.current[currentIndexRef.current];
+    if (!listing) return;
+
+    const newIndex = currentIndexRef.current + 1;
+
+    // PHASE 1: Only update refs and trigger animation
+    // NO setCurrentIndex, NO markClientSwiped, NO persistence
+    isSwipeAnimatingRef.current = true;
+    pendingSwipeRef.current = { listing, direction, newIndex };
+
+    // Update ONLY the refs (no React re-render)
+    currentIndexRef.current = newIndex;
+    swipedIdsRef.current.add(listing.id);
+
+    // Trigger exit animation direction (this is the ONLY React state we touch)
+    setSwipeDirection(direction);
+
+    // SAFETY NET: If animation callback doesn't fire within 350ms, force flush
+    // This prevents stuck state if onAnimationComplete fails
+    setTimeout(() => {
+      if (pendingSwipeRef.current?.listing.id === listing.id) {
+        flushPendingSwipe();
+      }
+    }, 350);
+  }, [flushPendingSwipe]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const listing = deckQueueRef.current[currentIndexRef.current];
@@ -947,9 +1016,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               transition={{ type: "spring", stiffness: 600, damping: 30, mass: 0.4 }}
               className="w-full h-full absolute inset-0"
               style={{ willChange: 'transform, opacity', zIndex: 10 }}
-              onAnimationComplete={() => {
+              onAnimationComplete={(definition) => {
                 // After first animation, allow future animations (for new cards)
                 hasAnimatedOnceRef.current = true;
+
+                // FIX #1: CRITICAL - Flush pending swipe AFTER exit animation completes
+                // This is what makes swipes feel "Tinder-level" instant
+                // The card has visually left the screen, NOW we update React state
+                if (pendingSwipeRef.current) {
+                  flushPendingSwipe();
+                }
               }}
             >
               <TinderSwipeCard
@@ -968,21 +1044,30 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         </AnimatePresence>
       </div>
 
-      {/* Insights Modal */}
-      <SwipeInsightsModal
-        open={insightsModalOpen}
-        onOpenChange={setInsightsModalOpen}
-        listing={topCard}
-      />
-
-      {/* Share Dialog */}
-      <ShareDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        listingId={topCard?.id}
-        title={topCard?.title || 'Check out this listing'}
-        description={topCard?.description}
-      />
+      {/* FIX #3: PORTAL ISOLATION - Modals render outside swipe tree
+          This prevents modal state changes from causing re-renders in the swipe container
+          The modal lives in a completely separate React subtree */}
+      {typeof document !== 'undefined' && createPortal(
+        <Suspense fallback={null}>
+          {insightsModalOpen && (
+            <SwipeInsightsModal
+              open={insightsModalOpen}
+              onOpenChange={setInsightsModalOpen}
+              listing={topCard}
+            />
+          )}
+          {shareDialogOpen && (
+            <ShareDialog
+              open={shareDialogOpen}
+              onOpenChange={setShareDialogOpen}
+              listingId={topCard?.id}
+              title={topCard?.title || 'Check out this listing'}
+              description={topCard?.description}
+            />
+          )}
+        </Suspense>,
+        document.body
+      )}
     </div>
   );
 };

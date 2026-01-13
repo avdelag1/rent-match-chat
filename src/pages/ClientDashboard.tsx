@@ -23,6 +23,7 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick, fi
 
   // PERFORMANCE: Only fetch the selected listing when dialog opens
   // This eliminates redundant fetch that was happening on every render
+  // FIX #4: React Query optimizations to prevent refetching during swipes
   const { data: selectedListing } = useQuery({
     queryKey: ['listing-detail', selectedListingId],
     queryFn: async () => {
@@ -37,6 +38,10 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick, fi
     },
     enabled: !!selectedListingId && insightsOpen,
     staleTime: 5 * 60 * 1000, // Cache for 5 min
+    gcTime: 30 * 60 * 1000, // Keep in memory for 30 min
+    refetchOnWindowFocus: false, // Don't refetch on tab switch
+    refetchOnMount: false, // Don't refetch when component remounts
+    refetchOnReconnect: false, // Don't refetch on network reconnect
   });
 
   const handleListingTap = useCallback((listingId: string) => {
