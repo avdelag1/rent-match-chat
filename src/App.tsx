@@ -139,15 +139,17 @@ const App = () => (
                     <Route path="/reset-password" element={<ResetPassword />} />
 
                     {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                        SPEED OF LIGHT: Client routes with PERSISTENT layout
-                        DashboardLayout is mounted ONCE and never remounts
+                        SPEED OF LIGHT: UNIFIED layout for ALL protected routes
+                        Single PersistentDashboardLayout instance shared between modes
+                        Prevents remount when switching between client/owner modes
                         Camera routes are INSIDE layout to prevent remount on navigation back
                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
                     <Route element={
-                      <ProtectedRoute requiredRole="client">
-                        <PersistentDashboardLayout requiredRole="client" />
+                      <ProtectedRoute>
+                        <PersistentDashboardLayout />
                       </ProtectedRoute>
                     }>
+                      {/* Client routes */}
                       <Route path="/client/dashboard" element={<ClientDashboard />} />
                       <Route path="/client/profile" element={<ClientProfile />} />
                       <Route path="/client/settings" element={<ClientSettings />} />
@@ -156,20 +158,9 @@ const App = () => (
                       <Route path="/client/security" element={<ClientSecurity />} />
                       <Route path="/client/services" element={<ClientWorkerDiscovery />} />
                       <Route path="/client/contracts" element={<ClientContracts />} />
-                      {/* Camera INSIDE layout - prevents dashboard remount on navigate back */}
                       <Route path="/client/camera" element={<ClientSelfieCamera />} />
-                    </Route>
 
-                    {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                        SPEED OF LIGHT: Owner routes with PERSISTENT layout
-                        DashboardLayout is mounted ONCE and never remounts
-                        Camera routes are INSIDE layout to prevent remount on navigation back
-                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-                    <Route element={
-                      <ProtectedRoute requiredRole="owner">
-                        <PersistentDashboardLayout requiredRole="owner" />
-                      </ProtectedRoute>
-                    }>
+                      {/* Owner routes */}
                       <Route path="/owner/dashboard" element={<EnhancedOwnerDashboard />} />
                       <Route path="/owner/profile" element={<OwnerProfile />} />
                       <Route path="/owner/settings" element={<OwnerSettings />} />
@@ -186,19 +177,10 @@ const App = () => (
                       <Route path="/owner/saved-searches" element={<OwnerSavedSearches />} />
                       <Route path="/owner/security" element={<OwnerSecurity />} />
                       <Route path="/owner/contracts" element={<OwnerContracts />} />
-                      {/* Camera routes INSIDE layout - prevents dashboard remount on navigate back */}
                       <Route path="/owner/camera" element={<OwnerProfileCamera />} />
                       <Route path="/owner/camera/listing" element={<OwnerListingCamera />} />
-                    </Route>
 
-                    {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                        Shared routes (both roles) with PERSISTENT layout
-                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-                    <Route element={
-                      <ProtectedRoute>
-                        <PersistentDashboardLayout />
-                      </ProtectedRoute>
-                    }>
+                      {/* Shared routes (both roles) */}
                       <Route path="/messages" element={<MessagingDashboard />} />
                       <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/subscription-packages" element={<SubscriptionPackagesPage />} />

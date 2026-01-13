@@ -102,6 +102,31 @@ function getTransitionVariant(fromPath: string, toPath: string) {
   };
 }
 
+/**
+ * SPEED OF LIGHT: Get a STABLE key for dashboard routes
+ *
+ * The critical fix: Mode switching between /client/* and /owner/* should NOT
+ * cause a full remount. We use a stable key "dashboard" for all protected routes
+ * so the PersistentDashboardLayout stays mounted during mode switches.
+ *
+ * This is the Tinder/Instagram pattern - navigation swaps CONTENT, not SCREENS.
+ */
+function getStableRouteKey(pathname: string): string {
+  // All dashboard routes (client or owner) share the same stable key
+  // This prevents remount when switching modes
+  if (pathname.startsWith('/client/') || pathname.startsWith('/owner/')) {
+    return 'dashboard-layout';
+  }
+
+  // Shared protected routes also use stable key
+  if (pathname === '/messages' || pathname === '/notifications' || pathname === '/subscription-packages') {
+    return 'dashboard-layout';
+  }
+
+  // Public/unprotected routes use their pathname for proper transitions
+  return pathname;
+}
+
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const prevLocationRef = useRef(location.pathname);
@@ -119,34 +144,53 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Enable View Transitions API
   useViewTransitions();
 
+  // SPEED OF LIGHT: Use stable key for dashboard routes to prevent remount
+  const routeKey = useMemo(() => getStableRouteKey(location.pathname), [location.pathname]);
+  const prevRouteKey = useRef(routeKey);
+
+  // Only animate when the STABLE key changes (not on every pathname change)
+  const shouldAnimate = routeKey !== prevRouteKey.current;
+
   // Get dynamic transition variant based on navigation direction
   // Use ref to get prev location synchronously before it updates
   const transitionVariant = useMemo(() => {
+    // Skip animation for same-key transitions (mode switches within dashboard)
+    if (!shouldAnimate) {
+      return {
+        initial: false as const,
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 1, x: 0 },
+      };
+    }
     const variant = getTransitionVariant(prevLocationRef.current, location.pathname);
     return variant;
-  }, [location.pathname]);
+  }, [location.pathname, shouldAnimate]);
 
   // Update previous location synchronously using useLayoutEffect
   // This ensures the ref is updated before the next render calculation
   useLayoutEffect(() => {
-    // Mark as transitioning to prevent glitches
-    setIsTransitioning(true);
+    // Only mark as transitioning if we're actually animating (key changed)
+    if (shouldAnimate) {
+      setIsTransitioning(true);
+    }
 
-    // Update ref immediately for next calculation
+    // Update refs immediately for next calculation
     prevLocationRef.current = location.pathname;
+    prevRouteKey.current = routeKey;
 
     // End transition instantly - match ultra-fast animation duration
     // Using RAF ensures smooth frame timing
-    const timer = requestAnimationFrame(() => {
-      setTimeout(() => setIsTransitioning(false), responsive.isMobile ? 80 : 100);
-    });
-
-    return () => cancelAnimationFrame(timer);
-  }, [location.pathname, responsive.isMobile]);
+    if (shouldAnimate) {
+      const timer = requestAnimationFrame(() => {
+        setTimeout(() => setIsTransitioning(false), responsive.isMobile ? 80 : 100);
+      });
+      return () => cancelAnimationFrame(timer);
+    }
+  }, [location.pathname, routeKey, responsive.isMobile, shouldAnimate]);
 
   // Ultra-fast transition - imperceptible delay
   const fastTransition = {
-    duration: responsive.isMobile ? 0.08 : 0.1,
+    duration: shouldAnimate ? (responsive.isMobile ? 0.08 : 0.1) : 0,
     ease: [0.25, 0.8, 0.25, 1] as const, // Ultra-snappy easing
   };
 
@@ -160,14 +204,14 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
-            key={location.pathname}
+            key={routeKey}
             initial={transitionVariant.initial}
             animate={transitionVariant.animate}
             exit={transitionVariant.exit}
             transition={fastTransition}
             className="w-full min-h-screen min-h-dvh overflow-x-hidden"
             style={{
-              willChange: 'opacity, transform',
+              willChange: shouldAnimate ? 'opacity, transform' : 'auto',
               transformOrigin: 'center center',
               // GPU acceleration for smooth slide
               backfaceVisibility: 'hidden',
