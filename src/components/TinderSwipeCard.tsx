@@ -335,8 +335,8 @@ const InstantImageGallery = memo(({
         transform: 'translateZ(0)',
       }}
     >
-      {/* LAYER 1: Premium skeleton shimmer placeholder - NEVER black/dark
-          Uses light slate colors that work in both light and dark mode with animated shimmer */}
+      {/* LAYER 1: LQIP (Low Quality Image Placeholder) - Premium blur placeholder
+          Mimics a blurry property photo with warm sky tones at top, neutral middle, darker bottom */}
       <div
         className="absolute inset-0 rounded-3xl overflow-hidden"
         style={{
@@ -345,48 +345,57 @@ const InstantImageGallery = memo(({
           transform: 'translateZ(0)',
         }}
       >
-        {/* Base gradient - neutral light gray */}
+        {/* LQIP Base gradient - mimics typical property photo (sky -> building -> ground) */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 35%, #cbd5e1 65%, #94a3b8 100%)',
+            background: `
+              linear-gradient(180deg,
+                #bfdbfe 0%,
+                #e0f2fe 15%,
+                #f1f5f9 30%,
+                #e2e8f0 50%,
+                #d1d5db 70%,
+                #9ca3af 85%,
+                #6b7280 100%
+              )
+            `,
           }}
         />
-        {/* Animated skeleton shimmer - sweeps across for loading effect */}
+        {/* Simulated window/building highlights */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: `
+              radial-gradient(ellipse 80% 40% at 50% 45%, rgba(255,255,255,0.6) 0%, transparent 50%),
+              radial-gradient(circle at 30% 35%, rgba(255,255,255,0.3) 0%, transparent 20%),
+              radial-gradient(circle at 70% 35%, rgba(255,255,255,0.3) 0%, transparent 20%)
+            `,
+          }}
+        />
+        {/* Animated shimmer sweep for loading effect */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 75%, transparent 100%)',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 25%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.3) 75%, transparent 100%)',
             backgroundSize: '200% 100%',
             animation: 'skeleton-shimmer 1.2s ease-in-out infinite',
-            // PERF: Only animate background-position, not entire repaint
             willChange: 'background-position',
             transform: 'translateZ(0)',
           }}
         />
-        {/* Secondary slower shimmer for depth */}
+        {/* Pulsing glow overlay for premium feel */}
         <div
-          className="absolute inset-0 opacity-50"
+          className="absolute inset-0 rounded-3xl animate-skeleton-glow"
           style={{
-            background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)',
-            backgroundSize: '200% 100%',
-            animation: 'skeleton-shimmer 2s ease-in-out infinite',
-            animationDelay: '0.5s',
+            background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%, transparent 70%)',
             transform: 'translateZ(0)',
           }}
         />
-        {/* Placeholder content skeleton - PERF: Removed backdrop-blur for 60fps */}
+        {/* Subtle loading indicator */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          {/* Image icon placeholder - PERF: Removed backdrop-blur */}
-          <div className="w-20 h-20 rounded-full bg-white/50 flex items-center justify-center shadow-inner">
-            <svg className="w-10 h-10 text-slate-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          {/* Text skeleton lines */}
-          <div className="flex flex-col items-center gap-2 w-48">
-            <div className="h-4 w-full rounded-full bg-white/30" />
-            <div className="h-3 w-3/4 rounded-full bg-white/25" />
+          <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <div className="w-8 h-8 border-2 border-white/40 border-t-white rounded-full animate-spin" />
           </div>
         </div>
       </div>

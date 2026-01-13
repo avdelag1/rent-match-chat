@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { triggerHaptic } from '@/utils/haptics';
 
 interface MatchCelebrationProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
 
   useEffect(() => {
     if (isOpen) {
+      // Trigger celebration haptic when match celebration opens
+      triggerHaptic('match');
       const timer = setTimeout(() => setShowContent(true), 500);
       return () => clearTimeout(timer);
     } else {

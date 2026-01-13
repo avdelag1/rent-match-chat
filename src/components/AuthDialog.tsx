@@ -14,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { FaGoogle } from 'react-icons/fa';
 import { loginSchema, signupSchema, forgotPasswordSchema } from '@/schemas/auth';
 import { Capacitor } from '@capacitor/core';
-import { SwipessLogo } from './SwipessLogo';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -236,9 +235,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
               {/* Centered Minimal Header */}
               <div className="text-center mb-4">
-                <SwipessLogo size="sm" />
-                <h2 className="text-xl font-bold text-white mt-3">
-                  {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome back to Swipess' : 'Create account'}
+                <h2 className="text-xl font-bold text-white">
+                  {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome to Swipess' : 'Create account'}
                 </h2>
               </div>
 

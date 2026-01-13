@@ -146,6 +146,20 @@ export default {
 				'glow-pulse': {
 					'0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)' },
 					'50%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.8)' }
+				},
+				'skeleton-glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 15px 3px rgba(255, 255, 255, 0.05)',
+						opacity: '0.3'
+					},
+					'50%': {
+						boxShadow: '0 0 30px 6px rgba(255, 255, 255, 0.15)',
+						opacity: '0.6'
+					}
+				},
+				'skeleton-shimmer': {
+					'0%': { backgroundPosition: '-200% 0' },
+					'100%': { backgroundPosition: '200% 0' }
 				}
 			},
 			animation: {
@@ -157,7 +171,9 @@ export default {
 				'elastic-bounce': 'elastic-bounce 0.6s ease-out',
 				'shimmer': 'shimmer 1.2s ease-in-out infinite',
 				'particle-burst': 'particle-burst 0.6s ease-out',
-				'glow-pulse': 'glow-pulse 2s ease-in-out infinite'
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+				'skeleton-glow': 'skeleton-glow 2s ease-in-out infinite',
+				'skeleton-shimmer': 'skeleton-shimmer 1.5s ease-in-out infinite'
 			}
 		}
 	},
