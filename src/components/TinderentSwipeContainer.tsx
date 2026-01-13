@@ -5,7 +5,8 @@ import { SwipeInsightsModal } from './SwipeInsightsModal';
 import { ShareDialog } from './ShareDialog';
 import { useSmartListingMatching, ListingFilters } from '@/hooks/useSmartMatching';
 import { useAuth } from '@/hooks/useAuth';
-import { useSwipe } from '@/hooks/useSwipe';
+import { swipeQueue } from '@/lib/swipe/SwipeQueue';
+import { imagePreloadController } from '@/lib/swipe/ImagePreloadController';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useStartConversation } from '@/hooks/useConversations';
@@ -291,12 +292,19 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   }, []);
 
   // Hooks for functionality
-  const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
+
+  // PERF: Initialize swipeQueue with user ID for fire-and-forget background writes
+  // This eliminates the async auth call on every swipe
+  useEffect(() => {
+    if (user?.id) {
+      swipeQueue.setUserId(user.id);
+    }
+  }, [user?.id]);
 
   // PERF: Memoize filters to prevent unnecessary query re-runs
   const stableFilters = useMemo(() => filters, [
@@ -502,43 +510,36 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const nextCard = deckQueue[currentIndex + 1];
 
   // INSTANT SWIPE: Update UI immediately, fire DB operations in background
+  // Uses swipeQueue for ZERO-BLOCKING database writes
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
     const listing = deckQueueRef.current[currentIndexRef.current];
     if (!listing) return;
 
     const newIndex = currentIndexRef.current + 1;
 
-    // 1. UPDATE UI STATE FIRST (INSTANT)
+    // 1. UPDATE UI STATE FIRST (INSTANT - < 1ms)
     setSwipeDirection(direction);
     currentIndexRef.current = newIndex;
     setCurrentIndex(newIndex); // This triggers re-render with new card
     swipedIdsRef.current.add(listing.id);
 
-    // 2. BACKGROUND TASKS (Fire-and-forget, don't block UI)
-    // These happen AFTER UI has already updated
-    Promise.all([
-      // Persist to store
-      Promise.resolve(markClientSwiped(listing.id)),
+    // 2. FIRE-AND-FORGET: Queue swipe for background processing
+    // This returns INSTANTLY - no await, no blocking, no network call
+    swipeQueue.queueSwipe(listing.id, direction, 'listing');
 
-      // Save swipe to DB with match detection
-      swipeMutation.mutateAsync({
-        targetId: listing.id,
-        direction,
-        targetType: 'listing'
-      }).catch(() => {}),
+    // 3. LOCAL STATE UPDATES (Synchronous, non-blocking)
+    // Persist to store (synchronous)
+    markClientSwiped(listing.id);
+    // Record for undo (synchronous)
+    recordSwipe(listing.id, 'listing', direction === 'right' ? 'like' : 'pass');
 
-      // Record for undo
-      Promise.resolve(recordSwipe(listing.id, 'listing', direction === 'right' ? 'like' : 'pass')),
-
-      // Record profile view
+    // 4. BACKGROUND: Profile view recording (non-critical, fire-and-forget)
+    queueMicrotask(() => {
       recordProfileView.mutateAsync({
         profileId: listing.id,
         viewType: 'listing',
         action: direction === 'right' ? 'like' : 'pass'
-      }).catch(() => {})
-    ]).catch(err => {
-      // Non-critical - user already saw the swipe complete
-      logger.error('[TinderentSwipeContainer] Background swipe tasks failed:', err);
+      }).catch(() => {});
     });
 
     // Clear direction for next swipe
@@ -550,12 +551,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       setPage(p => p + 1);
     }
 
-    // Eagerly preload next card's image
+    // Eagerly preload next card's image using both preloaders
     const nextNextCard = deckQueueRef.current[newIndex + 1];
     if (nextNextCard?.images?.[0]) {
       preloadImageToCache(nextNextCard.images[0]);
+      imagePreloadController.preload(nextNextCard.images[0], 'high');
     }
-  }, [swipeMutation, recordSwipe, recordProfileView, markClientSwiped]);
+  }, [recordSwipe, recordProfileView, markClientSwiped]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const listing = deckQueueRef.current[currentIndexRef.current];
@@ -570,13 +572,19 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     // BACKGROUND PREFETCH: Opportunistically prefetch next 2-3 cards in background
     // This doesn't block the swipe - images load with graceful skeleton fallback
-    const nextCard = deckQueueRef.current[currentIndexRef.current + 1];
-    if (nextCard?.images?.[0]) {
-      preloadImageToCache(nextCard.images[0]);
-    }
-    const nextNextCard = deckQueueRef.current[currentIndexRef.current + 2];
-    if (nextNextCard?.images?.[0]) {
-      preloadImageToCache(nextNextCard.images[0]);
+    // Use BOTH preloaders for maximum cache coverage
+    const imagesToPreload: string[] = [];
+    [1, 2, 3].forEach((offset) => {
+      const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
+      if (futureCard?.images?.[0]) {
+        imagesToPreload.push(futureCard.images[0]);
+        preloadImageToCache(futureCard.images[0]);
+      }
+    });
+
+    // Batch preload with ImagePreloadController (decodes images for instant display)
+    if (imagesToPreload.length > 0) {
+      imagePreloadController.preloadBatch(imagesToPreload);
     }
   }, [executeSwipe]);
 
@@ -878,13 +886,20 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       isFetchingMore.current = true;
       setPage(p => p + 1);
 
-      // Also preload next 3 card images opportunistically
+      // Also preload next 3 card images opportunistically using BOTH preloaders
+      const imagesToPreload: string[] = [];
       [1, 2, 3].forEach((offset) => {
         const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
         if (futureCard?.images?.[0]) {
+          imagesToPreload.push(futureCard.images[0]);
           preloadImageToCache(futureCard.images[0]);
         }
       });
+
+      // Use ImagePreloadController for decode (ensures GPU-ready images)
+      if (imagesToPreload.length > 0) {
+        imagePreloadController.preloadBatch(imagesToPreload);
+      }
     }
   }, []);
 
