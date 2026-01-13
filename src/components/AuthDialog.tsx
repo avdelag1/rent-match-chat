@@ -220,10 +220,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             {/* Back Button - Top Left Only */}
             <button
               onClick={onClose}
-              className="absolute top-4 left-4 safe-area-pt flex items-center gap-1.5 text-white/70 hover:text-white transition-all duration-200 group active:scale-95 z-20"
+              className="absolute top-4 left-4 safe-area-pt text-white/70 hover:text-white transition-all duration-200 active:scale-95 z-20"
             >
-              <ArrowLeft className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-1" />
-              <span className="text-sm font-medium">Exit</span>
+              <span className="text-sm font-medium">Back</span>
             </button>
 
             <div className="w-full max-w-sm mx-auto animate-fade-in">
