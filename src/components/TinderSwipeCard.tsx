@@ -9,6 +9,7 @@ import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
 import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
+import { usePWAMode } from '@/hooks/usePWAMode';
 
 // PLACEHOLDER FALLBACK: Inline SVG with neutral colors (not dark/black)
 // Using a light gradient that works in both light and dark mode
@@ -501,6 +502,9 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   const [isInsightsPanelOpen, setIsInsightsPanelOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // PWA Mode optimizations - use lighter animations in PWA context
+  const pwaMode = usePWAMode();
+
   // Motion values for drag - PROFESSIONAL RESPONSIVE FEEL
   const x = useMotionValue(0);
   // PROGRESSIVE rotation - gradual feedback as user approaches decision threshold (120px)
@@ -557,6 +561,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   }, []);
 
   // BUTTON SWIPE - Animate card then trigger swipe for smooth swoosh effect
+  // PWA MODE: Use stiffer springs for snappier response with fewer frames
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     const targetX = direction === 'right' ? 500 : -500;
 
@@ -564,16 +569,17 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
     // Animate card swooshing out with spring physics
+    // PWA uses stiffer springs for faster, more responsive animations
     animate(x, targetX, {
       type: "spring",
-      stiffness: 300,
-      damping: 25,
-      mass: 0.8,
+      stiffness: pwaMode.isPWA ? pwaMode.springStiffness : 300,
+      damping: pwaMode.isPWA ? pwaMode.springDamping : 25,
+      mass: pwaMode.isPWA ? pwaMode.springMass : 0.8,
       onComplete: () => {
         onSwipe(direction);
       }
     });
-  }, [onSwipe, x]);
+  }, [onSwipe, x, pwaMode]);
 
   // PROFESSIONAL drag handling - responsive but controlled
   const handleDragStart = useCallback(() => {
@@ -602,18 +608,18 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     }
 
     // SMOOTH SNAPBACK ANIMATION - Professional feel
-    // Lower stiffness = smoother return, higher damping = no oscillation
+    // PWA MODE: Stiffer springs for instant snap-back (reduces frame count)
     animate(x, 0, {
       type: "spring",
-      stiffness: 400,
-      damping: 30,
-      mass: 0.8,
+      stiffness: pwaMode.isPWA ? pwaMode.springStiffness + 100 : 400,
+      damping: pwaMode.isPWA ? pwaMode.springDamping + 5 : 30,
+      mass: pwaMode.isPWA ? pwaMode.springMass : 0.8,
       velocity: velocity.x * 0.3
     });
 
     // Light haptic on snapback to provide feedback
     triggerHaptic('light');
-  }, [onSwipe, x]);
+  }, [onSwipe, x, pwaMode]);
 
   const cardStyle = {
     x,
@@ -665,14 +671,14 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
         initial={false}
         transition={{
           type: "spring",
-          stiffness: 500,
-          damping: 35,
-          mass: 0.5
+          stiffness: pwaMode.springStiffness,
+          damping: pwaMode.springDamping,
+          mass: pwaMode.springMass
         }}
       >
         <div className="absolute inset-0 w-full h-full overflow-hidden">
-          {/* Swipe Overlays */}
-          <SwipeOverlays x={x} />
+          {/* Swipe Overlays - PWA mode disables expensive effects */}
+          <SwipeOverlays x={x} isPWA={pwaMode.isPWA} enableEffects={pwaMode.enableOverlayEffects} />
 
           {/* Main Image - Fullscreen */}
           <div
@@ -732,8 +738,10 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  className="absolute inset-x-4 top-16 bottom-36 z-30 bg-black/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden"
+                  transition={{ type: "spring", stiffness: pwaMode.springStiffness, damping: pwaMode.springDamping }}
+                  className={`absolute inset-x-4 top-16 bottom-36 z-30 bg-black/80 rounded-2xl border border-white/20 shadow-2xl overflow-hidden ${
+                    pwaMode.isPWA ? '' : 'backdrop-blur-xl'
+                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsInsightsPanelOpen(false);
@@ -885,15 +893,18 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
 
           {/* Bottom Sheet - Collapsible with Glassmorphism */}
           {/* FIX: Use translateY instead of height animation for GPU-friendly transforms (no reflow) */}
+          {/* PWA: Reduce backdrop blur which is expensive in PWA shell */}
           <motion.div
-            className="absolute bottom-0 left-0 right-0 bg-black/75 backdrop-blur-xl rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden z-20"
+            className={`absolute bottom-0 left-0 right-0 bg-black/75 rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden z-20 ${
+              pwaMode.isPWA ? '' : 'backdrop-blur-xl'
+            }`}
             animate={{
               y: isBottomSheetExpanded ? 0 : 230
             }}
             transition={{
               type: "spring",
-              stiffness: 400,
-              damping: 32
+              stiffness: pwaMode.springStiffness,
+              damping: pwaMode.springDamping
             }}
             style={{
               height: 350,
@@ -1046,7 +1057,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            transition={{ type: "spring", stiffness: pwaMode.springStiffness, damping: pwaMode.springDamping }}
             className="absolute bottom-28 left-0 right-0 flex justify-center items-center z-40 pointer-events-none"
           >
             <div className="flex items-center gap-3 pointer-events-auto">

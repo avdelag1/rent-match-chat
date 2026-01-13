@@ -95,12 +95,33 @@ export function getThumbnailUrl(url: string): string {
 
 /**
  * Get optimized card image URL (swipe cards)
+ * Standard browser mode - higher quality
  */
 export function getCardImageUrl(url: string): string {
   return optimizeImageUrl(url, {
     width: 800,
     height: 1200,
     quality: 85,
+    format: 'webp'
+  });
+}
+
+/**
+ * Get PWA-optimized card image URL (swipe cards in PWA mode)
+ * Lower quality and smaller dimensions for faster decoding in PWA shell
+ *
+ * PWA shells have:
+ * - Less aggressive GPU acceleration
+ * - More memory pressure
+ * - Slower image decode times
+ *
+ * So we sacrifice some quality for responsiveness
+ */
+export function getPWACardImageUrl(url: string): string {
+  return optimizeImageUrl(url, {
+    width: 640,      // Reduced from 800 - less pixels to decode
+    height: 960,     // Reduced from 1200
+    quality: 70,     // Reduced from 85 - smaller file size
     format: 'webp'
   });
 }
@@ -290,3 +311,127 @@ export const priorityImageProps = {
   decoding: 'async' as const,
   fetchPriority: 'high' as const,
 };
+
+/**
+ * PWA-Aggressive Image Preloader
+ *
+ * In PWA mode, we need to be more aggressive with preloading because:
+ * - Image decode is slower in PWA shell
+ * - Memory pressure causes micro-freezes
+ * - Images not already decoded will cause swipe lag
+ *
+ * This preloader:
+ * - Decodes images synchronously when possible
+ * - Keeps decoded images in memory
+ * - Preloads more images ahead
+ */
+export class PWAImagePreloader {
+  private decodedCache = new Map<string, HTMLImageElement>();
+  private decoding = new Set<string>();
+  private maxCached = 10; // Keep last 10 images decoded in memory
+
+  /**
+   * Aggressively preload and decode image for PWA mode
+   * Returns the decoded image element for immediate display
+   */
+  async preloadAndDecode(url: string): Promise<HTMLImageElement | null> {
+    if (!url) return null;
+
+    // Already decoded and cached
+    if (this.decodedCache.has(url)) {
+      return this.decodedCache.get(url)!;
+    }
+
+    // Already being decoded
+    if (this.decoding.has(url)) {
+      // Wait for existing decode
+      return new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (this.decodedCache.has(url)) {
+            clearInterval(checkInterval);
+            resolve(this.decodedCache.get(url)!);
+          }
+        }, 50);
+        // Timeout after 3s
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(null);
+        }, 3000);
+      });
+    }
+
+    this.decoding.add(url);
+
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      (img as any).fetchPriority = 'high';
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = url;
+      });
+
+      // Force decode
+      if ('decode' in img) {
+        await img.decode();
+      }
+
+      // Cache the decoded image
+      this.decodedCache.set(url, img);
+      this.decoding.delete(url);
+
+      // Evict old entries if cache is full
+      if (this.decodedCache.size > this.maxCached) {
+        const firstKey = this.decodedCache.keys().next().value;
+        if (firstKey) this.decodedCache.delete(firstKey);
+      }
+
+      return img;
+    } catch {
+      this.decoding.delete(url);
+      return null;
+    }
+  }
+
+  /**
+   * Batch preload multiple images for PWA
+   * More aggressive than standard preloader
+   */
+  async batchPreload(urls: string[]): Promise<void> {
+    const validUrls = urls.filter(url =>
+      url && url !== '/placeholder.svg' && !this.decodedCache.has(url)
+    );
+
+    // Preload all in parallel
+    await Promise.allSettled(
+      validUrls.map(url => this.preloadAndDecode(url))
+    );
+  }
+
+  /**
+   * Check if image is already decoded and ready
+   */
+  isDecoded(url: string): boolean {
+    return this.decodedCache.has(url);
+  }
+
+  /**
+   * Get decoded image if available
+   */
+  getDecoded(url: string): HTMLImageElement | null {
+    return this.decodedCache.get(url) || null;
+  }
+
+  /**
+   * Clear cache to free memory
+   */
+  clear(): void {
+    this.decodedCache.clear();
+    this.decoding.clear();
+  }
+}
+
+// Global PWA image preloader instance
+export const pwaImagePreloader = new PWAImagePreloader();

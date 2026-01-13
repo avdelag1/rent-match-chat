@@ -3,9 +3,24 @@ import { memo } from 'react';
 
 interface SwipeOverlaysProps {
   x: MotionValue<number>;
+  isPWA?: boolean;
+  enableEffects?: boolean;
 }
 
-export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysProps) {
+/**
+ * SwipeOverlays - Visual feedback during swipe gestures
+ *
+ * PWA MODE OPTIMIZATIONS:
+ * - Disables backdrop blur (expensive in PWA shell)
+ * - Disables animated ping effects (continuous animations hurt PWA performance)
+ * - Keeps gradient backgrounds for visual feedback
+ * - Uses simpler opacity-only transitions
+ */
+export const SwipeOverlays = memo(function SwipeOverlays({
+  x,
+  isPWA = false,
+  enableEffects = true
+}: SwipeOverlaysProps) {
   // PROGRESSIVE visual feedback - matches 120px swipe threshold
   // Overlays fade in gradually: starts appearing at 40px, full at 120px (decision point)
   // This gives users clear feedback on how close they are to committing
@@ -14,12 +29,14 @@ export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysPro
 
   // Progressive scale - grows as user approaches threshold
   // Starts subtle, becomes prominent at decision point
-  const likeScale = useTransform(x, [0, 60, 120], [0.7, 0.9, 1.1]);
-  const passScale = useTransform(x, [-120, -60, 0], [1.1, 0.9, 0.7]);
+  // PWA: Simpler scaling to reduce transform calculations
+  const likeScale = useTransform(x, isPWA ? [0, 120] : [0, 60, 120], isPWA ? [0.9, 1.0] : [0.7, 0.9, 1.1]);
+  const passScale = useTransform(x, isPWA ? [-120, 0] : [-120, -60, 0], isPWA ? [1.0, 0.9] : [1.1, 0.9, 0.7]);
 
   // Rotation intensifies progressively with swipe distance
-  const likeRotate = useTransform(x, [0, 60, 120], [-8, -12, -15]);
-  const passRotate = useTransform(x, [-120, -60, 0], [15, 12, 8]);
+  // PWA: Disable rotation entirely for smoother performance
+  const likeRotate = useTransform(x, [0, 60, 120], isPWA ? [0, 0, 0] : [-8, -12, -15]);
+  const passRotate = useTransform(x, [-120, -60, 0], isPWA ? [0, 0, 0] : [15, 12, 8]);
 
   return (
     <>
@@ -28,15 +45,26 @@ export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysPro
         style={{ opacity: likeOpacity }}
         className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none swipe-overlay-container like-overlay"
       >
-        {/* Imperial gold gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/60 via-amber-400/50 to-yellow-600/60 backdrop-blur-[6px]" />
+        {/* Imperial gold gradient background - PWA skips blur */}
+        <div className={`absolute inset-0 bg-gradient-to-br from-yellow-500/60 via-amber-400/50 to-yellow-600/60 ${
+          isPWA ? '' : 'backdrop-blur-[6px]'
+        }`} />
 
-        {/* Animated glow rings - gold themed */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute w-80 h-80 rounded-full bg-yellow-400/25 animate-ping" style={{ animationDuration: '2s' }} />
-          <div className="absolute w-64 h-64 rounded-full bg-amber-500/30 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
-          <div className="absolute w-48 h-48 rounded-full bg-yellow-300/20 animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.5s' }} />
-        </div>
+        {/* Animated glow rings - DISABLED in PWA mode (expensive continuous animations) */}
+        {enableEffects && !isPWA && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute w-80 h-80 rounded-full bg-yellow-400/25 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute w-64 h-64 rounded-full bg-amber-500/30 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
+            <div className="absolute w-48 h-48 rounded-full bg-yellow-300/20 animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.5s' }} />
+          </div>
+        )}
+
+        {/* PWA: Simplified static glow instead of animated rings */}
+        {isPWA && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute w-64 h-64 rounded-full bg-yellow-400/30" />
+          </div>
+        )}
 
         <motion.div
           className="relative"
@@ -54,15 +82,26 @@ export const SwipeOverlays = memo(function SwipeOverlays({ x }: SwipeOverlaysPro
         style={{ opacity: passOpacity }}
         className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none swipe-overlay-container pass-overlay"
       >
-        {/* Deep crimson gradient background - Chinese red inspired */}
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-600/60 via-red-700/55 to-rose-800/60 backdrop-blur-[6px]" />
+        {/* Deep crimson gradient background - PWA skips blur */}
+        <div className={`absolute inset-0 bg-gradient-to-br from-rose-600/60 via-red-700/55 to-rose-800/60 ${
+          isPWA ? '' : 'backdrop-blur-[6px]'
+        }`} />
 
-        {/* Animated glow rings - crimson themed */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute w-80 h-80 rounded-full bg-rose-500/25 animate-ping" style={{ animationDuration: '2s' }} />
-          <div className="absolute w-64 h-64 rounded-full bg-red-600/30 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
-          <div className="absolute w-48 h-48 rounded-full bg-rose-400/20 animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.5s' }} />
-        </div>
+        {/* Animated glow rings - DISABLED in PWA mode (expensive continuous animations) */}
+        {enableEffects && !isPWA && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute w-80 h-80 rounded-full bg-rose-500/25 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute w-64 h-64 rounded-full bg-red-600/30 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
+            <div className="absolute w-48 h-48 rounded-full bg-rose-400/20 animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.5s' }} />
+          </div>
+        )}
+
+        {/* PWA: Simplified static glow instead of animated rings */}
+        {isPWA && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute w-64 h-64 rounded-full bg-rose-500/30" />
+          </div>
+        )}
 
         <motion.div
           className="relative"
