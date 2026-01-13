@@ -111,31 +111,28 @@ function LegendaryLandingPage() {
 
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-6 max-w-2xl w-full px-4 safe-area-pt">
-        {/* Swipable Swipess Logo - Straight horizontal, no rotation */}
-        <motion.div
-          data-swipe-logo
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.9}
-          dragMomentum={false}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onClick={handleTap}
-          style={{ x }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-          className="space-y-4 cursor-grab active:cursor-grabbing focus:outline-none group touch-none select-none"
-        >
-          {/* Logo with fade/blur effect when swiping */}
-          <motion.div 
-            className="relative"
+        {/* Swipable Swipess Logo - Only the logo moves */}
+        <div className="space-y-4 text-center">
+          <motion.div
+            data-swipe-logo
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.9}
+            dragMomentum={false}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onClick={handleTap}
             style={{ 
+              x,
               opacity: logoOpacity,
               scale: logoScale,
               filter: useTransform(logoBlur, (v) => `blur(${v}px)`)
             }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+            className="cursor-grab active:cursor-grabbing focus:outline-none group touch-none select-none relative inline-block"
           >
             <SwipessLogo size="3xl" />
             {/* Glow effect on hover */}
@@ -149,10 +146,9 @@ function LegendaryLandingPage() {
 
           <motion.p 
             className="text-white text-xl sm:text-2xl font-medium whitespace-nowrap"
-            style={{ 
-              opacity: logoOpacity,
-              filter: useTransform(logoBlur, (v) => `blur(${v * 0.5}px)`)
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
             Swipe and find your perfect deal
           </motion.p>
@@ -163,11 +159,10 @@ function LegendaryLandingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            style={{ opacity: useTransform(x, [0, 50], [0.6, 0]) }}
           >
             Swipe right or tap to get started →
           </motion.p>
-        </motion.div>
+        </div>
 
         {/* Bottom Info Section */}
         <motion.div
