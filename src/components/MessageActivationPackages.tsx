@@ -188,10 +188,10 @@ export function MessageActivationPackages({
 
   const packagesUI = convertPackages(packages);
   
-  const roleLabel = currentUserRole === 'owner' ? 'Owner' : 'Client';
-  const roleDescription = currentUserRole === 'owner' 
-    ? 'Connect with potential clients interested in your listings'
-    : 'Start conversations with property owners about their listings';
+  const roleLabel = currentUserRole === 'owner' ? 'Provider' : 'Explorer';
+  const roleDescription = currentUserRole === 'owner'
+    ? 'Connect with potential explorers interested in your listings'
+    : 'Start conversations with providers about their listings';
 
   const getTierStyles = (tier: string) => {
     switch (tier) {

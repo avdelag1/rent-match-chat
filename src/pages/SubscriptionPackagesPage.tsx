@@ -196,7 +196,7 @@ export default function SubscriptionPackagesPage() {
   const userRole = activeMode;
   const packageCategory = userRole === 'owner' ? 'owner_pay_per_use' : 'client_pay_per_use';
   const premiumPlans = userRole === 'owner' ? ownerPremiumPlans : clientPremiumPlans;
-  const roleLabel = userRole === 'owner' ? 'Owner' : 'Client';
+  const roleLabel = userRole === 'owner' ? 'Provider' : 'Explorer';
 
   // Fetch message activation packages
   const { data: messagePackages, isLoading: packagesLoading } = useQuery({

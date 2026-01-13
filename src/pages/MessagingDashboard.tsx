@@ -488,7 +488,7 @@ export function MessagingDashboard() {
                                   : 'bg-[#007AFF]/20 text-[#007AFF]'
                               }`}
                             >
-                              {isOwner ? 'Property Owner' : 'Client'}
+                              {isOwner ? 'Provider' : 'Explorer'}
                             </Badge>
                             {/* Show listing info if available */}
                             {listing && userRole === 'client' && (

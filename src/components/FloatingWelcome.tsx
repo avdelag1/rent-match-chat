@@ -76,7 +76,7 @@ export function FloatingWelcome({ isOpen, onClose }: FloatingWelcomeProps) {
               </span>
             </motion.div>
 
-            {/* Welcome to Swipess */}
+            {/* Welcome to Swipes */}
             <motion.div
               className="text-2xl sm:text-3xl md:text-4xl font-bold text-white"
               initial={{ opacity: 0, y: 30, scale: 0.8 }}
@@ -94,7 +94,7 @@ export function FloatingWelcome({ isOpen, onClose }: FloatingWelcomeProps) {
             >
               Welcome to{' '}
               <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent font-extrabold">
-                Swipe<span className="text-amber-300">ss</span>
+                Swipes
               </span>
             </motion.div>
 
