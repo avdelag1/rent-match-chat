@@ -1060,31 +1060,50 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
             transition={{ type: "spring", stiffness: pwaMode.springStiffness, damping: pwaMode.springDamping }}
             className="absolute bottom-28 left-0 right-0 flex justify-center items-center z-40 pointer-events-none"
           >
-            <div className="flex items-center gap-3 pointer-events-auto">
-              {/* Dislike Button */}
+            {/* PWA TAP ZONE: Isolated from swipe gestures */}
+            <div
+              className="flex items-center gap-3 pointer-events-auto pwa-tap-zone"
+              style={{ touchAction: 'manipulation' }}
+            >
+              {/* Dislike Button - Uses onPointerDown for instant PWA response */}
               <motion.button
-                whileTap={{ scale: 0.85 }}
-                whileHover={{ scale: 1.05 }}
-                onClick={(e) => {
+                whileTap={pwaMode.isPWA ? undefined : { scale: 0.85 }}
+                whileHover={pwaMode.isPWA ? undefined : { scale: 1.05 }}
+                onPointerDown={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
+                  // Instant trigger on pointer down, not pointer up
                   handleButtonSwipe('left');
                 }}
-                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike"
+                onClick={(e) => {
+                  // Prevent double-firing in non-PWA mode
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-dislike pwa-instant-tap"
+                style={{ touchAction: 'manipulation' }}
                 title="Dislike"
               >
                 <X className="w-7 h-7" strokeWidth={3} />
               </motion.button>
 
-              {/* Insights Button */}
+              {/* Insights Button - Opens instantly on pointer down */}
               {onInsights && hasPremium && (
                 <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => {
+                  whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
+                  onPointerDown={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     triggerHaptic('light');
+                    // Instant trigger - no waiting for pointer up
                     onInsights();
                   }}
-                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights pwa-instant-tap"
+                  style={{ touchAction: 'manipulation' }}
                   title="View Insights"
                 >
                   <Eye className="w-5 h-5" />
@@ -1094,28 +1113,41 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
               {/* Share Button */}
               {onShare && (
                 <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => {
+                  whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
+                  onPointerDown={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     triggerHaptic('light');
                     onShare();
                   }}
-                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share pwa-instant-tap"
+                  style={{ touchAction: 'manipulation' }}
                   title="Share"
                 >
                   <Share2 className="w-5 h-5" />
                 </motion.button>
               )}
 
-              {/* Like Button */}
+              {/* Like Button - Critical: instant response on pointer down */}
               <motion.button
-                whileTap={{ scale: 0.85 }}
-                whileHover={{ scale: 1.05 }}
-                onClick={(e) => {
+                whileTap={pwaMode.isPWA ? undefined : { scale: 0.85 }}
+                whileHover={pwaMode.isPWA ? undefined : { scale: 1.05 }}
+                onPointerDown={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
+                  // Instant trigger on pointer down for PWA
                   handleButtonSwipe('right');
                 }}
-                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                className="w-14 h-14 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-heart pwa-instant-tap"
+                style={{ touchAction: 'manipulation' }}
                 title="Like"
               >
                 <Flame className="w-7 h-7" fill="currentColor" />

@@ -7,6 +7,7 @@ import { Eye, MapPin, DollarSign, Calendar, Shield, CheckCircle, Star, Bed, Bath
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { usePWAMode } from '@/hooks/usePWAMode';
 
 // Category icons for listings
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -27,6 +28,9 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+
+  // PWA Mode - use faster animations for instant opening
+  const pwaMode = usePWAMode();
 
   // Handle swipe-to-close gesture
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -142,16 +146,19 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
           <motion.div
-            initial={{ opacity: 0, y: '25%' }}
+            // PWA MODE: Instant opening - skip initial animation, use faster spring
+            initial={pwaMode.isPWA ? { opacity: 1, y: 0 } : { opacity: 0, y: '25%' }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '25%' }}
+            exit={pwaMode.isPWA ? { opacity: 0 } : { opacity: 0, y: '25%' }}
             transition={{
               type: 'spring',
-              damping: 30,
-              stiffness: 600,
-              mass: 0.3,
+              damping: pwaMode.isPWA ? pwaMode.springDamping + 10 : 30,
+              stiffness: pwaMode.isPWA ? pwaMode.springStiffness + 200 : 600,
+              mass: pwaMode.isPWA ? pwaMode.springMass : 0.3,
+              // PWA: Near-instant open
+              duration: pwaMode.isPWA ? 0.1 : undefined,
             }}
-            drag="y"
+            drag={pwaMode.isPWA ? false : "y"}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.2 }}
             onDragStart={() => setIsDragging(true)}
