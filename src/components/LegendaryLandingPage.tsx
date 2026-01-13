@@ -112,7 +112,7 @@ function LegendaryLandingPage() {
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-6 max-w-2xl w-full px-4 safe-area-pt">
         {/* Swipable Swipess Logo - Only the logo moves */}
-        <div className="space-y-4 text-center">
+        <div className="space-y-6 text-center">
           <motion.div
             data-swipe-logo
             drag="x"
