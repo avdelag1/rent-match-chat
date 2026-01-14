@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { OwnerClientTinderCard, preloadClientImageToCache, isClientImageDecodedInCache } from './OwnerClientTinderCard';
+import { PhysicsOwnerClientCard, preloadClientImageToCache, isClientImageDecodedInCache } from './PhysicsOwnerClientCard';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -569,7 +569,7 @@ const ClientSwipeContainerComponent = ({
                 hasAnimatedOnceRef.current = true;
               }}
             >
-              <OwnerClientTinderCard
+              <PhysicsOwnerClientCard
                 profile={topCard}
                 onSwipe={handleSwipe}
                 onTap={() => onClientTap(topCard.user_id)}
