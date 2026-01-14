@@ -147,6 +147,10 @@ export function usePhysicsGesture(
     callbacksRef.current = config;
   }, [config]);
 
+  // Store handler refs for cleanup
+  const handlePointerMoveRef = useRef<((e: PointerEvent) => void) | null>(null);
+  const handlePointerUpRef = useRef<((e: PointerEvent) => void) | null>(null);
+
   // Initialize predictor
   useEffect(() => {
     predictorRef.current = new GesturePredictor({
@@ -157,6 +161,14 @@ export function usePhysicsGesture(
     return () => {
       predictorRef.current?.cancel();
       animatorRef.current?.stop();
+      // Clean up any lingering event listeners
+      if (handlePointerMoveRef.current) {
+        document.removeEventListener('pointermove', handlePointerMoveRef.current);
+      }
+      if (handlePointerUpRef.current) {
+        document.removeEventListener('pointerup', handlePointerUpRef.current);
+        document.removeEventListener('pointercancel', handlePointerUpRef.current);
+      }
     };
   }, [mergedConfig.velocityThreshold, mergedConfig.swipeThreshold]);
 
@@ -207,7 +219,9 @@ export function usePhysicsGesture(
       stateRef.current.isDragging = true;
       hasSwipedRef.current = false;
 
-      // Attach move/up listeners to document
+      // Store refs and attach move/up listeners to document
+      handlePointerMoveRef.current = handlePointerMove;
+      handlePointerUpRef.current = handlePointerUp;
       document.addEventListener('pointermove', handlePointerMove, { passive: false });
       document.addEventListener('pointerup', handlePointerUp);
       document.addEventListener('pointercancel', handlePointerUp);
@@ -264,10 +278,12 @@ export function usePhysicsGesture(
     (e: PointerEvent) => {
       if (e.pointerId !== pointerIdRef.current) return;
 
-      // Remove listeners
+      // Remove listeners and clear refs
       document.removeEventListener('pointermove', handlePointerMove);
       document.removeEventListener('pointerup', handlePointerUp);
       document.removeEventListener('pointercancel', handlePointerUp);
+      handlePointerMoveRef.current = null;
+      handlePointerUpRef.current = null;
 
       // Release pointer
       if (elementRef.current && pointerIdRef.current !== null) {
