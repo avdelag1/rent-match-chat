@@ -237,6 +237,7 @@ export interface ListingFilters {
   furnished?: boolean;
   lifestyleTags?: string[];
   dietaryPreferences?: string[];
+  showHireServices?: boolean; // For services/workers discovery
 }
 
 export function useSmartListingMatching(
