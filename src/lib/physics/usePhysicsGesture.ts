@@ -147,6 +147,10 @@ export function usePhysicsGesture(
     callbacksRef.current = config;
   }, [config]);
 
+  // Store handler refs for cleanup
+  const handlePointerMoveRef = useRef<((e: PointerEvent) => void) | null>(null);
+  const handlePointerUpRef = useRef<((e: PointerEvent) => void) | null>(null);
+
   // Initialize predictor
   useEffect(() => {
     predictorRef.current = new GesturePredictor({
@@ -155,8 +159,28 @@ export function usePhysicsGesture(
     });
 
     return () => {
+      // FIX: Comprehensive cleanup on unmount
       predictorRef.current?.cancel();
       animatorRef.current?.stop();
+
+      // Remove any lingering event listeners
+      if (handlePointerMoveRef.current) {
+        document.removeEventListener('pointermove', handlePointerMoveRef.current);
+      }
+      if (handlePointerUpRef.current) {
+        document.removeEventListener('pointerup', handlePointerUpRef.current);
+        document.removeEventListener('pointercancel', handlePointerUpRef.current);
+      }
+
+      // Release any captured pointer
+      if (elementRef.current && pointerIdRef.current !== null) {
+        try {
+          elementRef.current.releasePointerCapture(pointerIdRef.current);
+        } catch (e) {
+          // Pointer may already be released
+        }
+      }
+      pointerIdRef.current = null;
     };
   }, [mergedConfig.velocityThreshold, mergedConfig.swipeThreshold]);
 
@@ -193,6 +217,12 @@ export function usePhysicsGesture(
       // Capture element reference
       elementRef.current = e.currentTarget as HTMLElement;
 
+      // FIX: Ensure element starts at reset position (prevents stale transforms)
+      if (elementRef.current && !hasSwipedRef.current) {
+        elementRef.current.style.transform = 'translate3d(0px, 0px, 0) rotate(0deg) scale(1)';
+        elementRef.current.style.opacity = '1';
+      }
+
       // Capture pointer
       pointerIdRef.current = e.pointerId;
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -207,7 +237,9 @@ export function usePhysicsGesture(
       stateRef.current.isDragging = true;
       hasSwipedRef.current = false;
 
-      // Attach move/up listeners to document
+      // Store refs for cleanup and attach listeners
+      handlePointerMoveRef.current = handlePointerMove;
+      handlePointerUpRef.current = handlePointerUp;
       document.addEventListener('pointermove', handlePointerMove, { passive: false });
       document.addEventListener('pointerup', handlePointerUp);
       document.addEventListener('pointercancel', handlePointerUp);
@@ -264,10 +296,12 @@ export function usePhysicsGesture(
     (e: PointerEvent) => {
       if (e.pointerId !== pointerIdRef.current) return;
 
-      // Remove listeners
+      // Remove listeners and clear refs
       document.removeEventListener('pointermove', handlePointerMove);
       document.removeEventListener('pointerup', handlePointerUp);
       document.removeEventListener('pointercancel', handlePointerUp);
+      handlePointerMoveRef.current = null;
+      handlePointerUpRef.current = null;
 
       // Release pointer
       if (elementRef.current && pointerIdRef.current !== null) {

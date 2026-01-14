@@ -187,7 +187,7 @@ export class InertialAnimator {
    * Inertia mode - pure friction decay
    */
   private tickInertia(dt: number): boolean {
-    const { decelerationRate } = this.config;
+    const { decelerationRate, isExitAnimation, exitDistance = 500 } = this.config;
 
     // Apply friction decay to X
     const resultX = applyFrictionDecay(
@@ -221,7 +221,14 @@ export class InertialAnimator {
     // Check threshold
     this.checkThreshold();
 
-    // Check if done
+    // FIX: For exit animations, complete when card reaches exit distance
+    // This prevents the animation from running for 20+ seconds
+    if (isExitAnimation && Math.abs(this.state.x) >= exitDistance) {
+      this.callbacks.onComplete?.(this.state);
+      return false; // Stop animation
+    }
+
+    // Check if done (velocity stopped)
     const done = resultX.stopped && resultY.stopped;
     if (done) {
       this.callbacks.onComplete?.(this.state);
