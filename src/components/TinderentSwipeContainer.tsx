@@ -997,51 +997,27 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         )}
 
         {/* Current card on top - fully interactive */}
-        {/* PERF FIX: Skip initial animation on re-entry to prevent "double render" feeling */}
-        <AnimatePresence mode="popLayout" initial={!isReturningRef.current}>
-          {topCard && (
-            <motion.div
-              key={topCard.id}
-              // PERF FIX: Use false to skip animation when returning to dashboard
-              // This prevents the visible "pop-in" that makes it look like double-rendering
-              initial={isReturningRef.current && !hasAnimatedOnceRef.current ? false : { scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{
-                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
-                opacity: 0,
-                rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
-                scale: 0.85,
-                transition: { type: "spring", stiffness: 600, damping: 30, mass: 0.4 }
-              }}
-              transition={{ type: "spring", stiffness: 600, damping: 30, mass: 0.4 }}
-              className="w-full h-full absolute inset-0"
-              style={{ willChange: 'transform, opacity', zIndex: 10 }}
-              onAnimationComplete={(definition) => {
-                // After first animation, allow future animations (for new cards)
-                hasAnimatedOnceRef.current = true;
-
-                // FIX #1: CRITICAL - Flush pending swipe AFTER exit animation completes
-                // This is what makes swipes feel "Tinder-level" instant
-                // The card has visually left the screen, NOW we update React state
-                if (pendingSwipeRef.current) {
-                  flushPendingSwipe();
-                }
-              }}
-            >
-              <PhysicsTinderSwipeCard
-                listing={topCard}
-                onSwipe={handleSwipe}
-                onTap={() => onListingTap(topCard.id)}
-                onUndo={canUndo ? () => undoLastSwipe() : undefined}
-                onInsights={handleInsights}
-                onShare={handleShare}
-                hasPremium={true}
-                isTop={true}
-                hideActions={insightsModalOpen}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* PHYSICS ENGINE handles ALL animations - no Framer Motion wrapper needed */}
+        {/* This eliminates the "blinking" caused by competing animation systems */}
+        {topCard && (
+          <div
+            key={topCard.id}
+            className="w-full h-full absolute inset-0"
+            style={{ zIndex: 10 }}
+          >
+            <PhysicsTinderSwipeCard
+              listing={topCard}
+              onSwipe={handleSwipe}
+              onTap={() => onListingTap(topCard.id)}
+              onUndo={canUndo ? () => undoLastSwipe() : undefined}
+              onInsights={handleInsights}
+              onShare={handleShare}
+              hasPremium={true}
+              isTop={true}
+              hideActions={insightsModalOpen}
+            />
+          </div>
+        )}
       </div>
 
       {/* FIX #3: PORTAL ISOLATION - Modals render outside swipe tree
