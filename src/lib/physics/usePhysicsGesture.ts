@@ -7,6 +7,7 @@
  * 3. Intent detection before release
  * 4. Inertial post-release animation
  * 5. Zero React state updates during gesture
+ * 6. HARD INTERACTION LOCK - blocks ALL React/state updates during gesture
  *
  * Usage:
  * const { bind, state, transform } = usePhysicsGesture({
@@ -26,6 +27,7 @@ import {
   createSnapBackAnimator,
 } from './InertialAnimator';
 import { IOS_PHYSICS } from './PhysicsEngine';
+import { interactionLock } from '../swipe/InteractionLock';
 
 export interface PhysicsGestureConfig {
   // Thresholds
@@ -202,6 +204,10 @@ export function usePhysicsGesture(
         stateRef.current.isAnimating = false;
       }
 
+      // === HARD INTERACTION LOCK ===
+      // Block ALL React/Zustand/storage updates until animation completes
+      interactionLock.lock();
+
       // Capture element reference
       elementRef.current = e.currentTarget as HTMLElement;
 
@@ -298,8 +304,9 @@ export function usePhysicsGesture(
 
       callbacksRef.current.onDragEnd?.(finalState.intent);
 
-      // Handle tap
+      // Handle tap - unlock immediately since no animation needed
       if (finalState.intent === 'tap') {
+        interactionLock.unlock();
         callbacksRef.current.onTap?.();
         return;
       }
@@ -327,6 +334,9 @@ export function usePhysicsGesture(
           },
           () => {
             stateRef.current.isAnimating = false;
+            // === UNLOCK AFTER EXIT ANIMATION COMPLETES ===
+            // NOW it's safe for React/Zustand/storage to update
+            interactionLock.unlock();
             callbacksRef.current.onAnimationComplete?.();
             if (direction === 'right') {
               callbacksRef.current.onSwipeRight?.();
@@ -350,6 +360,8 @@ export function usePhysicsGesture(
           },
           () => {
             stateRef.current.isAnimating = false;
+            // === UNLOCK AFTER SNAPBACK COMPLETES ===
+            interactionLock.unlock();
             callbacksRef.current.onAnimationComplete?.();
           }
         );

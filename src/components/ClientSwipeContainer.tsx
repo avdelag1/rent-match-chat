@@ -11,6 +11,7 @@ import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
+import { interactionLock } from '@/lib/swipe/InteractionLock';
 import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -223,48 +224,70 @@ const ClientSwipeContainerComponent = ({
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
 
-  // INSTANT SWIPE: Update UI immediately, fire DB operations in background
-  const executeSwipe = useCallback((direction: 'left' | 'right') => {
-    const profile = deckQueueRef.current[currentIndexRef.current];
-    if (!profile) return;
+  // =============================================================================
+  // PHASE ISOLATION: Two-phase swipe for Tinder-level feel
+  // PHASE 1: DOM only - card flies away, React is frozen (via interactionLock)
+  // PHASE 2 (after animation): Flush all state to React/Zustand/persistence
+  // =============================================================================
+  interface PendingSwipe {
+    profile: any;
+    direction: 'left' | 'right';
+    newIndex: number;
+  }
+  const pendingSwipeRef = useRef<PendingSwipe | null>(null);
+  const isSwipeAnimatingRef = useRef(false);
 
-    const newIndex = currentIndexRef.current + 1;
+  // PHASE 2: Called AFTER animation completes - flush all pending state
+  const flushPendingSwipe = useCallback(() => {
+    const pending = pendingSwipeRef.current;
+    if (!pending) return;
 
-    // 1. UPDATE UI STATE FIRST (INSTANT)
-    setSwipeDirection(direction);
-    currentIndexRef.current = newIndex;
-    setCurrentIndex(newIndex); // This triggers re-render with new card
+    const { profile, direction, newIndex } = pending;
+
+    // Clear pending immediately to prevent double-flush
+    pendingSwipeRef.current = null;
+    isSwipeAnimatingRef.current = false;
+
+    // NOW it's safe to update React state - animation is done
+    setCurrentIndex(newIndex);
+
+    // Update local ref for swiped IDs
     swipedIdsRef.current.add(profile.user_id);
 
-    // 2. BACKGROUND TASKS (Fire-and-forget, don't block UI)
-    // These happen AFTER UI has already updated
-    Promise.all([
-      // Persist to store
-      Promise.resolve(markOwnerSwiped(category, profile.user_id)),
+    // Zustand update - DEFERRED until animation complete
+    markOwnerSwiped(category, profile.user_id);
 
-      // Record profile view
+    // Record for undo
+    recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
+
+    // DEFERRED PERSISTENCE - use requestIdleCallback
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => {
+        persistDeckToSession('owner', category, deckQueueRef.current);
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        persistDeckToSession('owner', category, deckQueueRef.current);
+      }, 0);
+    }
+
+    // Background tasks (fire-and-forget)
+    queueMicrotask(() => {
       recordProfileView.mutateAsync({
         profileId: profile.user_id,
         viewType: 'profile',
-        action: direction === 'left' ? 'pass' : 'like'
-      }).catch(() => {}),
+        action: direction === 'right' ? 'like' : 'pass'
+      }).catch(() => {});
 
-      // Save swipe to DB with match detection
       swipeMutation.mutateAsync({
         targetId: profile.user_id,
         direction,
         targetType: 'profile'
-      }).catch(() => {}),
-
-      // Record for undo
-      Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass'))
-    ]).catch(err => {
-      // Non-critical - user already saw the swipe complete
-      logger.error('[ClientSwipeContainer] Background swipe tasks failed:', err);
+      }).catch(() => {});
     });
 
     // Clear direction for next swipe
-    setTimeout(() => setSwipeDirection(null), 300);
+    setSwipeDirection(null);
 
     // Fetch more if running low
     if (newIndex >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
@@ -279,6 +302,36 @@ const ClientSwipeContainerComponent = ({
       preloadClientImageToCache(nextNextImage);
     }
   }, [swipeMutation, recordSwipe, recordProfileView, markOwnerSwiped, category]);
+
+  // PHASE 1: Called when user swipes - ONLY updates refs and triggers animation
+  // NO React state updates, NO Zustand updates, NO persistence
+  const executeSwipe = useCallback((direction: 'left' | 'right') => {
+    // Prevent double-swipe while animation is in progress
+    if (isSwipeAnimatingRef.current) return;
+
+    const profile = deckQueueRef.current[currentIndexRef.current];
+    if (!profile) return;
+
+    const newIndex = currentIndexRef.current + 1;
+
+    // PHASE 1: Only update refs and trigger animation
+    isSwipeAnimatingRef.current = true;
+    pendingSwipeRef.current = { profile, direction, newIndex };
+
+    // Update ONLY the refs (no React re-render)
+    currentIndexRef.current = newIndex;
+    swipedIdsRef.current.add(profile.user_id);
+
+    // Trigger exit animation direction (this is the ONLY React state we touch)
+    setSwipeDirection(direction);
+
+    // SAFETY NET: If animation callback doesn't fire within 350ms, force flush
+    setTimeout(() => {
+      if (pendingSwipeRef.current?.profile.user_id === profile.user_id) {
+        flushPendingSwipe();
+      }
+    }, 350);
+  }, [flushPendingSwipe]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];
