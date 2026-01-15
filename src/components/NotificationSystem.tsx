@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/utils/prodLogger';
-import { interactionLock } from '@/lib/swipe/InteractionLock';
 
 export function NotificationSystem() {
   const { user } = useAuth();
@@ -41,12 +40,6 @@ export function NotificationSystem() {
           table: 'conversation_messages',
         },
         async (payload) => {
-          // === SKIP DURING INTERACTION LOCK ===
-          // Notifications would steal frames from swipe animation
-          if (interactionLock.isLocked) {
-            return;
-          }
-          
           try {
             const newMessage = payload.new;
 
@@ -121,22 +114,11 @@ export function NotificationSystem() {
                 }
 
                 // Invalidate relevant queries to update UI
-                // DEFER during interaction lock to prevent re-renders during swipe
-                if (interactionLock.isLocked) {
-                  interactionLock.defer(() => {
-                    queryClient.invalidateQueries({ queryKey: ['conversations'] });
-                    queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
-                    queryClient.invalidateQueries({
-                      queryKey: ['conversation-messages', newMessage.conversation_id]
-                    });
-                  });
-                } else {
-                  queryClient.invalidateQueries({ queryKey: ['conversations'] });
-                  queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
-                  queryClient.invalidateQueries({
-                    queryKey: ['conversation-messages', newMessage.conversation_id]
-                  });
-                }
+                queryClient.invalidateQueries({ queryKey: ['conversations'] });
+                queryClient.invalidateQueries({ queryKey: ['unread-message-count'] });
+                queryClient.invalidateQueries({
+                  queryKey: ['conversation-messages', newMessage.conversation_id]
+                });
               }
             }
           } catch (error) {
@@ -160,12 +142,6 @@ export function NotificationSystem() {
           table: 'likes',
         },
         async (payload) => {
-          // === SKIP DURING INTERACTION LOCK ===
-          // Like notifications would steal frames from swipe animation
-          if (interactionLock.isLocked) {
-            return;
-          }
-          
           try {
             const newLike = payload.new;
 

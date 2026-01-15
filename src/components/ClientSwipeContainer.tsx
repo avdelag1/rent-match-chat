@@ -11,7 +11,6 @@ import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
-import { interactionLock } from '@/lib/swipe/InteractionLock';
 import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -224,70 +223,48 @@ const ClientSwipeContainerComponent = ({
   const topCard = deckQueue[currentIndex];
   const nextCard = deckQueue[currentIndex + 1];
 
-  // =============================================================================
-  // PHASE ISOLATION: Two-phase swipe for Tinder-level feel
-  // PHASE 1: DOM only - card flies away, React is frozen (via interactionLock)
-  // PHASE 2 (after animation): Flush all state to React/Zustand/persistence
-  // =============================================================================
-  interface PendingSwipe {
-    profile: any;
-    direction: 'left' | 'right';
-    newIndex: number;
-  }
-  const pendingSwipeRef = useRef<PendingSwipe | null>(null);
-  const isSwipeAnimatingRef = useRef(false);
+  // INSTANT SWIPE: Update UI immediately, fire DB operations in background
+  const executeSwipe = useCallback((direction: 'left' | 'right') => {
+    const profile = deckQueueRef.current[currentIndexRef.current];
+    if (!profile) return;
 
-  // PHASE 2: Called AFTER animation completes - flush all pending state
-  const flushPendingSwipe = useCallback(() => {
-    const pending = pendingSwipeRef.current;
-    if (!pending) return;
+    const newIndex = currentIndexRef.current + 1;
 
-    const { profile, direction, newIndex } = pending;
-
-    // Clear pending immediately to prevent double-flush
-    pendingSwipeRef.current = null;
-    isSwipeAnimatingRef.current = false;
-
-    // NOW it's safe to update React state - animation is done
-    setCurrentIndex(newIndex);
-
-    // Update local ref for swiped IDs
+    // 1. UPDATE UI STATE FIRST (INSTANT)
+    setSwipeDirection(direction);
+    currentIndexRef.current = newIndex;
+    setCurrentIndex(newIndex); // This triggers re-render with new card
     swipedIdsRef.current.add(profile.user_id);
 
-    // Zustand update - DEFERRED until animation complete
-    markOwnerSwiped(category, profile.user_id);
+    // 2. BACKGROUND TASKS (Fire-and-forget, don't block UI)
+    // These happen AFTER UI has already updated
+    Promise.all([
+      // Persist to store
+      Promise.resolve(markOwnerSwiped(category, profile.user_id)),
 
-    // Record for undo
-    recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass');
-
-    // DEFERRED PERSISTENCE - use requestIdleCallback
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(() => {
-        persistDeckToSession('owner', category, deckQueueRef.current);
-      }, { timeout: 2000 });
-    } else {
-      setTimeout(() => {
-        persistDeckToSession('owner', category, deckQueueRef.current);
-      }, 0);
-    }
-
-    // Background tasks (fire-and-forget)
-    queueMicrotask(() => {
+      // Record profile view
       recordProfileView.mutateAsync({
         profileId: profile.user_id,
         viewType: 'profile',
-        action: direction === 'right' ? 'like' : 'pass'
-      }).catch(() => {});
+        action: direction === 'left' ? 'pass' : 'like'
+      }).catch(() => {}),
 
+      // Save swipe to DB with match detection
       swipeMutation.mutateAsync({
         targetId: profile.user_id,
         direction,
         targetType: 'profile'
-      }).catch(() => {});
+      }).catch(() => {}),
+
+      // Record for undo
+      Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass'))
+    ]).catch(err => {
+      // Non-critical - user already saw the swipe complete
+      logger.error('[ClientSwipeContainer] Background swipe tasks failed:', err);
     });
 
     // Clear direction for next swipe
-    setSwipeDirection(null);
+    setTimeout(() => setSwipeDirection(null), 300);
 
     // Fetch more if running low
     if (newIndex >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
@@ -302,36 +279,6 @@ const ClientSwipeContainerComponent = ({
       preloadClientImageToCache(nextNextImage);
     }
   }, [swipeMutation, recordSwipe, recordProfileView, markOwnerSwiped, category]);
-
-  // PHASE 1: Called when user swipes - ONLY updates refs and triggers animation
-  // NO React state updates, NO Zustand updates, NO persistence
-  const executeSwipe = useCallback((direction: 'left' | 'right') => {
-    // Prevent double-swipe while animation is in progress
-    if (isSwipeAnimatingRef.current) return;
-
-    const profile = deckQueueRef.current[currentIndexRef.current];
-    if (!profile) return;
-
-    const newIndex = currentIndexRef.current + 1;
-
-    // PHASE 1: Only update refs and trigger animation
-    isSwipeAnimatingRef.current = true;
-    pendingSwipeRef.current = { profile, direction, newIndex };
-
-    // Update ONLY the refs (no React re-render)
-    currentIndexRef.current = newIndex;
-    swipedIdsRef.current.add(profile.user_id);
-
-    // Trigger exit animation direction (this is the ONLY React state we touch)
-    setSwipeDirection(direction);
-
-    // SAFETY NET: If animation callback doesn't fire within 350ms, force flush
-    setTimeout(() => {
-      if (pendingSwipeRef.current?.profile.user_id === profile.user_id) {
-        flushPendingSwipe();
-      }
-    }, 350);
-  }, [flushPendingSwipe]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];
@@ -598,28 +545,45 @@ const ClientSwipeContainerComponent = ({
         )}
 
         {/* Current card on top - fully interactive */}
-        {/* PHYSICS ENGINE handles ALL animations - no Framer Motion wrapper needed */}
-        {/* This eliminates the "blinking" caused by competing animation systems */}
-        {topCard && (
-          <div
-            key={topCard.user_id}
-            className="w-full h-full absolute inset-0"
-            style={{ zIndex: 10 }}
-          >
-            <PhysicsOwnerClientCard
-              profile={topCard}
-              onSwipe={handleSwipe}
-              onTap={() => onClientTap(topCard.user_id)}
-              onInsights={() => handleInsights(topCard.user_id)}
-              onMessage={() => handleConnect(topCard.user_id)}
-              onShare={handleShare}
-              onUndo={canUndo ? undoLastSwipe : undefined}
-              isTop={true}
-              hasPremium={hasPremiumMessaging}
-              hideActions={insightsOpen}
-            />
-          </div>
-        )}
+        {/* PERF FIX: Skip initial animation on re-entry to prevent "double render" feeling */}
+        <AnimatePresence mode="popLayout" initial={!isReturningRef.current}>
+          {topCard && (
+            <motion.div
+              key={topCard.user_id}
+              // PERF FIX: Use false to skip animation when returning to dashboard
+              // This prevents the visible "pop-in" that makes it look like double-rendering
+              initial={isReturningRef.current && !hasAnimatedOnceRef.current ? false : { scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{
+                x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
+                opacity: 0,
+                rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
+                scale: 0.85,
+                transition: { type: "spring", stiffness: 600, damping: 30, mass: 0.4 }
+              }}
+              transition={{ type: "spring", stiffness: 600, damping: 30, mass: 0.4 }}
+              className="w-full h-full absolute inset-0"
+              style={{ willChange: 'transform, opacity', zIndex: 10 }}
+              onAnimationComplete={() => {
+                // After first animation, allow future animations (for new cards)
+                hasAnimatedOnceRef.current = true;
+              }}
+            >
+              <PhysicsOwnerClientCard
+                profile={topCard}
+                onSwipe={handleSwipe}
+                onTap={() => onClientTap(topCard.user_id)}
+                onInsights={() => handleInsights(topCard.user_id)}
+                onMessage={() => handleConnect(topCard.user_id)}
+                onShare={handleShare}
+                onUndo={canUndo ? undoLastSwipe : undefined}
+                isTop={true}
+                hasPremium={hasPremiumMessaging}
+                hideActions={insightsOpen}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <MatchCelebration

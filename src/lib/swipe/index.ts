@@ -19,11 +19,3 @@ export type { ImageEntry } from './ImagePreloadController';
 // Card stack
 export { RecyclingCardStack } from './RecyclingCardStack';
 export type { RecyclingCardStackProps, RecyclingCardStackHandle, CardData } from './RecyclingCardStack';
-
-// Interaction lock - prevents React/state updates during gestures
-export { 
-  interactionLock, 
-  useInteractionLock, 
-  deferredAction, 
-  skipIfLocked 
-} from './InteractionLock';

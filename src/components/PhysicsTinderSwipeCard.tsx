@@ -217,15 +217,16 @@ const InstantImageGallery = memo(({
         </div>
       </div>
 
-      {/* Actual image - NO transitions to prevent flicker with physics */}
+      {/* Actual image */}
       {displayedSrc && (
         <img
           src={displayedSrc}
           alt={alt}
-          className="absolute inset-0 w-full h-full object-cover rounded-3xl"
+          className="absolute inset-0 w-full h-full object-cover rounded-3xl transition-opacity duration-150"
           draggable={false}
           loading="eager"
           decoding="async"
+          fetchPriority="high"
           style={{
             zIndex: 4,
             opacity: showImage ? 1 : 0,

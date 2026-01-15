@@ -185,7 +185,7 @@ export function calculateSpringForce(
   currentPosition: number,
   targetPosition: number,
   velocity: number,
-  config: { stiffness: number; damping: number; mass: number } = IOS_PHYSICS.SNAP_SPRING
+  config = IOS_PHYSICS.SNAP_SPRING
 ): { force: number; isAtRest: boolean } {
   const displacement = targetPosition - currentPosition;
   const { stiffness, damping, mass } = config;

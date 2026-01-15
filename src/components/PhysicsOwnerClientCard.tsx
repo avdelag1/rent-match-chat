@@ -155,11 +155,12 @@ const ClientImageGallery = memo(({
 
   return (
     <div className="absolute inset-0 w-full h-full">
-      {/* Premium skeleton shimmer placeholder - NO transitions */}
+      {/* Premium skeleton shimmer placeholder */}
       <div
         className="absolute inset-0 rounded-3xl overflow-hidden"
         style={{
           opacity: isLoaded ? 0 : 1,
+          transition: 'opacity 150ms ease-out',
         }}
       >
         <div
@@ -186,16 +187,18 @@ const ClientImageGallery = memo(({
         </div>
       </div>
 
-      {/* Actual image - NO transitions to prevent flicker with physics */}
+      {/* Actual image */}
       <img
         src={displaySrc}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover rounded-3xl"
         loading="eager"
         decoding="async"
+        fetchPriority="high"
         draggable={false}
         style={{
           opacity: isLoaded ? 1 : 0,
+          transition: 'opacity 150ms ease-out',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           transform: 'translateZ(0)',
