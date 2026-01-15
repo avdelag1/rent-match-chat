@@ -149,9 +149,12 @@ export function usePhysicsGesture(
     callbacksRef.current = config;
   }, [config]);
 
-  // Store handler refs for cleanup
+  // Store handler refs for cleanup - MUST be stable refs, not recreated
   const handlePointerMoveRef = useRef<((e: PointerEvent) => void) | null>(null);
   const handlePointerUpRef = useRef<((e: PointerEvent) => void) | null>(null);
+  
+  // Track if gesture is active to prevent double-processing
+  const isGestureActiveRef = useRef(false);
 
   // Initialize predictor
   useEffect(() => {
@@ -163,6 +166,7 @@ export function usePhysicsGesture(
     return () => {
       predictorRef.current?.cancel();
       animatorRef.current?.stop();
+      isGestureActiveRef.current = false;
       // Clean up any lingering event listeners
       if (handlePointerMoveRef.current) {
         document.removeEventListener('pointermove', handlePointerMoveRef.current);
@@ -198,11 +202,15 @@ export function usePhysicsGesture(
     (e: React.PointerEvent) => {
       if (mergedConfig.disabled) return;
       if (pointerIdRef.current !== null) return;
+      if (isGestureActiveRef.current) return; // Prevent double gesture start
       if (stateRef.current.isAnimating) {
         // Cancel current animation if user grabs during animation
         animatorRef.current?.stop();
         stateRef.current.isAnimating = false;
       }
+
+      // Mark gesture as active FIRST to prevent race conditions
+      isGestureActiveRef.current = true;
 
       // === HARD INTERACTION LOCK ===
       // Block ALL React/Zustand/storage updates until animation completes
@@ -225,156 +233,161 @@ export function usePhysicsGesture(
       stateRef.current.isDragging = true;
       hasSwipedRef.current = false;
 
-      // Store refs and attach move/up listeners to document
-      handlePointerMoveRef.current = handlePointerMove;
-      handlePointerUpRef.current = handlePointerUp;
-      document.addEventListener('pointermove', handlePointerMove, { passive: false });
-      document.addEventListener('pointerup', handlePointerUp);
-      document.addEventListener('pointercancel', handlePointerUp);
+      // Create stable handler refs that won't change during gesture
+      // This is CRITICAL - we store the current closure to avoid stale refs
+      const moveHandler = (evt: PointerEvent) => {
+        if (evt.pointerId !== pointerIdRef.current) return;
+        if (!startPointRef.current || !predictorRef.current) return;
+
+        evt.preventDefault();
+
+        // Update gesture predictor
+        const gestureState = predictorRef.current.update(evt.clientX, evt.clientY);
+
+        // Calculate position with elasticity
+        const elastic = mergedConfig.dragElastic;
+        let x = 0;
+        let y = 0;
+
+        if (mergedConfig.dragAxis === 'x' || mergedConfig.dragAxis === 'both') {
+          x = gestureState.deltaX * elastic;
+        }
+        if (mergedConfig.dragAxis === 'y' || mergedConfig.dragAxis === 'both') {
+          y = gestureState.deltaY * elastic * 0.3; // Less Y movement for horizontal swipe
+        }
+
+        // Calculate rotation and scale based on X
+        const rotationFactor = Math.min(Math.abs(x) / mergedConfig.swipeThreshold, 1);
+        const rotation = (x / mergedConfig.swipeThreshold) * 20 * rotationFactor;
+        const scale = 1 - (Math.abs(x) / mergedConfig.exitDistance) * 0.1;
+        const opacity = 1 - (Math.abs(x) / mergedConfig.exitDistance) * 0.3;
+
+        // Apply transform directly to DOM
+        applyTransform({ x, y, rotation, scale, opacity });
+
+        // Update velocity in state
+        stateRef.current.velocity = {
+          x: gestureState.velocityX,
+          y: gestureState.velocityY,
+        };
+        stateRef.current.intent = gestureState.intent;
+      };
+
+      const upHandler = (evt: PointerEvent) => {
+        if (evt.pointerId !== pointerIdRef.current) return;
+        if (!isGestureActiveRef.current) return; // Already handled
+
+        // Mark gesture as done FIRST
+        isGestureActiveRef.current = false;
+
+        // Remove listeners immediately
+        document.removeEventListener('pointermove', moveHandler);
+        document.removeEventListener('pointerup', upHandler);
+        document.removeEventListener('pointercancel', upHandler);
+        handlePointerMoveRef.current = null;
+        handlePointerUpRef.current = null;
+
+        // Release pointer
+        if (elementRef.current && pointerIdRef.current !== null) {
+          try {
+            elementRef.current.releasePointerCapture(pointerIdRef.current);
+          } catch (e) {
+            // Pointer may already be released
+          }
+        }
+        pointerIdRef.current = null;
+        stateRef.current.isDragging = false;
+
+        // Get final gesture state
+        const finalState = predictorRef.current?.end();
+        if (!finalState) {
+          interactionLock.unlock();
+          return;
+        }
+
+        callbacksRef.current.onDragEnd?.(finalState.intent);
+
+        // Handle tap - unlock immediately since no animation needed
+        if (finalState.intent === 'tap') {
+          interactionLock.unlock();
+          callbacksRef.current.onTap?.();
+          return;
+        }
+
+        // Determine if swipe should commit
+        const hasEnoughDistance = Math.abs(stateRef.current.x) > mergedConfig.swipeThreshold;
+        const hasEnoughVelocity = Math.abs(finalState.velocityX) > mergedConfig.velocityThreshold;
+        const shouldCommit = hasEnoughDistance || hasEnoughVelocity;
+
+        if (shouldCommit && !hasSwipedRef.current) {
+          hasSwipedRef.current = true;
+          const direction = stateRef.current.x > 0 ? 'right' : 'left';
+
+          // Start exit animation
+          stateRef.current.isAnimating = true;
+          animatorRef.current = createExitAnimator(
+            stateRef.current.x,
+            stateRef.current.y,
+            finalState.velocityX,
+            finalState.velocityY,
+            direction,
+            (state) => {
+              applyTransform(state);
+              callbacksRef.current.onAnimationFrame?.(state);
+            },
+            () => {
+              stateRef.current.isAnimating = false;
+              // === UNLOCK AFTER EXIT ANIMATION COMPLETES ===
+              // NOW it's safe for React/Zustand/storage to update
+              interactionLock.unlock();
+              callbacksRef.current.onAnimationComplete?.();
+              if (direction === 'right') {
+                callbacksRef.current.onSwipeRight?.();
+              } else {
+                callbacksRef.current.onSwipeLeft?.();
+              }
+            }
+          );
+          animatorRef.current.start(finalState.velocityX, finalState.velocityY);
+        } else {
+          // Snap back
+          stateRef.current.isAnimating = true;
+          animatorRef.current = createSnapBackAnimator(
+            stateRef.current.x,
+            stateRef.current.y,
+            finalState.velocityX,
+            finalState.velocityY,
+            (state) => {
+              applyTransform(state);
+              callbacksRef.current.onAnimationFrame?.(state);
+            },
+            () => {
+              stateRef.current.isAnimating = false;
+              // === UNLOCK AFTER SNAPBACK COMPLETES ===
+              interactionLock.unlock();
+              callbacksRef.current.onAnimationComplete?.();
+            }
+          );
+          animatorRef.current.start(finalState.velocityX, finalState.velocityY);
+        }
+      };
+
+      // Store refs for cleanup
+      handlePointerMoveRef.current = moveHandler;
+      handlePointerUpRef.current = upHandler;
+
+      // Attach listeners
+      document.addEventListener('pointermove', moveHandler, { passive: false });
+      document.addEventListener('pointerup', upHandler);
+      document.addEventListener('pointercancel', upHandler);
 
       callbacksRef.current.onDragStart?.();
     },
-    [mergedConfig.disabled]
+    [mergedConfig.disabled, mergedConfig.dragAxis, mergedConfig.dragElastic, mergedConfig.swipeThreshold, mergedConfig.velocityThreshold, mergedConfig.exitDistance, applyTransform]
   );
 
-  // Handle pointer move
-  const handlePointerMove = useCallback(
-    (e: PointerEvent) => {
-      if (e.pointerId !== pointerIdRef.current) return;
-      if (!startPointRef.current || !predictorRef.current) return;
-
-      e.preventDefault();
-
-      // Update gesture predictor
-      const gestureState = predictorRef.current.update(e.clientX, e.clientY);
-
-      // Calculate position with elasticity
-      const elastic = mergedConfig.dragElastic;
-      let x = 0;
-      let y = 0;
-
-      if (mergedConfig.dragAxis === 'x' || mergedConfig.dragAxis === 'both') {
-        x = gestureState.deltaX * elastic;
-      }
-      if (mergedConfig.dragAxis === 'y' || mergedConfig.dragAxis === 'both') {
-        y = gestureState.deltaY * elastic * 0.3; // Less Y movement for horizontal swipe
-      }
-
-      // Calculate rotation and scale based on X
-      const rotationFactor = Math.min(Math.abs(x) / mergedConfig.swipeThreshold, 1);
-      const rotation = (x / mergedConfig.swipeThreshold) * 20 * rotationFactor;
-      const scale = 1 - (Math.abs(x) / mergedConfig.exitDistance) * 0.1;
-      const opacity = 1 - (Math.abs(x) / mergedConfig.exitDistance) * 0.3;
-
-      // Apply transform directly to DOM
-      applyTransform({ x, y, rotation, scale, opacity });
-
-      // Update velocity in state
-      stateRef.current.velocity = {
-        x: gestureState.velocityX,
-        y: gestureState.velocityY,
-      };
-      stateRef.current.intent = gestureState.intent;
-    },
-    [mergedConfig.dragAxis, mergedConfig.dragElastic, mergedConfig.swipeThreshold, mergedConfig.exitDistance, applyTransform]
-  );
-
-  // Handle pointer up
-  const handlePointerUp = useCallback(
-    (e: PointerEvent) => {
-      if (e.pointerId !== pointerIdRef.current) return;
-
-      // Remove listeners and clear refs
-      document.removeEventListener('pointermove', handlePointerMove);
-      document.removeEventListener('pointerup', handlePointerUp);
-      document.removeEventListener('pointercancel', handlePointerUp);
-      handlePointerMoveRef.current = null;
-      handlePointerUpRef.current = null;
-
-      // Release pointer
-      if (elementRef.current && pointerIdRef.current !== null) {
-        elementRef.current.releasePointerCapture(pointerIdRef.current);
-      }
-      pointerIdRef.current = null;
-      stateRef.current.isDragging = false;
-
-      // Get final gesture state
-      const finalState = predictorRef.current?.end();
-      if (!finalState) return;
-
-      callbacksRef.current.onDragEnd?.(finalState.intent);
-
-      // Handle tap - unlock immediately since no animation needed
-      if (finalState.intent === 'tap') {
-        interactionLock.unlock();
-        callbacksRef.current.onTap?.();
-        return;
-      }
-
-      // Determine if swipe should commit
-      const hasEnoughDistance = Math.abs(stateRef.current.x) > mergedConfig.swipeThreshold;
-      const hasEnoughVelocity = Math.abs(finalState.velocityX) > mergedConfig.velocityThreshold;
-      const shouldCommit = hasEnoughDistance || hasEnoughVelocity;
-
-      if (shouldCommit && !hasSwipedRef.current) {
-        hasSwipedRef.current = true;
-        const direction = stateRef.current.x > 0 ? 'right' : 'left';
-
-        // Start exit animation
-        stateRef.current.isAnimating = true;
-        animatorRef.current = createExitAnimator(
-          stateRef.current.x,
-          stateRef.current.y,
-          finalState.velocityX,
-          finalState.velocityY,
-          direction,
-          (state) => {
-            applyTransform(state);
-            callbacksRef.current.onAnimationFrame?.(state);
-          },
-          () => {
-            stateRef.current.isAnimating = false;
-            // === UNLOCK AFTER EXIT ANIMATION COMPLETES ===
-            // NOW it's safe for React/Zustand/storage to update
-            interactionLock.unlock();
-            callbacksRef.current.onAnimationComplete?.();
-            if (direction === 'right') {
-              callbacksRef.current.onSwipeRight?.();
-            } else {
-              callbacksRef.current.onSwipeLeft?.();
-            }
-          }
-        );
-        animatorRef.current.start(finalState.velocityX, finalState.velocityY);
-      } else {
-        // Snap back
-        stateRef.current.isAnimating = true;
-        animatorRef.current = createSnapBackAnimator(
-          stateRef.current.x,
-          stateRef.current.y,
-          finalState.velocityX,
-          finalState.velocityY,
-          (state) => {
-            applyTransform(state);
-            callbacksRef.current.onAnimationFrame?.(state);
-          },
-          () => {
-            stateRef.current.isAnimating = false;
-            // === UNLOCK AFTER SNAPBACK COMPLETES ===
-            interactionLock.unlock();
-            callbacksRef.current.onAnimationComplete?.();
-          }
-        );
-        animatorRef.current.start(finalState.velocityX, finalState.velocityY);
-      }
-    },
-    [
-      handlePointerMove,
-      mergedConfig.swipeThreshold,
-      mergedConfig.velocityThreshold,
-      applyTransform,
-    ]
-  );
+  // NOTE: handlePointerMove and handlePointerUp are now defined inline in handlePointerDown
+  // to avoid circular dependencies and stale closures that were causing the infinite swipe loop
 
   // Trigger swipe programmatically
   const triggerSwipe = useCallback(
