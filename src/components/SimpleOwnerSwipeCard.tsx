@@ -7,7 +7,7 @@
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, animate, AnimatePresence } from 'framer-motion';
-import { MapPin, X, Eye, Share2, Heart, DollarSign, User, Briefcase, MessageCircle } from 'lucide-react';
+import { MapPin, X, Share2, Heart, DollarSign, User, Briefcase, MessageCircle, RotateCcw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { triggerHaptic } from '@/utils/haptics';
@@ -75,6 +75,7 @@ interface SimpleOwnerSwipeCardProps {
   profile: ClientProfile;
   onSwipe: (direction: 'left' | 'right') => void;
   onTap?: () => void;
+  onUndo?: () => void;
   onInsights?: () => void;
   onMessage?: () => void;
   onShare?: () => void;
@@ -86,6 +87,7 @@ function SimpleOwnerSwipeCardComponent({
   profile,
   onSwipe,
   onTap,
+  onUndo,
   onInsights,
   onMessage,
   onShare,
@@ -362,6 +364,30 @@ function SimpleOwnerSwipeCardComponent({
           </div>
         </div>
         
+        {/* Share Button - Top Right Corner */}
+        {onShare && (
+          <div className="absolute top-3 right-3 z-20">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                triggerHaptic('light');
+                onShare();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center hover:bg-black/60 transition-colors"
+              style={{ touchAction: 'manipulation' }}
+              title="Share"
+            >
+              <Share2 className="w-5 h-5" />
+            </motion.button>
+          </div>
+        )}
+
         {/* Verified badge */}
         {profile.verified && (
           <div className="absolute top-16 right-4 z-20">
@@ -384,21 +410,22 @@ function SimpleOwnerSwipeCardComponent({
           >
             <X className="w-6 h-6 text-red-500" />
           </Button>
-          
-          {onInsights && (
+
+          {onUndo && (
             <Button
               variant="outline"
               size="icon"
-              className="w-12 h-12 rounded-full border-2 border-blue-400 bg-background hover:bg-blue-50 dark:hover:bg-blue-950"
+              className="w-12 h-12 rounded-full border-2 border-amber-400 bg-background hover:bg-amber-50 dark:hover:bg-amber-950"
               onClick={(e) => {
                 e.stopPropagation();
-                onInsights();
+                triggerHaptic('light');
+                onUndo();
               }}
             >
-              <Eye className="w-5 h-5 text-blue-500" />
+              <RotateCcw className="w-5 h-5 text-amber-500" />
             </Button>
           )}
-          
+
           {onMessage && (
             <Button
               variant="outline"
@@ -412,21 +439,7 @@ function SimpleOwnerSwipeCardComponent({
               <MessageCircle className="w-5 h-5 text-cyan-500" />
             </Button>
           )}
-          
-          {onShare && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-12 h-12 rounded-full border-2 border-purple-400 bg-background hover:bg-purple-50 dark:hover:bg-purple-950"
-              onClick={(e) => {
-                e.stopPropagation();
-                onShare();
-              }}
-            >
-              <Share2 className="w-5 h-5 text-purple-500" />
-            </Button>
-          )}
-          
+
           <Button
             variant="outline"
             size="icon"

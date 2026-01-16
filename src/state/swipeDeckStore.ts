@@ -22,6 +22,7 @@ export interface DeckState {
   isHydrated: boolean;
   isReady: boolean; // True when deck is fully initialized and ready for instant return
   swipedIds: Set<string>;
+  lastSwipedId: string | null; // Track last swipe for one-time undo
 }
 
 export interface SwipeDeckSlice {
@@ -35,6 +36,7 @@ export interface SwipeDeckSlice {
   setClientIndex: (index: number) => void;
   setClientPage: (page: number) => void;
   markClientSwiped: (id: string) => void;
+  undoClientSwipe: () => boolean; // Returns true if undo was successful
   resetClientDeck: () => void;
   hydrateClientDeck: () => void;
   markClientReady: () => void; // Mark deck as ready for instant return
@@ -44,6 +46,7 @@ export interface SwipeDeckSlice {
   setOwnerIndex: (category: string, index: number) => void;
   setOwnerPage: (category: string, page: number) => void;
   markOwnerSwiped: (category: string, id: string) => void;
+  undoOwnerSwipe: (category: string) => boolean; // Returns true if undo was successful
   resetOwnerDeck: (category: string) => void;
   hydrateOwnerDeck: (category: string) => void;
   markOwnerReady: (category: string) => void; // Mark deck as ready for instant return
@@ -67,6 +70,7 @@ const createEmptyDeckState = (): DeckState => ({
   isHydrated: false,
   isReady: false,
   swipedIds: new Set(),
+  lastSwipedId: null,
 });
 
 // Custom storage handler to serialize/deserialize Sets
@@ -212,9 +216,34 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
             clientDeck: {
               ...state.clientDeck,
               currentIndex: state.clientDeck.currentIndex + 1,
+              lastSwipedId: id, // Track for one-time undo
             }
           };
         });
+      },
+
+      undoClientSwipe: () => {
+        let success = false;
+        set((state) => {
+          const lastId = state.clientDeck.lastSwipedId;
+          // Can only undo if there's a last swiped ID and we're not at the start
+          if (!lastId || state.clientDeck.currentIndex === 0) {
+            return state; // No changes
+          }
+
+          // Remove from swiped set
+          state.clientDeck.swipedIds.delete(lastId);
+          success = true;
+
+          return {
+            clientDeck: {
+              ...state.clientDeck,
+              currentIndex: state.clientDeck.currentIndex - 1,
+              lastSwipedId: null, // Clear after undo (can only undo once)
+            }
+          };
+        });
+        return success;
       },
 
       resetClientDeck: () => {
@@ -313,10 +342,40 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
               [category]: {
                 ...existingDeck,
                 currentIndex: existingDeck.currentIndex + 1,
+                lastSwipedId: id, // Track for one-time undo
               }
             }
           };
         });
+      },
+
+      undoOwnerSwipe: (category) => {
+        let success = false;
+        set((state) => {
+          const existingDeck = state.ownerDecks[category] || createEmptyDeckState();
+          const lastId = existingDeck.lastSwipedId;
+
+          // Can only undo if there's a last swiped ID and we're not at the start
+          if (!lastId || existingDeck.currentIndex === 0) {
+            return state; // No changes
+          }
+
+          // Remove from swiped set
+          existingDeck.swipedIds.delete(lastId);
+          success = true;
+
+          return {
+            ownerDecks: {
+              ...state.ownerDecks,
+              [category]: {
+                ...existingDeck,
+                currentIndex: existingDeck.currentIndex - 1,
+                lastSwipedId: null, // Clear after undo (can only undo once)
+              }
+            }
+          };
+        });
+        return success;
       },
 
       resetOwnerDeck: (category) => {
@@ -372,6 +431,7 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
           isHydrated: state.clientDeck.isHydrated,
           isReady: state.clientDeck.isReady,
           swipedIds: state.clientDeck.swipedIds,
+          lastSwipedId: state.clientDeck.lastSwipedId,
           // CRITICAL: Persist minimal deck items for instant render (no dark cards)
           deckItems: state.clientDeck.deckItems.slice(0, 20).map(item => ({
             id: item.id,
@@ -403,6 +463,7 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
               isHydrated: deck.isHydrated,
               isReady: deck.isReady,
               swipedIds: deck.swipedIds,
+              lastSwipedId: deck.lastSwipedId,
               // CRITICAL: Persist minimal deck items for instant render (no dark cards)
               deckItems: deck.deckItems.slice(0, 20).map(item => ({
                 id: item.id || item.user_id,

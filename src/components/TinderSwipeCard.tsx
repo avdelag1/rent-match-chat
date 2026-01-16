@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, Eye, Flame, Share2, Info, Calendar, DollarSign } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, ChevronDown, ShieldCheck, CheckCircle, X, Flame, Share2, Info, Calendar, DollarSign, RotateCcw, MessageCircle } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -490,6 +490,7 @@ interface TinderSwipeCardProps {
   onTap?: () => void;
   onUndo?: () => void;
   onInsights?: () => void;
+  onMessage?: () => void;
   onShare?: () => void;
   hasPremium?: boolean;
   isTop?: boolean;
@@ -499,7 +500,7 @@ interface TinderSwipeCardProps {
 // Calculate exit distance dynamically based on viewport for reliable off-screen animation
 const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
 
-const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights, onShare, hasPremium = false, isTop = true, hideActions = false }: TinderSwipeCardProps) => {
+const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights, onMessage, onShare, hasPremium = false, isTop = true, hideActions = false }: TinderSwipeCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [isInsightsPanelOpen, setIsInsightsPanelOpen] = useState(false);
@@ -748,6 +749,30 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
 
             {/* Bottom gradient - Lighter for better photo visibility */}
             <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
+
+            {/* Share Button - Top Right Corner */}
+            {onShare && (
+              <div className="absolute top-3 right-3 z-20">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    triggerHaptic('light');
+                    onShare();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center hover:bg-black/60 transition-colors"
+                  style={{ touchAction: 'manipulation' }}
+                  title="Share"
+                >
+                  <Share2 className="w-5 h-5" />
+                </motion.button>
+              </div>
+            )}
 
             {/* Verification Badge */}
             {(listing as any).has_verified_documents && (
@@ -1121,48 +1146,47 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                 <X className="w-7 h-7" strokeWidth={3} />
               </motion.button>
 
-              {/* Insights Button - Opens instantly on pointer down */}
-              {onInsights && hasPremium && (
+              {/* Undo Button - Goes back one swipe */}
+              {onUndo && (
                 <motion.button
                   whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
                   onPointerDown={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     triggerHaptic('light');
-                    // Instant trigger - no waiting for pointer up
-                    onInsights();
+                    onUndo();
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                   }}
-                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights pwa-instant-tap"
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo pwa-instant-tap"
                   style={{ touchAction: 'manipulation' }}
-                  title="View Insights"
+                  title="Undo"
                 >
-                  <Eye className="w-5 h-5" />
+                  <RotateCcw className="w-5 h-5" />
                 </motion.button>
               )}
 
-              {/* Share Button */}
-              {onShare && (
+              {/* Message Button */}
+              {onMessage && (
                 <motion.button
                   whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
                   onPointerDown={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     triggerHaptic('light');
-                    onShare();
+                    onMessage();
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                   }}
-                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share pwa-instant-tap"
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-message pwa-instant-tap"
                   style={{ touchAction: 'manipulation' }}
-                  title="Share"
+                  title="Message"
                 >
-                  <Share2 className="w-5 h-5" />
+                  <MessageCircle className="w-5 h-5" />
                 </motion.button>
               )}
 

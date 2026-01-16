@@ -1953,6 +1953,14 @@ html[data-navigation-direction="back"] {
   ) !important;
 }
 
+/* Message button - Muted cyan */
+.swipe-btn-message {
+  background: linear-gradient(180deg,
+    #22d3ee 0%,
+    #06b6d4 100%
+  ) !important;
+}
+
 /* Hover - subtle scale up */
 .swipe-action-btn:hover {
   transform: scale(1.05);
