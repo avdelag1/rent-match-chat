@@ -347,6 +347,7 @@ const OwnerClientTinderCardComponent = ({
   }, [isTop, images.length]);
 
   // BUTTON SWIPE - Animate card then trigger swipe for smooth swoosh effect
+  // FIX: Use tween animation for INSTANT exit - no bounce-back possible
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     if (hasExitedRef.current) return;
     hasExitedRef.current = true;
@@ -358,12 +359,11 @@ const OwnerClientTinderCardComponent = ({
     // Haptic feedback immediately
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-    // Animate card swooshing out with spring physics
+    // FIX: Use tween animation for direct exit - no bounce-back possible
     animate(x, targetX, {
-      type: "spring",
-      stiffness: 300,
-      damping: 25,
-      mass: 0.8,
+      type: 'tween',
+      duration: 0.25,
+      ease: [0.32, 0.72, 0, 1], // iOS-style ease-out
       onComplete: () => {
         isExitingRef.current = false;
         onSwipe(direction);
@@ -372,10 +372,9 @@ const OwnerClientTinderCardComponent = ({
 
     // Also animate slight y movement for natural arc feel
     animate(y, direction === 'right' ? -30 : -30, {
-      type: "spring",
-      stiffness: 300,
-      damping: 25,
-      mass: 0.8
+      type: 'tween',
+      duration: 0.25,
+      ease: [0.32, 0.72, 0, 1]
     });
   }, [onSwipe, x, y]);
 
@@ -410,14 +409,12 @@ const OwnerClientTinderCardComponent = ({
       // Calculate exit distance based on viewport to ensure card fully exits
       const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-      // Animate card off-screen BEFORE calling onSwipe
-      // This prevents the snap-back glitch by ensuring the card exits cleanly
+      // FIX: Use tween animation for INSTANT exit - no bounce-back possible
+      // Spring animations can overshoot and cause the card to snap back briefly
       animate(x, exitX, {
-        type: "spring",
-        stiffness: 400,
-        damping: 30,
-        mass: 0.8,
-        velocity: velocity.x, // Inherit drag velocity for natural feel
+        type: 'tween',
+        duration: 0.2,
+        ease: [0.32, 0.72, 0, 1], // iOS-style ease-out for natural feel
         onComplete: () => {
           isExitingRef.current = false;
           onSwipe(direction);
@@ -426,11 +423,9 @@ const OwnerClientTinderCardComponent = ({
 
       // Also animate y for natural arc feel
       animate(y, -30, {
-        type: "spring",
-        stiffness: 400,
-        damping: 30,
-        mass: 0.8,
-        velocity: velocity.y * 0.3,
+        type: 'tween',
+        duration: 0.2,
+        ease: [0.32, 0.72, 0, 1],
       });
       return;
     }

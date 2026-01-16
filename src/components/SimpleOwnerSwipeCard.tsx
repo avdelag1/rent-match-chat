@@ -168,14 +168,13 @@ function SimpleOwnerSwipeCardComponent({
       // Calculate exit distance based on viewport to ensure card fully exits
       const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-      // Use Framer Motion's animate() for smooth exit animation
-      // Only call onSwipe AFTER animation completes to prevent snap-back glitch
+      // FIX: Use tween animation for INSTANT exit - no bounce-back possible
+      // Spring animations can overshoot and cause the card to snap back briefly
+      // Tween goes directly to the target with no oscillation
       animate(x, exitX, {
-        type: 'spring',
-        stiffness: 400,
-        damping: 30,
-        mass: 0.8,
-        velocity: velocity, // Inherit drag velocity for natural feel
+        type: 'tween',
+        duration: 0.2,
+        ease: [0.32, 0.72, 0, 1], // iOS-style ease-out for natural feel
         onComplete: () => {
           // Reset exit flag and notify parent AFTER animation is done
           isExitingRef.current = false;
@@ -233,13 +232,11 @@ function SimpleOwnerSwipeCardComponent({
     // Calculate exit distance based on viewport to ensure card fully exits
     const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-    // Use Framer Motion's animate() for smooth exit animation
-    // Only call onSwipe AFTER animation completes to prevent snap-back glitch
+    // FIX: Use tween animation for INSTANT exit - no bounce-back possible
     animate(x, exitX, {
-      type: 'spring',
-      stiffness: 300,
-      damping: 25,
-      mass: 0.8,
+      type: 'tween',
+      duration: 0.25,
+      ease: [0.32, 0.72, 0, 1], // iOS-style ease-out
       onComplete: () => {
         isExitingRef.current = false;
         onSwipe(direction);

@@ -151,6 +151,7 @@ const UltraFastSwipeCardComponent = ({
   const primaryImage = listing.images?.[0] || '/placeholder.svg';
 
   // Button swipe handler - animates then fires callback
+  // FIX: Use tween animation for INSTANT exit - no bounce-back possible
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     if (hasSwipedRef.current) return;
     hasSwipedRef.current = true;
@@ -159,11 +160,11 @@ const UltraFastSwipeCardComponent = ({
 
     const targetX = direction === 'right' ? 500 : -500;
 
+    // FIX: Use tween for direct exit - no bounce-back
     animate(x, targetX, {
-      type: 'spring',
-      stiffness: pwaMode.isPWA ? pwaMode.springStiffness : 400,
-      damping: pwaMode.isPWA ? pwaMode.springDamping : 30,
-      mass: pwaMode.isPWA ? pwaMode.springMass : 0.6,
+      type: 'tween',
+      duration: pwaMode.isPWA ? 0.15 : 0.25,
+      ease: [0.32, 0.72, 0, 1], // iOS-style ease-out
       onComplete: () => {
         // Fire-and-forget to queue
         swipeQueue.queueSwipe(listing.id, direction, 'listing');
