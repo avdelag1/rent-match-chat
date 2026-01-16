@@ -1,19 +1,28 @@
 /**
  * SIMPLE OWNER SWIPE CARD
- * 
- * Uses the EXACT same pattern as the landing page logo swipe.
- * Simple, clean, no complex physics - just framer-motion's built-in drag.
+ *
+ * Uses Framer Motion's animate controls for proper swipe behavior.
+ *
+ * Key behavior:
+ * - Swipe >= 50% of card width → card exits off-screen, then onSwipe fires
+ * - Swipe < 50% → card snaps back to center, no state change
+ * - These outcomes are MUTUALLY EXCLUSIVE - never both
  */
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useAnimation, PanInfo } from 'framer-motion';
 import { MapPin, X, Eye, Share2, Heart, DollarSign, User, Briefcase, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { triggerHaptic } from '@/utils/haptics';
 import { swipeQueue } from '@/lib/swipe/SwipeQueue';
 
-const SWIPE_THRESHOLD = 120;
+// Threshold as percentage of card width (50% = 0.5)
+const SWIPE_THRESHOLD_PERCENT = 0.5;
+// Minimum threshold in pixels (fallback if card width can't be measured)
+const MIN_SWIPE_THRESHOLD = 100;
+// Exit distance - how far card travels off-screen
+const EXIT_DISTANCE = 500;
 const FALLBACK_PLACEHOLDER = '/placeholder.svg';
 
 // Client profile type
@@ -90,74 +99,152 @@ function SimpleOwnerSwipeCardComponent({
 }: SimpleOwnerSwipeCardProps) {
   const isDragging = useRef(false);
   const hasExited = useRef(false);
-  
-  // Motion value for horizontal position - EXACTLY like the landing page logo
+  const cardRef = useRef<HTMLDivElement>(null);
+  const cardWidthRef = useRef(300); // Default fallback width
+
+  // Animation controls for proper sequenced animations
+  const controls = useAnimation();
+
+  // Motion value for horizontal position during drag
   const x = useMotionValue(0);
-  
+
+  // Calculate dynamic threshold based on card width
+  const getSwipeThreshold = useCallback(() => {
+    return Math.max(cardWidthRef.current * SWIPE_THRESHOLD_PERCENT, MIN_SWIPE_THRESHOLD);
+  }, []);
+
   // Transform effects based on x position
   const cardOpacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.9, 1, 0.9]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
   const cardBlur = useTransform(x, [-200, 0, 200], [4, 0, 4]);
-  
-  // Like/Pass overlay opacity
-  const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
-  const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
-  
+
+  // Like/Pass overlay opacity - use dynamic threshold
+  const likeOpacity = useTransform(x, (val) => {
+    const threshold = getSwipeThreshold();
+    return Math.max(0, Math.min(1, val / threshold));
+  });
+  const passOpacity = useTransform(x, (val) => {
+    const threshold = getSwipeThreshold();
+    return Math.max(0, Math.min(1, -val / threshold));
+  });
+
   // Image state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   const images = useMemo(() => {
-    return Array.isArray(profile.profile_images) && profile.profile_images.length > 0 
-      ? profile.profile_images 
+    return Array.isArray(profile.profile_images) && profile.profile_images.length > 0
+      ? profile.profile_images
       : [FALLBACK_PLACEHOLDER];
   }, [profile.profile_images]);
-  
+
   const imageCount = images.length;
   const currentImage = images[currentImageIndex] || FALLBACK_PLACEHOLDER;
+
+  // Measure card width on mount and resize
+  useEffect(() => {
+    const measureWidth = () => {
+      if (cardRef.current) {
+        cardWidthRef.current = cardRef.current.offsetWidth;
+      }
+    };
+    measureWidth();
+    window.addEventListener('resize', measureWidth);
+    return () => window.removeEventListener('resize', measureWidth);
+  }, []);
 
   // Reset state when profile changes
   useEffect(() => {
     hasExited.current = false;
     setCurrentImageIndex(0);
+    // Reset position without animation
+    controls.set({ x: 0, rotate: 0, scale: 1, opacity: 1 });
     x.set(0);
-  }, [profile.user_id, x]);
+  }, [profile.user_id, x, controls]);
 
   const handleDragStart = useCallback(() => {
     isDragging.current = true;
     triggerHaptic('light');
   }, []);
 
-  const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (hasExited.current) return;
-    
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
-    
-    // Check if swipe threshold is met
-    const shouldSwipe = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > 500;
-    
-    if (shouldSwipe) {
-      hasExited.current = true;
-      const direction = offset > 0 ? 'right' : 'left';
-      
-      triggerHaptic(direction === 'right' ? 'success' : 'warning');
-      swipeQueue.queueSwipe(profile.user_id, direction, 'profile');
-      
-      const exitX = direction === 'right' ? 500 : -500;
-      x.set(exitX);
-      
-      setTimeout(() => {
+  const handleDragEnd = useCallback(
+    async (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      // Prevent double-processing
+      if (hasExited.current) return;
+
+      const currentX = x.get();
+      const velocity = info.velocity.x;
+      const threshold = getSwipeThreshold();
+
+      // Determine if swipe should commit:
+      // 1. Card has moved >= 50% of its width, OR
+      // 2. User swiped with enough velocity (fast flick)
+      const hasEnoughDistance = Math.abs(currentX) >= threshold;
+      const hasEnoughVelocity = Math.abs(velocity) > 500;
+      const shouldCommit = hasEnoughDistance || hasEnoughVelocity;
+
+      // Determine direction from current position or velocity
+      const direction: 'left' | 'right' =
+        currentX !== 0 ? (currentX > 0 ? 'right' : 'left') : velocity > 0 ? 'right' : 'left';
+
+      if (shouldCommit) {
+        // COMMIT: Card exits - this path ONLY
+        // Mark as exited IMMEDIATELY to prevent any other logic
+        hasExited.current = true;
+
+        // Haptic feedback
+        triggerHaptic(direction === 'right' ? 'success' : 'warning');
+
+        // Queue the swipe for background DB processing
+        swipeQueue.queueSwipe(profile.user_id, direction, 'profile');
+
+        // Calculate exit position and rotation
+        const exitX = direction === 'right' ? EXIT_DISTANCE : -EXIT_DISTANCE;
+        const exitRotation = direction === 'right' ? 20 : -20;
+
+        // Animate card off-screen with physics-like feel
+        await controls.start({
+          x: exitX,
+          rotate: exitRotation,
+          opacity: 0.3,
+          scale: 0.9,
+          transition: {
+            type: 'spring',
+            stiffness: 300,
+            damping: 30,
+            velocity: velocity,
+          },
+        });
+
+        // Only call onSwipe AFTER animation completes
         onSwipe(direction);
-      }, 150);
-    } else {
-      x.set(0);
-    }
-    
-    setTimeout(() => {
-      isDragging.current = false;
-    }, 100);
-  }, [profile.user_id, onSwipe, x]);
+      } else {
+        // SNAP BACK: Card returns to center - this path ONLY
+
+        // Animate back to center with gentle spring
+        controls.start({
+          x: 0,
+          rotate: 0,
+          opacity: 1,
+          scale: 1,
+          transition: {
+            type: 'spring',
+            stiffness: 400,
+            damping: 30,
+          },
+        });
+
+        // Also update the motion value for transforms
+        x.set(0);
+      }
+
+      // Reset dragging state after a brief delay
+      setTimeout(() => {
+        isDragging.current = false;
+      }, 100);
+    },
+    [profile.user_id, onSwipe, x, controls, getSwipeThreshold]
+  );
 
   const handleCardTap = useCallback(() => {
     if (!isDragging.current && onTap) {
@@ -183,20 +270,39 @@ function SimpleOwnerSwipeCardComponent({
     }
   }, [imageCount]);
 
-  const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
-    if (hasExited.current) return;
-    hasExited.current = true;
-    
-    triggerHaptic(direction === 'right' ? 'success' : 'warning');
-    swipeQueue.queueSwipe(profile.user_id, direction, 'profile');
-    
-    const exitX = direction === 'right' ? 500 : -500;
-    x.set(exitX);
-    
-    setTimeout(() => {
+  const handleButtonSwipe = useCallback(
+    async (direction: 'left' | 'right') => {
+      if (hasExited.current) return;
+      hasExited.current = true;
+
+      // Haptic feedback
+      triggerHaptic(direction === 'right' ? 'success' : 'warning');
+
+      // Queue the swipe for background DB processing
+      swipeQueue.queueSwipe(profile.user_id, direction, 'profile');
+
+      // Calculate exit position and rotation
+      const exitX = direction === 'right' ? EXIT_DISTANCE : -EXIT_DISTANCE;
+      const exitRotation = direction === 'right' ? 20 : -20;
+
+      // Animate card off-screen with smooth spring
+      await controls.start({
+        x: exitX,
+        rotate: exitRotation,
+        opacity: 0.3,
+        scale: 0.9,
+        transition: {
+          type: 'spring',
+          stiffness: 350,
+          damping: 30,
+        },
+      });
+
+      // Only call onSwipe AFTER animation completes
       onSwipe(direction);
-    }, 150);
-  }, [profile.user_id, onSwipe, x]);
+    },
+    [profile.user_id, onSwipe, controls]
+  );
 
   // Format budget
   const budgetText = profile.budget_min && profile.budget_max 
@@ -221,16 +327,18 @@ function SimpleOwnerSwipeCardComponent({
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col">
-      {/* Draggable Card */}
+    <div className="absolute inset-0 flex flex-col" ref={cardRef}>
+      {/* Draggable Card with animation controls for proper exit/snap-back */}
       <motion.div
         drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.9}
+        // REMOVED dragConstraints - they were fighting against exit animation!
+        dragElastic={0.85}
         dragMomentum={false}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleCardTap}
+        // Use animation controls for position (exit/snap-back)
+        animate={controls}
         style={{
           x,
           opacity: cardOpacity,
