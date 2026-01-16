@@ -1,12 +1,12 @@
 /**
  * SIMPLE SWIPE CARD
- * 
+ *
  * Uses the EXACT same pattern as the landing page logo swipe.
  * Simple, clean, no complex physics - just framer-motion's built-in drag.
  */
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, ShieldCheck, CheckCircle, X, Eye, Share2, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,11 @@ import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 
 const SWIPE_THRESHOLD = 120;
+const VELOCITY_THRESHOLD = 500;
 const FALLBACK_PLACEHOLDER = '/placeholder.svg';
+
+// Calculate exit distance dynamically based on viewport for reliable off-screen animation
+const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
 
 // Simple image component with no complex state
 const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
@@ -68,37 +72,51 @@ function SimpleSwipeCardComponent({
 }: SimpleSwipeCardProps) {
   const isDragging = useRef(false);
   const hasExited = useRef(false);
-  
+  // Track if the card is currently animating out to prevent reset interference
+  const isExitingRef = useRef(false);
+  // Track the listing ID to detect changes
+  const lastListingIdRef = useRef(listing.id);
+
   // Motion value for horizontal position - EXACTLY like the landing page logo
   const x = useMotionValue(0);
-  
+
   // Transform effects based on x position - EXACTLY like the landing page logo
   const cardOpacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
   const cardScale = useTransform(x, [-200, 0, 200], [0.9, 1, 0.9]);
   const cardRotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
   const cardBlur = useTransform(x, [-200, 0, 200], [4, 0, 4]);
-  
+
   // Like/Pass overlay opacity
   const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
   const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
-  
+
   // Image state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   const images = useMemo(() => {
-    return Array.isArray(listing.images) && listing.images.length > 0 
-      ? listing.images 
+    return Array.isArray(listing.images) && listing.images.length > 0
+      ? listing.images
       : [FALLBACK_PLACEHOLDER];
   }, [listing.images]);
-  
+
   const imageCount = images.length;
   const currentImage = images[currentImageIndex] || FALLBACK_PLACEHOLDER;
 
-  // Reset state when listing changes
+  // Reset state when listing changes - but ONLY if we're not mid-exit
+  // This prevents the snap-back glitch caused by resetting during exit animation
   useEffect(() => {
-    hasExited.current = false;
-    setCurrentImageIndex(0);
-    x.set(0);
+    // Check if this is a genuine listing change (not a re-render during exit)
+    if (listing.id !== lastListingIdRef.current) {
+      lastListingIdRef.current = listing.id;
+
+      // Only reset if we're not currently in an exit animation
+      // This prevents the glitch where the card snaps back before disappearing
+      if (!isExitingRef.current) {
+        hasExited.current = false;
+        setCurrentImageIndex(0);
+        x.set(0);
+      }
+    }
   }, [listing.id, x]);
 
   const handleDragStart = useCallback(() => {
@@ -108,36 +126,52 @@ function SimpleSwipeCardComponent({
 
   const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (hasExited.current) return;
-    
+
     const offset = info.offset.x;
     const velocity = info.velocity.x;
-    
-    // Check if swipe threshold is met (by distance or velocity)
-    const shouldSwipe = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > 500;
-    
+
+    // Check if swipe threshold is met (either distance OR velocity)
+    const shouldSwipe = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > VELOCITY_THRESHOLD;
+
     if (shouldSwipe) {
       hasExited.current = true;
+      isExitingRef.current = true;
       const direction = offset > 0 ? 'right' : 'left';
-      
+
       // Trigger haptic
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
-      
+
       // Queue the swipe
       swipeQueue.queueSwipe(listing.id, direction, 'listing');
-      
-      // Animate card off screen then call onSwipe
-      const exitX = direction === 'right' ? 500 : -500;
-      x.set(exitX);
-      
-      // Small delay for animation to complete
-      setTimeout(() => {
-        onSwipe(direction);
-      }, 150);
+
+      // Calculate exit distance based on viewport to ensure card fully exits
+      const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
+
+      // Use Framer Motion's animate() for smooth exit animation
+      // Only call onSwipe AFTER animation completes to prevent snap-back glitch
+      animate(x, exitX, {
+        type: 'spring',
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
+        velocity: velocity, // Inherit drag velocity for natural feel
+        onComplete: () => {
+          // Reset exit flag and notify parent AFTER animation is done
+          isExitingRef.current = false;
+          onSwipe(direction);
+        },
+      });
     } else {
-      // Spring back to center
-      x.set(0);
+      // Snap back with smooth spring animation
+      animate(x, 0, {
+        type: 'spring',
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
+        velocity: velocity * 0.3, // Inherit some momentum for natural feel
+      });
     }
-    
+
     // Reset dragging state
     setTimeout(() => {
       isDragging.current = false;
@@ -171,16 +205,26 @@ function SimpleSwipeCardComponent({
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     if (hasExited.current) return;
     hasExited.current = true;
-    
+    isExitingRef.current = true;
+
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
     swipeQueue.queueSwipe(listing.id, direction, 'listing');
-    
-    const exitX = direction === 'right' ? 500 : -500;
-    x.set(exitX);
-    
-    setTimeout(() => {
-      onSwipe(direction);
-    }, 150);
+
+    // Calculate exit distance based on viewport to ensure card fully exits
+    const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
+
+    // Use Framer Motion's animate() for smooth exit animation
+    // Only call onSwipe AFTER animation completes to prevent snap-back glitch
+    animate(x, exitX, {
+      type: 'spring',
+      stiffness: 300,
+      damping: 25,
+      mass: 0.8,
+      onComplete: () => {
+        isExitingRef.current = false;
+        onSwipe(direction);
+      },
+    });
   }, [listing.id, onSwipe, x]);
 
   // Format price
