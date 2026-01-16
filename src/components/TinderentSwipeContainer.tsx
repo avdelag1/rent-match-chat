@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, memo, useRef, useMemo, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { triggerHaptic } from '@/utils/haptics';
-import { PhysicsTinderSwipeCard, preloadImageToCache, isImageDecodedInCache } from './PhysicsTinderSwipeCard';
+import { SimpleSwipeCard } from './SimpleSwipeCard';
+import { preloadImageToCache, isImageDecodedInCache } from './PhysicsTinderSwipeCard';
 
 // FIX #3: Lazy-load modals to prevent them from affecting swipe tree
 // These are rendered via portal outside the swipe container's React tree
@@ -999,14 +1000,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
             className="w-full h-full absolute inset-0"
             style={{ zIndex: 10 }}
           >
-            <PhysicsTinderSwipeCard
+            <SimpleSwipeCard
               listing={topCard}
               onSwipe={handleSwipe}
               onTap={() => onListingTap(topCard.id)}
-              onUndo={canUndo ? () => undoLastSwipe() : undefined}
               onInsights={handleInsights}
               onShare={handleShare}
-              hasPremium={true}
               isTop={true}
               hideActions={insightsModalOpen}
             />

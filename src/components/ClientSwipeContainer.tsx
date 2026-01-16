@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { PhysicsOwnerClientCard, preloadClientImageToCache, isClientImageDecodedInCache } from './PhysicsOwnerClientCard';
+import { SimpleOwnerSwipeCard } from './SimpleOwnerSwipeCard';
+import { preloadClientImageToCache, isClientImageDecodedInCache } from './PhysicsOwnerClientCard';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -552,16 +553,14 @@ const ClientSwipeContainerComponent = ({
             className="w-full h-full absolute inset-0"
             style={{ zIndex: 10 }}
           >
-            <PhysicsOwnerClientCard
+            <SimpleOwnerSwipeCard
               profile={topCard}
               onSwipe={handleSwipe}
               onTap={() => onClientTap(topCard.user_id)}
               onInsights={() => handleInsights(topCard.user_id)}
               onMessage={() => handleConnect(topCard.user_id)}
               onShare={handleShare}
-              onUndo={canUndo ? undoLastSwipe : undefined}
               isTop={true}
-              hasPremium={hasPremiumMessaging}
               hideActions={insightsOpen}
             />
           </div>
