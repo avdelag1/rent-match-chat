@@ -429,62 +429,9 @@ const ClientSwipeContainerComponent = ({
     );
   }
 
-  if (error) {
-    return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
-        <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
-          <div className="text-6xl mb-4">😞</div>
-          <h3 className="text-xl font-bold mb-2">Error</h3>
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            className="gap-2"
-            size="lg"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (deckQueue.length === 0) {
-    return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="text-center space-y-6 p-8"
-        >
-          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <Users className="w-12 h-12 text-primary" />
-            </div>
-          </motion.div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No Clients Found</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Try adjusting your filters or refresh to discover new clients
-            </p>
-          </div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : 'Refresh Clients'}
-            </Button>
-          </motion.div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (currentIndex >= deckQueue.length) {
+  // FIX: Check "All Caught Up" BEFORE error state to prevent showing errors
+  // when user has swiped through all clients (fetch error for next batch is not critical)
+  if (currentIndex >= deckQueue.length && deckQueue.length > 0) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -518,6 +465,63 @@ const ClientSwipeContainerComponent = ({
               </Button>
             </motion.div>
             <p className="text-xs text-muted-foreground">New clients are joining daily</p>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
+  if (error && deckQueue.length === 0) {
+    return (
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
+        <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
+          <div className="text-6xl mb-4">😞</div>
+          <h3 className="text-xl font-bold mb-2">Error</h3>
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            className="gap-2"
+            size="lg"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state (no cards fetched yet)
+  if (deckQueue.length === 0) {
+    return (
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <Users className="w-12 h-12 text-primary" />
+            </div>
+          </motion.div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">No Clients Found</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Try adjusting your filters or refresh to discover new clients
+            </p>
+          </div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+            </Button>
           </motion.div>
         </motion.div>
       </div>
