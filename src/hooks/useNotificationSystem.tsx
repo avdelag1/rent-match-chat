@@ -31,8 +31,22 @@ interface DBNotification {
 
 export function useNotificationSystem() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  // OPTIMIZATION: Batch notifications to reduce re-renders
+  const [pendingNotifications, setPendingNotifications] = useState<Notification[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // OPTIMIZATION: Batch pending notifications every 100ms to reduce re-renders
+  useEffect(() => {
+    if (pendingNotifications.length === 0) return;
+
+    const timeoutId = setTimeout(() => {
+      setNotifications(prev => [...pendingNotifications, ...prev]);
+      setPendingNotifications([]);
+    }, 100); // Batch within 100ms
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingNotifications]);
 
   // Fetch existing notifications from database on mount
   useEffect(() => {
@@ -119,8 +133,9 @@ export function useNotificationSystem() {
               relatedUserId: swipe.user_id,
               actionUrl: swiperRoleData?.role === 'client' ? '/owner/liked-clients' : '/client/liked-properties'
             };
-            
-            setNotifications(prev => [notification, ...prev]);
+
+            // OPTIMIZATION: Add to pending queue instead of immediate state update
+            setPendingNotifications(prev => [...prev, notification]);
           }
         }
       )
@@ -173,7 +188,8 @@ export function useNotificationSystem() {
                 actionUrl: '/messages'
               };
 
-              setNotifications(prev => [notification, ...prev]);
+              // OPTIMIZATION: Add to pending queue instead of immediate state update
+              setPendingNotifications(prev => [...prev, notification]);
             }
           }
         }
@@ -218,7 +234,8 @@ export function useNotificationSystem() {
                 actionUrl: '/messages'
               };
 
-              setNotifications(prev => [notification, ...prev]);
+              // OPTIMIZATION: Add to pending queue instead of immediate state update
+              setPendingNotifications(prev => [...prev, notification]);
             }
           }
         }

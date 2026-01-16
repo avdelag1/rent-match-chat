@@ -33,26 +33,52 @@ export function useRealtimeChat(conversationId: string) {
 
   // Use ref to track typing state to avoid dependency on isTyping in callback
   const isTypingRef = useRef(false);
+  // Throttle typing status updates - only send every 1 second max
+  const lastTypingSentRef = useRef(0);
 
   const startTyping = useCallback(() => {
     if (!conversationId || !user?.id || !typingChannelRef.current) return;
+
+    const now = Date.now();
+    const timeSinceLastSent = now - lastTypingSentRef.current;
+
+    // OPTIMIZATION: Throttle typing status updates to max 1 per second
+    // This prevents sending excessive realtime messages on every keystroke
+    if (timeSinceLastSent < 1000 && isTypingRef.current) {
+      // Just reset the timeout, don't send another status
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      typingTimeoutRef.current = setTimeout(() => {
+        isTypingRef.current = false;
+        setIsTyping(false);
+        typingChannelRef.current?.track({
+          userId: user.id,
+          userName: user.user_metadata?.full_name || 'User',
+          isTyping: false,
+          timestamp: Date.now()
+        }).catch(() => {});
+      }, 3000);
+      return;
+    }
 
     // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Send typing status if not already typing (use ref to avoid recreating callback)
+    // Send typing status if not already typing or if throttle period has elapsed
     if (!isTypingRef.current) {
       isTypingRef.current = true;
       setIsTyping(true);
+      lastTypingSentRef.current = now;
 
       // Use existing channel reference
       typingChannelRef.current.track({
         userId: user.id,
         userName: user.user_metadata?.full_name || 'User',
         isTyping: true,
-        timestamp: Date.now()
+        timestamp: now
       }).catch(() => {
         // Silently handle typing errors - not critical
       });
