@@ -496,11 +496,18 @@ interface TinderSwipeCardProps {
   hideActions?: boolean;
 }
 
+// Calculate exit distance dynamically based on viewport for reliable off-screen animation
+const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
+
 const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights, onShare, hasPremium = false, isTop = true, hideActions = false }: TinderSwipeCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [isInsightsPanelOpen, setIsInsightsPanelOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Track if the card is currently animating out to prevent reset interference
+  const isExitingRef = useRef(false);
+  const hasExitedRef = useRef(false);
 
   // PWA Mode optimizations - use lighter animations in PWA context
   const pwaMode = usePWAMode();
@@ -563,7 +570,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   // BUTTON SWIPE - Animate card then trigger swipe for smooth swoosh effect
   // PWA MODE: Use stiffer springs for snappier response with fewer frames
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
-    const targetX = direction === 'right' ? 500 : -500;
+    if (hasExitedRef.current) return;
+    hasExitedRef.current = true;
+    isExitingRef.current = true;
+
+    // Calculate exit distance based on viewport to ensure card fully exits
+    const targetX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
     // Haptic feedback immediately
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
@@ -576,6 +588,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
       damping: pwaMode.isPWA ? pwaMode.springDamping : 25,
       mass: pwaMode.isPWA ? pwaMode.springMass : 0.8,
       onComplete: () => {
+        isExitingRef.current = false;
         onSwipe(direction);
       }
     });
@@ -588,6 +601,8 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   }, []);
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
+    if (hasExitedRef.current) return;
+
     const { offset, velocity } = info;
     // HIGHER thresholds for controlled swipe decisions
     // Users must intentionally swipe far enough to commit
@@ -599,11 +614,30 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     const hasEnoughVelocity = Math.abs(velocity.x) > velocityThreshold;
 
     if (hasEnoughDistance || hasEnoughVelocity) {
+      hasExitedRef.current = true;
+      isExitingRef.current = true;
+
       // Determine direction based on offset primarily, velocity as tiebreaker
       const direction = offset.x > 0 ? 'right' : 'left';
       // Haptic feedback on successful swipe
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
-      onSwipe(direction);
+
+      // Calculate exit distance based on viewport to ensure card fully exits
+      const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
+
+      // Animate card off-screen BEFORE calling onSwipe
+      // This prevents the snap-back glitch by ensuring the card exits cleanly
+      animate(x, exitX, {
+        type: "spring",
+        stiffness: pwaMode.isPWA ? pwaMode.springStiffness : 400,
+        damping: pwaMode.isPWA ? pwaMode.springDamping : 30,
+        mass: pwaMode.isPWA ? pwaMode.springMass : 0.8,
+        velocity: velocity.x, // Inherit drag velocity for natural feel
+        onComplete: () => {
+          isExitingRef.current = false;
+          onSwipe(direction);
+        },
+      });
       return;
     }
 
