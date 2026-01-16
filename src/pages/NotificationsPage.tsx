@@ -338,9 +338,9 @@ export default function NotificationsPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 pb-24 overflow-y-auto">
-      <div className="p-4 sm:p-6 lg:p-8">
-          <div className="max-w-4xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-20 sm:pb-24 overflow-y-auto">
+        <div className="px-3 py-4 sm:p-6 lg:p-8">
+          <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
             {/* Header */}
             <PageHeader 
               title="Notifications"
@@ -386,35 +386,41 @@ export default function NotificationsPage() {
 
           {/* Filter Tabs */}
           <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-card/50 backdrop-blur-sm border border-border/50 h-12">
-              <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
-                <Bell className="w-4 h-4" />
-                <span className="hidden sm:inline">All</span>
+            <TabsList className="flex w-full bg-card/80 backdrop-blur-sm border border-border/40 rounded-xl p-1 h-auto gap-1">
+              <TabsTrigger
+                value="all"
+                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all"
+              >
+                <span>All</span>
               </TabsTrigger>
-              <TabsTrigger value="unread" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
-                <Eye className="w-4 h-4" />
-                <span className="hidden sm:inline">Unread</span>
+              <TabsTrigger
+                value="unread"
+                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all gap-1"
+              >
+                <span>Unread</span>
                 {unreadCount > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                  <Badge variant="secondary" className="h-4 sm:h-5 px-1 sm:px-1.5 text-[10px] sm:text-xs bg-background/50">
                     {unreadCount}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="messages" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
-                <MessageSquare className="w-4 h-4" />
-                <span className="hidden sm:inline">Messages</span>
+              <TabsTrigger
+                value="messages"
+                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all"
+              >
+                <span className="hidden sm:inline">Msgs</span>
+                <MessageSquare className="w-4 h-4 sm:hidden" />
               </TabsTrigger>
-              <TabsTrigger value="likes" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
-                <Flame className="w-4 h-4" />
+              <TabsTrigger
+                value="likes"
+                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all"
+              >
                 <span className="hidden sm:inline">Flames</span>
-              </TabsTrigger>
-              <TabsTrigger value="matches" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
-                <Sparkles className="w-4 h-4" />
-                <span className="hidden sm:inline">Matches</span>
+                <Flame className="w-4 h-4 sm:hidden" />
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value={activeFilter} className="mt-6">
+            <TabsContent value={activeFilter} className="mt-4 sm:mt-6">
               {isLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3, 4].map(i => (
@@ -433,24 +439,25 @@ export default function NotificationsPage() {
                   ))}
                 </div>
               ) : filteredNotifications.length === 0 ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-16 text-center"
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4"
                 >
-                  <div className="relative mb-6">
-                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl" />
-                    <div className="relative p-8 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10">
-                      <Bell className="w-16 h-16 text-primary/40" />
+                  <div className="relative mb-5">
+                    <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl scale-150" />
+                    <div className="relative p-5 sm:p-6 rounded-full bg-gradient-to-br from-card to-muted/50 border border-border/50 shadow-lg">
+                      <Bell className="w-10 h-10 sm:w-12 sm:h-12 text-primary/50" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                  <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
                     {activeFilter === 'all' ? 'No notifications yet' : `No ${activeFilter} notifications`}
                   </h3>
-                  <p className="text-muted-foreground max-w-sm">
-                    {activeFilter === 'all' 
-                      ? "When you receive messages, likes, or matches, they'll appear here."
-                      : `You don't have any ${activeFilter} notifications at the moment.`
+                  <p className="text-sm text-muted-foreground max-w-xs">
+                    {activeFilter === 'all'
+                      ? "New activity will appear here"
+                      : `No ${activeFilter} notifications at the moment`
                     }
                   </p>
                 </motion.div>
