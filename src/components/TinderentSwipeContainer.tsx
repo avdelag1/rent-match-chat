@@ -844,64 +844,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
-  // Error state - dynamic based on category
-  if (error) {
-    const categoryInfo = getActiveCategoryInfo(filters);
-    return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
-        <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
-          <div className="text-6xl mb-4">:(</div>
-          <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load {categoryInfo.plural.toLowerCase()} right now.</p>
-          <Button onClick={handleRefresh} variant="outline" className="gap-2">
-            <RotateCcw className="w-4 h-4" />
-            Try Again
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  // Empty state - dynamic based on category
-  if (deckQueue.length === 0) {
-    const categoryInfo = getActiveCategoryInfo(filters);
-    const CategoryIcon = categoryInfo.icon;
-    return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="text-center space-y-6 p-8"
-        >
-          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <CategoryIcon className={`w-12 h-12 ${categoryInfo.color}`} />
-            </div>
-          </motion.div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No {categoryInfo.plural} Found</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Try adjusting your filters or refresh to discover new listings
-            </p>
-          </div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : `Refresh ${categoryInfo.plural}`}
-            </Button>
-          </motion.div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // All caught up state - dynamic based on category
-  if (currentIndex >= deckQueue.length) {
+  // FIX: Check "All Caught Up" BEFORE error state to prevent showing errors
+  // when user has swiped through all cards (fetch error for next batch is not critical)
+  if (currentIndex >= deckQueue.length && deckQueue.length > 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
     const CategoryIcon = categoryInfo.icon;
     return (
@@ -937,6 +882,62 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               </Button>
             </motion.div>
             <p className="text-xs text-muted-foreground">New {categoryInfo.plural.toLowerCase()} are added daily</p>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
+  if (error && deckQueue.length === 0) {
+    const categoryInfo = getActiveCategoryInfo(filters);
+    return (
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
+        <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
+          <div className="text-6xl mb-4">:(</div>
+          <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
+          <p className="text-muted-foreground mb-4">We couldn't load {categoryInfo.plural.toLowerCase()} right now.</p>
+          <Button onClick={handleRefresh} variant="outline" className="gap-2">
+            <RotateCcw className="w-4 h-4" />
+            Try Again
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Empty state - dynamic based on category (no cards fetched yet)
+  if (deckQueue.length === 0) {
+    const categoryInfo = getActiveCategoryInfo(filters);
+    const CategoryIcon = categoryInfo.icon;
+    return (
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <CategoryIcon className={`w-12 h-12 ${categoryInfo.color}`} />
+            </div>
+          </motion.div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">No {categoryInfo.plural} Found</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Try adjusting your filters or refresh to discover new listings
+            </p>
+          </div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Loading...' : `Refresh ${categoryInfo.plural}`}
+            </Button>
           </motion.div>
         </motion.div>
       </div>

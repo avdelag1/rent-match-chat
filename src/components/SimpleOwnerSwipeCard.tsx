@@ -13,8 +13,9 @@ import { Button } from '@/components/ui/button';
 import { triggerHaptic } from '@/utils/haptics';
 import { swipeQueue } from '@/lib/swipe/SwipeQueue';
 
-const SWIPE_THRESHOLD = 120;
-const VELOCITY_THRESHOLD = 500;
+// LOWERED thresholds for faster, more responsive swipe
+const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
+const VELOCITY_THRESHOLD = 300; // Reduced from 500 - fast flicks work better
 
 // Calculate exit distance dynamically based on viewport for reliable off-screen animation
 const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
@@ -168,27 +169,23 @@ function SimpleOwnerSwipeCardComponent({
       // Calculate exit distance based on viewport to ensure card fully exits
       const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-      // FIX: Use tween animation for INSTANT exit - no bounce-back possible
-      // Spring animations can overshoot and cause the card to snap back briefly
-      // Tween goes directly to the target with no oscillation
+      // INSTANT exit animation - no bounce-back, fast duration
       animate(x, exitX, {
         type: 'tween',
-        duration: 0.2,
-        ease: [0.32, 0.72, 0, 1], // iOS-style ease-out for natural feel
+        duration: 0.15, // Faster exit for instant feel
+        ease: [0.25, 0.1, 0.25, 1], // Faster ease-out
         onComplete: () => {
-          // Reset exit flag and notify parent AFTER animation is done
           isExitingRef.current = false;
           onSwipe(direction);
         },
       });
     } else {
-      // Snap back with smooth spring animation
+      // Quick snap back
       animate(x, 0, {
         type: 'spring',
-        stiffness: 400,
-        damping: 30,
-        mass: 0.8,
-        velocity: velocity * 0.3, // Inherit some momentum for natural feel
+        stiffness: 500, // Stiffer for faster snap
+        damping: 35,
+        mass: 0.6, // Lighter for quicker response
       });
     }
 
@@ -232,11 +229,11 @@ function SimpleOwnerSwipeCardComponent({
     // Calculate exit distance based on viewport to ensure card fully exits
     const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-    // FIX: Use tween animation for INSTANT exit - no bounce-back possible
+    // INSTANT exit animation
     animate(x, exitX, {
       type: 'tween',
-      duration: 0.25,
-      ease: [0.32, 0.72, 0, 1], // iOS-style ease-out
+      duration: 0.15, // Fast exit
+      ease: [0.25, 0.1, 0.25, 1],
       onComplete: () => {
         isExitingRef.current = false;
         onSwipe(direction);
@@ -272,8 +269,9 @@ function SimpleOwnerSwipeCardComponent({
       <motion.div
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.9}
-        dragMomentum={false}
+        dragElastic={1} // Full elasticity for instant response to touch
+        dragMomentum={true} // Allow momentum for natural feel
+        dragTransition={{ bounceStiffness: 500, bounceDamping: 30 }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleCardTap}
