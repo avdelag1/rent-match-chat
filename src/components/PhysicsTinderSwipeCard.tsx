@@ -217,12 +217,12 @@ const InstantImageGallery = memo(({
         </div>
       </div>
 
-      {/* Actual image */}
+      {/* Actual image - NO transitions to prevent flicker with physics */}
       {displayedSrc && (
         <img
           src={displayedSrc}
           alt={alt}
-          className="absolute inset-0 w-full h-full object-cover rounded-3xl transition-opacity duration-150"
+          className="absolute inset-0 w-full h-full object-cover rounded-3xl"
           draggable={false}
           loading="eager"
           decoding="async"
@@ -233,6 +233,7 @@ const InstantImageGallery = memo(({
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
             transform: 'translateZ(0)',
+            // NO transition - physics engine controls card opacity
           }}
           onLoad={() => {
             if (!showImage && mountedRef.current) {

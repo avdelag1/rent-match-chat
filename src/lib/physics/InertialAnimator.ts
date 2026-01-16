@@ -187,7 +187,7 @@ export class InertialAnimator {
    * Inertia mode - pure friction decay
    */
   private tickInertia(dt: number): boolean {
-    const { decelerationRate } = this.config;
+    const { decelerationRate, isExitAnimation, exitDistance = 500 } = this.config;
 
     // Apply friction decay to X
     const resultX = applyFrictionDecay(
