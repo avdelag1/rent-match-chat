@@ -24,26 +24,63 @@ const FALLBACK_PLACEHOLDER = '/placeholder.svg';
 // Calculate exit distance dynamically based on viewport for reliable off-screen animation
 const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
 
+/**
+ * SPRING TUNING CONFIGS - Three pre-tuned profiles for different feels
+ *
+ * All configs use mass: 0.5 for lighter, more responsive feel
+ * Adjust stiffness/damping to tune the snap-back behavior
+ */
+const SPRING_CONFIGS = {
+  // SNAPPY: Very responsive, minimal overshoot - feels tight and controlled
+  SNAPPY: { stiffness: 1200, damping: 40, mass: 0.5 },
+
+  // NATIVE: iOS-like feel - balanced between snappy and smooth
+  NATIVE: { stiffness: 800, damping: 35, mass: 0.5 },
+
+  // SOFT: Gentle spring with slight bounce - feels playful
+  SOFT: { stiffness: 500, damping: 30, mass: 0.6 },
+};
+
+// Active spring config - change this to switch feels
+const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
+
 // Simple image component with no complex state
 const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const optimizedSrc = getCardImageUrl(src);
-  
+
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div
+      className="absolute inset-0 w-full h-full"
+      style={{
+        // GPU acceleration for smooth rendering
+        transform: 'translateZ(0)',
+        willChange: 'contents',
+      }}
+    >
       {/* Skeleton */}
-      <div 
+      <div
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
-        style={{ opacity: loaded ? 0 : 1 }}
+        style={{
+          opacity: loaded ? 0 : 1,
+          transition: 'opacity 200ms ease-out',
+        }}
       />
-      
+
       {/* Image */}
       <img
         src={error ? FALLBACK_PLACEHOLDER : optimizedSrc}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: loaded ? 1 : 0 }}
+        style={{
+          opacity: loaded ? 1 : 0,
+          transition: 'opacity 200ms ease-out',
+          // CSS performance optimizations
+          willChange: 'opacity',
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)',
+        }}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         draggable={false}
@@ -159,12 +196,10 @@ function SimpleSwipeCardComponent({
         },
       });
     } else {
-      // Quick snap back
+      // Quick snap back with tuned spring physics
       animate(x, 0, {
         type: 'spring',
-        stiffness: 500, // Stiffer for faster snap
-        damping: 35,
-        mass: 0.6, // Lighter for quicker response
+        ...ACTIVE_SPRING,
       });
     }
 
@@ -251,7 +286,7 @@ function SimpleSwipeCardComponent({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={1} // Full elasticity for instant response to touch
         dragMomentum={true} // Allow momentum for natural feel
-        dragTransition={{ bounceStiffness: 500, bounceDamping: 30 }} // Quick bounce
+        dragTransition={{ bounceStiffness: ACTIVE_SPRING.stiffness, bounceDamping: ACTIVE_SPRING.damping }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleCardTap}
@@ -261,6 +296,11 @@ function SimpleSwipeCardComponent({
           scale: cardScale,
           rotate: cardRotate,
           filter: useTransform(cardBlur, (v) => `blur(${v}px)`),
+          // CSS performance optimizations
+          willChange: 'transform, opacity, filter',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          perspective: 1000,
         }}
         className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-2xl relative"
       >
@@ -290,19 +330,43 @@ function SimpleSwipeCardComponent({
         {/* LIKE overlay */}
         <motion.div
           className="absolute top-8 left-8 z-30 pointer-events-none"
-          style={{ opacity: likeOpacity }}
+          style={{
+            opacity: likeOpacity,
+            // CSS performance optimizations for overlay
+            willChange: 'opacity',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+          }}
         >
-          <div className="px-6 py-3 rounded-xl border-4 border-green-500 text-green-500 font-black text-3xl tracking-wider transform -rotate-12">
+          <div
+            className="px-6 py-3 rounded-xl border-4 border-green-500 text-green-500 font-black text-3xl tracking-wider"
+            style={{
+              transform: 'rotate(-12deg) translateZ(0)',
+              backfaceVisibility: 'hidden',
+            }}
+          >
             LIKE
           </div>
         </motion.div>
-        
+
         {/* NOPE overlay */}
         <motion.div
           className="absolute top-8 right-8 z-30 pointer-events-none"
-          style={{ opacity: passOpacity }}
+          style={{
+            opacity: passOpacity,
+            // CSS performance optimizations for overlay
+            willChange: 'opacity',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+          }}
         >
-          <div className="px-6 py-3 rounded-xl border-4 border-red-500 text-red-500 font-black text-3xl tracking-wider transform rotate-12">
+          <div
+            className="px-6 py-3 rounded-xl border-4 border-red-500 text-red-500 font-black text-3xl tracking-wider"
+            style={{
+              transform: 'rotate(12deg) translateZ(0)',
+              backfaceVisibility: 'hidden',
+            }}
+          >
             NOPE
           </div>
         </motion.div>
