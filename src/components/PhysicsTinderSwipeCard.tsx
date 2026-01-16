@@ -32,16 +32,46 @@ const PLACEHOLDER_GRADIENT = `linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 35%, #
 
 // =============================================================================
 // PERF: Global image cache shared across all swipe cards
+// LRU cache with max size to prevent memory leaks
 // =============================================================================
+const MAX_CACHE_SIZE = 50; // Keep last 50 images in memory
 const globalSwipeImageCache = new Map<string, {
   loaded: boolean;
   decoded: boolean;
   failed: boolean;
+  lastAccessed: number;
 }>();
+
+/**
+ * Evict least recently used image from cache when size exceeds limit
+ */
+function evictLRUFromCache() {
+  if (globalSwipeImageCache.size <= MAX_CACHE_SIZE) return;
+
+  let oldestKey: string | null = null;
+  let oldestTime = Infinity;
+
+  globalSwipeImageCache.forEach((value, key) => {
+    if (value.lastAccessed < oldestTime) {
+      oldestTime = value.lastAccessed;
+      oldestKey = key;
+    }
+  });
+
+  if (oldestKey) {
+    globalSwipeImageCache.delete(oldestKey);
+  }
+}
 
 export function isImageDecodedInCache(rawUrl: string): boolean {
   const optimizedUrl = getCardImageUrl(rawUrl);
   const cached = globalSwipeImageCache.get(optimizedUrl);
+
+  // Update LRU timestamp on access
+  if (cached) {
+    cached.lastAccessed = Date.now();
+  }
+
   return cached?.decoded === true && !cached?.failed;
 }
 
@@ -49,8 +79,14 @@ export function preloadImageToCache(rawUrl: string): Promise<boolean> {
   const optimizedUrl = getCardImageUrl(rawUrl);
 
   const cached = globalSwipeImageCache.get(optimizedUrl);
-  if (cached?.decoded) return Promise.resolve(true);
+  if (cached?.decoded) {
+    cached.lastAccessed = Date.now(); // Update LRU timestamp
+    return Promise.resolve(true);
+  }
   if (cached?.failed) return Promise.resolve(false);
+
+  // Evict old entries before adding new one
+  evictLRUFromCache();
 
   return new Promise((resolve) => {
     const img = new Image();
@@ -58,25 +94,25 @@ export function preloadImageToCache(rawUrl: string): Promise<boolean> {
     img.decoding = 'async';
 
     img.onload = () => {
-      globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: false, failed: false });
+      globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: false, failed: false, lastAccessed: Date.now() });
       if ('decode' in img) {
         img.decode()
           .then(() => {
-            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
             resolve(true);
           })
           .catch(() => {
-            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
             resolve(true);
           });
       } else {
-        globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+        globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
         resolve(true);
       }
     };
 
     img.onerror = () => {
-      globalSwipeImageCache.set(optimizedUrl, { loaded: false, decoded: false, failed: true });
+      globalSwipeImageCache.set(optimizedUrl, { loaded: false, decoded: false, failed: true, lastAccessed: Date.now() });
       resolve(false);
     };
 

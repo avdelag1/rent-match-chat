@@ -16,11 +16,36 @@ import { usePWAMode } from '@/hooks/usePWAMode';
 const FALLBACK_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjEyMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZTJlOGYwIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNjYmQ1ZTEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM5NGEzYjgiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iNTAwIiByPSI4MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjQpIi8+PHBhdGggZD0iTTM2MCA0ODBsMjAgMjAgNDAtNDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjYpIiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxyZWN0IHg9IjM1MCIgeT0iNTIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEyIiByeD0iNiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PHJlY3QgeD0iMzcwIiB5PSI1NDUiIHdpZHRoPSI2MCIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjIpIi8+PC9zdmc+';
 
 // Global image cache shared across all swipe cards - persists during session
+// LRU cache with max size to prevent memory leaks
+const MAX_CACHE_SIZE = 50; // Keep last 50 images in memory
 const globalSwipeImageCache = new Map<string, {
   loaded: boolean;
   decoded: boolean;
   failed: boolean;
+  lastAccessed: number;
 }>();
+
+/**
+ * Evict least recently used image from cache when size exceeds limit
+ * Prevents unbounded memory growth during long swipe sessions
+ */
+function evictLRUFromCache() {
+  if (globalSwipeImageCache.size <= MAX_CACHE_SIZE) return;
+
+  let oldestKey: string | null = null;
+  let oldestTime = Infinity;
+
+  globalSwipeImageCache.forEach((value, key) => {
+    if (value.lastAccessed < oldestTime) {
+      oldestTime = value.lastAccessed;
+      oldestKey = key;
+    }
+  });
+
+  if (oldestKey) {
+    globalSwipeImageCache.delete(oldestKey);
+  }
+}
 
 /**
  * PERF FIX: Check if an image is already decoded in the global cache
@@ -29,6 +54,12 @@ const globalSwipeImageCache = new Map<string, {
 export function isImageDecodedInCache(rawUrl: string): boolean {
   const optimizedUrl = getCardImageUrl(rawUrl);
   const cached = globalSwipeImageCache.get(optimizedUrl);
+
+  // Update LRU timestamp on access
+  if (cached) {
+    cached.lastAccessed = Date.now();
+  }
+
   return cached?.decoded === true && !cached?.failed;
 }
 
@@ -42,8 +73,14 @@ export function preloadImageToCache(rawUrl: string): Promise<boolean> {
 
   // Already cached and decoded - instant return
   const cached = globalSwipeImageCache.get(optimizedUrl);
-  if (cached?.decoded) return Promise.resolve(true);
+  if (cached?.decoded) {
+    cached.lastAccessed = Date.now(); // Update LRU timestamp
+    return Promise.resolve(true);
+  }
   if (cached?.failed) return Promise.resolve(false);
+
+  // Evict old entries before adding new one
+  evictLRUFromCache();
 
   return new Promise((resolve) => {
     const img = new Image();
@@ -51,26 +88,26 @@ export function preloadImageToCache(rawUrl: string): Promise<boolean> {
     img.decoding = 'async';
 
     img.onload = () => {
-      globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: false, failed: false });
+      globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: false, failed: false, lastAccessed: Date.now() });
       if ('decode' in img) {
         img.decode()
           .then(() => {
-            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
             resolve(true);
           })
           .catch(() => {
             // Decode failed but image loaded - still usable
-            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+            globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
             resolve(true);
           });
       } else {
-        globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false });
+        globalSwipeImageCache.set(optimizedUrl, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
         resolve(true);
       }
     };
 
     img.onerror = () => {
-      globalSwipeImageCache.set(optimizedUrl, { loaded: false, decoded: false, failed: true });
+      globalSwipeImageCache.set(optimizedUrl, { loaded: false, decoded: false, failed: true, lastAccessed: Date.now() });
       resolve(false);
     };
 
