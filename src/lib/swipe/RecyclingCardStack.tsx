@@ -137,6 +137,7 @@ export const RecyclingCardStack = memo(forwardRef<
   }, []);
 
   // Handle swipe completion - rotates data through slots
+  // IMPORTANT: This is called AFTER the exit animation completes in SwipeEngine
   const handleSwipeComplete = useCallback((direction: 'left' | 'right') => {
     const idx = currentIndexRef.current;
     const cardData = cards[idx];
@@ -154,13 +155,25 @@ export const RecyclingCardStack = memo(forwardRef<
     const newTop = (currentTop + 1) % 3;
     topSlotRef.current = newTop;
 
-    // Reset engine and attach to new top card
+    // CRITICAL: Detach engine FIRST to prevent any transform interference
+    // Then wait a frame for React state to settle before resetting and reattaching
+    // This prevents the "snap-back" glitch where reset() pulls the card back
+    // while it's still visible during the DOM transition
     if (engineRef.current) {
-      engineRef.current.reset();
-      const newTopRef = getTopCardRef();
-      if (newTopRef.current) {
-        engineRef.current.attach(newTopRef.current);
-      }
+      engineRef.current.detach();
+
+      // Use requestAnimationFrame to wait for the next paint cycle
+      // This ensures the slot rotation has been reflected in the DOM
+      // before we reset the engine state and attach to the new card
+      requestAnimationFrame(() => {
+        if (engineRef.current) {
+          engineRef.current.reset();
+          const newTopRef = getTopCardRef();
+          if (newTopRef.current) {
+            engineRef.current.attach(newTopRef.current);
+          }
+        }
+      });
     }
 
     // Preload next images in background

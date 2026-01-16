@@ -1,0 +1,371 @@
+/**
+ * SIMPLE SWIPE CARD
+ * 
+ * Uses the EXACT same pattern as the landing page logo swipe.
+ * Simple, clean, no complex physics - just framer-motion's built-in drag.
+ */
+
+import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { MapPin, Bed, Bath, Square, ShieldCheck, CheckCircle, X, Eye, Share2, Heart } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { triggerHaptic } from '@/utils/haptics';
+import { getCardImageUrl } from '@/utils/imageOptimization';
+import { swipeQueue } from '@/lib/swipe/SwipeQueue';
+import { Listing } from '@/hooks/useListings';
+import { MatchedListing } from '@/hooks/useSmartMatching';
+
+const SWIPE_THRESHOLD = 120;
+const FALLBACK_PLACEHOLDER = '/placeholder.svg';
+
+// Simple image component with no complex state
+const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const optimizedSrc = getCardImageUrl(src);
+  
+  return (
+    <div className="absolute inset-0 w-full h-full">
+      {/* Skeleton */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
+        style={{ opacity: loaded ? 0 : 1 }}
+      />
+      
+      {/* Image */}
+      <img
+        src={error ? FALLBACK_PLACEHOLDER : optimizedSrc}
+        alt={alt}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: loaded ? 1 : 0 }}
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+        draggable={false}
+      />
+    </div>
+  );
+});
+
+interface SimpleSwipeCardProps {
+  listing: Listing | MatchedListing;
+  onSwipe: (direction: 'left' | 'right') => void;
+  onTap?: () => void;
+  onInsights?: () => void;
+  onShare?: () => void;
+  isTop?: boolean;
+  hideActions?: boolean;
+}
+
+function SimpleSwipeCardComponent({
+  listing,
+  onSwipe,
+  onTap,
+  onInsights,
+  onShare,
+  isTop = true,
+  hideActions = false,
+}: SimpleSwipeCardProps) {
+  const isDragging = useRef(false);
+  const hasExited = useRef(false);
+  
+  // Motion value for horizontal position - EXACTLY like the landing page logo
+  const x = useMotionValue(0);
+  
+  // Transform effects based on x position - EXACTLY like the landing page logo
+  const cardOpacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
+  const cardScale = useTransform(x, [-200, 0, 200], [0.9, 1, 0.9]);
+  const cardRotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
+  const cardBlur = useTransform(x, [-200, 0, 200], [4, 0, 4]);
+  
+  // Like/Pass overlay opacity
+  const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
+  const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
+  
+  // Image state
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  const images = useMemo(() => {
+    return Array.isArray(listing.images) && listing.images.length > 0 
+      ? listing.images 
+      : [FALLBACK_PLACEHOLDER];
+  }, [listing.images]);
+  
+  const imageCount = images.length;
+  const currentImage = images[currentImageIndex] || FALLBACK_PLACEHOLDER;
+
+  // Reset state when listing changes
+  useEffect(() => {
+    hasExited.current = false;
+    setCurrentImageIndex(0);
+    x.set(0);
+  }, [listing.id, x]);
+
+  const handleDragStart = useCallback(() => {
+    isDragging.current = true;
+    triggerHaptic('light');
+  }, []);
+
+  const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (hasExited.current) return;
+    
+    const offset = info.offset.x;
+    const velocity = info.velocity.x;
+    
+    // Check if swipe threshold is met (by distance or velocity)
+    const shouldSwipe = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > 500;
+    
+    if (shouldSwipe) {
+      hasExited.current = true;
+      const direction = offset > 0 ? 'right' : 'left';
+      
+      // Trigger haptic
+      triggerHaptic(direction === 'right' ? 'success' : 'warning');
+      
+      // Queue the swipe
+      swipeQueue.queueSwipe(listing.id, direction, 'listing');
+      
+      // Animate card off screen then call onSwipe
+      const exitX = direction === 'right' ? 500 : -500;
+      x.set(exitX);
+      
+      // Small delay for animation to complete
+      setTimeout(() => {
+        onSwipe(direction);
+      }, 150);
+    } else {
+      // Spring back to center
+      x.set(0);
+    }
+    
+    // Reset dragging state
+    setTimeout(() => {
+      isDragging.current = false;
+    }, 100);
+  }, [listing.id, onSwipe, x]);
+
+  const handleCardTap = useCallback(() => {
+    if (!isDragging.current && onTap) {
+      onTap();
+    }
+  }, [onTap]);
+
+  const handleImageTap = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (imageCount <= 1) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    
+    if (clickX < width * 0.3) {
+      setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
+      triggerHaptic('light');
+    } else if (clickX > width * 0.7) {
+      setCurrentImageIndex(prev => prev === imageCount - 1 ? 0 : prev + 1);
+      triggerHaptic('light');
+    }
+  }, [imageCount]);
+
+  const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
+    if (hasExited.current) return;
+    hasExited.current = true;
+    
+    triggerHaptic(direction === 'right' ? 'success' : 'warning');
+    swipeQueue.queueSwipe(listing.id, direction, 'listing');
+    
+    const exitX = direction === 'right' ? 500 : -500;
+    x.set(exitX);
+    
+    setTimeout(() => {
+      onSwipe(direction);
+    }, 150);
+  }, [listing.id, onSwipe, x]);
+
+  // Format price
+  const rentalType = (listing as any).rental_duration_type;
+  const formattedPrice = listing.price 
+    ? `$${listing.price.toLocaleString()}${rentalType === 'monthly' ? '/mo' : rentalType === 'daily' ? '/day' : ''}`
+    : null;
+
+  if (!isTop) {
+    // Render a simple static preview for non-top cards
+    return (
+      <div 
+        className="absolute inset-0 rounded-3xl overflow-hidden shadow-xl"
+        style={{ 
+          transform: 'scale(0.95)', 
+          opacity: 0.7,
+          pointerEvents: 'none'
+        }}
+      >
+        <CardImage src={currentImage} alt={listing.title || 'Listing'} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="absolute inset-0 flex flex-col">
+      {/* Draggable Card - EXACTLY like the landing page logo */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.9}
+        dragMomentum={false}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onClick={handleCardTap}
+        style={{
+          x,
+          opacity: cardOpacity,
+          scale: cardScale,
+          rotate: cardRotate,
+          filter: useTransform(cardBlur, (v) => `blur(${v}px)`),
+        }}
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-2xl relative"
+      >
+        {/* Image area */}
+        <div 
+          className="absolute inset-0 w-full h-full"
+          onClick={handleImageTap}
+        >
+          <CardImage src={currentImage} alt={listing.title || 'Listing'} />
+          
+          {/* Image dots */}
+          {imageCount > 1 && (
+            <div className="absolute top-3 left-4 right-4 z-20 flex gap-1">
+              {images.map((_, idx) => (
+                <div 
+                  key={idx}
+                  className={`flex-1 h-1 rounded-full ${idx === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
+                />
+              ))}
+            </div>
+          )}
+          
+          {/* Bottom gradient */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
+        </div>
+        
+        {/* LIKE overlay */}
+        <motion.div
+          className="absolute top-8 left-8 z-30 pointer-events-none"
+          style={{ opacity: likeOpacity }}
+        >
+          <div className="px-6 py-3 rounded-xl border-4 border-green-500 text-green-500 font-black text-3xl tracking-wider transform -rotate-12">
+            LIKE
+          </div>
+        </motion.div>
+        
+        {/* NOPE overlay */}
+        <motion.div
+          className="absolute top-8 right-8 z-30 pointer-events-none"
+          style={{ opacity: passOpacity }}
+        >
+          <div className="px-6 py-3 rounded-xl border-4 border-red-500 text-red-500 font-black text-3xl tracking-wider transform rotate-12">
+            NOPE
+          </div>
+        </motion.div>
+        
+        {/* Content overlay at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
+          <h2 className="text-white text-xl font-bold mb-1 line-clamp-1">
+            {listing.title || 'Untitled Listing'}
+          </h2>
+          
+          {listing.city && (
+            <div className="flex items-center gap-1 text-white/80 text-sm mb-2">
+              <MapPin className="w-4 h-4" />
+              <span>{listing.city}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-3 text-white/90 text-sm">
+            {formattedPrice && (
+              <span className="font-semibold text-lg">{formattedPrice}</span>
+            )}
+            {listing.beds && (
+              <span className="flex items-center gap-1">
+                <Bed className="w-4 h-4" /> {listing.beds}
+              </span>
+            )}
+            {listing.baths && (
+              <span className="flex items-center gap-1">
+                <Bath className="w-4 h-4" /> {listing.baths}
+              </span>
+            )}
+            {listing.square_footage && (
+              <span className="flex items-center gap-1">
+                <Square className="w-4 h-4" /> {listing.square_footage}m²
+              </span>
+            )}
+          </div>
+        </div>
+        
+        {/* Verified badge */}
+        {(listing as any).has_verified_documents && (
+          <div className="absolute top-16 right-4 z-20">
+            <Badge className="bg-blue-500/90 border-blue-400 text-white flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4" />
+              <span className="text-sm">Verified</span>
+            </Badge>
+          </div>
+        )}
+      </motion.div>
+      
+      {/* Action buttons */}
+      {!hideActions && (
+        <div className="flex justify-center items-center gap-4 py-4 px-4">
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-14 h-14 rounded-full border-2 border-red-400 bg-background hover:bg-red-50 dark:hover:bg-red-950"
+            onClick={() => handleButtonSwipe('left')}
+          >
+            <X className="w-6 h-6 text-red-500" />
+          </Button>
+          
+          {onInsights && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-12 h-12 rounded-full border-2 border-blue-400 bg-background hover:bg-blue-50 dark:hover:bg-blue-950"
+              onClick={(e) => {
+                e.stopPropagation();
+                onInsights();
+              }}
+            >
+              <Eye className="w-5 h-5 text-blue-500" />
+            </Button>
+          )}
+          
+          {onShare && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-12 h-12 rounded-full border-2 border-purple-400 bg-background hover:bg-purple-50 dark:hover:bg-purple-950"
+              onClick={(e) => {
+                e.stopPropagation();
+                onShare();
+              }}
+            >
+              <Share2 className="w-5 h-5 text-purple-500" />
+            </Button>
+          )}
+          
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-14 h-14 rounded-full border-2 border-green-400 bg-background hover:bg-green-50 dark:hover:bg-green-950"
+            onClick={() => handleButtonSwipe('right')}
+          >
+            <Heart className="w-6 h-6 text-green-500" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export const SimpleSwipeCard = memo(SimpleSwipeCardComponent);

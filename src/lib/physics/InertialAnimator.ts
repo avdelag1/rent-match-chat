@@ -221,15 +221,17 @@ export class InertialAnimator {
     // Check threshold
     this.checkThreshold();
 
-    // FIX: For exit animations, complete when card reaches exit distance
-    // This prevents the animation from running for 20+ seconds
-    if (isExitAnimation && Math.abs(this.state.x) >= exitDistance) {
-      this.callbacks.onComplete?.(this.state);
-      return false; // Stop animation
+    // Check if done - for exit animations, also stop when far enough off-screen
+    let done = resultX.stopped && resultY.stopped;
+
+    if (!done && this.config.isExitAnimation && this.config.exitDistance) {
+      const distanceTraveled = Math.abs(this.state.x);
+      // Force completion when card has traveled 1.2x the exit distance
+      if (distanceTraveled >= this.config.exitDistance * 1.2) {
+        done = true;
+      }
     }
 
-    // Check if done (velocity stopped)
-    const done = resultX.stopped && resultY.stopped;
     if (done) {
       this.callbacks.onComplete?.(this.state);
     }
@@ -245,15 +247,17 @@ export class InertialAnimator {
     const dtSeconds = dt / 1000;
 
     // Calculate spring force for X
+    const springConfig = {
+      stiffness: Number(this.config.springStiffness) || 400,
+      damping: Number(this.config.springDamping) || 35,
+      mass: Number(this.config.springMass) || 0.5,
+    };
+    
     const forceX = calculateSpringForce(
       this.state.x,
       targetX,
       this.state.velocityX,
-      {
-        stiffness: this.config.springStiffness!,
-        damping: this.config.springDamping!,
-        mass: this.config.springMass!,
-      }
+      springConfig
     );
 
     // Calculate spring force for Y
@@ -261,11 +265,7 @@ export class InertialAnimator {
       this.state.y,
       targetY,
       this.state.velocityY,
-      {
-        stiffness: this.config.springStiffness!,
-        damping: this.config.springDamping!,
-        mass: this.config.springMass!,
-      }
+      springConfig
     );
 
     // Apply forces
@@ -395,6 +395,7 @@ export class InertialAnimator {
 
 /**
  * Create an animator for swipe exit animation
+ * Uses higher velocity and minimal friction for smooth, continuous exit
  */
 export function createExitAnimator(
   startX: number,
@@ -408,12 +409,20 @@ export function createExitAnimator(
   const exitDistance = 500;
   const targetX = direction === 'right' ? exitDistance : -exitDistance;
 
-  // Boost velocity if too slow for satisfying exit
-  const minExitVelocity = 800;
-  const boostedVelocityX =
-    Math.abs(velocityX) < minExitVelocity
-      ? Math.sign(targetX) * minExitVelocity
-      : velocityX;
+  // Boost velocity significantly for smooth, fast exit that doesn't pull back
+  // Higher minimum velocity prevents the "hesitation" feeling
+  const minExitVelocity = 1200;
+  let boostedVelocityX = velocityX;
+
+  // Ensure velocity is always in the swipe direction and fast enough
+  if (Math.abs(velocityX) < minExitVelocity || Math.sign(velocityX) !== Math.sign(targetX)) {
+    boostedVelocityX = Math.sign(targetX) * minExitVelocity;
+  }
+
+  // If user had good momentum, preserve it but ensure minimum
+  if (Math.sign(velocityX) === Math.sign(targetX)) {
+    boostedVelocityX = Math.sign(targetX) * Math.max(Math.abs(velocityX), minExitVelocity);
+  }
 
   return new InertialAnimator(
     { x: startX, y: startY, rotation: 0, scale: 1, opacity: 1 },
@@ -421,7 +430,8 @@ export function createExitAnimator(
       mode: 'inertia',
       isExitAnimation: true,
       exitDistance,
-      decelerationRate: 0.995, // Slightly less friction for exit
+      // Very low friction - almost no deceleration so card flows smoothly off screen
+      decelerationRate: 0.9995,
     },
     { onFrame, onComplete }
   );
@@ -429,6 +439,7 @@ export function createExitAnimator(
 
 /**
  * Create an animator for snap-back animation
+ * Uses a softer, more gentle spring for natural feel without harsh pull-back
  */
 export function createSnapBackAnimator(
   startX: number,
@@ -444,9 +455,10 @@ export function createSnapBackAnimator(
       mode: 'spring',
       targetX: 0,
       targetY: 0,
-      springStiffness: 500,
-      springDamping: 35,
-      springMass: 0.5,
+      // Softer spring - less stiff, higher damping for smooth return without harsh snap
+      springStiffness: 280,
+      springDamping: 28,
+      springMass: 0.6,
     },
     { onFrame, onComplete }
   );

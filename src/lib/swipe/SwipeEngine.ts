@@ -65,6 +65,9 @@ export interface SwipeState {
   isAnimating: boolean;
 }
 
+// Calculate exit distance dynamically based on viewport for reliable off-screen animation
+const getDefaultExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
+
 const DEFAULT_CONFIG: SwipeEngineConfig = {
   swipeThreshold: 120,
   velocityThreshold: 400,
@@ -72,7 +75,7 @@ const DEFAULT_CONFIG: SwipeEngineConfig = {
   springDamping: 35,
   springMass: 0.5,
   dragElastic: 0.85,
-  exitDistance: 500,
+  exitDistance: getDefaultExitDistance(),
   maxRotation: 20,
 };
 
@@ -306,10 +309,17 @@ export class SwipeEngine {
       const direction = this.state.x > 0 ? 'right' : 'left';
       this.state.isAnimating = true;
 
+      // Boost velocity if too slow for satisfying exit
+      const minExitVelocity = 800;
+      const boostedVelocityX =
+        Math.abs(finalState.velocityX) < minExitVelocity
+          ? Math.sign(this.state.x) * minExitVelocity
+          : finalState.velocityX;
+
       this.animator = createExitAnimator(
         this.state.x,
         this.state.y,
-        finalState.velocityX,
+        boostedVelocityX,
         finalState.velocityY,
         direction,
         (animState) => this.applyAnimationState(animState),
@@ -322,7 +332,7 @@ export class SwipeEngine {
           }
         }
       );
-      this.animator.start(finalState.velocityX, finalState.velocityY);
+      this.animator.start(boostedVelocityX, finalState.velocityY);
     } else {
       // Snap back
       this.state.isAnimating = true;

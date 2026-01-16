@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
-import { PhysicsOwnerClientCard, preloadClientImageToCache, isClientImageDecodedInCache } from './PhysicsOwnerClientCard';
+import { SimpleOwnerSwipeCard } from './SimpleOwnerSwipeCard';
+import { preloadClientImageToCache, isClientImageDecodedInCache } from './PhysicsOwnerClientCard';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
@@ -18,7 +19,7 @@ import { RefreshCw, Users, Search } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
 
 interface ClientSwipeContainerProps {
@@ -545,24 +546,21 @@ const ClientSwipeContainerComponent = ({
         )}
 
         {/* Current card on top - fully interactive */}
-        {/* PHYSICS ENGINE handles ALL animations - no Framer Motion wrapper needed */}
-        {/* This eliminates the "blinking" caused by competing animation systems */}
+        {/* Physics engine handles ALL animations - no Framer Motion wrapper needed */}
         {topCard && (
           <div
             key={topCard.user_id}
             className="w-full h-full absolute inset-0"
             style={{ zIndex: 10 }}
           >
-            <PhysicsOwnerClientCard
+            <SimpleOwnerSwipeCard
               profile={topCard}
               onSwipe={handleSwipe}
               onTap={() => onClientTap(topCard.user_id)}
               onInsights={() => handleInsights(topCard.user_id)}
               onMessage={() => handleConnect(topCard.user_id)}
               onShare={handleShare}
-              onUndo={canUndo ? undoLastSwipe : undefined}
               isTop={true}
-              hasPremium={hasPremiumMessaging}
               hideActions={insightsOpen}
             />
           </div>

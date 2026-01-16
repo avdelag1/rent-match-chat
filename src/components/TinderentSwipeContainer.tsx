@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, memo, useRef, useMemo, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { triggerHaptic } from '@/utils/haptics';
-import { PhysicsTinderSwipeCard, preloadImageToCache, isImageDecodedInCache } from './PhysicsTinderSwipeCard';
+import { SimpleSwipeCard } from './SimpleSwipeCard';
+import { preloadImageToCache, isImageDecodedInCache } from './PhysicsTinderSwipeCard';
 
 // FIX #3: Lazy-load modals to prevent them from affecting swipe tree
 // These are rendered via portal outside the swipe container's React tree
@@ -25,7 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw, RefreshCw, Home, Search, Car, Bike, Anchor, Briefcase } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
 
 // Custom motorcycle icon
@@ -64,11 +65,6 @@ const getActiveCategoryInfo = (filters?: ListingFilters) => {
   const category = filters?.category;
   if (category) {
     return categoryConfig[category] || categoryConfig.property;
-  }
-
-  // Check for services/workers
-  if (filters?.showHireServices) {
-    return categoryConfig.services;
   }
 
   // Default to properties
@@ -997,22 +993,19 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         )}
 
         {/* Current card on top - fully interactive */}
-        {/* PHYSICS ENGINE handles ALL animations - no Framer Motion wrapper needed */}
-        {/* This eliminates the "blinking" caused by competing animation systems */}
+        {/* Physics engine handles ALL animations - no Framer Motion wrapper needed */}
         {topCard && (
           <div
             key={topCard.id}
             className="w-full h-full absolute inset-0"
             style={{ zIndex: 10 }}
           >
-            <PhysicsTinderSwipeCard
+            <SimpleSwipeCard
               listing={topCard}
               onSwipe={handleSwipe}
               onTap={() => onListingTap(topCard.id)}
-              onUndo={canUndo ? () => undoLastSwipe() : undefined}
               onInsights={handleInsights}
               onShare={handleShare}
-              hasPremium={true}
               isTop={true}
               hideActions={insightsModalOpen}
             />
