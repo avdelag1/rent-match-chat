@@ -297,12 +297,19 @@ export function usePhysicsGesture(
         hasSwipedRef.current = true;
         const direction = stateRef.current.x > 0 ? 'right' : 'left';
 
+        // Boost velocity if too slow for satisfying exit
+        const minExitVelocity = 800;
+        const boostedVelocityX =
+          Math.abs(finalState.velocityX) < minExitVelocity
+            ? Math.sign(stateRef.current.x) * minExitVelocity
+            : finalState.velocityX;
+
         // Start exit animation
         stateRef.current.isAnimating = true;
         animatorRef.current = createExitAnimator(
           stateRef.current.x,
           stateRef.current.y,
-          finalState.velocityX,
+          boostedVelocityX,
           finalState.velocityY,
           direction,
           (state) => {
@@ -319,7 +326,7 @@ export function usePhysicsGesture(
             }
           }
         );
-        animatorRef.current.start(finalState.velocityX, finalState.velocityY);
+        animatorRef.current.start(boostedVelocityX, finalState.velocityY);
       } else {
         // Snap back
         stateRef.current.isAnimating = true;

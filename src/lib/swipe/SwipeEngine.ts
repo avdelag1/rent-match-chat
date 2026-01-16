@@ -306,10 +306,17 @@ export class SwipeEngine {
       const direction = this.state.x > 0 ? 'right' : 'left';
       this.state.isAnimating = true;
 
+      // Boost velocity if too slow for satisfying exit
+      const minExitVelocity = 800;
+      const boostedVelocityX =
+        Math.abs(finalState.velocityX) < minExitVelocity
+          ? Math.sign(this.state.x) * minExitVelocity
+          : finalState.velocityX;
+
       this.animator = createExitAnimator(
         this.state.x,
         this.state.y,
-        finalState.velocityX,
+        boostedVelocityX,
         finalState.velocityY,
         direction,
         (animState) => this.applyAnimationState(animState),
@@ -322,7 +329,7 @@ export class SwipeEngine {
           }
         }
       );
-      this.animator.start(finalState.velocityX, finalState.velocityY);
+      this.animator.start(boostedVelocityX, finalState.velocityY);
     } else {
       // Snap back
       this.state.isAnimating = true;

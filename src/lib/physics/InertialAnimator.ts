@@ -221,8 +221,17 @@ export class InertialAnimator {
     // Check threshold
     this.checkThreshold();
 
-    // Check if done
-    const done = resultX.stopped && resultY.stopped;
+    // Check if done - for exit animations, also stop when far enough off-screen
+    let done = resultX.stopped && resultY.stopped;
+
+    if (!done && this.config.isExitAnimation && this.config.exitDistance) {
+      const distanceTraveled = Math.abs(this.state.x);
+      // Force completion when card has traveled 1.2x the exit distance
+      if (distanceTraveled >= this.config.exitDistance * 1.2) {
+        done = true;
+      }
+    }
+
     if (done) {
       this.callbacks.onComplete?.(this.state);
     }
