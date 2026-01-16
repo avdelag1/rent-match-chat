@@ -65,6 +65,9 @@ export interface SwipeState {
   isAnimating: boolean;
 }
 
+// Calculate exit distance dynamically based on viewport for reliable off-screen animation
+const getDefaultExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
+
 const DEFAULT_CONFIG: SwipeEngineConfig = {
   swipeThreshold: 120,
   velocityThreshold: 400,
@@ -72,7 +75,7 @@ const DEFAULT_CONFIG: SwipeEngineConfig = {
   springDamping: 35,
   springMass: 0.5,
   dragElastic: 0.85,
-  exitDistance: 500,
+  exitDistance: getDefaultExitDistance(),
   maxRotation: 20,
 };
 

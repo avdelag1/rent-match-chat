@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, memo, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
 import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart, Info, DollarSign, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -276,6 +276,9 @@ interface OwnerClientTinderCardProps {
   hideActions?: boolean;
 }
 
+// Calculate exit distance dynamically based on viewport for reliable off-screen animation
+const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
+
 const OwnerClientTinderCardComponent = ({
   profile,
   onSwipe,
@@ -292,6 +295,10 @@ const OwnerClientTinderCardComponent = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [isInsightsPanelOpen, setIsInsightsPanelOpen] = useState(false);
+
+  // Track if the card is currently animating out to prevent reset interference
+  const isExitingRef = useRef(false);
+  const hasExitedRef = useRef(false);
 
   // PWA Mode optimizations - use lighter animations in PWA context
   const pwaMode = usePWAMode();
@@ -341,7 +348,12 @@ const OwnerClientTinderCardComponent = ({
 
   // BUTTON SWIPE - Animate card then trigger swipe for smooth swoosh effect
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
-    const targetX = direction === 'right' ? 500 : -500;
+    if (hasExitedRef.current) return;
+    hasExitedRef.current = true;
+    isExitingRef.current = true;
+
+    // Calculate exit distance based on viewport to ensure card fully exits
+    const targetX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
     // Haptic feedback immediately
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
@@ -353,6 +365,7 @@ const OwnerClientTinderCardComponent = ({
       damping: 25,
       mass: 0.8,
       onComplete: () => {
+        isExitingRef.current = false;
         onSwipe(direction);
       }
     });
@@ -373,6 +386,8 @@ const OwnerClientTinderCardComponent = ({
   }, []);
 
   const handleDragEnd = useCallback((event: any, info: PanInfo) => {
+    if (hasExitedRef.current) return;
+
     const { offset, velocity } = info;
     // HIGHER thresholds for controlled swipe decisions
     // Users must intentionally swipe far enough to commit
@@ -384,11 +399,39 @@ const OwnerClientTinderCardComponent = ({
     const hasEnoughVelocity = Math.abs(velocity.x) > velocityThreshold;
 
     if (hasEnoughDistance || hasEnoughVelocity) {
+      hasExitedRef.current = true;
+      isExitingRef.current = true;
+
       // Determine direction based on offset primarily, velocity as tiebreaker
       const direction = offset.x > 0 ? 'right' : 'left';
       // Haptic feedback on successful swipe
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
-      onSwipe(direction);
+
+      // Calculate exit distance based on viewport to ensure card fully exits
+      const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
+
+      // Animate card off-screen BEFORE calling onSwipe
+      // This prevents the snap-back glitch by ensuring the card exits cleanly
+      animate(x, exitX, {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
+        velocity: velocity.x, // Inherit drag velocity for natural feel
+        onComplete: () => {
+          isExitingRef.current = false;
+          onSwipe(direction);
+        },
+      });
+
+      // Also animate y for natural arc feel
+      animate(y, -30, {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
+        velocity: velocity.y * 0.3,
+      });
       return;
     }
 
