@@ -181,8 +181,14 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                 // RENTER/CLIENT PROFILE INSIGHTS - Enhanced Info First Design
                 <div className="space-y-4 sm:space-y-5">
                   {/* Hero Profile Card */}
-                  <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/10 p-3 sm:p-5 border border-primary/20">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-full blur-2xl" />
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/30 via-purple-500/20 to-pink-500/15 p-3 sm:p-5 border border-primary/30 backdrop-blur-sm shadow-lg"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/30 to-transparent rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-full blur-2xl" />
                     <div className="relative">
                       <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                         {/* Small Avatar */}
@@ -208,77 +214,109 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
 
                       {/* Budget Badge */}
                       {profile.budget_max && (
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full">
+                        <motion.div
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/30 to-emerald-500/20 rounded-full border border-green-500/30 backdrop-blur-sm shadow-md"
+                        >
                           <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
                           <span className="font-bold text-green-600 dark:text-green-400">
                             ${profile.budget_max.toLocaleString()}/mo
                           </span>
                           <span className="text-xs text-muted-foreground">budget</span>
-                        </div>
+                        </motion.div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
 
                   {/* Readiness Score Bar */}
-                  <div className="p-4 bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-xl border border-primary/20">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="p-4 bg-gradient-to-br from-primary/15 to-purple-500/15 rounded-xl border border-primary/30 backdrop-blur-sm shadow-lg"
+                  >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-primary animate-pulse" />
                         Renter Readiness
                       </span>
                       <Badge className={`${
-                        insights.readinessScore >= 80 ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
-                        insights.readinessScore >= 60 ? 'bg-blue-500/20 text-blue-700 dark:text-blue-400' :
-                        insights.readinessScore >= 40 ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
-                        'bg-gray-500/20 text-gray-700 dark:text-gray-400'
-                      }`}>
+                        insights.readinessScore >= 80 ? 'bg-gradient-to-r from-green-500/30 to-emerald-500/20 text-green-700 dark:text-green-400 border-green-500/40' :
+                        insights.readinessScore >= 60 ? 'bg-gradient-to-r from-blue-500/30 to-cyan-500/20 text-blue-700 dark:text-blue-400 border-blue-500/40' :
+                        insights.readinessScore >= 40 ? 'bg-gradient-to-r from-yellow-500/30 to-amber-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/40' :
+                        'bg-gradient-to-r from-gray-500/30 to-gray-400/20 text-gray-700 dark:text-gray-400 border-gray-500/40'
+                      } font-bold shadow-sm`}>
                         {insights.readinessScore}%
                       </Badge>
                     </div>
-                    <div className="w-full bg-muted/30 rounded-full h-2 mb-2">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-500 ${
-                          insights.readinessScore >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                          insights.readinessScore >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                          insights.readinessScore >= 40 ? 'bg-gradient-to-r from-yellow-500 to-amber-500' :
-                          'bg-gradient-to-r from-gray-400 to-gray-500'
+                    <div className="w-full bg-muted/40 rounded-full h-3 mb-2 shadow-inner">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${insights.readinessScore}%` }}
+                        transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                        className={`h-3 rounded-full transition-all duration-500 shadow-md ${
+                          insights.readinessScore >= 80 ? 'bg-gradient-to-r from-green-500 via-green-400 to-emerald-500' :
+                          insights.readinessScore >= 60 ? 'bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-500' :
+                          insights.readinessScore >= 40 ? 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-500' :
+                          'bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500'
                         }`}
-                        style={{ width: `${insights.readinessScore}%` }}
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground font-medium">
                       {insights.readinessScore >= 80
-                        ? 'Highly prepared - Ready to move!'
+                        ? '🎉 Highly prepared - Ready to move!'
                         : insights.readinessScore >= 60
-                        ? 'Well-prepared with detailed preferences'
+                        ? '✨ Well-prepared with detailed preferences'
                         : insights.readinessScore >= 40
-                        ? 'Moderately prepared'
-                        : 'New to the platform'}
+                        ? '📝 Moderately prepared'
+                        : '🆕 New to the platform'}
                     </p>
-                  </div>
+                  </motion.div>
 
                   {/* Quick Stats Row */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-lg sm:rounded-xl border border-yellow-500/20">
-                      <Star className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-yellow-600 mb-0.5 sm:mb-1" />
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-yellow-500/15 to-amber-500/10 rounded-lg sm:rounded-xl border border-yellow-500/30 shadow-md hover:shadow-lg transition-shadow backdrop-blur-sm"
+                    >
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-yellow-600 mb-0.5 sm:mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-yellow-600 dark:text-yellow-400">{insights.readinessScore}%</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Score</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-lg sm:rounded-xl border border-blue-500/20">
-                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-0.5 sm:mb-1" />
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">Score</div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-blue-500/15 to-cyan-500/10 rounded-lg sm:rounded-xl border border-blue-500/30 shadow-md hover:shadow-lg transition-shadow backdrop-blur-sm"
+                    >
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-0.5 sm:mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">2-4h</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Response</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-lg sm:rounded-xl border border-green-500/20">
-                      <Eye className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-0.5 sm:mb-1" />
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">Response</div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-green-500/15 to-emerald-500/10 rounded-lg sm:rounded-xl border border-green-500/30 shadow-md hover:shadow-lg transition-shadow backdrop-blur-sm"
+                    >
+                      <Eye className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-0.5 sm:mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">{insights.photoCount}</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Photos</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-red-500/10 to-pink-500/5 rounded-lg sm:rounded-xl border border-red-500/20">
-                      <Flame className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-red-600 mb-0.5 sm:mb-1" />
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">Photos</div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-red-500/15 to-pink-500/10 rounded-lg sm:rounded-xl border border-red-500/30 shadow-md hover:shadow-lg transition-shadow backdrop-blur-sm"
+                    >
+                      <Flame className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-red-600 mb-0.5 sm:mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">{insights.interestCount}</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Interests</div>
-                    </div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">Interests</div>
+                    </motion.div>
                   </div>
 
                   {/* What They're Looking For */}
@@ -403,9 +441,14 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                   )}
 
                   {/* Profile Highlights */}
-                  <div className="p-4 bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-xl border border-primary/20">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="p-4 bg-gradient-to-r from-primary/15 to-purple-500/15 rounded-xl border border-primary/30 shadow-lg backdrop-blur-sm"
+                  >
                     <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
+                      <Sparkles className="w-4 h-4 text-primary animate-pulse" />
                       Profile Highlights
                     </h4>
                     <div className="space-y-2">
@@ -481,15 +524,24 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                 <div className="mt-4 space-y-5">
                   {/* Hot Listing Alert */}
                   {insights.isHotListing && (
-                    <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
-                        <Zap className="w-4 h-4 text-red-500" />
-                      </div>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                      className="p-3 bg-gradient-to-r from-red-500/20 to-orange-500/15 rounded-xl border border-red-500/40 flex items-center gap-3 shadow-lg backdrop-blur-sm"
+                    >
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 10, 0] }}
+                        transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                        className="w-8 h-8 bg-red-500/30 rounded-full flex items-center justify-center shadow-md"
+                      >
+                        <Zap className="w-4 h-4 text-red-500 drop-shadow-md" />
+                      </motion.div>
                       <div>
-                        <p className="text-sm font-semibold text-red-600 dark:text-red-400">Hot Listing!</p>
-                        <p className="text-xs text-muted-foreground">High quality - Act fast</p>
+                        <p className="text-sm font-bold text-red-600 dark:text-red-400">🔥 Hot Listing!</p>
+                        <p className="text-xs text-muted-foreground font-medium">High quality - Act fast</p>
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Property Title & Location with Category */}
@@ -523,26 +575,46 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
 
                   {/* Quick Stats Row */}
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
-                      <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-1" />
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-green-500/15 to-emerald-500/10 rounded-xl border border-green-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                    >
+                      <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-green-600 mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400 break-all">${listing.price?.toLocaleString()}</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">{listing.listing_type === 'buy' ? 'price' : '/month'}</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5 rounded-xl border border-purple-500/20">
-                      <Star className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-purple-600 mb-1" />
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{listing.listing_type === 'buy' ? 'price' : '/month'}</div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-purple-500/15 to-pink-500/10 rounded-xl border border-purple-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                    >
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-purple-600 mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-purple-600 dark:text-purple-400">{insights.qualityScore || 75}%</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Quality</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 rounded-xl border border-blue-500/20">
-                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">Quality</div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-blue-500/15 to-cyan-500/10 rounded-xl border border-blue-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                    >
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">&lt;2h</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Response</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-xl border border-yellow-500/20">
-                      <Heart className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-yellow-600 mb-1" />
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">Response</div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25 }}
+                      className="text-center p-2 sm:p-3 bg-gradient-to-br from-yellow-500/15 to-amber-500/10 rounded-xl border border-yellow-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                    >
+                      <Heart className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-yellow-600 mb-1 drop-shadow-md" />
                       <div className="text-xs sm:text-sm font-bold text-yellow-600 dark:text-yellow-400">{insights.saves}</div>
-                      <div className="text-[9px] sm:text-[10px] text-muted-foreground">Interested</div>
-                    </div>
+                      <div className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">Interested</div>
+                    </motion.div>
                   </div>
 
                   {/* Key Details Grid - Adaptive for category */}

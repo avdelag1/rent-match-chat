@@ -202,21 +202,27 @@ function SimpleOwnerSwipeCardComponent({
 
   const handleImageTap = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    if (imageCount <= 1) return;
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
-    
-    if (clickX < width * 0.3) {
+
+    // Left third - previous image (only if multiple images)
+    if (clickX < width * 0.3 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
       triggerHaptic('light');
-    } else if (clickX > width * 0.7) {
+    }
+    // Right third - next image (only if multiple images)
+    else if (clickX > width * 0.7 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === imageCount - 1 ? 0 : prev + 1);
       triggerHaptic('light');
     }
-  }, [imageCount]);
+    // Middle area - open insights
+    else if (onInsights) {
+      triggerHaptic('light');
+      onInsights();
+    }
+  }, [imageCount, onInsights]);
 
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     if (hasExited.current) return;

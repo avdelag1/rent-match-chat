@@ -11,6 +11,7 @@ import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
 import { useState, memo, useMemo, useCallback } from 'react';
 import { logger } from '@/utils/prodLogger';
+import { motion } from 'framer-motion';
 
 // Interest category icons for visual display
 const INTEREST_ICONS: Record<string, React.ReactNode> = {
@@ -227,19 +228,33 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
           <div className="space-y-3 sm:space-y-4 py-3 px-3 sm:px-4 w-full max-w-full overflow-x-hidden">
             {/* Hot Prospect Alert */}
             {renterInsights?.isHotProspect && (
-              <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
-                <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-red-500" />
-                </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="p-3 bg-gradient-to-r from-red-500/20 to-orange-500/15 rounded-xl border border-red-500/40 flex items-center gap-3 shadow-lg backdrop-blur-sm"
+              >
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 10, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                  className="w-8 h-8 bg-red-500/30 rounded-full flex items-center justify-center shadow-md"
+                >
+                  <Zap className="w-4 h-4 text-red-500 drop-shadow-md" />
+                </motion.div>
                 <div>
-                  <p className="text-sm font-semibold text-red-600 dark:text-red-400">Hot Prospect!</p>
-                  <p className="text-xs text-muted-foreground">Highly engaged renter - Respond quickly</p>
+                  <p className="text-sm font-bold text-red-600 dark:text-red-400">🔥 Hot Prospect!</p>
+                  <p className="text-xs text-muted-foreground font-medium">Highly engaged renter - Respond quickly</p>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Basic Info Header */}
-            <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-3 sm:p-6 rounded-lg border border-primary/20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gradient-to-br from-primary/15 to-secondary/15 p-3 sm:p-6 rounded-lg border border-primary/30 shadow-lg backdrop-blur-sm"
+            >
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -310,7 +325,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   {recommendationScore}/5 stars
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Profile Photos Gallery */}
             {profile.profile_images && profile.profile_images.length > 0 && (
@@ -351,71 +366,98 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 Client Statistics
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                <div className="bg-primary/10 p-2 sm:p-4 rounded-lg text-center border border-primary/20">
-                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-primary mb-1 sm:mb-2" />
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-gradient-to-br from-primary/15 to-primary/5 p-2 sm:p-4 rounded-lg text-center border border-primary/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                >
+                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-primary mb-1 sm:mb-2 drop-shadow-md" />
                   <div className="text-lg sm:text-2xl font-bold text-primary">{clientStats.profileViews}</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">Profile Views</div>
-                </div>
-                
-                <div className="bg-secondary/10 p-2 sm:p-4 rounded-lg text-center border border-secondary/20">
-                  <ThumbsUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-secondary mb-1 sm:mb-2" />
+                  <div className="text-[10px] sm:text-xs text-muted-foreground font-medium">Profile Views</div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="bg-gradient-to-br from-secondary/15 to-secondary/5 p-2 sm:p-4 rounded-lg text-center border border-secondary/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                >
+                  <ThumbsUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-secondary mb-1 sm:mb-2 drop-shadow-md" />
                   <div className="text-lg sm:text-2xl font-bold text-secondary">{clientStats.ownerLikes}</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">Owner Likes</div>
-                </div>
-                
-                <div className="bg-green-500/10 p-2 sm:p-4 rounded-lg text-center border border-green-500/20">
-                  <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-green-600 dark:text-green-400 mb-1 sm:mb-2" />
+                  <div className="text-[10px] sm:text-xs text-muted-foreground font-medium">Owner Likes</div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-gradient-to-br from-green-500/15 to-emerald-500/5 p-2 sm:p-4 rounded-lg text-center border border-green-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                >
+                  <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-green-600 dark:text-green-400 mb-1 sm:mb-2 drop-shadow-md" />
                   <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">{clientStats.responseRate}%</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">Response Rate</div>
-                </div>
-                
-                <div className="bg-blue-500/10 p-2 sm:p-4 rounded-lg text-center border border-blue-500/20">
-                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-blue-600 dark:text-blue-400 mb-1 sm:mb-2" />
+                  <div className="text-[10px] sm:text-xs text-muted-foreground font-medium">Response Rate</div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="bg-gradient-to-br from-blue-500/15 to-cyan-500/5 p-2 sm:p-4 rounded-lg text-center border border-blue-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                >
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-blue-600 dark:text-blue-400 mb-1 sm:mb-2 drop-shadow-md" />
                   <div className="text-base sm:text-2xl font-bold text-blue-600 dark:text-blue-400">{clientStats.averageResponseTime}</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground">Avg Response</div>
-                </div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground font-medium">Avg Response</div>
+                </motion.div>
               </div>
             </div>
 
             {/* Renter Readiness Score */}
             <div>
               <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
+                <Sparkles className="w-5 h-5 text-primary animate-pulse" />
                 Renter Readiness
               </h4>
-              <div className="bg-gradient-to-br from-primary/10 to-purple-500/10 p-4 rounded-lg border border-primary/20">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gradient-to-br from-primary/15 to-purple-500/15 p-4 rounded-lg border border-primary/30 shadow-lg backdrop-blur-sm"
+              >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium">Readiness Score</span>
+                  <span className="text-sm font-semibold">Readiness Score</span>
                   <Badge className={`${
-                    renterInsights.readinessScore >= 80 ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
-                    renterInsights.readinessScore >= 60 ? 'bg-blue-500/20 text-blue-700 dark:text-blue-400' :
-                    renterInsights.readinessScore >= 40 ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
-                    'bg-gray-500/20 text-gray-700 dark:text-gray-400'
-                  }`}>
+                    renterInsights.readinessScore >= 80 ? 'bg-gradient-to-r from-green-500/30 to-emerald-500/20 text-green-700 dark:text-green-400 border-green-500/40' :
+                    renterInsights.readinessScore >= 60 ? 'bg-gradient-to-r from-blue-500/30 to-cyan-500/20 text-blue-700 dark:text-blue-400 border-blue-500/40' :
+                    renterInsights.readinessScore >= 40 ? 'bg-gradient-to-r from-yellow-500/30 to-amber-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/40' :
+                    'bg-gradient-to-r from-gray-500/30 to-gray-400/20 text-gray-700 dark:text-gray-400 border-gray-500/40'
+                  } font-bold shadow-sm`}>
                     {renterInsights.readinessScore}%
                   </Badge>
                 </div>
-                <div className="w-full bg-muted/30 rounded-full h-2 mb-3">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      renterInsights.readinessScore >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                      renterInsights.readinessScore >= 60 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                      renterInsights.readinessScore >= 40 ? 'bg-gradient-to-r from-yellow-500 to-amber-500' :
-                      'bg-gradient-to-r from-gray-400 to-gray-500'
+                <div className="w-full bg-muted/40 rounded-full h-3 mb-3 shadow-inner">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${renterInsights.readinessScore}%` }}
+                    transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+                    className={`h-3 rounded-full transition-all duration-500 shadow-md ${
+                      renterInsights.readinessScore >= 80 ? 'bg-gradient-to-r from-green-500 via-green-400 to-emerald-500' :
+                      renterInsights.readinessScore >= 60 ? 'bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-500' :
+                      renterInsights.readinessScore >= 40 ? 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-500' :
+                      'bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500'
                     }`}
-                    style={{ width: `${renterInsights.readinessScore}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground font-medium">
                   {renterInsights.readinessScore >= 80
-                    ? 'Highly prepared renter with complete profile - ready to move!'
+                    ? '🎉 Highly prepared renter with complete profile - ready to move!'
                     : renterInsights.readinessScore >= 60
-                    ? 'Well-prepared renter with detailed preferences.'
+                    ? '✨ Well-prepared renter with detailed preferences.'
                     : renterInsights.readinessScore >= 40
-                    ? 'Moderately prepared - may need more details.'
-                    : 'New to the platform - building their profile.'}
+                    ? '📝 Moderately prepared - may need more details.'
+                    : '🆕 New to the platform - building their profile.'}
                 </p>
-              </div>
+              </motion.div>
             </div>
 
             {/* Activity Level */}
@@ -621,7 +663,12 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 <ThumbsUp className="w-5 h-5 text-green-500" />
                 Why This Renter
               </h4>
-              <div className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="p-4 bg-gradient-to-r from-green-500/15 to-emerald-500/10 rounded-xl border border-green-500/30 shadow-lg backdrop-blur-sm"
+              >
                 <div className="space-y-2">
                   {profile.verified && (
                     <div className="flex items-start gap-2">
@@ -666,7 +713,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Recommendation Insights */}
