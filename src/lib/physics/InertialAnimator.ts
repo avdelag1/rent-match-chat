@@ -247,15 +247,17 @@ export class InertialAnimator {
     const dtSeconds = dt / 1000;
 
     // Calculate spring force for X
+    const springConfig = {
+      stiffness: Number(this.config.springStiffness) || 400,
+      damping: Number(this.config.springDamping) || 35,
+      mass: Number(this.config.springMass) || 0.5,
+    };
+    
     const forceX = calculateSpringForce(
       this.state.x,
       targetX,
       this.state.velocityX,
-      {
-        stiffness: this.config.springStiffness!,
-        damping: this.config.springDamping!,
-        mass: this.config.springMass!,
-      }
+      springConfig
     );
 
     // Calculate spring force for Y
@@ -263,11 +265,7 @@ export class InertialAnimator {
       this.state.y,
       targetY,
       this.state.velocityY,
-      {
-        stiffness: this.config.springStiffness!,
-        damping: this.config.springDamping!,
-        mass: this.config.springMass!,
-      }
+      springConfig
     );
 
     // Apply forces

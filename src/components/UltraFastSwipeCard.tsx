@@ -233,7 +233,6 @@ const UltraFastSwipeCardComponent = ({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl relative"
-        style={{ touchAction: 'pan-y' }}
       >
         <div
           className="absolute inset-0 w-full h-full overflow-hidden"

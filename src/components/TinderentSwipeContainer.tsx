@@ -66,11 +66,6 @@ const getActiveCategoryInfo = (filters?: ListingFilters) => {
     return categoryConfig[category] || categoryConfig.property;
   }
 
-  // Check for services/workers
-  if (filters?.showHireServices) {
-    return categoryConfig.services;
-  }
-
   // Default to properties
   return categoryConfig.property;
 };
