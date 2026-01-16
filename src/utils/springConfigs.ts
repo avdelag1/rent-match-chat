@@ -195,12 +195,14 @@ export const gesturePhysics = {
   },
 
   // Swipe cards - optimized for Tinder-style swiping
+  // Softer spring for gentle snap-back, minimal friction for smooth exit
   swipeCard: {
-    decelerationRate: 0.996,
-    springStiffness: 500,
-    springDamping: 35,
-    springMass: 0.5,
+    decelerationRate: 0.9995,
+    springStiffness: 280,
+    springDamping: 28,
+    springMass: 0.6,
     swipeThreshold: 120,
     velocityThreshold: 400,
+    minExitVelocity: 1200,
   },
 } as const;

@@ -297,12 +297,17 @@ export function usePhysicsGesture(
         hasSwipedRef.current = true;
         const direction = stateRef.current.x > 0 ? 'right' : 'left';
 
-        // Boost velocity if too slow for satisfying exit
-        const minExitVelocity = 800;
-        const boostedVelocityX =
-          Math.abs(finalState.velocityX) < minExitVelocity
-            ? Math.sign(stateRef.current.x) * minExitVelocity
-            : finalState.velocityX;
+        // Boost velocity significantly for smooth exit without any pull-back
+        const minExitVelocity = 1200;
+        let boostedVelocityX = finalState.velocityX;
+
+        // Always ensure velocity is in swipe direction and fast enough
+        if (Math.abs(finalState.velocityX) < minExitVelocity || Math.sign(finalState.velocityX) !== Math.sign(stateRef.current.x)) {
+          boostedVelocityX = Math.sign(stateRef.current.x) * minExitVelocity;
+        } else {
+          // Preserve user momentum but ensure minimum speed
+          boostedVelocityX = Math.sign(stateRef.current.x) * Math.max(Math.abs(finalState.velocityX), minExitVelocity);
+        }
 
         // Start exit animation
         stateRef.current.isAnimating = true;
@@ -363,7 +368,8 @@ export function usePhysicsGesture(
       hasSwipedRef.current = true;
       stateRef.current.isAnimating = true;
 
-      const velocity = direction === 'right' ? 1000 : -1000;
+      // Higher velocity for smooth button-triggered swipes
+      const velocity = direction === 'right' ? 1400 : -1400;
 
       animatorRef.current = createExitAnimator(
         0,
