@@ -569,7 +569,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
   }, []);
 
   // BUTTON SWIPE - Animate card then trigger swipe for smooth swoosh effect
-  // PWA MODE: Use stiffer springs for snappier response with fewer frames
+  // FIX: Use tween animation for INSTANT exit - no bounce-back possible
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     if (hasExitedRef.current) return;
     hasExitedRef.current = true;
@@ -581,13 +581,11 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
     // Haptic feedback immediately
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-    // Animate card swooshing out with spring physics
-    // PWA uses stiffer springs for faster, more responsive animations
+    // FIX: Use tween animation for direct exit - no bounce-back possible
     animate(x, targetX, {
-      type: "spring",
-      stiffness: pwaMode.isPWA ? pwaMode.springStiffness : 300,
-      damping: pwaMode.isPWA ? pwaMode.springDamping : 25,
-      mass: pwaMode.isPWA ? pwaMode.springMass : 0.8,
+      type: 'tween',
+      duration: pwaMode.isPWA ? 0.15 : 0.25,
+      ease: [0.32, 0.72, 0, 1], // iOS-style ease-out
       onComplete: () => {
         isExitingRef.current = false;
         onSwipe(direction);
@@ -626,14 +624,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
       // Calculate exit distance based on viewport to ensure card fully exits
       const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-      // Animate card off-screen BEFORE calling onSwipe
-      // This prevents the snap-back glitch by ensuring the card exits cleanly
+      // FIX: Use tween animation for INSTANT exit - no bounce-back possible
+      // Spring animations can overshoot and cause the card to snap back briefly
       animate(x, exitX, {
-        type: "spring",
-        stiffness: pwaMode.isPWA ? pwaMode.springStiffness : 400,
-        damping: pwaMode.isPWA ? pwaMode.springDamping : 30,
-        mass: pwaMode.isPWA ? pwaMode.springMass : 0.8,
-        velocity: velocity.x, // Inherit drag velocity for natural feel
+        type: 'tween',
+        duration: pwaMode.isPWA ? 0.15 : 0.2,
+        ease: [0.32, 0.72, 0, 1], // iOS-style ease-out for natural feel
         onComplete: () => {
           isExitingRef.current = false;
           onSwipe(direction);
