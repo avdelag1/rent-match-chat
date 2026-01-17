@@ -15,8 +15,8 @@ interface RoleSwitcherProps {
  * Role Switcher Component
  *
  * Allows users to switch between:
- * - "I Need" mode: Browse and discover deals, services, properties
- * - "I Offer" mode: Share services and manage listings
+ * - "I'm a Client" mode: Browse and discover deals, services, properties
+ * - "I Own / I Can Do" mode: Share services and manage listings
  *
  * One account, two modes - like Uber driver/rider toggle.
  */
@@ -43,7 +43,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <ArrowLeftRight className="w-4 h-4" />
         )}
         <span>
-          {activeMode === 'client' ? 'Switch to I Offer' : 'Switch to I Need'}
+          {activeMode === 'client' ? 'Switch to I Own' : 'Switch to I\'m a Client'}
         </span>
       </motion.button>
     );
@@ -70,7 +70,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <ModeOption
             mode="client"
             icon={Search}
-            label="I Need"
+            label="I'm a Client"
             description="Browse & discover"
             isActive={activeMode === 'client'}
             onClick={() => switchMode('client')}
@@ -79,7 +79,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <ModeOption
             mode="owner"
             icon={Briefcase}
-            label="I Offer"
+            label="I Own / I Can Do"
             description="Share & manage"
             isActive={activeMode === 'owner'}
             onClick={() => switchMode('owner')}
@@ -97,7 +97,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
             <span className="text-muted-foreground">
               Currently in{' '}
               <span className="font-medium text-foreground">
-                {activeMode === 'client' ? 'I Need' : 'I Offer'}
+                {activeMode === 'client' ? 'I\'m a Client' : 'I Own / I Can Do'}
               </span>
               {' '}mode
             </span>
@@ -203,12 +203,12 @@ export function RoleIndicator({ className }: { className?: string }) {
       {activeMode === 'client' ? (
         <>
           <Search className="w-3 h-3" />
-          <span>I Need</span>
+          <span>I'm a Client</span>
         </>
       ) : (
         <>
           <Briefcase className="w-3 h-3" />
-          <span>I Offer</span>
+          <span>I Own</span>
         </>
       )}
     </div>

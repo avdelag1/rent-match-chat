@@ -12,7 +12,7 @@ interface ModeSwitcherProps {
 }
 
 /**
- * ModeSwitcher - Premium mode toggle for switching between "Explore" and "Provide" modes
+ * ModeSwitcher - Premium mode toggle for switching between "Client" and "Owner" modes
  *
  * Features:
  * - Instant visual feedback with optimistic updates
@@ -55,7 +55,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           className
         )}
         whileTap={{ scale: 0.92 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'Provide' : 'Explore'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
       >
         <AnimatePresence mode="wait">
           {isSwitching ? (
@@ -103,7 +103,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           className
         )}
         whileTap={{ scale: 0.97 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'Provide' : 'Explore'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
       >
         {/* Sliding indicator */}
         <motion.div
@@ -117,22 +117,22 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           style={{ willChange: 'left, right' }}
         />
 
-        {/* Explore option */}
+        {/* Client option */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
           activeMode === 'client' ? 'text-primary' : 'text-muted-foreground'
         )}>
           <Search className="h-3.5 w-3.5" />
-          <span className="font-medium">Explore</span>
+          <span className="font-medium">Client</span>
         </div>
 
-        {/* Provide option */}
+        {/* Owner option */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
           activeMode === 'owner' ? 'text-emerald-500' : 'text-muted-foreground'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
-          <span className="font-medium">Provide</span>
+          <span className="font-medium">Owner</span>
         </div>
 
         {/* Loading overlay */}
@@ -169,7 +169,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
       whileTap={{ scale: 0.95, rotate: activeMode === 'client' ? 3 : -3 }}
       animate={isSwitching ? { scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] } : { scale: 1, rotate: 0 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      aria-label={`Switch to ${activeMode === 'client' ? 'Provide' : 'Explore'} mode`}
+      aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
     >
       {/* Mode icon with animation */}
       <AnimatePresence mode="wait">
@@ -186,12 +186,12 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           ) : activeMode === 'client' ? (
             <>
               <Search className="h-3.5 w-3.5 text-primary" />
-              <span className="font-semibold text-primary">Explore</span>
+              <span className="font-semibold text-primary">Client</span>
             </>
           ) : (
             <>
               <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="font-semibold text-emerald-500">Provide</span>
+              <span className="font-semibold text-emerald-500">Owner</span>
             </>
           )}
         </motion.div>
