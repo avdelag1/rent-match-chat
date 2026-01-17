@@ -248,18 +248,20 @@ function SimpleOwnerSwipeCardComponent({
   }, [profile.user_id, onSwipe, x]);
 
   // Format budget
-  const budgetText = profile.budget_min && profile.budget_max 
+  // Format budget - moved before conditional render to avoid hook order issues
+  const budgetText = profile.budget_min && profile.budget_max
     ? `$${profile.budget_min.toLocaleString()} - $${profile.budget_max.toLocaleString()}`
-    : profile.budget_max 
+    : profile.budget_max
       ? `Up to $${profile.budget_max.toLocaleString()}`
       : null;
 
+  // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
     return (
-      <div 
+      <div
         className="absolute inset-0 rounded-3xl overflow-hidden shadow-xl"
-        style={{ 
-          transform: 'scale(0.95)', 
+        style={{
+          transform: 'scale(0.95)',
           opacity: 0.7,
           pointerEvents: 'none'
         }}

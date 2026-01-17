@@ -518,8 +518,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Get current visible cards for 2-card stack (top + next)
   // Use currentIndex from state (already synced with currentIndexRef)
   const deckQueue = deckQueueRef.current;
-  const topCard = deckQueue[currentIndex];
-  const nextCard = deckQueue[currentIndex + 1];
+  // Add bounds checking to prevent rendering with invalid indices
+  const safeIndex = Math.min(currentIndex, Math.max(0, deckQueue.length - 1));
+  const topCard = deckQueue.length > 0 ? deckQueue[safeIndex] : null;
+  const nextCard = deckQueue.length > safeIndex + 1 ? deckQueue[safeIndex + 1] : null;
 
   // =============================================================================
   // FIX #1: SWIPE PHASE ISOLATION - Two-phase swipe for Tinder-level feel
