@@ -96,6 +96,7 @@ interface SimpleSwipeCardProps {
   onInsights?: () => void;
   onShare?: () => void;
   onUndo?: () => void;
+  canUndo?: boolean;
   onMessage?: () => void;
   isTop?: boolean;
   hideActions?: boolean;
@@ -108,6 +109,7 @@ function SimpleSwipeCardComponent({
   onInsights,
   onShare,
   onUndo,
+  canUndo = false,
   onMessage,
   isTop = true,
   hideActions = false,
@@ -442,21 +444,22 @@ function SimpleSwipeCardComponent({
             <X className="w-6 h-6 text-red-500" />
           </Button>
 
-          {/* Undo Button */}
-          {onUndo && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-11 h-11 rounded-full border-2 border-amber-400 bg-background hover:bg-amber-50 dark:hover:bg-amber-950"
-              onClick={(e) => {
-                e.stopPropagation();
+          {/* Undo Button - Always visible, disabled when can't undo */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-11 h-11 rounded-full border-2 border-amber-400 bg-background hover:bg-amber-50 dark:hover:bg-amber-950 disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled={!canUndo}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (canUndo && onUndo) {
                 triggerHaptic('light');
                 onUndo();
-              }}
-            >
-              <RotateCcw className="w-5 h-5 text-amber-500" />
-            </Button>
-          )}
+              }
+            }}
+          >
+            <RotateCcw className="w-5 h-5 text-amber-500" />
+          </Button>
 
           {/* Message Button */}
           {onMessage && (

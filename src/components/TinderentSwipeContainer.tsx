@@ -1009,7 +1009,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               onTap={() => onListingTap(topCard.id)}
               onInsights={handleInsights}
               onShare={handleShare}
-              onUndo={canUndo ? undoLastSwipe : undefined}
+              onUndo={undoLastSwipe}
+              canUndo={canUndo}
               onMessage={handleMessage}
               isTop={true}
               hideActions={insightsModalOpen}

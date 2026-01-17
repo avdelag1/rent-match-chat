@@ -77,6 +77,7 @@ interface SimpleOwnerSwipeCardProps {
   onSwipe: (direction: 'left' | 'right') => void;
   onTap?: () => void;
   onUndo?: () => void;
+  canUndo?: boolean;
   onInsights?: () => void;
   onMessage?: () => void;
   onShare?: () => void;
@@ -89,6 +90,7 @@ function SimpleOwnerSwipeCardComponent({
   onSwipe,
   onTap,
   onUndo,
+  canUndo = false,
   onInsights,
   onMessage,
   onShare,
@@ -381,20 +383,22 @@ function SimpleOwnerSwipeCardComponent({
             <X className="w-6 h-6 text-red-500" />
           </Button>
 
-          {onUndo && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-12 h-12 rounded-full border-2 border-amber-400 bg-background hover:bg-amber-50 dark:hover:bg-amber-950"
-              onClick={(e) => {
-                e.stopPropagation();
+          {/* Undo Button - Always visible, disabled when can't undo */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-12 h-12 rounded-full border-2 border-amber-400 bg-background hover:bg-amber-50 dark:hover:bg-amber-950 disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled={!canUndo}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (canUndo && onUndo) {
                 triggerHaptic('light');
                 onUndo();
-              }}
-            >
-              <RotateCcw className="w-5 h-5 text-amber-500" />
-            </Button>
-          )}
+              }
+            }}
+          >
+            <RotateCcw className="w-5 h-5 text-amber-500" />
+          </Button>
 
           {onMessage && (
             <Button
