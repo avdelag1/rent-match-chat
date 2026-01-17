@@ -1,8 +1,8 @@
 /**
  * SWIPE ACTION BUTTON BAR
  *
- * Premium floating button bar for swipe cards
- * Matches modern dating apps (Tinder/Bumble/Hinge) pixel-perfect
+ * Premium floating button bar for swipe cards.
+ * Matches modern dating apps (Tinder/Bumble/Hinge) pixel-perfect.
  *
  * Features:
  * - iOS-style frosted glass effect (backdrop-blur)
