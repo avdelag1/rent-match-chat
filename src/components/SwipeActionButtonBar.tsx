@@ -225,19 +225,8 @@ function SwipeActionButtonBarComponent({
       transition={{ ...springConfig, delay: 0.05 }}
       className={`relative flex items-center justify-center ${className}`}
       style={{
-        // Pill-shaped glass container
+        // Transparent container - no background
         padding: '10px 16px',
-        borderRadius: 100,
-        // Glass background
-        background: 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.65) 100%)',
-        backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: `
-          0 8px 32px rgba(0,0,0,0.4),
-          inset 0 1px 0 rgba(255,255,255,0.1),
-          inset 0 -1px 0 rgba(0,0,0,0.2)
-        `,
         // GPU acceleration
         transform: 'translateZ(0)',
         willChange: 'transform, opacity',
@@ -245,7 +234,7 @@ function SwipeActionButtonBarComponent({
         zIndex: 100,
       }}
     >
-      {/* Buttons Row */}
+      {/* Buttons Row - fully transparent, only buttons have glass effect */}
       <div className="flex items-center gap-3">
         {/* 1. Return/Undo Button (Small) - Amber */}
         <ActionButton
