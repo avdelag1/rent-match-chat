@@ -564,6 +564,7 @@ const ClientSwipeContainerComponent = ({
               onInsights={() => handleInsights(topCard.user_id)}
               onMessage={() => handleConnect(topCard.user_id)}
               onShare={handleShare}
+              onUndo={canUndo ? undoLastSwipe : undefined}
               isTop={true}
               hideActions={insightsOpen}
             />
