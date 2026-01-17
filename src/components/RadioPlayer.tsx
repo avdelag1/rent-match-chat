@@ -11,29 +11,29 @@ export interface RadioStation {
 // Radio stations for each theme
 export const RADIO_STATIONS: Record<string, RadioStation> = {
   'sunset-coconuts': {
-    name: 'Tropical Vibes Radio',
-    url: 'https://stream.zeno.fm/f3wvbbqmdg8uv', // Example tropical music stream
-    description: 'Chill tropical beats',
+    name: 'Radio Tulum',
+    url: 'https://stream.zeno.fm/d8ta12arf5zuv', // Radio Tulum - tropical house & chill vibes
+    description: 'Tulum tropical beats',
   },
   'vehicles-properties': {
-    name: 'Urban Pulse',
-    url: 'https://stream.zeno.fm/8a8wew5u38zuv', // Example urban/electronic stream
-    description: 'Electronic city sounds',
+    name: 'Dubai Radio',
+    url: 'https://stream.zeno.fm/nq6s05sm938uv', // Dubai Radio - luxury city sounds
+    description: 'Dubai luxury vibes',
   },
   'ducks': {
-    name: 'Happy Vibes FM',
-    url: 'https://stream.zeno.fm/0r0xa53mbzzuv', // Example upbeat/pop stream
-    description: 'Feel-good music',
+    name: 'Ibiza Global Radio',
+    url: 'https://ibizaglobalradio.streaming-pro.com/igr.mp3', // Ibiza Global Radio - party music
+    description: 'Ibiza party vibes',
   },
   'stars': {
-    name: 'Ambient Space',
-    url: 'https://stream.zeno.fm/h77mbp7n6s8uv', // Example ambient/chill stream
+    name: 'Chillout Lounge',
+    url: 'https://stream.zeno.fm/b9rdaqxum18uv', // Ambient chillout
     description: 'Cosmic ambient music',
   },
   'ny-red': {
-    name: 'New York Hip-Hop',
-    url: 'https://stream.zeno.fm/f6vdqunnwd0uv', // Example NY hip-hop stream
-    description: 'Classic NY hip-hop',
+    name: 'Jamaica Irie FM',
+    url: 'https://ais-edge09-live365-dal02.cdnstream.com/a10108', // Jamaica reggae station
+    description: 'Authentic reggae vibes',
   },
 };
 
