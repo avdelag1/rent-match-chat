@@ -780,8 +780,8 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
               isTop={isTop}
             />
 
-            {/* Bottom gradient - Lighter for better photo visibility */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
+            {/* Bottom gradient - Darker fade like Tinder for better text visibility */}
+            <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none z-10" />
 
 
             {/* Verification Badge */}
@@ -960,12 +960,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
             </AnimatePresence>
           </div>
 
-          {/* Bottom Sheet - Collapsible with Glassmorphism */}
+          {/* Bottom Sheet - Collapsible with Glassmorphism (More transparent like Tinder) */}
           {/* FIX: Use translateY instead of height animation for GPU-friendly transforms (no reflow) */}
           {/* PWA: Reduce backdrop blur which is expensive in PWA shell */}
           <motion.div
-            className={`absolute bottom-0 left-0 right-0 bg-black/75 rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden z-20 ${
-              pwaMode.isPWA ? '' : 'backdrop-blur-xl'
+            className={`absolute bottom-0 left-0 right-0 bg-black/30 rounded-t-[24px] shadow-2xl border-t border-white/10 overflow-hidden z-20 ${
+              pwaMode.isPWA ? '' : 'backdrop-blur-md'
             }`}
             animate={{
               y: isBottomSheetExpanded ? 0 : 230
@@ -991,25 +991,25 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
             <div className="px-4 pb-3">
               <div className="flex justify-between items-start mb-1.5">
                 <div className="flex-1">
-                  <h2 className="text-base font-bold text-foreground">
+                  <h2 className="text-base font-bold text-white drop-shadow-lg">
                     {listing.title}
                   </h2>
-                  <div className="flex items-center text-muted-foreground text-xs">
+                  <div className="flex items-center text-white/80 text-xs drop-shadow-lg">
                     <MapPin className="w-4 h-4 mr-1" />
                     <span>{listing.neighborhood}, {listing.city}</span>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className="text-xl font-bold text-primary">
+                  <div className="text-xl font-bold text-white drop-shadow-lg">
                     ${listing.price?.toLocaleString()}
                   </div>
-                  <div className="text-[10px] text-muted-foreground">/month</div>
+                  <div className="text-[10px] text-white/70 drop-shadow-lg">/month</div>
                 </div>
               </div>
 
               {/* Key Stats */}
-              <div className="flex items-center gap-2 text-muted-foreground text-xs">
+              <div className="flex items-center gap-2 text-white/80 text-xs drop-shadow-lg">
                 {listing.category === 'vehicle' ? (
                   <>
                     {listing.brand && (
@@ -1082,12 +1082,12 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                   {/* Amenities */}
                   {listing.amenities && listing.amenities.length > 0 && (
                     <div className="mb-4">
-                      <h3 className="text-sm font-semibold text-foreground mb-2">
+                      <h3 className="text-sm font-semibold text-white mb-2 drop-shadow-lg">
                         Amenities
                       </h3>
                       <div className="flex flex-wrap gap-1.5">
                         {listing.amenities.map((amenity, idx) => (
-                          <Badge key={`amenity-${idx}`} variant="secondary" className="text-xs">
+                          <Badge key={`amenity-${idx}`} variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
                             {amenity}
                           </Badge>
                         ))}
@@ -1101,7 +1101,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full mt-1 text-muted-foreground h-5"
+                className="w-full mt-1 text-white/70 hover:text-white h-5"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsBottomSheetExpanded(!isBottomSheetExpanded);
