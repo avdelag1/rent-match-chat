@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { logger } from './prodLogger';
 
 /**
@@ -9,9 +11,47 @@ import { logger } from './prodLogger';
  * - match: Celebratory pattern for mutual matches
  * - celebration: Extended celebration pattern
  */
-export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'match' | 'celebration') => {
-  // Check if device supports haptics
-  if ('vibrate' in navigator) {
+export const triggerHaptic = async (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'match' | 'celebration') => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      switch (type) {
+        case 'light':
+          await Haptics.impact({ style: ImpactStyle.Light });
+          break;
+        case 'medium':
+          await Haptics.impact({ style: ImpactStyle.Medium });
+          break;
+        case 'heavy':
+          await Haptics.impact({ style: ImpactStyle.Heavy });
+          break;
+        case 'success':
+          await Haptics.impact({ style: ImpactStyle.Light });
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Light }), 100);
+          break;
+        case 'warning':
+          await Haptics.impact({ style: ImpactStyle.Medium });
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Medium }), 150);
+          break;
+        case 'error':
+          await Haptics.impact({ style: ImpactStyle.Heavy });
+          break;
+        case 'match':
+          await Haptics.impact({ style: ImpactStyle.Light });
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Medium }), 100);
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 200);
+          break;
+        case 'celebration':
+          await Haptics.impact({ style: ImpactStyle.Light });
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Light }), 80);
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Medium }), 160);
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 250);
+          setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 350);
+          break;
+      }
+    } catch (e) {
+      logger.error('Haptics error:', e);
+    }
+  } else if ('vibrate' in navigator) {
     switch (type) {
       case 'light':
         navigator.vibrate(10);
@@ -23,47 +63,20 @@ export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | '
         navigator.vibrate(30);
         break;
       case 'success':
-        // Double tap for regular likes
         navigator.vibrate([10, 50, 10]);
         break;
       case 'warning':
-        // Double tap with longer pause for passes
         navigator.vibrate([20, 100, 20]);
         break;
       case 'error':
         navigator.vibrate(50);
         break;
       case 'match':
-        // Premium match pattern: quick succession build-up then strong finish
-        // Creates a "heartbeat" then "celebration" feeling
         navigator.vibrate([15, 30, 15, 30, 30, 50, 40]);
         break;
       case 'celebration':
-        // Extended celebration for special moments (e.g., first match)
         navigator.vibrate([10, 20, 10, 20, 10, 20, 30, 40, 50, 60, 40]);
         break;
-    }
-  }
-
-  // iOS haptics (if available)
-  if ('ontouchstart' in window && (window as any).Haptics) {
-    try {
-      // Map our custom types to iOS styles
-      const iosStyle = type === 'match' || type === 'celebration' ? 'heavy' : type;
-      (window as any).Haptics.impact({ style: iosStyle });
-
-      // For match/celebration, trigger multiple haptics for iOS
-      if (type === 'match') {
-        setTimeout(() => (window as any).Haptics?.impact({ style: 'medium' }), 100);
-        setTimeout(() => (window as any).Haptics?.impact({ style: 'heavy' }), 200);
-      } else if (type === 'celebration') {
-        setTimeout(() => (window as any).Haptics?.impact({ style: 'light' }), 80);
-        setTimeout(() => (window as any).Haptics?.impact({ style: 'medium' }), 160);
-        setTimeout(() => (window as any).Haptics?.impact({ style: 'heavy' }), 250);
-        setTimeout(() => (window as any).Haptics?.impact({ style: 'heavy' }), 350);
-      }
-    } catch (e) {
-      logger.error('iOS haptics error:', e);
     }
   }
 };
