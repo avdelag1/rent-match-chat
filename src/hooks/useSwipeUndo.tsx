@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/prodLogger';
@@ -34,6 +34,48 @@ export function useSwipeUndo() {
   // Get deck store undo methods
   const undoClientSwipe = useSwipeDeckStore((state) => state.undoClientSwipe);
   const undoOwnerSwipe = useSwipeDeckStore((state) => state.undoOwnerSwipe);
+
+  // Check if user has unlimited undo from premium subscription
+  const { data: hasUnlimitedUndo = false } = useQuery({
+    queryKey: ['has-unlimited-undo'],
+    queryFn: async () => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return false;
+
+      const { data, error } = await supabase.rpc('has_unlimited_undo', {
+        p_user_id: user.id
+      });
+
+      if (error) {
+        logger.error('Error checking unlimited undo:', error);
+        return false;
+      }
+
+      return data || false;
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Get today's undo count
+  const { data: undoTracking } = useQuery({
+    queryKey: ['undo-tracking'],
+    queryFn: async () => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return null;
+
+      const { data, error } = await supabase.rpc('get_or_create_undo_tracking', {
+        p_user_id: user.id
+      });
+
+      if (error) {
+        logger.error('Error fetching undo tracking:', error);
+        return null;
+      }
+
+      return data?.[0] || null;
+    },
+    staleTime: 10 * 1000, // Cache for 10 seconds
+  });
 
   // Persist to localStorage whenever lastSwipe changes
   useEffect(() => {
@@ -76,6 +118,14 @@ export function useSwipeUndo() {
       }
       if (!user) throw new Error('User not authenticated');
 
+      // Check if user has reached daily limit (unless they have unlimited)
+      if (!hasUnlimitedUndo) {
+        const currentCount = undoTracking?.undo_count || 0;
+        if (currentCount >= 1) {
+          throw new Error('DAILY_LIMIT_REACHED');
+        }
+      }
+
       // Remove the last swipe from the likes table
       const { error } = await supabase
         .from('likes')
@@ -96,6 +146,13 @@ export function useSwipeUndo() {
         });
 
       if (error) throw error;
+
+      // Increment undo count (only if not unlimited)
+      if (!hasUnlimitedUndo) {
+        await supabase.rpc('increment_undo_count', {
+          p_user_id: user.id
+        });
+      }
 
       return lastSwipe;
     },
@@ -122,26 +179,48 @@ export function useSwipeUndo() {
       queryClient.invalidateQueries({ queryKey: ['swiped-listings'] });
       queryClient.invalidateQueries({ queryKey: ['likes'] });
       queryClient.invalidateQueries({ queryKey: ['swipe-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['undo-tracking'] }); // Refresh undo count
+
+      const remainingUndos = hasUnlimitedUndo
+        ? 'unlimited'
+        : `${Math.max(0, 1 - ((undoTracking?.undo_count || 0) + 1))} remaining today`;
 
       toast({
         title: "Card Returned",
-        description: `The ${undoneSwipe.targetType === 'listing' ? 'listing' : 'profile'} you passed on has been brought back.`,
+        description: hasUnlimitedUndo
+          ? `The ${undoneSwipe.targetType === 'listing' ? 'listing' : 'profile'} you passed on has been brought back. (Unlimited undo active)`
+          : `The ${undoneSwipe.targetType === 'listing' ? 'listing' : 'profile'} you passed on has been brought back. You have ${remainingUndos}.`,
       });
     },
     onError: (error) => {
       logger.error('Failed to undo swipe:', error);
-      toast({
-        title: "Failed to undo",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+
+      // Check if daily limit reached
+      if (error instanceof Error && error.message === 'DAILY_LIMIT_REACHED') {
+        toast({
+          title: "Daily Limit Reached",
+          description: "You've used your 1 free undo today. Upgrade to premium for unlimited undos!",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Failed to undo",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
   // Can only undo "pass" swipes within 30 seconds - gives users one last chance to reconsider
-  const canUndo = lastSwipe &&
-                  lastSwipe.swipeType === 'pass' &&
-                  (new Date().getTime() - lastSwipe.timestamp.getTime()) < 30000;
+  // Also check daily limit (1 per day for free users, unlimited for premium)
+  const withinTimeWindow = lastSwipe &&
+                           lastSwipe.swipeType === 'pass' &&
+                           (new Date().getTime() - lastSwipe.timestamp.getTime()) < 30000;
+
+  const withinDailyLimit = hasUnlimitedUndo || (undoTracking?.undo_count || 0) < 1;
+
+  const canUndo = withinTimeWindow && withinDailyLimit;
 
   return {
     recordSwipe,
@@ -149,5 +228,7 @@ export function useSwipeUndo() {
     canUndo,
     isUndoing: undoMutation.isPending,
     lastSwipe,
+    hasUnlimitedUndo,
+    remainingUndos: hasUnlimitedUndo ? 999 : Math.max(0, 1 - (undoTracking?.undo_count || 0)),
   };
 }
