@@ -259,11 +259,11 @@ const InstantImageGallery = memo(({
       decodeImageWithTimeout(targetSrc).then((success) => {
         if (!mountedRef.current) return;
         if (success) {
-          globalSwipeImageCache.set(targetSrc, { loaded: true, decoded: true, failed: false });
+          globalSwipeImageCache.set(targetSrc, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
           loadedImagesRef.current.add(targetSrc);
           setShowImage(true);
         } else {
-          globalSwipeImageCache.set(targetSrc, { loaded: false, decoded: false, failed: true });
+          globalSwipeImageCache.set(targetSrc, { loaded: false, decoded: false, failed: true, lastAccessed: Date.now() });
           failedImagesRef.current.add(targetSrc);
           setDisplayedSrc(FALLBACK_PLACEHOLDER);
           setShowImage(true);
@@ -283,12 +283,12 @@ const InstantImageGallery = memo(({
       decodingRef.current = false;
 
       if (success) {
-        globalSwipeImageCache.set(targetSrc, { loaded: true, decoded: true, failed: false });
+        globalSwipeImageCache.set(targetSrc, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
         loadedImagesRef.current.add(targetSrc);
         setDisplayedSrc(targetSrc);
         setShowImage(true);
       } else {
-        globalSwipeImageCache.set(targetSrc, { loaded: false, decoded: false, failed: true });
+        globalSwipeImageCache.set(targetSrc, { loaded: false, decoded: false, failed: true, lastAccessed: Date.now() });
         failedImagesRef.current.add(targetSrc);
         // Keep previous image if decode failed, or show placeholder
         if (!displayedSrc || displayedSrc === FALLBACK_PLACEHOLDER) {
@@ -334,7 +334,7 @@ const InstantImageGallery = memo(({
         (img as any).fetchPriority = 'low';
         img.onload = () => {
           loadedImagesRef.current.add(optimizedSrc);
-          globalSwipeImageCache.set(optimizedSrc, { loaded: true, decoded: false, failed: false });
+          globalSwipeImageCache.set(optimizedSrc, { loaded: true, decoded: false, failed: false, lastAccessed: Date.now() });
           // Decode in idle time
           if ('decode' in img) {
             img.decode().then(() => {
@@ -345,7 +345,7 @@ const InstantImageGallery = memo(({
         };
         img.onerror = () => {
           failedImagesRef.current.add(optimizedSrc);
-          globalSwipeImageCache.set(optimizedSrc, { loaded: false, decoded: false, failed: true });
+          globalSwipeImageCache.set(optimizedSrc, { loaded: false, decoded: false, failed: true, lastAccessed: Date.now() });
         };
         img.src = optimizedSrc;
       });
@@ -510,7 +510,7 @@ const InstantImageGallery = memo(({
           onError={() => {
             if (displayedSrc !== FALLBACK_PLACEHOLDER && mountedRef.current) {
               failedImagesRef.current.add(displayedSrc);
-              globalSwipeImageCache.set(displayedSrc, { loaded: false, decoded: false, failed: true });
+              globalSwipeImageCache.set(displayedSrc, { loaded: false, decoded: false, failed: true, lastAccessed: Date.now() });
               setDisplayedSrc(FALLBACK_PLACEHOLDER);
               setShowImage(true);
             }

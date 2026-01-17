@@ -178,8 +178,59 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
               </DialogHeader>
 
               {isClientProfile && profile ? (
-                // RENTER/CLIENT PROFILE INSIGHTS - Enhanced Info First Design
+                // RENTER/CLIENT PROFILE INSIGHTS - Photos First Design
                 <div className="space-y-4 sm:space-y-5">
+                  {/* Profile Photos - FIRST - Most Important */}
+                  {profile.profile_images && profile.profile_images.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-3"
+                    >
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-primary" />
+                        Photos ({profile.profile_images.length})
+                      </h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {profile.profile_images.slice(0, 6).map((image, index) => (
+                          <button
+                            key={`profile-img-top-${image}-${index}`}
+                            onClick={() => {
+                              setSelectedImageIndex(index);
+                              setGalleryOpen(true);
+                            }}
+                            className="relative aspect-square rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.98] transition-all shadow-md group"
+                          >
+                            <img
+                              src={image}
+                              alt={`${profile.name} photo ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              loading={index < 3 ? "eager" : "lazy"}
+                              decoding="async"
+                              fetchPriority={index === 0 ? "high" : "auto"}
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                            {index === 0 && (
+                              <div className="absolute top-1.5 left-1.5 bg-primary/90 text-primary-foreground text-[9px] px-1.5 py-0.5 rounded-full font-medium">
+                                Main
+                              </div>
+                            )}
+                            <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                              {index + 1}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {profile.profile_images.length > 6 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          +{profile.profile_images.length - 6} more photos
+                        </p>
+                      )}
+                      <p className="text-xs text-primary text-center">Tap any photo to view full size</p>
+                    </motion.div>
+                  )}
+
                   {/* Hero Profile Card */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -485,39 +536,6 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     </div>
                   </motion.div>
 
-                  {/* Profile Photos - Now at the bottom with horizontal scroll */}
-                  {profile.profile_images && profile.profile_images.length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <span className="text-lg">📸</span> Photos ({profile.profile_images.length})
-                      </h4>
-                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory scrollbar-hide">
-                        {profile.profile_images.map((image, index) => (
-                          <button
-                            key={`profile-img-${image}-${index}`}
-                            onClick={() => {
-                              setSelectedImageIndex(index);
-                              setGalleryOpen(true);
-                            }}
-                            className="relative flex-shrink-0 w-40 aspect-[3/4] rounded-xl overflow-hidden hover:opacity-90 active:scale-[0.98] transition-all snap-start shadow-lg"
-                          >
-                            <img
-                              src={image}
-                              alt={`${profile.name} photo ${index + 1}`}
-                              className="w-full h-full object-cover"
-                              loading={index < 2 ? "eager" : "lazy"}
-                              decoding="async"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                            <div className="absolute bottom-2 left-2 text-white text-xs font-medium">
-                              {index + 1}/{profile.profile_images.length}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                      <p className="text-xs text-muted-foreground text-center">← Swipe to see more • Tap to zoom</p>
-                    </div>
-                  )}
                 </div>
               ) : listing ? (
                 // PROPERTY LISTING INSIGHTS - Enhanced version

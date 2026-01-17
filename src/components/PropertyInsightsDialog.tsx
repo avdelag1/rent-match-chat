@@ -231,6 +231,52 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
         ) : (
         <ScrollArea className="flex-1 h-full overflow-x-hidden">
           <div className="space-y-3 sm:space-y-4 py-3 px-3 sm:px-4 pb-4 sm:pb-6 w-full max-w-full overflow-x-hidden">
+            {/* Property Images Grid - FIRST - Most Important */}
+            {listing.images && listing.images.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-primary" />
+                  Property Photos ({listing.images.length})
+                </h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {listing.images.slice(0, 6).map((image, idx) => (
+                    <button
+                      key={`image-top-${listing.id}-${idx}`}
+                      onClick={() => {
+                        setSelectedImageIndex(idx);
+                        setGalleryOpen(true);
+                      }}
+                      className="relative aspect-square rounded-xl overflow-hidden hover:opacity-80 transition-opacity shadow-md group"
+                    >
+                      <img
+                        src={image}
+                        alt={`Property ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        loading={idx < 3 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={idx === 0 ? "high" : "auto"}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                      {idx === 0 && (
+                        <div className="absolute top-1.5 left-1.5 bg-primary/90 text-primary-foreground text-[9px] px-1.5 py-0.5 rounded-full font-medium">
+                          Main
+                        </div>
+                      )}
+                      <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                        {idx + 1}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {listing.images.length > 6 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    +{listing.images.length - 6} more photos
+                  </p>
+                )}
+                <p className="text-xs text-primary text-center">Tap any photo to view full size</p>
+              </div>
+            )}
+
             {/* Hot Listing Alert */}
             {propertyInsights?.isHotListing && (
               <div className="p-3 bg-gradient-to-r from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 flex items-center gap-3">
@@ -756,37 +802,6 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Property Images Grid - Moved to Bottom */}
-            {listing.images && listing.images.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="font-semibold text-sm flex items-center gap-2">
-                  <span className="text-lg">📸</span> Property Photos ({listing.images.length})
-                </h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {listing.images.map((image, idx) => (
-                    <button
-                      key={`image-${listing.id}-${idx}`}
-                      onClick={() => {
-                        setSelectedImageIndex(idx);
-                        setGalleryOpen(true);
-                      }}
-                      className="relative aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                    >
-                      <img
-                        src={image}
-                        alt={`Property ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                        loading={idx < 3 ? "eager" : "lazy"}
-                        decoding="async"
-                        fetchPriority={idx === 0 ? "high" : "auto"}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground text-center">Tap any photo to view full size</p>
               </div>
             )}
           </div>

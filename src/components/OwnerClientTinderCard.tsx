@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, memo, useRef } from 'react';
+import { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
 import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart, Info, DollarSign, User, RotateCcw, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ const globalClientImageCache = new Map<string, {
   loaded: boolean;
   decoded: boolean;
   failed: boolean;
+  lastAccessed: number;
 }>();
 
 /**
@@ -60,7 +61,7 @@ export function preloadClientImageToCache(url: string): Promise<boolean> {
   }
 
   // Start loading
-  globalClientImageCache.set(url, { loaded: true, decoded: false, failed: false });
+  globalClientImageCache.set(url, { loaded: true, decoded: false, failed: false, lastAccessed: Date.now() });
 
   return new Promise((resolve) => {
     const img = new Image();
@@ -78,18 +79,18 @@ export function preloadClientImageToCache(url: string): Promise<boolean> {
         if ('decode' in img) {
           await img.decode();
         }
-        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false });
+        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
         cleanup();
         resolve(true);
       } catch {
-        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false });
+        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
         cleanup();
         resolve(true);
       }
     };
 
     img.onerror = () => {
-      globalClientImageCache.set(url, { loaded: true, decoded: false, failed: true });
+      globalClientImageCache.set(url, { loaded: true, decoded: false, failed: true, lastAccessed: Date.now() });
       cleanup();
       resolve(false);
     };
@@ -99,7 +100,7 @@ export function preloadClientImageToCache(url: string): Promise<boolean> {
     // Timeout after 3 seconds
     setTimeout(() => {
       if (!globalClientImageCache.get(url)?.decoded) {
-        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false });
+        globalClientImageCache.set(url, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
         cleanup();
         resolve(true);
       }
@@ -230,14 +231,14 @@ const ClientImageGallery = memo(({
         }}
         onLoad={() => {
           if (!globalClientImageCache.get(displaySrc)?.decoded) {
-            globalClientImageCache.set(displaySrc, { loaded: true, decoded: true, failed: false });
+            globalClientImageCache.set(displaySrc, { loaded: true, decoded: true, failed: false, lastAccessed: Date.now() });
             forceUpdate(n => n + 1);
           }
         }}
         onError={() => {
           if (!failedImagesRef.current.has(displaySrc)) {
             failedImagesRef.current.add(displaySrc);
-            globalClientImageCache.set(displaySrc, { loaded: true, decoded: false, failed: true });
+            globalClientImageCache.set(displaySrc, { loaded: true, decoded: false, failed: true, lastAccessed: Date.now() });
             forceUpdate(n => n + 1);
           }
         }}
