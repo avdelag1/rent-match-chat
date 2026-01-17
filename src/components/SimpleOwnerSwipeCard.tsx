@@ -6,9 +6,8 @@
  */
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo, animate, AnimatePresence } from 'framer-motion';
-import { MapPin, X, Share2, Heart, DollarSign, User, Briefcase, MessageCircle, RotateCcw } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
+import { MapPin, X, Share2, Heart, DollarSign, Briefcase, MessageCircle, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { triggerHaptic } from '@/utils/haptics';
 
