@@ -3,12 +3,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/prodLogger';
+import { useSwipeDeckStore } from '@/state/swipeDeckStore';
 
 interface LastSwipe {
   targetId: string;
   targetType: 'listing' | 'profile';
   swipeType: 'like' | 'pass' | 'super_like';
   timestamp: Date;
+  category?: string; // For owner swipes (profile type) - e.g., 'property', 'moto', etc.
 }
 
 const UNDO_STORAGE_KEY = 'lastSwipe';
@@ -29,6 +31,10 @@ export function useSwipeUndo() {
   });
   const queryClient = useQueryClient();
 
+  // Get deck store undo methods
+  const undoClientSwipe = useSwipeDeckStore((state) => state.undoClientSwipe);
+  const undoOwnerSwipe = useSwipeDeckStore((state) => state.undoOwnerSwipe);
+
   // Persist to localStorage whenever lastSwipe changes
   useEffect(() => {
     if (lastSwipe) {
@@ -38,13 +44,25 @@ export function useSwipeUndo() {
     }
   }, [lastSwipe]);
 
-  const recordSwipe = useCallback((targetId: string, targetType: 'listing' | 'profile', swipeType: 'like' | 'pass' | 'super_like') => {
-    setLastSwipe({
-      targetId,
-      targetType,
-      swipeType,
-      timestamp: new Date(),
-    });
+  const recordSwipe = useCallback((
+    targetId: string,
+    targetType: 'listing' | 'profile',
+    swipeType: 'like' | 'pass' | 'super_like',
+    category?: string
+  ) => {
+    // Only allow undoing "pass" swipes (dislikes) - users get one last chance to reconsider
+    if (swipeType === 'pass') {
+      setLastSwipe({
+        targetId,
+        targetType,
+        swipeType,
+        timestamp: new Date(),
+        category,
+      });
+    } else {
+      // Clear any previous undo state if they liked something
+      setLastSwipe(null);
+    }
   }, []);
 
   const undoMutation = useMutation({
@@ -82,9 +100,21 @@ export function useSwipeUndo() {
       return lastSwipe;
     },
     onSuccess: (undoneSwipe) => {
+      // Bring the card back in the deck by calling the appropriate undo method
+      let deckUndoSuccess = false;
+      if (undoneSwipe.targetType === 'listing') {
+        deckUndoSuccess = undoClientSwipe();
+      } else if (undoneSwipe.targetType === 'profile' && undoneSwipe.category) {
+        deckUndoSuccess = undoOwnerSwipe(undoneSwipe.category);
+      }
+
+      if (!deckUndoSuccess) {
+        logger.warn('[useSwipeUndo] Deck undo failed - card may not return to deck immediately');
+      }
+
       // Clear the last swipe
       setLastSwipe(null);
-      
+
       // Invalidate and refetch relevant queries
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       queryClient.invalidateQueries({ queryKey: ['smart-listings'] });
@@ -92,10 +122,10 @@ export function useSwipeUndo() {
       queryClient.invalidateQueries({ queryKey: ['swiped-listings'] });
       queryClient.invalidateQueries({ queryKey: ['likes'] });
       queryClient.invalidateQueries({ queryKey: ['swipe-analytics'] });
-      
+
       toast({
-        title: "Swipe undone",
-        description: `Your ${undoneSwipe.swipeType} has been reversed.`,
+        title: "Card Returned",
+        description: `The ${undoneSwipe.targetType === 'listing' ? 'listing' : 'profile'} you passed on has been brought back.`,
       });
     },
     onError: (error) => {
@@ -108,7 +138,10 @@ export function useSwipeUndo() {
     },
   });
 
-  const canUndo = lastSwipe && (new Date().getTime() - lastSwipe.timestamp.getTime()) < 30000; // 30 seconds
+  // Can only undo "pass" swipes within 30 seconds - gives users one last chance to reconsider
+  const canUndo = lastSwipe &&
+                  lastSwipe.swipeType === 'pass' &&
+                  (new Date().getTime() - lastSwipe.timestamp.getTime()) < 30000;
 
   return {
     recordSwipe,
