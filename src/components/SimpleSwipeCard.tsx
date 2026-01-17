@@ -337,7 +337,7 @@ function SimpleSwipeCardComponent({
           )}
           
           {/* Bottom gradient */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
+          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none z-10" />
         </div>
         
         {/* LIKE overlay */}
