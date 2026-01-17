@@ -7,7 +7,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useResponsiveContext } from '@/contexts/ResponsiveContext'
 import { prefetchRoleRoutes } from '@/utils/routePrefetcher'
 import { logger } from '@/utils/prodLogger'
-import { Gamepad2 } from 'lucide-react'
 
 // New Mobile Navigation Components
 import { TopBar } from '@/components/TopBar'
@@ -648,22 +647,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           userRole={userRole === 'admin' ? 'client' : userRole}
         />
       </Suspense>
-
-      {/* Floating Arcade Game Button */}
-      {!isCameraRoute && (
-        <button
-          onClick={() => navigate('/game/bubble-chain')}
-          className="fixed top-20 right-4 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 shadow-lg hover:shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center group"
-          style={{
-            top: 'calc(var(--safe-top) + 64px)',
-            right: 'calc(var(--safe-right) + 16px)',
-          }}
-          aria-label="Play Bubble Chain Game"
-        >
-          <Gamepad2 className="w-7 h-7 text-white group-hover:rotate-12 transition-transform duration-200" />
-          <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-200" />
-        </button>
-      )}
     </div>
   )
 }
