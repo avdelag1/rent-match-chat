@@ -259,8 +259,8 @@ const ClientSwipeContainerComponent = ({
         targetType: 'profile'
       }).catch(() => {}),
 
-      // Record for undo
-      Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass'))
+      // Record for undo - pass category so deck can be properly restored
+      Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass', category))
     ]).catch(err => {
       // Non-critical - user already saw the swipe complete
       logger.error('[ClientSwipeContainer] Background swipe tasks failed:', err);
