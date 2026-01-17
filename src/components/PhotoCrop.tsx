@@ -237,7 +237,10 @@ const PhotoCrop: React.FC<PhotoCropProps> = ({
         canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.75);
       });
 
-      const compressed = await compressImage(blob, {
+      // Convert Blob to File for compressImage compatibility
+      const file = new File([blob], 'cropped-photo.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+
+      const compressed = await compressImage(file, {
         maxSizeMB: 0.4,
         maxWidthOrHeight: 2048,
         useWebWorker: true,

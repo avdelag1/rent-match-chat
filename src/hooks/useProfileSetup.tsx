@@ -90,18 +90,12 @@ export function useProfileSetup() {
         .single();
 
       if (!activError && activationData) {
-        // Create referral tracking record
-        await supabase
-          .from('user_referrals')
-          .insert({
-            referrer_id: referrerId,
-            referred_user_id: newUserId,
-            referral_code: referrerId,
-            referral_source: referralData.source || '/',
-            reward_granted: true,
-            reward_activation_id: activationData.id,
-          })
-          .then(() => {});
+        // Referral tracking - just log since user_referrals table doesn't exist
+        logger.info('[ProfileSetup] Referral reward granted:', {
+          referrerId,
+          newUserId,
+          activationId: activationData.id,
+        });
 
         // Create notification for referrer (silent, non-blocking)
         supabase

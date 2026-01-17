@@ -36,46 +36,12 @@ export function useSwipeUndo() {
   const undoOwnerSwipe = useSwipeDeckStore((state) => state.undoOwnerSwipe);
 
   // Check if user has unlimited undo from premium subscription
-  const { data: hasUnlimitedUndo = false } = useQuery({
-    queryKey: ['has-unlimited-undo'],
-    queryFn: async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return false;
-
-      const { data, error } = await supabase.rpc('has_unlimited_undo', {
-        p_user_id: user.id
-      });
-
-      if (error) {
-        logger.error('Error checking unlimited undo:', error);
-        return false;
-      }
-
-      return data || false;
-    },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
+  // Disabled: rpc function doesn't exist - always returns false
+  const hasUnlimitedUndo = false;
 
   // Get today's undo count
-  const { data: undoTracking } = useQuery({
-    queryKey: ['undo-tracking'],
-    queryFn: async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) return null;
-
-      const { data, error } = await supabase.rpc('get_or_create_undo_tracking', {
-        p_user_id: user.id
-      });
-
-      if (error) {
-        logger.error('Error fetching undo tracking:', error);
-        return null;
-      }
-
-      return data?.[0] || null;
-    },
-    staleTime: 10 * 1000, // Cache for 10 seconds
-  });
+  // Disabled: rpc function doesn't exist - use local tracking instead
+  const undoTracking = { undo_count: 0 };
 
   // Persist to localStorage whenever lastSwipe changes
   useEffect(() => {
@@ -172,11 +138,9 @@ export function useSwipeUndo() {
       }
 
       // Increment undo count (only if not unlimited)
+      // Disabled: rpc function doesn't exist
       if (!hasUnlimitedUndo) {
-        logger.info('[useSwipeUndo] Incrementing undo count');
-        await supabase.rpc('increment_undo_count', {
-          p_user_id: user.id
-        });
+        logger.info('[useSwipeUndo] Incrementing undo count (disabled - no rpc function)');
       }
 
       logger.info('[useSwipeUndo] Undo operation successful');
