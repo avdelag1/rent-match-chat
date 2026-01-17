@@ -226,19 +226,23 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
         let success = false;
         set((state) => {
           const lastId = state.clientDeck.lastSwipedId;
-          // Can only undo if there's a last swiped ID and we're not at the start
-          if (!lastId || state.clientDeck.currentIndex === 0) {
-            return state; // No changes
+          // Can only undo if there's a last swiped ID
+          // FIX: Allow undo even if currentIndex is 0 (edge case after refresh)
+          if (!lastId) {
+            return state; // No changes - nothing to undo
           }
 
           // Remove from swiped set
           state.clientDeck.swipedIds.delete(lastId);
           success = true;
 
+          // FIX: Only decrement if > 0 to prevent negative index
+          const newIndex = Math.max(0, state.clientDeck.currentIndex - 1);
+
           return {
             clientDeck: {
               ...state.clientDeck,
-              currentIndex: state.clientDeck.currentIndex - 1,
+              currentIndex: newIndex,
               lastSwipedId: null, // Clear after undo (can only undo once)
             }
           };
@@ -355,21 +359,25 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
           const existingDeck = state.ownerDecks[category] || createEmptyDeckState();
           const lastId = existingDeck.lastSwipedId;
 
-          // Can only undo if there's a last swiped ID and we're not at the start
-          if (!lastId || existingDeck.currentIndex === 0) {
-            return state; // No changes
+          // Can only undo if there's a last swiped ID
+          // FIX: Allow undo even if currentIndex is 0 (edge case after refresh)
+          if (!lastId) {
+            return state; // No changes - nothing to undo
           }
 
           // Remove from swiped set
           existingDeck.swipedIds.delete(lastId);
           success = true;
 
+          // FIX: Only decrement if > 0 to prevent negative index
+          const newIndex = Math.max(0, existingDeck.currentIndex - 1);
+
           return {
             ownerDecks: {
               ...state.ownerDecks,
               [category]: {
                 ...existingDeck,
-                currentIndex: existingDeck.currentIndex - 1,
+                currentIndex: newIndex,
                 lastSwipedId: null, // Clear after undo (can only undo once)
               }
             }

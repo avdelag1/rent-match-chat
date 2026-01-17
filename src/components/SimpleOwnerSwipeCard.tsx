@@ -11,7 +11,6 @@ import { MapPin, X, Share2, Heart, DollarSign, User, Briefcase, MessageCircle, R
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { triggerHaptic } from '@/utils/haptics';
-import { swipeQueue } from '@/lib/swipe/SwipeQueue';
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -166,7 +165,8 @@ function SimpleOwnerSwipeCardComponent({
       const direction = offset > 0 ? 'right' : 'left';
 
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
-      swipeQueue.queueSwipe(profile.user_id, direction, 'profile');
+
+      // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
 
       // Calculate exit distance based on viewport to ensure card fully exits
       const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
@@ -232,7 +232,8 @@ function SimpleOwnerSwipeCardComponent({
     isExitingRef.current = true;
 
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
-    swipeQueue.queueSwipe(profile.user_id, direction, 'profile');
+
+    // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
 
     // Calculate exit distance based on viewport to ensure card fully exits
     const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();

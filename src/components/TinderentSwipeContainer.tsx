@@ -306,8 +306,29 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Hooks for functionality
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
-  const { recordSwipe, undoLastSwipe, canUndo, isUndoing } = useSwipeUndo();
+  const { recordSwipe, undoLastSwipe, canUndo, isUndoing, undoSuccess, resetUndoState } = useSwipeUndo();
   const startConversation = useStartConversation();
+
+  // FIX: Sync local state when undo completes successfully
+  useEffect(() => {
+    if (undoSuccess) {
+      // Get the updated state from the store
+      const storeState = useSwipeDeckStore.getState();
+      const newIndex = storeState.clientDeck.currentIndex;
+
+      // Sync local refs and state with store
+      currentIndexRef.current = newIndex;
+      setCurrentIndex(newIndex);
+
+      // Sync the entire swipedIds set with store (source of truth)
+      swipedIdsRef.current = new Set(storeState.clientDeck.swipedIds);
+
+      // Reset undo state so this effect doesn't run again
+      resetUndoState();
+
+      logger.info('[TinderentSwipeContainer] Synced local state after undo, new index:', newIndex);
+    }
+  }, [undoSuccess, resetUndoState]);
   const recordProfileView = useRecordProfileView();
 
   // PERF: Initialize swipeQueue with user ID for fire-and-forget background writes

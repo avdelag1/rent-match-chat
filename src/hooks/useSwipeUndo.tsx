@@ -92,41 +92,62 @@ export function useSwipeUndo() {
     swipeType: 'like' | 'pass' | 'super_like',
     category?: string
   ) => {
+    logger.info('[useSwipeUndo] recordSwipe called', {
+      targetId,
+      targetType,
+      swipeType,
+      category,
+    });
+
     // Only allow undoing "pass" swipes (dislikes) - users get one last chance to reconsider
     if (swipeType === 'pass') {
-      setLastSwipe({
+      const newLastSwipe = {
         targetId,
         targetType,
         swipeType,
         timestamp: new Date(),
         category,
-      });
+      };
+      setLastSwipe(newLastSwipe);
+      logger.info('[useSwipeUndo] Set lastSwipe for potential undo:', newLastSwipe.targetId);
     } else {
       // Clear any previous undo state if they liked something
       setLastSwipe(null);
+      logger.info('[useSwipeUndo] Cleared lastSwipe (swipe type was not pass)');
     }
   }, []);
 
   const undoMutation = useMutation({
     mutationFn: async () => {
-      if (!lastSwipe) throw new Error('No swipe to undo');
+      logger.info('[useSwipeUndo] Starting undo operation', { lastSwipe: lastSwipe?.targetId });
+
+      if (!lastSwipe) {
+        logger.warn('[useSwipeUndo] No swipe to undo - lastSwipe is null');
+        throw new Error('No swipe to undo');
+      }
 
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) {
-        logger.error('Error fetching authenticated user:', authError);
+        logger.error('[useSwipeUndo] Error fetching authenticated user:', authError);
         throw authError;
       }
-      if (!user) throw new Error('User not authenticated');
+      if (!user) {
+        logger.error('[useSwipeUndo] User not authenticated');
+        throw new Error('User not authenticated');
+      }
 
       // Check if user has reached daily limit (unless they have unlimited)
       if (!hasUnlimitedUndo) {
         const currentCount = undoTracking?.undo_count || 0;
+        logger.info('[useSwipeUndo] Daily undo count:', currentCount);
         if (currentCount >= 1) {
+          logger.warn('[useSwipeUndo] Daily limit reached');
           throw new Error('DAILY_LIMIT_REACHED');
         }
       }
 
       // Remove the last swipe from the likes table
+      logger.info('[useSwipeUndo] Deleting from likes table:', lastSwipe.targetId);
       const { error } = await supabase
         .from('likes')
         .delete()
@@ -145,28 +166,45 @@ export function useSwipeUndo() {
           view_type: lastSwipe.targetType,
         });
 
-      if (error) throw error;
+      if (error) {
+        logger.error('[useSwipeUndo] Error deleting from likes:', error);
+        throw error;
+      }
 
       // Increment undo count (only if not unlimited)
       if (!hasUnlimitedUndo) {
+        logger.info('[useSwipeUndo] Incrementing undo count');
         await supabase.rpc('increment_undo_count', {
           p_user_id: user.id
         });
       }
 
+      logger.info('[useSwipeUndo] Undo operation successful');
       return lastSwipe;
     },
     onSuccess: (undoneSwipe) => {
+      logger.info('[useSwipeUndo] onSuccess - processing deck undo', {
+        targetType: undoneSwipe.targetType,
+        targetId: undoneSwipe.targetId,
+        category: undoneSwipe.category,
+      });
+
       // Bring the card back in the deck by calling the appropriate undo method
       let deckUndoSuccess = false;
       if (undoneSwipe.targetType === 'listing') {
+        logger.info('[useSwipeUndo] Calling undoClientSwipe');
         deckUndoSuccess = undoClientSwipe();
-      } else if (undoneSwipe.targetType === 'profile' && undoneSwipe.category) {
-        deckUndoSuccess = undoOwnerSwipe(undoneSwipe.category);
+      } else if (undoneSwipe.targetType === 'profile') {
+        // FIX: Allow undo even without category by using 'default' as fallback
+        const categoryToUse = undoneSwipe.category || 'default';
+        logger.info('[useSwipeUndo] Calling undoOwnerSwipe with category:', categoryToUse);
+        deckUndoSuccess = undoOwnerSwipe(categoryToUse);
       }
 
       if (!deckUndoSuccess) {
-        logger.warn('[useSwipeUndo] Deck undo failed - card may not return to deck immediately');
+        logger.warn('[useSwipeUndo] Deck undo returned false - card may not return to deck immediately');
+      } else {
+        logger.info('[useSwipeUndo] Deck undo successful');
       }
 
       // Clear the last swipe
@@ -230,5 +268,8 @@ export function useSwipeUndo() {
     lastSwipe,
     hasUnlimitedUndo,
     remainingUndos: hasUnlimitedUndo ? 999 : Math.max(0, 1 - (undoTracking?.undo_count || 0)),
+    // FIX: Expose undo success state for containers to sync local state
+    undoSuccess: undoMutation.isSuccess,
+    resetUndoState: undoMutation.reset,
   };
 }
