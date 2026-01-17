@@ -226,6 +226,52 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
 
         <ScrollArea className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="space-y-3 sm:space-y-4 py-3 px-3 sm:px-4 w-full max-w-full overflow-x-hidden">
+            {/* Profile Photos Gallery - FIRST - Most Important */}
+            {profile.profile_images && profile.profile_images.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-primary" />
+                  Client Photos ({profile.profile_images.length})
+                </h4>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2">
+                  {profile.profile_images.slice(0, 6).map((image, index) => (
+                    <div
+                      key={`profile-image-${image}`}
+                      className="relative aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group shadow-md"
+                      onClick={() => handleImageClick(index)}
+                    >
+                      <img
+                        src={image}
+                        alt={`Client photo ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        loading={index < 3 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index === 0 ? "high" : "auto"}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                      </div>
+                      {index === 0 && (
+                        <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground text-[10px] px-2 py-0.5 rounded-full font-medium">
+                          Main
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {profile.profile_images.length > 6 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    +{profile.profile_images.length - 6} more photos
+                  </p>
+                )}
+                <p className="text-xs text-primary text-center mt-1">Tap any photo to view full size</p>
+              </motion.div>
+            )}
+
             {/* Hot Prospect Alert */}
             {renterInsights?.isHotProspect && (
               <motion.div
@@ -252,13 +298,13 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-br from-primary/15 to-secondary/15 p-3 sm:p-6 rounded-lg border border-primary/30 shadow-lg backdrop-blur-sm"
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="bg-gradient-to-br from-primary/15 to-secondary/15 p-3 sm:p-5 rounded-xl border border-primary/30 shadow-lg backdrop-blur-sm"
             >
-              <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg sm:text-2xl font-bold break-words">{profile.name}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold break-words">{profile.name}</h3>
                     {profile.verified && (
                       <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                         <CheckCircle className="w-3 h-3 mr-1" />
@@ -266,54 +312,60 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                       </Badge>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     {profile.age && (
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{profile.age} years old</span>
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{profile.age} yrs</span>
                       </div>
                     )}
                     {profile.gender && (
+                      <span className="text-muted-foreground/50">•</span>
+                    )}
+                    {profile.gender && (
                       <div className="flex items-center gap-1">
-                        <User className="w-4 h-4" />
+                        <User className="w-3.5 h-3.5" />
                         <span>{profile.gender}</span>
                       </div>
                     )}
                     {(profile.location || profile.city) && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{profile.city || 'Location verified'}</span>
-                      </div>
+                      <>
+                        <span className="text-muted-foreground/50">•</span>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>{profile.city || 'Location verified'}</span>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
                 {/* Match Potential Badge */}
                 {renterInsights && (
-                  <div className={`text-center p-3 rounded-xl border ${
+                  <div className={`text-center p-2.5 rounded-xl border ${
                     renterInsights.matchPotential >= 80 ? 'bg-green-500/10 border-green-500/30' :
                     renterInsights.matchPotential >= 60 ? 'bg-blue-500/10 border-blue-500/30' :
                     renterInsights.matchPotential >= 40 ? 'bg-yellow-500/10 border-yellow-500/30' :
                     'bg-gray-500/10 border-gray-500/30'
                   }`}>
-                    <div className={`text-2xl font-bold ${
+                    <div className={`text-xl font-bold ${
                       renterInsights.matchPotential >= 80 ? 'text-green-600 dark:text-green-400' :
                       renterInsights.matchPotential >= 60 ? 'text-blue-600 dark:text-blue-400' :
                       renterInsights.matchPotential >= 40 ? 'text-yellow-600 dark:text-yellow-400' :
                       'text-gray-600 dark:text-gray-400'
                     }`}>{renterInsights.matchPotential}%</div>
-                    <div className="text-[10px] text-muted-foreground">Match Score</div>
+                    <div className="text-[10px] text-muted-foreground">Match</div>
                   </div>
                 )}
               </div>
 
               {/* Recommendation Stars */}
-              <div className="flex items-center gap-2 pt-3 border-t border-primary/10">
-                <span className="text-sm font-medium">Owner Rating:</span>
-                <div className="flex gap-1">
+              <div className="flex items-center gap-2 pt-2 border-t border-primary/10">
+                <span className="text-xs font-medium text-muted-foreground">Rating:</span>
+                <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
+                      className={`w-4 h-4 ${
                         i < recommendationScore
                           ? 'fill-yellow-400 text-yellow-400'
                           : 'text-muted-foreground/30'
@@ -321,43 +373,11 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground ml-2">
-                  {recommendationScore}/5 stars
+                <span className="text-xs text-muted-foreground">
+                  {recommendationScore}/5
                 </span>
               </div>
             </motion.div>
-
-            {/* Profile Photos Gallery */}
-            {profile.profile_images && profile.profile_images.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <Eye className="w-5 h-5 text-primary" />
-                  Client Photos
-                </h4>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2">
-                  {profile.profile_images.slice(0, 6).map((image, index) => (
-                    <div
-                      key={`profile-image-${image}`}
-                      className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
-                      onClick={() => handleImageClick(index)}
-                    >
-                      <img
-                        src={image}
-                        alt={`Client photo ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        loading={index < 3 ? "eager" : "lazy"}
-                        decoding="async"
-                        fetchPriority={index === 0 ? "high" : "auto"}
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-primary text-center">Click any photo to view full size</p>
-              </div>
-            )}
 
             {/* Client Statistics */}
             <div>

@@ -279,7 +279,7 @@ const InstantImageGallery = memo(({
           onError={() => {
             if (displayedSrc !== FALLBACK_PLACEHOLDER && mountedRef.current) {
               failedImagesRef.current.add(displayedSrc);
-              globalSwipeImageCache.set(displayedSrc, { loaded: false, decoded: false, failed: true });
+              globalSwipeImageCache.set(displayedSrc, { loaded: false, decoded: false, failed: true, lastAccessed: Date.now() });
               setDisplayedSrc(FALLBACK_PLACEHOLDER);
               setShowImage(true);
             }
