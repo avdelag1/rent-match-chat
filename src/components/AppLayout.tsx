@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { useState, useMemo, useRef, useLayoutEffect } from 'react';
+import { useMemo, useRef, useLayoutEffect } from 'react';
 import { SkipToMainContent, useFocusManagement } from './AccessibilityHelpers';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useOfflineDetection } from '@/hooks/useOfflineDetection';
@@ -130,8 +130,6 @@ function getStableRouteKey(pathname: string): string {
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const prevLocationRef = useRef(location.pathname);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isVisible, setIsVisible] = useState(true); // Safety fallback to ensure content is always visible
 
   // Get responsive state for adaptive behavior
   const responsive = useResponsiveContext();
@@ -170,46 +168,10 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Update previous location synchronously using useLayoutEffect
   // This ensures the ref is updated before the next render calculation
   useLayoutEffect(() => {
-    // Only mark as transitioning if we're actually animating (key changed)
-    if (shouldAnimate) {
-      setIsTransitioning(true);
-      setIsVisible(false); // Temporarily hide during animation
-    }
-
     // Update refs immediately for next calculation
     prevLocationRef.current = location.pathname;
     prevRouteKey.current = routeKey;
-
-    // End transition instantly - match ultra-fast animation duration
-    // Using RAF ensures smooth frame timing
-    if (shouldAnimate) {
-      const timer = requestAnimationFrame(() => {
-        setTimeout(() => {
-          setIsTransitioning(false);
-          setIsVisible(true); // Ensure visibility after animation
-        }, responsive.isMobile ? 80 : 100);
-      });
-      return () => cancelAnimationFrame(timer);
-    } else {
-      // If not animating, ensure immediate visibility
-      setIsVisible(true);
-    }
-  }, [location.pathname, routeKey, responsive.isMobile, shouldAnimate]);
-
-  // SAFETY FALLBACK: Force visibility after max timeout to prevent invisible content
-  // If animation fails or gets stuck, this ensures content becomes visible
-  useLayoutEffect(() => {
-    const safetyTimer = setTimeout(() => {
-      if (!isVisible) {
-        setIsVisible(true);
-        if (import.meta.env.DEV) {
-          console.warn('AppLayout: Safety fallback triggered - forced content visibility');
-        }
-      }
-    }, 500); // 500ms max before forcing visibility
-
-    return () => clearTimeout(safetyTimer);
-  }, [isVisible, location.pathname]);
+  }, [location.pathname, routeKey]);
 
   // Ultra-fast transition - imperceptible delay
   const fastTransition = {
@@ -239,18 +201,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               // GPU acceleration for smooth slide
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
-              // SAFETY FALLBACK: Ensure content is always visible after timeout
-              opacity: isVisible ? 1 : undefined,
             }}
             layout={false}
-            onAnimationComplete={() => {
-              // Ensure transform is reset after animation completes
-              if (isTransitioning) {
-                setIsTransitioning(false);
-              }
-              // Ensure visibility after animation
-              setIsVisible(true);
-            }}
           >
             {children}
           </motion.div>

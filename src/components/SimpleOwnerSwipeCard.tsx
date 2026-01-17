@@ -7,9 +7,9 @@
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
-import { MapPin, X, Share2, Heart, DollarSign, Briefcase, MessageCircle, RotateCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MapPin, DollarSign, Briefcase } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
+import { SwipeActionButtonBar } from './SwipeActionButtonBar';
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -371,72 +371,20 @@ function SimpleOwnerSwipeCardComponent({
         
       </motion.div>
       
-      {/* Action buttons */}
+      {/* Premium Floating Action Button Bar */}
       {!hideActions && (
-        <div className="flex justify-center items-center gap-4 py-4 px-4">
-          <Button
-            variant="outline"
-            size="icon"
-            className="w-14 h-14 rounded-full border-2 border-red-400 bg-background hover:bg-red-50 dark:hover:bg-red-950"
-            onClick={() => handleButtonSwipe('left')}
-          >
-            <X className="w-6 h-6 text-red-500" />
-          </Button>
-
-          {/* Undo Button - Always visible, disabled when can't undo */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="w-12 h-12 rounded-full border-2 border-amber-400 bg-background hover:bg-amber-50 dark:hover:bg-amber-950 disabled:opacity-40 disabled:cursor-not-allowed"
-            disabled={!canUndo}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (canUndo && onUndo) {
-                triggerHaptic('light');
-                onUndo();
-              }
-            }}
-          >
-            <RotateCcw className="w-5 h-5 text-amber-500" />
-          </Button>
-
-          {onMessage && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-12 h-12 rounded-full border-2 border-cyan-400 bg-background hover:bg-cyan-50 dark:hover:bg-cyan-950"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMessage();
-              }}
-            >
-              <MessageCircle className="w-5 h-5 text-cyan-500" />
-            </Button>
-          )}
-
-          {onShare && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-12 h-12 rounded-full border-2 border-purple-400 bg-background hover:bg-purple-50 dark:hover:bg-purple-950"
-              onClick={(e) => {
-                e.stopPropagation();
-                triggerHaptic('light');
-                onShare();
-              }}
-            >
-              <Share2 className="w-5 h-5 text-purple-500" />
-            </Button>
-          )}
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="w-14 h-14 rounded-full border-2 border-green-400 bg-background hover:bg-green-50 dark:hover:bg-green-950"
-            onClick={() => handleButtonSwipe('right')}
-          >
-            <Heart className="w-6 h-6 text-green-500" />
-          </Button>
+        <div
+          className="absolute bottom-4 left-0 right-0 flex justify-center px-4"
+          style={{ zIndex: 50 }}
+        >
+          <SwipeActionButtonBar
+            onLike={() => handleButtonSwipe('right')}
+            onDislike={() => handleButtonSwipe('left')}
+            onShare={onShare}
+            onUndo={onUndo}
+            onMessage={onMessage}
+            canUndo={canUndo}
+          />
         </div>
       )}
     </div>
