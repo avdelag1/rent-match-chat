@@ -437,7 +437,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
 
   return (
-    <div className="app-root bg-background min-h-screen min-h-dvh overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
+    <div className="app-root bg-background min-h-screen min-h-dvh overflow-hidden relative" style={{ width: '100%', maxWidth: '100vw' }}>
       {/* PERF FIX: NotificationSystem has its own Suspense boundary to never suspend dashboard paint */}
       <Suspense fallback={null}>
         <NotificationSystem />
@@ -458,7 +458,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       {/* When on camera route, use full screen (no padding for TopBar/BottomNav) */}
       <main
-        className="fixed inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
+        className="absolute inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
           paddingTop: isCameraRoute ? 'var(--safe-top)' : `calc(${topBarHeight}px + var(--safe-top))`,
           paddingBottom: isCameraRoute ? 'var(--safe-bottom)' : `calc(${bottomNavHeight}px + var(--safe-bottom))`,
@@ -467,6 +467,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           width: '100%',
           maxWidth: '100vw',
           boxSizing: 'border-box',
+          zIndex: 0,
           transform: 'translateZ(0)',
           WebkitOverflowScrolling: 'touch',
           willChange: 'contents',
