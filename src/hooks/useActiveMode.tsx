@@ -161,7 +161,17 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
 
   // FAST mode switch - everything happens synchronously
   const switchMode = useCallback((newMode: ActiveMode) => {
-    if (!user?.id || isSwitching || newMode === localMode) return;
+    // CRITICAL: Prevent mode switch if already switching or if mode is the same
+    // This prevents accidental rapid clicks or event bubbling from causing unwanted switches
+    if (!user?.id || isSwitching || newMode === localMode) {
+      logger.info('[ActiveMode] switchMode blocked:', {
+        hasUser: !!user?.id,
+        isSwitching,
+        newMode,
+        currentMode: localMode
+      });
+      return;
+    }
 
     // 1. Set switching flag
     setIsSwitching(true);

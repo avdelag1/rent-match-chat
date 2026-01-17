@@ -108,7 +108,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   const navItems = userRole === 'client' ? clientNavItems : ownerNavItems;
 
-  const handleNavClick = (item: NavItem) => {
+  const handleNavClick = (event: React.MouseEvent, item: NavItem) => {
+    // Prevent event bubbling to avoid accidental triggers of other buttons
+    event.stopPropagation();
+
     if (item.onClick) {
       item.onClick();
     } else if (item.path) {
@@ -200,12 +203,12 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 ...springConfigs.instant,
                 delay: 0.15 + index * 0.05
               }}
-              onClick={() => handleNavClick(item)}
+              onClick={(e) => handleNavClick(e, item)}
               // INSTANT NAVIGATION: Prefetch on earliest possible events
-              onPointerDown={() => item.path && prefetchRoute(item.path)} // Fires before touch/click
-              onTouchStart={() => item.path && prefetchRoute(item.path)} // Mobile fallback
-              onMouseEnter={() => item.path && prefetchRoute(item.path)} // Desktop hover
-              onFocus={() => item.path && prefetchRoute(item.path)} // Keyboard navigation
+              onPointerDown={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }} // Fires before touch/click
+              onTouchStart={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }} // Mobile fallback
+              onMouseEnter={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }} // Desktop hover
+              onFocus={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }} // Keyboard navigation
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9, transition: springConfigs.instant }}
               className="relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center p-3 rounded-2xl"
