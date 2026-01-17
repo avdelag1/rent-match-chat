@@ -30,7 +30,11 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     await switchMode(newMode);
   };
 
-  const handleToggle = () => {
+  const handleToggle = (event: React.MouseEvent) => {
+    // Prevent event propagation to avoid accidental triggers
+    event.stopPropagation();
+    event.preventDefault();
+
     const newMode = activeMode === 'client' ? 'owner' : 'client';
     handleModeSwitch(newMode);
   };
@@ -45,7 +49,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
   if (variant === 'icon') {
     return (
       <motion.button
-        onClick={handleToggle}
+        onClick={(e) => handleToggle(e)}
         disabled={isSwitching || !canSwitchMode}
         className={cn(
           'relative flex items-center justify-center rounded-xl transition-all duration-200',
@@ -92,7 +96,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
   if (variant === 'toggle') {
     return (
       <motion.button
-        onClick={handleToggle}
+        onClick={(e) => handleToggle(e)}
         disabled={isSwitching || !canSwitchMode}
         className={cn(
           'relative flex items-center gap-2 rounded-full px-3 py-1.5',
@@ -155,7 +159,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
   // Pill variant (default) - Compact with mode indicator + micro-animations
   return (
     <motion.button
-      onClick={handleToggle}
+      onClick={(e) => handleToggle(e)}
       disabled={isSwitching || !canSwitchMode}
       className={cn(
         'relative flex items-center gap-1.5 rounded-xl px-2.5',
