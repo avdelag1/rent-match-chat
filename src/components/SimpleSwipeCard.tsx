@@ -267,18 +267,20 @@ function SimpleSwipeCardComponent({
   }, [listing.id, onSwipe, x]);
 
   // Format price
+  // Format price - moved before conditional render to avoid hook order issues
   const rentalType = (listing as any).rental_duration_type;
-  const formattedPrice = listing.price 
+  const formattedPrice = listing.price
     ? `$${listing.price.toLocaleString()}${rentalType === 'monthly' ? '/mo' : rentalType === 'daily' ? '/day' : ''}`
     : null;
 
+  // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
     // Render a simple static preview for non-top cards
     return (
-      <div 
+      <div
         className="absolute inset-0 rounded-3xl overflow-hidden shadow-xl"
-        style={{ 
-          transform: 'scale(0.95)', 
+        style={{
+          transform: 'scale(0.95)',
           opacity: 0.7,
           pointerEvents: 'none'
         }}
