@@ -111,7 +111,7 @@ function LegendaryLandingPage() {
 
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden transition-all duration-500 ease-out cursor-pointer"
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-x-hidden transition-all duration-500 ease-out cursor-pointer"
       onClick={handleBackgroundTap}
     >
       {/* Animated background */}
