@@ -365,39 +365,6 @@ function SimpleOwnerSwipeCardComponent({
           </div>
         </div>
         
-        {/* Share Button - Top Right Corner */}
-        {onShare && (
-          <div className="absolute top-3 right-3 z-20">
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                triggerHaptic('light');
-                onShare();
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center hover:bg-black/60 transition-colors"
-              style={{ touchAction: 'manipulation' }}
-              title="Share"
-            >
-              <Share2 className="w-5 h-5" />
-            </motion.button>
-          </div>
-        )}
-
-        {/* Verified badge */}
-        {profile.verified && (
-          <div className="absolute top-16 right-4 z-20">
-            <Badge className="bg-blue-500/90 border-blue-400 text-white flex items-center gap-1.5">
-              <User className="w-4 h-4" />
-              <span className="text-sm">Verified</span>
-            </Badge>
-          </div>
-        )}
       </motion.div>
       
       {/* Action buttons */}
@@ -438,6 +405,21 @@ function SimpleOwnerSwipeCardComponent({
               }}
             >
               <MessageCircle className="w-5 h-5 text-cyan-500" />
+            </Button>
+          )}
+
+          {onShare && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-12 h-12 rounded-full border-2 border-purple-400 bg-background hover:bg-purple-50 dark:hover:bg-purple-950"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic('light');
+                onShare();
+              }}
+            >
+              <Share2 className="w-5 h-5 text-purple-500" />
             </Button>
           )}
 

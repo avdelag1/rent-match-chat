@@ -483,7 +483,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
 
                   {/* Profile Photos - Now at the bottom with horizontal scroll */}
                   {profile.profile_images && profile.profile_images.length > 0 && (
