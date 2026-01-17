@@ -992,29 +992,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
   }, []);
 
-  // Main swipe view with 2-card stack (Tinder-like)
+  // Main swipe view - edge-to-edge cards
   return (
     <div
-      className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto px-3"
+      className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto"
       onMouseEnter={handleDeckHover}
     >
       <div className="relative flex-1 w-full">
-        {/* 2-CARD STACK: Render next card behind, current on top */}
-        {/* Next card (behind current) - static placeholder for smooth transitions */}
-        {nextCard && (
-          <div
-            key={`next-${nextCard.id}`}
-            className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden"
-            style={{
-              transform: 'scale(0.95) translateY(8px)',
-              opacity: 0.75,
-              zIndex: 2,
-              pointerEvents: 'none',
-            }}
-          >
-            <div className="w-full h-full bg-muted/40 rounded-3xl" />
-          </div>
-        )}
+        {/* Single card - no background placeholder layer */}
 
         {/* Current card on top - fully interactive */}
         {/* Physics engine handles ALL animations - no Framer Motion wrapper needed */}

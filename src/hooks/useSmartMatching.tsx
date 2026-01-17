@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Listing } from './useListings';
 import { ClientFilterPreferences } from './useClientFilterPreferences';
-import { useVisibilityRanking } from './useVisibilityRanking';
 import { logger } from '@/utils/prodLogger';
 
 // Fisher-Yates shuffle algorithm for randomizing array order

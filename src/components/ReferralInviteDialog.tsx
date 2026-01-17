@@ -28,23 +28,13 @@ export function ReferralInviteDialog({ open, onOpenChange }: ReferralInviteDialo
   const [recipientEmail, setRecipientEmail] = useState('');
   const { user } = useAuth();
 
-  // Fetch user's referral stats
-  const { data: referralStats } = useQuery({
-    queryKey: ['referral-stats', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-
-      const { data, error } = await supabase
-        .from('referral_stats')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id && open,
-  });
+  // Referral stats - disabled since table doesn't exist
+  // Use fallback values instead
+  const referralStats = {
+    invitation_code: user?.id?.substring(0, 8) || 'LOADING',
+    total_referrals: 0,
+    total_rewards_earned: 0,
+  };
 
   // Generate referral URL with user's ID
   const baseUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com';
