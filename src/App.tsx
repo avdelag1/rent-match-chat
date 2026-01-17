@@ -86,9 +86,6 @@ const OwnerProfileCamera = lazy(() => import("./pages/OwnerProfileCamera"));
 const PublicProfilePreview = lazy(() => import("./pages/PublicProfilePreview"));
 const PublicListingPreview = lazy(() => import("./pages/PublicListingPreview"));
 
-// Game pages
-const BubbleChainGame = lazy(() => import("./pages/BubbleChainGame"));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -202,9 +199,6 @@ const App = () => (
                     {/* Public Preview Pages - Shareable Links */}
                     <Route path="/profile/:id" element={<PublicProfilePreview />} />
                     <Route path="/listing/:id" element={<PublicListingPreview />} />
-
-                    {/* Game Pages */}
-                    <Route path="/game/bubble-chain" element={<BubbleChainGame />} />
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
