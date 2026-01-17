@@ -1937,11 +1937,11 @@ html[data-navigation-direction="back"] {
   ) !important;
 }
 
-/* Undo button - Vibrant green */
+/* Undo button - Muted amber */
 .swipe-btn-undo {
   background: linear-gradient(180deg,
-    #4ade80 0%,
-    #22c55e 100%
+    #fbbf24 0%,
+    #f59e0b 100%
   ) !important;
 }
 

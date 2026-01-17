@@ -3,35 +3,28 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Shield, Sparkles, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 import { SwipessLogo } from './SwipessLogo';
-import { AnimatedBackground, BackgroundTheme } from './AnimatedBackground';
-import { RadioPlayer } from './RadioPlayer';
 
-// Background themes with animations and radio stations
-const BACKGROUND_THEMES = [
+// Background color themes that cycle on tap
+const BACKGROUND_COLORS = [
   {
-    theme: 'stars' as BackgroundTheme,
-    statusBar: '#0a0a0a',
-    name: 'Starry Night'
+    bg: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)', // Black
+    statusBar: '#0a0a0a'
   },
   {
-    theme: 'ny-red' as BackgroundTheme,
-    statusBar: '#FF4458',
-    name: 'New York Vibes'
+    bg: 'linear-gradient(135deg, #FF4458 0%, #FE3C72 50%, #FF6B6B 100%)', // Tinder pink/coral
+    statusBar: '#FF4458'
   },
   {
-    theme: 'ducks' as BackgroundTheme,
-    statusBar: '#FFD700',
-    name: 'Happy Ducks'
+    bg: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #FFA500 100%)', // Yellow to orange
+    statusBar: '#FF8C00'
   },
   {
-    theme: 'vehicles-properties' as BackgroundTheme,
-    statusBar: '#667eea',
-    name: 'Urban Life'
+    bg: 'linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)', // Orange to red
+    statusBar: '#f97316'
   },
   {
-    theme: 'sunset-coconuts' as BackgroundTheme,
-    statusBar: '#FF6B35',
-    name: 'Tropical Sunset'
+    bg: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%)', // Warm orange
+    statusBar: '#FF6B35'
   },
 ];
 
@@ -40,7 +33,6 @@ const SWIPE_THRESHOLD = 120;
 function LegendaryLandingPage() {
   const [colorIndex, setColorIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [radioEnabled, setRadioEnabled] = useState(false);
   const isDragging = useRef(false);
 
   // Motion values for swipe - straight horizontal movement
@@ -58,7 +50,7 @@ function LegendaryLandingPage() {
   // Update status bar color when background changes
   useEffect(() => {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) metaThemeColor.setAttribute('content', BACKGROUND_THEMES[colorIndex].statusBar);
+    if (metaThemeColor) metaThemeColor.setAttribute('content', BACKGROUND_COLORS[colorIndex].statusBar);
 
     return () => {
       if (metaThemeColor) metaThemeColor.setAttribute('content', '#1a1a1a');
@@ -72,11 +64,7 @@ function LegendaryLandingPage() {
   const handleBackgroundTap = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only change color if clicking on background, not on the logo button
     if ((e.target as HTMLElement).closest('[data-swipe-logo]')) return;
-    setColorIndex(prev => (prev + 1) % BACKGROUND_THEMES.length);
-    // Auto-enable radio on first tap if not already enabled
-    if (!radioEnabled) {
-      setRadioEnabled(true);
-    }
+    setColorIndex(prev => (prev + 1) % BACKGROUND_COLORS.length);
   };
 
   const handleDragStart = () => {
@@ -107,16 +95,12 @@ function LegendaryLandingPage() {
     }
   };
 
-  const currentTheme = BACKGROUND_THEMES[colorIndex];
-
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-x-hidden transition-all duration-500 ease-out cursor-pointer"
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden transition-all duration-500 ease-out cursor-pointer"
+      style={{ background: BACKGROUND_COLORS[colorIndex].bg }}
       onClick={handleBackgroundTap}
     >
-      {/* Animated background */}
-      <AnimatedBackground theme={currentTheme.theme} isActive={true} />
-
       {/* Subtle overlay for depth */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
@@ -203,13 +187,6 @@ function LegendaryLandingPage() {
 
       {/* Auth Dialog - defaults to client role, user can switch roles after login */}
       <AuthDialog isOpen={authDialogOpen} onClose={closeAuthDialog} role="client" />
-
-      {/* Radio Player */}
-      <RadioPlayer
-        stationKey={currentTheme.theme}
-        isEnabled={radioEnabled}
-        onToggle={() => setRadioEnabled(!radioEnabled)}
-      />
     </div>
   );
 }

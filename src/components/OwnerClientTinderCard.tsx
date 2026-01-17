@@ -271,7 +271,6 @@ interface OwnerClientTinderCardProps {
   onMessage?: () => void;
   onShare?: () => void;
   onUndo?: () => void;
-  canUndo?: boolean;
   isTop?: boolean;
   showNextCard?: boolean;
   hasPremium?: boolean;
@@ -289,7 +288,6 @@ const OwnerClientTinderCardComponent = ({
   onMessage,
   onShare,
   onUndo,
-  canUndo = false,
   isTop = false,
   showNextCard = false,
   hasPremium = false,
@@ -898,28 +896,27 @@ const OwnerClientTinderCardComponent = ({
                 <X className="w-7 h-7" strokeWidth={3} />
               </motion.button>
 
-              {/* Undo Button - Always visible, goes back one swipe */}
-              <motion.button
-                whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (canUndo && onUndo) {
+              {/* Undo Button - Goes back one swipe */}
+              {onUndo && (
+                <motion.button
+                  whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     triggerHaptic('light');
                     onUndo();
-                  }
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-                disabled={!canUndo || !onUndo}
-                className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo pwa-instant-tap disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ touchAction: 'manipulation' }}
-                title="Undo"
-              >
-                <RotateCcw className="w-5 h-5" />
-              </motion.button>
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo pwa-instant-tap"
+                  style={{ touchAction: 'manipulation' }}
+                  title="Undo"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </motion.button>
+              )}
 
               {/* Message Button */}
               {onMessage && (
