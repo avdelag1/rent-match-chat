@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
-import { swipeQueue } from '@/lib/swipe/SwipeQueue';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 
@@ -185,8 +184,7 @@ function SimpleSwipeCardComponent({
       // Trigger haptic
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-      // Queue the swipe
-      swipeQueue.queueSwipe(listing.id, direction, 'listing');
+      // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
 
       // Calculate exit distance based on viewport to ensure card fully exits
       const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
@@ -251,7 +249,8 @@ function SimpleSwipeCardComponent({
     isExitingRef.current = true;
 
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
-    swipeQueue.queueSwipe(listing.id, direction, 'listing');
+
+    // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
 
     // Calculate exit distance based on viewport to ensure card fully exits
     const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
