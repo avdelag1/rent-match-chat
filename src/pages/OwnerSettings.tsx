@@ -8,15 +8,17 @@ import { FilterColorPreferences } from "@/components/FilterColorPreferences";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
-import { Building2, Mail, MapPin, Phone, Edit, Camera, Palette } from "lucide-react";
+import { Building2, Mail, MapPin, Phone, Edit, Camera, Palette, Gift } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReferralInviteDialog } from "@/components/ReferralInviteDialog";
 
 const OwnerSettings = () => {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("profile");
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showReferralDialog, setShowReferralDialog] = useState(false);
   const { data: ownerProfile, isLoading: profileLoading } = useOwnerProfile();
 
   // Support deep-linking to specific tabs via URL parameter
@@ -149,6 +151,54 @@ const OwnerSettings = () => {
                   </div>
                 )}
               </div>
+
+              {/* Referral & Rewards Section */}
+              <div className="mt-4 sm:mt-6 bg-gradient-to-br from-primary/10 via-primary/5 to-green-500/10 backdrop-blur-sm rounded-xl border border-primary/20 p-4 sm:p-6">
+                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                  <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  <h2 className="text-lg sm:text-xl font-bold text-white">Invite Friends & Earn Rewards</h2>
+                </div>
+                <p className="text-gray-400 mb-4 text-xs sm:text-sm">
+                  Share your invitation link with friends and you both get free message activations!
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                      <span className="text-primary font-bold">1</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-white">Share your unique link</p>
+                      <p className="text-xs text-gray-400">Invite friends via WhatsApp, email, or social media</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
+                    <div className="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                      <span className="text-primary font-bold">2</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-white">They sign up with your link</p>
+                      <p className="text-xs text-gray-400">Your friends create a new account</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
+                    <div className="flex-shrink-0 w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                      <span className="text-green-600 dark:text-green-400 font-bold">3</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-green-600 dark:text-green-400">You both get free messages!</p>
+                      <p className="text-xs text-gray-400">You get 1 free message, they get 2 free messages</p>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setShowReferralDialog(true)}
+                  size="lg"
+                  className="w-full mt-4 bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-500/90"
+                >
+                  <Gift className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  Share My Invitation Link
+                </Button>
+              </div>
             </TabsContent>
 
 
@@ -181,6 +231,12 @@ const OwnerSettings = () => {
       <OwnerProfileDialog
         open={showProfileDialog}
         onOpenChange={setShowProfileDialog}
+      />
+
+      {/* Referral Invite Dialog */}
+      <ReferralInviteDialog
+        open={showReferralDialog}
+        onOpenChange={setShowReferralDialog}
       />
     </DashboardLayout>
   );

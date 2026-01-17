@@ -75,7 +75,7 @@ export function useProfileSetup() {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 60);
 
-      const { error: activError } = await supabase
+      const { data: activationData, error: activError } = await supabase
         .from('message_activations')
         .insert({
           user_id: referrerId,
@@ -85,9 +85,24 @@ export function useProfileSetup() {
           used_activations: 0,
           expires_at: expiresAt.toISOString(),
           notes: `Referral reward - referred_user:${newUserId}`,
-        });
+        })
+        .select()
+        .single();
 
-      if (!activError) {
+      if (!activError && activationData) {
+        // Create referral tracking record
+        await supabase
+          .from('user_referrals')
+          .insert({
+            referrer_id: referrerId,
+            referred_user_id: newUserId,
+            referral_code: referrerId,
+            referral_source: referralData.source || '/',
+            reward_granted: true,
+            reward_activation_id: activationData.id,
+          })
+          .then(() => {});
+
         // Create notification for referrer (silent, non-blocking)
         supabase
           .from('notifications')
@@ -283,7 +298,7 @@ export function useProfileSetup() {
       await new Promise(resolve => setTimeout(resolve, 150));
 
       // Grant welcome message activation for the new user
-      // This gives them 1 free message to start a conversation
+      // This gives them 1 free message to start (or 2 if they signed up via referral)
       const grantWelcomeActivation = async (userId: string) => {
         try {
           // Check if welcome activation already granted - escape deep type inference
@@ -293,24 +308,63 @@ export function useProfileSetup() {
             .select('id')
             .eq('user_id', userId)
             .eq('activation_type', 'referral_bonus')
-            .eq('notes', 'Welcome bonus - first message free')
+            .like('notes', '%Welcome bonus%')
             .maybeSingle();
           const existingWelcome = welcomeResult?.data;
 
           if (existingWelcome) return;
 
-          // Grant 1 free welcome message activation (expires in 90 days)
+          // Check if user signed up via referral code
+          const storedData = localStorage.getItem(STORAGE.REFERRAL_CODE_KEY);
+          let hasReferralCode = false;
+
+          if (storedData) {
+            try {
+              const referralData = JSON.parse(storedData);
+              const referrerId = referralData.code;
+
+              // Validate referral code is valid (not self, not expired, referrer exists)
+              if (referrerId && referrerId !== userId) {
+                const capturedAt = referralData.capturedAt || 0;
+                const expiryMs = REFERRAL.REFERRAL_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+
+                if (Date.now() - capturedAt <= expiryMs) {
+                  // Verify referrer exists
+                  const { data: referrerProfile } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('id', referrerId)
+                    .maybeSingle();
+
+                  if (referrerProfile) {
+                    hasReferralCode = true;
+                  }
+                }
+              }
+            } catch (parseError) {
+              // Invalid JSON, ignore
+            }
+          }
+
+          // Grant free message activations (expires in 90 days)
+          // - 2 activations if signed up via referral
+          // - 1 activation if normal signup
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + 90);
+
+          const activationCount = hasReferralCode ? 2 : 1;
+          const notesText = hasReferralCode
+            ? 'Welcome bonus - referral signup (2 free messages)'
+            : 'Welcome bonus - first message free';
 
           const insertData = {
             user_id: userId,
             activation_type: 'referral_bonus' as const,
-            total_activations: 1,
-            remaining_activations: 1,
+            total_activations: activationCount,
+            remaining_activations: activationCount,
             used_activations: 0,
             expires_at: expiresAt.toISOString(),
-            notes: 'Welcome bonus - first message free',
+            notes: notesText,
           };
           const { error: activError } = await supabase
             .from('message_activations')
@@ -318,7 +372,7 @@ export function useProfileSetup() {
 
           if (!activError) {
             if (import.meta.env.DEV) {
-              logger.log('[ProfileSetup] Welcome activation granted to:', userId);
+              logger.log(`[ProfileSetup] Welcome activation granted to ${userId}: ${activationCount} message(s)`);
             }
             // Invalidate activations cache
             queryClient.invalidateQueries({ queryKey: ['message-activations', userId] });
