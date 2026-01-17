@@ -783,29 +783,6 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
             {/* Bottom gradient - Lighter for better photo visibility */}
             <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
 
-            {/* Share Button - Top Right Corner */}
-            {onShare && (
-              <div className="absolute top-3 right-3 z-20">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    triggerHaptic('light');
-                    onShare();
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                  }}
-                  className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center hover:bg-black/60 transition-colors"
-                  style={{ touchAction: 'manipulation' }}
-                  title="Share"
-                >
-                  <Share2 className="w-5 h-5" />
-                </motion.button>
-              </div>
-            )}
 
             {/* Verification Badge */}
             {(listing as any).has_verified_documents && (
@@ -1220,6 +1197,28 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
                   title="Message"
                 >
                   <MessageCircle className="w-5 h-5" />
+                </motion.button>
+              )}
+
+              {/* Share Button */}
+              {onShare && (
+                <motion.button
+                  whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    triggerHaptic('light');
+                    onShare();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-share pwa-instant-tap"
+                  style={{ touchAction: 'manipulation' }}
+                  title="Share"
+                >
+                  <Share2 className="w-5 h-5" />
                 </motion.button>
               )}
 

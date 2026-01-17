@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, memo, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence, animate } from 'framer-motion';
-import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart, Info, DollarSign, User } from 'lucide-react';
+import { MapPin, Flame, CheckCircle, BarChart3, Home, ChevronDown, X, Eye, Share2, Heart, Info, DollarSign, User, RotateCcw, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SwipeOverlays } from './SwipeOverlays';
@@ -548,16 +548,6 @@ const OwnerClientTinderCardComponent = ({
             {/* Bottom gradient - Lighter for better photo visibility */}
             <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 via-black/15 to-transparent pointer-events-none z-10" />
 
-            {/* Verified Badge */}
-            {profile.verified && (
-              <div className="absolute top-20 right-4 z-20">
-                <Badge className="bg-blue-500/95 border-blue-400 text-white flex items-center gap-1.5 px-3 py-1.5 shadow-lg">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm font-medium">Verified</span>
-                </Badge>
-              </div>
-            )}
-
             {/* Center-Tap Insights Panel - Shows client details when tapping center of photo */}
             <AnimatePresence>
               {isInsightsPanelOpen && (
@@ -905,25 +895,47 @@ const OwnerClientTinderCardComponent = ({
                 <X className="w-7 h-7" strokeWidth={3} />
               </motion.button>
 
-              {/* Insights Button - Opens instantly on pointer down */}
-              {onInsights && hasPremium && (
+              {/* Undo Button - Goes back one swipe */}
+              {onUndo && (
                 <motion.button
                   whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
                   onPointerDown={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     triggerHaptic('light');
-                    onInsights();
+                    onUndo();
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                   }}
-                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-insights pwa-instant-tap"
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-undo pwa-instant-tap"
                   style={{ touchAction: 'manipulation' }}
-                  title="View Insights"
+                  title="Undo"
                 >
-                  <Eye className="w-5 h-5" />
+                  <RotateCcw className="w-5 h-5" />
+                </motion.button>
+              )}
+
+              {/* Message Button */}
+              {onMessage && (
+                <motion.button
+                  whileTap={pwaMode.isPWA ? undefined : { scale: 0.9 }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    triggerHaptic('light');
+                    onMessage();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className="w-11 h-11 rounded-full text-white flex items-center justify-center swipe-action-btn swipe-btn-message pwa-instant-tap"
+                  style={{ touchAction: 'manipulation' }}
+                  title="Message"
+                >
+                  <MessageCircle className="w-5 h-5" />
                 </motion.button>
               )}
 
