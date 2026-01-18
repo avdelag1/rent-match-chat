@@ -212,10 +212,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{
-          ...springConfigs.snappy,
-          delay: 0.1
-        }}
+        transition={springConfigs.instant}
         // FULL-WIDTH LAYOUT: Use available screen width, spread buttons across full width
         className="flex items-center justify-around w-full max-w-xl mx-auto px-4 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
         style={{
@@ -233,10 +230,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               key={item.id}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                ...springConfigs.instant,
-                delay: 0.15 + index * 0.05
-              }}
+              transition={springConfigs.instant}
               onClick={(e) => handleNavClick(e, item)}
               // INSTANT NAVIGATION: Prefetch on earliest possible events
               onPointerDown={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }}
@@ -246,7 +240,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92, transition: springConfigs.instant }}
               // EXPANDED TOUCH TARGETS: Each button has generous hit area
-              className="relative transition-colors duration-200 select-none touch-manipulation flex items-center justify-center rounded-2xl"
+              className="relative transition-colors duration-75 select-none touch-manipulation flex items-center justify-center rounded-2xl"
               style={{
                 // Ensure minimum touch target size
                 minWidth: TOUCH_TARGET_SIZE,
@@ -277,7 +271,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               <div className="flex flex-col items-center">
                 <Icon
                   className={cn(
-                    'transition-all duration-200',
+                    'transition-all duration-75',
                     getIconColorClass(item, active)
                   )}
                   style={{
