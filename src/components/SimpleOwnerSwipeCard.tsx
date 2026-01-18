@@ -47,6 +47,7 @@ interface ClientProfile {
   monthly_income?: number | null;
   verified?: boolean | null;
   lifestyle_tags?: string[] | null;
+  preferred_listing_types?: string[] | null;
 }
 
 // Placeholder component for profiles without photos
