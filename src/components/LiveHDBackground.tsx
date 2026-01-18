@@ -36,9 +36,9 @@ const THEMES: Record<BackgroundTheme, {
   default: {
     base: 'hsl(240 10% 4%)',
     orbs: [
-      'radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(59, 130, 246, 0.10) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(239, 68, 68, 0.25) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(168, 85, 247, 0.20) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%)',
     ],
     gradient: 'linear-gradient(135deg, hsl(240 10% 4%) 0%, hsl(240 10% 8%) 50%, hsl(240 10% 6%) 100%)',
   },
@@ -82,9 +82,9 @@ const THEMES: Record<BackgroundTheme, {
 
 // Orb animation configurations for organic motion
 const ORB_CONFIGS = [
-  { size: '40%', x: '-10%', y: '10%', duration: '25s', delay: '0s' },
-  { size: '35%', x: '60%', y: '60%', duration: '30s', delay: '-10s' },
-  { size: '45%', x: '30%', y: '-15%', duration: '35s', delay: '-20s' },
+  { size: '50%', x: '-10%', y: '10%', duration: '25s', delay: '0s' },
+  { size: '45%', x: '60%', y: '60%', duration: '30s', delay: '-10s' },
+  { size: '55%', x: '30%', y: '-15%', duration: '35s', delay: '-20s' },
 ];
 
 function LiveHDBackgroundComponent({
@@ -147,7 +147,7 @@ function LiveHDBackgroundComponent({
             ...style,
             animation: `live-hd-float-${i + 1} ${style.animationDuration} ease-in-out infinite`,
             animationDelay: style.animationDelay,
-            filter: 'blur(60px)',
+            filter: 'blur(40px)',
             willChange: 'transform',
             transform: 'translateZ(0)',
           }}
