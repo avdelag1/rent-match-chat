@@ -3,6 +3,11 @@
  * 
  * Uses the EXACT same pattern as the landing page logo swipe.
  * Simple, clean, no complex physics - just framer-motion's built-in drag.
+ * 
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Pointer events for instant touch response (no 300ms delay)
+ * - GPU-accelerated transforms
+ * - Press-and-hold magnifier for image inspection
  */
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
@@ -10,6 +15,7 @@ import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-m
 import { MapPin, DollarSign, Briefcase } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 import { SwipeActionButtonBar } from './SwipeActionButtonBar';
+import { useMagnifier } from '@/hooks/useMagnifier';
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -43,17 +49,26 @@ interface ClientProfile {
   lifestyle_tags?: string[] | null;
 }
 
-// Simple image component
+// Simple image component - optimized for instant display
 const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div 
+      className="absolute inset-0 w-full h-full"
+      style={{
+        // GPU acceleration
+        transform: 'translateZ(0)',
+        touchAction: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+      }}
+    >
       {/* Skeleton */}
       <div 
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
-        style={{ opacity: loaded ? 0 : 1 }}
+        style={{ opacity: loaded ? 0 : 1, transition: 'opacity 150ms ease-out' }}
       />
       
       {/* Image */}
@@ -61,10 +76,17 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         src={error ? FALLBACK_PLACEHOLDER : (src || FALLBACK_PLACEHOLDER)}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: loaded ? 1 : 0 }}
+        style={{ 
+          opacity: loaded ? 1 : 0, 
+          transition: 'opacity 150ms ease-out',
+          WebkitUserDrag: 'none',
+          pointerEvents: 'none',
+        } as React.CSSProperties}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         draggable={false}
+        loading="eager"
+        decoding="async"
       />
     </div>
   );
@@ -249,13 +271,20 @@ function SimpleOwnerSwipeCardComponent({
     });
   }, [profile.user_id, onSwipe, x]);
 
-  // Format budget
   // Format budget - moved before conditional render to avoid hook order issues
   const budgetText = profile.budget_min && profile.budget_max
     ? `$${profile.budget_min.toLocaleString()} - $${profile.budget_max.toLocaleString()}`
     : profile.budget_max
       ? `Up to $${profile.budget_max.toLocaleString()}`
       : null;
+
+  // Magnifier hook for press-and-hold zoom - MUST be before conditional returns
+  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
+    scale: 2.0,
+    lensSize: 160,
+    holdDelay: 350,
+    enabled: isTop,
+  });
 
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
@@ -277,7 +306,7 @@ function SimpleOwnerSwipeCardComponent({
     <div className="absolute inset-0 flex flex-col">
       {/* Draggable Card */}
       <motion.div
-        drag="x"
+        drag={!isMagnifierActive() ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={1} // Full elasticity for instant response to touch
         dragMomentum={true} // Allow momentum for natural feel
@@ -291,15 +320,38 @@ function SimpleOwnerSwipeCardComponent({
           scale: cardScale,
           rotate: cardRotate,
           filter: useTransform(cardBlur, (v) => `blur(${v}px)`),
-        }}
+          // CSS performance optimizations for instant touch response
+          willChange: 'transform, opacity, filter',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          perspective: 1000,
+          // Disable all browser touch delays
+          touchAction: 'pan-y',
+          WebkitTapHighlightColor: 'transparent',
+          WebkitTouchCallout: 'none',
+        } as any}
         className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-2xl relative"
       >
-        {/* Image area */}
+        {/* Image area with magnifier support */}
         <div 
+          ref={containerRef}
           className="absolute inset-0 w-full h-full"
           onClick={handleImageTap}
+          {...pointerHandlers}
+          style={{
+            touchAction: 'none',
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+          }}
         >
           <CardImage src={currentImage} alt={profile.name || 'Client'} />
+          
+          {/* Magnifier canvas overlay */}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none z-50"
+            style={{ display: 'none' }}
+          />
           
           {/* Image dots */}
           {imageCount > 1 && (
