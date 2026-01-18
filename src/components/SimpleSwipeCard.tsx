@@ -375,7 +375,8 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
             </div>
           )}
           
-          {/* Bottom gradient - Removed for cleaner photo display */}
+          {/* Bottom gradient fade for text readability and Tinder-style look */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
         </div>
         
         {/* YES! overlay */}
