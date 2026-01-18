@@ -23,7 +23,7 @@
 
 import { memo, useCallback, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { X, Heart, Share2, RotateCcw, MessageCircle } from 'lucide-react';
+import { ThumbsDown, Heart, Share2, RotateCcw, MessageCircle } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 
 interface SwipeActionButtonBarProps {
@@ -57,15 +57,15 @@ const springConfig = {
  *
  * Hit areas are the full button size - no invisible padding needed.
  */
-const LARGE_SIZE = 72;  // Primary actions (Like/Dislike) - increased from 68
-const SMALL_SIZE = 54;  // Secondary actions (Undo/Share/Message) - increased from 48
+const LARGE_SIZE = 72;  // Primary actions (Like/Dislike) - dominant
+const SMALL_SIZE = 46;  // Secondary actions (Undo/Share/Message) - compact
 
 // Icon sizes scale proportionally
-const LARGE_ICON_SIZE = 34;  // Increased from 32
-const SMALL_ICON_SIZE = 26;  // Increased from 24
+const LARGE_ICON_SIZE = 34;  // Primary action icons
+const SMALL_ICON_SIZE = 22;  // Secondary action icons - smaller for compact buttons
 
-// Gap between buttons - balanced for thumb navigation
-const BUTTON_GAP = 14; // Slightly larger gap for better separation
+// Gap between buttons - tighter for compact layout
+const BUTTON_GAP = 10; // Closer together for ergonomic reach
 
 // Tap animation scale
 const TAP_SCALE = 0.92; // Slightly less dramatic for premium feel
@@ -275,7 +275,7 @@ function SwipeActionButtonBarComponent({
           variant="dislike"
           ariaLabel="Pass on this listing"
         >
-          <X className="w-full h-full" strokeWidth={2.5} />
+          <ThumbsDown className="w-full h-full" strokeWidth={2} />
         </ActionButton>
 
         {/* 3. Share Button (Small) - Purple */}
