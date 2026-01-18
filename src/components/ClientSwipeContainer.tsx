@@ -243,15 +243,19 @@ const ClientSwipeContainerComponent = ({
   // Get current visible cards for 2-card stack (top + next)
   // Use currentIndex from state (already synced with currentIndexRef)
   const deckQueue = deckQueueRef.current;
-  // Add bounds checking to prevent rendering with invalid indices
-  const safeIndex = Math.min(currentIndex, Math.max(0, deckQueue.length - 1));
-  const topCard = deckQueue.length > 0 ? deckQueue[safeIndex] : null;
-  const nextCard = deckQueue.length > safeIndex + 1 ? deckQueue[safeIndex + 1] : null;
+  // FIX: Don't clamp the index - allow topCard to be null when all cards are swiped
+  // This ensures the "All Caught Up" screen shows correctly
+  const topCard = currentIndex < deckQueue.length ? deckQueue[currentIndex] : null;
+  const nextCard = currentIndex + 1 < deckQueue.length ? deckQueue[currentIndex + 1] : null;
 
   // INSTANT SWIPE: Update UI immediately, fire DB operations in background
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];
-    if (!profile) return;
+    // FIX: Add explicit null/undefined check to prevent errors
+    if (!profile || !profile.user_id) {
+      logger.warn('[ClientSwipeContainer] Cannot swipe - no valid profile at current index');
+      return;
+    }
 
     const newIndex = currentIndexRef.current + 1;
 
@@ -307,7 +311,11 @@ const ClientSwipeContainerComponent = ({
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];
-    if (!profile) return;
+    // FIX: Add explicit null/undefined check to prevent errors
+    if (!profile || !profile.user_id) {
+      logger.warn('[ClientSwipeContainer] Cannot swipe - no valid profile at current index');
+      return;
+    }
 
     // Immediate haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
