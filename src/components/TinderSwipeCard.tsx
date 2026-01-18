@@ -190,8 +190,8 @@ const InstantImageGallery = memo(({
   const decodingRef = useRef<boolean>(false);
   const mountedRef = useRef<boolean>(true);
 
-  // PERF FIX: Track if we started with a cached image (skip fade animation)
-  const startedCachedRef = useRef(initialState.showImage);
+  // PERF FIX: Track if current image came from cache (skip fade animation for instant display)
+  const isCachedRef = useRef(initialState.showImage);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -230,19 +230,17 @@ const InstantImageGallery = memo(({
     const targetSrc = getCurrentSrc();
     if (!targetSrc || targetSrc === displayedSrc) return;
 
-    // Check global cache first - instant display if already decoded
+    // Check global cache first - INSTANT display if already decoded (no transition, no delay)
     const cached = globalSwipeImageCache.get(targetSrc);
     if (cached?.decoded && !cached?.failed) {
-      setPreviousSrc(displayedSrc);
+      // Mark as cached for instant CSS rendering
+      isCachedRef.current = true;
+      // Instant swap - no previous image, no transition state, no delays
       setDisplayedSrc(targetSrc);
       setShowImage(true);
-      setIsTransitioning(true);
-      setTimeout(() => {
-        if (mountedRef.current) {
-          setIsTransitioning(false);
-          setPreviousSrc(null);
-        }
-      }, 100);
+      // Clear any previous transition state immediately
+      setPreviousSrc(null);
+      setIsTransitioning(false);
       return;
     }
 
@@ -255,6 +253,7 @@ const InstantImageGallery = memo(({
 
     // First image load - no transition needed, just decode and show
     if (!displayedSrc) {
+      isCachedRef.current = false; // Not cached, will need to load
       setDisplayedSrc(targetSrc);
       decodeImageWithTimeout(targetSrc).then((success) => {
         if (!mountedRef.current) return;
@@ -274,6 +273,7 @@ const InstantImageGallery = memo(({
 
     // Switching images - keep previous visible during decode
     if (decodingRef.current) return;
+    isCachedRef.current = false; // Not cached, will need transition
     decodingRef.current = true;
     setPreviousSrc(displayedSrc);
     setIsTransitioning(true);
@@ -479,14 +479,14 @@ const InstantImageGallery = memo(({
         />
       )}
 
-      {/* LAYER 4: Current image - fades in after decode (or instant if cached) */}
+      {/* LAYER 4: Current image - fades in after decode (or INSTANT if cached) */}
       {displayedSrc && (
         <img
           src={displayedSrc}
           alt={alt}
-          // PERF FIX: Skip transition when started with cached image
+          // PERF FIX: Skip transition completely when image is cached for INSTANT display
           className={`absolute inset-0 w-full h-full object-cover rounded-3xl ${
-            startedCachedRef.current ? '' : 'transition-opacity duration-150'
+            isCachedRef.current ? '' : 'transition-opacity duration-150'
           }`}
           draggable={false}
           loading="eager"
@@ -495,7 +495,7 @@ const InstantImageGallery = memo(({
           style={{
             zIndex: 4,
             opacity: showImage ? 1 : 0,
-            willChange: startedCachedRef.current ? 'auto' : 'opacity',
+            willChange: isCachedRef.current ? 'auto' : 'opacity',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
             transform: 'translateZ(0)',
@@ -503,8 +503,6 @@ const InstantImageGallery = memo(({
           onLoad={() => {
             if (!showImage && mountedRef.current) {
               setShowImage(true);
-              // After first load, allow transitions for subsequent images
-              startedCachedRef.current = false;
             }
           }}
           onError={() => {
