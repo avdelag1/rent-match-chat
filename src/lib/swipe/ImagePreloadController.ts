@@ -31,7 +31,7 @@ interface PreloadControllerConfig {
 const DEFAULT_CONFIG: PreloadControllerConfig = {
   prefetchCount: 4,
   decodeTimeout: 3000,
-  maxCacheSize: 20,
+  maxCacheSize: 100,
   isPWA: false,
 };
 

@@ -176,16 +176,21 @@ export const RecyclingCardStack = memo(forwardRef<
       });
     }
 
-    // Preload next images in background
+    // Preload ALL images from next cards in background
     const nextIdx = currentIndexRef.current + 1;
-    if (cards[nextIdx]?.images?.[0]) {
-      imagePreloadController.preload(cards[nextIdx].images[0], 'high');
+
+    // Preload ALL images from next card (high priority)
+    if (cards[nextIdx]?.images) {
+      cards[nextIdx].images.forEach((img: string) => {
+        imagePreloadController.preload(img, 'high');
+      });
     }
-    if (cards[nextIdx + 1]?.images?.[0]) {
-      imagePreloadController.preload(cards[nextIdx + 1].images[0], 'low');
-    }
-    if (cards[nextIdx + 2]?.images?.[0]) {
-      imagePreloadController.preload(cards[nextIdx + 2].images[0], 'low');
+
+    // Preload ALL images from card after next (low priority)
+    if (cards[nextIdx + 1]?.images) {
+      cards[nextIdx + 1].images.forEach((img: string) => {
+        imagePreloadController.preload(img, 'low');
+      });
     }
   }, [cards, onSwipe, getTopCardRef]);
 
@@ -199,15 +204,20 @@ export const RecyclingCardStack = memo(forwardRef<
     },
   }), []);
 
-  // Preload images on mount and index change
+  // Preload ALL images from current and next cards on mount and index change
   useEffect(() => {
     const imagesToPreload: string[] = [];
 
-    // Current and next 3 cards
-    for (let i = 0; i < 4; i++) {
+    // Current card + next 2 cards - preload ALL images from each
+    for (let i = 0; i < 3; i++) {
       const card = cards[currentIndex + i];
-      if (card?.images?.[0]) {
-        imagesToPreload.push(card.images[0]);
+      if (card?.images) {
+        // Add ALL images from this card
+        card.images.forEach((img: string) => {
+          if (img) {
+            imagesToPreload.push(img);
+          }
+        });
       }
     }
 
