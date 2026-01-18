@@ -171,6 +171,15 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
     }
   }, [listing.id, x]);
 
+  // Magnifier hook for press-and-hold zoom - MUST be called before any callbacks that use it
+  // PREMIUM WATER-DROP: Large lens (~50% of photo), organic refraction, no borders
+  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
+    scale: 1.6, // Lower zoom = more visible area (premium feel)
+    lensSize: 'auto', // Auto-calculates ~50% of container
+    holdDelay: 300, // Fast activation for instant feel
+    enabled: isTop,
+  });
+
   const handleDragStart = useCallback(() => {
     isDragging.current = true;
     triggerHaptic('light');
@@ -292,15 +301,6 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
   const formattedPrice = listing.price
     ? `$${listing.price.toLocaleString()}${rentalType === 'monthly' ? '/mo' : rentalType === 'daily' ? '/day' : ''}`
     : null;
-
-  // Magnifier hook for press-and-hold zoom - MUST be before conditional returns
-  // PREMIUM WATER-DROP: Large lens (~50% of photo), organic refraction, no borders
-  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
-    scale: 1.6, // Lower zoom = more visible area (premium feel)
-    lensSize: 'auto', // Auto-calculates ~50% of container
-    holdDelay: 300, // Fast activation for instant feel
-    enabled: isTop,
-  });
 
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {

@@ -212,6 +212,14 @@ function SimpleOwnerSwipeCardComponent({
     triggerHaptic('light');
   }, []);
 
+  // Magnifier hook for press-and-hold zoom - MUST be called before any callbacks that use it
+  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
+    scale: 2.0,
+    lensSize: 160,
+    holdDelay: 350,
+    enabled: isTop,
+  });
+
   const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (hasExited.current) return;
 
@@ -323,14 +331,6 @@ function SimpleOwnerSwipeCardComponent({
     : profile.budget_max
       ? `Up to $${profile.budget_max.toLocaleString()}`
       : null;
-
-  // Magnifier hook for press-and-hold zoom - MUST be before conditional returns
-  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
-    scale: 2.0,
-    lensSize: 160,
-    holdDelay: 350,
-    enabled: isTop,
-  });
 
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
