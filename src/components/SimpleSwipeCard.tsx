@@ -423,8 +423,8 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           </div>
         </motion.div>
         
-        {/* Content overlay - Positioned at bottom (buttons are now outside card) */}
-        <div className="absolute bottom-4 left-0 right-0 p-4 z-20 pointer-events-none">
+        {/* Content overlay - Positioned higher for Tinder style (above button area) */}
+        <div className="absolute bottom-28 left-0 right-0 p-4 z-20 pointer-events-none">
           <h2 className="text-white text-xl font-bold mb-1 line-clamp-1">
             {listing.title || 'Untitled Listing'}
           </h2>
