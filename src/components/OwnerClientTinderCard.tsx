@@ -500,7 +500,7 @@ const OwnerClientTinderCardComponent = ({
         }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl shadow-2xl relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl shadow-xl relative"
         initial={false}
         transition={{
           type: "spring",
@@ -546,8 +546,8 @@ const OwnerClientTinderCardComponent = ({
               isTop={isTop}
             />
 
-            {/* Bottom gradient - Lighter for better photo visibility */}
-            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
+            {/* Bottom gradient - Subtle for better photo visibility */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none z-10" />
 
             {/* Center-Tap Insights Panel - Shows client details when tapping center of photo */}
             <AnimatePresence>

@@ -376,7 +376,7 @@ function SimpleOwnerSwipeCardComponent({
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-2xl relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-xl relative"
       >
         {/* Image area with magnifier support */}
         <div 
@@ -411,8 +411,8 @@ function SimpleOwnerSwipeCardComponent({
             </div>
           )}
           
-          {/* Bottom gradient - Extended Tinder-style dark fade for button backdrop */}
-          <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient - Subtle for better photo visibility */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none z-10" />
         </div>
         
         {/* YES! overlay */}
