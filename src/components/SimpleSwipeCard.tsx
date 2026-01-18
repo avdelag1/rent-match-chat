@@ -231,6 +231,11 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
   const handleImageTap = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
 
+    // Don't handle tap if magnifier is active - allows zoom to work
+    if (isMagnifierActive()) {
+      return;
+    }
+
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
@@ -250,7 +255,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
       triggerHaptic('light');
       onInsights();
     }
-  }, [imageCount, onInsights]);
+  }, [imageCount, onInsights, isMagnifierActive]);
 
   const handleButtonSwipe = useCallback((direction: 'left' | 'right') => {
     if (hasExited.current) return;
