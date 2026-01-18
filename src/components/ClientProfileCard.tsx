@@ -265,7 +265,7 @@ const ClientProfileCardComponent = ({
       
       {/* Bottom Content - Modern Glass-morphism */}
       <div
-        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 via-black/30 to-transparent backdrop-blur-sm cursor-pointer"
+        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/25 via-black/15 to-transparent backdrop-blur-sm cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           onTap();

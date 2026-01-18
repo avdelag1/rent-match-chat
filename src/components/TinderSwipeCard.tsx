@@ -781,7 +781,7 @@ const TinderSwipeCardComponent = ({ listing, onSwipe, onTap, onUndo, onInsights,
             />
 
             {/* Bottom gradient - Subtle for better photo visibility */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/25 via-black/10 to-transparent pointer-events-none z-10" />
 
 
             {/* Verification Badge */}
