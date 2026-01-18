@@ -91,7 +91,7 @@ const LockedImage = memo(({
         style={{
           background: PLACEHOLDER_GRADIENT,
           opacity: isReady ? 0 : 1,
-          transition: 'opacity 150ms ease-out',
+          transition: 'opacity 0ms',
         }}
       />
 
@@ -106,7 +106,7 @@ const LockedImage = memo(({
         draggable={false}
         style={{
           opacity: isReady ? 1 : 0,
-          transition: 'opacity 150ms ease-out',
+          transition: 'opacity 0ms',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
         }}
@@ -253,32 +253,16 @@ const PhysicsSwipeCardComponent = ({
     reset();
   }, [listing.id, reset]);
 
-  // Entrance animation - smooth pop when card becomes top
+  // Entrance animation - instant appearance when card becomes top
   useEffect(() => {
     if (isTop && !wasTopRef.current && cardContainerRef.current) {
-      // Card just became the top card - trigger entrance animation
+      // Card just became the top card - show instantly without animation
       const el = cardContainerRef.current;
 
-      // Start from scaled down state
-      el.style.transform = 'scale(0.92)';
-      el.style.opacity = '0.7';
-
-      // Force reflow for animation
-      el.offsetHeight;
-
-      // Animate to full size with smooth easing
-      el.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease-out';
+      // Set to full size immediately
       el.style.transform = 'scale(1)';
       el.style.opacity = '1';
-
-      // Clean up transition after animation
-      const cleanup = setTimeout(() => {
-        if (cardContainerRef.current) {
-          cardContainerRef.current.style.transition = '';
-        }
-      }, 400);
-
-      return () => clearTimeout(cleanup);
+      el.style.transition = '';
     }
     wasTopRef.current = isTop;
   }, [isTop]);
