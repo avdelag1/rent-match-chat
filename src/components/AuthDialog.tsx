@@ -219,7 +219,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             {/* Back Button - Top Left Only */}
             <button
               onClick={onClose}
-              className="absolute top-4 left-4 safe-area-pt text-white/70 hover:text-white transition-all duration-200 active:scale-95 z-20"
+              className="absolute top-4 left-4 safe-area-pt text-white/60 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition-all duration-300 active:scale-95 z-20"
             >
               <span className="text-sm font-medium">Back</span>
             </button>
@@ -285,7 +285,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        className="pl-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-orange-500/50 focus:ring-0"
+                        className="pl-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30"
                         placeholder="Full Name"
                       />
                     </div>
@@ -300,7 +300,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="pl-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-orange-500/50 focus:ring-0"
+                      className="pl-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30"
                       placeholder="Email"
                     />
                   </div>
@@ -316,7 +316,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="pl-10 pr-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-orange-500/50 focus:ring-0"
+                          className="pl-10 pr-10 h-11 text-sm bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder:text-white/30"
                           placeholder="Password"
                         />
                         <button
