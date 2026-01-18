@@ -218,7 +218,7 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-16px)] max-w-[400px] sm:max-w-lg max-h-[85vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent className="w-[calc(100%-16px)] max-w-[400px] sm:max-w-lg max-h-[70vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="px-3 sm:px-4 py-3 border-b shrink-0">
           <DialogTitle className="text-sm sm:text-base">Property Insights</DialogTitle>
         </DialogHeader>
