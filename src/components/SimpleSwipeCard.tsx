@@ -336,8 +336,8 @@ function SimpleSwipeCardComponent({
             </div>
           )}
           
-          {/* Bottom gradient */}
-          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient - Extended Tinder-style dark fade for button backdrop */}
+          <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
         </div>
         
         {/* LIKE overlay */}
@@ -345,7 +345,6 @@ function SimpleSwipeCardComponent({
           className="absolute top-8 left-8 z-30 pointer-events-none"
           style={{
             opacity: likeOpacity,
-            // CSS performance optimizations for overlay
             willChange: 'opacity',
             backfaceVisibility: 'hidden',
             transform: 'translateZ(0)',
@@ -367,7 +366,6 @@ function SimpleSwipeCardComponent({
           className="absolute top-8 right-8 z-30 pointer-events-none"
           style={{
             opacity: passOpacity,
-            // CSS performance optimizations for overlay
             willChange: 'opacity',
             backfaceVisibility: 'hidden',
             transform: 'translateZ(0)',
@@ -384,8 +382,8 @@ function SimpleSwipeCardComponent({
           </div>
         </motion.div>
         
-        {/* Content overlay at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
+        {/* Content overlay - Positioned higher for Tinder style (above button area) */}
+        <div className="absolute bottom-24 left-0 right-0 p-4 z-20 pointer-events-none">
           <h2 className="text-white text-xl font-bold mb-1 line-clamp-1">
             {listing.title || 'Untitled Listing'}
           </h2>
@@ -428,24 +426,21 @@ function SimpleSwipeCardComponent({
             </Badge>
           </div>
         )}
+        
+        {/* Action buttons INSIDE card - Tinder style */}
+        {!hideActions && (
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-30">
+            <SwipeActionButtonBar
+              onLike={() => handleButtonSwipe('right')}
+              onDislike={() => handleButtonSwipe('left')}
+              onShare={onShare}
+              onUndo={onUndo}
+              onMessage={onMessage}
+              canUndo={canUndo}
+            />
+          </div>
+        )}
       </motion.div>
-      
-      {/* Premium Floating Action Button Bar */}
-      {!hideActions && (
-        <div
-          className="absolute bottom-4 left-0 right-0 flex justify-center px-4"
-          style={{ zIndex: 50 }}
-        >
-          <SwipeActionButtonBar
-            onLike={() => handleButtonSwipe('right')}
-            onDislike={() => handleButtonSwipe('left')}
-            onShare={onShare}
-            onUndo={onUndo}
-            onMessage={onMessage}
-            canUndo={canUndo}
-          />
-        </div>
-      )}
     </div>
   );
 }

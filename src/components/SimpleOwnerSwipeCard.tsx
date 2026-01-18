@@ -313,8 +313,8 @@ function SimpleOwnerSwipeCardComponent({
             </div>
           )}
           
-          {/* Bottom gradient - Darker fade like Tinder for better text visibility */}
-          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient - Extended Tinder-style dark fade for button backdrop */}
+          <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
         </div>
         
         {/* LIKE overlay */}
@@ -337,8 +337,8 @@ function SimpleOwnerSwipeCardComponent({
           </div>
         </motion.div>
         
-        {/* Content overlay at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
+        {/* Content overlay - Positioned higher for Tinder style (above button area) */}
+        <div className="absolute bottom-24 left-0 right-0 p-4 z-20 pointer-events-none">
           <div className="flex items-center gap-2 mb-1">
             <h2 className="text-white text-xl font-bold">
               {profile.name || 'Anonymous'}
@@ -369,24 +369,20 @@ function SimpleOwnerSwipeCardComponent({
           </div>
         </div>
         
+        {/* Action buttons INSIDE card - Tinder style */}
+        {!hideActions && (
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-30">
+            <SwipeActionButtonBar
+              onLike={() => handleButtonSwipe('right')}
+              onDislike={() => handleButtonSwipe('left')}
+              onShare={onShare}
+              onUndo={onUndo}
+              onMessage={onMessage}
+              canUndo={canUndo}
+            />
+          </div>
+        )}
       </motion.div>
-      
-      {/* Premium Floating Action Button Bar */}
-      {!hideActions && (
-        <div
-          className="absolute bottom-4 left-0 right-0 flex justify-center px-4"
-          style={{ zIndex: 50 }}
-        >
-          <SwipeActionButtonBar
-            onLike={() => handleButtonSwipe('right')}
-            onDislike={() => handleButtonSwipe('left')}
-            onShare={onShare}
-            onUndo={onUndo}
-            onMessage={onMessage}
-            canUndo={canUndo}
-          />
-        </div>
-      )}
     </div>
   );
 }
