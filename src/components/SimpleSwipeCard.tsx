@@ -382,7 +382,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
         </div>
         
-        {/* LIKE overlay */}
+        {/* YES! overlay */}
         <motion.div
           className="absolute top-8 left-8 z-30 pointer-events-none"
           style={{
@@ -397,9 +397,10 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
             style={{
               transform: 'rotate(-12deg) translateZ(0)',
               backfaceVisibility: 'hidden',
+              textShadow: '0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.4)',
             }}
           >
-            LIKE
+            YES!
           </div>
         </motion.div>
 
@@ -418,6 +419,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
             style={{
               transform: 'rotate(12deg) translateZ(0)',
               backfaceVisibility: 'hidden',
+              textShadow: '0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)',
             }}
           >
             NOPE

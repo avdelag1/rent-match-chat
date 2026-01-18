@@ -409,22 +409,28 @@ function SimpleOwnerSwipeCardComponent({
           <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
         </div>
         
-        {/* LIKE overlay */}
+        {/* YES! overlay */}
         <motion.div
           className="absolute top-8 left-8 z-30 pointer-events-none"
           style={{ opacity: likeOpacity }}
         >
-          <div className="px-6 py-3 rounded-xl border-4 border-green-500 text-green-500 font-black text-3xl tracking-wider transform -rotate-12">
-            LIKE
+          <div
+            className="px-6 py-3 rounded-xl border-4 border-green-500 text-green-500 font-black text-3xl tracking-wider transform -rotate-12"
+            style={{ textShadow: '0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.4)' }}
+          >
+            YES!
           </div>
         </motion.div>
-        
+
         {/* NOPE overlay */}
         <motion.div
           className="absolute top-8 right-8 z-30 pointer-events-none"
           style={{ opacity: passOpacity }}
         >
-          <div className="px-6 py-3 rounded-xl border-4 border-red-500 text-red-500 font-black text-3xl tracking-wider transform rotate-12">
+          <div
+            className="px-6 py-3 rounded-xl border-4 border-red-500 text-red-500 font-black text-3xl tracking-wider transform rotate-12"
+            style={{ textShadow: '0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)' }}
+          >
             NOPE
           </div>
         </motion.div>
