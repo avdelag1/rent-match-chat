@@ -54,7 +54,7 @@ interface UseMagnifierReturn {
 export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
   const {
     scale = 2.0,
-    lensSize = 150,
+    lensSize = 280, // ~2x larger for premium feel
     holdDelay = 300,
     enabled = true,
   } = config;
@@ -158,30 +158,36 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
       // Image not ready or cross-origin issue
     }
 
-    // Draw lens border with soft edge (water-drop effect)
+    // Water-drop lens effect - organic, no hard borders
     ctx.restore();
-    
-    // Outer glow
-    const gradient = ctx.createRadialGradient(
-      lensX, lensY, radius * 0.85,
+
+    // Subtle outer edge softness - like natural light refraction
+    // Creates a gentle fade at the edges without visible rings
+    const edgeGradient = ctx.createRadialGradient(
+      lensX, lensY, radius * 0.92,
       lensX, lensY, radius
     );
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
-    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.4)');
-    
+    edgeGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    edgeGradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.03)');
+    edgeGradient.addColorStop(1, 'rgba(0, 0, 0, 0.12)');
+
     ctx.beginPath();
     ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    
-    // Inner subtle shadow for depth
+    ctx.fillStyle = edgeGradient;
+    ctx.fill();
+
+    // Very subtle highlight at top-left for depth (like a water droplet)
+    const highlightGradient = ctx.createRadialGradient(
+      lensX - radius * 0.35, lensY - radius * 0.35, 0,
+      lensX - radius * 0.35, lensY - radius * 0.35, radius * 0.5
+    );
+    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.08)');
+    highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
     ctx.beginPath();
-    ctx.arc(lensX, lensY, radius - 2, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.arc(lensX, lensY, radius - 1, 0, Math.PI * 2);
+    ctx.fillStyle = highlightGradient;
+    ctx.fill();
 
   }, [lensSize, scale, findImage]);
 

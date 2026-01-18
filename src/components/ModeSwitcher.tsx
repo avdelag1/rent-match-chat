@@ -100,7 +100,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         disabled={isSwitching || !canSwitchMode}
         className={cn(
           'relative flex items-center gap-2 rounded-full px-3 py-1.5',
-          'bg-white/5 border border-white/10',
+          'bg-white/5',
           'hover:bg-white/10 transition-all duration-200',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           sizeClasses[size],
@@ -163,8 +163,8 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
       disabled={isSwitching || !canSwitchMode}
       className={cn(
         'relative flex items-center gap-1.5 rounded-xl px-2.5',
-        'bg-white/5 border border-white/10',
-        'hover:bg-white/10 hover:border-white/20',
+        'bg-white/5',
+        'hover:bg-white/10',
         'active:scale-[0.97] transition-all duration-200',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         sizeClasses[size],

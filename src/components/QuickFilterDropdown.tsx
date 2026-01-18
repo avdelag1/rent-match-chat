@@ -360,8 +360,8 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
         className={cn(
           'relative flex items-center gap-1.5 px-3 h-9 rounded-xl transition-all duration-200',
           activeFilterCount > 0
-            ? 'bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/30 shadow-lg shadow-orange-500/10'
-            : 'bg-muted/50 border border-white/10 hover:bg-muted hover:border-white/20'
+            ? 'bg-gradient-to-r from-orange-500/20 to-pink-500/20 shadow-lg shadow-orange-500/10'
+            : 'bg-muted/50 hover:bg-muted'
         )}
       >
         <QuickFilterText />

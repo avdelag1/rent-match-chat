@@ -134,12 +134,11 @@ function ModeOption({
       className={cn(
         "relative flex flex-col items-center gap-2 p-4 rounded-xl",
         "transition-all duration-200",
-        "border-2",
         isActive
           ? mode === 'client'
-            ? "border-blue-500 bg-blue-500/10"
-            : "border-orange-500 bg-orange-500/10"
-          : "border-border bg-muted/30 hover:bg-muted/50 hover:border-muted-foreground/30",
+            ? "bg-blue-500/15"
+            : "bg-orange-500/15"
+          : "bg-muted/30 hover:bg-muted/50",
         (disabled && !isActive) && "opacity-50 cursor-not-allowed"
       )}
       whileTap={!disabled && !isActive ? { scale: 0.98 } : undefined}
