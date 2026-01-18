@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, memo, useRef, useMemo, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { triggerHaptic } from '@/utils/haptics';
-import { SimpleSwipeCard } from './SimpleSwipeCard';
+import { SimpleSwipeCard, SimpleSwipeCardRef } from './SimpleSwipeCard';
+import { SwipeActionButtonBar } from './SwipeActionButtonBar';
 import { preloadImageToCache, isImageDecodedInCache } from './PhysicsTinderSwipeCard';
 
 // FIX #3: Lazy-load modals to prevent them from affecting swipe tree
@@ -234,6 +235,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const swipedIdsRef = useRef<Set<string>>(new Set(useSwipeDeckStore.getState().clientDeck.swipedIds));
   const initializedRef = useRef(deckQueueRef.current.length > 0);
 
+  // Ref to trigger swipe animations from the fixed action buttons
+  const cardRef = useRef<SimpleSwipeCardRef>(null);
+
   // Sync state with ref on mount
   useEffect(() => {
     setCurrentIndex(currentIndexRef.current);
@@ -247,7 +251,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   );
   const hasAnimatedOnceRef = useRef(isReturningRef.current);
 
-  // PERF FIX: Eagerly preload top 3 cards' images when we have hydrated deck data
+  // PERF FIX: Eagerly preload top 4 cards' images when we have hydrated deck data
   // This runs SYNCHRONOUSLY during component initialization (before first paint)
   // The images will be in cache when TinderSwipeCard renders, preventing any flash
   const eagerPreloadInitiatedRef = useRef(false);
@@ -255,8 +259,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     eagerPreloadInitiatedRef.current = true;
     const currentIdx = currentIndexRef.current;
 
-    // Preload current, next, and next-next card images with decode
-    [0, 1, 2].forEach((offset) => {
+    // Preload current + next 3 card images with decode (4 total for smooth swiping)
+    [0, 1, 2, 3].forEach((offset) => {
       const cardImages = deckQueueRef.current[currentIdx + offset]?.images;
       if (cardImages?.[0]) {
         preloadImageToCache(cardImages[0]);
@@ -445,12 +449,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     prevListingIdsRef.current = listingIdsSignature;
   }
 
-  // Prefetch images for next cards
+  // Prefetch images for next cards (3 profiles ahead for smoother swiping)
   // PERF: Use currentIndex state as trigger (re-runs when index changes)
   usePrefetchImages({
     currentIndex: currentIndex,
     profiles: deckQueueRef.current,
-    prefetchCount: 2,
+    prefetchCount: 3,
     trigger: currentIndex
   });
 
@@ -658,11 +662,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // The next card will show with skeleton placeholder until image loads
     executeSwipe(direction);
 
-    // BACKGROUND PREFETCH: Opportunistically prefetch next 2-3 cards in background
+    // BACKGROUND PREFETCH: Opportunistically prefetch next 3-4 cards in background
     // This doesn't block the swipe - images load with graceful skeleton fallback
     // Use BOTH preloaders for maximum cache coverage
     const imagesToPreload: string[] = [];
-    [1, 2, 3].forEach((offset) => {
+    [1, 2, 3, 4].forEach((offset) => {
       const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
       if (futureCard?.images?.[0]) {
         imagesToPreload.push(futureCard.images[0]);
@@ -675,6 +679,19 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       imagePreloadController.preloadBatch(imagesToPreload);
     }
   }, [executeSwipe]);
+
+  // Button-triggered swipe - animates the card via ref
+  const handleButtonLike = useCallback(() => {
+    if (cardRef.current) {
+      cardRef.current.triggerSwipe('right');
+    }
+  }, []);
+
+  const handleButtonDislike = useCallback(() => {
+    if (cardRef.current) {
+      cardRef.current.triggerSwipe('left');
+    }
+  }, []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -975,9 +992,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       isFetchingMore.current = true;
       setPage(p => p + 1);
 
-      // Also preload next 3 card images opportunistically using BOTH preloaders
+      // Also preload next 4 card images opportunistically using BOTH preloaders
       const imagesToPreload: string[] = [];
-      [1, 2, 3].forEach((offset) => {
+      [1, 2, 3, 4].forEach((offset) => {
         const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
         if (futureCard?.images?.[0]) {
           imagesToPreload.push(futureCard.images[0]);
@@ -1010,20 +1027,30 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
             style={{ zIndex: 10 }}
           >
             <SimpleSwipeCard
+              ref={cardRef}
               listing={topCard}
               onSwipe={handleSwipe}
               onTap={() => onListingTap(topCard.id)}
               onInsights={handleInsights}
-              onShare={handleShare}
-              onUndo={undoLastSwipe}
-              canUndo={canUndo}
-              onMessage={handleMessage}
               isTop={true}
-              hideActions={insightsModalOpen}
             />
           </div>
         )}
       </div>
+
+      {/* Fixed action buttons - stay in place while cards animate above */}
+      {topCard && !insightsModalOpen && (
+        <div className="flex-shrink-0 flex justify-center items-center py-3 px-4">
+          <SwipeActionButtonBar
+            onLike={handleButtonLike}
+            onDislike={handleButtonDislike}
+            onShare={handleShare}
+            onUndo={undoLastSwipe}
+            onMessage={handleMessage}
+            canUndo={canUndo}
+          />
+        </div>
+      )}
 
       {/* FIX #3: PORTAL ISOLATION - Modals render outside swipe tree
           This prevents modal state changes from causing re-renders in the swipe container

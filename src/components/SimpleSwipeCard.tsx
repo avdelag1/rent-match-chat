@@ -10,7 +10,7 @@
  * - Press-and-hold magnifier for image inspection
  */
 
-import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import { memo, useRef, useState, useCallback, useMemo, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -18,8 +18,12 @@ import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
-import { SwipeActionButtonBar } from './SwipeActionButtonBar';
 import { useMagnifier } from '@/hooks/useMagnifier';
+
+// Exposed interface for parent to trigger swipe animations
+export interface SimpleSwipeCardRef {
+  triggerSwipe: (direction: 'left' | 'right') => void;
+}
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -108,26 +112,16 @@ interface SimpleSwipeCardProps {
   onSwipe: (direction: 'left' | 'right') => void;
   onTap?: () => void;
   onInsights?: () => void;
-  onShare?: () => void;
-  onUndo?: () => void;
-  canUndo?: boolean;
-  onMessage?: () => void;
   isTop?: boolean;
-  hideActions?: boolean;
 }
 
-function SimpleSwipeCardComponent({
+const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardProps>(({
   listing,
   onSwipe,
   onTap,
   onInsights,
-  onShare,
-  onUndo,
-  canUndo = false,
-  onMessage,
   isTop = true,
-  hideActions = false,
-}: SimpleSwipeCardProps) {
+}, ref) => {
   const isDragging = useRef(false);
   const hasExited = useRef(false);
   // Track if the card is currently animating out to prevent reset interference
@@ -282,6 +276,11 @@ function SimpleSwipeCardComponent({
     });
   }, [listing.id, onSwipe, x]);
 
+  // Expose triggerSwipe method to parent via ref
+  useImperativeHandle(ref, () => ({
+    triggerSwipe: handleButtonSwipe,
+  }), [handleButtonSwipe]);
+
   // Format price
   // Format price - moved before conditional render to avoid hook order issues
   const rentalType = (listing as any).rental_duration_type;
@@ -425,8 +424,8 @@ function SimpleSwipeCardComponent({
           </div>
         </motion.div>
         
-        {/* Content overlay - Positioned higher for Tinder style (above button area) */}
-        <div className="absolute bottom-24 left-0 right-0 p-4 z-20 pointer-events-none">
+        {/* Content overlay - Positioned at bottom (buttons are now outside card) */}
+        <div className="absolute bottom-4 left-0 right-0 p-4 z-20 pointer-events-none">
           <h2 className="text-white text-xl font-bold mb-1 line-clamp-1">
             {listing.title || 'Untitled Listing'}
           </h2>
@@ -469,23 +468,9 @@ function SimpleSwipeCardComponent({
             </Badge>
           </div>
         )}
-        
-        {/* Action buttons INSIDE card - Tinder style */}
-        {!hideActions && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-30">
-            <SwipeActionButtonBar
-              onLike={() => handleButtonSwipe('right')}
-              onDislike={() => handleButtonSwipe('left')}
-              onShare={onShare}
-              onUndo={onUndo}
-              onMessage={onMessage}
-              canUndo={canUndo}
-            />
-          </div>
-        )}
       </motion.div>
     </div>
   );
-}
+});
 
 export const SimpleSwipeCard = memo(SimpleSwipeCardComponent);
