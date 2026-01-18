@@ -149,7 +149,7 @@ function FilterDropdown({
             initial={{ opacity: 0, y: -5, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -5, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.08 }}
             style={{
               position: 'fixed',
               top: dropdownPosition.top,
@@ -235,7 +235,7 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        transition={{ type: 'spring', stiffness: 600, damping: 25 }}
         className={cn(
           'bg-background/80 backdrop-blur-xl border-b border-white/5 px-3 py-2',
           className
@@ -294,7 +294,7 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      transition={{ type: 'spring', stiffness: 600, damping: 25 }}
       className={cn(
         'bg-background/80 backdrop-blur-xl border-b border-white/5 px-3 py-2',
         className

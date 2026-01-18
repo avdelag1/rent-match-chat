@@ -66,22 +66,22 @@ const NotificationIcon = memo(({ type, className = "w-5 h-5" }: { type: string; 
 NotificationIcon.displayName = 'NotificationIcon';
 
 const NotificationIconBg = memo(({ type }: { type: string }) => {
-  const bgColors: Record<string, string> = {
-    'new_message': 'bg-blue-500/10',
-    'message': 'bg-blue-500/10',
-    'new_like': 'bg-orange-500/10',
-    'like': 'bg-orange-500/10',
-    'new_match': 'bg-amber-500/10',
-    'match': 'bg-amber-500/10',
-    'super_like': 'bg-yellow-500/10',
-    'property': 'bg-emerald-500/10',
-    'yacht': 'bg-cyan-500/10',
-    'bicycle': 'bg-orange-500/10',
-    'vehicle': 'bg-purple-500/10',
+  const bgGradients: Record<string, string> = {
+    'new_message': 'bg-gradient-to-br from-blue-500/20 to-cyan-500/10',
+    'message': 'bg-gradient-to-br from-blue-500/20 to-cyan-500/10',
+    'new_like': 'bg-gradient-to-br from-orange-500/20 to-amber-500/10',
+    'like': 'bg-gradient-to-br from-orange-500/20 to-amber-500/10',
+    'new_match': 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10',
+    'match': 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10',
+    'super_like': 'bg-gradient-to-br from-yellow-500/20 to-orange-500/10',
+    'property': 'bg-gradient-to-br from-emerald-500/20 to-teal-500/10',
+    'yacht': 'bg-gradient-to-br from-cyan-500/20 to-blue-500/10',
+    'bicycle': 'bg-gradient-to-br from-orange-500/20 to-red-500/10',
+    'vehicle': 'bg-gradient-to-br from-purple-500/20 to-pink-500/10',
   };
 
   return (
-    <div className={`p-3 rounded-2xl ${bgColors[type] || 'bg-muted'}`}>
+    <div className={`p-3 rounded-2xl shadow-lg ${bgGradients[type] || 'bg-gradient-to-br from-muted to-muted-foreground/20'}`}>
       <NotificationIcon type={type} className="w-6 h-6" />
     </div>
   );
@@ -112,10 +112,10 @@ const NotificationRow = memo(({
 
   return (
     <Card
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md border-0 ${
+      className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] border ${
         notification.read
-          ? 'bg-card/50'
-          : 'bg-gradient-to-r from-primary/5 to-card border-l-2 border-l-primary'
+          ? 'bg-gradient-to-br from-card/80 to-card/40 border-border/40'
+          : 'bg-gradient-to-br from-primary/10 via-card to-card border-primary/30 shadow-lg shadow-primary/5'
       }`}
       onClick={handleClick}
     >

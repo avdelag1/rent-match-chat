@@ -165,7 +165,7 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            transition={{ duration: 0.1, ease: 'easeOut' }}
             className="absolute top-full left-0 mt-2 z-[100] w-80 bg-popover border border-border rounded-2xl shadow-2xl overflow-hidden"
           >
             {/* Header */}
