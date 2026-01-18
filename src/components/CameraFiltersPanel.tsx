@@ -126,16 +126,23 @@ export function CameraFiltersPanel({
                   >
                     <div className="grid grid-cols-3 gap-3">
                       {(Object.entries(CAMERA_FILTERS) as [FilterType, typeof CAMERA_FILTERS[FilterType]][]).map(([key, config]) => (
-                        <button
+                        <motion.button
                           key={key}
                           onClick={() => onFilterChange(key)}
-                          className={`flex flex-col items-center gap-2 p-2 rounded-xl transition-all ${
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`relative flex flex-col items-center gap-2 p-2.5 rounded-2xl transition-all ${
                             selectedFilter === key
-                              ? 'bg-red-500/20 ring-2 ring-red-500'
-                              : 'hover:bg-white/10'
+                              ? 'bg-gradient-to-br from-red-500/30 to-orange-500/20 ring-2 ring-red-500 shadow-lg shadow-red-500/20'
+                              : 'bg-white/5 hover:bg-white/10 shadow-md'
                           }`}
                         >
-                          <div className="w-full aspect-square rounded-lg overflow-hidden bg-gray-800">
+                          {/* Filter preview with better styling */}
+                          <div className={`relative w-full aspect-square rounded-xl overflow-hidden ${
+                            selectedFilter === key
+                              ? 'ring-2 ring-white/30 shadow-xl'
+                              : 'shadow-md'
+                          }`}>
                             {previewImageUrl ? (
                               <img
                                 src={previewImageUrl}
@@ -145,17 +152,39 @@ export function CameraFiltersPanel({
                               />
                             ) : (
                               <div
-                                className="w-full h-full bg-gradient-to-br from-red-400 to-orange-500"
+                                className="w-full h-full bg-gradient-to-br from-red-400 via-pink-500 to-orange-500"
                                 style={{ filter: config.cssFilter }}
                               />
                             )}
+                            {/* Selected indicator */}
+                            {selectedFilter === key && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                                className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg"
+                              >
+                                <svg
+                                  className="w-4 h-4 text-white"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="3"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path d="M5 13l4 4L19 7" />
+                                </svg>
+                              </motion.div>
+                            )}
                           </div>
-                          <span className={`text-xs font-medium ${
-                            selectedFilter === key ? 'text-red-400' : 'text-white/70'
+                          {/* Filter name with better typography */}
+                          <span className={`text-xs font-semibold tracking-wide ${
+                            selectedFilter === key ? 'text-red-400' : 'text-white/80'
                           }`}>
                             {config.name}
                           </span>
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   </motion.div>
