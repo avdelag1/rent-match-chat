@@ -83,9 +83,12 @@ const PlaceholderImage = memo(({ name }: { name?: string | null }) => {
   );
 });
 
-// Simple image component - optimized for instant display
+// Image cache to prevent reloading and blinking
+const imageCache = new Map<string, boolean>();
+
+// Simple image component - optimized for instant display without blinking
 const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: string | null }) => {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(() => imageCache.has(src));
   const [error, setError] = useState(false);
 
   // Show placeholder if no valid image
@@ -106,10 +109,10 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
         userSelect: 'none',
       }}
     >
-      {/* Skeleton */}
+      {/* Skeleton - only show if image not in cache */}
       <div
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
-        style={{ opacity: loaded ? 0 : 1, transition: 'opacity 50ms ease-out' }}
+        style={{ opacity: loaded ? 0 : 1, transition: 'opacity 0ms' }}
       />
 
       {/* Image */}
@@ -119,11 +122,14 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 50ms ease-out',
+          transition: 'opacity 0ms',
           WebkitUserDrag: 'none',
           pointerEvents: 'none',
         } as React.CSSProperties}
-        onLoad={() => setLoaded(true)}
+        onLoad={() => {
+          imageCache.set(src, true);
+          setLoaded(true);
+        }}
         onError={() => setError(true)}
         draggable={false}
         loading="eager"
@@ -192,6 +198,19 @@ function SimpleOwnerSwipeCardComponent({
 
   const imageCount = images.length;
   const currentImage = images[currentImageIndex] || FALLBACK_PLACEHOLDER;
+
+  // Preload all images for current card when it's the top card to prevent blinking
+  useEffect(() => {
+    if (!isTop || !images.length) return;
+
+    images.forEach((imageUrl) => {
+      if (imageUrl && imageUrl !== FALLBACK_PLACEHOLDER && !imageCache.has(imageUrl)) {
+        const img = new Image();
+        img.onload = () => imageCache.set(imageUrl, true);
+        img.src = imageUrl;
+      }
+    });
+  }, [isTop, images, profile?.user_id]);
 
   // Reset state when profile changes - but ONLY if we're not mid-exit
   // This prevents the snap-back glitch caused by resetting during exit animation
