@@ -6,24 +6,24 @@
  *
  * Features:
  * - iOS-style frosted glass effect (backdrop-blur)
- * - 5-button layout: Return | Dislike | Share | Like | Message
- * - Size hierarchy: Like/Dislike are 1.5x larger (60px vs 40px)
+ * - 5-button layout: Return | Nope | Share | Yes! | Message
+ * - Neon glowing text buttons for Like (Yes!) and Dislike (Nope)
  * - GPU-accelerated animations at 60fps
  * - Capacitor iOS haptics (light for small, medium for large)
  * - Depth illusion: cards swipe behind buttons
  * - Safe area handling for iOS home indicator
  *
  * BUTTON ORDER (LEFT → RIGHT):
- * 1. Return/Undo (small) - amber
- * 2. Dislike ❌ (large) - red
- * 3. Share (small) - purple
- * 4. Like ❤️ (large) - green
- * 5. Message/Chat (small) - cyan
+ * 1. Return/Undo (small) - amber icon
+ * 2. "Nope" (large) - red neon text
+ * 3. Share (small) - purple icon
+ * 4. "Yes!" (large) - green neon text
+ * 5. Message/Chat (small) - cyan icon
  */
 
 import { memo, useCallback, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ThumbsDown, Heart, Share2, RotateCcw, MessageCircle } from 'lucide-react';
+import { Share2, RotateCcw, MessageCircle } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 
 interface SwipeActionButtonBarProps {
@@ -227,6 +227,118 @@ const ActionButton = memo(({
 
 ActionButton.displayName = 'ActionButton';
 
+// Neon Text Button for Yes!/Nope with glowing text effect
+const NeonTextButton = memo(({
+  onClick,
+  disabled = false,
+  variant = 'like',
+  text,
+  ariaLabel,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  variant: 'like' | 'dislike';
+  text: string;
+  ariaLabel: string;
+}) => {
+  const [isPressed, setIsPressed] = useState(false);
+
+  const handleClick = useCallback(() => {
+    if (disabled) return;
+    triggerHaptic(variant === 'like' ? 'success' : 'warning');
+    onClick();
+  }, [disabled, variant, onClick]);
+
+  // Neon color configurations
+  const neonConfig = useMemo(() => {
+    if (variant === 'like') {
+      return {
+        color: '#22c55e',
+        glowColor: 'rgba(34, 197, 94, 0.8)',
+        textShadow: `
+          0 0 5px #22c55e,
+          0 0 10px #22c55e,
+          0 0 20px #22c55e,
+          0 0 40px rgba(34, 197, 94, 0.6)
+        `,
+        borderColor: 'rgba(34, 197, 94, 0.8)',
+        pressedBorder: '#22c55e',
+      };
+    }
+    return {
+      color: '#ef4444',
+      glowColor: 'rgba(239, 68, 68, 0.8)',
+      textShadow: `
+        0 0 5px #ef4444,
+        0 0 10px #ef4444,
+        0 0 20px #ef4444,
+        0 0 40px rgba(239, 68, 68, 0.6)
+      `,
+      borderColor: 'rgba(239, 68, 68, 0.8)',
+      pressedBorder: '#ef4444',
+    };
+  }, [variant]);
+
+  return (
+    <motion.button
+      onClick={handleClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      onPointerDown={() => setIsPressed(true)}
+      onPointerUp={() => setIsPressed(false)}
+      onPointerLeave={() => setIsPressed(false)}
+      onPointerCancel={() => setIsPressed(false)}
+      whileTap={{ scale: TAP_SCALE }}
+      transition={springConfig}
+      style={{
+        minWidth: LARGE_SIZE,
+        height: LARGE_SIZE,
+        padding: '0 16px',
+        borderRadius: LARGE_SIZE / 2,
+        // Bright neon frame border
+        border: `2px solid ${isPressed ? neonConfig.pressedBorder : neonConfig.borderColor}`,
+        // Semi-transparent backdrop
+        backgroundColor: isPressed
+          ? 'rgba(35, 35, 35, 0.75)'
+          : 'rgba(25, 25, 25, 0.55)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        // Glow effect on button
+        boxShadow: isPressed
+          ? `0 0 15px ${neonConfig.glowColor}, 0 0 30px ${neonConfig.glowColor}, 0 4px 16px rgba(0,0,0,0.35)`
+          : `0 0 8px ${neonConfig.glowColor}, 0 2px 8px rgba(0,0,0,0.25)`,
+        // GPU acceleration
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        willChange: 'transform, box-shadow',
+        // Transitions
+        transition: 'background-color 150ms ease-out, box-shadow 200ms ease-out, border-color 150ms ease-out',
+        // Disabled state
+        opacity: disabled ? 0.3 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+      }}
+      className="flex items-center justify-center touch-manipulation select-none"
+    >
+      <span
+        style={{
+          color: neonConfig.color,
+          fontSize: '18px',
+          fontWeight: 800,
+          letterSpacing: '0.5px',
+          textShadow: neonConfig.textShadow,
+          textTransform: 'uppercase',
+          transition: 'text-shadow 150ms ease-out',
+        }}
+      >
+        {text}
+      </span>
+    </motion.button>
+  );
+});
+
+NeonTextButton.displayName = 'NeonTextButton';
+
 function SwipeActionButtonBarComponent({
   onLike,
   onDislike,
@@ -267,16 +379,14 @@ function SwipeActionButtonBarComponent({
           <RotateCcw className="w-full h-full" strokeWidth={2} />
         </ActionButton>
 
-        {/* 2. Dislike Button (Large) - Red */}
-        <ActionButton
+        {/* 2. Dislike Button (Large) - Red Neon "Nope" */}
+        <NeonTextButton
           onClick={onDislike}
           disabled={disabled}
-          size="large"
           variant="dislike"
+          text="Nope"
           ariaLabel="Pass on this listing"
-        >
-          <ThumbsDown className="w-full h-full" strokeWidth={2} />
-        </ActionButton>
+        />
 
         {/* 3. Share Button (Small) - Purple */}
         {onShare && (
@@ -291,16 +401,14 @@ function SwipeActionButtonBarComponent({
           </ActionButton>
         )}
 
-        {/* 4. Like Button (Large) - Green */}
-        <ActionButton
+        {/* 4. Like Button (Large) - Green Neon "Yes!" */}
+        <NeonTextButton
           onClick={onLike}
           disabled={disabled}
-          size="large"
           variant="like"
+          text="Yes!"
           ariaLabel="Like this listing"
-        >
-          <Heart className="w-full h-full" fill="currentColor" strokeWidth={0} />
-        </ActionButton>
+        />
 
         {/* 5. Message Button (Small) - Cyan */}
         {onMessage && (
