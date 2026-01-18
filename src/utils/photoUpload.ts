@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
 export interface UploadProgressCallback {
   (progress: number): void;
@@ -85,7 +86,7 @@ export const updateProfilePhoto = async (
   });
 
   if (authError) {
-    console.error('Auth metadata update failed:', authError);
+    logger.error('Auth metadata update failed:', authError);
   }
 };
 

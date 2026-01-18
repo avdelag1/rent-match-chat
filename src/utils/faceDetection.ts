@@ -26,7 +26,7 @@ export const detectFaceCenter = async (image: HTMLImageElement): Promise<FaceCen
       };
     }
   } catch (error) {
-    console.log('Face detection error:', error);
+    // Face detection error - silently fail and use default crop
   }
 
   return null;

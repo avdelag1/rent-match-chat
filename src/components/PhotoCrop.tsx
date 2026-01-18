@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { detectFaceCenter } from '@/utils/faceDetection';
 import { compressImage } from '@/utils/imageCompression';
+import { logger } from '@/utils/logger';
 
 interface PhotoCropProps {
   imageUrl: string;
@@ -103,7 +104,7 @@ const PhotoCrop: React.FC<PhotoCropProps> = ({
             centerY = Math.max(0, Math.min(centerY, displayHeight - cropSize));
           }
         } catch (error) {
-          console.log('Face detection not available, using center crop');
+          // Face detection not available, using center crop
         }
       }
 
@@ -252,7 +253,7 @@ const PhotoCrop: React.FC<PhotoCropProps> = ({
       };
       reader.readAsDataURL(compressed);
     } catch (error) {
-      console.error('Crop error:', error);
+      logger.error('Crop error:', error);
     } finally {
       setIsProcessing(false);
     }
