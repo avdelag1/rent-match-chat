@@ -1036,21 +1036,21 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
             />
           </div>
         )}
-      </div>
 
-      {/* Fixed action buttons - stay in place while cards animate above */}
-      {topCard && !insightsModalOpen && (
-        <div className="flex-shrink-0 flex justify-center items-center py-3 px-4">
-          <SwipeActionButtonBar
-            onLike={handleButtonLike}
-            onDislike={handleButtonDislike}
-            onShare={handleShare}
-            onUndo={undoLastSwipe}
-            onMessage={handleMessage}
-            canUndo={canUndo}
-          />
-        </div>
-      )}
+        {/* Action buttons INSIDE card area - Tinder style overlay */}
+        {topCard && !insightsModalOpen && (
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-30">
+            <SwipeActionButtonBar
+              onLike={handleButtonLike}
+              onDislike={handleButtonDislike}
+              onShare={handleShare}
+              onUndo={undoLastSwipe}
+              onMessage={handleMessage}
+              canUndo={canUndo}
+            />
+          </div>
+        )}
+      </div>
 
       {/* FIX #3: PORTAL ISOLATION - Modals render outside swipe tree
           This prevents modal state changes from causing re-renders in the swipe container
