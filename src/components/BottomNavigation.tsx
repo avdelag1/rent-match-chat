@@ -31,9 +31,9 @@ import { prefetchRoute } from '@/utils/routePrefetcher';
  * Based on Apple HIG (44pt minimum) scaled for comfortable one-handed use.
  * These values ensure "my thumb never misses, even one-handed."
  */
-const ICON_SIZE = 28; // Slightly larger icons for visibility
-const TOUCH_TARGET_SIZE = 52; // Comfortable touch target (exceeds 44pt minimum)
-const NAV_BUTTON_PADDING = 14; // Padding inside touch target around icon
+const ICON_SIZE = 24; // Compact icons for cleaner look
+const TOUCH_TARGET_SIZE = 56; // Expanded touch target with more breathing room
+const NAV_BUTTON_PADDING = 16; // More padding for better icon spacing
 
 interface BottomNavigationProps {
   userRole: 'client' | 'owner' | 'admin';
@@ -216,8 +216,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
           ...springConfigs.snappy,
           delay: 0.1
         }}
-        // FULL-WIDTH LAYOUT: Use available screen width, evenly distribute buttons
-        className="flex items-center justify-evenly w-full max-w-lg mx-auto px-2 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
+        // FULL-WIDTH LAYOUT: Use available screen width, spread buttons across full width
+        className="flex items-center justify-around w-full max-w-xl mx-auto px-4 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
         style={{
           // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
