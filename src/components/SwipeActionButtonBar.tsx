@@ -165,15 +165,16 @@ const ActionButton = memo(({
         width: buttonSize,
         height: buttonSize,
         borderRadius: '50%',
-        border: `2px solid ${variantConfig.borderColor}`,
-        backgroundColor: isPressed ? variantConfig.hoverBg : variantConfig.bgColor,
-        // iOS frosted glass effect
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        // Shadow and glow
+        border: `1px solid rgba(255, 255, 255, 0.15)`,
+        // Tinder-style: Dark semi-transparent with minimal blur - photo shows through
+        backgroundColor: isPressed 
+          ? 'rgba(40, 40, 40, 0.7)' 
+          : 'rgba(30, 30, 30, 0.5)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        // Subtle shadow
         boxShadow: `
-          inset 0 1px 1px rgba(255,255,255,${size === 'large' ? 0.15 : 0.1}),
-          0 ${size === 'large' ? 8 : 4}px ${size === 'large' ? 24 : 12}px -${size === 'large' ? 4 : 2}px rgba(0,0,0,0.3)
+          0 2px 8px rgba(0,0,0,0.3)
           ${glowStyle ? `, ${glowStyle}` : ''}
         `,
         // GPU acceleration
