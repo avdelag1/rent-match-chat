@@ -508,7 +508,13 @@ function SimpleOwnerSwipeCardComponent({
         
         {/* Action buttons INSIDE card - Tinder style */}
         {!hideActions && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-30">
+          <div
+            className="absolute bottom-4 left-0 right-0 flex justify-center z-30"
+            onClick={(e) => {
+              // Prevent clicks in button area from bubbling to card handler
+              e.stopPropagation();
+            }}
+          >
             <SwipeActionButtonBar
               onLike={() => handleButtonSwipe('right')}
               onDislike={() => handleButtonSwipe('left')}
