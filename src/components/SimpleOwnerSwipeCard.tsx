@@ -163,7 +163,8 @@ function SimpleOwnerSwipeCardComponent({
   // Track if the card is currently animating out to prevent reset interference
   const isExitingRef = useRef(false);
   // Track the profile ID to detect changes
-  const lastProfileIdRef = useRef(profile.user_id);
+  // FIX: Add null check to prevent errors when profile is undefined
+  const lastProfileIdRef = useRef(profile?.user_id || '');
 
   // Motion value for horizontal position - EXACTLY like the landing page logo
   const x = useMotionValue(0);
@@ -182,10 +183,12 @@ function SimpleOwnerSwipeCardComponent({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const images = useMemo(() => {
+    // FIX: Add null check for profile
+    if (!profile) return [FALLBACK_PLACEHOLDER];
     return Array.isArray(profile.profile_images) && profile.profile_images.length > 0
       ? profile.profile_images
       : [FALLBACK_PLACEHOLDER];
-  }, [profile.profile_images]);
+  }, [profile?.profile_images]);
 
   const imageCount = images.length;
   const currentImage = images[currentImageIndex] || FALLBACK_PLACEHOLDER;
@@ -193,6 +196,11 @@ function SimpleOwnerSwipeCardComponent({
   // Reset state when profile changes - but ONLY if we're not mid-exit
   // This prevents the snap-back glitch caused by resetting during exit animation
   useEffect(() => {
+    // FIX: Add null/undefined check for profile to prevent errors
+    if (!profile || !profile.user_id) {
+      return;
+    }
+
     // Check if this is a genuine profile change (not a re-render during exit)
     if (profile.user_id !== lastProfileIdRef.current) {
       lastProfileIdRef.current = profile.user_id;
@@ -205,7 +213,7 @@ function SimpleOwnerSwipeCardComponent({
         x.set(0);
       }
     }
-  }, [profile.user_id, x]);
+  }, [profile?.user_id, x]);
 
   const handleDragStart = useCallback(() => {
     isDragging.current = true;
@@ -264,7 +272,7 @@ function SimpleOwnerSwipeCardComponent({
     setTimeout(() => {
       isDragging.current = false;
     }, 100);
-  }, [profile.user_id, onSwipe, x]);
+  }, [profile?.user_id, onSwipe, x]);
 
   const handleCardTap = useCallback(() => {
     if (!isDragging.current && onTap) {
@@ -323,14 +331,20 @@ function SimpleOwnerSwipeCardComponent({
         onSwipe(direction);
       },
     });
-  }, [profile.user_id, onSwipe, x]);
+  }, [profile?.user_id, onSwipe, x]);
 
   // Format budget - moved before conditional render to avoid hook order issues
-  const budgetText = profile.budget_min && profile.budget_max
+  const budgetText = profile?.budget_min && profile?.budget_max
     ? `$${profile.budget_min.toLocaleString()} - $${profile.budget_max.toLocaleString()}`
-    : profile.budget_max
+    : profile?.budget_max
       ? `Up to $${profile.budget_max.toLocaleString()}`
       : null;
+
+  // FIX: Early return if profile is null/undefined to prevent errors
+  // All hooks must be called above this point to maintain hook order
+  if (!profile || !profile.user_id) {
+    return null;
+  }
 
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
