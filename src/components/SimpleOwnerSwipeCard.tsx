@@ -411,8 +411,8 @@ function SimpleOwnerSwipeCardComponent({
             </div>
           )}
           
-          {/* Bottom gradient - Smith fade for text readability */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/20 via-black/5 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient fade for text readability and Tinder-style look */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
         </div>
         
         {/* YES! overlay */}
