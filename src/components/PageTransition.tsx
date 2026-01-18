@@ -122,9 +122,9 @@ const pageTransition = {
   mass: 0.8,
 };
 
-// Faster transition for exit
+// Instant transition for exit
 const exitTransition = {
-  duration: 0.2,
+  duration: 0.05,
   ease: [0.32, 0.72, 0, 1],
 };
 

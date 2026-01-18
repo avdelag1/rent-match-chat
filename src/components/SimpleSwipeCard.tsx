@@ -77,7 +77,7 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
         style={{
           opacity: loaded ? 0 : 1,
-          transition: 'opacity 150ms ease-out',
+          transition: 'opacity 50ms ease-out',
         }}
       />
 
@@ -88,7 +88,7 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 150ms ease-out',
+          transition: 'opacity 50ms ease-out',
           // CSS performance optimizations
           willChange: 'opacity',
           backfaceVisibility: 'hidden',
@@ -375,8 +375,8 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
             </div>
           )}
           
-          {/* Bottom gradient fade for text readability and Tinder-style look */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient fade - tall and dark for Tinder-style look */}
+          <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/70 via-40% to-transparent pointer-events-none z-10" />
         </div>
         
         {/* YES! overlay */}
@@ -423,8 +423,8 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           </div>
         </motion.div>
         
-        {/* Content overlay - Positioned higher for Tinder style (above button area) */}
-        <div className="absolute bottom-28 left-0 right-0 p-4 z-20 pointer-events-none">
+        {/* Content overlay - Above buttons */}
+        <div className="absolute bottom-24 left-0 right-0 p-4 z-20 pointer-events-none">
           <h2 className="text-white text-xl font-bold mb-1 line-clamp-1">
             {listing.title || 'Untitled Listing'}
           </h2>

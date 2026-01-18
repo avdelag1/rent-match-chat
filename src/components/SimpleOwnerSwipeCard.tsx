@@ -109,7 +109,7 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
       {/* Skeleton */}
       <div
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
-        style={{ opacity: loaded ? 0 : 1, transition: 'opacity 150ms ease-out' }}
+        style={{ opacity: loaded ? 0 : 1, transition: 'opacity 50ms ease-out' }}
       />
 
       {/* Image */}
@@ -119,7 +119,7 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 150ms ease-out',
+          transition: 'opacity 50ms ease-out',
           WebkitUserDrag: 'none',
           pointerEvents: 'none',
         } as React.CSSProperties}
@@ -411,8 +411,8 @@ function SimpleOwnerSwipeCardComponent({
             </div>
           )}
           
-          {/* Bottom gradient fade for text readability and Tinder-style look */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-10" />
+          {/* Bottom gradient fade - tall and dark for Tinder-style look */}
+          <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/70 via-40% to-transparent pointer-events-none z-10" />
         </div>
         
         {/* YES! overlay */}
