@@ -3,6 +3,11 @@
  *
  * Uses the EXACT same pattern as the landing page logo swipe.
  * Simple, clean, no complex physics - just framer-motion's built-in drag.
+ * 
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Pointer events for instant touch response (no 300ms delay)
+ * - GPU-accelerated transforms
+ * - Press-and-hold magnifier for image inspection
  */
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
@@ -14,6 +19,7 @@ import { getCardImageUrl } from '@/utils/imageOptimization';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { SwipeActionButtonBar } from './SwipeActionButtonBar';
+import { useMagnifier } from '@/hooks/useMagnifier';
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -43,7 +49,7 @@ const SPRING_CONFIGS = {
 // Active spring config - change this to switch feels
 const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
 
-// Simple image component with no complex state
+// Simple image component with no complex state - optimized for instant display
 const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -56,6 +62,10 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         // GPU acceleration for smooth rendering
         transform: 'translateZ(0)',
         willChange: 'contents',
+        // Disable all browser touch behaviors for instant response
+        touchAction: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
       }}
     >
       {/* Skeleton */}
@@ -63,7 +73,7 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
         style={{
           opacity: loaded ? 0 : 1,
-          transition: 'opacity 200ms ease-out',
+          transition: 'opacity 150ms ease-out',
         }}
       />
 
@@ -74,15 +84,20 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 200ms ease-out',
+          transition: 'opacity 150ms ease-out',
           // CSS performance optimizations
           willChange: 'opacity',
           backfaceVisibility: 'hidden',
           transform: 'translateZ(0)',
-        }}
+          // Disable image dragging
+          WebkitUserDrag: 'none',
+          pointerEvents: 'none',
+        } as React.CSSProperties}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         draggable={false}
+        loading="eager"
+        decoding="async"
       />
     </div>
   );
@@ -274,6 +289,14 @@ function SimpleSwipeCardComponent({
     ? `$${listing.price.toLocaleString()}${rentalType === 'monthly' ? '/mo' : rentalType === 'daily' ? '/day' : ''}`
     : null;
 
+  // Magnifier hook for press-and-hold zoom - MUST be before conditional returns
+  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
+    scale: 2.0,
+    lensSize: 160,
+    holdDelay: 350,
+    enabled: isTop,
+  });
+
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
     // Render a simple static preview for non-top cards
@@ -291,11 +314,12 @@ function SimpleSwipeCardComponent({
     );
   }
 
+
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Draggable Card - EXACTLY like the landing page logo */}
       <motion.div
-        drag="x"
+        drag={!isMagnifierActive() ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={1} // Full elasticity for instant response to touch
         dragMomentum={true} // Allow momentum for natural feel
@@ -309,20 +333,38 @@ function SimpleSwipeCardComponent({
           scale: cardScale,
           rotate: cardRotate,
           filter: useTransform(cardBlur, (v) => `blur(${v}px)`),
-          // CSS performance optimizations
+          // CSS performance optimizations for instant touch response
           willChange: 'transform, opacity, filter',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           perspective: 1000,
-        }}
+          // Disable all browser touch delays
+          touchAction: 'pan-y',
+          WebkitTapHighlightColor: 'transparent',
+          WebkitTouchCallout: 'none',
+        } as any}
         className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-2xl relative"
       >
-        {/* Image area */}
+        {/* Image area with magnifier support */}
         <div 
+          ref={containerRef}
           className="absolute inset-0 w-full h-full"
           onClick={handleImageTap}
+          {...pointerHandlers}
+          style={{
+            touchAction: 'none',
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+          }}
         >
           <CardImage src={currentImage} alt={listing.title || 'Listing'} />
+          
+          {/* Magnifier canvas overlay */}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none z-50"
+            style={{ display: 'none' }}
+          />
           
           {/* Image dots */}
           {imageCount > 1 && (

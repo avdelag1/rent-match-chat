@@ -18,7 +18,7 @@
 /*  Handles Android/iOS notches, status bar, and home gesture bar       */
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Global responsive foundation with safe areas */
+/* Global responsive foundation with safe areas and instant touch */
 html {
   font-size: 16px;
   line-height: 1.5;
@@ -28,6 +28,10 @@ html {
   width: 100%;
   /* Prevent page shift when scrollbar appears/disappears */
   scrollbar-gutter: stable;
+
+  /* INSTANT TOUCH - Disable all browser touch delays */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
 
   /* Safe area CSS variables - Available globally */
   --sat: env(safe-area-inset-top, 0px);
