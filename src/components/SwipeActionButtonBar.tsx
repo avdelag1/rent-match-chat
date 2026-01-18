@@ -57,15 +57,15 @@ const springConfig = {
  *
  * Hit areas are the full button size - no invisible padding needed.
  */
-const LARGE_SIZE = 72;  // Primary actions (Like/Dislike) - dominant
+const LARGE_SIZE = 80;  // Primary actions (Like/Dislike) - dominant, increased for better visibility
 const SMALL_SIZE = 46;  // Secondary actions (Undo/Share/Message) - compact
 
 // Icon sizes scale proportionally
-const LARGE_ICON_SIZE = 34;  // Primary action icons
+const LARGE_ICON_SIZE = 38;  // Primary action icons - increased for better visibility
 const SMALL_ICON_SIZE = 22;  // Secondary action icons - smaller for compact buttons
 
 // Gap between buttons - tighter for compact layout
-const BUTTON_GAP = 10; // Closer together for ergonomic reach
+const BUTTON_GAP = 6; // Closer together for ergonomic reach
 
 // Tap animation scale
 const TAP_SCALE = 0.92; // Slightly less dramatic for premium feel
