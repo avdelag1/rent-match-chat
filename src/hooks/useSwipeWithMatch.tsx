@@ -33,8 +33,9 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       let like: any;
 
       if (targetType === 'profile') {
-        // Owner swiping on a client profile - save to owner_likes table
+        // Owner swiping on a client profile
         if (direction === 'right') {
+          // Save like to owner_likes table
           const { data: ownerLike, error: ownerLikeError } = await supabase
             .from('owner_likes')
             .upsert({
@@ -54,9 +55,27 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           }
           like = ownerLike;
         } else {
-          // For left swipes, we don't need to save anything special
-          // Just return early with a placeholder
-          like = { id: 'skipped', direction };
+          // Save dislike to dislikes table with 7-day cooldown
+          const { data: dislike, error: dislikeError } = await supabase
+            .from('dislikes')
+            .upsert({
+              user_id: user.id,
+              target_id: targetId,
+              target_type: 'profile',
+              disliked_at: new Date().toISOString(),
+              cooldown_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            }, {
+              onConflict: 'user_id,target_id,target_type',
+              ignoreDuplicates: false
+            })
+            .select()
+            .single();
+
+          if (dislikeError) {
+            logger.error('Error saving dislike:', dislikeError);
+            throw dislikeError;
+          }
+          like = dislike;
         }
       } else {
         // Client swiping on a listing - save to likes table
@@ -98,9 +117,9 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       return like;
     },
     onSuccess: (data, variables) => {
-      // OPTIMIZED: Only invalidate relevant queries based on swipe type
-      // Skip invalidations on left swipes (no UI changes needed)
+      // OPTIMIZED: Invalidate relevant queries based on swipe type
       const isLike = variables.direction === 'right';
+      const isDislike = variables.direction === 'left';
 
       if (isLike) {
         // Fire-and-forget invalidation - don't block on cache updates
@@ -118,12 +137,23 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
         // Fire-and-forget - cache errors are non-critical
         Promise.all(invalidations).catch(() => {});
+      } else if (isDislike) {
+        // Invalidate dislikes cache so the disliked profiles are excluded from future fetches
+        const invalidations = [
+          queryClient.invalidateQueries({ queryKey: ['dislikes'] }),
+          queryClient.invalidateQueries({ queryKey: ['client-profiles'] }),
+        ];
+        Promise.all(invalidations).catch(() => {});
       }
-      // Skip all invalidations on left swipes - no UI impact
     },
     onError: (error) => {
       logger.error('Swipe error:', error);
-      toast.error("Something went wrong. Please try again.");
+      // Only show error toast for critical failures (auth, network), not for edge cases
+      // Background swipe errors are handled gracefully in the container
+      if (error instanceof Error && (error.message.includes('auth') || error.message.includes('network'))) {
+        toast.error("Something went wrong. Please try again.");
+      }
+      // Silently fail for other errors - the swipe already happened in the UI
     }
   });
 }

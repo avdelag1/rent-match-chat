@@ -49,13 +49,53 @@ interface ClientProfile {
   lifestyle_tags?: string[] | null;
 }
 
+// Placeholder component for profiles without photos
+const PlaceholderImage = memo(({ name }: { name?: string | null }) => {
+  return (
+    <div
+      className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center"
+      style={{
+        transform: 'translateZ(0)',
+        touchAction: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+      }}
+    >
+      <div className="absolute inset-0 bg-black/20" />
+      <div className="text-center relative z-10 px-8">
+        <div className="w-32 h-32 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-6 border-4 border-white/50">
+          <img
+            src="/icons/icon.svg"
+            alt="Logo"
+            className="w-20 h-20"
+            draggable={false}
+          />
+        </div>
+        <p className="text-white text-xl font-bold mb-2 drop-shadow-lg">
+          {name || 'Client Profile'}
+        </p>
+        <p className="text-white/90 text-base font-medium drop-shadow-md">
+          Waiting for client to upload photos :)
+        </p>
+      </div>
+    </div>
+  );
+});
+
 // Simple image component - optimized for instant display
-const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
+const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: string | null }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  
+
+  // Show placeholder if no valid image
+  const isPlaceholder = !src || src === FALLBACK_PLACEHOLDER || error;
+
+  if (isPlaceholder) {
+    return <PlaceholderImage name={name} />;
+  }
+
   return (
-    <div 
+    <div
       className="absolute inset-0 w-full h-full"
       style={{
         // GPU acceleration
@@ -66,18 +106,18 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
       }}
     >
       {/* Skeleton */}
-      <div 
+      <div
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
         style={{ opacity: loaded ? 0 : 1, transition: 'opacity 150ms ease-out' }}
       />
-      
+
       {/* Image */}
       <img
-        src={error ? FALLBACK_PLACEHOLDER : (src || FALLBACK_PLACEHOLDER)}
+        src={src}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ 
-          opacity: loaded ? 1 : 0, 
+        style={{
+          opacity: loaded ? 1 : 0,
           transition: 'opacity 150ms ease-out',
           WebkitUserDrag: 'none',
           pointerEvents: 'none',
@@ -297,7 +337,7 @@ function SimpleOwnerSwipeCardComponent({
           pointerEvents: 'none'
         }}
       >
-        <CardImage src={currentImage} alt={profile.name || 'Client'} />
+        <CardImage src={currentImage} alt={profile.name || 'Client'} name={profile.name} />
       </div>
     );
   }
@@ -344,8 +384,8 @@ function SimpleOwnerSwipeCardComponent({
             userSelect: 'none',
           }}
         >
-          <CardImage src={currentImage} alt={profile.name || 'Client'} />
-          
+          <CardImage src={currentImage} alt={profile.name || 'Client'} name={profile.name} />
+
           {/* Magnifier canvas overlay */}
           <canvas
             ref={canvasRef}
