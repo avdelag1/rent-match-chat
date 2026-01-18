@@ -208,13 +208,13 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
 
   return (
-    <nav className="app-bottom-bar pointer-events-none px-4">
+    <nav className="app-bottom-bar pointer-events-none px-1">
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={springConfigs.instant}
-        // FULL-WIDTH LAYOUT: Use available screen width, spread buttons across full width
-        className="flex items-center justify-around w-full max-w-xl mx-auto px-4 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
+        // FULL-WIDTH LAYOUT: Use available screen width, spread buttons across full width with edge coverage
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
         style={{
           // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
