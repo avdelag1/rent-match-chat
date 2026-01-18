@@ -75,22 +75,22 @@ const NotificationIcon = ({ type, className = "w-5 h-5" }: { type: string; class
 };
 
 const NotificationIconBg = ({ type }: { type: string }) => {
-  const bgColors: Record<string, string> = {
-    'new_message': 'bg-blue-500/10',
-    'message': 'bg-blue-500/10',
-    'new_like': 'bg-orange-500/10',
-    'like': 'bg-orange-500/10',
-    'new_match': 'bg-amber-500/10',
-    'match': 'bg-amber-500/10',
-    'super_like': 'bg-yellow-500/10',
-    'property': 'bg-emerald-500/10',
-    'yacht': 'bg-cyan-500/10',
-    'bicycle': 'bg-orange-500/10',
-    'vehicle': 'bg-purple-500/10',
+  const bgGradients: Record<string, string> = {
+    'new_message': 'bg-gradient-to-br from-blue-500/20 to-cyan-500/10',
+    'message': 'bg-gradient-to-br from-blue-500/20 to-cyan-500/10',
+    'new_like': 'bg-gradient-to-br from-orange-500/20 to-amber-500/10',
+    'like': 'bg-gradient-to-br from-orange-500/20 to-amber-500/10',
+    'new_match': 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10',
+    'match': 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10',
+    'super_like': 'bg-gradient-to-br from-yellow-500/20 to-orange-500/10',
+    'property': 'bg-gradient-to-br from-emerald-500/20 to-teal-500/10',
+    'yacht': 'bg-gradient-to-br from-cyan-500/20 to-blue-500/10',
+    'bicycle': 'bg-gradient-to-br from-orange-500/20 to-red-500/10',
+    'vehicle': 'bg-gradient-to-br from-purple-500/20 to-pink-500/10',
   };
 
   return (
-    <div className={`p-3 rounded-2xl ${bgColors[type] || 'bg-muted'}`}>
+    <div className={`p-3 rounded-2xl shadow-lg ${bgGradients[type] || 'bg-gradient-to-br from-muted to-muted-foreground/20'}`}>
       <NotificationIcon type={type} className="w-6 h-6" />
     </div>
   );
@@ -424,14 +424,14 @@ export default function NotificationsPage() {
               {isLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3, 4].map(i => (
-                    <Card key={i} className="animate-pulse">
+                    <Card key={i} className="animate-pulse bg-gradient-to-br from-card/80 to-card/40 border-border/40 shadow-md">
                       <CardContent className="p-4">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-muted" />
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-muted to-muted-foreground/20" />
                           <div className="flex-1 space-y-2">
-                            <div className="h-4 w-1/3 bg-muted rounded" />
-                            <div className="h-3 w-2/3 bg-muted rounded" />
-                            <div className="h-3 w-1/4 bg-muted rounded" />
+                            <div className="h-4 w-1/3 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-lg" />
+                            <div className="h-3 w-2/3 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-lg" />
+                            <div className="h-3 w-1/4 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-lg" />
                           </div>
                         </div>
                       </CardContent>
@@ -445,16 +445,16 @@ export default function NotificationsPage() {
                   transition={{ duration: 0.3 }}
                   className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4"
                 >
-                  <div className="relative mb-5">
-                    <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl scale-150" />
-                    <div className="relative p-5 sm:p-6 rounded-full bg-gradient-to-br from-card to-muted/50 border border-border/50 shadow-lg">
-                      <Bell className="w-10 h-10 sm:w-12 sm:h-12 text-primary/50" />
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-full blur-2xl scale-150 animate-pulse" />
+                    <div className="relative p-6 sm:p-8 rounded-full bg-gradient-to-br from-primary/10 via-purple-500/5 to-primary/10 border-2 border-primary/20 shadow-2xl shadow-primary/10">
+                      <Bell className="w-12 h-12 sm:w-14 sm:h-14 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
+                  <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent mb-3">
                     {activeFilter === 'all' ? 'No notifications yet' : `No ${activeFilter} notifications`}
                   </h3>
-                  <p className="text-sm text-muted-foreground max-w-xs">
+                  <p className="text-sm sm:text-base text-muted-foreground max-w-md">
                     {activeFilter === 'all'
                       ? "New activity will appear here"
                       : `No ${activeFilter} notifications at the moment`
