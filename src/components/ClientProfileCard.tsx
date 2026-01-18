@@ -201,19 +201,25 @@ const ClientProfileCardComponent = ({
             }}
           />
         ) : (
-          <div 
-            className="w-full h-full bg-gradient-to-br from-red-400 via-pink-500 to-purple-600 flex items-center justify-center cursor-pointer relative overflow-hidden"
+          <div
+            className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center cursor-pointer relative overflow-hidden"
             onClick={handleImageClick}
           >
             <div className="absolute inset-0 bg-black/20" />
-            <div className="text-center relative z-10">
-              <div className="w-32 h-32 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border-4 border-white/50">
-                <span className="text-6xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  {profile.name?.charAt(0)?.toUpperCase() || '?'}
-                </span>
+            <div className="text-center relative z-10 px-8">
+              <div className="w-32 h-32 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-6 border-4 border-white/50">
+                <img
+                  src="/icons/icon.svg"
+                  alt="Logo"
+                  className="w-20 h-20"
+                  draggable={false}
+                />
               </div>
-              <p className="text-white text-sm font-medium">
+              <p className="text-white text-lg font-semibold mb-2">
                 {profile.name || 'Client Profile'}
+              </p>
+              <p className="text-white/90 text-sm font-medium">
+                Waiting for client to upload photos :)
               </p>
             </div>
           </div>
