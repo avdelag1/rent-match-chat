@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { applyFilter, FilterType } from '@/utils/photoFilters';
 import { triggerHaptic } from '@/utils/haptics';
+import { logger } from '@/utils/logger';
 import PhotoCrop from './PhotoCrop';
 import UploadProgress from './UploadProgress';
 
@@ -62,7 +63,7 @@ const PhotoCamera: React.FC<PhotoCameraProps> = ({
         };
       }
     } catch (err) {
-      console.error('Camera error:', err);
+      logger.error('Camera error:', err);
       setError('Camera access denied or unavailable');
     }
   }, [cameraMode]);

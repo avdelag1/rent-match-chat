@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { logger } from '@/utils/logger';
 
 /**
  * SwipeDeckStore - Persists swipe deck state across navigation
@@ -133,7 +134,7 @@ const customStorage = {
       }
       localStorage.setItem(name, JSON.stringify(toSerialize));
     } catch (e) {
-      console.warn('Failed to persist swipe deck state', e);
+      logger.warn('Failed to persist swipe deck state', e);
     }
   },
   removeItem: (name: string) => localStorage.removeItem(name),

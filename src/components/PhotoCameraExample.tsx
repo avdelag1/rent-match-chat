@@ -13,11 +13,10 @@ const PhotoCameraExample = () => {
 
   const onCapture = async (originalBlob: Blob, croppedBlob: Blob) => {
     try {
-      const photoUrl = await handleCapture(originalBlob, croppedBlob);
-      console.log('Photo uploaded:', photoUrl);
+      await handleCapture(originalBlob, croppedBlob);
       setShowCamera(false);
     } catch (error) {
-      console.error('Upload failed:', error);
+      // Error is already handled by usePhotoCamera hook
     }
   };
 
