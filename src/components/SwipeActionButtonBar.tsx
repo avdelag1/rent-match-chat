@@ -45,9 +45,9 @@ const springConfig = {
   mass: 0.8,
 } as const;
 
-// Button sizes for visual hierarchy
-const LARGE_SIZE = 60;  // Primary actions (Like/Dislike)
-const SMALL_SIZE = 40;  // Secondary actions (Undo/Share/Message)
+// Button sizes for visual hierarchy - slightly larger for premium feel
+const LARGE_SIZE = 68;  // Primary actions (Like/Dislike)
+const SMALL_SIZE = 48;  // Secondary actions (Undo/Share/Message)
 
 // Tap animation scale
 const TAP_SCALE = 0.9;
@@ -85,9 +85,9 @@ const ActionButton = memo(({
     onClick();
   }, [disabled, variant, onClick]);
 
-  // Compute sizes
+  // Compute sizes - icons slightly larger for better visual balance
   const buttonSize = size === 'large' ? LARGE_SIZE : SMALL_SIZE;
-  const iconSize = size === 'large' ? 28 : 20;
+  const iconSize = size === 'large' ? 32 : 24;
 
   // Color configurations for each variant
   const variantConfig = useMemo(() => {
@@ -165,18 +165,18 @@ const ActionButton = memo(({
         width: buttonSize,
         height: buttonSize,
         borderRadius: '50%',
-        border: `1px solid rgba(255, 255, 255, 0.15)`,
-        // Tinder-style: Dark semi-transparent with minimal blur - photo shows through
-        backgroundColor: isPressed 
-          ? 'rgba(40, 40, 40, 0.7)' 
-          : 'rgba(30, 30, 30, 0.5)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        // Subtle shadow
-        boxShadow: `
-          0 2px 8px rgba(0,0,0,0.3)
-          ${glowStyle ? `, ${glowStyle}` : ''}
-        `,
+        // No border - icons float naturally on background
+        border: 'none',
+        // Clean semi-transparent backdrop - minimal, modern
+        backgroundColor: isPressed
+          ? 'rgba(35, 35, 35, 0.65)'
+          : 'rgba(25, 25, 25, 0.45)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        // Very subtle shadow for depth, no hard edges
+        boxShadow: isPressed
+          ? `0 4px 16px rgba(0,0,0,0.35)${glowStyle ? `, ${glowStyle}` : ''}`
+          : '0 2px 8px rgba(0,0,0,0.25)',
         // GPU acceleration
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',

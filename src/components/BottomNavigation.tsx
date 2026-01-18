@@ -188,7 +188,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
           ...springConfigs.snappy,
           delay: 0.1
         }}
-        className="flex items-center justify-center gap-2 px-3 py-2 pointer-events-auto bg-background/95 rounded-2xl border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.25)] mx-auto max-w-fit"
+        className="flex items-center justify-center gap-2 px-4 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)] mx-auto max-w-fit"
       >
         {navItems.map((item, index) => {
           const Icon = item.icon;
@@ -233,7 +233,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               <div className="flex flex-col items-center">
                 <Icon
                   className={cn(
-                    'h-6 w-6 transition-all duration-200',
+                    'h-[26px] w-[26px] transition-all duration-200',
                     item.isCenter && 'h-7 w-7',
                     getIconColorClass(item, active)
                   )}
