@@ -88,8 +88,13 @@ const ActionButton = memo(({
 }) => {
   const [isPressed, setIsPressed] = useState(false);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     if (disabled) return;
+
+    // CRITICAL: Stop event from bubbling to parent card's onClick
+    // This prevents the card tap handler from opening insights when clicking buttons
+    e.stopPropagation();
+    e.preventDefault();
 
     // iOS haptics - medium for large buttons, light for small
     if (variant === 'like') {
