@@ -547,7 +547,7 @@ const OwnerClientTinderCardComponent = ({
             />
 
             {/* Bottom gradient - Lighter for better photo visibility */}
-            <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
 
             {/* Center-Tap Insights Panel - Shows client details when tapping center of photo */}
             <AnimatePresence>
