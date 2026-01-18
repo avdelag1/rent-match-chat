@@ -593,14 +593,16 @@ const ClientSwipeContainerComponent = ({
         onMessage={() => topCard?.user_id && handleConnect(topCard.user_id)}
       />
 
-      {/* Share Dialog */}
-      <ShareDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        profileId={topCard?.user_id}
-        title={topCard?.name ? `Check out ${topCard.name}'s profile` : 'Check out this profile'}
-        description={`Budget: $${topCard?.budget_max?.toLocaleString() || 'N/A'} - Looking for: ${topCard?.preferred_listing_types?.join(', ') || 'Various properties'}`}
-      />
+      {/* Share Dialog - only render when we have a valid topCard */}
+      {topCard && (
+        <ShareDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          profileId={topCard.user_id}
+          title={topCard.name ? `Check out ${topCard.name}'s profile` : 'Check out this profile'}
+          description={`Budget: $${topCard.budget_max?.toLocaleString() || 'N/A'} - Looking for: ${topCard.preferred_listing_types?.join(', ') || 'Various properties'}`}
+        />
+      )}
     </div>
   );
 };

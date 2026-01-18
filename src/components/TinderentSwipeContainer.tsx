@@ -1064,13 +1064,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               listing={topCard}
             />
           )}
-          {shareDialogOpen && (
+          {shareDialogOpen && topCard && (
             <ShareDialog
               open={shareDialogOpen}
               onOpenChange={setShareDialogOpen}
-              listingId={topCard?.id}
-              title={topCard?.title || 'Check out this listing'}
-              description={topCard?.description}
+              listingId={topCard.id}
+              title={topCard.title || 'Check out this listing'}
+              description={topCard.description}
             />
           )}
         </Suspense>,
