@@ -172,10 +172,9 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
   }, [listing.id, x]);
 
   // Magnifier hook for press-and-hold zoom - MUST be called before any callbacks that use it
-  // PREMIUM WATER-DROP: Large lens (~50% of photo), organic refraction, no borders
-  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
-    scale: 1.6, // Lower zoom = more visible area (premium feel)
-    lensSize: 'auto', // Auto-calculates ~50% of container
+  // FULL-IMAGE ZOOM: Entire image zooms on press-and-hold, no lens/clipping
+  const { containerRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
+    scale: 2.5, // Full-image zoom level (2.5 = 250%)
     holdDelay: 300, // Fast activation for instant feel
     enabled: isTop,
   });
@@ -307,7 +306,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
     // Render a simple static preview for non-top cards
     return (
       <div
-        className="absolute inset-0 rounded-3xl overflow-hidden shadow-xl"
+        className="absolute inset-0 rounded-3xl overflow-hidden shadow-lg"
         style={{
           transform: 'scale(0.95)',
           opacity: 0.7,
@@ -348,12 +347,12 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-xl relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-lg relative"
       >
-        {/* Image area with magnifier support */}
-        <div 
+        {/* Image area with full-image zoom support */}
+        <div
           ref={containerRef}
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full overflow-hidden"
           onClick={handleImageTap}
           {...pointerHandlers}
           style={{
@@ -363,14 +362,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           }}
         >
           <CardImage src={currentImage} alt={listing.title || 'Listing'} />
-          
-          {/* Magnifier canvas overlay */}
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none z-50"
-            style={{ display: 'none' }}
-          />
-          
+
           {/* Image dots */}
           {imageCount > 1 && (
             <div className="absolute top-3 left-4 right-4 z-20 flex gap-1">

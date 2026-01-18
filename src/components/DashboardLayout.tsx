@@ -438,7 +438,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
 
   return (
-    <div className="app-root bg-background min-h-screen min-h-dvh overflow-hidden relative" style={{ width: '100%', maxWidth: '100vw' }}>
+    <div className="app-root min-h-screen min-h-dvh overflow-hidden relative" style={{ width: '100%', maxWidth: '100vw' }}>
       {/* LIVE HD BACKGROUND: Subtle animated background for premium feel
           - GPU-accelerated CSS animations (no JS loop)
           - Respects reduced motion preferences

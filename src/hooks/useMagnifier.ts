@@ -1,21 +1,21 @@
 /**
- * PRESS-AND-HOLD MAGNIFIER HOOK
+ * PRESS-AND-HOLD FULL-IMAGE ZOOM HOOK
  *
- * Creates a premium water-drop / lens magnifier effect on long-press.
- * Uses canvas for GPU-accelerated real-time zoom at 60fps.
+ * Creates a premium full-image zoom effect on long-press.
+ * Uses GPU-accelerated CSS transforms for instant 60fps performance.
  *
  * Features:
  * - 300ms press-and-hold activation
- * - Large water-drop lens covering ~50% of visible photo
- * - Organic refraction effect with no hard borders
- * - Real-time finger tracking at 60fps
+ * - ENTIRE image zooms (no lens/frame/clipping)
+ * - Zoom follows finger position smoothly
  * - Haptic feedback on activation
  * - No layout changes or DOM reflow
  *
  * DESIGN GOALS:
- * - Increase VISIBLE AREA, not zoom strength
- * - No rings, borders, outlines, or inner circles
- * - Feels like touching the image directly
+ * - Zoom the entire image layer, not a circular lens
+ * - No clipping, masks, frames, or overflow hidden
+ * - No visible lens UI
+ * - Zoom feels like the image itself bends under the finger
  * - Release removes zoom instantly
  */
 
@@ -23,10 +23,8 @@ import { useRef, useCallback, useEffect } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 
 interface MagnifierConfig {
-  /** Zoom level (1.5 = 150% zoom). Lower = more visible area. Default: 1.6 */
+  /** Zoom level (2.0 = 200% zoom). Default: 2.5 */
   scale?: number;
-  /** Lens diameter in pixels or 'auto' for 50% of container. Default: 'auto' */
-  lensSize?: number | 'auto';
   /** Time in ms before magnifier activates. Default: 300 */
   holdDelay?: number;
   /** Whether magnifier is enabled. Default: true */
@@ -42,8 +40,6 @@ interface MagnifierState {
 interface UseMagnifierReturn {
   /** Ref to attach to the image container element */
   containerRef: React.RefObject<HTMLDivElement>;
-  /** Ref to attach to the canvas overlay */
-  canvasRef: React.RefObject<HTMLCanvasElement>;
   /** Current magnifier state */
   magnifierState: React.RefObject<MagnifierState>;
   /** Pointer event handlers */
@@ -60,22 +56,17 @@ interface UseMagnifierReturn {
 
 export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
   const {
-    scale = 1.6, // Lower zoom = more visible area (premium feel)
-    lensSize = 'auto', // Will calculate ~50% of container at activation
+    scale = 2.5, // Full-image zoom level (2.5 = 250%)
     holdDelay = 300,
     enabled = true,
   } = config;
 
-  // Computed lens size - will be calculated on activation for ~50% coverage
-  const computedLensSizeRef = useRef<number>(280);
-
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const holdTimerRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
-  
+
   const magnifierState = useRef<MagnifierState>({
     isActive: false,
     x: 0,
@@ -91,6 +82,11 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
+      // Reset image transform on unmount
+      if (imageRef.current) {
+        imageRef.current.style.transform = '';
+        imageRef.current.style.transition = '';
+      }
     };
   }, []);
 
@@ -105,185 +101,93 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
     return null;
   }, []);
 
-  // Draw magnified portion on canvas - Premium water-drop effect
-  const drawMagnifier = useCallback((x: number, y: number) => {
-    const canvas = canvasRef.current;
+  // Apply full-image zoom with GPU-accelerated transforms
+  const applyZoom = useCallback((clientX: number, clientY: number) => {
     const container = containerRef.current;
     const img = imageRef.current || findImage();
 
-    if (!canvas || !container || !img) return;
+    if (!container || !img) return;
 
-    const ctx = canvas.getContext('2d', { alpha: true });
-    if (!ctx) return;
-
-    // Get current computed lens size
-    const currentLensSize = computedLensSizeRef.current;
-
-    // Get container dimensions
+    // Get container dimensions and mouse position relative to container
     const rect = container.getBoundingClientRect();
+    const relX = clientX - rect.left;
+    const relY = clientY - rect.top;
 
-    // Calculate position relative to container
-    const relX = x - rect.left;
-    const relY = y - rect.top;
+    // Calculate transform origin as percentage of container
+    // This makes the zoom center on the finger position
+    const originX = (relX / rect.width) * 100;
+    const originY = (relY / rect.height) * 100;
 
-    // Calculate image-to-container ratio for proper mapping
-    const imgRect = img.getBoundingClientRect();
-    const scaleX = img.naturalWidth / imgRect.width;
-    const scaleY = img.naturalHeight / imgRect.height;
-
-    // Source coordinates on the original image
-    const srcX = (relX - (container.offsetLeft - imgRect.left)) * scaleX;
-    const srcY = (relY - (container.offsetTop - imgRect.top)) * scaleY;
-
-    // Source size (how much of the image to capture) - larger area, less zoom
-    const srcSize = (currentLensSize / scale) * Math.max(scaleX, scaleY);
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Position lens centered on finger
-    const lensX = relX;
-    const lensY = relY;
-    const radius = currentLensSize / 2;
-
-    // ORGANIC WATER-DROP EFFECT: No hard borders, pure refraction illusion
-    ctx.save();
-
-    // Create soft circular clip with feathered edge using shadow
-    ctx.beginPath();
-    ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
-    ctx.clip();
-
-    // Draw magnified image portion
-    try {
-      ctx.drawImage(
-        img,
-        srcX - srcSize / 2,
-        srcY - srcSize / 2,
-        srcSize,
-        srcSize,
-        lensX - radius,
-        lensY - radius,
-        currentLensSize,
-        currentLensSize
-      );
-    } catch {
-      // Image not ready or cross-origin issue - silent fail
-    }
-
-    ctx.restore();
-
-    // WATER-DROP REFRACTION EFFECT (extremely subtle, no visible rings)
-    // Only add the faintest edge softening - like light bending through water
-
-    // Ultra-subtle vignette at the very edge only
-    const edgeFade = ctx.createRadialGradient(
-      lensX, lensY, radius * 0.96,
-      lensX, lensY, radius
-    );
-    edgeFade.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    edgeFade.addColorStop(1, 'rgba(0, 0, 0, 0.06)');
-
-    ctx.beginPath();
-    ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
-    ctx.fillStyle = edgeFade;
-    ctx.fill();
-
-    // Subtle top-left highlight for depth (like a water droplet catching light)
-    const highlightGradient = ctx.createRadialGradient(
-      lensX - radius * 0.4, lensY - radius * 0.4, 0,
-      lensX - radius * 0.4, lensY - radius * 0.4, radius * 0.6
-    );
-    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.06)');
-    highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.02)');
-    highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-    ctx.beginPath();
-    ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
-    ctx.fillStyle = highlightGradient;
-    ctx.fill();
+    // Apply GPU-accelerated transform
+    // transformOrigin sets zoom center, scale zooms the image
+    img.style.transformOrigin = `${originX}% ${originY}%`;
+    img.style.transform = `scale(${scale}) translateZ(0)`;
+    img.style.transition = 'transform 0.15s ease-out';
+    img.style.willChange = 'transform';
 
   }, [scale, findImage]);
 
-  // Activate magnifier
+  // Activate full-image zoom
   const activateMagnifier = useCallback((x: number, y: number) => {
     magnifierState.current = { isActive: true, x, y };
 
     // Haptic feedback on activation
     triggerHaptic('light');
 
-    // Initialize canvas and compute lens size
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (canvas && container) {
-      canvas.width = container.offsetWidth;
-      canvas.height = container.offsetHeight;
-      canvas.style.display = 'block';
-      canvas.style.pointerEvents = 'none';
-
-      // COMPUTE LENS SIZE: ~50% of the smaller dimension for optimal coverage
-      // This creates a large, premium magnifier that shows significant area
-      if (lensSize === 'auto') {
-        const smallerDim = Math.min(container.offsetWidth, container.offsetHeight);
-        // 50% of smaller dimension, clamped between 200-400px for usability
-        computedLensSizeRef.current = Math.max(200, Math.min(400, smallerDim * 0.5));
-      } else {
-        computedLensSizeRef.current = lensSize;
-      }
-    }
-
     // Find and cache image
     findImage();
 
-    // Draw initial magnifier
-    drawMagnifier(x, y);
-  }, [lensSize, drawMagnifier, findImage]);
+    // Apply zoom transform
+    applyZoom(x, y);
+  }, [applyZoom, findImage]);
 
-  // Deactivate magnifier
+  // Deactivate zoom
   const deactivateMagnifier = useCallback(() => {
     magnifierState.current = { isActive: false, x: 0, y: 0 };
-    
+
     // Clear timer
     if (holdTimerRef.current) {
       clearTimeout(holdTimerRef.current);
       holdTimerRef.current = null;
     }
-    
+
     // Cancel RAF
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     }
-    
-    // Hide canvas
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-      canvas.style.display = 'none';
+
+    // Reset image transform with smooth transition
+    const img = imageRef.current;
+    if (img) {
+      img.style.transition = 'transform 0.15s ease-out';
+      img.style.transform = 'scale(1) translateZ(0)';
+      img.style.transformOrigin = 'center center';
+      // Clean up willChange after transition
+      setTimeout(() => {
+        if (img) img.style.willChange = 'auto';
+      }, 150);
     }
-    
+
     startPosRef.current = null;
   }, []);
 
-  // Update magnifier position (throttled via RAF)
+  // Update zoom position (throttled via RAF)
   const updateMagnifier = useCallback((x: number, y: number) => {
     if (!magnifierState.current.isActive) return;
-    
+
     magnifierState.current.x = x;
     magnifierState.current.y = y;
-    
+
     // Use RAF for smooth 60fps updates
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
     }
-    
+
     rafRef.current = requestAnimationFrame(() => {
-      drawMagnifier(x, y);
+      applyZoom(x, y);
     });
-  }, [drawMagnifier]);
+  }, [applyZoom]);
 
   // Pointer handlers
   const onPointerDown = useCallback((e: React.PointerEvent) => {
@@ -354,7 +258,6 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
 
   return {
     containerRef,
-    canvasRef,
     magnifierState,
     pointerHandlers: {
       onPointerDown,
