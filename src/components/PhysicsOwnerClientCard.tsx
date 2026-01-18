@@ -365,7 +365,7 @@ const PhysicsOwnerClientCardComponent = ({
       {/* Draggable Card */}
       <div
         {...bind}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-xl relative"
         style={{
           ...bind.style,
           transform: isTop ? undefined : 'scale(0.95)',
@@ -448,7 +448,7 @@ const PhysicsOwnerClientCardComponent = ({
             />
 
             {/* Bottom gradient */}
-            <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none z-10" />
 
             {/* Verified Badge */}
             {profile.verified && (

@@ -297,7 +297,7 @@ const PhysicsSwipeCardComponent = ({
       {/* Draggable Card */}
       <div
         {...bind}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-2xl relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-manipulation rounded-3xl overflow-hidden shadow-xl relative"
         style={{
           ...bind.style,
           transform: isTop ? undefined : 'scale(0.95)',
