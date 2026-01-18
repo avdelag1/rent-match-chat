@@ -290,10 +290,11 @@ function SimpleSwipeCardComponent({
     : null;
 
   // Magnifier hook for press-and-hold zoom - MUST be before conditional returns
+  // PREMIUM WATER-DROP: Large lens (~50% of photo), organic refraction, no borders
   const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
-    scale: 2.0,
-    lensSize: 160,
-    holdDelay: 350,
+    scale: 1.6, // Lower zoom = more visible area (premium feel)
+    lensSize: 'auto', // Auto-calculates ~50% of container
+    holdDelay: 300, // Fast activation for instant feel
     enabled: isTop,
   });
 

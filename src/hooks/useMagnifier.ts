@@ -1,28 +1,35 @@
 /**
  * PRESS-AND-HOLD MAGNIFIER HOOK
- * 
- * Creates a water-drop / lens magnifier effect on long-press.
- * Uses canvas for GPU-accelerated real-time zoom.
- * 
+ *
+ * Creates a premium water-drop / lens magnifier effect on long-press.
+ * Uses canvas for GPU-accelerated real-time zoom at 60fps.
+ *
  * Features:
  * - 300ms press-and-hold activation
- * - Circular lens with soft edges
+ * - Large water-drop lens covering ~50% of visible photo
+ * - Organic refraction effect with no hard borders
  * - Real-time finger tracking at 60fps
  * - Haptic feedback on activation
  * - No layout changes or DOM reflow
+ *
+ * DESIGN GOALS:
+ * - Increase VISIBLE AREA, not zoom strength
+ * - No rings, borders, outlines, or inner circles
+ * - Feels like touching the image directly
+ * - Release removes zoom instantly
  */
 
 import { useRef, useCallback, useEffect } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 
 interface MagnifierConfig {
-  /** Zoom level (1.5 = 150% zoom) */
+  /** Zoom level (1.5 = 150% zoom). Lower = more visible area. Default: 1.6 */
   scale?: number;
-  /** Lens diameter in pixels */
-  lensSize?: number;
-  /** Time in ms before magnifier activates */
+  /** Lens diameter in pixels or 'auto' for 50% of container. Default: 'auto' */
+  lensSize?: number | 'auto';
+  /** Time in ms before magnifier activates. Default: 300 */
   holdDelay?: number;
-  /** Whether magnifier is enabled */
+  /** Whether magnifier is enabled. Default: true */
   enabled?: boolean;
 }
 
@@ -53,11 +60,14 @@ interface UseMagnifierReturn {
 
 export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
   const {
-    scale = 2.0,
-    lensSize = 280, // ~2x larger for premium feel
+    scale = 1.6, // Lower zoom = more visible area (premium feel)
+    lensSize = 'auto', // Will calculate ~50% of container at activation
     holdDelay = 300,
     enabled = true,
   } = config;
+
+  // Computed lens size - will be calculated on activation for ~50% coverage
+  const computedLensSizeRef = useRef<number>(280);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -95,20 +105,23 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
     return null;
   }, []);
 
-  // Draw magnified portion on canvas
+  // Draw magnified portion on canvas - Premium water-drop effect
   const drawMagnifier = useCallback((x: number, y: number) => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     const img = imageRef.current || findImage();
-    
+
     if (!canvas || !container || !img) return;
 
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
+    // Get current computed lens size
+    const currentLensSize = computedLensSizeRef.current;
+
     // Get container dimensions
     const rect = container.getBoundingClientRect();
-    
+
     // Calculate position relative to container
     const relX = x - rect.left;
     const relY = y - rect.top;
@@ -122,21 +135,21 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
     const srcX = (relX - (container.offsetLeft - imgRect.left)) * scaleX;
     const srcY = (relY - (container.offsetTop - imgRect.top)) * scaleY;
 
-    // Source size (how much of the image to capture)
-    const srcSize = (lensSize / scale) * Math.max(scaleX, scaleY);
+    // Source size (how much of the image to capture) - larger area, less zoom
+    const srcSize = (currentLensSize / scale) * Math.max(scaleX, scaleY);
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Set up clipping circle for water-drop effect
-    ctx.save();
-    
     // Position lens centered on finger
     const lensX = relX;
     const lensY = relY;
-    const radius = lensSize / 2;
+    const radius = currentLensSize / 2;
 
-    // Draw circular clip path
+    // ORGANIC WATER-DROP EFFECT: No hard borders, pure refraction illusion
+    ctx.save();
+
+    // Create soft circular clip with feathered edge using shadow
     ctx.beginPath();
     ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
     ctx.clip();
@@ -151,54 +164,55 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
         srcSize,
         lensX - radius,
         lensY - radius,
-        lensSize,
-        lensSize
+        currentLensSize,
+        currentLensSize
       );
-    } catch (e) {
-      // Image not ready or cross-origin issue
+    } catch {
+      // Image not ready or cross-origin issue - silent fail
     }
 
-    // Water-drop lens effect - organic, no hard borders
     ctx.restore();
 
-    // Subtle outer edge softness - like natural light refraction
-    // Creates a gentle fade at the edges without visible rings
-    const edgeGradient = ctx.createRadialGradient(
-      lensX, lensY, radius * 0.92,
+    // WATER-DROP REFRACTION EFFECT (extremely subtle, no visible rings)
+    // Only add the faintest edge softening - like light bending through water
+
+    // Ultra-subtle vignette at the very edge only
+    const edgeFade = ctx.createRadialGradient(
+      lensX, lensY, radius * 0.96,
       lensX, lensY, radius
     );
-    edgeGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    edgeGradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.03)');
-    edgeGradient.addColorStop(1, 'rgba(0, 0, 0, 0.12)');
+    edgeFade.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    edgeFade.addColorStop(1, 'rgba(0, 0, 0, 0.06)');
 
     ctx.beginPath();
     ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
-    ctx.fillStyle = edgeGradient;
+    ctx.fillStyle = edgeFade;
     ctx.fill();
 
-    // Very subtle highlight at top-left for depth (like a water droplet)
+    // Subtle top-left highlight for depth (like a water droplet catching light)
     const highlightGradient = ctx.createRadialGradient(
-      lensX - radius * 0.35, lensY - radius * 0.35, 0,
-      lensX - radius * 0.35, lensY - radius * 0.35, radius * 0.5
+      lensX - radius * 0.4, lensY - radius * 0.4, 0,
+      lensX - radius * 0.4, lensY - radius * 0.4, radius * 0.6
     );
-    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.08)');
+    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.06)');
+    highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.02)');
     highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
     ctx.beginPath();
-    ctx.arc(lensX, lensY, radius - 1, 0, Math.PI * 2);
+    ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
     ctx.fillStyle = highlightGradient;
     ctx.fill();
 
-  }, [lensSize, scale, findImage]);
+  }, [scale, findImage]);
 
   // Activate magnifier
   const activateMagnifier = useCallback((x: number, y: number) => {
     magnifierState.current = { isActive: true, x, y };
-    
+
     // Haptic feedback on activation
     triggerHaptic('light');
-    
-    // Initialize canvas
+
+    // Initialize canvas and compute lens size
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (canvas && container) {
@@ -206,14 +220,24 @@ export function useMagnifier(config: MagnifierConfig = {}): UseMagnifierReturn {
       canvas.height = container.offsetHeight;
       canvas.style.display = 'block';
       canvas.style.pointerEvents = 'none';
+
+      // COMPUTE LENS SIZE: ~50% of the smaller dimension for optimal coverage
+      // This creates a large, premium magnifier that shows significant area
+      if (lensSize === 'auto') {
+        const smallerDim = Math.min(container.offsetWidth, container.offsetHeight);
+        // 50% of smaller dimension, clamped between 200-400px for usability
+        computedLensSizeRef.current = Math.max(200, Math.min(400, smallerDim * 0.5));
+      } else {
+        computedLensSizeRef.current = lensSize;
+      }
     }
-    
+
     // Find and cache image
     findImage();
-    
+
     // Draw initial magnifier
     drawMagnifier(x, y);
-  }, [drawMagnifier, findImage]);
+  }, [lensSize, drawMagnifier, findImage]);
 
   // Deactivate magnifier
   const deactivateMagnifier = useCallback(() => {
