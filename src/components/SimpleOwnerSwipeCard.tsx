@@ -336,7 +336,7 @@ function SimpleOwnerSwipeCardComponent({
   if (!isTop) {
     return (
       <div
-        className="absolute inset-0 rounded-3xl overflow-hidden shadow-xl"
+        className="absolute inset-0 rounded-3xl overflow-hidden shadow-lg"
         style={{
           transform: 'scale(0.95)',
           opacity: 0.7,
@@ -376,7 +376,7 @@ function SimpleOwnerSwipeCardComponent({
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-xl relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-lg relative"
       >
         {/* Image area with magnifier support */}
         <div 
