@@ -13,6 +13,7 @@ import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
 import { QuickFilters, QuickFilterCategory } from '@/components/QuickFilterDropdown'
+import { LiveHDBackground } from '@/components/LiveHDBackground'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
 const SubscriptionPackages = lazy(() => import("@/components/SubscriptionPackages").then(m => ({ default: m.SubscriptionPackages })))
@@ -438,6 +439,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <div className="app-root bg-background min-h-screen min-h-dvh overflow-hidden relative" style={{ width: '100%', maxWidth: '100vw' }}>
+      {/* LIVE HD BACKGROUND: Subtle animated background for premium feel
+          - GPU-accelerated CSS animations (no JS loop)
+          - Respects reduced motion preferences
+          - Zero battery impact */}
+      <LiveHDBackground theme="default" showOrbs={true} intensity={0.7} />
+
       {/* PERF FIX: NotificationSystem has its own Suspense boundary to never suspend dashboard paint */}
       <Suspense fallback={null}>
         <NotificationSystem />

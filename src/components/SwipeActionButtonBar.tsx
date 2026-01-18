@@ -45,12 +45,30 @@ const springConfig = {
   mass: 0.8,
 } as const;
 
-// Button sizes for visual hierarchy - slightly larger for premium feel
-const LARGE_SIZE = 68;  // Primary actions (Like/Dislike)
-const SMALL_SIZE = 48;  // Secondary actions (Undo/Share/Message)
+/**
+ * BUTTON SIZING SYSTEM
+ *
+ * Designed for optimal thumb reach and touch ergonomics.
+ * Based on Apple HIG minimum 44pt touch targets, scaled up for premium feel.
+ *
+ * Size Hierarchy:
+ * - Primary (Like/Dislike): Dominant, easy to hit one-handed
+ * - Secondary (Undo/Share/Message): Comfortable but not competing
+ *
+ * Hit areas are the full button size - no invisible padding needed.
+ */
+const LARGE_SIZE = 72;  // Primary actions (Like/Dislike) - increased from 68
+const SMALL_SIZE = 54;  // Secondary actions (Undo/Share/Message) - increased from 48
+
+// Icon sizes scale proportionally
+const LARGE_ICON_SIZE = 34;  // Increased from 32
+const SMALL_ICON_SIZE = 26;  // Increased from 24
+
+// Gap between buttons - balanced for thumb navigation
+const BUTTON_GAP = 14; // Slightly larger gap for better separation
 
 // Tap animation scale
-const TAP_SCALE = 0.9;
+const TAP_SCALE = 0.92; // Slightly less dramatic for premium feel
 
 // Premium ActionButton with glass effect and haptics
 const ActionButton = memo(({
@@ -85,9 +103,9 @@ const ActionButton = memo(({
     onClick();
   }, [disabled, variant, onClick]);
 
-  // Compute sizes - icons slightly larger for better visual balance
+  // Compute sizes - icons scale proportionally with buttons
   const buttonSize = size === 'large' ? LARGE_SIZE : SMALL_SIZE;
-  const iconSize = size === 'large' ? 32 : 24;
+  const iconSize = size === 'large' ? LARGE_ICON_SIZE : SMALL_ICON_SIZE;
 
   // Color configurations for each variant
   const variantConfig = useMemo(() => {
@@ -236,7 +254,8 @@ function SwipeActionButtonBarComponent({
       }}
     >
       {/* Buttons Row - fully transparent, only buttons have glass effect */}
-      <div className="flex items-center gap-3">
+      {/* Gap uses BUTTON_GAP constant for consistent, ergonomic spacing */}
+      <div className="flex items-center" style={{ gap: BUTTON_GAP }}>
         {/* 1. Return/Undo Button (Small) - Amber */}
         <ActionButton
           onClick={onUndo || (() => {})}
