@@ -185,6 +185,10 @@ function SimpleOwnerSwipeCardComponent({
   const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
   const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
 
+  // FIX: Move useTransform hook to top level - hooks must not be called inside JSX
+  // This was causing "Rendered fewer hooks than expected" error when card unmounted
+  const cardFilter = useTransform(cardBlur, (v) => `blur(${v}px)`);
+
   // Image state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -397,7 +401,7 @@ function SimpleOwnerSwipeCardComponent({
           opacity: cardOpacity,
           scale: cardScale,
           rotate: cardRotate,
-          filter: useTransform(cardBlur, (v) => `blur(${v}px)`),
+          filter: cardFilter,
           // CSS performance optimizations for instant touch response
           willChange: 'transform, opacity, filter',
           backfaceVisibility: 'hidden',
