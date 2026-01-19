@@ -55,17 +55,28 @@ const categoryConfig: Record<string, { icon: React.ComponentType<{ className?: s
 
 // Helper to get the active category display info from filters
 const getActiveCategoryInfo = (filters?: ListingFilters) => {
-  // Check for categories array first (from quick filters)
+  // Safety: Handle null/undefined filters
+  if (!filters) return categoryConfig.property;
+
+  // Check for activeCategory string first (from AdvancedFilters)
+  const activeCategory = (filters as any).activeCategory;
+  if (activeCategory && typeof activeCategory === 'string' && categoryConfig[activeCategory]) {
+    return categoryConfig[activeCategory];
+  }
+
+  // Check for categories array (from quick filters)
   const categories = filters?.categories;
-  if (categories && categories.length === 1) {
+  if (Array.isArray(categories) && categories.length > 0) {
     const cat = categories[0];
-    return categoryConfig[cat] || categoryConfig.property;
+    if (typeof cat === 'string' && categoryConfig[cat]) {
+      return categoryConfig[cat];
+    }
   }
 
   // Check for single category
   const category = filters?.category;
-  if (category) {
-    return categoryConfig[category] || categoryConfig.property;
+  if (category && typeof category === 'string' && categoryConfig[category]) {
+    return categoryConfig[category];
   }
 
   // Default to properties
@@ -888,7 +899,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // when user has swiped through all cards (fetch error for next batch is not critical)
   if (currentIndex >= deckQueue.length && deckQueue.length > 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
-    const CategoryIcon = categoryInfo.icon;
+    // FIX: Ensure CategoryIcon is always a valid component - fallback to Home if undefined
+    const CategoryIcon = categoryInfo?.icon || Home;
+    const categoryLabel = categoryInfo?.plural || 'Listings';
+    const categoryColor = categoryInfo?.color || 'text-primary';
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -900,14 +914,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}>
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
               <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                <CategoryIcon className={`w-12 h-12 ${categoryInfo.color}`} />
+                <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
               </motion.div>
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              You've seen all available {categoryInfo.plural.toLowerCase()}. Check back later or refresh for new listings.
+              You've seen all available {categoryLabel.toLowerCase()}. Check back later or refresh for new listings.
             </p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col gap-3">
@@ -918,10 +932,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? `Finding ${categoryInfo.plural}...` : 'Discover More'}
+                {isRefreshing ? `Finding ${categoryLabel}...` : 'Discover More'}
               </Button>
             </motion.div>
-            <p className="text-xs text-muted-foreground">New {categoryInfo.plural.toLowerCase()} are added daily</p>
+            <p className="text-xs text-muted-foreground">New {categoryLabel.toLowerCase()} are added daily</p>
           </motion.div>
         </motion.div>
       </div>
@@ -931,12 +945,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
   if (error && deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
+    const categoryLabel = categoryInfo?.plural || 'listings';
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">:(</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load {categoryInfo.plural.toLowerCase()} right now.</p>
+          <p className="text-muted-foreground mb-4">We couldn't load {categoryLabel.toLowerCase()} right now.</p>
           <Button onClick={handleRefresh} variant="outline" className="gap-2">
             <RotateCcw className="w-4 h-4" />
             Try Again
@@ -949,7 +964,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Empty state - dynamic based on category (no cards fetched yet)
   if (deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
-    const CategoryIcon = categoryInfo.icon;
+    // FIX: Ensure values are always defined - fallback to defaults
+    const CategoryIcon = categoryInfo?.icon || Home;
+    const categoryLabel = categoryInfo?.plural || 'Listings';
+    const categoryColor = categoryInfo?.color || 'text-primary';
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -960,11 +978,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         >
           <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <CategoryIcon className={`w-12 h-12 ${categoryInfo.color}`} />
+              <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
             </div>
           </motion.div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No {categoryInfo.plural} Found</h3>
+            <h3 className="text-xl font-semibold text-foreground">No {categoryLabel} Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               Try adjusting your filters or refresh to discover new listings
             </p>
@@ -976,7 +994,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : `Refresh ${categoryInfo.plural}`}
+              {isRefreshing ? 'Loading...' : `Refresh ${categoryLabel}`}
             </Button>
           </motion.div>
         </motion.div>
