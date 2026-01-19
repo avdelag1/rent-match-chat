@@ -1,6 +1,7 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
 import { OwnerClientFilterDialog } from "@/components/OwnerClientFilterDialog";
+import { SharedProfileSection } from "@/components/SharedProfileSection";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -131,6 +132,13 @@ const OwnerProfileNew = () => {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* Share Profile Section - Earn Free Messages */}
+          <SharedProfileSection
+            profileId={user?.id}
+            profileName={ownerProfile?.business_name || 'Your Business'}
+            isClient={false}
+          />
 
           {/* Client Preferences - PROMINENT PLACEMENT */}
           <motion.div
