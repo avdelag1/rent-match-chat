@@ -25,7 +25,7 @@ export function LikeNotificationActions({
 
   if (variant === 'stacked') {
     return (
-      <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-col gap-1.5 w-full">
         <Button
           onClick={onAccept}
           disabled={isLoading}
