@@ -901,8 +901,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     const categoryInfo = getActiveCategoryInfo(filters);
     // FIX: Ensure CategoryIcon is always a valid component - fallback to Home if undefined
     const CategoryIcon = categoryInfo?.icon || Home;
-    const categoryLabel = categoryInfo?.plural || 'Listings';
-    const categoryColor = categoryInfo?.color || 'text-primary';
+    // FIX: Ensure categoryLabel and categoryColor are always strings, never objects
+    const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -945,7 +946,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
   if (error && deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
-    const categoryLabel = categoryInfo?.plural || 'listings';
+    // FIX: Ensure categoryLabel is always a string, never an object
+    const categoryLabel = String(categoryInfo?.plural || 'listings');
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
@@ -964,10 +966,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Empty state - dynamic based on category (no cards fetched yet)
   if (deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
-    // FIX: Ensure values are always defined - fallback to defaults
+    // FIX: Ensure values are always defined and properly typed - fallback to defaults
     const CategoryIcon = categoryInfo?.icon || Home;
-    const categoryLabel = categoryInfo?.plural || 'Listings';
-    const categoryColor = categoryInfo?.color || 'text-primary';
+    // FIX: Ensure categoryLabel and categoryColor are always strings, never objects
+    const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
