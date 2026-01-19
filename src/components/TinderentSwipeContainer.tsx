@@ -370,6 +370,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     filters?.furnished,
     filters?.verified,
     filters?.premiumOnly,
+    filters?.showHireServices,
+    filters?.clientGender,
+    filters?.clientType,
   ]);
 
   // PERF FIX: Create stable filter signature for deck versioning
@@ -389,6 +392,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       filters.furnished ? '1' : '0',
       filters.verified ? '1' : '0',
       filters.premiumOnly ? '1' : '0',
+      filters.showHireServices ? '1' : '0',
+      filters.clientGender || '',
+      filters.clientType || '',
     ].join('|');
   }, [filters]);
 
@@ -618,7 +624,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     // Fetch more if running low
     // FIX: Prevent pagination when deck is exhausted to avoid empty fetch errors
+    // Only fetch more if we're within the deck bounds (haven't swiped past the last card)
     if (
+      newIndex < deckQueueRef.current.length &&
       newIndex >= deckQueueRef.current.length - 3 &&
       deckQueueRef.current.length > 0 &&
       !isFetchingMore.current
@@ -1061,7 +1069,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const handleDeckHover = useCallback(() => {
     // Only prefetch if we're running low and not already fetching
     const remainingCards = deckQueueRef.current.length - currentIndexRef.current;
-    if (remainingCards <= 5 && !isFetchingMore.current) {
+    // Don't fetch if we're past the end of the deck (remainingCards <= 0)
+    if (remainingCards > 0 && remainingCards <= 5 && !isFetchingMore.current) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
 
