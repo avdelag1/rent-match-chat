@@ -617,7 +617,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     setSwipeDirection(null);
 
     // Fetch more if running low
-    if (newIndex >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
+    // FIX: Prevent pagination when deck is exhausted to avoid empty fetch errors
+    if (
+      newIndex >= deckQueueRef.current.length - 3 &&
+      deckQueueRef.current.length > 0 &&
+      !isFetchingMore.current
+    ) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
     }
@@ -943,8 +948,55 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
+  // SAFETY GUARD: Swipe exhaustion must ALWAYS override error state
+  // If user has swiped through cards, show "All Caught Up" even if deck is temporarily empty
+  if (currentIndex >= deckQueue.length && currentIndex > 0) {
+    const categoryInfo = getActiveCategoryInfo(filters);
+    const CategoryIcon = categoryInfo?.icon || Home;
+    const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const categoryColor = String(categoryInfo?.color || 'text-primary');
+    return (
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
+              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
+              </motion.div>
+            </div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              You've seen all available {categoryLabel.toLowerCase()}. Check back later or refresh for new listings.
+            </p>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col gap-3">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
+              >
+                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? `Finding ${categoryLabel}...` : 'Discover More'}
+              </Button>
+            </motion.div>
+            <p className="text-xs text-muted-foreground">New {categoryLabel.toLowerCase()} are added daily</p>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
+
   // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
-  if (error && deckQueue.length === 0) {
+  // FIX: Only show error on initial load (currentIndex === 0), never after swipe exhaustion
+  if (error && currentIndex === 0 && deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
     // FIX: Ensure categoryLabel is always a string, never an object
     const categoryLabel = String(categoryInfo?.plural || 'listings');
