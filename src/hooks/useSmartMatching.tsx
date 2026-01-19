@@ -367,15 +367,24 @@ export function useSmartListingMatching(
 
         // Apply filter-based query constraints
         if (filters) {
+          logger.info('[SmartMatching] Applying filters:', {
+            categories: filters.categories,
+            category: filters.category,
+            listingType: filters.listingType,
+          });
+
           // Category filter - support multiple categories
           if (filters.categories && filters.categories.length > 0) {
+            logger.info('[SmartMatching] Filtering by categories:', filters.categories);
             query = query.in('category', filters.categories);
           } else if (filters.category) {
+            logger.info('[SmartMatching] Filtering by single category:', filters.category);
             query = query.eq('category', filters.category);
           }
 
           // Listing type filter
           if (filters.listingType && filters.listingType !== 'both') {
+            logger.info('[SmartMatching] Filtering by listing type:', filters.listingType);
             query = query.eq('listing_type', filters.listingType);
           }
 
@@ -424,6 +433,16 @@ export function useSmartListingMatching(
         const start = page * pageSize;
         const end = start + pageSize - 1;
         const { data: listings, error } = await query.range(start, end);
+
+        logger.info('[SmartMatching] Query result:', {
+          count: listings?.length || 0,
+          error: error?.message,
+          page,
+          filters: filters ? {
+            categories: filters.categories,
+            listingType: filters.listingType,
+          } : null,
+        });
 
         if (error) {
           // Log ALL errors for debugging (including RLS)
