@@ -87,8 +87,8 @@ serve(async (req) => {
 
     // Storage cleanup completed
 
-    // Delete all related user data using RPC (updated function name)
-    const { error: rpcError } = await supabaseAdmin.rpc('delete_user_account', {
+    // Delete all related user data using RPC
+    const { error: rpcError } = await supabaseAdmin.rpc('delete_user_account_data', {
       user_id_to_delete: userIdToDelete,
     })
 
