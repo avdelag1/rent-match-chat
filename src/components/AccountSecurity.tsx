@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useSecuritySettings } from '@/hooks/useSecuritySettings';
+import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/utils/prodLogger';
 
 interface AccountSecurityProps {
@@ -18,14 +19,15 @@ interface AccountSecurityProps {
 
 export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const navigate = useNavigate();
+  const { user, session } = useAuth(); // Get auth from context - single source of truth
   // Destructure with fallback for both API versions
-  const { 
-    settings, 
-    updateSettings, 
-    isLoading, 
-    loading, 
-    isSaving, 
-    saving 
+  const {
+    settings,
+    updateSettings,
+    isLoading,
+    loading,
+    isSaving,
+    saving
   } = useSecuritySettings();
   
   // Use fallback logic for loading and saving states
@@ -41,6 +43,7 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false); // ✅ Button reliability
   
   // Security settings state - sync with database
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -162,6 +165,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
   };
 
   const handleDeleteAccount = async () => {
+    // ✅ Button reliability: Guard against double-clicks
+    if (isDeletingAccount) return;
+
     if (deleteConfirmText.toLowerCase() !== 'delete') {
       toast({
         title: 'Error',
@@ -171,13 +177,16 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
       return;
     }
 
+    setIsDeletingAccount(true); // ✅ Button reliability: Disable immediately
     try {
-      // Get current user and session
-      const { data: { session } } = await supabase.auth.getSession();
-      const { data: { user } } = await supabase.auth.getUser();
-
+      // ✅ Use AuthContext - single source of truth (no direct auth calls)
       if (!user || !session) {
-        throw new Error('No user session found');
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to delete your account.',
+          variant: 'destructive',
+        });
+        return;
       }
 
       // Get the Supabase URL to construct the edge function URL
@@ -235,6 +244,8 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
         description: error instanceof Error ? error.message : 'Failed to delete account. Please contact support.',
         variant: 'destructive'
       });
+    } finally {
+      setIsDeletingAccount(false); // ✅ Button reliability: Reset state
     }
   };
 
@@ -553,9 +564,9 @@ export function AccountSecurity({ userRole }: AccountSecurityProps) {
             <Button
               variant="destructive"
               onClick={handleDeleteAccount}
-              disabled={deleteConfirmText.toLowerCase() !== 'delete'}
+              disabled={deleteConfirmText.toLowerCase() !== 'delete' || isDeletingAccount}
             >
-              Delete Account Permanently
+              {isDeletingAccount ? 'Deleting Account...' : 'Delete Account Permanently'}
             </Button>
           </DialogFooter>
         </DialogContent>
