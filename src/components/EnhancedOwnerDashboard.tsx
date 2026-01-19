@@ -32,9 +32,17 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick, filters }: E
   const navigate = useNavigate();
   // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
   const { user } = useAuth();
-  // PERFORMANCE: Let ClientSwipeContainer handle its own data fetching and skeleton loading
-  // This eliminates the double loading state and provides instant skeleton rendering
-  const { data: clientProfiles = [] } = useSmartClientMatching(user?.id);
+  // FIX: Pass filters to query so fetched profiles match what container displays
+  // Extract category from filters if available
+  const filterCategory = filters?.categories?.[0] || filters?.category || undefined;
+  const { data: clientProfiles = [], isLoading, error } = useSmartClientMatching(
+    user?.id,
+    filterCategory,
+    0,      // page
+    50,     // limit
+    false,  // isRefreshMode
+    filters // FIX: Now includes filters!
+  );
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
 
   // Initialize notifications
@@ -76,6 +84,9 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick, filters }: E
         onClientTap={handleClientTap}
         onInsights={handleInsights}
         onMessageClick={onMessageClick}
+        profiles={clientProfiles}
+        isLoading={isLoading}
+        error={error}
         insightsOpen={insightsOpen}
         filters={filters}
       />

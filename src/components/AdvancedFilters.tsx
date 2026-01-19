@@ -22,12 +22,12 @@ interface AdvancedFiltersProps {
   currentFilters?: any;
 }
 
-type CategoryType = 'property' | 'vehicle' | 'moto' | 'bicycle' | 'yacht' | 'services';
+type CategoryType = 'property' | 'vehicle' | 'motorcyclercycle' | 'bicycle' | 'yacht' | 'services';
 
 const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
   { id: 'property', name: 'Property', icon: Home, color: 'text-emerald-500' },
   { id: 'vehicle', name: 'Cars', icon: Car, color: 'text-blue-500' },
-  { id: 'moto', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
+  { id: 'motorcyclercycle', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
   { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-purple-500' },
   { id: 'yacht', name: 'Yachts', icon: Ship, color: 'text-cyan-500' },
   { id: 'services', name: 'Jobs', icon: Briefcase, color: 'text-pink-500' },
@@ -39,7 +39,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
     property: 0,
     vehicle: 0,
-    moto: 0,
+    motorcycle: 0,
     bicycle: 0,
     yacht: 0,
     services: 0,
@@ -47,7 +47,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   const [categoryFilters, setCategoryFilters] = useState<Record<CategoryType, any>>({
     property: safeCurrentFilters,
     vehicle: {},
-    moto: {},
+    motorcycle: {},
     bicycle: {},
     yacht: {},
     services: {},
@@ -68,12 +68,39 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   };
 
   const handleApply = () => {
-    // Apply all filters with category information
-    const allFilters = {
-      ...categoryFilters[activeCategory],
+    // FIX: Combine filters from ALL categories, not just active one
+    // This prevents filters from being lost when switching tabs
+    const allFilters: any = {
       activeCategory,
       filterCounts,
+      // Collect all category-specific filters
+      categoryFilters: categoryFilters,
     };
+
+    // Merge non-empty filters from all categories into the root level
+    // This maintains backwards compatibility with existing filter consumers
+    Object.entries(categoryFilters).forEach(([category, filters]) => {
+      if (filters && Object.keys(filters).length > 0) {
+        // Add category-prefixed keys for disambiguation
+        Object.entries(filters).forEach(([key, value]) => {
+          // Skip empty/default values
+          if (
+            (Array.isArray(value) && value.length === 0) ||
+            (typeof value === 'string' && (value === '' || value === 'any')) ||
+            value === null ||
+            value === undefined
+          ) {
+            return;
+          }
+
+          // Store with category prefix to avoid collisions
+          // e.g., "property_priceMin", "vehicle_seats"
+          const prefixedKey = `${category}_${key}`;
+          allFilters[prefixedKey] = value;
+        });
+      }
+    });
+
     onApplyFilters(allFilters);
     onClose();
   };
@@ -82,7 +109,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
     setFilterCounts({
       property: 0,
       vehicle: 0,
-      moto: 0,
+      motorcycle: 0,
       bicycle: 0,
       yacht: 0,
       services: 0,
@@ -90,7 +117,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
     setCategoryFilters({
       property: {},
       vehicle: {},
-      moto: {},
+      motorcycle: {},
       bicycle: {},
       yacht: {},
       services: {},
@@ -198,11 +225,11 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     activeCount={filterCounts.vehicle}
                   />
                 )}
-                {activeCategory === 'moto' && (
+                {activeCategory === 'motorcycle' && (
                   <MotoClientFilters
-                    onApply={(filters) => handleApplyFilters('moto', filters)}
-                    initialFilters={categoryFilters.moto}
-                    activeCount={filterCounts.moto}
+                    onApply={(filters) => handleApplyFilters('motorcycle', filters)}
+                    initialFilters={categoryFilters.motorcycle}
+                    activeCount={filterCounts.motorcycle}
                   />
                 )}
                 {activeCategory === 'bicycle' && (

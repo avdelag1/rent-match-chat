@@ -331,10 +331,13 @@ const ClientSwipeContainerComponent = ({
     setTimeout(() => setSwipeDirection(null), 300);
 
     // FIX: Prevent pagination trigger after final card
+    // Check: 1) Not past end, 2) Near end (3 cards away), 3) Has cards, 4) Not already fetching, 5) No error
     if (
-      newIndex >= Math.max(0, deckQueueRef.current.length - 3) &&
-      deckQueueRef.current.length > 0 &&
-      !isFetchingMore.current
+      newIndex < deckQueueRef.current.length &&       // Still within deck
+      newIndex >= deckQueueRef.current.length - 3 &&  // Near the end (trigger prefetch)
+      deckQueueRef.current.length > 0 &&              // Deck has cards
+      !isFetchingMore.current &&                       // Not already fetching
+      !error                                           // Don't fetch if previous fetch errored
     ) {
       isFetchingMore.current = true;
       setPage(p => p + 1);

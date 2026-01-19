@@ -198,7 +198,7 @@ function SimpleOwnerSwipeCardComponent({
     return Array.isArray(profile.profile_images) && profile.profile_images.length > 0
       ? profile.profile_images
       : [FALLBACK_PLACEHOLDER];
-  }, [profile?.profile_images]);
+  }, [profile]); // FIX: Depend on entire profile, not just profile_images
 
   const imageCount = images.length;
   const currentImage = images[currentImageIndex] || FALLBACK_PLACEHOLDER;

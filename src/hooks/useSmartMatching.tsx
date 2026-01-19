@@ -1014,7 +1014,8 @@ export function useSmartClientMatching(
         if (filters) {
           filteredProfiles = filteredProfiles.filter(profile => {
             // Budget range filter
-            if (filters.budgetRange) {
+            // FIX: Add array length check before accessing indices
+            if (filters.budgetRange && Array.isArray(filters.budgetRange) && filters.budgetRange.length === 2) {
               const clientBudget = profile.budget_max || profile.monthly_income || 0;
               if (clientBudget < filters.budgetRange[0] || clientBudget > filters.budgetRange[1]) {
                 return false;
@@ -1022,7 +1023,8 @@ export function useSmartClientMatching(
             }
 
             // Age range filter
-            if (filters.ageRange && profile.age) {
+            // FIX: Add array length check before accessing indices
+            if (filters.ageRange && Array.isArray(filters.ageRange) && filters.ageRange.length === 2 && profile.age) {
               if (profile.age < filters.ageRange[0] || profile.age > filters.ageRange[1]) {
                 return false;
               }
