@@ -158,12 +158,12 @@ function CollapsibleFilterButtonComponent({ filters, onChange, userRole, classNa
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop - transparent to allow visibility of header/bottom */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[10001]"
+              className="fixed inset-0 bg-black/20 z-[10001]"
               onClick={() => setIsOpen(false)}
             />
 

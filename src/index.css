@@ -619,6 +619,106 @@ body {
     color: hsl(var(--foreground));
     transition: all 0.2s ease;
   }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /*  MOBILE PERFORMANCE OPTIMIZATIONS - Tinder-like Speed                 */
+  /*  Disable expensive effects on mobile for 60fps buttery smoothness     */
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+  /* INSTANT TOUCH - Global touch optimization */
+  * {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* MOBILE PERFORMANCE MODE - Disable blur effects on phones */
+  @media (max-width: 768px) {
+    /* Remove backdrop-blur - GPU intensive on mobile */
+    .backdrop-blur-sm,
+    .backdrop-blur-md,
+    .backdrop-blur-lg,
+    .backdrop-blur-xl,
+    .backdrop-blur-2xl,
+    .backdrop-blur-3xl,
+    [class*="backdrop-blur"] {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* Faster transitions on mobile */
+    * {
+      transition-duration: 150ms !important;
+    }
+
+    /* Disable box-shadow animations (expensive repaints) */
+    .shadow-lg,
+    .shadow-xl,
+    .shadow-2xl {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Use simpler backgrounds for overlays */
+    [class*="bg-black/"] {
+      background-color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Hardware acceleration for swipeable cards */
+    .swipe-card,
+    [data-swipeable="true"] {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+      will-change: transform;
+    }
+  }
+
+  /* CSS Containment for layout stability */
+  .contain-layout {
+    contain: layout;
+  }
+
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  /* Hardware-accelerated scroll containers */
+  .scroll-area-momentum {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+  }
+
+  @media (max-width: 768px) {
+    .scroll-area-momentum {
+      scroll-behavior: auto; /* Faster on mobile */
+    }
+  }
+
+  /* Fast tap states for interactive elements */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Active state for instant feedback */
+  button:active, a:active, [role="button"]:active {
+    transform: scale(0.97);
+    transition: transform 50ms ease-out;
+  }
   
   .brand-glow {
     text-shadow: 
