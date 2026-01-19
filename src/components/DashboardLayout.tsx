@@ -443,7 +443,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           - GPU-accelerated CSS animations (no JS loop)
           - Respects reduced motion preferences
           - Zero battery impact */}
-      <LiveHDBackground theme="default" showOrbs={true} intensity={1.0} />
+      <LiveHDBackground theme="default" showOrbs={false} intensity={1.0} />
 
       {/* PERF FIX: NotificationSystem has its own Suspense boundary to never suspend dashboard paint */}
       <Suspense fallback={null}>
