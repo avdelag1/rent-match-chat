@@ -12,6 +12,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  initialized: boolean; // TRUE after first auth check completes (regardless of user logged in or not)
   signUp: (email: string, password: string, role: 'client' | 'owner', name?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string, role: 'client' | 'owner') => Promise<{ error: any }>;
   signInWithOAuth: (provider: 'google', role: 'client' | 'owner') => Promise<{ error: any }>;
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false); // TRUE after first auth check
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { createProfileIfMissing } = useProfileSetup();
@@ -53,11 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // CRITICAL: Set loading to false IMMEDIATELY after getting session
           // Profile/role setup will happen separately via Index.tsx and ProtectedRoute
           setLoading(false);
+          setInitialized(true); // Mark auth as initialized
         }
       } catch (error) {
         logger.error('[Auth] Failed to initialize auth:', error);
         if (isMounted) {
           setLoading(false);
+          setInitialized(true); // Still mark as initialized even on error
         }
       } finally {
         isInitializing = false;
@@ -93,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // CRITICAL: Set loading to false immediately
         // Don't wait for profile setup - that's handled by Index/ProtectedRoute
         setLoading(false);
+        setInitialized(true); // Mark as initialized on any auth state change
 
         // Handle OAuth setup asynchronously WITHOUT blocking loading state
         if (event === 'SIGNED_IN' && session?.user) {
@@ -513,6 +518,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     loading,
+    initialized,
     signUp,
     signIn,
     signInWithOAuth,
