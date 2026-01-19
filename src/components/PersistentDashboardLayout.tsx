@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useActiveMode } from '@/hooks/useActiveMode';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 /**
  * SPEED OF LIGHT: Persistent Dashboard Layout
@@ -39,7 +39,7 @@ function getRoleFromPath(pathname: string): 'client' | 'owner' {
 
 export function PersistentDashboardLayout() {
   const location = useLocation();
-  const { activeMode } = useActiveMode();
+  const { activeMode, syncMode } = useActiveMode();
 
   // SPEED OF LIGHT: Derive role from path INSTANTLY
   // No async calls, no loading states, no skeleton
@@ -54,6 +54,16 @@ export function PersistentDashboardLayout() {
     // For shared routes (messages, notifications, subscription), use activeMode
     return activeMode;
   }, [location.pathname, activeMode]);
+
+  // Auto-sync activeMode when navigating to explicit client/owner routes
+  // This ensures that shared routes (messages, notifications) use the correct mode
+  useEffect(() => {
+    if (location.pathname.startsWith('/client/') && activeMode !== 'client') {
+      syncMode('client');
+    } else if (location.pathname.startsWith('/owner/') && activeMode !== 'owner') {
+      syncMode('owner');
+    }
+  }, [location.pathname, activeMode, syncMode]);
 
   return (
     <DashboardLayout userRole={userRole}>

@@ -15,6 +15,7 @@ interface ActiveModeContextType {
   isSwitching: boolean;
   switchMode: (newMode: ActiveMode) => void;
   toggleMode: () => void;
+  syncMode: (newMode: ActiveMode) => void;
   canSwitchMode: boolean;
 }
 
@@ -217,6 +218,25 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
     switchMode(newMode);
   }, [localMode, switchMode]);
 
+  // Sync mode without navigation (used for route-based sync)
+  const syncMode = useCallback((newMode: ActiveMode) => {
+    if (!user?.id || newMode === localMode) {
+      return;
+    }
+
+    // Update local state
+    setLocalMode(newMode);
+
+    // Cache to localStorage (persistent)
+    setCachedMode(user.id, newMode);
+
+    // Update query cache
+    queryClient.setQueryData(['active-mode', user.id], newMode);
+
+    // Save to database in background (fire and forget)
+    saveModeToDatabase(newMode);
+  }, [user?.id, localMode, queryClient, saveModeToDatabase]);
+
   // Allow all authenticated users to switch
   const canSwitchMode = !!user?.id;
 
@@ -226,8 +246,9 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
     isSwitching,
     switchMode,
     toggleMode,
+    syncMode,
     canSwitchMode,
-  }), [localMode, isLoading, isFetched, isSwitching, switchMode, toggleMode, canSwitchMode]);
+  }), [localMode, isLoading, isFetched, isSwitching, switchMode, toggleMode, syncMode, canSwitchMode]);
 
   return (
     <ActiveModeContext.Provider value={value}>
