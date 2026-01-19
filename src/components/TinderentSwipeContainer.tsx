@@ -835,6 +835,32 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
   };
 
+  // PREMIUM: Hover-based prefetch - prefetch next batch when user hovers near bottom of deck
+  const handleDeckHover = useCallback(() => {
+    // Only prefetch if we're running low and not already fetching
+    const remainingCards = deckQueueRef.current.length - currentIndexRef.current;
+    // Don't fetch if we're past the end of the deck (remainingCards <= 0)
+    if (remainingCards > 0 && remainingCards <= 5 && !isFetchingMore.current) {
+      isFetchingMore.current = true;
+      setPage(p => p + 1);
+
+      // Also preload next 4 card images opportunistically using BOTH preloaders
+      const imagesToPreload: string[] = [];
+      [1, 2, 3, 4].forEach((offset) => {
+        const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
+        if (futureCard?.images?.[0]) {
+          imagesToPreload.push(futureCard.images[0]);
+          preloadImageToCache(futureCard.images[0]);
+        }
+      });
+
+      // Use ImagePreloadController for decode (ensures GPU-ready images)
+      if (imagesToPreload.length > 0) {
+        imagePreloadController.preloadBatch(imagesToPreload);
+      }
+    }
+  }, []);
+
   const progress = deckQueue.length > 0 ? ((currentIndex + 1) / deckQueue.length) * 100 : 0;
 
   // Check if we have hydrated data (from store/session) - prevents blank deck flash
@@ -1025,32 +1051,6 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       </div>
     );
   }
-
-  // PREMIUM: Hover-based prefetch - prefetch next batch when user hovers near bottom of deck
-  const handleDeckHover = useCallback(() => {
-    // Only prefetch if we're running low and not already fetching
-    const remainingCards = deckQueueRef.current.length - currentIndexRef.current;
-    // Don't fetch if we're past the end of the deck (remainingCards <= 0)
-    if (remainingCards > 0 && remainingCards <= 5 && !isFetchingMore.current) {
-      isFetchingMore.current = true;
-      setPage(p => p + 1);
-
-      // Also preload next 4 card images opportunistically using BOTH preloaders
-      const imagesToPreload: string[] = [];
-      [1, 2, 3, 4].forEach((offset) => {
-        const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
-        if (futureCard?.images?.[0]) {
-          imagesToPreload.push(futureCard.images[0]);
-          preloadImageToCache(futureCard.images[0]);
-        }
-      });
-
-      // Use ImagePreloadController for decode (ensures GPU-ready images)
-      if (imagesToPreload.length > 0) {
-        imagePreloadController.preloadBatch(imagesToPreload);
-      }
-    }
-  }, []);
 
   // Main swipe view - edge-to-edge cards
   return (
