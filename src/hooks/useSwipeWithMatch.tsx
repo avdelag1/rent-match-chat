@@ -54,18 +54,17 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             throw ownerLikeError;
           }
           like = ownerLike;
-        } else {
-          // Save dislike to dislikes table with 7-day cooldown
+      } else {
+          // For left swipes (dislikes), we use the likes table with direction='left'
+          // This avoids needing a separate dislikes table that may not exist
           const { data: dislike, error: dislikeError } = await supabase
-            .from('dislikes')
+            .from('likes')
             .upsert({
               user_id: user.id,
               target_id: targetId,
-              target_type: 'profile',
-              disliked_at: new Date().toISOString(),
-              cooldown_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+              direction: 'left'
             }, {
-              onConflict: 'user_id,target_id,target_type',
+              onConflict: 'user_id,target_id',
               ignoreDuplicates: false
             })
             .select()

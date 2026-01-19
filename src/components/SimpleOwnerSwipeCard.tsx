@@ -240,9 +240,8 @@ function SimpleOwnerSwipeCardComponent({
   }, []);
 
   // Magnifier hook for press-and-hold zoom - MUST be called before any callbacks that use it
-  const { containerRef, canvasRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
+  const { containerRef, pointerHandlers, isActive: isMagnifierActive } = useMagnifier({
     scale: 2.0,
-    lensSize: 160,
     holdDelay: 350,
     enabled: isTop,
   });
@@ -425,12 +424,7 @@ function SimpleOwnerSwipeCardComponent({
         >
           <CardImage src={currentImage} alt={profile.name || 'Client'} name={profile.name} />
 
-          {/* Magnifier canvas overlay */}
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none z-50"
-            style={{ display: 'none' }}
-          />
+          {/* Magnifier is handled by the useMagnifier hook directly on the image */}
           
           {/* Image dots */}
           {imageCount > 1 && (
