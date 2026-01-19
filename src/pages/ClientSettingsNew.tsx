@@ -6,6 +6,7 @@ import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, Bookmark, Chevron
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 import { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
@@ -99,12 +100,24 @@ const ClientSettingsNew = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={fastSpring}
+            className="space-y-6"
           >
             <Card className="bg-card border-border">
               <CardContent className="p-6">
                 <AccountSecurity userRole="client" />
               </CardContent>
             </Card>
+
+            {/* Danger Zone - Delete Account */}
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium text-destructive">Danger Zone</h3>
+                <p className="text-xs text-muted-foreground">
+                  Irreversible actions that affect your account
+                </p>
+              </div>
+              <DeleteAccountSection />
+            </div>
           </motion.div>
         </div>
       </div>
