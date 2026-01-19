@@ -268,36 +268,19 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 )}
               </AnimatePresence>
 
-              <div className="flex flex-col items-center">
-                <Icon
-                  className={cn(
-                    'transition-all duration-75',
-                    getIconColorClass(item, active),
-                    active && 'fill-current'
-                  )}
-                  style={{
-                    // Use constant for icon size - slightly larger for center items
-                    width: item.isCenter ? ICON_SIZE + 2 : ICON_SIZE,
-                    height: item.isCenter ? ICON_SIZE + 2 : ICON_SIZE,
-                  }}
-                  strokeWidth={active ? 2.5 : 2}
-                />
-
-                {/* Active indicator - subtle underline dot */}
-                <AnimatePresence>
-                  {active && (
-                    <motion.div
-                      initial={{ scaleX: 0, opacity: 0 }}
-                      animate={{ scaleX: 1, opacity: 1 }}
-                      exit={{ scaleX: 0, opacity: 0 }}
-                      className={cn(
-                        "w-5 h-0.5 rounded-full mt-1.5",
-                        getIndicatorColorClass(item)
-                      )}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
+              <Icon
+                className={cn(
+                  'transition-all duration-75',
+                  getIconColorClass(item, active),
+                  active && 'fill-current'
+                )}
+                style={{
+                  // Use constant for icon size - slightly larger for center items
+                  width: item.isCenter ? ICON_SIZE + 2 : ICON_SIZE,
+                  height: item.isCenter ? ICON_SIZE + 2 : ICON_SIZE,
+                }}
+                strokeWidth={active ? 2.5 : 2}
+              />
             </motion.button>
           );
         })}
