@@ -3,6 +3,7 @@ import { ClientProfileDialog } from "@/components/ClientProfileDialog";
 import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
 import { ShareDialog } from "@/components/ShareDialog";
+import { SharedProfileSection } from "@/components/SharedProfileSection";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -214,6 +215,13 @@ const ClientProfileNew = () => {
               )}
             </motion.div>
           )}
+
+          {/* Share Profile Section - Earn Free Messages */}
+          <SharedProfileSection
+            profileId={user?.id}
+            profileName={profile?.name || 'Your Profile'}
+            isClient={true}
+          />
 
           {/* My Preferences - PROMINENT PLACEMENT */}
           <motion.div
