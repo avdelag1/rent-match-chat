@@ -272,7 +272,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 <Icon
                   className={cn(
                     'transition-all duration-75',
-                    getIconColorClass(item, active)
+                    getIconColorClass(item, active),
+                    active && 'fill-current'
                   )}
                   style={{
                     // Use constant for icon size - slightly larger for center items

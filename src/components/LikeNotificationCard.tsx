@@ -106,7 +106,7 @@ export function LikeNotificationCard({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-3 pt-2">
+        <div className="flex flex-col gap-2 pt-1">
           <LikeNotificationActions
             onAccept={handleAccept}
             onReject={handleReject}
@@ -118,7 +118,7 @@ export function LikeNotificationCard({
           />
 
           {/* Privacy Info */}
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center mt-1">
             Their full profile will be revealed once you accept
           </p>
         </div>
