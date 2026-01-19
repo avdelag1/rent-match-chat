@@ -560,6 +560,43 @@ const ClientSwipeContainerComponent = ({
     );
   }
 
+  // SAFETY: If we somehow got here without a topCard, show empty state
+  // This should never happen due to the checks above, but prevents errors
+  if (!topCard) {
+    return (
+      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="text-center space-y-6 p-8"
+        >
+          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <Users className="w-12 h-12 text-primary" />
+            </div>
+          </motion.div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-foreground">No Clients Available</h3>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Please refresh to discover new clients
+            </p>
+          </div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+            </Button>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
+
   // Main swipe view - edge-to-edge cards
   return (
     <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto">
@@ -568,49 +605,45 @@ const ClientSwipeContainerComponent = ({
 
         {/* Current card on top - fully interactive */}
         {/* Physics engine handles ALL animations - no Framer Motion wrapper needed */}
-        {topCard && (
-          <div
-            key={topCard.user_id}
-            className="w-full h-full absolute inset-0"
-            style={{ zIndex: 10 }}
-          >
-            <SimpleOwnerSwipeCard
-              profile={topCard}
-              onSwipe={handleSwipe}
-              onTap={() => onClientTap(topCard.user_id)}
-              onInsights={() => handleInsights(topCard.user_id)}
-              onMessage={() => handleConnect(topCard.user_id)}
-              onShare={handleShare}
-              onUndo={undoLastSwipe}
-              canUndo={canUndo}
-              isTop={true}
-              hideActions={insightsOpen}
-            />
-          </div>
-        )}
+        <div
+          key={topCard.user_id}
+          className="w-full h-full absolute inset-0"
+          style={{ zIndex: 10 }}
+        >
+          <SimpleOwnerSwipeCard
+            profile={topCard}
+            onSwipe={handleSwipe}
+            onTap={() => onClientTap(topCard.user_id)}
+            onInsights={() => handleInsights(topCard.user_id)}
+            onMessage={() => handleConnect(topCard.user_id)}
+            onShare={handleShare}
+            onUndo={undoLastSwipe}
+            canUndo={canUndo}
+            isTop={true}
+            hideActions={insightsOpen}
+          />
+        </div>
       </div>
 
       <MatchCelebration
         isOpen={matchCelebration.isOpen}
         onClose={() => setMatchCelebration({ isOpen: false })}
         matchedUser={{
-          name: matchCelebration.clientProfile?.name || 'User',
+          name: String(matchCelebration.clientProfile?.name || 'User'),
           avatar: matchCelebration.clientProfile?.images?.[0],
           role: 'client'
         }}
-        onMessage={() => topCard?.user_id && handleConnect(topCard.user_id)}
+        onMessage={() => topCard.user_id && handleConnect(topCard.user_id)}
       />
 
       {/* Share Dialog - only render when we have a valid topCard */}
-      {topCard && (
-        <ShareDialog
-          open={shareDialogOpen}
-          onOpenChange={setShareDialogOpen}
-          profileId={topCard.user_id}
-          title={topCard.name ? `Check out ${topCard.name}'s profile` : 'Check out this profile'}
-          description={`Budget: $${topCard.budget_max?.toLocaleString() || 'N/A'} - Looking for: ${topCard.preferred_listing_types?.join(', ') || 'Various properties'}`}
-        />
-      )}
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        profileId={topCard.user_id}
+        title={topCard.name ? `Check out ${String(topCard.name)}'s profile` : 'Check out this profile'}
+        description={`Budget: $${topCard.budget_max?.toLocaleString() || 'N/A'} - Looking for: ${Array.isArray(topCard.preferred_listing_types) ? topCard.preferred_listing_types.join(', ') : 'Various properties'}`}
+      />
     </div>
   );
 };
