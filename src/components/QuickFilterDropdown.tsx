@@ -49,10 +49,10 @@ type CategoryOption = {
 const categoryOptions: CategoryOption[] = [
   { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" />, color: 'from-orange-500 to-amber-500', hasSubOptions: true },
   { id: 'vehicle', label: 'Car', icon: <Car className="w-4 h-4" />, color: 'from-blue-500 to-cyan-500', hasSubOptions: true },
-  { id: 'yacht', label: 'Jet', icon: <JetIcon className="w-4 h-4" />, color: 'from-purple-500 to-pink-500', hasSubOptions: true },
+  { id: 'yacht', label: 'Yacht', icon: <JetIcon className="w-4 h-4" />, color: 'from-purple-500 to-pink-500', hasSubOptions: true },
   { id: 'motorcycle', label: 'Motorcycle', icon: <MotorcycleIcon className="w-4 h-4" />, color: 'from-red-500 to-orange-500', hasSubOptions: true },
   { id: 'bicycle', label: 'Bicycle', icon: <Bike className="w-4 h-4" />, color: 'from-green-500 to-emerald-500', hasSubOptions: true },
-  { id: 'services', label: 'Service', icon: <Wrench className="w-4 h-4" />, color: 'from-pink-500 to-rose-500', hasSubOptions: false },
+  { id: 'services', label: 'Workers', icon: <Wrench className="w-4 h-4" />, color: 'from-pink-500 to-rose-500', hasSubOptions: true },
 ];
 
 const listingTypeOptions: { id: QuickFilterListingType; label: string }[] = [
@@ -121,20 +121,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
   }, []);
 
   const handleCategoryClick = (categoryId: QuickFilterCategory) => {
-    // For services, just select and close
-    if (categoryId === 'services') {
-      onChange({
-        ...filters,
-        categories: ['services'],
-        listingType: 'both',
-      });
-      setIsOpen(false);
-      setHoveredCategory(null);
-      setClickedCategory(null);
-      return;
-    }
-
-    // For other categories, toggle the submenu
+    // Toggle the submenu for all categories with sub-options
     setClickedCategory(clickedCategory === categoryId ? null : categoryId);
   };
 

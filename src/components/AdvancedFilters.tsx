@@ -22,15 +22,15 @@ interface AdvancedFiltersProps {
   currentFilters?: any;
 }
 
-type CategoryType = 'property' | 'vehicle' | 'motorcyclercycle' | 'bicycle' | 'yacht' | 'services';
+type CategoryType = 'property' | 'vehicle' | 'motorcycle' | 'bicycle' | 'yacht' | 'services';
 
 const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
   { id: 'property', name: 'Property', icon: Home, color: 'text-emerald-500' },
   { id: 'vehicle', name: 'Cars', icon: Car, color: 'text-blue-500' },
-  { id: 'motorcyclercycle', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
+  { id: 'motorcycle', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
   { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-purple-500' },
   { id: 'yacht', name: 'Yachts', icon: Ship, color: 'text-cyan-500' },
-  { id: 'services', name: 'Jobs', icon: Briefcase, color: 'text-pink-500' },
+  { id: 'services', name: 'Workers', icon: Briefcase, color: 'text-pink-500' },
 ];
 
 export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, currentFilters }: AdvancedFiltersProps) {
