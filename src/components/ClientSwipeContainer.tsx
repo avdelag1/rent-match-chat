@@ -493,7 +493,7 @@ const ClientSwipeContainerComponent = ({
                 className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Finding Clients...' : 'Discover More'}
+                {String(isRefreshing ? 'Finding Clients...' : 'Discover More')}
               </Button>
             </motion.div>
             <p className="text-xs text-muted-foreground">New clients are joining daily</p>
