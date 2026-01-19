@@ -940,6 +940,7 @@ export function useSmartClientMatching(
           has_pets,
           smoking,
           party_friendly,
+          preferred_listing_types,
           user_roles!inner(role)
         `;
 
@@ -988,11 +989,36 @@ export function useSmartClientMatching(
               }
             }
 
-            // Gender filter
+            // Gender filter (from quick filters or advanced filters)
             if (filters.genders && filters.genders.length > 0 && profile.gender) {
               if (!filters.genders.includes(profile.gender.toLowerCase())) {
                 return false;
               }
+            }
+
+            // Quick filter: clientGender (map to genders filter)
+            if ((filters as any).clientGender && (filters as any).clientGender !== 'any' && profile.gender) {
+              if (profile.gender.toLowerCase() !== (filters as any).clientGender.toLowerCase()) {
+                return false;
+              }
+            }
+
+            // Quick filter: clientType (what the client is looking for: hire/rent/buy)
+            if ((filters as any).clientType && (filters as any).clientType !== 'all' && profile.preferred_listing_types) {
+              const clientType = (filters as any).clientType;
+              // Map clientType to listing type: 'hire' -> 'hire', 'rent' -> 'rent', 'buy' -> 'sale'
+              const lookingFor = clientType === 'buy' ? 'sale' : clientType;
+              if (!profile.preferred_listing_types.includes(lookingFor)) {
+                return false;
+              }
+            }
+
+            // Quick filter: categories (what type of listings the client is interested in)
+            // This filters clients who are looking for specific categories (property, moto, etc.)
+            if ((filters as any).categories && (filters as any).categories.length > 0) {
+              // For now, we don't have a field that maps client interests to categories
+              // This would need to be added to the profile schema
+              // Skipping for now
             }
 
             // Pet friendly filter
@@ -1104,7 +1130,7 @@ export function useSmartClientMatching(
             location: profile.city ? { city: profile.city } : {},
             lifestyle_tags: profile.lifestyle_tags || [],
             profile_images: profile.images || [],
-            preferred_listing_types: ['rent'],
+            preferred_listing_types: profile.preferred_listing_types || ['rent'],
             budget_min: profile.budget_min || 0,
             budget_max: profile.budget_max || 100000,
             matchPercentage: match.percentage,

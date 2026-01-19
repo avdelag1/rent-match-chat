@@ -31,6 +31,7 @@ interface ClientSwipeContainerProps {
   error?: any;
   insightsOpen?: boolean; // Whether insights modal is open - hides action buttons
   category?: string; // Category for owner deck persistence (property, moto, etc.)
+  filters?: any; // Filters from parent (quick filters + advanced filters)
 }
 
 const ClientSwipeContainerComponent = ({
@@ -41,7 +42,8 @@ const ClientSwipeContainerComponent = ({
   isLoading: externalIsLoading,
   error: externalError,
   insightsOpen = false,
-  category = 'default'
+  category = 'default',
+  filters
 }: ClientSwipeContainerProps) => {
   const navigate = useNavigate();
   // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
@@ -100,6 +102,39 @@ const ClientSwipeContainerComponent = ({
     setCurrentIndex(currentIndexRef.current);
   }, []);
 
+  // FILTER CHANGE DETECTION: Reset deck when filters change
+  // Track previous filter state to detect changes
+  const prevFiltersRef = useRef(filters);
+  useEffect(() => {
+    // Skip on initial mount
+    if (!prevFiltersRef.current && !filters) return;
+
+    // Check if filters actually changed (deep comparison of relevant fields)
+    const filtersChanged =
+      JSON.stringify(prevFiltersRef.current?.categories) !== JSON.stringify(filters?.categories) ||
+      JSON.stringify(prevFiltersRef.current?.category) !== JSON.stringify(filters?.category) ||
+      prevFiltersRef.current?.clientGender !== filters?.clientGender ||
+      prevFiltersRef.current?.clientType !== filters?.clientType ||
+      prevFiltersRef.current?.listingType !== filters?.listingType;
+
+    if (filtersChanged) {
+      logger.info('[ClientSwipeContainer] Filters changed, resetting deck');
+
+      // Reset local state and refs
+      currentIndexRef.current = 0;
+      setCurrentIndex(0);
+      deckQueueRef.current = [];
+      swipedIdsRef.current.clear();
+      setPage(0);
+
+      // Reset store
+      resetOwnerDeck(category);
+
+      // Update prev filters
+      prevFiltersRef.current = filters;
+    }
+  }, [filters, category, resetOwnerDeck]);
+
   // PERF FIX: Track if we're returning to dashboard (has hydrated data AND is ready)
   // When true, skip initial animations to prevent "double render" feeling
   // Use isReady flag from store to determine if deck is fully initialized
@@ -156,7 +191,9 @@ const ClientSwipeContainerComponent = ({
   }, []); // Empty deps - only run once on mount
 
   // PERF: pass userId to avoid getUser() inside queryFn
-  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(user?.id, undefined, page, 50, isRefreshMode);
+  // Extract category from filters if available (for filtering client profiles by their interests)
+  const filterCategory = filters?.categories?.[0] || filters?.category || undefined;
+  const { data: internalProfiles = [], isLoading: internalIsLoading, refetch, isRefetching, error: internalError } = useSmartClientMatching(user?.id, filterCategory, page, 50, isRefreshMode, filters);
 
   const clientProfiles = externalProfiles || internalProfiles;
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
