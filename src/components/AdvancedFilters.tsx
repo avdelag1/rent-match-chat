@@ -101,7 +101,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl h-[90vh] sm:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-2xl h-[70vh] sm:h-[75vh] max-h-[600px] flex flex-col p-0 gap-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b bg-gradient-to-r from-primary/5 via-background to-background">
           <div className="flex items-center justify-between">
