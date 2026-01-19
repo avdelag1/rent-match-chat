@@ -12,13 +12,13 @@
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
-import { MapPin, Bed, Bath, Square, ShieldCheck } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
 import { Listing } from '@/hooks/useListings';
 import { MatchedListing } from '@/hooks/useSmartMatching';
 import { useMagnifier } from '@/hooks/useMagnifier';
+import { PropertyCardInfo, VehicleCardInfo, ServiceCardInfo } from '@/components/ui/CardInfoHierarchy';
+import { VerifiedBadge } from '@/components/ui/TrustSignals';
 
 // Exposed interface for parent to trigger swipe animations
 export interface SimpleSwipeCardRef {
@@ -423,48 +423,47 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           </div>
         </motion.div>
         
-        {/* Content overlay - Above buttons */}
+        {/* Content overlay - Using CardInfoHierarchy for 2-second scanning */}
         <div className="absolute bottom-24 left-0 right-0 p-4 z-20 pointer-events-none">
-          <h2 className="text-white text-xl font-bold mb-1 line-clamp-1">
-            {listing.title || 'Untitled Listing'}
-          </h2>
-          
-          {listing.city && (
-            <div className="flex items-center gap-1 text-white/80 text-sm mb-2">
-              <MapPin className="w-4 h-4" />
-              <span>{listing.city}</span>
-            </div>
+          {/* Determine card type and render appropriate info hierarchy */}
+          {listing.category === 'vehicle' || listing.vehicle_type ? (
+            <VehicleCardInfo
+              price={listing.price || 0}
+              priceType={(listing as any).rental_duration_type === 'monthly' ? 'month' : 'day'}
+              make={(listing as any).vehicle_brand}
+              model={(listing as any).vehicle_model}
+              year={listing.year}
+              location={listing.city}
+              isVerified={(listing as any).has_verified_documents}
+            />
+          ) : listing.category === 'services' || (listing as any).service_type ? (
+            <ServiceCardInfo
+              hourlyRate={(listing as any).hourly_rate}
+              serviceName={(listing as any).service_type || listing.title || 'Service'}
+              name={(listing as any).provider_name}
+              location={listing.city}
+              isVerified={(listing as any).has_verified_documents}
+            />
+          ) : (
+            <PropertyCardInfo
+              price={listing.price || 0}
+              priceType={(listing as any).rental_duration_type === 'monthly' ? 'month' : 'night'}
+              propertyType={listing.property_type}
+              beds={listing.beds}
+              baths={listing.baths}
+              location={listing.city}
+              isVerified={(listing as any).has_verified_documents}
+            />
           )}
-          
-          <div className="flex items-center gap-3 text-white/90 text-sm">
-            {formattedPrice && (
-              <span className="font-semibold text-lg">{formattedPrice}</span>
-            )}
-            {listing.beds && (
-              <span className="flex items-center gap-1">
-                <Bed className="w-4 h-4" /> {listing.beds}
-              </span>
-            )}
-            {listing.baths && (
-              <span className="flex items-center gap-1">
-                <Bath className="w-4 h-4" /> {listing.baths}
-              </span>
-            )}
-            {listing.square_footage && (
-              <span className="flex items-center gap-1">
-                <Square className="w-4 h-4" /> {listing.square_footage}m²
-              </span>
-            )}
-          </div>
         </div>
         
-        {/* Verified badge */}
+        {/* Verified badge - now using TrustSignals component */}
         {(listing as any).has_verified_documents && (
           <div className="absolute top-16 right-4 z-20">
-            <Badge className="bg-blue-500/90 border-blue-400 text-white flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4" />
-              <span className="text-sm">Verified</span>
-            </Badge>
+            <div className="px-2.5 py-1.5 rounded-full bg-black/40 backdrop-blur-sm flex items-center gap-1.5">
+              <VerifiedBadge size="sm" />
+              <span className="text-xs font-medium text-white">Verified</span>
+            </div>
           </div>
         )}
       </motion.div>
