@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Briefcase, ArrowLeftRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -23,21 +23,27 @@ interface ModeSwitcherProps {
  */
 function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: ModeSwitcherProps) {
   const { activeMode, isSwitching, switchMode, canSwitchMode } = useActiveMode();
+  const lastClickTime = useRef(0);
 
-  const handleModeSwitch = async (newMode: ActiveMode) => {
+  // Debounce rapid clicks (prevent accidental double-taps)
+  const handleModeSwitch = useCallback(async (newMode: ActiveMode) => {
+    const now = Date.now();
+    if (now - lastClickTime.current < 300) return; // 300ms debounce
+    lastClickTime.current = now;
+
     if (isSwitching || newMode === activeMode || !canSwitchMode) return;
     triggerHaptic('medium');
     await switchMode(newMode);
-  };
+  }, [isSwitching, activeMode, canSwitchMode, switchMode]);
 
-  const handleToggle = (event: React.MouseEvent) => {
+  const handleToggle = useCallback((event: React.MouseEvent) => {
     // Prevent event propagation to avoid accidental triggers
     event.stopPropagation();
     event.preventDefault();
 
     const newMode = activeMode === 'client' ? 'owner' : 'client';
     handleModeSwitch(newMode);
-  };
+  }, [activeMode, handleModeSwitch]);
 
   const sizeClasses = {
     sm: 'h-8 text-xs',
@@ -170,9 +176,8 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         sizeClasses[size],
         className
       )}
-      whileTap={{ scale: 0.95, rotate: activeMode === 'client' ? 3 : -3 }}
-      animate={isSwitching ? { scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] } : { scale: 1, rotate: 0 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
       aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
     >
       {/* Mode icon with animation */}
@@ -207,7 +212,14 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
   );
 }
 
-export const ModeSwitcher = memo(ModeSwitcherComponent);
+// Memoize with shallow props comparison for better performance
+export const ModeSwitcher = memo(ModeSwitcherComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.className === nextProps.className &&
+    prevProps.size === nextProps.size &&
+    prevProps.variant === nextProps.variant
+  );
+});
 
 // Compact version for tight spaces
 export const ModeSwitcherCompact = memo(function ModeSwitcherCompact({ className }: { className?: string }) {
