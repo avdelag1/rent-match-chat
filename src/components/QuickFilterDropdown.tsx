@@ -181,7 +181,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
 
   // Render owner filters dropdown
   const renderOwnerFilters = () => (
-    <div className="bg-background/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
         <span className="text-sm font-semibold text-foreground">Filter Clients</span>
@@ -263,7 +263,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
 
   // Render client filters dropdown (categories)
   const renderClientFilters = () => (
-    <div className="bg-background/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
         <span className="text-sm font-semibold text-foreground">Select Category</span>
@@ -330,7 +330,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
                   className="absolute left-full top-0 ml-1 z-[10003]"
                   onMouseEnter={() => setHoveredCategory(category.id)}
                 >
-                  <div className="bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden min-w-[140px]">
+                  <div className="bg-background border border-white/10 rounded-xl shadow-lg overflow-hidden min-w-[140px]">
                     <div className="py-2">
                       {listingTypeOptions.map((listingType, ltIndex) => (
                         <motion.button

@@ -101,7 +101,10 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl h-[70vh] sm:h-[75vh] max-h-[600px] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent
+        overlayClassName="bg-transparent backdrop-blur-none"
+        className="max-w-2xl h-[60vh] sm:h-[65vh] max-h-[500px] flex flex-col p-0 gap-0 overflow-hidden top-[55%] sm:top-[50%]"
+      >
         {/* Header */}
         <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b bg-gradient-to-r from-primary/5 via-background to-background">
           <div className="flex items-center justify-between">
