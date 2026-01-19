@@ -377,6 +377,19 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     setQuickFilters(newQuickFilters);
   }, []);
 
+  // Map quick filter category names to database category names
+  const mapCategoryToDatabase = useCallback((category: QuickFilterCategory): string => {
+    const mapping: Record<QuickFilterCategory, string> = {
+      'moto': 'motorcycle',
+      'vehicle': 'vehicle',
+      'yacht': 'yacht',
+      'property': 'property',
+      'bicycle': 'bicycle',
+      'services': 'worker',
+    };
+    return mapping[category] || category;
+  }, []);
+
   // Combine quick filters with applied filters - MEMOIZED to prevent identity changes
   const combinedFilters = useMemo(() => {
     const base = appliedFilters || {};
@@ -395,11 +408,16 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     // Check if services category is selected
     const hasServicesCategory = quickFilters.categories.includes('services');
 
+    // Map quick filter categories to database categories
+    const mappedCategories = quickFilters.categories.length > 0
+      ? quickFilters.categories.map(mapCategoryToDatabase)
+      : undefined;
+
     return {
       ...base,
       // Client quick filter categories take precedence if set
       category: quickFilters.categories.length === 0 ? base.category : undefined,
-      categories: quickFilters.categories.length > 0 ? quickFilters.categories : undefined,
+      categories: mappedCategories,
       // Quick filter listing type takes precedence if not 'both'
       listingType: quickFilters.listingType !== 'both' ? quickFilters.listingType : base.listingType,
       // Services filter - derived from categories
@@ -408,7 +426,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       clientGender: quickFilters.clientGender !== 'any' ? quickFilters.clientGender : undefined,
       clientType: quickFilters.clientType !== 'all' ? quickFilters.clientType : undefined,
     };
-  }, [appliedFilters, quickFilters]);
+  }, [appliedFilters, quickFilters, mapCategoryToDatabase]);
 
   // FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {
