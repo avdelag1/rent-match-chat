@@ -430,7 +430,11 @@ export function useSmartListingMatching(
           if (error.code !== '42501' && error.code !== 'PGRST301') {
             logger.error('[SmartMatching] Error fetching listings:', error.message);
           }
-          throw error;
+          // CRITICAL FIX: Don't throw error when paginating beyond available results
+          // When there are no more results (e.g., fetching page 2 when only page 1 exists),
+          // Supabase returns an empty array, not an error. But if it does error,
+          // return empty array instead of throwing to show "All Caught Up" screen
+          return [];
         }
 
         if (!listings?.length) {
@@ -959,7 +963,10 @@ export function useSmartClientMatching(
           .range(start, end);
 
         if (profileError) {
-          throw profileError;
+          // CRITICAL FIX: Don't throw error when paginating beyond available results
+          // Return empty array to show "All Caught Up" screen instead of error
+          logger.error('[SmartMatching] Error fetching client profiles:', profileError.message);
+          return [] as MatchedClientProfile[];
         }
 
         if (!profiles?.length) {

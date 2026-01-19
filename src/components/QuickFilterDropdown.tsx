@@ -88,6 +88,7 @@ const QuickFilterText = () => (
 function QuickFilterDropdownComponent({ filters, onChange, userRole, className }: QuickFilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<QuickFilterCategory | null>(null);
+  const [clickedCategory, setClickedCategory] = useState<QuickFilterCategory | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -115,13 +116,14 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       ) {
         setIsOpen(false);
         setHoveredCategory(null);
+        setClickedCategory(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleCategorySelect = (categoryId: QuickFilterCategory, listingType?: QuickFilterListingType) => {
+  const handleCategoryClick = (categoryId: QuickFilterCategory) => {
     // For services, just select and close
     if (categoryId === 'services') {
       onChange({
@@ -131,19 +133,24 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       });
       setIsOpen(false);
       setHoveredCategory(null);
+      setClickedCategory(null);
       return;
     }
 
-    // For other categories, apply with listing type
-    if (listingType) {
-      onChange({
-        ...filters,
-        categories: [categoryId],
-        listingType,
-      });
-      setIsOpen(false);
-      setHoveredCategory(null);
-    }
+    // For other categories, toggle the submenu
+    setClickedCategory(clickedCategory === categoryId ? null : categoryId);
+  };
+
+  const handleCategorySelect = (categoryId: QuickFilterCategory, listingType: QuickFilterListingType) => {
+    // Apply category with listing type
+    onChange({
+      ...filters,
+      categories: [categoryId],
+      listingType,
+    });
+    setIsOpen(false);
+    setHoveredCategory(null);
+    setClickedCategory(null);
   };
 
   const handleGenderSelect = (gender: OwnerClientGender) => {
@@ -169,6 +176,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
     });
     setIsOpen(false);
     setHoveredCategory(null);
+    setClickedCategory(null);
   };
 
   // Render owner filters dropdown
@@ -281,10 +289,10 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
             transition={{ delay: index * 0.05 }}
             className="relative"
             onMouseEnter={() => category.hasSubOptions && setHoveredCategory(category.id)}
-            onMouseLeave={() => !category.hasSubOptions && setHoveredCategory(null)}
+            onMouseLeave={() => setHoveredCategory(null)}
           >
             <button
-              onClick={() => !category.hasSubOptions && handleCategorySelect(category.id)}
+              onClick={() => handleCategoryClick(category.id)}
               className={cn(
                 'w-full flex items-center justify-between px-4 py-2.5 text-sm transition-all duration-200',
                 filters.categories.includes(category.id)
@@ -304,13 +312,16 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
                 <span className="font-medium">{category.label}</span>
               </div>
               {category.hasSubOptions && (
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <ChevronRight className={cn(
+                  "w-4 h-4 text-muted-foreground transition-transform",
+                  clickedCategory === category.id && "rotate-90"
+                )} />
               )}
             </button>
 
             {/* Sub-menu for listing type */}
             <AnimatePresence>
-              {hoveredCategory === category.id && category.hasSubOptions && (
+              {(hoveredCategory === category.id || clickedCategory === category.id) && category.hasSubOptions && (
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
