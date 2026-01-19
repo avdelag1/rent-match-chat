@@ -2,6 +2,7 @@ import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, X, Home, Car, Anchor, Bike, Wrench, Users, User, Briefcase, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { QuickFilterCategory, QuickFilters, ClientGender, ClientType } from '@/types/filters';
 
 // Custom motorcycle icon
 const MotorcycleIcon = ({ className }: { className?: string }) => (
@@ -14,17 +15,13 @@ const MotorcycleIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export type QuickFilterCategory = 'property' | 'vehicle' | 'yacht' | 'moto' | 'bicycle' | 'services';
-export type QuickFilterListingType = 'rent' | 'sale' | 'both';
-export type OwnerClientGender = 'female' | 'male' | 'any';
-export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
+// Re-export unified types
+export type { QuickFilterCategory, QuickFilters } from '@/types/filters';
 
-export interface QuickFilters {
-  categories: QuickFilterCategory[];
-  listingType: QuickFilterListingType;
-  clientGender?: OwnerClientGender;
-  clientType?: OwnerClientType;
-}
+// Legacy type aliases for backwards compatibility
+export type QuickFilterListingType = 'rent' | 'sale' | 'both';
+export type OwnerClientGender = ClientGender;
+export type OwnerClientType = ClientType;
 
 interface CollapsibleFilterButtonProps {
   filters: QuickFilters;
@@ -37,7 +34,7 @@ const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNod
   { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" /> },
   { id: 'vehicle', label: 'Vehicle', icon: <Car className="w-4 h-4" /> },
   { id: 'yacht', label: 'Yacht', icon: <Anchor className="w-4 h-4" /> },
-  { id: 'moto', label: 'Moto', icon: <MotorcycleIcon className="w-4 h-4" /> },
+  { id: 'motorcycle', label: 'Moto', icon: <MotorcycleIcon className="w-4 h-4" /> },
   { id: 'bicycle', label: 'Bicycle', icon: <Bike className="w-4 h-4" /> },
   { id: 'services', label: 'Services', icon: <Wrench className="w-4 h-4" /> },
 ];

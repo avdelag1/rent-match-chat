@@ -2,23 +2,18 @@ import { memo, useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench, Filter, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { QuickFilterCategory, QuickFilters, ClientGender, ClientType } from '@/types/filters';
 
 // Re-export from CascadeFilterButton for backwards compatibility
 export { CascadeFilterButton } from './CascadeFilterButton';
 
-// Category type matching ListingFilters - now includes services
-export type QuickFilterCategory = 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services';
-export type QuickFilterListingType = 'rent' | 'sale' | 'both';
-export type OwnerClientGender = 'female' | 'male' | 'any';
-export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
+// Re-export unified types for backwards compatibility
+export type { QuickFilterCategory, QuickFilters } from '@/types/filters';
 
-export interface QuickFilters {
-  categories: QuickFilterCategory[];
-  listingType: QuickFilterListingType;
-  // Owner-specific filters
-  clientGender?: OwnerClientGender;
-  clientType?: OwnerClientType;
-}
+// Legacy type aliases for backwards compatibility
+export type QuickFilterListingType = 'rent' | 'sale' | 'both';
+export type OwnerClientGender = ClientGender;
+export type OwnerClientType = ClientType;
 
 interface QuickFilterBarProps {
   filters: QuickFilters;

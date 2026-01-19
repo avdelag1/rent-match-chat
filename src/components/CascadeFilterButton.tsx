@@ -2,21 +2,15 @@ import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench, Filter, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { QuickFilterCategory, QuickFilters, ClientGender, ClientType } from '@/types/filters';
 
-// Category type matching ListingFilters
-export type QuickFilterCategory = 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services';
+// Re-export unified types
+export type { QuickFilterCategory, QuickFilters } from '@/types/filters';
+
+// Legacy type aliases for backwards compatibility
 export type QuickFilterListingType = 'rent' | 'sale' | 'both';
-
-// Owner-specific filter types
-export type OwnerClientGender = 'female' | 'male' | 'any';
-export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
-
-export interface QuickFilters {
-  categories: QuickFilterCategory[];
-  listingType: QuickFilterListingType;
-  clientGender?: OwnerClientGender;
-  clientType?: OwnerClientType;
-}
+export type OwnerClientGender = ClientGender;
+export type OwnerClientType = ClientType;
 
 interface CascadeFilterButtonProps {
   filters: QuickFilters;

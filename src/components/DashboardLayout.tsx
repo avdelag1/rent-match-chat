@@ -381,12 +381,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Map quick filter category names to database category names
   const mapCategoryToDatabase = useCallback((category: QuickFilterCategory): string => {
     const mapping: Record<QuickFilterCategory, string> = {
-      'moto': 'motorcycle',
+      'motorcycle': 'motorcycle',
       'vehicle': 'vehicle',
       'yacht': 'yacht',
       'property': 'property',
       'bicycle': 'bicycle',
-      'services': 'worker',
+      'services': 'worker',  // UI 'services' -> DB 'worker'
     };
     return mapping[category] || category;
   }, []);
