@@ -66,17 +66,17 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
   const getNotificationColor = (type: string) => {
     switch (type) {
       case 'like':
-        return 'border-orange-200 bg-orange-50';
+        return 'border-orange-500/30 bg-gradient-to-r from-orange-500/15 to-red-500/10';
       case 'message':
-        return 'border-blue-200 bg-blue-50';
+        return 'border-blue-500/30 bg-gradient-to-r from-blue-500/15 to-cyan-500/10';
       case 'super_like':
-        return 'border-yellow-200 bg-yellow-50';
+        return 'border-yellow-500/30 bg-gradient-to-r from-yellow-500/15 to-amber-500/10';
       case 'match':
-        return 'border-orange-200 bg-orange-50';
+        return 'border-pink-500/30 bg-gradient-to-r from-pink-500/15 to-purple-500/10';
       case 'new_user':
-        return 'border-green-200 bg-green-50';
+        return 'border-green-500/30 bg-gradient-to-r from-green-500/15 to-emerald-500/10';
       default:
-        return 'border-gray-200 bg-gray-50';
+        return 'border-gray-500/30 bg-gradient-to-r from-gray-500/15 to-gray-400/10';
     }
   };
 
@@ -94,29 +94,34 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
           className="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 pt-2"
         >
-          <Card className="mx-auto max-w-4xl bg-white/95 backdrop-blur-md border shadow-lg">
+          <Card className="mx-auto max-w-4xl bg-gradient-to-br from-gray-900/98 to-gray-800/98 backdrop-blur-xl border-white/10 shadow-2xl rounded-3xl">
             
             {/* Notification Summary Header */}
-            <div className="p-3 border-b">
+            <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between">
-                <div 
+                <div
                   className="flex items-center gap-3 cursor-pointer flex-1"
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
-                  <div className="flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-primary" />
-                    <span className="font-medium text-sm">
-                      {unreadNotifications.length} new notification{unreadNotifications.length !== 1 ? 's' : ''}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center ring-2 ring-primary/30">
+                      <Bell className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-base text-white">
+                        {unreadNotifications.length} new notification{unreadNotifications.length !== 1 ? 's' : ''}
+                      </span>
+                      <p className="text-xs text-gray-400">Tap to expand</p>
+                    </div>
                   </div>
                   {unreadNotifications.length > 0 && (
-                    <Badge variant="destructive" className="text-xs">
+                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-none shadow-lg shadow-red-500/30 text-xs px-2.5 py-1">
                       {unreadNotifications.length}
                     </Badge>
                   )}
                 </div>
                 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {isExpanded && (
                     <Button
                       variant="ghost"
@@ -125,7 +130,7 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                         e.stopPropagation();
                         onMarkAllRead();
                       }}
-                      className="text-xs"
+                      className="text-xs text-primary hover:text-primary/80 hover:bg-primary/10"
                     >
                       Mark all read
                     </Button>
@@ -137,9 +142,9 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                       setVisible(false);
                       setIsExpanded(false);
                     }}
-                    className="h-8 w-8 p-0"
+                    className="h-9 w-9 p-0 rounded-full hover:bg-white/10"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5 text-gray-400" />
                   </Button>
                 </div>
               </div>
@@ -155,46 +160,48 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                   className="overflow-hidden"
                 >
                   <div className="max-h-80 overflow-y-auto">
-                    {unreadNotifications.slice(0, 5).map((notification) => (
+                    {unreadNotifications.slice(0, 5).map((notification, index) => (
                       <motion.div
                         key={notification.id}
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${getNotificationColor(notification.type)}`}
+                        transition={{ delay: index * 0.05 }}
+                        className={`p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-all duration-200 backdrop-blur-sm ${getNotificationColor(notification.type)}`}
                         onClick={() => onNotificationClick(notification)}
                       >
                         <div className="flex items-start gap-3">
                           {notification.avatar ? (
-                            <Avatar className="w-10 h-10 border-2 border-white">
+                            <Avatar className="w-12 h-12 border-2 border-white/20 ring-2 ring-primary/20">
                               <AvatarImage src={notification.avatar} />
-                              <AvatarFallback>
+                              <AvatarFallback className="bg-gradient-to-br from-primary/30 to-purple-500/30 text-white font-bold">
                                 {notification.title.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/20 shadow-lg">
                               {getNotificationIcon(notification.type)}
                             </div>
                           )}
-                          
+
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className="font-medium text-sm text-gray-900 truncate">
+                              <p className="font-semibold text-sm text-white truncate">
                                 {notification.title}
                               </p>
                               {getNotificationIcon(notification.type)}
                             </div>
-                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                            <p className="text-sm text-gray-300 mt-1 line-clamp-2">
                               {notification.message}
                             </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {notification.timestamp.toLocaleTimeString([], { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
+                            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                              <span className="w-1 h-1 rounded-full bg-primary"></span>
+                              {notification.timestamp.toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
                               })}
                             </p>
                           </div>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -202,17 +209,17 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                               e.stopPropagation();
                               onDismiss(notification.id);
                             }}
-                            className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                            className="h-7 w-7 p-0 opacity-50 hover:opacity-100 hover:bg-white/10 rounded-full"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-4 h-4 text-gray-400" />
                           </Button>
                         </div>
                       </motion.div>
                     ))}
                     
                     {unreadNotifications.length > 5 && (
-                      <div className="p-3 text-center">
-                        <p className="text-xs text-gray-500">
+                      <div className="p-4 text-center border-t border-white/5">
+                        <p className="text-sm text-gray-400 font-medium">
                           +{unreadNotifications.length - 5} more notifications
                         </p>
                       </div>
