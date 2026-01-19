@@ -190,6 +190,12 @@ const ClientSwipeContainerComponent = ({
     }
   }, []); // Empty deps - only run once on mount
 
+  // ========================================
+  // 🔥 CRITICAL: ALL HOOKS MUST BE AT TOP
+  // ========================================
+  // React requires hooks to be called in the SAME ORDER on EVERY render.
+  // NO early returns before all hooks execute!
+
   // PERF: pass userId to avoid getUser() inside queryFn
   // Extract category from filters if available (for filtering client profiles by their interests)
   const filterCategory = filters?.categories?.[0] || filters?.category || undefined;
@@ -277,14 +283,6 @@ const ClientSwipeContainerComponent = ({
     }
   }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady]);
 
-  // Get current visible cards for 2-card stack (top + next)
-  // Use currentIndex from state (already synced with currentIndexRef)
-  const deckQueue = deckQueueRef.current;
-  // FIX: Don't clamp the index - allow topCard to be null when all cards are swiped
-  // This ensures the "All Caught Up" screen shows correctly
-  const topCard = currentIndex < deckQueue.length ? deckQueue[currentIndex] : null;
-  const nextCard = currentIndex + 1 < deckQueue.length ? deckQueue[currentIndex + 1] : null;
-
   // INSTANT SWIPE: Update UI immediately, fire DB operations in background
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];
@@ -332,8 +330,12 @@ const ClientSwipeContainerComponent = ({
     // Clear direction for next swipe
     setTimeout(() => setSwipeDirection(null), 300);
 
-    // Fetch more if running low
-    if (newIndex >= deckQueueRef.current.length - 3 && !isFetchingMore.current) {
+    // FIX: Prevent pagination trigger after final card
+    if (
+      newIndex >= Math.max(0, deckQueueRef.current.length - 3) &&
+      deckQueueRef.current.length > 0 &&
+      !isFetchingMore.current
+    ) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
     }
@@ -400,7 +402,7 @@ const ClientSwipeContainerComponent = ({
     }
   }, [refetch, resetOwnerDeck, category]);
 
-  const handleInsights = (clientId: string) => {
+  const handleInsights = useCallback((clientId: string) => {
     if (onInsights) {
       onInsights(clientId);
     } else {
@@ -408,12 +410,12 @@ const ClientSwipeContainerComponent = ({
         description: 'Viewing detailed insights for this client.',
       });
     }
-  };
+  }, [onInsights]);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     setShareDialogOpen(true);
     triggerHaptic('light');
-  };
+  }, []);
 
   const handleConnect = useCallback(async (clientId: string) => {
     if (isCreatingConversation) return;
@@ -444,13 +446,36 @@ const ClientSwipeContainerComponent = ({
     }
   }, [isCreatingConversation, startConversation, navigate]);
 
+  // ========================================
+  // 🔥 ALL HOOKS ABOVE - DERIVED STATE BELOW
+  // ========================================
+  // Derived UI flags (NO hooks here - just calculations)
+
+  // Get current visible cards for 2-card stack (top + next)
+  // Use currentIndex from state (already synced with currentIndexRef)
+  const deckQueue = deckQueueRef.current;
+  // FIX: Don't clamp the index - allow topCard to be null when all cards are swiped
+  // This ensures the "All Caught Up" screen shows correctly
+  const topCard = currentIndex < deckQueue.length ? deckQueue[currentIndex] : null;
+  const nextCard = currentIndex + 1 < deckQueue.length ? deckQueue[currentIndex + 1] : null;
+
   // Check if we have hydrated data (from store/session) - prevents blank deck flash
   // isReady means we've fully initialized at least once - skip loading UI on return
   const hasHydratedData = isOwnerHydrated(category) || isOwnerReady(category) || deckQueue.length > 0;
 
-  // STABLE LOADING SHELL: Only show full skeleton if NOT hydrated AND loading
-  // Once hydrated or ready, never show full skeleton again (use placeholderData from query)
-  if (!hasHydratedData && isLoading) {
+  // UI state flags - determine what to render
+  const isDeckFinished = currentIndex >= deckQueue.length && deckQueue.length > 0;
+  const showInitialError = error && currentIndex === 0 && deckQueue.length === 0;
+  const showEmptyState = deckQueue.length === 0 && !isLoading && !hasHydratedData;
+  const showLoadingSkeleton = !hasHydratedData && isLoading;
+
+  // ========================================
+  // 🔥 SINGLE RETURN BLOCK - SAFE ORDER
+  // ========================================
+  // All conditions use derived flags - NO hooks called after this point
+
+  // Loading skeleton - initial load only
+  if (showLoadingSkeleton) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
         <div className="relative flex-1 w-full">
@@ -498,9 +523,8 @@ const ClientSwipeContainerComponent = ({
     );
   }
 
-  // FIX: Check "All Caught Up" BEFORE error state to prevent showing errors
-  // when user has swiped through all clients (fetch error for next batch is not critical)
-  if (currentIndex >= deckQueue.length && deckQueue.length > 0) {
+  // "All Caught Up" - finished swiping through all cards
+  if (isDeckFinished) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -541,7 +565,7 @@ const ClientSwipeContainerComponent = ({
   }
 
   // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
-  if (error && deckQueue.length === 0) {
+  if (showInitialError) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
@@ -562,7 +586,7 @@ const ClientSwipeContainerComponent = ({
   }
 
   // Empty state (no cards fetched yet)
-  if (deckQueue.length === 0) {
+  if (showEmptyState || !topCard) {
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
@@ -580,43 +604,6 @@ const ClientSwipeContainerComponent = ({
             <h3 className="text-xl font-semibold text-foreground">No Clients Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               Try adjusting your filters or refresh to discover new clients
-            </p>
-          </div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : 'Refresh Clients'}
-            </Button>
-          </motion.div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // SAFETY: If we somehow got here without a topCard, show empty state
-  // This should never happen due to the checks above, but prevents errors
-  if (!topCard) {
-    return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="text-center space-y-6 p-8"
-        >
-          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <Users className="w-12 h-12 text-primary" />
-            </div>
-          </motion.div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No Clients Available</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Please refresh to discover new clients
             </p>
           </div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
