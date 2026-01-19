@@ -941,6 +941,11 @@ export function useSmartClientMatching(
           smoking,
           party_friendly,
           preferred_listing_types,
+          property_types,
+          moto_types,
+          bicycle_types,
+          yacht_types,
+          vehicle_types,
           user_roles!inner(role)
         `;
 
@@ -1016,9 +1021,41 @@ export function useSmartClientMatching(
             // Quick filter: categories (what type of listings the client is interested in)
             // This filters clients who are looking for specific categories (property, moto, etc.)
             if ((filters as any).categories && (filters as any).categories.length > 0) {
-              // For now, we don't have a field that maps client interests to categories
-              // This would need to be added to the profile schema
-              // Skipping for now
+              const categories = (filters as any).categories;
+              let hasMatchingCategory = false;
+
+              // Check if client has preferences for any of the selected categories
+              for (const category of categories) {
+                if (category === 'property' && profile.property_types && profile.property_types.length > 0) {
+                  hasMatchingCategory = true;
+                  break;
+                }
+                if (category === 'motorcycle' && profile.moto_types && profile.moto_types.length > 0) {
+                  hasMatchingCategory = true;
+                  break;
+                }
+                if (category === 'bicycle' && profile.bicycle_types && profile.bicycle_types.length > 0) {
+                  hasMatchingCategory = true;
+                  break;
+                }
+                if (category === 'yacht' && profile.yacht_types && profile.yacht_types.length > 0) {
+                  hasMatchingCategory = true;
+                  break;
+                }
+                if (category === 'vehicle' && profile.vehicle_types && profile.vehicle_types.length > 0) {
+                  hasMatchingCategory = true;
+                  break;
+                }
+                // Services category - for now, show all clients as they might be interested in services
+                if (category === 'services') {
+                  hasMatchingCategory = true;
+                  break;
+                }
+              }
+
+              if (!hasMatchingCategory) {
+                return false;
+              }
             }
 
             // Pet friendly filter
