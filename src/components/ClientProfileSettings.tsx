@@ -16,9 +16,10 @@ import { getStates, getCitiesForState, getNeighborhoodsForCity } from '@/data/me
 import { logger } from '@/utils/prodLogger';
 
 export function ClientProfileSettings() {
-  const { user } = useAuth();
+  const { user, session } = useAuth(); // ✅ Get session from AuthContext
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false); // ✅ Button reliability
   
   // Profile form state
   const [profile, setProfile] = useState({
@@ -85,16 +86,21 @@ export function ClientProfileSettings() {
   };
 
   const handleDeleteAccount = async () => {
+    // ✅ Button reliability: Guard against double-clicks
+    if (isDeletingAccount) return;
+
+    // ✅ Use AuthContext - single source of truth
+    if (!session) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to delete your account.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsDeletingAccount(true); // ✅ Button reliability: Disable immediately
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: 'Error',
-          description: 'You must be logged in to delete your account.',
-          variant: 'destructive',
-        });
-        return;
-      }
 
       const { data, error } = await supabase.functions.invoke('delete-user', {
         headers: {
@@ -121,6 +127,8 @@ export function ClientProfileSettings() {
         description: error.message || 'Failed to delete account. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setIsDeletingAccount(false); // ✅ Button reliability: Reset state
     }
   };
 
@@ -403,9 +411,13 @@ export function ClientProfileSettings() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
-                  Yes, delete my account
+                <AlertDialogCancel disabled={isDeletingAccount}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  disabled={isDeletingAccount}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  {isDeletingAccount ? 'Deleting Account...' : 'Yes, delete my account'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
