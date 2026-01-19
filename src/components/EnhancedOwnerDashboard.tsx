@@ -15,9 +15,10 @@ import { useNavigate } from 'react-router-dom';
 interface EnhancedOwnerDashboardProps {
   onClientInsights?: (clientId: string) => void;
   onMessageClick?: () => void;
+  filters?: any; // Combined quick filters + advanced filters from DashboardLayout
 }
 
-const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOwnerDashboardProps) => {
+const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick, filters }: EnhancedOwnerDashboardProps) => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
 
@@ -76,6 +77,7 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick }: EnhancedOw
         onInsights={handleInsights}
         onMessageClick={onMessageClick}
         insightsOpen={insightsOpen}
+        filters={filters}
       />
 
       {selectedClient && (
