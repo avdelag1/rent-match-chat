@@ -439,6 +439,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
               year={listing.year}
               location={listing.city}
               isVerified={(listing as any).has_verified_documents}
+              photoIndex={currentImageIndex}
             />
           ) : listing.category === 'services' || (listing as any).service_type ? (
             <ServiceCardInfo
@@ -447,6 +448,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
               name={(listing as any).provider_name}
               location={listing.city}
               isVerified={(listing as any).has_verified_documents}
+              photoIndex={currentImageIndex}
             />
           ) : (
             <PropertyCardInfo
@@ -457,6 +459,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
               baths={listing.baths}
               location={listing.city}
               isVerified={(listing as any).has_verified_documents}
+              photoIndex={currentImageIndex}
             />
           )}
         </div>
