@@ -625,11 +625,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Fetch more if running low
     // FIX: Prevent pagination when deck is exhausted to avoid empty fetch errors
     // Only fetch more if we're within the deck bounds (haven't swiped past the last card)
+    // AND we're approaching the end (within 3 cards of the end)
     if (
       newIndex < deckQueueRef.current.length &&
       newIndex >= deckQueueRef.current.length - 3 &&
       deckQueueRef.current.length > 0 &&
-      !isFetchingMore.current
+      !isFetchingMore.current &&
+      !error // Don't try to fetch more if previous fetch errored
     ) {
       isFetchingMore.current = true;
       setPage(p => p + 1);
