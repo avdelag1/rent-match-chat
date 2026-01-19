@@ -163,7 +163,7 @@ function CollapsibleFilterButtonComponent({ filters, onChange, userRole, classNa
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[10001]"
               onClick={() => setIsOpen(false)}
             />
 
@@ -174,7 +174,7 @@ function CollapsibleFilterButtonComponent({ filters, onChange, userRole, classNa
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-100%', opacity: 0 }}
               transition={{ type: 'spring', stiffness: 600, damping: 25 }}
-              className="fixed left-0 top-0 bottom-0 w-72 bg-background border-r border-border shadow-2xl z-50 flex flex-col"
+              className="fixed left-0 top-0 bottom-0 w-72 bg-background border-r border-border shadow-2xl z-[10002] flex flex-col"
               style={{ paddingTop: 'var(--safe-top)', paddingBottom: 'var(--safe-bottom)' }}
             >
               {/* Header */}
