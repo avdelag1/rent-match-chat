@@ -55,32 +55,37 @@ const categoryConfig: Record<string, { icon: React.ComponentType<{ className?: s
 
 // Helper to get the active category display info from filters
 const getActiveCategoryInfo = (filters?: ListingFilters) => {
-  // Safety: Handle null/undefined filters
-  if (!filters) return categoryConfig.property;
+  try {
+    // Safety: Handle null/undefined filters
+    if (!filters) return categoryConfig.property;
 
-  // Check for activeCategory string first (from AdvancedFilters)
-  const activeCategory = (filters as any).activeCategory;
-  if (activeCategory && typeof activeCategory === 'string' && categoryConfig[activeCategory]) {
-    return categoryConfig[activeCategory];
-  }
-
-  // Check for categories array (from quick filters)
-  const categories = filters?.categories;
-  if (Array.isArray(categories) && categories.length > 0) {
-    const cat = categories[0];
-    if (typeof cat === 'string' && categoryConfig[cat]) {
-      return categoryConfig[cat];
+    // Check for activeCategory string first (from AdvancedFilters)
+    const activeCategory = (filters as any).activeCategory;
+    if (activeCategory && typeof activeCategory === 'string' && categoryConfig[activeCategory]) {
+      return categoryConfig[activeCategory];
     }
-  }
 
-  // Check for single category
-  const category = filters?.category;
-  if (category && typeof category === 'string' && categoryConfig[category]) {
-    return categoryConfig[category];
-  }
+    // Check for categories array (from quick filters)
+    const categories = filters?.categories;
+    if (Array.isArray(categories) && categories.length > 0) {
+      const cat = categories[0];
+      if (typeof cat === 'string' && categoryConfig[cat]) {
+        return categoryConfig[cat];
+      }
+    }
 
-  // Default to properties
-  return categoryConfig.property;
+    // Check for single category
+    const category = filters?.category;
+    if (category && typeof category === 'string' && categoryConfig[category]) {
+      return categoryConfig[category];
+    }
+
+    // Default to properties
+    return categoryConfig.property;
+  } catch (error) {
+    logger.error('[TinderentSwipeContainer] Error in getActiveCategoryInfo:', error);
+    return categoryConfig.property;
+  }
 };
 
 // Debounce utility for preventing rapid-fire actions
@@ -834,7 +839,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // Check if we have hydrated data (from store/session) - prevents blank deck flash
   // isReady means we've fully initialized at least once - skip loading UI on return
-  const hasHydratedData = isClientHydrated() || isClientReady() || deckQueue.length > 0;
+  // CRITICAL FIX: When filters change, deck is reset, so check if we're actually loading new data
+  const hasHydratedData = (isClientHydrated() || isClientReady() || deckQueue.length > 0) && !isLoading;
 
   // STABLE LOADING SHELL: Only show full skeleton if NOT hydrated AND loading
   // Once hydrated or ready, never show full skeleton again (use placeholderData from query)

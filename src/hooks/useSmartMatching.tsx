@@ -426,10 +426,18 @@ export function useSmartListingMatching(
         const { data: listings, error } = await query.range(start, end);
 
         if (error) {
-          // Only log non-RLS errors to avoid console spam
-          if (error.code !== '42501' && error.code !== 'PGRST301') {
-            logger.error('[SmartMatching] Error fetching listings:', error.message);
-          }
+          // Log ALL errors for debugging (including RLS)
+          logger.error('[SmartMatching] Error fetching listings:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+            filters: {
+              category: filters?.category,
+              categories: filters?.categories,
+              listingType: filters?.listingType,
+            }
+          });
           // CRITICAL FIX: Don't throw error when paginating beyond available results
           // When there are no more results (e.g., fetching page 2 when only page 1 exists),
           // Supabase returns an empty array, not an error. But if it does error,
