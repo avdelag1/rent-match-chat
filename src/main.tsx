@@ -6,6 +6,33 @@ import "./styles/responsive.css";
 import { ErrorBoundaryWrapper } from "@/components/ErrorBoundaryWrapper";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CACHE RECOVERY - Force clear all caches if ?clear-cache=1 in URL
+// This helps recover from stale service worker or cache issues
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('clear-cache') === '1') {
+  // Unregister all service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
+    });
+  }
+  // Clear all caches
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      names.forEach((name) => caches.delete(name));
+    });
+  }
+  // Clear local/session storage
+  localStorage.clear();
+  sessionStorage.clear();
+  // Remove the query param and reload
+  const cleanUrl = window.location.pathname + window.location.hash;
+  window.history.replaceState({}, '', cleanUrl);
+  window.location.reload();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // FAST INITIAL RENDER - Quita el loader apenas carga la página
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const initialLoader = document.getElementById("initial-loader");
