@@ -15,6 +15,7 @@ import { swipeQueue } from '@/lib/swipe/SwipeQueue';
 import { imagePreloadController } from '@/lib/swipe/ImagePreloadController';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
+import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
@@ -332,6 +333,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const navigate = useNavigate();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing, undoSuccess, resetUndoState } = useSwipeUndo();
+  const swipeMutation = useSwipeWithMatch();
   const startConversation = useStartConversation();
 
   // FIX: Sync local state when undo completes successfully
@@ -601,15 +603,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Update local ref for swiped IDs (already done in phase 1, but ensure consistency)
     swipedIdsRef.current.add(listing.id);
 
-    // Fire-and-forget: Queue swipe for background DB processing
-    swipeQueue.queueSwipe(listing.id, direction, 'listing');
-
-    // FIX: Optimistic cache update for immediate UI feedback
-    // The swipeQueue processes in background, so we optimistically update cache NOW
+    // FIX: Immediate DB save with optimistic update for instant UI feedback
     if (direction === 'right') {
-      // Optimistically add the liked listing to the cache immediately
+      // Optimistically add the liked listing to the cache immediately (before DB write)
       queryClient.setQueryData(['liked-properties'], (oldData: any[] | undefined) => {
-        // Add the current listing to the front of the liked properties
         const currentListing = listing;
         if (!oldData) {
           return [currentListing];
@@ -621,11 +618,17 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         }
         return [currentListing, ...oldData];
       });
-
-      // FIX: Don't invalidate immediately - let the optimistic update persist
-      // The auto-refetch interval (15s) in useLikedProperties will sync with DB naturally
-      // This prevents the race condition where setTimeout fires before SwipeQueue completes
     }
+
+    // Save swipe to DB immediately (not queued) - fire-and-forget but completes fast
+    swipeMutation.mutateAsync({
+      targetId: listing.id,
+      direction,
+      targetType: 'listing'
+    }).catch(() => {
+      // Non-critical error - user already saw the swipe complete
+      // The optimistic update will persist until next refetch
+    });
 
     // Zustand update - DEFERRED until animation complete
     markClientSwiped(listing.id);
