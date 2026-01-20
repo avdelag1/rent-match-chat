@@ -32,6 +32,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
       try {
         // OPTIMIZED: Get client profiles with role in ONE query using JOIN
         // CRITICAL: Only get client users (excludes admins and owners automatically)
+        // CRITICAL: Exclude own profile - user shouldn't see themselves when browsing clients
         const { data: clientProfiles, error } = await supabase
           .from('profiles_public')
           .select(`
@@ -39,6 +40,7 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
             user_roles!inner(role)
           `)
           .eq('user_roles.role', 'client')
+          .neq('id', user.id) // Exclude own profile - user shouldn't see themselves
           .limit(100);
 
         if (error) {
@@ -92,8 +94,12 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000,
+    // PERF: Longer stale time for profiles since they don't change frequently
+    staleTime: 10 * 60 * 1000, // 10 minutes - profiles are stable
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
     refetchOnWindowFocus: false,
+    // PERF: Keep previous data while fetching new data to prevent UI flash
+    placeholderData: (prev) => prev,
     retry: 2
   });
 }

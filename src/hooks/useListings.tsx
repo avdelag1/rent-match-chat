@@ -110,6 +110,11 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
           .eq('is_active', true)
           .order('created_at', { ascending: false }); // Newest first
 
+        // CRITICAL: Exclude own listings - user shouldn't see their own listings when browsing
+        if (user.user) {
+          query = query.neq('owner_id', user.user.id);
+        }
+
         // Filter by listing types (rent/buy) based on user preferences
         if (preferredListingTypes.length > 0 && !preferredListingTypes.includes('both')) {
           query = query.in('listing_type', preferredListingTypes);
@@ -136,6 +141,9 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
       }
     },
     enabled: options.enabled !== false,
+    // PERF: Longer stale time for listings since they don't change frequently
+    staleTime: 10 * 60 * 1000, // 10 minutes - listings are stable
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
     retry: 3,
     retryDelay: 1000,
   });
