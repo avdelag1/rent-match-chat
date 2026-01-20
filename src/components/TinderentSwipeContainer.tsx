@@ -360,7 +360,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   }, [user?.id]);
 
   // PERF: Memoize filters to prevent unnecessary query re-runs
-  const stableFilters = useMemo(() => filters, [
+  const stableFilters = useMemo(() => {
+    console.log('[TinderentSwipeContainer] 📊 Filters received:', filters);
+    return filters;
+  }, [
     // Only re-create when actual filter values change
     filters?.category,
     filters?.categories?.join(','),

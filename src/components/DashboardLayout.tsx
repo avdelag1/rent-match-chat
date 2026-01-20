@@ -374,7 +374,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   // Handle quick filter changes
   const handleQuickFilterChange = useCallback((newQuickFilters: QuickFilters) => {
-    console.log('[DashboardLayout] Quick filter changed:', newQuickFilters);
+    console.log('[DashboardLayout] ⚡ Quick filter changed:', newQuickFilters);
     logger.info('[DashboardLayout] Quick filter changed:', newQuickFilters);
     setQuickFilters(newQuickFilters);
   }, []);
@@ -429,6 +429,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       clientType: quickFilters.clientType !== 'all' ? quickFilters.clientType : undefined,
     };
 
+    console.log('[DashboardLayout] 🔥 Combined filters result:', result);
     logger.info('[DashboardLayout] Combined filters:', result);
     return result;
   }, [appliedFilters, quickFilters, mapCategoryToDatabase]);
