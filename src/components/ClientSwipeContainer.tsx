@@ -4,6 +4,7 @@ import { SimpleOwnerSwipeCard } from './SimpleOwnerSwipeCard';
 import { preloadClientImageToCache, isClientImageDecodedInCache } from './PhysicsOwnerClientCard';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
+import { MessageConfirmationDialog } from './MessageConfirmationDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useAuth } from '@/hooks/useAuth';
 import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
@@ -52,6 +53,8 @@ const ClientSwipeContainerComponent = ({
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
     clientProfile?: any;
@@ -420,8 +423,15 @@ const ClientSwipeContainerComponent = ({
     triggerHaptic('light');
   }, []);
 
-  const handleConnect = useCallback(async (clientId: string) => {
-    if (isCreatingConversation) return;
+  const handleConnect = useCallback((clientId: string) => {
+    logger.info('[ClientSwipeContainer] Message icon clicked, opening confirmation dialog');
+    setSelectedClientId(clientId);
+    setMessageDialogOpen(true);
+    triggerHaptic('light');
+  }, []);
+
+  const handleSendMessage = useCallback(async (message: string) => {
+    if (isCreatingConversation || !selectedClientId) return;
 
     setIsCreatingConversation(true);
 
@@ -429,13 +439,14 @@ const ClientSwipeContainerComponent = ({
       sonnerToast.loading('Creating conversation...', { id: 'start-conv' });
 
       const result = await startConversation.mutateAsync({
-        otherUserId: clientId,
-        initialMessage: "Hi! I'd like to connect with you.",
+        otherUserId: selectedClientId,
+        initialMessage: message,
         canStartNewConversation: true,
       });
 
       if (result?.conversationId) {
         sonnerToast.success('Opening chat...', { id: 'start-conv' });
+        setMessageDialogOpen(false);
         await new Promise(resolve => setTimeout(resolve, 300));
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
@@ -447,7 +458,7 @@ const ClientSwipeContainerComponent = ({
     } finally {
       setIsCreatingConversation(false);
     }
-  }, [isCreatingConversation, startConversation, navigate]);
+  }, [isCreatingConversation, selectedClientId, startConversation, navigate]);
 
   // ========================================
   // 🔥 ALL HOOKS ABOVE - DERIVED STATE BELOW
@@ -661,6 +672,15 @@ const ClientSwipeContainerComponent = ({
           role: 'client'
         }}
         onMessage={() => topCard.user_id && handleConnect(topCard.user_id)}
+      />
+
+      {/* Message Confirmation Dialog */}
+      <MessageConfirmationDialog
+        open={messageDialogOpen}
+        onOpenChange={setMessageDialogOpen}
+        onConfirm={handleSendMessage}
+        recipientName={selectedClientId ? deckQueueRef.current.find(p => p.user_id === selectedClientId)?.name || 'this person' : 'this person'}
+        isLoading={isCreatingConversation}
       />
 
       {/* Share Dialog - only render when we have a valid topCard */}
