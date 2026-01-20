@@ -127,17 +127,22 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
 
   const handleCategorySelect = (categoryId: QuickFilterCategory, listingType: QuickFilterListingType) => {
     // Apply category with listing type
-    onChange({
+    const newFilters = {
       ...filters,
       categories: [categoryId],
       listingType,
-    });
+    };
+
+    console.log('[QuickFilterDropdown] Category selected:', { categoryId, listingType, newFilters });
+
+    onChange(newFilters);
     setIsOpen(false);
     setHoveredCategory(null);
     setClickedCategory(null);
   };
 
   const handleGenderSelect = (gender: OwnerClientGender) => {
+    console.log('[QuickFilterDropdown] Gender selected:', gender);
     onChange({
       ...filters,
       clientGender: gender,
@@ -145,6 +150,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
   };
 
   const handleClientTypeSelect = (type: OwnerClientType) => {
+    console.log('[QuickFilterDropdown] Client type selected:', type);
     onChange({
       ...filters,
       clientType: type,
