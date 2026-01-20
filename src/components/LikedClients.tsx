@@ -97,7 +97,7 @@ export function LikedClients() {
     { id: 'worker', label: 'Services', icon: Users }
   ];
 
-  const { data: likedClients = [], isLoading, refetch } = useQuery({
+  const { data: likedClients = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ['liked-clients', user?.id],
     // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
     placeholderData: (prev) => prev,
@@ -413,11 +413,15 @@ export function LikedClients() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => refetch()}
-                disabled={isLoading}
+                onClick={() => {
+                  // Force a fresh fetch by invalidating the cache
+                  queryClient.invalidateQueries({ queryKey: ['liked-clients'] });
+                  refetch();
+                }}
+                disabled={isLoading || isFetching}
                 className="gap-2"
               >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${(isLoading || isFetching) ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">Refresh</span>
               </Button>
             </div>

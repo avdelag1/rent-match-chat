@@ -169,12 +169,12 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
     setClickedCategory(null);
   };
 
-  // Render owner filters dropdown - IMPROVED: Better touch targets
+  // Render owner filters dropdown - MOBILE OPTIMIZED
   const renderOwnerFilters = () => (
-    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden min-w-[280px]">
+    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden w-[calc(100vw-2rem)] sm:min-w-[280px] sm:w-auto max-w-[400px]">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-        <span className="text-base font-semibold text-foreground">Filter Clients</span>
+      <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
+        <span className="text-sm sm:text-base font-semibold text-foreground">Filter Clients</span>
         {activeFilterCount > 0 && (
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -188,7 +188,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       </div>
 
       {/* Gender Section */}
-      <div className="p-4 border-b border-white/5">
+      <div className="p-3 sm:p-4 border-b border-white/5 max-h-[50vh] overflow-y-auto">
         <span className="text-sm font-medium text-muted-foreground mb-3 block">Gender</span>
         <div className="flex flex-wrap gap-2">
           {genderOptions.map((option, index) => (
@@ -199,21 +199,21 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               transition={{ delay: index * 0.05 }}
               onClick={() => handleGenderSelect(option.id)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
+                'flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
                 filters.clientGender === option.id
                   ? `bg-gradient-to-r ${option.color} text-white shadow-md`
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-white/5'
               )}
             >
               {option.icon}
-              <span>{option.label}</span>
+              <span className="whitespace-nowrap">{option.label}</span>
             </motion.button>
           ))}
         </div>
       </div>
 
       {/* Client Type Section */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <span className="text-sm font-medium text-muted-foreground mb-3 block">Looking For</span>
         <div className="grid grid-cols-2 gap-2">
           {clientTypeOptions.map((option, index) => (
@@ -224,21 +224,21 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               transition={{ delay: index * 0.05 }}
               onClick={() => handleClientTypeSelect(option.id)}
               className={cn(
-                'flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
+                'flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
                 filters.clientType === option.id
                   ? `bg-gradient-to-r ${option.color} text-white shadow-md`
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-white/5'
               )}
             >
               {option.icon}
-              <span>{option.label}</span>
+              <span className="whitespace-nowrap">{option.label}</span>
             </motion.button>
           ))}
         </div>
       </div>
 
       {/* Apply button */}
-      <div className="p-4 border-t border-white/5">
+      <div className="p-3 sm:p-4 border-t border-white/5">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -251,104 +251,115 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
     </div>
   );
 
-  // Render client filters dropdown (categories) - IMPROVED: Better touch targets
-  const renderClientFilters = () => (
-    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden min-w-[280px]">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-        <span className="text-base font-semibold text-foreground">Select Category</span>
-        {activeFilterCount > 0 && (
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleClearFilters}
-            className="text-xs text-muted-foreground hover:text-destructive transition-colors p-1 touch-manipulation"
-          >
-            <X className="w-5 h-5" />
-          </motion.button>
-        )}
-      </div>
+  // Render client filters dropdown (categories) - MOBILE OPTIMIZED
+  const renderClientFilters = () => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-      {/* Category Options */}
-      <div className="py-2">
-        {categoryOptions.map((category, index) => (
-          <motion.div
-            key={category.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="relative"
-            onMouseEnter={() => category.hasSubOptions && setHoveredCategory(category.id)}
-            onMouseLeave={() => setHoveredCategory(null)}
-          >
-            <button
-              onClick={() => handleCategoryClick(category.id)}
-              className={cn(
-                'w-full flex items-center justify-between px-5 py-3.5 text-sm transition-all duration-200 touch-manipulation min-h-[52px]',
-                filters.categories.includes(category.id)
-                  ? 'bg-gradient-to-r ' + category.color + ' text-white'
-                  : 'text-foreground/80 hover:bg-white/5'
-              )}
+    return (
+      <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden w-[calc(100vw-2rem)] sm:min-w-[280px] sm:w-auto max-w-[400px]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
+          <span className="text-sm sm:text-base font-semibold text-foreground">Select Category</span>
+          {activeFilterCount > 0 && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleClearFilters}
+              className="text-xs text-muted-foreground hover:text-destructive transition-colors p-1 touch-manipulation"
             >
-              <div className="flex items-center gap-3">
-                <span className={cn(
-                  'p-2 rounded-lg',
-                  filters.categories.includes(category.id)
-                    ? 'bg-white/20'
-                    : `bg-gradient-to-br ${category.color} bg-opacity-20`
-                )}>
-                  {category.icon}
-                </span>
-                <span className="font-medium text-base">{category.label}</span>
-              </div>
-              {category.hasSubOptions && (
-                <ChevronRight className={cn(
-                  "w-5 h-5 text-muted-foreground transition-transform",
-                  clickedCategory === category.id && "rotate-90"
-                )} />
-              )}
-            </button>
+              <X className="w-5 h-5" />
+            </motion.button>
+          )}
+        </div>
 
-            {/* Sub-menu for listing type */}
-            <AnimatePresence>
-              {(hoveredCategory === category.id || clickedCategory === category.id) && category.hasSubOptions && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ type: 'spring', stiffness: 600, damping: 25 }}
-                  className="absolute left-full top-0 ml-1 z-[10003]"
-                  onMouseEnter={() => setHoveredCategory(category.id)}
-                >
-                  <div className="bg-background border border-white/10 rounded-xl shadow-lg overflow-hidden min-w-[160px]">
-                    <div className="py-2">
-                      {listingTypeOptions.map((listingType, ltIndex) => (
-                        <motion.button
-                          key={listingType.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: ltIndex * 0.05 }}
-                          onClick={() => handleCategorySelect(category.id, listingType.id)}
-                          className={cn(
-                            'w-full flex items-center px-5 py-3 text-sm transition-all duration-200 touch-manipulation min-h-[48px]',
-                            filters.categories.includes(category.id) && filters.listingType === listingType.id
-                              ? `bg-gradient-to-r ${category.color} text-white`
-                              : 'text-foreground/80 hover:bg-white/5'
-                          )}
-                        >
-                          <span className="font-medium text-base">{listingType.label}</span>
-                        </motion.button>
-                      ))}
+        {/* Category Options */}
+        <div className="py-2 max-h-[60vh] overflow-y-auto">
+          {categoryOptions.map((category, index) => (
+            <motion.div
+              key={category.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="relative"
+              onMouseEnter={() => !isMobile && category.hasSubOptions && setHoveredCategory(category.id)}
+              onMouseLeave={() => !isMobile && setHoveredCategory(null)}
+            >
+              <button
+                onClick={() => handleCategoryClick(category.id)}
+                className={cn(
+                  'w-full flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 text-sm transition-all duration-200 touch-manipulation min-h-[52px]',
+                  filters.categories.includes(category.id)
+                    ? 'bg-gradient-to-r ' + category.color + ' text-white'
+                    : 'text-foreground/80 hover:bg-white/5'
+                )}
+              >
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className={cn(
+                    'p-1.5 sm:p-2 rounded-lg',
+                    filters.categories.includes(category.id)
+                      ? 'bg-white/20'
+                      : `bg-gradient-to-br ${category.color} bg-opacity-20`
+                  )}>
+                    {category.icon}
+                  </span>
+                  <span className="font-medium text-sm sm:text-base">{category.label}</span>
+                </div>
+                {category.hasSubOptions && (
+                  <ChevronRight className={cn(
+                    "w-5 h-5 text-muted-foreground transition-transform",
+                    clickedCategory === category.id && "rotate-90"
+                  )} />
+                )}
+              </button>
+
+              {/* Sub-menu for listing type - MOBILE: appears below, DESKTOP: appears to the right */}
+              <AnimatePresence>
+                {(hoveredCategory === category.id || clickedCategory === category.id) && category.hasSubOptions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: isMobile ? -10 : 0, x: isMobile ? 0 : -10 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    exit={{ opacity: 0, y: isMobile ? -10 : 0, x: isMobile ? 0 : -10 }}
+                    transition={{ type: 'spring', stiffness: 600, damping: 25 }}
+                    className={cn(
+                      isMobile
+                        ? "pl-8 sm:pl-12 pb-2" // Mobile: indented submenu below
+                        : "absolute left-full top-0 ml-1 z-[10003]" // Desktop: flyout to the right
+                    )}
+                    onMouseEnter={() => !isMobile && setHoveredCategory(category.id)}
+                  >
+                    <div className={cn(
+                      "bg-background border border-white/10 rounded-xl shadow-lg overflow-hidden",
+                      isMobile ? "w-full" : "min-w-[160px]"
+                    )}>
+                      <div className="py-1 sm:py-2">
+                        {listingTypeOptions.map((listingType, ltIndex) => (
+                          <motion.button
+                            key={listingType.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: ltIndex * 0.05 }}
+                            onClick={() => handleCategorySelect(category.id, listingType.id)}
+                            className={cn(
+                              'w-full flex items-center px-4 sm:px-5 py-2.5 sm:py-3 text-sm transition-all duration-200 touch-manipulation min-h-[48px]',
+                              filters.categories.includes(category.id) && filters.listingType === listingType.id
+                                ? `bg-gradient-to-r ${category.color} text-white`
+                                : 'text-foreground/80 hover:bg-white/5'
+                            )}
+                          >
+                            <span className="font-medium text-sm sm:text-base">{listingType.label}</span>
+                          </motion.button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className={cn('relative', className)}>
@@ -397,14 +408,14 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               }}
             />
 
-            {/* Main dropdown */}
+            {/* Main dropdown - MOBILE OPTIMIZED POSITIONING */}
             <motion.div
               ref={dropdownRef}
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 600, damping: 25 }}
-              className="absolute left-0 top-full mt-2 z-[10002] min-w-[220px]"
+              className="absolute left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 top-full mt-2 z-[10002]"
             >
               {userRole === 'owner' ? renderOwnerFilters() : renderClientFilters()}
             </motion.div>
