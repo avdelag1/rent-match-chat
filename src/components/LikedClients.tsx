@@ -192,8 +192,12 @@ export function LikedClients() {
       return deduplicatedClients;
     },
     enabled: !!user?.id,
-    staleTime: 30000, // Cache for 30 seconds
-    refetchInterval: 15000, // Refetch every 15 seconds for faster updates
+    staleTime: Infinity, // Never mark as stale - rely on optimistic updates
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when user returns to tab
+    refetchOnMount: false, // Don't refetch when component mounts
+    refetchOnReconnect: false, // Don't refetch when internet reconnects
+    // NO refetchInterval - rely purely on optimistic updates and manual invalidations
   });
 
   const removeLikeMutation = useMutation({
