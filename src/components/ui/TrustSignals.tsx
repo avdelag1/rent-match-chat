@@ -91,7 +91,7 @@ ActivityIndicator.displayName = 'ActivityIndicator';
 interface RatingDisplayProps {
   rating: number;
   reviewCount?: number;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -100,22 +100,28 @@ export const RatingDisplay = memo(({ rating, reviewCount, size = 'md', className
 
   const confidence = reviewCount && reviewCount > 10 ? 'high' : reviewCount && reviewCount > 3 ? 'medium' : 'low';
 
+  const sizeClasses = {
+    sm: { icon: 'w-3.5 h-3.5', text: 'text-xs' },
+    md: { icon: 'w-4 h-4', text: 'text-sm' },
+    lg: { icon: 'w-5 h-5', text: 'text-base' },
+  };
+
   return (
     <div className={cn('inline-flex items-center gap-1', className)}>
       <Star className={cn(
         'fill-amber-400 text-amber-400',
-        size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'
+        sizeClasses[size].icon
       )} />
       <span className={cn(
         'font-semibold text-foreground',
-        size === 'sm' ? 'text-xs' : 'text-sm'
+        sizeClasses[size].text
       )}>
         {rating.toFixed(1)}
       </span>
       {reviewCount !== undefined && (
         <span className={cn(
           'text-muted-foreground',
-          size === 'sm' ? 'text-xs' : 'text-sm',
+          sizeClasses[size].text,
           confidence === 'low' && 'opacity-70'
         )}>
           ({reviewCount})

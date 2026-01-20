@@ -220,8 +220,8 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
 }
 
 export interface ListingFilters {
-  category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle';
-  categories?: ('property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle')[]; // Support multiple categories
+  category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services' | 'worker';
+  categories?: ('property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services' | 'worker')[]; // Support multiple categories
   listingType?: 'rent' | 'sale' | 'both';
   propertyType?: string[];
   priceRange?: [number, number];
@@ -236,6 +236,11 @@ export interface ListingFilters {
   furnished?: boolean;
   lifestyleTags?: string[];
   dietaryPreferences?: string[];
+  // Services/worker filter
+  showHireServices?: boolean;
+  // Owner client filters
+  clientGender?: 'male' | 'female' | 'other' | 'any' | 'all';
+  clientType?: 'individual' | 'family' | 'business' | 'hire' | 'rent' | 'buy' | 'all';
 }
 
 export function useSmartListingMatching(
