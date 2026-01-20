@@ -120,21 +120,35 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       const isLike = variables.direction === 'right';
       const isDislike = variables.direction === 'left';
 
-      if (isLike) {
+      if (isLike && variables.targetType === 'profile') {
+        // Owner swiping right on client - add optimistic update
+        // Get the client profile from cache or set a placeholder
+        queryClient.setQueryData(['liked-clients', user?.id], (oldData: any[] | undefined) => {
+          if (!oldData) return oldData;
+          // We don't have the full profile here, so just invalidate to refetch
+          // The actual profile will be fetched by the query
+          return oldData;
+        });
+
         // Fire-and-forget invalidation - don't block on cache updates
-        const invalidations = variables.targetType === 'profile'
-          ? [
-              queryClient.invalidateQueries({ queryKey: ['owner-likes'] }),
-              queryClient.invalidateQueries({ queryKey: ['liked-clients'] }),
-              queryClient.invalidateQueries({ queryKey: ['matches'] }),
-            ]
-          : [
-              queryClient.invalidateQueries({ queryKey: ['likes'] }),
-              queryClient.invalidateQueries({ queryKey: ['liked-properties'] }),
-              queryClient.invalidateQueries({ queryKey: ['matches'] }),
-            ];
+        const invalidations = [
+          queryClient.invalidateQueries({ queryKey: ['owner-likes'] }),
+          queryClient.invalidateQueries({
+            queryKey: ['liked-clients'],
+            refetchType: 'active' // Force immediate refetch of active queries
+          }),
+          queryClient.invalidateQueries({ queryKey: ['matches'] }),
+        ];
 
         // Fire-and-forget - cache errors are non-critical
+        Promise.all(invalidations).catch(() => {});
+      } else if (isLike && variables.targetType === 'listing') {
+        // Client liking listing - already handled in TinderentSwipeContainer with optimistic update
+        const invalidations = [
+          queryClient.invalidateQueries({ queryKey: ['likes'] }),
+          queryClient.invalidateQueries({ queryKey: ['liked-properties'] }),
+          queryClient.invalidateQueries({ queryKey: ['matches'] }),
+        ];
         Promise.all(invalidations).catch(() => {});
       } else if (isDislike) {
         // Invalidate dislikes cache so the disliked profiles are excluded from future fetches

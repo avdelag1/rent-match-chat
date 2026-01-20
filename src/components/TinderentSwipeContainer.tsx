@@ -604,14 +604,33 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Fire-and-forget: Queue swipe for background DB processing
     swipeQueue.queueSwipe(listing.id, direction, 'listing');
 
-    // FIX: Invalidate queries immediately after queueing swipe so liked section updates
+    // FIX: Optimistic cache update for immediate UI feedback
+    // The swipeQueue processes in background, so we optimistically update cache NOW
     if (direction === 'right') {
-      // Fire-and-forget cache invalidation
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['likes'] }),
-        queryClient.invalidateQueries({ queryKey: ['liked-properties'] }),
-        queryClient.invalidateQueries({ queryKey: ['matches'] }),
-      ]).catch(() => { /* Cache invalidation errors are non-critical */ });
+      // Optimistically add the liked listing to the cache immediately
+      queryClient.setQueryData(['liked-properties'], (oldData: any[] | undefined) => {
+        // Add the current listing to the front of the liked properties
+        const currentListing = listing;
+        if (!oldData) {
+          return [currentListing];
+        }
+        // Check if already in the list to avoid duplicates
+        const exists = oldData.some((item: any) => item.id === currentListing.id);
+        if (exists) {
+          return oldData;
+        }
+        return [currentListing, ...oldData];
+      });
+
+      // Also invalidate to refetch from DB in background (will sync when swipeQueue completes)
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: ['liked-properties'],
+          refetchType: 'active' // Force immediate refetch of active queries
+        });
+        queryClient.invalidateQueries({ queryKey: ['likes'] });
+        queryClient.invalidateQueries({ queryKey: ['matches'] });
+      }, 1000); // Wait 1 second for swipeQueue to process
     }
 
     // Zustand update - DEFERRED until animation complete
