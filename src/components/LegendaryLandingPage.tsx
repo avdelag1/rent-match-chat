@@ -97,7 +97,7 @@ function LegendaryLandingPage() {
 
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-6 sm:p-8 relative overflow-hidden transition-all duration-500 ease-out cursor-pointer"
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden transition-all duration-500 ease-out cursor-pointer safe-area-p"
       style={{ background: BACKGROUND_COLORS[colorIndex].bg }}
       onClick={handleBackgroundTap}
     >
@@ -110,7 +110,7 @@ function LegendaryLandingPage() {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 text-center space-y-6 max-w-2xl w-full px-4 safe-area-pt">
+      <div className="relative z-10 text-center space-y-4 sm:space-y-6 max-w-2xl w-full px-2 sm:px-4">
         {/* Swipable Swipess Logo - Only the logo moves */}
         <div className="space-y-6 text-center">
           <motion.div
@@ -122,27 +122,20 @@ function LegendaryLandingPage() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onClick={handleTap}
-            style={{ 
+            style={{
               x,
               opacity: logoOpacity,
               scale: logoScale,
               filter: useTransform(logoBlur, (v) => `blur(${v}px)`)
             }}
             whileTap={{ scale: 0.98 }}
-            className="cursor-grab active:cursor-grabbing focus:outline-none group touch-none select-none relative inline-block"
+            className="cursor-grab active:cursor-grabbing focus:outline-none touch-none select-none bg-transparent"
           >
-            <SwipessLogo size="3xl" />
-            {/* Glow effect on hover */}
-            <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-2xl -z-10"
-              style={{
-                background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)'
-              }}
-            />
+            <SwipessLogo size="3xl" className="drop-shadow-2xl" />
           </motion.div>
 
-          <motion.p 
-            className="text-white text-xl sm:text-2xl font-medium whitespace-nowrap"
+          <motion.p
+            className="text-white text-lg sm:text-xl md:text-2xl font-medium text-center px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
