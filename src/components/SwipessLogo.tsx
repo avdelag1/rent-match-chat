@@ -10,13 +10,14 @@ function SwipessLogoComponent({
   size = 'md',
   className,
 }: SwipessLogoProps) {
+  // Responsive sizes optimized for all screen sizes including small iOS phones
   const sizeClasses = {
     sm: 'text-xl',
-    md: 'text-3xl',
-    lg: 'text-5xl',
-    xl: 'text-6xl sm:text-7xl',
-    '2xl': 'text-7xl sm:text-8xl',
-    '3xl': 'text-8xl sm:text-9xl',
+    md: 'text-2xl sm:text-3xl',
+    lg: 'text-4xl sm:text-5xl',
+    xl: 'text-5xl sm:text-6xl md:text-7xl',
+    '2xl': 'text-5xl sm:text-6xl md:text-7xl lg:text-8xl',
+    '3xl': 'text-[2.75rem] sm:text-6xl md:text-7xl lg:text-8xl',
   };
 
   return (

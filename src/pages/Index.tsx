@@ -38,7 +38,7 @@ const Index = () => {
     return Date.now() - new Date(user.created_at).getTime();
   }, [user?.created_at]);
 
-  const isNewUser = userAgeMs < 20000; // Menos de 20 segundos desde registro
+  const isNewUser = userAgeMs < 30000; // Less than 30 seconds since registration
 
   const {
     data: userRole,
@@ -83,10 +83,10 @@ const Index = () => {
     }
     const fallbackTimeout = setTimeout(() => {
       if (isLoadingRole) {
-        logger.log("[Index] Loading timeout reached (6s)");
+        logger.log("[Index] Loading timeout reached (10s)");
         setLoadingTimeout(true);
       }
-    }, 6000);
+    }, 10000);
     return () => clearTimeout(fallbackTimeout);
   }, [user, isLoadingRole]);
 
@@ -98,9 +98,8 @@ const Index = () => {
         if (!hasShownError.current) {
           hasShownError.current = true;
           toast({
-            title: "Account Setup Issue",
-            description: "Taking longer than expected. Please refresh the page.",
-            variant: "destructive",
+            title: "Still loading...",
+            description: "Your account is being set up. Please wait a moment.",
           });
         }
         return;
@@ -113,9 +112,8 @@ const Index = () => {
         if (!hasShownError.current) {
           hasShownError.current = true;
           toast({
-            title: "Account Setup Incomplete",
-            description: "Please refresh the page or contact support if this persists.",
-            variant: "destructive",
+            title: "Almost there!",
+            description: "Setting up your profile. Try refreshing if this takes too long.",
           });
         }
         return;
