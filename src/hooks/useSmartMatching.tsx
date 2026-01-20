@@ -262,6 +262,11 @@ export function useSmartListingMatching(
 
   return useQuery({
     queryKey: ['smart-listings', userId, filtersKey, page, isRefreshMode], // Stable query key with userId
+    // PERF: Longer stale time for listings since they don't change frequently
+    staleTime: 10 * 60 * 1000, // 10 minutes - listings are stable
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    // PERF: Keep previous data while fetching new data to prevent UI flash
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       // PERF: userId is passed in, no need for async getUser() call
       if (!userId) return [];
@@ -368,6 +373,7 @@ export function useSmartListingMatching(
           .select(SWIPE_CARD_FIELDS)
           .eq('status', 'active')
           .eq('is_active', true)
+          .neq('owner_id', userId) // CRITICAL: Exclude own listings - user shouldn't see their own listings when browsing
           .order('created_at', { ascending: false }); // Newest first
 
         // Apply filter-based query constraints
@@ -900,6 +906,11 @@ export function useSmartClientMatching(
 
   return useQuery<MatchedClientProfile[]>({
     queryKey: ['smart-clients', userId, category, page, isRefreshMode, filtersKey],
+    // PERF: Longer stale time for client profiles since they don't change frequently
+    staleTime: 10 * 60 * 1000, // 10 minutes - profiles are stable
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    // PERF: Keep previous data while fetching new data to prevent UI flash
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       // PERF: userId is passed in, no need for async getUser() call
       if (!userId) {
@@ -1036,6 +1047,17 @@ export function useSmartClientMatching(
 
         // Apply client filters if provided
         if (filters) {
+          console.log('[SmartClientMatching] 🎯 APPLYING CLIENT FILTERS:', {
+            clientGender: (filters as any).clientGender,
+            clientType: (filters as any).clientType,
+            categories: (filters as any).categories,
+            profileCount: filteredProfiles.length,
+          });
+          logger.info('[SmartClientMatching] Applying client filters:', {
+            clientGender: (filters as any).clientGender,
+            clientType: (filters as any).clientType,
+            categories: (filters as any).categories,
+          });
           filteredProfiles = filteredProfiles.filter(profile => {
             // Budget range filter
             // FIX: Add array length check before accessing indices
@@ -1190,6 +1212,11 @@ export function useSmartClientMatching(
 
             return true;
           });
+          console.log('[SmartClientMatching] 📊 After filtering:', {
+            profilesRemaining: filteredProfiles.length,
+          });
+        } else {
+          console.log('[SmartClientMatching] ❌ NO FILTERS PROVIDED');
         }
 
         // Calculate match scores based on profile completeness and preferences
