@@ -143,13 +143,11 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         // Fire-and-forget - cache errors are non-critical
         Promise.all(invalidations).catch(() => {});
       } else if (isLike && variables.targetType === 'listing') {
-        // Client liking listing - already handled in TinderentSwipeContainer with optimistic update
-        const invalidations = [
-          queryClient.invalidateQueries({ queryKey: ['likes'] }),
-          queryClient.invalidateQueries({ queryKey: ['liked-properties'] }),
-          queryClient.invalidateQueries({ queryKey: ['matches'] }),
-        ];
-        Promise.all(invalidations).catch(() => {});
+        // Client liking listing - DON'T invalidate cache, let optimistic update persist
+        // The TinderentSwipeContainer already did optimistic setQueryData
+        // Auto-refetch will sync with DB naturally without causing disappearing items
+        // Only invalidate matches to detect new matches
+        queryClient.invalidateQueries({ queryKey: ['matches'] }).catch(() => {});
       } else if (isDislike) {
         // Invalidate dislikes cache so the disliked profiles are excluded from future fetches
         const invalidations = [
