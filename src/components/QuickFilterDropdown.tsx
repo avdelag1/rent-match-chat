@@ -163,27 +163,27 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
     setClickedCategory(null);
   };
 
-  // Render owner filters dropdown
+  // Render owner filters dropdown - IMPROVED: Better touch targets
   const renderOwnerFilters = () => (
-    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden">
+    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden min-w-[280px]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-        <span className="text-sm font-semibold text-foreground">Filter Clients</span>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+        <span className="text-base font-semibold text-foreground">Filter Clients</span>
         {activeFilterCount > 0 && (
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleClearFilters}
-            className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+            className="text-xs text-muted-foreground hover:text-destructive transition-colors p-1 touch-manipulation"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </motion.button>
         )}
       </div>
 
       {/* Gender Section */}
-      <div className="p-3 border-b border-white/5">
-        <span className="text-xs font-medium text-muted-foreground mb-2 block">Gender</span>
+      <div className="p-4 border-b border-white/5">
+        <span className="text-sm font-medium text-muted-foreground mb-3 block">Gender</span>
         <div className="flex flex-wrap gap-2">
           {genderOptions.map((option, index) => (
             <motion.button
@@ -193,7 +193,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               transition={{ delay: index * 0.05 }}
               onClick={() => handleGenderSelect(option.id)}
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200',
+                'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
                 filters.clientGender === option.id
                   ? `bg-gradient-to-r ${option.color} text-white shadow-md`
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-white/5'
@@ -207,8 +207,8 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       </div>
 
       {/* Client Type Section */}
-      <div className="p-3">
-        <span className="text-xs font-medium text-muted-foreground mb-2 block">Looking For</span>
+      <div className="p-4">
+        <span className="text-sm font-medium text-muted-foreground mb-3 block">Looking For</span>
         <div className="grid grid-cols-2 gap-2">
           {clientTypeOptions.map((option, index) => (
             <motion.button
@@ -218,7 +218,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               transition={{ delay: index * 0.05 }}
               onClick={() => handleClientTypeSelect(option.id)}
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200',
+                'flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
                 filters.clientType === option.id
                   ? `bg-gradient-to-r ${option.color} text-white shadow-md`
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-white/5'
@@ -232,12 +232,12 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       </div>
 
       {/* Apply button */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-4 border-t border-white/5">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setIsOpen(false)}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold text-sm shadow-lg shadow-orange-500/25"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold text-sm shadow-lg shadow-orange-500/25 touch-manipulation min-h-[48px]"
         >
           Apply Filters
         </motion.button>
@@ -245,20 +245,20 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
     </div>
   );
 
-  // Render client filters dropdown (categories)
+  // Render client filters dropdown (categories) - IMPROVED: Better touch targets
   const renderClientFilters = () => (
-    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden">
+    <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden min-w-[280px]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-        <span className="text-sm font-semibold text-foreground">Select Category</span>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+        <span className="text-base font-semibold text-foreground">Select Category</span>
         {activeFilterCount > 0 && (
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleClearFilters}
-            className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+            className="text-xs text-muted-foreground hover:text-destructive transition-colors p-1 touch-manipulation"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </motion.button>
         )}
       </div>
@@ -278,7 +278,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
             <button
               onClick={() => handleCategoryClick(category.id)}
               className={cn(
-                'w-full flex items-center justify-between px-4 py-2.5 text-sm transition-all duration-200',
+                'w-full flex items-center justify-between px-5 py-3.5 text-sm transition-all duration-200 touch-manipulation min-h-[52px]',
                 filters.categories.includes(category.id)
                   ? 'bg-gradient-to-r ' + category.color + ' text-white'
                   : 'text-foreground/80 hover:bg-white/5'
@@ -286,18 +286,18 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
             >
               <div className="flex items-center gap-3">
                 <span className={cn(
-                  'p-1.5 rounded-lg',
+                  'p-2 rounded-lg',
                   filters.categories.includes(category.id)
                     ? 'bg-white/20'
                     : `bg-gradient-to-br ${category.color} bg-opacity-20`
                 )}>
                   {category.icon}
                 </span>
-                <span className="font-medium">{category.label}</span>
+                <span className="font-medium text-base">{category.label}</span>
               </div>
               {category.hasSubOptions && (
                 <ChevronRight className={cn(
-                  "w-4 h-4 text-muted-foreground transition-transform",
+                  "w-5 h-5 text-muted-foreground transition-transform",
                   clickedCategory === category.id && "rotate-90"
                 )} />
               )}
@@ -314,7 +314,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
                   className="absolute left-full top-0 ml-1 z-[10003]"
                   onMouseEnter={() => setHoveredCategory(category.id)}
                 >
-                  <div className="bg-background border border-white/10 rounded-xl shadow-lg overflow-hidden min-w-[140px]">
+                  <div className="bg-background border border-white/10 rounded-xl shadow-lg overflow-hidden min-w-[160px]">
                     <div className="py-2">
                       {listingTypeOptions.map((listingType, ltIndex) => (
                         <motion.button
@@ -324,13 +324,13 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
                           transition={{ delay: ltIndex * 0.05 }}
                           onClick={() => handleCategorySelect(category.id, listingType.id)}
                           className={cn(
-                            'w-full flex items-center px-4 py-2.5 text-sm transition-all duration-200',
+                            'w-full flex items-center px-5 py-3 text-sm transition-all duration-200 touch-manipulation min-h-[48px]',
                             filters.categories.includes(category.id) && filters.listingType === listingType.id
                               ? `bg-gradient-to-r ${category.color} text-white`
                               : 'text-foreground/80 hover:bg-white/5'
                           )}
                         >
-                          <span className="font-medium">{listingType.label}</span>
+                          <span className="font-medium text-base">{listingType.label}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -346,14 +346,14 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
 
   return (
     <div className={cn('relative', className)}>
-      {/* Quick Filter Button */}
+      {/* Quick Filter Button - IMPROVED: Better touch target */}
       <motion.button
         ref={buttonRef}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'relative flex items-center gap-1.5 px-3 h-9 rounded-xl transition-all duration-200',
+          'relative flex items-center gap-2 px-4 h-10 rounded-xl transition-all duration-200 touch-manipulation',
           activeFilterCount > 0
             ? 'bg-gradient-to-r from-orange-500/20 to-pink-500/20 shadow-lg shadow-orange-500/10'
             : 'bg-muted/50 hover:bg-muted'
@@ -367,7 +367,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="bg-gradient-to-br from-orange-500 to-pink-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+              className="bg-gradient-to-br from-orange-500 to-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
             >
               {activeFilterCount}
             </motion.span>
