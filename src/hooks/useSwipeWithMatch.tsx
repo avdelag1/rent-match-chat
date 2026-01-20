@@ -121,27 +121,10 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       const isDislike = variables.direction === 'left';
 
       if (isLike && variables.targetType === 'profile') {
-        // Owner swiping right on client - add optimistic update
-        // Get the client profile from cache or set a placeholder
-        queryClient.setQueryData(['liked-clients', user?.id], (oldData: any[] | undefined) => {
-          if (!oldData) return oldData;
-          // We don't have the full profile here, so just invalidate to refetch
-          // The actual profile will be fetched by the query
-          return oldData;
-        });
-
-        // Fire-and-forget invalidation - don't block on cache updates
-        const invalidations = [
-          queryClient.invalidateQueries({ queryKey: ['owner-likes'] }),
-          queryClient.invalidateQueries({
-            queryKey: ['liked-clients'],
-            refetchType: 'active' // Force immediate refetch of active queries
-          }),
-          queryClient.invalidateQueries({ queryKey: ['matches'] }),
-        ];
-
-        // Fire-and-forget - cache errors are non-critical
-        Promise.all(invalidations).catch(() => {});
+        // Owner swiping right on client - DON'T invalidate cache, let it persist
+        // The ClientSwipeContainer handles optimistic updates
+        // Only invalidate matches to detect new matches
+        queryClient.invalidateQueries({ queryKey: ['matches'] }).catch(() => {});
       } else if (isLike && variables.targetType === 'listing') {
         // Client liking listing - DON'T invalidate cache, let optimistic update persist
         // The TinderentSwipeContainer already did optimistic setQueryData
