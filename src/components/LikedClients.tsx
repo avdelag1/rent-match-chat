@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useStartConversation } from "@/hooks/useConversations";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
 import { logger } from "@/utils/prodLogger";
+import { getCardImageUrl, getThumbnailUrl } from "@/utils/imageOptimization";
 import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
 import {
   DropdownMenu,
@@ -195,6 +196,62 @@ export function LikedClients() {
     staleTime: 30000, // Cache for 30 seconds
     refetchInterval: 15000, // Refetch every 15 seconds for faster updates
   });
+
+  // PERFORMANCE: Preload client profile images for instant display
+  useEffect(() => {
+    if (!likedClients || likedClients.length === 0) return;
+
+    const preload = () => {
+      // Priority: First image of first 5 clients (visible immediately)
+      const priorityImages: string[] = [];
+      const secondaryImages: string[] = [];
+
+      likedClients.forEach((client, clientIdx) => {
+        const images = client.profile_images || client.images || [];
+        if (images.length === 0) return;
+
+        images.forEach((url, imgIdx) => {
+          if (clientIdx < 5 && imgIdx === 0) {
+            // First image of first 5 clients = high priority
+            priorityImages.push(url);
+          } else if (clientIdx < 10 && imgIdx < 2) {
+            // First 2 images of first 10 clients = secondary priority
+            secondaryImages.push(url);
+          }
+        });
+      });
+
+      // Load priority images immediately
+      priorityImages.forEach(url => {
+        const img = new Image();
+        img.decoding = 'async';
+        (img as any).fetchPriority = 'high';
+        img.src = getCardImageUrl(url);
+      });
+
+      // Load thumbnails
+      priorityImages.concat(secondaryImages).forEach(url => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = getThumbnailUrl(url);
+      });
+
+      // Load secondary images in background
+      setTimeout(() => {
+        secondaryImages.forEach(url => {
+          const img = new Image();
+          img.decoding = 'async';
+          img.src = getCardImageUrl(url);
+        });
+      }, 100);
+    };
+
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(preload, { timeout: 2000 });
+    } else {
+      setTimeout(preload, 50);
+    }
+  }, [likedClients]);
 
   const removeLikeMutation = useMutation({
     mutationFn: async (clientId: string) => {
