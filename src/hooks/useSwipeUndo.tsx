@@ -112,10 +112,13 @@ export function useSwipeUndo() {
         }
       }
 
-      // Remove the last swipe from the likes table
-      logger.info('[useSwipeUndo] Deleting from likes table:', lastSwipe.targetId);
+      // Remove the last swipe from the appropriate table
+      logger.info('[useSwipeUndo] Deleting swipe:', lastSwipe.targetId);
+
+      // Only delete from dislikes table (pass swipes go to dislikes, not likes)
+      // The new architecture separates likes (right swipes) from dislikes (left swipes/passes)
       const { error } = await supabase
-        .from('likes')
+        .from('dislikes')
         .delete()
         .match({
           user_id: user.id,

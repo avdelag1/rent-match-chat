@@ -4,48 +4,56 @@ import { supabase } from '@/integrations/supabase/client';
 import { Listing } from './useListings';
 import { logger } from '@/utils/prodLogger';
 
+/**
+ * Fetch liked properties using the CORRECT query pattern.
+ *
+ * ARCHITECTURE:
+ * - This hook fetches ONLY from Supabase (single source of truth)
+ * - Never derives likes from swipe state
+ * - Never infers likes from cards
+ *
+ * The query uses Supabase's relation syntax to join likes with listings
+ * in a single query, preventing race conditions and flicker.
+ */
 export function useLikedProperties() {
   return useQuery<Listing[]>({
     queryKey: ['liked-properties'],
     // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
     placeholderData: (prev) => prev,
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return [];
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return [];
 
-      // Get liked listing IDs from likes table
-      const { data: likes, error: likesError } = await supabase
+      // CORRECT QUERY: Single fetch using Supabase relation syntax
+      // This is the ONLY correct way to fetch liked listings
+      const { data, error } = await supabase
         .from('likes')
-        .select('target_id, created_at, direction')
-        .eq('user_id', user.user.id)
-        .eq('direction', 'right')
+        .select(`
+          id,
+          created_at,
+          listing:target_listing_id (*)
+        `)
+        .eq('user_id', userData.user.id)
         .order('created_at', { ascending: false });
 
-      if (likesError) {
-        logger.error('[useLikedProperties] Error fetching likes:', likesError);
-        throw likesError;
+      if (error) {
+        logger.error('[useLikedProperties] Error fetching likes:', error);
+        throw error;
       }
 
-      // If no likes found, return empty array (removed swipes fallback - table may not exist)
-      if (!likes || likes.length === 0) {
+      // If no likes found, return empty array
+      if (!data || data.length === 0) {
         return [];
       }
 
-      const likedIds = likes.map(l => l.target_id);
+      // Extract listings from the joined result, filter out nulls (deleted listings)
+      const listings = data
+        .map((like: any) => like.listing)
+        .filter((listing: any): listing is Listing =>
+          listing !== null && listing.is_active === true
+        );
 
-      // Get the actual listings
-      const { data: listings, error: listingsError } = await supabase
-        .from('listings')
-        .select('*')
-        .in('id', likedIds)
-        .eq('is_active', true);
-
-      if (listingsError) {
-        logger.error('[useLikedProperties] Error fetching listings:', listingsError);
-        throw listingsError;
-      }
-
-      return (listings || []) as Listing[];
+      return listings;
     },
     staleTime: 30000, // Cache for 30 seconds
     gcTime: 60000, // 1 minute
