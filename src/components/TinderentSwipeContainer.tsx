@@ -622,15 +622,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         return [currentListing, ...oldData];
       });
 
-      // Also invalidate to refetch from DB in background (will sync when swipeQueue completes)
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ['liked-properties'],
-          refetchType: 'active' // Force immediate refetch of active queries
-        });
-        queryClient.invalidateQueries({ queryKey: ['likes'] });
-        queryClient.invalidateQueries({ queryKey: ['matches'] });
-      }, 1000); // Wait 1 second for swipeQueue to process
+      // FIX: Don't invalidate immediately - let the optimistic update persist
+      // The auto-refetch interval (15s) in useLikedProperties will sync with DB naturally
+      // This prevents the race condition where setTimeout fires before SwipeQueue completes
     }
 
     // Zustand update - DEFERRED until animation complete
