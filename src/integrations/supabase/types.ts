@@ -1449,27 +1449,39 @@ export type Database = {
       }
       likes: {
         Row: {
-          created_at: string | null
-          direction: string
           id: string
-          target_id: string
           user_id: string
+          target_listing_id: string
+          created_at: string | null
         }
         Insert: {
-          created_at?: string | null
-          direction: string
           id?: string
-          target_id: string
           user_id: string
+          target_listing_id: string
+          created_at?: string | null
         }
         Update: {
-          created_at?: string | null
-          direction?: string
           id?: string
-          target_id?: string
           user_id?: string
+          target_listing_id?: string
+          created_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_target_listing_id_fkey"
+            columns: ["target_listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       listings: {
         Row: {
