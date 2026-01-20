@@ -29,6 +29,8 @@ import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
+import { MessageConfirmationDialog } from './MessageConfirmationDialog';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Custom motorcycle icon
 const MotorcycleIcon = ({ className }: { className?: string }) => (
@@ -198,9 +200,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshMode, setIsRefreshMode] = useState(false);
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<any | null>(null);
 
   // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   // PERF: Use selective subscriptions to prevent re-renders on unrelated store changes
   // Only subscribe to actions (stable references) - NOT to clientDeck object
@@ -599,6 +604,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Fire-and-forget: Queue swipe for background DB processing
     swipeQueue.queueSwipe(listing.id, direction, 'listing');
 
+    // FIX: Invalidate queries immediately after queueing swipe so liked section updates
+    if (direction === 'right') {
+      // Fire-and-forget cache invalidation
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['likes'] }),
+        queryClient.invalidateQueries({ queryKey: ['liked-properties'] }),
+        queryClient.invalidateQueries({ queryKey: ['matches'] }),
+      ]).catch(() => { /* Cache invalidation errors are non-critical */ });
+    }
+
     // Zustand update - DEFERRED until animation complete
     markClientSwiped(listing.id);
 
@@ -651,7 +666,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       preloadImageToCache(nextNextCard.images[0]);
       imagePreloadController.preload(nextNextCard.images[0], 'high');
     }
-  }, [recordSwipe, recordProfileView, markClientSwiped]);
+  }, [recordSwipe, recordProfileView, markClientSwiped, queryClient]);
 
   // PHASE 1: Called when user swipes - ONLY updates refs and triggers animation
   // NO React state updates, NO Zustand updates, NO persistence
@@ -769,12 +784,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     triggerHaptic('light');
   };
 
-  const handleMessage = async () => {
+  const handleMessage = () => {
     const listing = deckQueueRef.current[currentIndexRef.current];
 
     if (!canNavigate()) return;
 
-    if (!listing?.owner_id || isCreatingConversation) {
+    if (!listing?.owner_id) {
       toast({
         title: 'Cannot Start Conversation',
         description: 'Owner information not available.',
@@ -800,6 +815,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       return;
     }
 
+    // Open confirmation dialog with message quota info
+    logger.info('[TinderentSwipeContainer] Message icon clicked, opening confirmation dialog');
+    setSelectedListing(listing);
+    setMessageDialogOpen(true);
+    triggerHaptic('light');
+  };
+
+  const handleSendMessage = async (message: string) => {
+    if (isCreatingConversation || !selectedListing?.owner_id) return;
+
     setIsCreatingConversation(true);
     startNavigation();
 
@@ -810,9 +835,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       });
 
       const result = await startConversation.mutateAsync({
-        otherUserId: listing.owner_id,
-        listingId: listing.id,
-        initialMessage: `Hi! I'm interested in your property: ${listing.title}`,
+        otherUserId: selectedListing.owner_id,
+        listingId: selectedListing.id,
+        initialMessage: message,
         canStartNewConversation: true,
       });
 
@@ -821,6 +846,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           title: 'Conversation created!',
           description: 'Opening chat...'
         });
+        setMessageDialogOpen(false);
+        await new Promise(resolve => setTimeout(resolve, 300));
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
     } catch (err) {
@@ -1122,6 +1149,15 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         </Suspense>,
         document.body
       )}
+
+      {/* Message Confirmation Dialog - Shows remaining message activations */}
+      <MessageConfirmationDialog
+        open={messageDialogOpen}
+        onOpenChange={setMessageDialogOpen}
+        onConfirm={handleSendMessage}
+        recipientName={selectedListing ? `the owner of ${selectedListing.title}` : 'the owner'}
+        isLoading={isCreatingConversation}
+      />
     </div>
   );
 };
