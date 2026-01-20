@@ -90,7 +90,7 @@ const ClientLikedProperties = () => {
   const [propertyToDelete, setPropertyToDelete] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const { data: likedProperties = [], isLoading, refetch: refreshLikedProperties } = useLikedProperties();
+  const { data: likedProperties = [], isLoading, refetch: refreshLikedProperties, isFetching } = useLikedProperties();
   const { data: subscription } = useUserSubscription();
   const { data: conversationStats } = useConversationStats();
   const startConversation = useStartConversation();
@@ -230,12 +230,16 @@ const ClientLikedProperties = () => {
               showBack={true}
               actions={
                 <Button
-                  onClick={() => refreshLikedProperties()}
+                  onClick={() => {
+                    // Force a fresh fetch by invalidating the cache
+                    queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
+                    refreshLikedProperties();
+                  }}
                   variant="outline"
                   size="sm"
-                  disabled={isLoading}
+                  disabled={isLoading || isFetching}
                 >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 mr-2 ${(isLoading || isFetching) ? 'animate-spin' : ''}`} />
                   refresh
                 </Button>
               }
