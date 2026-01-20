@@ -68,6 +68,10 @@ import OwnerVehicleClientDiscovery from "./pages/OwnerVehicleClientDiscovery";
 import OwnerViewClientProfile from "./pages/OwnerViewClientProfile";
 import OwnerFiltersExplore from "./pages/OwnerFiltersExplore";
 
+// Filter pages - direct imports for instant navigation
+import ClientFilters from "./pages/ClientFilters";
+import OwnerFilters from "./pages/OwnerFilters";
+
 // Shared routes - direct imports for instant navigation
 import { MessagingDashboard } from "./pages/MessagingDashboard";
 import NotificationsPage from "./pages/NotificationsPage";
@@ -161,6 +165,7 @@ const App = () => (
                       <Route path="/client/services" element={<ClientWorkerDiscovery />} />
                       <Route path="/client/contracts" element={<ClientContracts />} />
                       <Route path="/client/camera" element={<ClientSelfieCamera />} />
+                      <Route path="/client/filters" element={<ClientFilters />} />
 
                       {/* Owner routes */}
                       <Route path="/owner/dashboard" element={<EnhancedOwnerDashboard />} />
@@ -181,6 +186,7 @@ const App = () => (
                       <Route path="/owner/contracts" element={<OwnerContracts />} />
                       <Route path="/owner/camera" element={<OwnerProfileCamera />} />
                       <Route path="/owner/camera/listing" element={<OwnerListingCamera />} />
+                      <Route path="/owner/filters" element={<OwnerFilters />} />
 
                       {/* Shared routes (both roles) */}
                       <Route path="/messages" element={<MessagingDashboard />} />
