@@ -400,9 +400,6 @@ export function useSmartListingMatching(
             logger.info('[SmartMatching] Filtering by listing type:', filters.listingType);
             query = query.eq('listing_type', filters.listingType);
           }
-        } else {
-          console.log('[SmartMatching] ❌ NO FILTERS PROVIDED');
-        }
 
           // Price range filter
           if (filters.priceRange) {
@@ -443,6 +440,8 @@ export function useSmartListingMatching(
 
           // Premium only filter (owner has premium subscription)
           // This will be applied client-side after we get subscription data
+        } else {
+          console.log('[SmartMatching] ❌ NO FILTERS PROVIDED');
         }
 
         // Apply pagination

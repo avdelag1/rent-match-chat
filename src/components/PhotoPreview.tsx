@@ -55,17 +55,17 @@ function PhotoPreviewComponent({ photos, isOpen, onClose, initialIndex = 0 }: Ph
     // Preload all remaining in background
     photos.forEach((src, idx) => {
       if (idx !== currentIndex && !loadedImagesRef.current.has(src)) {
-        requestIdleCallback?.(() => {
+        const preloadFn = () => {
           const img = new Image();
           img.decoding = 'async';
           img.onload = () => loadedImagesRef.current.add(src);
           img.src = src;
-        }) || setTimeout(() => {
-          const img = new Image();
-          img.decoding = 'async';
-          img.onload = () => loadedImagesRef.current.add(src);
-          img.src = src;
-        }, 50);
+        };
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(preloadFn);
+        } else {
+          setTimeout(preloadFn, 50);
+        }
       }
     });
   }, [isOpen, photos, currentIndex]);

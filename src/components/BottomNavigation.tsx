@@ -233,10 +233,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               transition={springConfigs.instant}
               onClick={(e) => handleNavClick(e, item)}
               // INSTANT NAVIGATION: Prefetch on earliest possible events
-              onPointerDown={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }}
-              onTouchStart={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }}
-              onMouseEnter={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }}
-              onFocus={(e) => { e.stopPropagation(); item.path && prefetchRoute(item.path); }}
+              onPointerDown={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
+              onTouchStart={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
+              onMouseEnter={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
+              onFocus={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92, transition: springConfigs.instant }}
               // EXPANDED TOUCH TARGETS: Each button has generous hit area

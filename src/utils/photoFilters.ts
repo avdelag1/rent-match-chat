@@ -45,7 +45,7 @@ export const applyFilter = (canvas: HTMLCanvasElement, filter: FilterType): void
       }
       break;
 
-    case 'contrast':
+    case 'contrast': {
       const factor = 1.5;
       const intercept = 128 * (1 - factor);
       for (let i = 0; i < data.length; i += 4) {
@@ -54,6 +54,7 @@ export const applyFilter = (canvas: HTMLCanvasElement, filter: FilterType): void
         data[i + 2] = Math.min(255, Math.max(0, data[i + 2] * factor + intercept));
       }
       break;
+    }
 
     case 'normal':
     default:
