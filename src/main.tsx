@@ -63,7 +63,9 @@ deferredInit(async () => {
     initPerformanceOptimizations();
     initWebVitalsMonitoring();
     initOfflineSync(); // PERF: Sync queued swipes when back online
-  } catch {}
+  } catch {
+    // Silently ignore - these are optional optimizations
+  }
 }, 3000);
 
 // Priority 3: Configuración nativa (solo en app móvil)
@@ -76,7 +78,9 @@ deferredInit(async () => {
       await StatusBar.setStyle({ style: Style.Light });
       await StatusBar.setBackgroundColor({ color: "#FF0000" });
     }
-  } catch {}
+  } catch {
+    // Silently ignore - only applies to native mobile platforms
+  }
 }, 5000);
 
 // Service Worker with proper versioning and update handling

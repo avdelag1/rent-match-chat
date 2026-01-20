@@ -183,28 +183,14 @@ const ImageCarouselComponent = ({
     });
   }, [currentIndex, images]);
 
-  if (!images || images.length === 0) {
-    return (
-      <div className={cn(
-        "w-full bg-muted/20 rounded-lg flex items-center justify-center",
-        aspectRatio === 'square' && 'aspect-square',
-        aspectRatio === '4:3' && 'aspect-[4/3]',
-        aspectRatio === '16:9' && 'aspect-video',
-        aspectRatio === 'auto' && 'h-64',
-        className
-      )}>
-        <p className="text-muted-foreground">No images available</p>
-      </div>
-    );
-  }
-
+  // These hooks must be defined before any early returns to follow Rules of Hooks
   const goToPrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  }, [images.length]);
+    setCurrentIndex((prev) => (prev === 0 ? (images?.length || 1) - 1 : prev - 1));
+  }, [images?.length]);
 
   const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  }, [images.length]);
+    setCurrentIndex((prev) => (prev === (images?.length || 1) - 1 ? 0 : prev + 1));
+  }, [images?.length]);
 
   const handleImageClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -220,6 +206,21 @@ const ImageCarouselComponent = ({
       goToNext();
     }
   }, [goToPrevious, goToNext]);
+
+  if (!images || images.length === 0) {
+    return (
+      <div className={cn(
+        "w-full bg-muted/20 rounded-lg flex items-center justify-center",
+        aspectRatio === 'square' && 'aspect-square',
+        aspectRatio === '4:3' && 'aspect-[4/3]',
+        aspectRatio === '16:9' && 'aspect-video',
+        aspectRatio === 'auto' && 'h-64',
+        className
+      )}>
+        <p className="text-muted-foreground">No images available</p>
+      </div>
+    );
+  }
 
   const aspectRatioClass = cn(
     aspectRatio === 'square' && 'aspect-square',

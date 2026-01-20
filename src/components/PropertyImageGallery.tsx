@@ -65,17 +65,17 @@ function PropertyImageGalleryComponent({
       if (idx !== currentIndex && !adjacentIndices.includes(idx)) {
         const url = getFullImageUrl(image);
         if (!loadedImagesRef.current.has(url)) {
-          requestIdleCallback?.(() => {
+          const preloadFn = () => {
             const img = new Image();
             img.decoding = 'async';
             img.onload = () => loadedImagesRef.current.add(url);
             img.src = url;
-          }) || setTimeout(() => {
-            const img = new Image();
-            img.decoding = 'async';
-            img.onload = () => loadedImagesRef.current.add(url);
-            img.src = url;
-          }, 100);
+          };
+          if (typeof requestIdleCallback !== 'undefined') {
+            requestIdleCallback(preloadFn);
+          } else {
+            setTimeout(preloadFn, 100);
+          }
         }
       }
     });
