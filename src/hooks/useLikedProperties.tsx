@@ -28,15 +28,16 @@ export function useLikedProperties() {
       if (!userData.user) return [];
 
       // CORRECT QUERY: Single fetch using Supabase relation syntax
-      // This is the ONLY correct way to fetch liked listings
+      // Uses target_id (not target_listing_id) to match the actual schema
       const { data, error } = await supabase
         .from('likes')
         .select(`
           id,
           created_at,
-          listing:target_listing_id (*)
+          target_id
         `)
         .eq('user_id', userData.user.id)
+        .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -49,18 +50,36 @@ export function useLikedProperties() {
         return [];
       }
 
-      // Extract listings from the joined result, filter out nulls (deleted listings)
-      const listings = data
-        .map((like: any) => like.listing)
-        .filter((listing: any): listing is Listing =>
-          listing !== null && listing.is_active === true
-        );
+      // Get listing IDs from the likes
+      const listingIds = data.map((like: any) => like.target_id).filter(Boolean);
+
+      if (listingIds.length === 0) {
+        return [];
+      }
+
+      // Fetch the actual listings
+      const { data: listings, error: listingsError } = await supabase
+        .from('listings')
+        .select('*')
+        .in('id', listingIds)
+        .eq('is_active', true);
+
+      if (listingsError) {
+        logger.error('[useLikedProperties] Error fetching listings:', listingsError);
+        throw listingsError;
+      }
+
+      // Map listings to maintain the order of likes
+      const listingMap = new Map((listings || []).map((l: any) => [l.id, l]));
+      const orderedListings = listingIds
+        .map((id: string) => listingMap.get(id))
+        .filter((listing): listing is Listing => listing !== null && listing !== undefined);
 
       // PERFORMANCE: Preload images for ALL liked properties immediately
       // This ensures the carousel and gallery load instantly
-      preloadLikedImages(listings);
+      preloadLikedImages(orderedListings);
 
-      return listings;
+      return orderedListings;
     },
     staleTime: Infinity, // Never mark as stale - rely on optimistic updates
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
@@ -85,7 +104,7 @@ function preloadLikedImages(listings: Listing[]): void {
     const secondaryImages: string[] = [];
 
     listings.forEach((listing, listingIdx) => {
-      const images = listing.images || listing.photos || [];
+      const images = listing.images || [];
       if (images.length === 0) return;
 
       images.forEach((url, imgIdx) => {

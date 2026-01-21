@@ -10,15 +10,16 @@ import { isOffline, queueSwipe } from '@/utils/offlineSwipeQueue';
  *
  * Rules:
  * - Swipe deck = temporary UI
- * - Likes table = permanent truth (for client -> listing likes)
+ * - Likes table = permanent truth (for all swipes)
+ *   - direction='right' for likes
+ *   - direction='left' for dislikes
  * - owner_likes table = for owner -> client likes
- * - Dislikes table = for left swipes with cooldown
  * - Matches = derived, not inferred
  *
  * This hook handles:
- * 1. Client swiping on listings -> INSERT into likes table
+ * 1. Client swiping on listings -> INSERT into likes table (target_id = listing.id)
  * 2. Owner swiping on clients -> INSERT into owner_likes table
- * 3. Left swipes -> INSERT into dislikes table
+ * 3. Left swipes -> INSERT into likes table with direction='left'
  */
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -46,18 +47,16 @@ export function useSwipe() {
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
-      // Handle LEFT swipes (dislikes) - goes to dislikes table
+      // Handle LEFT swipes (dislikes) - goes to likes table with direction='left'
       if (direction === 'left') {
         const { error: dislikeError } = await supabase
-          .from('dislikes')
+          .from('likes')
           .upsert({
             user_id: user.id,
             target_id: targetId,
-            target_type: targetType,
-            disliked_at: new Date().toISOString(),
-            cooldown_until: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() // 3 day cooldown
+            direction: 'left'
           }, {
-            onConflict: 'user_id,target_id,target_type',
+            onConflict: 'user_id,target_id',
             ignoreDuplicates: false
           });
 
@@ -71,14 +70,15 @@ export function useSwipe() {
 
       // Handle RIGHT swipes (likes)
       if (targetType === 'listing') {
-        // CLIENT -> LISTING like: Use the likes table with new schema
+        // CLIENT -> LISTING like: Use the likes table with target_id
         const { error } = await supabase
           .from('likes')
           .upsert({
             user_id: user.id,
-            target_listing_id: targetId
+            target_id: targetId,
+            direction: 'right'
           }, {
-            onConflict: 'user_id,target_listing_id',
+            onConflict: 'user_id,target_id',
             ignoreDuplicates: false
           })
           .select();
@@ -171,15 +171,23 @@ export function useSwipe() {
             .from('likes')
             .select(`
               id,
-              target_listing_id,
-              created_at,
-              listing:target_listing_id (owner_id)
+              target_id,
+              created_at
             `)
-            .eq('user_id', targetId);
+            .eq('user_id', targetId)
+            .eq('direction', 'right');
+
+          // Get owner's listings
+          const { data: ownerListings } = await supabase
+            .from('listings')
+            .select('id')
+            .eq('owner_id', user.id);
+
+          const ownerListingIds = new Set(ownerListings?.map(l => l.id) || []);
 
           // Find if client liked any listing owned by this user
           const mutualLike = clientLikes?.find(
-            (like: any) => like.listing?.owner_id === user.id
+            (like: any) => ownerListingIds.has(like.target_id)
           );
 
           if (mutualLike) {
@@ -187,7 +195,7 @@ export function useSwipe() {
             await createMatch({
               clientId: targetId,
               ownerId: user.id,
-              listingId: mutualLike.target_listing_id,
+              listingId: mutualLike.target_id,
               clientLikedAt: mutualLike.created_at,
               ownerLikedAt: new Date().toISOString()
             });

@@ -1,10 +1,10 @@
 /**
  * Offline Swipe Queue - Queues swipes when offline and syncs when back online
  *
- * ARCHITECTURE (NEW):
- * - Right swipes on listings -> likes table (target_listing_id)
+ * ARCHITECTURE:
+ * - Right swipes on listings -> likes table (target_id, direction='right')
  * - Right swipes on profiles -> owner_likes table (owner_id, client_id)
- * - Left swipes -> dislikes table
+ * - Left swipes -> likes table (target_id, direction='left')
  *
  * PERFORMANCE BENEFIT:
  * - Users can continue swiping even when offline
@@ -102,10 +102,9 @@ function markSwipeFailed(id: string): void {
 
 /**
  * Sync a single queued swipe to the server
- * Uses the new architecture:
- * - Right swipes on listings -> likes table
- * - Right swipes on profiles -> owner_likes table
- * - Left swipes -> dislikes table
+ * Uses the correct architecture:
+ * - All swipes go to likes table with direction column
+ * - Right swipes on profiles go to owner_likes table
  */
 async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
   try {
@@ -115,18 +114,16 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
       return false;
     }
 
-    // Handle LEFT swipes (dislikes) -> dislikes table
+    // Handle LEFT swipes (dislikes) -> likes table with direction='left'
     if (swipe.direction === 'left') {
       const { error } = await supabase
-        .from('dislikes')
+        .from('likes')
         .upsert({
           user_id: user.id,
           target_id: swipe.targetId,
-          target_type: swipe.targetType,
-          disliked_at: new Date(swipe.timestamp).toISOString(),
-          cooldown_until: new Date(swipe.timestamp + 3 * 24 * 60 * 60 * 1000).toISOString()
+          direction: 'left'
         }, {
-          onConflict: 'user_id,target_id,target_type',
+          onConflict: 'user_id,target_id',
           ignoreDuplicates: false,
         });
 
@@ -141,14 +138,15 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
 
     // Handle RIGHT swipes (likes)
     if (swipe.targetType === 'listing') {
-      // Client liking a listing -> likes table with target_listing_id
+      // Client liking a listing -> likes table with target_id and direction='right'
       const { error } = await supabase
         .from('likes')
         .upsert({
           user_id: user.id,
-          target_listing_id: swipe.targetId,
+          target_id: swipe.targetId,
+          direction: 'right'
         }, {
-          onConflict: 'user_id,target_listing_id',
+          onConflict: 'user_id,target_id',
           ignoreDuplicates: false,
         });
 

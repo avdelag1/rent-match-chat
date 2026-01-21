@@ -106,12 +106,12 @@ const ClientLikedProperties = () => {
   // Remove like mutation
   const removeLikeMutation = useMutation({
     mutationFn: async (propertyId: string) => {
-      // Use the new schema: target_listing_id instead of target_id
+      // Use target_id to match the actual schema
       const { error } = await supabase
         .from('likes')
         .delete()
         .eq('user_id', user?.id)
-        .eq('target_listing_id', propertyId);
+        .eq('target_id', propertyId);
 
       if (error) throw error;
     },

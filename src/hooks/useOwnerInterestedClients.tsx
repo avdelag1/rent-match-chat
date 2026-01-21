@@ -25,7 +25,7 @@ export interface InterestedClient {
  *
  * ARCHITECTURE:
  * - Single source of truth from likes table
- * - Uses Supabase subquery to filter by owner's listings
+ * - Uses target_id to reference listings (not target_listing_id)
  * - Joins with profiles and listings for display data
  */
 export function useOwnerInterestedClients() {
@@ -56,16 +56,17 @@ export function useOwnerInterestedClients() {
 
       const listingIds = ownerListings.map(l => l.id);
 
-      // CORRECT QUERY: Fetch likes on owner's listings with user and listing info
+      // CORRECT QUERY: Fetch likes on owner's listings using target_id
       const { data, error } = await supabase
         .from('likes')
         .select(`
           id,
           created_at,
           user_id,
-          target_listing_id
+          target_id
         `)
-        .in('target_listing_id', listingIds)
+        .in('target_id', listingIds)
+        .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -78,10 +79,10 @@ export function useOwnerInterestedClients() {
       }
 
       // Fetch user profiles for all users who liked
-      const userIds = [...new Set(data.map(like => like.user_id))];
+      const userIds = [...new Set(data.map((like: any) => like.user_id))];
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar')
+        .select('id, full_name, avatar_url')
         .in('id', userIds);
 
       if (profilesError) {
@@ -99,14 +100,14 @@ export function useOwnerInterestedClients() {
       }
 
       // Map profiles and listings to lookups
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
-      const listingMap = new Map(listings?.map(l => [l.id, l]) || []);
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      const listingMap = new Map((listings || []).map((l: any) => [l.id, l]));
 
       // Combine the data
       const interestedClients: InterestedClient[] = data
-        .map(like => {
+        .map((like: any) => {
           const profile = profileMap.get(like.user_id);
-          const listing = listingMap.get(like.target_listing_id);
+          const listing = listingMap.get(like.target_id);
 
           if (!profile || !listing) {
             return null;
@@ -118,7 +119,7 @@ export function useOwnerInterestedClients() {
             user: {
               id: profile.id,
               full_name: profile.full_name || 'Anonymous',
-              avatar: profile.avatar
+              avatar: profile.avatar_url
             },
             listing: {
               id: listing.id,
@@ -133,48 +134,5 @@ export function useOwnerInterestedClients() {
     staleTime: 30000, // Cache for 30 seconds
     gcTime: 60000, // 1 minute
     refetchInterval: 30000, // Refetch every 30 seconds
-  });
-}
-
-/**
- * Alternative hook that uses the view (if created)
- * This can be simpler but requires the view to be set up in the database
- */
-export function useOwnerInterestedClientsView() {
-  return useQuery<InterestedClient[]>({
-    queryKey: ['owner-interested-clients-view'],
-    placeholderData: (prev) => prev,
-    queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return [];
-
-      const { data, error } = await supabase
-        .from('listing_interested_clients')
-        .select('*')
-        .eq('owner_id', userData.user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        logger.error('[useOwnerInterestedClientsView] Error:', error);
-        throw error;
-      }
-
-      return (data || []).map(row => ({
-        id: row.like_id,
-        created_at: row.created_at,
-        user: {
-          id: row.user_id,
-          full_name: row.full_name || 'Anonymous',
-          avatar: row.avatar
-        },
-        listing: {
-          id: row.target_listing_id,
-          title: row.listing_title || 'Untitled Listing'
-        }
-      }));
-    },
-    staleTime: 30000,
-    gcTime: 60000,
-    refetchInterval: 30000,
   });
 }
