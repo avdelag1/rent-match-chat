@@ -29,7 +29,10 @@ export function MessageConfirmationDialog({
   isLoading = false,
 }: MessageConfirmationDialogProps) {
   const [message, setMessage] = useState("Hi! I'd like to connect with you.");
-  const { canStartNewConversation, remainingConversations, isLoading: quotaLoading } = useMessagingQuota();
+  const messagingQuota = useMessagingQuota();
+  const canStartNewConversation = messagingQuota.canStartNewConversation;
+  const remainingConversations = messagingQuota.remainingConversations;
+  const quotaLoading = false; // useMessagingQuota doesn't have isLoading
 
   const handleConfirm = () => {
     if (!message.trim()) {

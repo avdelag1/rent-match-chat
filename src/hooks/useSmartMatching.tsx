@@ -616,19 +616,15 @@ export function useSmartListingMatching(
         return [];
       }
     },
-    // PERF: Only run query when userId is available
     enabled: !!userId,
-    // AGGRESSIVE CACHING: Maximum stability for instant dashboard feel
-    staleTime: 5 * 60 * 1000, // 5 minutes - data fresh for entire browsing session
-    gcTime: 30 * 60 * 1000, // 30 minutes - keep in memory for fast re-entry
-    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
-    refetchOnMount: false, // Don't refetch when component remounts (navigation)
-    refetchOnReconnect: false, // Don't refetch on network reconnect
-    refetchInterval: false, // No automatic refetching
-    retry: 1, // Retry only once on failure
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: 1,
     retryDelay: 1000,
-    // CRITICAL: Keep previous data during refetch - prevents blank UI
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData: any) => previousData,
   });
 }
 
@@ -1280,18 +1276,14 @@ export function useSmartClientMatching(
         return [] as MatchedClientProfile[];
       }
     },
-    // PERF: Only run query when userId is available
     enabled: !!userId,
-    // AGGRESSIVE CACHING: Maximum stability for instant dashboard feel
-    staleTime: 5 * 60 * 1000, // 5 minutes - data fresh for entire browsing session
-    gcTime: 30 * 60 * 1000, // 30 minutes - keep in memory for fast re-entry
-    refetchOnWindowFocus: false, // Disabled to prevent flickering on tab switch
-    refetchOnMount: false, // Don't refetch when component remounts (navigation)
-    refetchOnReconnect: false, // Don't refetch on network reconnect
-    refetchInterval: false, // Disable automatic refetching - only refetch when filters change
-    retry: 1, // Retry only once on failure
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: 1,
     retryDelay: 1000,
-    // CRITICAL: Keep previous data during refetch - prevents blank UI
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData: any) => previousData,
   });
 }

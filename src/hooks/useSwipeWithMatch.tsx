@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { PG_ERROR_CODES } from '@/utils/retryUtils';
 import { logger } from '@/utils/prodLogger';
 
 interface SwipeWithMatchOptions {
@@ -54,9 +53,8 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             throw ownerLikeError;
           }
           like = ownerLike;
-      } else {
+        } else {
           // For left swipes (dislikes), we use the likes table with direction='left'
-          // This avoids needing a separate dislikes table that may not exist
           const { data: dislike, error: dislikeError } = await supabase
             .from('likes')
             .upsert({
@@ -122,19 +120,15 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
       if (isLike && variables.targetType === 'profile') {
         // Owner swiping right on client - DON'T invalidate cache, let it persist
-        // The ClientSwipeContainer handles optimistic updates
         // Only invalidate matches to detect new matches
         queryClient.invalidateQueries({ queryKey: ['matches'] }).catch(() => {});
       } else if (isLike && variables.targetType === 'listing') {
         // Client liking listing - DON'T invalidate cache, let optimistic update persist
-        // The TinderentSwipeContainer already did optimistic setQueryData
-        // Auto-refetch will sync with DB naturally without causing disappearing items
         // Only invalidate matches to detect new matches
         queryClient.invalidateQueries({ queryKey: ['matches'] }).catch(() => {});
       } else if (isDislike) {
         // Invalidate dislikes cache so the disliked profiles are excluded from future fetches
         const invalidations = [
-          queryClient.invalidateQueries({ queryKey: ['dislikes'] }),
           queryClient.invalidateQueries({ queryKey: ['client-profiles'] }),
         ];
         Promise.all(invalidations).catch(() => {});
@@ -143,11 +137,9 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
     onError: (error) => {
       logger.error('Swipe error:', error);
       // Only show error toast for critical failures (auth, network), not for edge cases
-      // Background swipe errors are handled gracefully in the container
       if (error instanceof Error && (error.message.includes('auth') || error.message.includes('network'))) {
         toast.error("Something went wrong. Please try again.");
       }
-      // Silently fail for other errors - the swipe already happened in the UI
     }
   });
 }

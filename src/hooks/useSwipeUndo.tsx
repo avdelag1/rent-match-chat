@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/prodLogger';
@@ -112,13 +112,11 @@ export function useSwipeUndo() {
         }
       }
 
-      // Remove the last swipe from the appropriate table
+      // Remove the last swipe from the likes table (pass swipes use direction='left')
       logger.info('[useSwipeUndo] Deleting swipe:', lastSwipe.targetId);
 
-      // Only delete from dislikes table (pass swipes go to dislikes, not likes)
-      // The new architecture separates likes (right swipes) from dislikes (left swipes/passes)
       const { error } = await supabase
-        .from('dislikes')
+        .from('likes')
         .delete()
         .match({
           user_id: user.id,
