@@ -1,37 +1,12 @@
-import { memo, useEffect, useState, useRef } from 'react';
+import { memo, useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Shield, Sparkles, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 import { SwipessLogo } from './SwipessLogo';
 
-// Background color themes that cycle on tap
-const BACKGROUND_COLORS = [
-  {
-    bg: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)', // Black
-    statusBar: '#0a0a0a'
-  },
-  {
-    bg: 'linear-gradient(135deg, #FF4458 0%, #FE3C72 50%, #FF6B6B 100%)', // Tinder pink/coral
-    statusBar: '#FF4458'
-  },
-  {
-    bg: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #FFA500 100%)', // Yellow to orange
-    statusBar: '#FF8C00'
-  },
-  {
-    bg: 'linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)', // Orange to red
-    statusBar: '#f97316'
-  },
-  {
-    bg: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%)', // Warm orange
-    statusBar: '#FF6B35'
-  },
-];
-
 const SWIPE_THRESHOLD = 120;
 
 function LegendaryLandingPage() {
-  const [colorIndex, setColorIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const isDragging = useRef(false);
 
@@ -47,25 +22,8 @@ function LegendaryLandingPage() {
   // Blur effect increases as it moves right (like dissolving)
   const logoBlur = useTransform(x, [0, 80, 200], [0, 4, 12]);
 
-  // Update status bar color when background changes
-  useEffect(() => {
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) metaThemeColor.setAttribute('content', BACKGROUND_COLORS[colorIndex].statusBar);
-
-    return () => {
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#1a1a1a');
-    };
-  }, [colorIndex]);
-
   const openAuthDialog = () => setAuthDialogOpen(true);
   const closeAuthDialog = () => setAuthDialogOpen(false);
-
-  // Handle tap on background to change color (not on the logo button)
-  const handleBackgroundTap = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only change color if clicking on background, not on the logo button
-    if ((e.target as HTMLElement).closest('[data-swipe-logo]')) return;
-    setColorIndex(prev => (prev + 1) % BACKGROUND_COLORS.length);
-  };
 
   const handleDragStart = () => {
     isDragging.current = true;
@@ -97,9 +55,8 @@ function LegendaryLandingPage() {
 
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden transition-all duration-500 ease-out cursor-pointer safe-area-p"
-      style={{ background: BACKGROUND_COLORS[colorIndex].bg }}
-      onClick={handleBackgroundTap}
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p"
+      style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)' }}
     >
       {/* Subtle overlay for depth */}
       <div
@@ -131,7 +88,7 @@ function LegendaryLandingPage() {
             whileTap={{ scale: 0.98 }}
             className="cursor-grab active:cursor-grabbing focus:outline-none touch-none select-none bg-transparent"
           >
-            <SwipessLogo size="3xl" className="drop-shadow-2xl" />
+            <SwipessLogo size="4xl" className="drop-shadow-2xl" />
           </motion.div>
 
           <motion.p

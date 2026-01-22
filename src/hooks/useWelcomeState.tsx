@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/prodLogger';
 
 /**
  * SPEED OF LIGHT: Welcome state with SERVER-SIDE persistence
@@ -10,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
  * Solution: Use profiles.created_at to determine if user is new
  * - If created_at is within 2 minutes, user is new → show welcome once
  * - Use localStorage as a backup to prevent showing again in same session
+ * - ALSO save welcome notification to database for notification history
  *
  * The welcome should ONLY show once per user, ever.
  */
@@ -66,6 +68,10 @@ export function useWelcomeState(userId: string | undefined) {
         // User is new - show welcome once
         // Mark as seen IMMEDIATELY (optimistic) to prevent double-showing
         localStorage.setItem(localKey, 'true');
+        
+        // Save welcome notification to database for history
+        await saveWelcomeNotification(userId);
+        
         setIsChecking(false);
         setShouldShowWelcome(true);
 
@@ -92,4 +98,40 @@ export function useWelcomeState(userId: string | undefined) {
     isChecking,
     dismissWelcome,
   };
+}
+
+/**
+ * Save welcome notification to database so it appears in notification history
+ */
+async function saveWelcomeNotification(userId: string) {
+  try {
+    // Check if welcome notification already exists
+    const { data: existing } = await supabase
+      .from('notifications')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('type', 'system')
+      .maybeSingle();
+
+    if (existing) {
+      // Already saved, skip
+      return;
+    }
+
+    // Insert welcome notification with correct schema
+    // Use type assertion to bypass strict typing issues
+    const notificationData = {
+      user_id: userId,
+      type: 'system',
+      message: 'Welcome to Swipess! 🎉 Your journey to finding the perfect match starts now!',
+      read: false
+    } as any;
+
+    await supabase.from('notifications').insert(notificationData);
+
+    logger.log('[Welcome] Saved welcome notification to database');
+  } catch (error) {
+    // Silent fail - this is not critical
+    logger.error('[Welcome] Failed to save welcome notification:', error);
+  }
 }

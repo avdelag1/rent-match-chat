@@ -10,11 +10,10 @@ import { logger } from "@/utils/prodLogger";
 import { STORAGE } from "@/constants/app";
 
 const Index = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, initialized } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const hasShownError = useRef(false);
+  const hasNavigated = useRef(false);
 
   // Capture referral code from URL if present (works for app-wide referral links)
   useEffect(() => {
@@ -38,14 +37,13 @@ const Index = () => {
     return Date.now() - new Date(user.created_at).getTime();
   }, [user?.created_at]);
 
-  const isNewUser = userAgeMs < 30000; // Less than 30 seconds since registration
+  const isNewUser = userAgeMs < 60000; // Less than 60 seconds since registration (increased from 30s)
 
   const {
     data: userRole,
     isLoading: profileLoading,
     isFetching,
     error,
-    isError,
   } = useQuery({
     queryKey: ["user-role", user?.id],
     queryFn: async () => {
@@ -60,74 +58,64 @@ const Index = () => {
       logger.log("[Index] Role fetched successfully:", data?.role);
       return data?.role;
     },
-    enabled: !!user && !loading,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
-    staleTime: 60000,
+    enabled: !!user && initialized,
+    retry: 5, // More retries for new users
+    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 3000),
+    staleTime: 30000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    // Poll for role if new user and role not found yet
     refetchInterval: (query) => {
       const role = query.state.data as string | null | undefined;
-      if (!user || loading || !isNewUser || role) return false;
-      return 1000;
+      if (!user || !isNewUser || role) return false;
+      return 800; // Poll every 800ms for new users
     },
   });
 
   const isLoadingRole = (profileLoading || isFetching) && userRole === undefined;
 
+  // CRITICAL FIX: Navigate as soon as we have role, don't wait
   useEffect(() => {
-    if (!user || !isLoadingRole) {
-      setLoadingTimeout(false);
+    if (hasNavigated.current) return;
+    if (!initialized) return; // Wait for auth to initialize
+    if (loading) return;
+    
+    // Not logged in - show landing page
+    if (!user) return;
+
+    // Have role - navigate immediately
+    if (userRole) {
+      hasNavigated.current = true;
+      const targetPath = userRole === "client" ? "/client/dashboard" : "/owner/dashboard";
+      logger.log("[Index] Navigating to:", targetPath);
+      navigate(targetPath, { replace: true });
       return;
     }
-    const fallbackTimeout = setTimeout(() => {
-      if (isLoadingRole) {
-        logger.log("[Index] Loading timeout reached (10s)");
-        setLoadingTimeout(true);
-      }
-    }, 10000);
-    return () => clearTimeout(fallbackTimeout);
-  }, [user, isLoadingRole]);
 
-  useEffect(() => {
-    if (loading) return;
-
-    if (user) {
-      if (isError && !isLoadingRole) {
-        if (!hasShownError.current) {
-          hasShownError.current = true;
-          toast({
-            title: "Still loading...",
-            description: "Your account is being set up. Please wait a moment.",
-          });
-        }
+    // New user without role yet - check metadata for fallback
+    if (isNewUser && !userRole && !isLoadingRole) {
+      const metadataRole = user.user_metadata?.role as 'client' | 'owner' | undefined;
+      if (metadataRole) {
+        hasNavigated.current = true;
+        const targetPath = metadataRole === "client" ? "/client/dashboard" : "/owner/dashboard";
+        logger.log("[Index] Using metadata role, navigating to:", targetPath);
+        navigate(targetPath, { replace: true });
         return;
       }
-
-      if (isLoadingRole) return;
-
-      if (userRole === null || userRole === undefined) {
-        if (isNewUser) return;
-        if (!hasShownError.current) {
-          hasShownError.current = true;
-          toast({
-            title: "Almost there!",
-            description: "Setting up your profile. Try refreshing if this takes too long.",
-          });
-        }
-        return;
-      }
-
-      hasShownError.current = false;
-      const targetPath = userRole === "client" ? "/client/dashboard" : "/owner/dashboard";
-      navigate(targetPath, { replace: true });
     }
-  }, [user, userRole, loading, isLoadingRole, isError, isNewUser, navigate]);
+  }, [user, userRole, loading, initialized, isLoadingRole, isNewUser, navigate]);
+
+  // Reset navigation flag when user changes
+  useEffect(() => {
+    if (!user) {
+      hasNavigated.current = false;
+    }
+  }, [user?.id]);
 
   // CRITICAL: Show loading spinner while auth is initializing
   // This prevents the landing page from flashing before redirecting to dashboard
-  if (loading) {
+  if (!initialized || loading) {
     return (
       <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
         <div className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
@@ -135,31 +123,13 @@ const Index = () => {
     );
   }
 
-  // Loading mientras espera el rol
-  if (user && (isLoadingRole || (isNewUser && !userRole)) && !loadingTimeout) {
+  // User exists but still loading role - show loading
+  if (user && (isLoadingRole || (isNewUser && !userRole))) {
     return (
       <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 mx-auto border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
           <p className="text-white/70 text-sm">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Timeout error
-  if (user && loadingTimeout) {
-    return (
-      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-        <div className="text-center space-y-4 px-6">
-          <p className="text-white/90 text-lg font-medium">Taking longer than expected</p>
-          <p className="text-white/60 text-sm">Please refresh the page or try signing in again.</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
-          >
-            Refresh
-          </button>
         </div>
       </div>
     );
