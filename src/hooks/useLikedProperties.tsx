@@ -5,6 +5,7 @@ import { Listing } from './useListings';
 import { logger } from '@/utils/prodLogger';
 import { likedImagesCache } from '@/utils/likedImagesCache';
 import { getCardImageUrl, getThumbnailUrl } from '@/utils/imageOptimization';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * Fetch liked properties using the CORRECT query pattern.
@@ -19,13 +20,18 @@ import { getCardImageUrl, getThumbnailUrl } from '@/utils/imageOptimization';
  * in a single query, preventing race conditions and flicker.
  */
 export function useLikedProperties() {
+  const { user, initialized } = useAuth();
+
   return useQuery<Listing[]>({
     queryKey: ['liked-properties'],
     // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
     placeholderData: (prev) => prev,
+    // CRITICAL: Prevent caching an empty list before auth is initialized.
+    // Without this, the query can run with no user, cache [], and (due to staleTime: Infinity)
+    // never refetch, making likes “disappear” until a hard refresh.
+    enabled: initialized && !!user?.id,
     queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return [];
+      if (!user?.id) return [];
 
       // CORRECT QUERY: Single fetch using Supabase relation syntax
       // Uses target_id (not target_listing_id) to match the actual schema
@@ -36,7 +42,7 @@ export function useLikedProperties() {
           created_at,
           target_id
         `)
-        .eq('user_id', userData.user.id)
+        .eq('user_id', user.id)
         .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
