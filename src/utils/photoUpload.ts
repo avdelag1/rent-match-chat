@@ -69,24 +69,33 @@ export const updateProfilePhoto = async (
   userId: string,
   photoUrl: string
 ): Promise<void> => {
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update({
-      avatar_url: photoUrl,
-      profile_photo_url: photoUrl,
+  // Run both updates in parallel for faster execution
+  const [profileResult, authResult] = await Promise.allSettled([
+    supabase
+      .from('profiles')
+      .update({
+        avatar_url: photoUrl,
+        profile_photo_url: photoUrl,
+      })
+      .eq('id', userId),
+    supabase.auth.updateUser({
+      data: { avatar_url: photoUrl },
     })
-    .eq('id', userId);
+  ]);
 
-  if (profileError) {
-    throw new Error(`Profile update failed: ${profileError.message}`);
+  // Check profile update result (critical)
+  if (profileResult.status === 'rejected') {
+    throw new Error(`Profile update failed: ${profileResult.reason}`);
+  }
+  if (profileResult.value.error) {
+    throw new Error(`Profile update failed: ${profileResult.value.error.message}`);
   }
 
-  const { error: authError } = await supabase.auth.updateUser({
-    data: { avatar_url: photoUrl },
-  });
-
-  if (authError) {
-    logger.error('Auth metadata update failed:', authError);
+  // Log auth update errors but don't throw (non-critical)
+  if (authResult.status === 'rejected' || authResult.value.error) {
+    logger.error('Auth metadata update failed:',
+      authResult.status === 'rejected' ? authResult.reason : authResult.value.error
+    );
   }
 };
 
@@ -113,4 +122,41 @@ export const uploadProfilePhoto = async (
   }
 
   return publicUrl;
+};
+
+/**
+ * Batch upload multiple photos in parallel
+ * Returns array of public URLs in the same order as input blobs
+ */
+export const uploadPhotoBatch = async (
+  userId: string,
+  blobs: Blob[],
+  bucket = 'profile-photos',
+  onProgress?: UploadProgressCallback
+): Promise<string[]> => {
+  if (blobs.length === 0) return [];
+
+  // Upload all photos in parallel
+  const uploadPromises = blobs.map((blob, index) =>
+    uploadPhoto({
+      userId,
+      blob,
+      bucket,
+      onProgress: (progress) => {
+        if (onProgress) {
+          // Calculate overall progress across all uploads
+          const overallProgress = ((index + (progress / 100)) / blobs.length) * 100;
+          onProgress(Math.min(99, Math.floor(overallProgress)));
+        }
+      },
+    })
+  );
+
+  const results = await Promise.all(uploadPromises);
+
+  if (onProgress) {
+    onProgress(100);
+  }
+
+  return results.map(result => result.publicUrl);
 };

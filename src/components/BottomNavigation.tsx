@@ -209,10 +209,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   return (
     <nav className="app-bottom-bar pointer-events-none px-1">
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={springConfigs.instant}
+      <div
         // FULL-WIDTH LAYOUT: Use available screen width, spread buttons across full width with edge coverage
         className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
         style={{
@@ -228,9 +225,6 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
           return (
             <motion.button
               key={item.id}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={springConfigs.instant}
               onClick={(e) => handleNavClick(e, item)}
               // INSTANT NAVIGATION: Prefetch on earliest possible events
               onPointerDown={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
@@ -284,7 +278,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
             </motion.button>
           );
         })}
-      </motion.div>
+      </div>
     </nav>
   );
 }
