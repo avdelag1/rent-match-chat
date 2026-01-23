@@ -55,16 +55,8 @@ function LegendaryLandingPage() {
 
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p"
-      style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)' }}
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p bg-black"
     >
-      {/* Subtle overlay for depth */}
-      <div
-        className="absolute inset-0 opacity-20 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.3) 0%, transparent 60%)'
-        }}
-      />
 
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-4 sm:space-y-6 max-w-2xl w-full px-2 sm:px-4">

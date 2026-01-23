@@ -10,15 +10,15 @@ function SwipessLogoComponent({
   size = 'md',
   className,
 }: SwipessLogoProps) {
-  // Responsive sizes - BIGGER logo that still fits all screens
+  // Responsive sizes - MAXIMUM visibility while fitting screens
   const sizeClasses = {
-    sm: 'text-2xl sm:text-3xl',
-    md: 'text-3xl sm:text-4xl',
-    lg: 'text-5xl sm:text-6xl',
-    xl: 'text-6xl sm:text-7xl md:text-8xl',
-    '2xl': 'text-6xl sm:text-7xl md:text-8xl lg:text-9xl',
-    '3xl': 'text-[3.5rem] sm:text-7xl md:text-8xl lg:text-9xl',
-    '4xl': 'text-[4rem] sm:text-8xl md:text-9xl lg:text-[10rem]',
+    sm: 'text-3xl sm:text-4xl',
+    md: 'text-4xl sm:text-5xl',
+    lg: 'text-6xl sm:text-7xl',
+    xl: 'text-7xl sm:text-8xl md:text-9xl',
+    '2xl': 'text-7xl sm:text-8xl md:text-9xl lg:text-[10rem]',
+    '3xl': 'text-[4.5rem] sm:text-8xl md:text-9xl lg:text-[10rem]',
+    '4xl': 'text-[5rem] sm:text-[6rem] md:text-[8rem] lg:text-[11rem]',
   };
 
   return (
