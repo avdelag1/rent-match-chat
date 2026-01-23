@@ -89,12 +89,12 @@ const clientTypeOptions: ClientTypeOption[] = [
 
 export default function OwnerFilters() {
   const navigate = useNavigate();
-  
-  // Get current filter state from store
-  const storeClientGender = useFilterStore((s) => s.clientGender);
-  const storeClientType = useFilterStore((s) => s.clientType);
+
+  // Get current filter state from store with fallback defaults
+  const storeClientGender = useFilterStore((s) => s.clientGender) || 'any';
+  const storeClientType = useFilterStore((s) => s.clientType) || 'all';
   const { setClientGender, setClientType, resetOwnerFilters } = useFilterActions();
-  
+
   // Local state for pending changes (allows cancel without applying)
   const [localGender, setLocalGender] = useState<ClientGender>(storeClientGender);
   const [localClientType, setLocalClientType] = useState<ClientType>(storeClientType);
