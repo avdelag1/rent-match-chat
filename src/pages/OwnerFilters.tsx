@@ -137,7 +137,7 @@ export default function OwnerFilters() {
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        <h1 className="text-xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">Filter Clients</h1>
+        <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent text-center leading-tight">Client Preferences</h1>
 
         {hasActiveFilters && (
           <motion.button
