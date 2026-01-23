@@ -211,44 +211,13 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
           <DialogTitle>My Preferences</DialogTitle>
         </DialogHeader>
 
-        {/* Category Interest Toggles */}
-        <div className="px-6 pt-4 pb-2 border-b bg-muted/30">
-          <h3 className="text-sm font-medium mb-3">I'm interested in:</h3>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="interested_properties"
-                checked={formData.interested_in_properties}
-                onCheckedChange={(checked) => setFormData({ ...formData, interested_in_properties: !!checked })}
-              />
-              <Label htmlFor="interested_properties">Properties</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="interested_motorcycles"
-                checked={formData.interested_in_motorcycles}
-                onCheckedChange={(checked) => setFormData({ ...formData, interested_in_motorcycles: !!checked })}
-              />
-              <Label htmlFor="interested_motorcycles">Motorcycles</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="interested_bicycles"
-                checked={formData.interested_in_bicycles}
-                onCheckedChange={(checked) => setFormData({ ...formData, interested_in_bicycles: !!checked })}
-              />
-              <Label htmlFor="interested_bicycles">Bicycles</Label>
-            </div>
-          </div>
-        </div>
-
         <Tabs defaultValue="properties" className="flex-1 flex flex-col">
           <TabsList className="mx-6 mt-4">
             <TabsTrigger value="properties">Properties</TabsTrigger>
-            <TabsTrigger value="motorcycles" disabled={!formData.interested_in_motorcycles}>
+            <TabsTrigger value="motorcycles">
               Motorcycles
             </TabsTrigger>
-            <TabsTrigger value="bicycles" disabled={!formData.interested_in_bicycles}>
+            <TabsTrigger value="bicycles">
               Bicycles
             </TabsTrigger>
           </TabsList>
@@ -342,55 +311,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
                           }}
                         />
                         <Label htmlFor={`property-${type}`}>{type}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Listing Types */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Looking For</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['rent', 'buy', 'both'].map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`listing-${type}`}
-                          checked={
-                            type === 'both'
-                              ? formData.preferred_listing_types.includes('rent') && formData.preferred_listing_types.includes('buy')
-                              : formData.preferred_listing_types.includes(type)
-                          }
-                          onCheckedChange={(checked) => {
-                            if (type === 'both') {
-                              if (checked) {
-                                setFormData({
-                                  ...formData,
-                                  preferred_listing_types: ['rent', 'buy']
-                                })
-                              } else {
-                                setFormData({
-                                  ...formData,
-                                  preferred_listing_types: ['rent']
-                                })
-                              }
-                            } else {
-                              if (checked) {
-                                setFormData({
-                                  ...formData,
-                                  preferred_listing_types: [type]
-                                })
-                              } else {
-                                if (formData.preferred_listing_types.length > 1) {
-                                  setFormData({
-                                    ...formData,
-                                    preferred_listing_types: formData.preferred_listing_types.filter(t => t !== type)
-                                  })
-                                }
-                              }
-                            }
-                          }}
-                        />
-                        <Label htmlFor={`listing-${type}`} className="capitalize">{type === 'both' ? 'Rent & Buy' : type}</Label>
                       </div>
                     ))}
                   </div>

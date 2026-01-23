@@ -69,7 +69,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       id: 'filter',
       label: 'Filter',
       icon: Filter,
-      onClick: onFilterClick,
+      path: '/client/filters',
     },
     {
       id: 'likes',
@@ -104,7 +104,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       id: 'filter',
       label: 'Filter',
       icon: SlidersHorizontal,
-      onClick: onFilterClick,
+      path: '/owner/filters',
     },
     {
       id: 'liked',
