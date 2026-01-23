@@ -6,12 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Car, Bike, Ship, CircleDot, Briefcase, RotateCcw, Sparkles } from 'lucide-react';
+import { Home, Bike, CircleDot, Briefcase, RotateCcw, Sparkles } from 'lucide-react';
 import { PropertyClientFilters } from '@/components/filters/PropertyClientFilters';
-import { VehicleClientFilters } from '@/components/filters/VehicleClientFilters';
 import { MotoClientFilters } from '@/components/filters/MotoClientFilters';
 import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters';
-import { YachtClientFilters } from '@/components/filters/YachtClientFilters';
 import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
 import { cn } from '@/lib/utils';
 
@@ -23,14 +21,12 @@ interface AdvancedFiltersProps {
   currentFilters?: any;
 }
 
-type CategoryType = 'property' | 'vehicle' | 'motorcycle' | 'bicycle' | 'yacht' | 'services';
+type CategoryType = 'property' | 'motorcycle' | 'bicycle' | 'services';
 
 const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
   { id: 'property', name: 'Property', icon: Home, color: 'text-emerald-500' },
-  { id: 'vehicle', name: 'Cars', icon: Car, color: 'text-blue-500' },
   { id: 'motorcycle', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
   { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-purple-500' },
-  { id: 'yacht', name: 'Yachts', icon: Ship, color: 'text-cyan-500' },
   { id: 'services', name: 'Workers', icon: Briefcase, color: 'text-pink-500' },
 ];
 
@@ -39,18 +35,14 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   const [activeCategory, setActiveCategory] = useState<CategoryType>('property');
   const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
     property: 0,
-    vehicle: 0,
     motorcycle: 0,
     bicycle: 0,
-    yacht: 0,
     services: 0,
   });
   const [categoryFilters, setCategoryFilters] = useState<Record<CategoryType, any>>({
     property: safeCurrentFilters,
-    vehicle: {},
     motorcycle: {},
     bicycle: {},
-    yacht: {},
     services: {},
   });
 
@@ -112,18 +104,14 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
   const handleReset = () => {
     setFilterCounts({
       property: 0,
-      vehicle: 0,
       motorcycle: 0,
       bicycle: 0,
-      yacht: 0,
       services: 0,
     });
     setCategoryFilters({
       property: {},
-      vehicle: {},
       motorcycle: {},
       bicycle: {},
-      yacht: {},
       services: {},
     });
   };
@@ -196,7 +184,7 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
         )}>
           <Tabs value={activeCategory} onValueChange={(value) => setActiveCategory(value as CategoryType)} className="w-full">
             <TabsList className={cn(
-              "w-full grid grid-cols-6 p-1 bg-muted/50 rounded-xl",
+              "w-full grid grid-cols-4 p-1 bg-muted/50 rounded-xl",
               isMobile ? "h-16 gap-1" : "h-12"
             )}>
               {categories.map((cat) => {
@@ -263,13 +251,6 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     activeCount={filterCounts.property}
                   />
                 )}
-                {activeCategory === 'vehicle' && (
-                  <VehicleClientFilters
-                    onApply={(filters) => handleApplyFilters('vehicle', filters)}
-                    initialFilters={categoryFilters.vehicle}
-                    activeCount={filterCounts.vehicle}
-                  />
-                )}
                 {activeCategory === 'motorcycle' && (
                   <MotoClientFilters
                     onApply={(filters) => handleApplyFilters('motorcycle', filters)}
@@ -282,13 +263,6 @@ export function AdvancedFilters({ isOpen, onClose, userRole, onApplyFilters, cur
                     onApply={(filters) => handleApplyFilters('bicycle', filters)}
                     initialFilters={categoryFilters.bicycle}
                     activeCount={filterCounts.bicycle}
-                  />
-                )}
-                {activeCategory === 'yacht' && (
-                  <YachtClientFilters
-                    onApply={(filters) => handleApplyFilters('yacht', filters)}
-                    initialFilters={categoryFilters.yacht}
-                    activeCount={filterCounts.yacht}
                   />
                 )}
                 {activeCategory === 'services' && (

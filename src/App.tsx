@@ -63,8 +63,6 @@ import OwnerSecurity from "./pages/OwnerSecurity";
 import OwnerPropertyClientDiscovery from "./pages/OwnerPropertyClientDiscovery";
 import OwnerMotoClientDiscovery from "./pages/OwnerMotoClientDiscovery";
 import OwnerBicycleClientDiscovery from "./pages/OwnerBicycleClientDiscovery";
-import OwnerYachtClientDiscovery from "./pages/OwnerYachtClientDiscovery";
-import OwnerVehicleClientDiscovery from "./pages/OwnerVehicleClientDiscovery";
 import OwnerViewClientProfile from "./pages/OwnerViewClientProfile";
 import OwnerFiltersExplore from "./pages/OwnerFiltersExplore";
 
@@ -177,8 +175,6 @@ const App = () => (
                       <Route path="/owner/clients/property" element={<OwnerPropertyClientDiscovery />} />
                       <Route path="/owner/clients/moto" element={<OwnerMotoClientDiscovery />} />
                       <Route path="/owner/clients/bicycle" element={<OwnerBicycleClientDiscovery />} />
-                      <Route path="/owner/clients/yacht" element={<OwnerYachtClientDiscovery />} />
-                      <Route path="/owner/clients/vehicle" element={<OwnerVehicleClientDiscovery />} />
                       <Route path="/owner/view-client/:clientId" element={<OwnerViewClientProfile />} />
                       <Route path="/owner/filters-explore" element={<OwnerFiltersExplore />} />
                       <Route path="/owner/saved-searches" element={<OwnerSavedSearches />} />

@@ -18,9 +18,7 @@ import {
   X,
   Loader2,
   Home,
-  Car,
   Bike,
-  Ship,
   Wrench,
   ChevronRight,
   Image as ImageIcon,
@@ -32,7 +30,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type Category = 'property' | 'vehicle' | 'motorcycle' | 'bicycle' | 'yacht' | 'worker';
+type Category = 'property' | 'motorcycle' | 'bicycle' | 'worker';
 
 interface CategoryOption {
   id: Category;
@@ -44,10 +42,8 @@ interface CategoryOption {
 
 const CATEGORIES: CategoryOption[] = [
   { id: 'property', name: 'Property', icon: <Home className="w-6 h-6" />, description: 'Apartments, houses, rooms', color: 'from-blue-500 to-blue-600' },
-  { id: 'vehicle', name: 'Car', icon: <Car className="w-6 h-6" />, description: 'Cars, trucks, vans', color: 'from-red-500 to-red-600' },
   { id: 'motorcycle', name: 'Motorcycle', icon: <Bike className="w-6 h-6" />, description: 'Bikes, scooters', color: 'from-orange-500 to-orange-600' },
   { id: 'bicycle', name: 'Bicycle', icon: <Bike className="w-6 h-6" />, description: 'Electric, mountain, city', color: 'from-green-500 to-green-600' },
-  { id: 'yacht', name: 'Yacht', icon: <Ship className="w-6 h-6" />, description: 'Boats, yachts, jet skis', color: 'from-cyan-500 to-cyan-600' },
   { id: 'worker', name: 'Service', icon: <Wrench className="w-6 h-6" />, description: 'Your skills & services', color: 'from-purple-500 to-purple-600' },
 ];
 
@@ -191,14 +187,6 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
         pet_friendly: false,
         amenities: ['wifi', 'kitchen', 'washer'],
       });
-    } else if (selectedCategory === 'vehicle') {
-      Object.assign(baseData, {
-        vehicle_type: 'car',
-        body_type: 'sedan',
-        vehicle_condition: 'good',
-        transmission_type: 'automatic',
-        fuel_type: 'gasoline',
-      });
     } else if (selectedCategory === 'motorcycle') {
       Object.assign(baseData, {
         motorcycle_type: 'sport',
@@ -211,12 +199,6 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
         vehicle_condition: 'good',
         includes_lock: true,
         includes_lights: true,
-      });
-    } else if (selectedCategory === 'yacht') {
-      Object.assign(baseData, {
-        yacht_type: 'motorboat',
-        vehicle_condition: 'excellent',
-        crew_option: 'available',
       });
     } else if (selectedCategory === 'worker') {
       Object.assign(baseData, {
@@ -237,10 +219,8 @@ export function AIListingAssistant({ isOpen, onClose, onComplete }: AIListingAss
   const generateTitle = (category: Category, desc: string): string => {
     const categoryTitles: Record<Category, string[]> = {
       property: ['Cozy Apartment', 'Modern Space', 'Beautiful Home', 'Charming Room'],
-      vehicle: ['Reliable Car', 'Well-Maintained Vehicle', 'Quality Ride'],
       motorcycle: ['Sport Bike', 'Cruiser Motorcycle', 'Adventure Bike'],
       bicycle: ['City Bike', 'Mountain Bicycle', 'Electric Bike'],
-      yacht: ['Luxury Yacht', 'Motor Boat', 'Sailing Vessel'],
       worker: ['Professional Service', 'Expert Help', 'Quality Work'],
     };
 

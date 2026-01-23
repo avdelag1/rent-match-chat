@@ -12,8 +12,6 @@
 export type QuickFilterCategory =
   | 'property'
   | 'motorcycle'  // ALWAYS use 'motorcycle' not 'moto'
-  | 'vehicle'
-  | 'yacht'
   | 'bicycle'
   | 'services';   // UI name (maps to 'worker' in database)
 
@@ -97,18 +95,6 @@ export const categoryConfig: Record<QuickFilterCategory, CategoryConfig> = {
     color: 'bg-red-500',
     description: 'Motorcycles, scooters, bikes'
   },
-  vehicle: {
-    label: 'Vehicle',
-    icon: '🚗',
-    color: 'bg-green-500',
-    description: 'Cars, trucks, vans'
-  },
-  yacht: {
-    label: 'Yacht',
-    icon: '⛵',
-    color: 'bg-cyan-500',
-    description: 'Boats, yachts, watercraft'
-  },
   bicycle: {
     label: 'Bicycle',
     icon: '🚴',
@@ -131,8 +117,6 @@ export const categoryToDatabase: Record<string, string> = {
   'property': 'property',
   'motorcycle': 'motorcycle',
   'moto': 'motorcycle',  // Legacy support
-  'vehicle': 'vehicle',
-  'yacht': 'yacht',
   'bicycle': 'bicycle',
   'services': 'worker',  // UI shows "Services", DB uses "worker"
   'worker': 'worker'

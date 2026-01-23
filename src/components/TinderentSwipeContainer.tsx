@@ -25,7 +25,7 @@ import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RotateCcw, RefreshCw, Home, Search, Car, Bike, Anchor, Briefcase } from 'lucide-react';
+import { RotateCcw, RefreshCw, Home, Search, Bike, Briefcase } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -47,8 +47,6 @@ const MotorcycleIcon = ({ className }: { className?: string }) => (
 // Category configuration for dynamic empty states
 const categoryConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string; plural: string; color: string }> = {
   property: { icon: Home, label: 'Property', plural: 'Properties', color: 'text-primary' },
-  vehicle: { icon: Car, label: 'Car', plural: 'Cars', color: 'text-blue-500' },
-  yacht: { icon: Anchor, label: 'Yacht', plural: 'Yachts', color: 'text-cyan-500' },
   moto: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-orange-500' },
   motorcycle: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-orange-500' },
   bicycle: { icon: Bike, label: 'Bicycle', plural: 'Bicycles', color: 'text-green-500' },

@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Home, Anchor, Bike, CircleDot, Car, ArrowRight, Sparkles, Briefcase } from "lucide-react";
+import { Home, Bike, CircleDot, ArrowRight, Sparkles, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
@@ -11,12 +11,12 @@ import { cn } from "@/lib/utils";
 interface CategorySelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCategorySelect?: (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker', mode: 'rent' | 'sale' | 'both') => void;
+  onCategorySelect?: (category: 'property' | 'motorcycle' | 'bicycle' | 'worker', mode: 'rent' | 'sale' | 'both') => void;
   navigateToNewPage?: boolean;
 }
 
 interface Category {
-  id: 'property' | 'yacht' | 'motorcycle' | 'bicycle' | 'vehicle' | 'worker';
+  id: 'property' | 'motorcycle' | 'bicycle' | 'worker';
   name: string;
   description: string;
   icon: React.ReactNode;
@@ -36,14 +36,6 @@ const categories: Category[] = [
     popular: true,
   },
   {
-    id: 'yacht',
-    name: 'Yacht',
-    description: 'Boats, yachts, sailing vessels',
-    icon: <Anchor className="w-7 h-7" />,
-    gradient: 'from-cyan-500/20 via-cyan-500/5 to-transparent',
-    iconColor: 'text-cyan-500 bg-cyan-500/10',
-  },
-  {
     id: 'motorcycle',
     name: 'Motorcycle',
     description: 'Motorcycles, scooters, ATVs',
@@ -58,14 +50,6 @@ const categories: Category[] = [
     icon: <Bike className="w-7 h-7" />,
     gradient: 'from-purple-500/20 via-purple-500/5 to-transparent',
     iconColor: 'text-purple-500 bg-purple-500/10',
-  },
-  {
-    id: 'vehicle',
-    name: 'Vehicle',
-    description: 'Cars, trucks, SUVs',
-    icon: <Car className="w-7 h-7" />,
-    gradient: 'from-blue-500/20 via-blue-500/5 to-transparent',
-    iconColor: 'text-blue-500 bg-blue-500/10',
   },
   {
     id: 'worker',
