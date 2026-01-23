@@ -133,7 +133,6 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       listingType,
     };
 
-    console.log('[QuickFilterDropdown] Category selected:', { categoryId, listingType, newFilters });
 
     onChange(newFilters);
     setIsOpen(false);
@@ -142,7 +141,6 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
   };
 
   const handleGenderSelect = (gender: OwnerClientGender) => {
-    console.log('[QuickFilterDropdown] Gender selected:', gender);
     onChange({
       ...filters,
       clientGender: gender,
@@ -150,7 +148,6 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
   };
 
   const handleClientTypeSelect = (type: OwnerClientType) => {
-    console.log('[QuickFilterDropdown] Client type selected:', type);
     onChange({
       ...filters,
       clientType: type,
@@ -191,12 +188,9 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       <div className="p-3 sm:p-4 border-b border-white/5 max-h-[50vh] overflow-y-auto">
         <span className="text-sm font-medium text-muted-foreground mb-3 block">Gender</span>
         <div className="flex flex-wrap gap-2">
-          {genderOptions.map((option, index) => (
-            <motion.button
+          {genderOptions.map((option) => (
+            <button
               key={option.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
               onClick={() => handleGenderSelect(option.id)}
               className={cn(
                 'flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
@@ -216,15 +210,12 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
       <div className="p-3 sm:p-4">
         <span className="text-sm font-medium text-muted-foreground mb-3 block">Looking For</span>
         <div className="grid grid-cols-2 gap-2">
-          {clientTypeOptions.map((option, index) => (
-            <motion.button
+          {clientTypeOptions.map((option) => (
+            <button
               key={option.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
               onClick={() => handleClientTypeSelect(option.id)}
               className={cn(
-                'flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
+                'flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 touch-manipulation min-h-[44px] will-change-transform active:scale-95',
                 filters.clientType === option.id
                   ? `bg-gradient-to-r ${option.color} text-white shadow-md`
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-white/5'
@@ -232,21 +223,19 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
             >
               {option.icon}
               <span className="whitespace-nowrap">{option.label}</span>
-            </motion.button>
+            </button>
           ))}
         </div>
       </div>
 
       {/* Apply button */}
       <div className="p-3 sm:p-4 border-t border-white/5">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={() => setIsOpen(false)}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold text-sm shadow-lg shadow-orange-500/25 touch-manipulation min-h-[48px]"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold text-sm shadow-lg shadow-orange-500/25 touch-manipulation min-h-[48px] will-change-transform active:scale-95 transition-transform duration-150"
         >
           Apply Filters
-        </motion.button>
+        </button>
       </div>
     </div>
   );

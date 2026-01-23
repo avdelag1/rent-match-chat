@@ -415,7 +415,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       ? quickFilters.categories.map(mapCategoryToDatabase)
       : undefined;
 
-    const result = {
+    return {
       ...base,
       // Client quick filter categories take precedence if set
       category: quickFilters.categories.length === 0 ? base.category : undefined,
@@ -428,10 +428,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       clientGender: quickFilters.clientGender !== 'any' ? quickFilters.clientGender : undefined,
       clientType: quickFilters.clientType !== 'all' ? quickFilters.clientType : undefined,
     };
-
-    console.log('[DashboardLayout] 🔥 Combined filters result:', result);
-    logger.info('[DashboardLayout] Combined filters:', result);
-    return result;
   }, [appliedFilters, quickFilters, mapCategoryToDatabase]);
 
   // FIX: Memoize cloned children to prevent infinite re-renders
