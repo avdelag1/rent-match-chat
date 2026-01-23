@@ -11,8 +11,37 @@ interface ImageCarouselProps {
   showThumbnails?: boolean;
 }
 
-// Global image cache - shared across all carousels for instant re-display
-const globalImageCache = new Map<string, { loaded: boolean; decoded: boolean }>();
+// LRU Cache implementation for image caching
+const MAX_CACHE_SIZE = 100;
+const globalImageCache = new Map<string, { loaded: boolean; decoded: boolean; lastAccessed: number }>();
+
+// Add LRU eviction when cache is full
+function evictLRUIfNeeded() {
+  if (globalImageCache.size >= MAX_CACHE_SIZE) {
+    // Find least recently used entry
+    let oldestKey: string | null = null;
+    let oldestTime = Infinity;
+
+    for (const [key, value] of globalImageCache.entries()) {
+      if (value.lastAccessed < oldestTime) {
+        oldestTime = value.lastAccessed;
+        oldestKey = key;
+      }
+    }
+
+    if (oldestKey) {
+      globalImageCache.delete(oldestKey);
+    }
+  }
+}
+
+// Update cache access time
+function updateCacheAccess(url: string) {
+  const cached = globalImageCache.get(url);
+  if (cached) {
+    cached.lastAccessed = Date.now();
+  }
+}
 
 // Preload queue to avoid competing preloads
 const preloadQueue: Set<string> = new Set();
@@ -27,12 +56,16 @@ function preloadImage(url: string): void {
     img.decoding = 'async';
     img.onload = () => {
       preloadQueue.delete(url);
-      globalImageCache.set(url, { loaded: true, decoded: false });
+      evictLRUIfNeeded();
+      globalImageCache.set(url, { loaded: true, decoded: false, lastAccessed: Date.now() });
       // Decode in idle time for instant display later
       if ('decode' in img) {
         img.decode().then(() => {
           const cached = globalImageCache.get(url);
-          if (cached) cached.decoded = true;
+          if (cached) {
+            cached.decoded = true;
+            cached.lastAccessed = Date.now();
+          }
         }).catch(() => {});
       }
     };
@@ -115,6 +148,7 @@ const ImageCarouselComponent = ({
     const cached = globalImageCache.get(currentImageSrc);
     if (cached?.decoded && displayedSrc !== currentImageSrc) {
       // Instant switch for cached+decoded images
+      updateCacheAccess(currentImageSrc);
       setPreviousSrc(displayedSrc);
       setDisplayedSrc(currentImageSrc);
       setShowImage(true);
@@ -131,7 +165,8 @@ const ImageCarouselComponent = ({
       setDisplayedSrc(currentImageSrc);
       decodeImage(currentImageSrc).then((success) => {
         if (success) {
-          globalImageCache.set(currentImageSrc, { loaded: true, decoded: true });
+          evictLRUIfNeeded();
+          globalImageCache.set(currentImageSrc, { loaded: true, decoded: true, lastAccessed: Date.now() });
           setShowImage(true);
         }
       });
@@ -147,7 +182,8 @@ const ImageCarouselComponent = ({
       decodeImage(currentImageSrc).then((success) => {
         decodingRef.current = false;
         if (success) {
-          globalImageCache.set(currentImageSrc, { loaded: true, decoded: true });
+          evictLRUIfNeeded();
+          globalImageCache.set(currentImageSrc, { loaded: true, decoded: true, lastAccessed: Date.now() });
           setDisplayedSrc(currentImageSrc);
           setShowImage(true);
           setHasError(false);

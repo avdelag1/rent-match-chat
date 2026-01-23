@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ type Props = {
   onOpenChange: (v: boolean) => void;
 };
 
-export function OwnerProfileDialog({ open, onOpenChange }: Props) {
+function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
   const { data, isLoading } = useOwnerProfile();
   const saveMutation = useSaveOwnerProfile();
 
@@ -205,3 +205,6 @@ export function OwnerProfileDialog({ open, onOpenChange }: Props) {
     </Dialog>
   );
 }
+
+
+export const OwnerProfileDialog = memo(OwnerProfileDialogComponent);
