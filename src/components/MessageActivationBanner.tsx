@@ -89,10 +89,14 @@ export function MessageActivationBanner({
                     </div>
 
                     {/* Premium hint */}
-                    <div className="mt-3 pt-3 border-t border-white/20">
+                    <div className="mt-3 pt-3 border-t border-white/20 space-y-2">
                       <div className="flex items-center gap-2 text-xs text-white/80">
                         <Crown className="w-3.5 h-3.5" />
                         <span>Premium plans include monthly message credits + visibility boost!</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-white/90 font-medium">
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>💬 Free messaging for motorcycles & bicycles!</span>
                       </div>
                     </div>
                   </div>

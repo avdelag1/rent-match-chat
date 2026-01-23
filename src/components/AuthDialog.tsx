@@ -263,6 +263,14 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm animate-fade-in" />
         <DialogPrimitive.Content className="fixed inset-0 z-50 w-full h-full overflow-hidden bg-black">
 
+          {/* Animated smoky background effect */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl animate-float-slow" />
+            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-400/4 rounded-full blur-3xl animate-float-slower" />
+            <div className="absolute top-1/3 right-1/3 w-72 h-72 bg-orange-600/3 rounded-full blur-3xl animate-float-slowest" />
+            <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-orange-300/4 rounded-full blur-3xl animate-float-medium" />
+          </div>
+
           {/* Single-screen layout - no scrolling */}
           <div className="h-full flex flex-col justify-center p-4 sm:p-5 relative z-10 safe-area-pt safe-area-pb">
             {/* Back Button - Top Left Only */}
