@@ -265,6 +265,38 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     setCurrentIndex(currentIndexRef.current);
   }, []);
 
+  // FILTER CHANGE DETECTION: Reset deck when filters change
+  // Track previous filter state to detect changes
+  const prevFiltersRef = useRef(filters);
+  useEffect(() => {
+    // Skip on initial mount
+    if (!prevFiltersRef.current && !filters) return;
+
+    // Check if filters actually changed (deep comparison of relevant fields)
+    const filtersChanged =
+      JSON.stringify(prevFiltersRef.current?.categories) !== JSON.stringify(filters?.categories) ||
+      JSON.stringify(prevFiltersRef.current?.category) !== JSON.stringify(filters?.category) ||
+      prevFiltersRef.current?.listingType !== filters?.listingType ||
+      JSON.stringify(prevFiltersRef.current?.priceRange) !== JSON.stringify(filters?.priceRange);
+
+    if (filtersChanged) {
+      logger.info('[TinderentSwipeContainer] Filters changed, resetting deck');
+
+      // Reset local state and refs
+      currentIndexRef.current = 0;
+      setCurrentIndex(0);
+      deckQueueRef.current = [];
+      swipedIdsRef.current.clear();
+      setPage(0);
+
+      // Reset store
+      resetClientDeck();
+
+      // Update prev filters
+      prevFiltersRef.current = filters;
+    }
+  }, [filters, resetClientDeck]);
+
   // PERF FIX: Track if we're returning to dashboard (has hydrated data AND is ready)
   // When true, skip initial animations to prevent "double render" feeling
   // Use isReady flag from store to determine if deck is fully initialized
